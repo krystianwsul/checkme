@@ -9,6 +9,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.app.NotificationCompat
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -26,9 +27,10 @@ import java.util.*
 
 open class NotificationWrapperImpl : NotificationWrapper() {
 
-    override fun cancelNotification(context: Context, id: Int) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
+    protected val alarmManager by lazy { MyApplication.instance.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
 
+    override fun cancelNotification(id: Int) {
         MyCrashlytics.log("NotificationManager.cancel " + id)
         notificationManager.cancel(id)
     }
@@ -54,28 +56,28 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return InstanceKey(instanceKey.mTaskKey, scheduleKey)
     }
 
-    override fun notifyInstance(context: Context, domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
+    override fun notifyInstance(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
         val task = instance.task
         val notificationId = instance.notificationId
 
         val instanceKey = instance.instanceKey
         val remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(domainFactory, instance)
 
-        val deleteIntent = InstanceNotificationDeleteService.getIntent(context, remoteCustomTimeFixInstanceKey)
-        val pendingDeleteIntent = PendingIntent.getService(context, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val deleteIntent = InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey)
+        val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val contentIntent = ShowInstanceActivity.getNotificationIntent(context, instanceKey)
-        val pendingContentIntent = PendingIntent.getActivity(context, notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val contentIntent = ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey)
+        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         val actions = ArrayList<NotificationCompat.Action>()
 
-        val doneIntent = InstanceDoneService.getIntent(context, instanceKey, notificationId)
-        val pendingDoneIntent = PendingIntent.getService(context, notificationId, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        actions.add(NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, context.getString(R.string.done), pendingDoneIntent).build())
+        val doneIntent = InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId)
+        val pendingDoneIntent = PendingIntent.getService(MyApplication.instance, notificationId, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        actions.add(NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, MyApplication.instance.getString(R.string.done), pendingDoneIntent).build())
 
-        val hourIntent = InstanceHourService.getIntent(context, instanceKey, notificationId)
-        val pendingHourIntent = PendingIntent.getService(context, notificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        actions.add(NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, context.getString(R.string.hour), pendingHourIntent).build())
+        val hourIntent = InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId)
+        val pendingHourIntent = PendingIntent.getService(MyApplication.instance, notificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        actions.add(NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, MyApplication.instance.getString(R.string.hour), pendingHourIntent).build())
 
         val childNames = getChildNames(instance, now)
 
@@ -83,7 +85,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val style: NotificationCompat.Style?
         if (!childNames.isEmpty()) {
             text = childNames.joinToString(", ")
-            style = getInboxStyle(context, childNames, false)
+            style = getInboxStyle(childNames, false)
         } else if (!task.note.isNullOrEmpty()) {
             text = task.note
 
@@ -96,7 +98,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             style = null
         }
 
-        notify(context, instance.name, text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.instanceDateTime.timeStamp.long, style, true, false, instance.instanceDateTime.timeStamp.long!!.toString() + instance.task.startExactTimeStamp.toString())
+        notify(instance.name, text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.instanceDateTime.timeStamp.long, style, true, false, instance.instanceDateTime.timeStamp.long!!.toString() + instance.task.startExactTimeStamp.toString())
     }
 
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {
@@ -121,7 +123,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return (notDone + done).map(Instance::getName)
     }
 
-    protected open fun getInboxStyle(context: Context, lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
+    protected open fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
         Assert.assertTrue(!lines.isEmpty())
 
         val max = 5
@@ -133,17 +135,17 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val extraCount = lines.size - max
 
         if (extraCount > 0)
-            inboxStyle.setSummaryText("+" + extraCount + " " + context.getString(R.string.more))
+            inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
 
         return inboxStyle
     }
 
-    protected open fun notify(context: Context, title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
+    protected open fun newNotificationBuilder() = NotificationCompat.Builder(MyApplication.instance)
+
+    protected open fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
         Assert.assertTrue(title.isNotEmpty())
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val builder = NotificationCompat.Builder(context)
+        val builder = newNotificationBuilder()
                 .setContentTitle(title)
                 .setSmallIcon(R.drawable.ikona_bez)
                 .setDeleteIntent(deleteIntent)
@@ -181,13 +183,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     @SuppressLint("NewApi")
-    protected open fun setExact(context: Context, time: Long, pendingIntent: PendingIntent) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
+    protected open fun setExact(time: Long, pendingIntent: PendingIntent) {
         alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent)
     }
 
-    override fun notifyGroup(context: Context, domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) {
+    override fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) {
         val names = ArrayList<String>()
         val instanceKeys = ArrayList<InstanceKey>()
         val remoteCustomTimeFixInstanceKeys = ArrayList<InstanceKey>()
@@ -197,42 +197,40 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             remoteCustomTimeFixInstanceKeys.add(getRemoteCustomTimeFixInstanceKey(domainFactory, it))
         }
 
-        val deleteIntent = GroupNotificationDeleteService.getIntent(context, remoteCustomTimeFixInstanceKeys)
-        val pendingDeleteIntent = PendingIntent.getService(context, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val deleteIntent = GroupNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKeys)
+        val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val contentIntent = ShowNotificationGroupActivity.getIntent(context, instanceKeys)
-        val pendingContentIntent = PendingIntent.getActivity(context, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val contentIntent = ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys)
+        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val inboxStyle = getInboxStyle(context, instances
+        val inboxStyle = getInboxStyle(instances
                 .sortedWith(compareBy({ it.instanceDateTime.timeStamp }, { it.task.startExactTimeStamp }))
                 .map { it.name + getInstanceText(it, now) }, true)
 
-        notify(context, instances.size.toString() + " " + context.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, ArrayList(), null, inboxStyle, false, true, "0")
+        notify(instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, ArrayList(), null, inboxStyle, false, true, "0")
     }
 
-    override fun setAlarm(context: Context, pendingIntent: PendingIntent, nextAlarm: TimeStamp) {
-        setExact(context, nextAlarm.long!!, pendingIntent)
+    override fun setAlarm(pendingIntent: PendingIntent, nextAlarm: TimeStamp) {
+        setExact(nextAlarm.long!!, pendingIntent)
     }
 
-    override fun getPendingIntent(context: Context): PendingIntent {
-        val nextIntent = TickService.getIntent(context, false, "NotificationWrapper: TickService.getIntent")
+    override fun getPendingIntent(): PendingIntent {
+        val nextIntent = TickService.getIntent(MyApplication.instance, false, "NotificationWrapper: TickService.getIntent")
 
-        val pendingIntent = PendingIntent.getService(context, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getService(MyApplication.instance, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         Assert.assertTrue(pendingIntent != null)
 
         return pendingIntent
     }
 
-    override fun cancelAlarm(context: Context, pendingIntent: PendingIntent) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
+    override fun cancelAlarm(pendingIntent: PendingIntent) {
         alarmManager.cancel(pendingIntent)
     }
 
-    override fun cleanGroup(context: Context, lastNotificationId: Int?) {
+    override fun cleanGroup(lastNotificationId: Int?) {
         Assert.assertTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
 
         if (lastNotificationId != null)
-            cancelNotification(context, lastNotificationId)
+            cancelNotification(lastNotificationId)
     }
 }

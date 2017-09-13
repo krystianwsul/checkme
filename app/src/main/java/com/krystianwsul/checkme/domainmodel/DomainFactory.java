@@ -2594,48 +2594,48 @@ public class DomainFactory {
             if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        NotificationWrapper.Companion.getInstance().notifyGroup(context, this, notificationInstances.values(), silent, now);
+                        NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
                     } else {
-                        NotificationWrapper.Companion.getInstance().notifyGroup(context, this, notificationInstances.values(), true, now);
+                        NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), true, now);
                     }
                 } else { // instances shown
                     for (InstanceKey shownInstanceKey : shownInstanceKeys) {
                         if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
                             Instance shownInstance = getInstance(shownInstanceKey);
 
-                            NotificationWrapper.Companion.getInstance().cancelNotification(context, shownInstance.getNotificationId());
+                            NotificationWrapper.Companion.getInstance().cancelNotification(shownInstance.getNotificationId());
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
 
                             int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
 
-                            NotificationWrapper.Companion.getInstance().cancelNotification(context, notificationId);
+                            NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
                         }
                     }
 
-                    NotificationWrapper.Companion.getInstance().notifyGroup(context, this, notificationInstances.values(), silent, now);
+                    NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
                 }
             } else { // show instances
                 if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
-                    NotificationWrapper.Companion.getInstance().cancelNotification(context, 0);
+                    NotificationWrapper.Companion.getInstance().cancelNotification(0);
 
                     for (Instance instance : notificationInstances.values()) {
                         Assert.assertTrue(instance != null);
 
-                        notifyInstance(context, instance, silent, now);
+                        notifyInstance(instance, silent, now);
                     }
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                         if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
                             Instance instance = getInstance(hideInstanceKey);
 
-                            NotificationWrapper.Companion.getInstance().cancelNotification(context, instance.getNotificationId());
+                            NotificationWrapper.Companion.getInstance().cancelNotification(instance.getNotificationId());
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
                             int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
 
-                            NotificationWrapper.Companion.getInstance().cancelNotification(context, notificationId);
+                            NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
                         }
                     }
 
@@ -2643,21 +2643,21 @@ public class DomainFactory {
                         Instance instance = notificationInstances.get(showInstanceKey);
                         Assert.assertTrue(instance != null);
 
-                        notifyInstance(context, instance, silent, now);
+                        notifyInstance(instance, silent, now);
                     }
 
                     Stream.of(notificationInstances.values())
                             .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                            .forEach(instance -> updateInstance(context, instance, now));
+                            .forEach(instance -> updateInstance(instance, now));
                 }
             }
         } else {
             if (notificationInstances.isEmpty()) {
                 message += ", hg";
-                NotificationWrapper.Companion.getInstance().cancelNotification(context, 0);
+                NotificationWrapper.Companion.getInstance().cancelNotification(0);
             } else {
                 message += ", sg";
-                NotificationWrapper.Companion.getInstance().notifyGroup(context, this, notificationInstances.values(), true, now);
+                NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), true, now);
             }
 
             message += ", hiding " + hideInstanceKeys.size();
@@ -2665,13 +2665,13 @@ public class DomainFactory {
                 if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
                     Instance instance = getInstance(hideInstanceKey);
 
-                    NotificationWrapper.Companion.getInstance().cancelNotification(context, instance.getNotificationId());
+                    NotificationWrapper.Companion.getInstance().cancelNotification(instance.getNotificationId());
                 } else {
                     Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
                     int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
 
-                    NotificationWrapper.Companion.getInstance().cancelNotification(context, notificationId);
+                    NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
                 }
             }
 
@@ -2680,7 +2680,7 @@ public class DomainFactory {
                 Instance instance = notificationInstances.get(showInstanceKey);
                 Assert.assertTrue(instance != null);
 
-                notifyInstance(context, instance, silent, now);
+                notifyInstance(instance, silent, now);
             }
 
             List<Instance> updateInstances = Stream.of(notificationInstances.values())
@@ -2689,7 +2689,7 @@ public class DomainFactory {
 
             message += ", u " + updateInstances.size();
             Stream.of(updateInstances)
-                    .forEach(instance -> updateInstance(context, instance, now));
+                    .forEach(instance -> updateInstance(instance, now));
         }
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
@@ -2728,24 +2728,24 @@ public class DomainFactory {
         if (minSchedulesTimeStamp.isPresent() && (nextAlarm == null || nextAlarm.compareTo(minSchedulesTimeStamp.get()) > 0))
             nextAlarm = minSchedulesTimeStamp.get();
 
-        PendingIntent pendingIntent = NotificationWrapper.Companion.getInstance().getPendingIntent(context);
-        NotificationWrapper.Companion.getInstance().cancelAlarm(context, pendingIntent);
+        PendingIntent pendingIntent = NotificationWrapper.Companion.getInstance().getPendingIntent();
+        NotificationWrapper.Companion.getInstance().cancelAlarm(pendingIntent);
 
         if (nextAlarm != null) {
             Assert.assertTrue(nextAlarm.toExactTimeStamp().compareTo(now) > 0);
 
-            NotificationWrapper.Companion.getInstance().setAlarm(context, pendingIntent, nextAlarm);
+            NotificationWrapper.Companion.getInstance().setAlarm(pendingIntent, nextAlarm);
         }
     }
 
-    private void notifyInstance(@NonNull Context context, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
-        NotificationWrapper.Companion.getInstance().notifyInstance(context, this, instance, silent, now);
+    private void notifyInstance(@NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
+        NotificationWrapper.Companion.getInstance().notifyInstance(this, instance, silent, now);
 
         if (!silent)
             mLastNotificationBeeps.put(instance.getInstanceKey(), SystemClock.elapsedRealtime());
     }
 
-    private void updateInstance(@NonNull Context context, @NonNull Instance instance, @NonNull ExactTimeStamp now) {
+    private void updateInstance(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
         InstanceKey instanceKey = instance.getInstanceKey();
 
         long realtime = SystemClock.elapsedRealtime();
@@ -2762,7 +2762,7 @@ public class DomainFactory {
             }
         }
 
-        NotificationWrapper.Companion.getInstance().notifyInstance(context, this, instance, true, now);
+        NotificationWrapper.Companion.getInstance().notifyInstance(this, instance, true, now);
     }
 
     private void setInstanceNotified(@NonNull InstanceKey instanceKey, @NonNull ExactTimeStamp now) {

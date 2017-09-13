@@ -9,9 +9,14 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import net.danlew.android.joda.JodaTimeAndroid;
 
 public class MyApplication extends Application {
+
+    public static MyApplication instance;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        instance = this;
 
         JodaTimeAndroid.init(this);
 

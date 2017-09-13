@@ -2,14 +2,13 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.annotation.SuppressLint
 import android.app.Notification
-import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.support.v4.app.NotificationCompat
 import android.util.Log
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.notifications.TickService
@@ -18,16 +17,14 @@ import junit.framework.Assert
 @SuppressLint("NewApi")
 class NotificationWrapperImplN : NotificationWrapperImplM() {
 
-    override fun cleanGroup(context: Context, lastNotificationId: Int?) {
+    override fun cleanGroup(lastNotificationId: Int?) {
         Assert.assertTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val statusBarNotifications = notificationManager.activeNotifications!!
 
         if (lastNotificationId != null) {
             if (statusBarNotifications.size > 2) {
-                cancelNotification(context, lastNotificationId)
+                cancelNotification(lastNotificationId)
             } else if (statusBarNotifications.size < 2) {
                 Assert.assertTrue(statusBarNotifications.isEmpty())
             } else {
@@ -37,8 +34,8 @@ class NotificationWrapperImplN : NotificationWrapperImplM() {
                     NotificationException.throwException(lastNotificationId, statusBarNotifications)
 
                 if (statusBarNotifications.any { it.id == lastNotificationId }) {
-                    cancelNotification(context, 0)
-                    cancelNotification(context, lastNotificationId)
+                    cancelNotification(0)
+                    cancelNotification(lastNotificationId)
                 }
             }
         } else {
@@ -49,11 +46,11 @@ class NotificationWrapperImplN : NotificationWrapperImplM() {
 
             Assert.assertTrue(statusBarNotifications.single().id == 0)
 
-            cancelNotification(context, 0)
+            cancelNotification(0)
         }
     }
 
-    override fun getInboxStyle(context: Context, lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
+    override fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
         Assert.assertTrue(!lines.isEmpty())
 
         val max = 5
@@ -65,17 +62,15 @@ class NotificationWrapperImplN : NotificationWrapperImplM() {
         val extraCount = lines.size - max
 
         if (extraCount > 0 && !group)
-            inboxStyle.setSummaryText("+" + extraCount + " " + context.getString(R.string.more))
+            inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
 
         return inboxStyle
     }
 
-    override fun notify(context: Context, title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
+    override fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
         Assert.assertTrue(title.isNotEmpty())
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val builder = NotificationCompat.Builder(context)
+        val builder = newNotificationBuilder()
                 .setContentTitle(title)
                 .setSmallIcon(R.drawable.ikona_bez)
                 .setDeleteIntent(deleteIntent)

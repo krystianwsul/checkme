@@ -177,7 +177,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_instance);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -187,7 +187,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         mActionBar.setTitle(null);
 
-        FloatingActionButton showInstanceFab = (FloatingActionButton) findViewById(R.id.show_instance_fab);
+        FloatingActionButton showInstanceFab = findViewById(R.id.show_instance_fab);
         Assert.assertTrue(showInstanceFab != null);
 
         if (savedInstanceState == null)
@@ -211,7 +211,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         getSupportLoaderManager().initLoader(0, null, this);
 
-        NotificationWrapper.Companion.getInstance().cleanGroup(this, null);
+        NotificationWrapper.Companion.getInstance().cleanGroup(null);
     }
 
     @Override

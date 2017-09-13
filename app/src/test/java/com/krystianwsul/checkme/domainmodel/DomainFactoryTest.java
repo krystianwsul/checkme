@@ -74,38 +74,38 @@ public class DomainFactoryTest {
     public static void setUpStatic() {
         NotificationWrapper.Companion.setInstance(new NotificationWrapper() {
             @Override
-            public void cancelNotification(@NonNull Context context, int id) {
+            public void cancelNotification(int id) {
 
             }
 
             @Override
-            public void notifyInstance(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+            public void notifyInstance(@NonNull DomainFactory domainFactory, @NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
 
             }
 
             @Override
-            public void notifyGroup(@NonNull Context context, @NonNull DomainFactory domainFactory, @NonNull Collection<? extends Instance> instances, boolean silent, @NonNull ExactTimeStamp now, boolean nougat) {
+            public void notifyGroup(@NonNull DomainFactory domainFactory, @NonNull Collection<? extends Instance> instances, boolean silent, @NonNull ExactTimeStamp now) {
 
             }
 
             @Override
-            public void setAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent, @NonNull TimeStamp nextAlarm) {
+            public void setAlarm(@NonNull PendingIntent pendingIntent, @NonNull TimeStamp nextAlarm) {
 
             }
 
             @NonNull
             @Override
-            public PendingIntent getPendingIntent(@NonNull Context context) {
+            public PendingIntent getPendingIntent() {
                 return null;
             }
 
             @Override
-            public void cancelAlarm(@NonNull Context context, @NonNull PendingIntent pendingIntent) {
+            public void cancelAlarm(@NonNull PendingIntent pendingIntent) {
 
             }
 
             @Override
-            public void cleanGroup(@NonNull Context context, @Nullable Integer lastNotificationId) {
+            public void cleanGroup(@Nullable Integer lastNotificationId) {
 
             }
         });

@@ -2739,6 +2739,15 @@ public class DomainFactory {
     }
 
     private void notifyInstance(@NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
+        long realtime = SystemClock.elapsedRealtime();
+
+        Optional<Long> optional = Stream.of(mLastNotificationBeeps.values()).max(Long::compareTo);
+        if (optional.isPresent() && realtime - optional.get() < 5000) {
+            Log.e("asdf", "skipping notification sound for " + instance.getName());
+
+            silent = true;
+        }
+
         NotificationWrapper.Companion.getInstance().notifyInstance(this, instance, silent, now);
 
         if (!silent)

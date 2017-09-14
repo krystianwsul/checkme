@@ -461,7 +461,7 @@ public class PersistenceManger {
     }
 
     public void save(@NonNull Context context) {
-        SaveService.Factory.getInstance().startService(context, this);
+        SaveService.Factory.Companion.getInstance().startService(context, this);
     }
 
     SQLiteDatabase getSQLiteDatabase() {

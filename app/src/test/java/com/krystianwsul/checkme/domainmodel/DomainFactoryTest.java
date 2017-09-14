@@ -110,7 +110,7 @@ public class DomainFactoryTest {
             }
         });
 
-        SaveService.Factory.setInstance(new SaveService.Factory() {
+        SaveService.Factory.Companion.setInstance(new SaveService.Factory() {
             @Override
             public void startService(@NonNull Context context, @NonNull PersistenceManger persistenceManger) {
 

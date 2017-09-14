@@ -45,6 +45,27 @@ class TickService : WakefulIntentService("TickService") {
             intent.putExtra(SOURCE_KEY, source)
             return intent
         }
+
+        fun tick(context: Context, silent: Boolean, source: String) {
+            val domainFactory = DomainFactory.getDomainFactory(context)
+
+            if (domainFactory.isConnected) {
+                if (domainFactory.isSaved) {
+                    domainFactory.setFirebaseTickListener(context, DomainFactory.TickData(silent, source, context))
+                } else {
+                    domainFactory.updateNotificationsTick(context, silent, source)
+                }
+            } else {
+                domainFactory.updateNotificationsTick(context, silent, source)
+
+                val firebaseUser = FirebaseAuth.getInstance().currentUser
+                if (firebaseUser != null) {
+                    domainFactory.setUserInfo(context, UserInfo(firebaseUser))
+
+                    domainFactory.setFirebaseTickListener(context, DomainFactory.TickData(silent, source, context))
+                }
+            }
+        }
     }
 
     override fun doWakefulWork(intent: Intent) {
@@ -56,23 +77,6 @@ class TickService : WakefulIntentService("TickService") {
         val source = intent.getStringExtra(SOURCE_KEY)
         Assert.assertTrue(!TextUtils.isEmpty(source))
 
-        val domainFactory = DomainFactory.getDomainFactory(this)
-
-        if (domainFactory.isConnected) {
-            if (domainFactory.isSaved) {
-                domainFactory.setFirebaseTickListener(this, DomainFactory.TickData(silent, source, this))
-            } else {
-                domainFactory.updateNotificationsTick(this, silent, source)
-            }
-        } else {
-            domainFactory.updateNotificationsTick(this, silent, source)
-
-            val firebaseUser = FirebaseAuth.getInstance().currentUser
-            if (firebaseUser != null) {
-                domainFactory.setUserInfo(this, UserInfo(firebaseUser))
-
-                domainFactory.setFirebaseTickListener(this, DomainFactory.TickData(silent, source, this))
-            }
-        }
+        tick(this, silent, source)
     }
 }

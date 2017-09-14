@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import junit.framework.Assert;
 
@@ -42,6 +43,8 @@ abstract class Record {
     @NonNull
     InsertCommand getInsertCommand(@NonNull String tableName) {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
+
+        Log.e("asdf", toString() + " created? " + mCreated);
 
         Assert.assertTrue(!mCreated);
 

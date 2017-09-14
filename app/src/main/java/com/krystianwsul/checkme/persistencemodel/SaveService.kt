@@ -66,11 +66,10 @@ class SaveService : JobIntentService() {
         private class FactoryImpl : Factory() {
 
             override fun startService(context: Context, persistenceManger: PersistenceManger) {
-                val collections = Arrays.asList(
+                val collections = listOf(
                         persistenceManger.mCustomTimeRecords,
                         persistenceManger.mTaskRecords,
                         persistenceManger.mTaskHierarchyRecords,
-                        persistenceManger.mScheduleRecords,
                         persistenceManger.mScheduleRecords,
                         persistenceManger.mSingleScheduleRecords.values,
                         persistenceManger.mDailyScheduleRecords.values,

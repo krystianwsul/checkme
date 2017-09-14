@@ -3,11 +3,12 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.Context
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
-import com.commonsware.cwac.wakeful.WakefulIntentService
+import android.support.v4.app.JobIntentService
+import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import java.util.*
 
-class SaveService : WakefulIntentService("SaveService") {
+class SaveService : JobIntentService() {
 
     companion object {
 
@@ -16,6 +17,8 @@ class SaveService : WakefulIntentService("SaveService") {
         private val DELETE_COMMAND_KEY = "deleteCommands"
 
         private fun save(sqLiteDatabase: SQLiteDatabase, insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>) {
+            Log.e("asdf", "SaveService.save")
+
             sqLiteDatabase.beginTransaction()
 
             try {
@@ -35,7 +38,7 @@ class SaveService : WakefulIntentService("SaveService") {
         }
     }
 
-    override fun doWakefulWork(intent: Intent) {
+    override fun onHandleWork(intent: Intent) {
         val insertCommands = intent.getParcelableArrayListExtra<InsertCommand>(INSERT_COMMAND_KEY)!!
         val updateCommands = intent.getParcelableArrayListExtra<UpdateCommand>(UPDATE_COMMAND_KEY)!!
         val deleteCommands = intent.getParcelableArrayListExtra<DeleteCommand>(DELETE_COMMAND_KEY)!!
@@ -94,7 +97,7 @@ class SaveService : WakefulIntentService("SaveService") {
                 intent.putParcelableArrayListExtra(UPDATE_COMMAND_KEY, updateCommands)
                 intent.putParcelableArrayListExtra(DELETE_COMMAND_KEY, deleteCommands)
 
-                WakefulIntentService.sendWakefulWork(context, intent)
+                JobIntentService.enqueueWork(context, SaveService::class.java, 0, intent)
             }
 
             private fun delete(collection: MutableCollection<out Record>): List<DeleteCommand> {

@@ -2591,8 +2591,8 @@ public class DomainFactory {
         String message = "";
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (notificationInstances.size() > TickService.MAX_NOTIFICATIONS) { // show group
-                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+            if (notificationInstances.size() > TickService.Companion.getMAX_NOTIFICATIONS()) { // show group
+                if (shownInstanceKeys.size() > TickService.Companion.getMAX_NOTIFICATIONS()) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
                         NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
                     } else {
@@ -2616,7 +2616,7 @@ public class DomainFactory {
                     NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
                 }
             } else { // show instances
-                if (shownInstanceKeys.size() > TickService.MAX_NOTIFICATIONS) { // group shown
+                if (shownInstanceKeys.size() > TickService.Companion.getMAX_NOTIFICATIONS()) { // group shown
                     NotificationWrapper.Companion.getInstance().cancelNotification(0);
 
                     for (Instance instance : notificationInstances.values()) {
@@ -2692,19 +2692,19 @@ public class DomainFactory {
                     .forEach(instance -> updateInstance(instance, now));
         }
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.Companion.getTICK_PREFERENCES(), Context.MODE_PRIVATE);
         Assert.assertTrue(sharedPreferences != null);
 
-        String tickLog = sharedPreferences.getString(TickService.TICK_LOG, "");
+        String tickLog = sharedPreferences.getString(TickService.Companion.getTICK_LOG(), "");
         List<String> tickLogArr = Arrays.asList(TextUtils.split(tickLog, "\n"));
         List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 9, 0), tickLogArr.size()));
         tickLogArrTrimmed.add(now.toString() + " s? " + (silent ? "t" : "f") + message);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(TickService.TICK_LOG, TextUtils.join("\n", tickLogArrTrimmed));
+        editor.putString(TickService.Companion.getTICK_LOG(), TextUtils.join("\n", tickLogArrTrimmed));
 
         if (!silent)
-            editor.putLong(TickService.LAST_TICK_KEY, now.getLong());
+            editor.putLong(TickService.Companion.getLAST_TICK_KEY(), now.getLong());
 
         editor.apply();
 

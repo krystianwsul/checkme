@@ -45,31 +45,31 @@ public class DebugFragment extends AbstractFragment {
         View view = getView();
         Assert.assertTrue(view != null);
 
-        Button debugException = (Button) view.findViewById(R.id.debug_exception);
+        Button debugException = view.findViewById(R.id.debug_exception);
         Assert.assertTrue(debugException != null);
 
         debugException.setOnClickListener(v -> {
             int i = 0;
-            int j = 1 / i;
+            @SuppressWarnings("unused") int j = 1 / i;
         });
 
-        Button debugTick = (Button) view.findViewById(R.id.debug_tick);
+        Button debugTick = view.findViewById(R.id.debug_tick);
         Assert.assertTrue(debugTick != null);
 
-        debugTick.setOnClickListener(v -> TickService.startServiceDebug(getActivity(), "DebugFragment: TickService.startServiceDebug"));
+        debugTick.setOnClickListener(v -> TickService.Companion.startServiceDebug(getActivity(), "DebugFragment: TickService.startServiceDebug"));
 
-        TextView debugData = (TextView) view.findViewById(R.id.debug_data);
+        TextView debugData = view.findViewById(R.id.debug_data);
         Assert.assertTrue(debugData != null);
 
-        Button debugLoad = (Button) view.findViewById(R.id.debug_load);
+        Button debugLoad = view.findViewById(R.id.debug_load);
         Assert.assertTrue(debugLoad != null);
 
         debugLoad.setOnClickListener(v -> {
             StringBuilder stringBuilder = new StringBuilder();
 
-            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(TickService.TICK_PREFERENCES, Context.MODE_PRIVATE);
-            long lastTick = sharedPreferences.getLong(TickService.LAST_TICK_KEY, -1);
-            String tickLog = sharedPreferences.getString(TickService.TICK_LOG, "");
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(TickService.Companion.getTICK_PREFERENCES(), Context.MODE_PRIVATE);
+            long lastTick = sharedPreferences.getLong(TickService.Companion.getLAST_TICK_KEY(), -1);
+            String tickLog = sharedPreferences.getString(TickService.Companion.getTICK_LOG(), "");
 
             ExactTimeStamp lastTickExactTimeStamp = new ExactTimeStamp(lastTick);
 
@@ -109,10 +109,10 @@ public class DebugFragment extends AbstractFragment {
             debugData.setText(stringBuilder);
         });
 
-        Button debugDiffButton = (Button) view.findViewById(R.id.debug_diff_button);
+        Button debugDiffButton = view.findViewById(R.id.debug_diff_button);
         Assert.assertTrue(debugDiffButton != null);
 
-        TextView debugDiffText = (TextView) view.findViewById(R.id.debug_diff_text);
+        TextView debugDiffText = view.findViewById(R.id.debug_diff_text);
         Assert.assertTrue(debugDiffText != null);
 
         debugDiffButton.setOnClickListener(v -> debugDiffText.setText(DataDiff.getDiff()));

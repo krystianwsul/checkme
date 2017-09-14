@@ -234,7 +234,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.main_activity_toolbar);
+        Toolbar toolbar = findViewById(R.id.main_activity_toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -260,13 +260,13 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             mDebug = savedInstanceState.getBoolean(DEBUG_KEY);
         }
 
-        mMainActivityAppBarLayout = (AppBarLayout) findViewById(R.id.main_activity_app_bar_layout);
+        mMainActivityAppBarLayout = findViewById(R.id.main_activity_app_bar_layout);
         Assert.assertTrue(mMainActivityAppBarLayout != null);
 
-        mMainActivityDrawer = (DrawerLayout) findViewById(R.id.main_activity_drawer);
+        mMainActivityDrawer = findViewById(R.id.main_activity_drawer);
         Assert.assertTrue(mMainActivityDrawer != null);
 
-        mMainActivitySpinner = (Spinner) findViewById(R.id.main_activity_spinner);
+        mMainActivitySpinner = findViewById(R.id.main_activity_spinner);
         Assert.assertTrue(mMainActivitySpinner != null);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(mActionBar.getThemedContext(), R.array.main_activity_spinner, R.layout.custom_toolbar_spinner);
@@ -339,7 +339,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(mFriendListFragment != null);
         }
 
-        mDaysPager = (ViewPager) findViewById(R.id.main_pager);
+        mDaysPager = findViewById(R.id.main_pager);
         Assert.assertTrue(mDaysPager != null);
 
         mDaysPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -361,25 +361,25 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         mDaysPager.setAdapter(new MyFragmentStatePagerAdapter(getSupportFragmentManager()));
 
-        mMainTaskListFrame = (FrameLayout) findViewById(R.id.main_task_list_frame);
+        mMainTaskListFrame = findViewById(R.id.main_task_list_frame);
         Assert.assertTrue(mMainTaskListFrame != null);
 
-        mMainProjectListFrame = (FrameLayout) findViewById(R.id.main_project_frame);
+        mMainProjectListFrame = findViewById(R.id.main_project_frame);
         Assert.assertTrue(mMainProjectListFrame != null);
 
-        mMainCustomTimesFrame = (FrameLayout) findViewById(R.id.main_custom_times_frame);
+        mMainCustomTimesFrame = findViewById(R.id.main_custom_times_frame);
         Assert.assertTrue(mMainCustomTimesFrame != null);
 
-        mMainFriendListFrame = (FrameLayout) findViewById(R.id.main_friend_list_frame);
+        mMainFriendListFrame = findViewById(R.id.main_friend_list_frame);
         Assert.assertTrue(mMainFriendListFrame != null);
 
-        mMainDebugFrame = (FrameLayout) findViewById(R.id.main_debug_frame);
+        mMainDebugFrame = findViewById(R.id.main_debug_frame);
         Assert.assertTrue(mMainDebugFrame != null);
 
-        mMainFab = (FloatingActionButton) findViewById(R.id.main_fab);
+        mMainFab = findViewById(R.id.main_fab);
         Assert.assertTrue(mMainFab != null);
 
-        mMainActivityNavigation = (NavigationView) findViewById(R.id.main_activity_navigation);
+        mMainActivityNavigation = findViewById(R.id.main_activity_navigation);
         Assert.assertTrue(mMainActivityNavigation != null);
 
         mMainActivityNavigation.setCheckedItem(R.id.main_drawer_instances);
@@ -485,15 +485,15 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             return true;
         });
 
-        mNavHeaderName = (TextView) headerView.findViewById(R.id.nav_header_name);
+        mNavHeaderName = headerView.findViewById(R.id.nav_header_name);
         Assert.assertTrue(mNavHeaderName != null);
 
-        mNavHeaderEmail = (TextView) headerView.findViewById(R.id.nav_header_email);
+        mNavHeaderEmail = headerView.findViewById(R.id.nav_header_email);
         Assert.assertTrue(mNavHeaderEmail != null);
 
         showTab(mVisibleTab);
 
-        TickService.startServiceRegister(this, "MainActivity: TickService.startServiceRegister");
+        TickService.Companion.startServiceRegister(this, "MainActivity: TickService.startServiceRegister");
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))

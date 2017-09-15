@@ -2697,16 +2697,13 @@ public class DomainFactory {
 
         String tickLog = sharedPreferences.getString(TickService.Companion.getTICK_LOG(), "");
         List<String> tickLogArr = Arrays.asList(TextUtils.split(tickLog, "\n"));
-        List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 9, 0), tickLogArr.size()));
+        List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 20, 0), tickLogArr.size()));
         tickLogArrTrimmed.add(now.toString() + " s? " + (silent ? "t" : "f") + message);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(TickService.Companion.getTICK_LOG(), TextUtils.join("\n", tickLogArrTrimmed));
 
         if (!silent)
             editor.putLong(TickService.Companion.getLAST_TICK_KEY(), now.getLong());
-
-        editor.apply();
 
         Optional<TimeStamp> minInstancesTimeStamp = Stream.of(getExistingInstances())
                 .map(existingInstance -> existingInstance.getInstanceDateTime().getTimeStamp())
@@ -2735,7 +2732,12 @@ public class DomainFactory {
             Assert.assertTrue(nextAlarm.toExactTimeStamp().compareTo(now) > 0);
 
             NotificationWrapper.Companion.getInstance().setAlarm(pendingIntent, nextAlarm);
+
+            tickLogArrTrimmed.add("next tick: " + nextAlarm.toString());
         }
+
+        editor.putString(TickService.Companion.getTICK_LOG(), TextUtils.join("\n", tickLogArrTrimmed));
+        editor.apply();
     }
 
     private void notifyInstance(@NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {

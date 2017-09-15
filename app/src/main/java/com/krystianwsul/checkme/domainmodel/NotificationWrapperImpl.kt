@@ -237,8 +237,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
             GcmNetworkManager.getInstance(MyApplication.instance)
                     .schedule(OneoffTask.Builder()
-                            .setService(GcmTickService::class.java)
                             .setExecutionWindow(delay, delay + 5)
+                            .setRequiredNetwork(OneoffTask.NETWORK_STATE_ANY)
+                            .setRequiresCharging(false)
+                            .setService(GcmTickService::class.java)
                             .setTag(tag)
                             .setUpdateCurrent(true)
                             .build())

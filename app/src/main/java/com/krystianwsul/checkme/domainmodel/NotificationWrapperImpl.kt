@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationManager
@@ -182,7 +181,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.notify(notificationId, notification)
     }
 
-    @SuppressLint("NewApi")
     protected open fun setExact(time: Long, pendingIntent: PendingIntent) {
         alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent)
     }
@@ -210,15 +208,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notify(instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, ArrayList(), null, inboxStyle, false, true, "0")
     }
 
-    override fun getPendingIntent(): PendingIntent {
-        val nextIntent = TickService.getIntent(MyApplication.instance, false, "NotificationWrapper: TickService.getIntent")
-
-        val pendingIntent = PendingIntent.getService(MyApplication.instance, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-        Assert.assertTrue(pendingIntent != null)
-
-        return pendingIntent
-    }
-
     override fun cleanGroup(lastNotificationId: Int?) {
         Assert.assertTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
 
@@ -227,7 +216,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
-        val pendingIntent = getPendingIntent()
+        val nextIntent = TickService.getIntent(MyApplication.instance, false, "NotificationWrapper: TickService.getIntent")
+        val pendingIntent = PendingIntent.getService(MyApplication.instance, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)!!
+
         alarmManager.cancel(pendingIntent)
 
         if (nextAlarm != null)

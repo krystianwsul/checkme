@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.app.PendingIntent
 import android.os.Build
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
@@ -25,8 +24,6 @@ abstract class NotificationWrapper {
     abstract fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp)
 
     abstract fun cleanGroup(lastNotificationId: Int?)
-
-    abstract fun getPendingIntent(): PendingIntent
 
     abstract fun updateAlarm(nextAlarm: TimeStamp?)
 }

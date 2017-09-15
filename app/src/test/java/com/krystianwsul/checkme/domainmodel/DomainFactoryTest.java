@@ -88,12 +88,6 @@ public class DomainFactoryTest {
 
             }
 
-            @NonNull
-            @Override
-            public PendingIntent getPendingIntent() {
-                return null;
-            }
-
             @Override
             public void cleanGroup(@Nullable Integer lastNotificationId) {
 

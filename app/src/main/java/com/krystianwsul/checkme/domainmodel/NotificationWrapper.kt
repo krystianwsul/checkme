@@ -24,11 +24,9 @@ abstract class NotificationWrapper {
 
     abstract fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp)
 
-    abstract fun setAlarm(pendingIntent: PendingIntent, nextAlarm: TimeStamp)
-
     abstract fun cleanGroup(lastNotificationId: Int?)
 
     abstract fun getPendingIntent(): PendingIntent
 
-    abstract fun cancelAlarm(pendingIntent: PendingIntent)
+    abstract fun updateAlarm(nextAlarm: TimeStamp?)
 }

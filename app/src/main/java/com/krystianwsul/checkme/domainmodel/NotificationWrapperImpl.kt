@@ -210,10 +210,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notify(instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, ArrayList(), null, inboxStyle, false, true, "0")
     }
 
-    override fun setAlarm(pendingIntent: PendingIntent, nextAlarm: TimeStamp) {
-        setExact(nextAlarm.long!!, pendingIntent)
-    }
-
     override fun getPendingIntent(): PendingIntent {
         val nextIntent = TickService.getIntent(MyApplication.instance, false, "NotificationWrapper: TickService.getIntent")
 
@@ -223,14 +219,18 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return pendingIntent
     }
 
-    override fun cancelAlarm(pendingIntent: PendingIntent) {
-        alarmManager.cancel(pendingIntent)
-    }
-
     override fun cleanGroup(lastNotificationId: Int?) {
         Assert.assertTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
 
         if (lastNotificationId != null)
             cancelNotification(lastNotificationId)
+    }
+
+    override fun updateAlarm(nextAlarm: TimeStamp?) {
+        val pendingIntent = getPendingIntent()
+        alarmManager.cancel(pendingIntent)
+
+        if (nextAlarm != null)
+            setExact(nextAlarm.long!!, pendingIntent)
     }
 }

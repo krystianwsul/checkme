@@ -88,11 +88,6 @@ public class DomainFactoryTest {
 
             }
 
-            @Override
-            public void setAlarm(@NonNull PendingIntent pendingIntent, @NonNull TimeStamp nextAlarm) {
-
-            }
-
             @NonNull
             @Override
             public PendingIntent getPendingIntent() {
@@ -100,12 +95,12 @@ public class DomainFactoryTest {
             }
 
             @Override
-            public void cancelAlarm(@NonNull PendingIntent pendingIntent) {
+            public void cleanGroup(@Nullable Integer lastNotificationId) {
 
             }
 
             @Override
-            public void cleanGroup(@Nullable Integer lastNotificationId) {
+            public void updateAlarm(TimeStamp nextAlarm) {
 
             }
         });

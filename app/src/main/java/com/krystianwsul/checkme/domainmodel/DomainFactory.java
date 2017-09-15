@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.annotation.SuppressLint;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -2725,14 +2724,9 @@ public class DomainFactory {
         if (minSchedulesTimeStamp.isPresent() && (nextAlarm == null || nextAlarm.compareTo(minSchedulesTimeStamp.get()) > 0))
             nextAlarm = minSchedulesTimeStamp.get();
 
-        PendingIntent pendingIntent = NotificationWrapper.Companion.getInstance().getPendingIntent();
-        NotificationWrapper.Companion.getInstance().cancelAlarm(pendingIntent);
+        NotificationWrapper.Companion.getInstance().updateAlarm(nextAlarm);
 
         if (nextAlarm != null) {
-            Assert.assertTrue(nextAlarm.toExactTimeStamp().compareTo(now) > 0);
-
-            NotificationWrapper.Companion.getInstance().setAlarm(pendingIntent, nextAlarm);
-
             tickLogArrTrimmed.add("next tick: " + nextAlarm.toString());
         }
 

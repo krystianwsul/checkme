@@ -8,6 +8,8 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.app.NotificationCompat
+import com.google.android.gms.gcm.GcmNetworkManager
+import com.google.android.gms.gcm.OneoffTask
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -216,6 +218,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
+        /*
         val nextIntent = TickService.getIntent(MyApplication.instance, false, "NotificationWrapper: TickService.getIntent")
         val pendingIntent = PendingIntent.getService(MyApplication.instance, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)!!
 
@@ -223,5 +226,22 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         if (nextAlarm != null)
             setExact(nextAlarm.long!!, pendingIntent)
+            */
+
+        val tag = "tickService"
+
+        if (nextAlarm != null) {
+            val now = ExactTimeStamp.getNow()
+
+            val delay = (nextAlarm.long - now.long) / 1000
+
+            GcmNetworkManager.getInstance(MyApplication.instance)
+                    .schedule(OneoffTask.Builder()
+                            .setService(GcmTickService::class.java)
+                            .setExecutionWindow(delay, delay + 5)
+                            .setTag(tag)
+                            .setUpdateCurrent(true)
+                            .build())
+        }
     }
 }

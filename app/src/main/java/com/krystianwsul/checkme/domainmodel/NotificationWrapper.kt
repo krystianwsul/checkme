@@ -11,8 +11,6 @@ abstract class NotificationWrapper {
         var instance: NotificationWrapper = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> NotificationWrapperImplO()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> NotificationWrapperImplN()
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> NotificationWrapperImplM()
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> NotificationWrapperImplKITKAT()
             else -> NotificationWrapperImpl()
         }
     }

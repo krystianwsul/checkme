@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -29,7 +28,6 @@ import java.util.*
 open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
-    protected val alarmManager by lazy { MyApplication.instance.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
 
     override fun cancelNotification(id: Int) {
         MyCrashlytics.log("NotificationManager.cancel " + id)
@@ -183,10 +181,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.notify(notificationId, notification)
     }
 
-    protected open fun setExact(time: Long, pendingIntent: PendingIntent) {
-        alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent)
-    }
-
     override fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) {
         val names = ArrayList<String>()
         val instanceKeys = ArrayList<InstanceKey>()
@@ -218,16 +212,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
-        /*
-        val nextIntent = TickService.getIntent(MyApplication.instance, false, "NotificationWrapper: TickService.getIntent")
-        val pendingIntent = PendingIntent.getService(MyApplication.instance, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT)!!
-
-        alarmManager.cancel(pendingIntent)
-
-        if (nextAlarm != null)
-            setExact(nextAlarm.long!!, pendingIntent)
-            */
-
         val tag = "tickService"
 
         if (nextAlarm != null) {

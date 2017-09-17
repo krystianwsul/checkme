@@ -96,6 +96,16 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_edit_instance_hour -> {
+                Assert.assertTrue(mData != null)
+                Assert.assertTrue(mData!!.mShowHour)
+
+                supportLoaderManager.destroyLoader(0)
+
+                DomainFactory.getDomainFactory(this).setInstancesAddHourActivity(this, mData!!.DataId, mData!!.InstanceDatas.keys)
+
+                finish()
+            }
             R.id.action_edit_instance_save -> {
                 Assert.assertTrue(mDate != null)
                 Assert.assertTrue(mData != null)

@@ -1140,6 +1140,34 @@ public class DomainFactory {
         notifyCloud(context, instance.getRemoteNullableProject());
     }
 
+    public synchronized void setInstancesAddHourActivity(@NonNull Context context, int dataId, @NonNull Collection<InstanceKey> instanceKeys) {
+        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity");
+        Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+        Calendar calendar = now.getCalendar();
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+
+        Date date = new Date(calendar);
+        HourMinute hourMinute = new HourMinute(calendar);
+
+        List<Instance> instances = Stream.of(instanceKeys)
+                .map(this::getInstance)
+                .collect(Collectors.toList());
+
+        instances.forEach(instance -> instance.setInstanceDateTime(date, new TimePair(hourMinute), now));
+
+        updateNotifications(context, now);
+
+        save(context, dataId);
+
+        Set<RemoteProject> remoteProjects = Stream.of(instances).map(Instance::getRemoteNullableProject)
+                .filter(remoteProject -> remoteProject != null)
+                .collect(Collectors.toSet());
+
+        notifyCloud(context, remoteProjects);
+    }
+
     public synchronized void setInstanceNotificationDone(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotificationDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());

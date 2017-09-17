@@ -169,7 +169,7 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_instance);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -183,13 +183,13 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
 
         mSavedInstanceState = savedInstanceState;
 
-        mEditInstanceLayout = (LinearLayout) findViewById(R.id.edit_instance_layout);
+        mEditInstanceLayout = findViewById(R.id.edit_instance_layout);
         Assert.assertTrue(mEditInstanceLayout != null);
 
-        mEditInstanceDateLayout = (TextInputLayout) findViewById(R.id.edit_instance_date_layout);
+        mEditInstanceDateLayout = findViewById(R.id.edit_instance_date_layout);
         Assert.assertTrue(mEditInstanceDateLayout != null);
 
-        mEditInstanceDate = (TextView) findViewById(R.id.edit_instance_date);
+        mEditInstanceDate = findViewById(R.id.edit_instance_date);
         Assert.assertTrue(mEditInstanceDate != null);
 
         mEditInstanceDate.setOnClickListener(v -> {
@@ -201,10 +201,10 @@ public class EditInstancesActivity extends AbstractActivity implements LoaderMan
         if (datePickerDialogFragment != null)
             datePickerDialogFragment.setListener(mDatePickerDialogFragmentListener);
 
-        mEditInstanceTimeLayout = (TextInputLayout) findViewById(R.id.edit_instance_time_layout);
+        mEditInstanceTimeLayout = findViewById(R.id.edit_instance_time_layout);
         Assert.assertTrue(mEditInstanceTimeLayout != null);
 
-        mEditInstanceTime = (TextView) findViewById(R.id.edit_instance_time);
+        mEditInstanceTime = findViewById(R.id.edit_instance_time);
         Assert.assertTrue(mEditInstanceTime != null);
 
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(DATE_KEY)) {

@@ -138,13 +138,13 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
         mSavedInstanceState = savedInstanceState
 
-        mEditInstanceLayout = findViewById(R.id.edit_instance_layout)
+        mEditInstanceLayout = findViewById(R.id.editInstanceLayout)
         Assert.assertTrue(mEditInstanceLayout != null)
 
-        mEditInstanceDateLayout = findViewById(R.id.edit_instance_date_layout)
+        mEditInstanceDateLayout = findViewById(R.id.editInstanceDateLayout)
         Assert.assertTrue(mEditInstanceDateLayout != null)
 
-        mEditInstanceDate = findViewById(R.id.edit_instance_date)
+        mEditInstanceDate = findViewById(R.id.editInstanceDate)
         Assert.assertTrue(mEditInstanceDate != null)
 
         mEditInstanceDate!!.setOnClickListener {
@@ -155,10 +155,10 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         val datePickerDialogFragment = supportFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment
         datePickerDialogFragment?.setListener(mDatePickerDialogFragmentListener)
 
-        mEditInstanceTimeLayout = findViewById(R.id.edit_instance_time_layout)
+        mEditInstanceTimeLayout = findViewById(R.id.editInstanceTimeLayout)
         Assert.assertTrue(mEditInstanceTimeLayout != null)
 
-        mEditInstanceTime = findViewById(R.id.edit_instance_time)
+        mEditInstanceTime = findViewById(R.id.editInstanceTime)
         Assert.assertTrue(mEditInstanceTime != null)
 
         if (mSavedInstanceState != null && mSavedInstanceState!!.containsKey(DATE_KEY)) {

@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.design.widget.TextInputLayout
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
 import android.support.v7.app.ActionBar
@@ -14,8 +13,6 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
@@ -26,6 +23,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import junit.framework.Assert
+import kotlinx.android.synthetic.main.activity_edit_instance.*
 import java.util.*
 
 class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<EditInstancesLoader.Data> {
@@ -33,13 +31,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
     private var mDate: Date? = null
     private var mData: EditInstancesLoader.Data? = null
 
-    private var mActionBar: ActionBar? = null
-
-    private var mEditInstanceLayout: LinearLayout? = null
-    private var mEditInstanceDateLayout: TextInputLayout? = null
-    private var mEditInstanceDate: TextView? = null
-    private var mEditInstanceTimeLayout: TextInputLayout? = null
-    private var mEditInstanceTime: TextView? = null
+    private lateinit var actionBar: ActionBar
 
     private var mSavedInstanceState: Bundle? = null
 
@@ -129,37 +121,21 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
         setSupportActionBar(toolbar)
 
-        mActionBar = supportActionBar
-        Assert.assertTrue(mActionBar != null)
+        actionBar = supportActionBar!!
 
-        mActionBar!!.setDisplayHomeAsUpEnabled(true)
-        mActionBar!!.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp)
-        mActionBar!!.title = null
+        actionBar.setDisplayHomeAsUpEnabled(true)
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp)
+        actionBar.title = null
 
         mSavedInstanceState = savedInstanceState
 
-        mEditInstanceLayout = findViewById(R.id.editInstanceLayout)
-        Assert.assertTrue(mEditInstanceLayout != null)
-
-        mEditInstanceDateLayout = findViewById(R.id.editInstanceDateLayout)
-        Assert.assertTrue(mEditInstanceDateLayout != null)
-
-        mEditInstanceDate = findViewById(R.id.editInstanceDate)
-        Assert.assertTrue(mEditInstanceDate != null)
-
-        mEditInstanceDate!!.setOnClickListener {
+        editInstanceDate.setOnClickListener {
             val datePickerDialogFragment = DatePickerDialogFragment.newInstance(mDate!!)
             datePickerDialogFragment.setListener(mDatePickerDialogFragmentListener)
             datePickerDialogFragment.show(supportFragmentManager, DATE_FRAGMENT_TAG)
         }
         val datePickerDialogFragment = supportFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment
         datePickerDialogFragment?.setListener(mDatePickerDialogFragmentListener)
-
-        mEditInstanceTimeLayout = findViewById(R.id.editInstanceTimeLayout)
-        Assert.assertTrue(mEditInstanceTimeLayout != null)
-
-        mEditInstanceTime = findViewById(R.id.editInstanceTime)
-        Assert.assertTrue(mEditInstanceTime != null)
 
         if (mSavedInstanceState != null && mSavedInstanceState!!.containsKey(DATE_KEY)) {
             mDate = mSavedInstanceState!!.getParcelable(DATE_KEY)
@@ -238,7 +214,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
     override fun onLoadFinished(loader: Loader<EditInstancesLoader.Data>, data: EditInstancesLoader.Data) {
         mData = data
 
-        mEditInstanceLayout!!.visibility = View.VISIBLE
+        editInstanceLayout.visibility = View.VISIBLE
 
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState!!.containsKey(DATE_KEY))) {
             Assert.assertTrue(mDate == null)
@@ -261,7 +237,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
             mInitialDate = mDate
         }
 
-        mActionBar!!.title = mData!!.InstanceDatas
+        actionBar.title = mData!!.InstanceDatas
                 .values
                 .joinToString(", ") { it.Name }
 
@@ -272,7 +248,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         val timePickerDialogFragment = supportFragmentManager.findFragmentByTag(TIME_FRAGMENT_TAG) as? TimePickerDialogFragment
         timePickerDialogFragment?.setListener(mTimePickerDialogFragmentListener)
 
-        mEditInstanceTime!!.setOnClickListener {
+        editInstanceTime.setOnClickListener {
             Assert.assertTrue(mData != null)
             val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(mData!!.CustomTimeDatas.values
                     .filter { it.mCustomTimeKey.mLocalCustomTimeId != null }
@@ -294,9 +270,8 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
     private fun updateDateText() {
         Assert.assertTrue(mDate != null)
-        Assert.assertTrue(mEditInstanceDate != null)
 
-        mEditInstanceDate!!.text = mDate!!.getDisplayText(this)
+        editInstanceDate.setText(mDate!!.getDisplayText(this))
 
         updateTimeText()
 
@@ -306,7 +281,6 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
     @SuppressLint("SetTextI18n")
     private fun updateTimeText() {
         Assert.assertTrue(mTimePairPersist != null)
-        Assert.assertTrue(mEditInstanceTime != null)
         Assert.assertTrue(mData != null)
         Assert.assertTrue(mDate != null)
 
@@ -314,9 +288,9 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
             val customTimeData = mData!!.CustomTimeDatas[mTimePairPersist!!.customTimeKey]
             Assert.assertTrue(customTimeData != null)
 
-            mEditInstanceTime!!.text = customTimeData!!.Name + " (" + customTimeData.HourMinutes[mDate!!.dayOfWeek] + ")"
+            editInstanceTime.setText(customTimeData!!.Name + " (" + customTimeData.HourMinutes[mDate!!.dayOfWeek] + ")")
         } else {
-            mEditInstanceTime!!.text = mTimePairPersist!!.hourMinute.toString()
+            editInstanceTime.setText(mTimePairPersist!!.hourMinute.toString())
         }
     }
 
@@ -348,11 +322,11 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
     private fun updateError() {
         if (isValidDate) {
-            mEditInstanceDateLayout!!.error = null
-            mEditInstanceTimeLayout!!.error = if (isValidDateTime) null else getString(R.string.error_time)
+            editInstanceDateLayout.error = null
+            editInstanceTimeLayout.error = if (isValidDateTime) null else getString(R.string.error_time)
         } else {
-            mEditInstanceDateLayout!!.error = getString(R.string.error_date)
-            mEditInstanceTimeLayout!!.error = null
+            editInstanceDateLayout.error = getString(R.string.error_date)
+            editInstanceTimeLayout.error = null
         }
     }
 

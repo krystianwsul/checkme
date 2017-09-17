@@ -125,7 +125,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                                 .map(instanceData -> instanceData.InstanceKey)
                                 .collect(Collectors.toCollection(ArrayList::new));
 
-                        startActivity(EditInstancesActivity.getIntent(getActivity(), instanceKeys));
+                        startActivity(EditInstancesActivity.Companion.getIntent(getActivity(), instanceKeys));
                     }
                     break;
                 }

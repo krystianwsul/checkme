@@ -57,16 +57,19 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
         @NonNull
         public final Map<CustomTimeKey, CustomTimeData> CustomTimeDatas;
 
-        public Data(@NonNull HashMap<InstanceKey, InstanceData> instanceDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas) {
+        public final boolean mShowHour;
+
+        public Data(@NonNull HashMap<InstanceKey, InstanceData> instanceDatas, @NonNull Map<CustomTimeKey, CustomTimeData> customTimeDatas, boolean showHour) {
             Assert.assertTrue(instanceDatas.size() > 1);
 
             InstanceDatas = instanceDatas;
             CustomTimeDatas = customTimeDatas;
+            mShowHour = showHour;
         }
 
         @Override
         public int hashCode() {
-            return (InstanceDatas.hashCode() + CustomTimeDatas.hashCode());
+            return (InstanceDatas.hashCode() + CustomTimeDatas.hashCode() + (mShowHour ? 1 : 0));
         }
 
         @SuppressWarnings("RedundantIfStatement")
@@ -87,6 +90,9 @@ public class EditInstancesLoader extends DomainLoader<EditInstancesLoader.Data> 
                 return false;
 
             if (!CustomTimeDatas.equals(data.CustomTimeDatas))
+                return false;
+
+            if (mShowHour != data.mShowHour)
                 return false;
 
             return true;

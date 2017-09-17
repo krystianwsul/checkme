@@ -90,6 +90,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.action_edit_instance_save).isVisible = mData != null
+        menu.findItem(R.id.action_edit_instance_hour).isVisible = mData != null && mData!!.mShowHour
         return true
     }
 

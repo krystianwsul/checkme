@@ -576,7 +576,9 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstancesLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new EditInstancesLoader.Data(instanceDatas, customTimeDatas);
+        Boolean showHour = Stream.of(instanceDatas.values()).allMatch(instanceData -> instanceData.mInstanceDateTime.getTimeStamp().toExactTimeStamp().compareTo(now) < 0);
+
+        return new EditInstancesLoader.Data(instanceDatas, customTimeDatas, showHour);
     }
 
     @NonNull

@@ -106,16 +106,6 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
                 DomainFactory.getDomainFactory(this).setInstanceAddHourActivity(this, mData!!.DataId, mData!!.InstanceKey)
 
                 finish()
-                Assert.assertTrue(mDate != null)
-                Assert.assertTrue(mData != null)
-
-                if (isValidDateTime) {
-                    supportLoaderManager.destroyLoader(0)
-
-                    DomainFactory.getDomainFactory(this).setInstanceDateTime(this, mData!!.DataId, mData!!.InstanceKey, mDate!!, mTimePairPersist!!.timePair)
-
-                    finish()
-                }
             }
             R.id.action_edit_instance_save -> {
                 Assert.assertTrue(mDate != null)

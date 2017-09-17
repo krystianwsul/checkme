@@ -114,7 +114,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         InstanceData instanceData = instanceDatas.get(0);
                         Assert.assertTrue(instanceData.IsRootInstance);
 
-                        startActivity(EditInstanceActivity.getIntent(getActivity(), instanceData.InstanceKey));
+                        startActivity(EditInstanceActivity.Companion.getIntent(getActivity(), instanceData.InstanceKey));
                     } else {
                         Assert.assertTrue(instanceDatas.size() > 1);
 
@@ -549,15 +549,15 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         View view = inflater.inflate(R.layout.fragment_group_list, container, false);
         Assert.assertTrue(view != null);
 
-        mGroupListProgress = (ProgressBar) view.findViewById(R.id.group_list_progress);
+        mGroupListProgress = view.findViewById(R.id.group_list_progress);
         Assert.assertTrue(mGroupListProgress != null);
 
-        mGroupListRecycler = (RecyclerView) view.findViewById(R.id.group_list_recycler);
+        mGroupListRecycler = view.findViewById(R.id.group_list_recycler);
         Assert.assertTrue(mGroupListRecycler != null);
 
         mGroupListRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        mEmptyText = (TextView) view.findViewById(R.id.empty_text);
+        mEmptyText = view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
         return view;
@@ -992,12 +992,12 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LinearLayout groupRow = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.row_group_list, parent, false);
 
-            LinearLayout groupRowContainer = (LinearLayout) groupRow.findViewById(R.id.group_row_container);
-            TextView groupRowName = (TextView) groupRow.findViewById(R.id.group_row_name);
-            TextView groupRowDetails = (TextView) groupRow.findViewById(R.id.group_row_details);
-            TextView groupRowChildren = (TextView) groupRow.findViewById(R.id.group_row_children);
-            ImageView groupRowExpand = (ImageView) groupRow.findViewById(R.id.group_row_expand);
-            CheckBox groupCheckBox = (CheckBox) groupRow.findViewById(R.id.group_row_checkbox);
+            LinearLayout groupRowContainer = groupRow.findViewById(R.id.group_row_container);
+            TextView groupRowName = groupRow.findViewById(R.id.group_row_name);
+            TextView groupRowDetails = groupRow.findViewById(R.id.group_row_details);
+            TextView groupRowChildren = groupRow.findViewById(R.id.group_row_children);
+            ImageView groupRowExpand = groupRow.findViewById(R.id.group_row_expand);
+            CheckBox groupCheckBox = groupRow.findViewById(R.id.group_row_checkbox);
             View groupRowSeparator = groupRow.findViewById(R.id.group_row_separator);
 
             return new GroupHolder(groupRow, groupRowContainer, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator);

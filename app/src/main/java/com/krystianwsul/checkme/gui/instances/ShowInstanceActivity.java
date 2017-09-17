@@ -115,7 +115,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.IsRootInstance);
 
-                startActivity(EditInstanceActivity.getIntent(this, mInstanceKey));
+                startActivity(EditInstanceActivity.Companion.getIntent(this, mInstanceKey));
                 break;
             case R.id.instance_menu_share:
                 Assert.assertTrue(mInstanceData != null);

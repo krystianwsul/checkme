@@ -2512,7 +2512,7 @@ public class DomainFactory {
         if (!remoteProjects.isEmpty()) {
             Assert.assertTrue(mUserInfo != null);
 
-            new BackendNotifier(context, remoteProjects, mUserInfo, new ArrayList<>());
+            BackendNotifier.INSTANCE.notify(context, remoteProjects, mUserInfo, new ArrayList<>());
         }
     }
 
@@ -2521,7 +2521,7 @@ public class DomainFactory {
 
         Set<RemoteProject> remoteProjects = Collections.singleton(remoteProject);
 
-        new BackendNotifier(context, remoteProjects, mUserInfo, userKeys);
+        BackendNotifier.INSTANCE.notify(context, remoteProjects, mUserInfo, userKeys);
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull ExactTimeStamp now) {

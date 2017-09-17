@@ -12,28 +12,26 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.RemoteProject
 import junit.framework.Assert
 
-class BackendNotifier(context: Context, remoteProjects: Set<RemoteProject>, userInfo: UserInfo, userKeys: Collection<String>) {
+object BackendNotifier {
 
-    companion object {
-        private val PREFIX = "http://check-me-add47.appspot.com/notify?"
+    private val PREFIX = "http://check-me-add47.appspot.com/notify?"
 
-        fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String?): String {
-            Assert.assertTrue(!projects.isEmpty())
+    fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String?): String {
+        Assert.assertTrue(!projects.isEmpty())
 
-            val parameters = projects.map { "projects=" + it }.toMutableSet()
+        val parameters = projects.map { "projects=" + it }.toMutableSet()
 
-            parameters.addAll(userKeys.map { "userKeys=" + it })
+        parameters.addAll(userKeys.map { "userKeys=" + it })
 
-            if (production)
-                parameters.add("production=1")
+        if (production)
+            parameters.add("production=1")
 
-            parameters.add("senderToken=" + senderToken!!)
+        parameters.add("senderToken=" + senderToken!!)
 
-            return PREFIX + parameters.joinToString("&")
-        }
+        return PREFIX + parameters.joinToString("&")
     }
 
-    init {
+    fun notify(context: Context, remoteProjects: Set<RemoteProject>, userInfo: UserInfo, userKeys: Collection<String>) {
         val root = DatabaseWrapper.getRoot()
 
         val production = when (root) {

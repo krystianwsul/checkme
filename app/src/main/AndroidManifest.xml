@@ -65,7 +65,7 @@
             android:name=".persistencemodel.SaveService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
         <service
-            android:name=".notifications.BootService"
+            android:name=".notifications.TickJobIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <receiver

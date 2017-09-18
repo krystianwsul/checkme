@@ -4,16 +4,16 @@ import android.content.Intent
 import android.support.v4.app.JobIntentService
 import com.krystianwsul.checkme.MyApplication
 
-class BootService : JobIntentService() {
+class TickJobIntentService : JobIntentService() {
 
     companion object {
 
-        fun start() {
-            JobIntentService.enqueueWork(MyApplication.instance, BootService::class.java, 1, Intent())
+        fun start(intent: Intent) {
+            JobIntentService.enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
         }
     }
 
     override fun onHandleWork(intent: Intent) {
-        TickService.tick(this, true, "BootService")
+        TickService.tick(intent)
     }
 }

@@ -30,10 +30,6 @@ class TickService : WakefulIntentService("TickService") {
             WakefulIntentService.sendWakefulWork(context, getIntent(context, true, source))
         }
 
-        fun startServiceTimeChange(context: Context, source: String) {
-            WakefulIntentService.sendWakefulWork(context, getIntent(context, true, source))
-        }
-
         fun startServiceDebug(context: Context, source: String) {
             WakefulIntentService.sendWakefulWork(context, getIntent(context, false, source))
         }
@@ -56,6 +52,10 @@ class TickService : WakefulIntentService("TickService") {
             val source = intent.getStringExtra(SOURCE_KEY)
             Assert.assertTrue(!TextUtils.isEmpty(source))
 
+            tick(silent, source)
+        }
+
+        fun tick(silent: Boolean, source: String) {
             val domainFactory = DomainFactory.getDomainFactory(MyApplication.instance)
 
             if (domainFactory.isConnected) {

@@ -7,7 +7,7 @@ import com.google.android.gms.gcm.TaskParams
 class GcmTickService : GcmTaskService() {
 
     override fun onRunTask(taskParams: TaskParams): Int {
-        TickService.tick(TickService.getIntent(this, false, "GcmTickService"))
+        TickService.tick(false, "GcmTickService")
 
         return GcmNetworkManager.RESULT_SUCCESS
     }

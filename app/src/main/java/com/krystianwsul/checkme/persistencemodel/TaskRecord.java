@@ -5,14 +5,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
-
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class TaskRecord extends Record {
     static final String TABLE_TASKS = "tasks";
@@ -48,101 +44,6 @@ public class TaskRecord extends Record {
                 + COLUMN_OLDEST_VISIBLE_MONTH + " INTEGER, "
                 + COLUMN_OLDEST_VISIBLE_DAY + " INTEGER, "
                 + COLUMN_NOTE + " TEXT);");
-    }
-
-    @SuppressWarnings("UnusedParameters")
-    @Deprecated
-    static void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        if (oldVersion <= 5) {
-            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
-                    + " ADD COLUMN relevant INTEGER NOT NULL DEFAULT 1");
-
-            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
-                    + " ADD COLUMN oldestVisible INTEGER");
-        }
-
-        if (oldVersion <= 7) {
-            sqLiteDatabase.execSQL("CREATE INDEX tasksIndexRelevant ON " + TABLE_TASKS + "(relevant DESC)");
-        }
-
-        if (oldVersion <= 9) {
-            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
-                    + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE_YEAR + " INTEGER");
-            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
-                    + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE_MONTH + " INTEGER");
-            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
-                    + " ADD COLUMN " + COLUMN_OLDEST_VISIBLE_DAY + " INTEGER");
-
-            Cursor cursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null);
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                if (!cursor.isNull(5)) {
-                    int id = cursor.getInt(0);
-                    long oldestVisible = cursor.getLong(5);
-
-                    ExactTimeStamp exactTimeStamp = new ExactTimeStamp(oldestVisible);
-
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(COLUMN_OLDEST_VISIBLE_YEAR, exactTimeStamp.getDate().getYear());
-                    contentValues.put(COLUMN_OLDEST_VISIBLE_MONTH, exactTimeStamp.getDate().getMonth());
-                    contentValues.put(COLUMN_OLDEST_VISIBLE_DAY, exactTimeStamp.getDate().getDay());
-
-                    sqLiteDatabase.update(TABLE_TASKS, contentValues, COLUMN_ID + " = " + id, null);
-                }
-
-                cursor.moveToNext();
-            }
-            cursor.close();
-        }
-
-        if (oldVersion <= 12) {
-            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_TASKS
-                    + " ADD COLUMN " + COLUMN_NOTE + " TEXT");
-        }
-
-        if (oldVersion < 16) {
-            sqLiteDatabase.delete(TABLE_TASKS, "relevant = 0", null);
-
-            String columns = COLUMN_ID + ", "
-                    + COLUMN_NAME + ", "
-                    + COLUMN_START_TIME + ", "
-                    + COLUMN_END_TIME + ", "
-                    + COLUMN_OLDEST_VISIBLE_YEAR + ", "
-                    + COLUMN_OLDEST_VISIBLE_MONTH + ", "
-                    + COLUMN_OLDEST_VISIBLE_DAY + ", "
-                    + COLUMN_NOTE;
-
-            sqLiteDatabase.execSQL("DROP INDEX tasksIndexRelevant");
-
-            Cursor dbCursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null);
-            String[] columnNames = dbCursor.getColumnNames();
-
-            Log.e("asdf", "column names before: " + Arrays.toString(columnNames));
-
-            dbCursor.close();
-
-            sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t2_backup(" + columns + ");");
-            sqLiteDatabase.execSQL("INSERT INTO t2_backup SELECT " + columns + " FROM " + TABLE_TASKS + ";");
-            sqLiteDatabase.execSQL("DROP TABLE " + TABLE_TASKS + ";");
-            sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_TASKS
-                            + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                            + COLUMN_NAME + " TEXT NOT NULL, "
-                            + COLUMN_START_TIME + " TEXT NOT NULL, "
-                            + COLUMN_END_TIME + " TEXT, "
-                            + COLUMN_OLDEST_VISIBLE_YEAR + " INTEGER, "
-                            + COLUMN_OLDEST_VISIBLE_MONTH + " INTEGER, "
-                            + COLUMN_OLDEST_VISIBLE_DAY + " INTEGER, "
-                    + COLUMN_NOTE + " TEXT);");
-            sqLiteDatabase.execSQL("INSERT INTO " + TABLE_TASKS + " SELECT * FROM t2_backup;");
-            sqLiteDatabase.execSQL("DROP TABLE t2_backup;");
-
-            dbCursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null);
-            columnNames = dbCursor.getColumnNames();
-
-            Log.e("asdf", "column names after: " + Arrays.toString(columnNames));
-
-            dbCursor.close();
-        }
     }
 
     static ArrayList<TaskRecord> getTaskRecords(SQLiteDatabase sqLiteDatabase) {

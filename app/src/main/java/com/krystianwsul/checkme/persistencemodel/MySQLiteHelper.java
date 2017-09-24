@@ -10,7 +10,7 @@ import junit.framework.Assert;
 
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
-    private static final int DATABASE_VERSION = 19;
+    private static final int DATABASE_VERSION = 20;
 
     @Nullable
     private static SQLiteDatabase sSQLiteDatabase;
@@ -73,10 +73,6 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
                 onCreate(sqLiteDatabase);
             } else {
-                TaskRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-
-                InstanceRecord.onUpgrade(sqLiteDatabase, oldVersion, newVersion);
-
                 if (oldVersion < 18) {
                     String columns = InstanceShownRecord.COLUMN_ID + ", "
                             + InstanceShownRecord.COLUMN_TASK_ID + ", "
@@ -110,7 +106,30 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
                 if (oldVersion < 19) {
                     sqLiteDatabase.execSQL("ALTER TABLE " + InstanceShownRecord.TABLE_INSTANCES_SHOWN
-                            + " ADD COLUMN " + InstanceShownRecord.COLUMN_PROJECT_ID + " TEXt");
+                            + " ADD COLUMN " + InstanceShownRecord.COLUMN_PROJECT_ID + " TEXT");
+                }
+
+                if (oldVersion < 20) {
+                    sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.INDEX_HOUR_MINUTE + " ON " + InstanceShownRecord.TABLE_INSTANCES_SHOWN
+                            + "("
+                            + InstanceShownRecord.COLUMN_PROJECT_ID + ", "
+                            + InstanceShownRecord.COLUMN_TASK_ID + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_YEAR + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_MONTH + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_DAY + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_HOUR + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_MINUTE
+                            + ")");
+
+                    sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.INDEX_CUSTOM_TIME_ID + " ON " + InstanceShownRecord.TABLE_INSTANCES_SHOWN
+                            + "("
+                            + InstanceShownRecord.COLUMN_PROJECT_ID + ", "
+                            + InstanceShownRecord.COLUMN_TASK_ID + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_YEAR + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_MONTH + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_DAY + ", "
+                            + InstanceShownRecord.COLUMN_SCHEDULE_CUSTOM_TIME_ID
+                            + ")");
                 }
             }
 

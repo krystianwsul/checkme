@@ -26,6 +26,9 @@ public class InstanceShownRecord extends Record {
     static final String COLUMN_NOTIFICATION_SHOWN = "notificationShown";
     static final String COLUMN_PROJECT_ID = "projectId";
 
+    static final String INDEX_HOUR_MINUTE = "instanceShownIndexTaskScheduleHourMinute";
+    static final String INDEX_CUSTOM_TIME_ID = "instanceShownIndexTaskScheduleCustomTimeId";
+
     private final int mId;
     private final String mTaskId;
 
@@ -58,6 +61,27 @@ public class InstanceShownRecord extends Record {
                 + COLUMN_NOTIFICATION_SHOWN + " INTEGER NOT NULL DEFAULT 0, "
                 + COLUMN_PROJECT_ID + " TEXT NOT NULL"
                 + ");");
+
+        sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_HOUR_MINUTE + " ON " + TABLE_INSTANCES_SHOWN
+                + "("
+                + COLUMN_PROJECT_ID + ", "
+                + COLUMN_TASK_ID + ", "
+                + COLUMN_SCHEDULE_YEAR + ", "
+                + COLUMN_SCHEDULE_MONTH + ", "
+                + COLUMN_SCHEDULE_DAY + ", "
+                + COLUMN_SCHEDULE_HOUR + ", "
+                + COLUMN_SCHEDULE_MINUTE
+                + ")");
+
+        sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + INDEX_CUSTOM_TIME_ID + " ON " + TABLE_INSTANCES_SHOWN
+                + "("
+                + COLUMN_PROJECT_ID + ", "
+                + COLUMN_TASK_ID + ", "
+                + COLUMN_SCHEDULE_YEAR + ", "
+                + COLUMN_SCHEDULE_MONTH + ", "
+                + COLUMN_SCHEDULE_DAY + ", "
+                + COLUMN_SCHEDULE_CUSTOM_TIME_ID
+                + ")");
     }
 
     @NonNull

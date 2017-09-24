@@ -248,6 +248,7 @@ public class LocalFactory {
             Assert.assertTrue(scheduleHour != null);
             Assert.assertTrue(scheduleMinute != null);
 
+            // todo put a key on these fields
             matches = Stream.of(mPersistenceManager.getInstanceShownRecords())
                     .filter(instanceShownRecord -> instanceShownRecord.getProjectId().equals(projectId))
                     .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))

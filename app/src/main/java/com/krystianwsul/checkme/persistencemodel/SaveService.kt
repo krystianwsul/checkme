@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.persistencemodel
 
 import android.content.Context
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.support.v4.app.JobIntentService
 import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -17,24 +16,31 @@ class SaveService : JobIntentService() {
         private val DELETE_COMMAND_KEY = "deleteCommands"
         private val SOURCE_KEY = "source"
 
-        private fun save(sqLiteDatabase: SQLiteDatabase, insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>) {
+        private fun save(context: Context, insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>, source: Source) {
             Log.e("asdf", "SaveService.save")
 
-            sqLiteDatabase.beginTransaction()
-
             try {
-                for (insertCommand in insertCommands)
-                    insertCommand.execute(sqLiteDatabase)
+                val sqLiteDatabase = PersistenceManger.getInstance(context).sqLiteDatabase!!
 
-                for (updateCommand in updateCommands)
-                    updateCommand.execute(sqLiteDatabase)
+                sqLiteDatabase.beginTransaction()
 
-                for (deleteCommand in deleteCommands)
-                    deleteCommand.execute(sqLiteDatabase)
+                try {
+                    for (insertCommand in insertCommands)
+                        insertCommand.execute(sqLiteDatabase)
 
-                sqLiteDatabase.setTransactionSuccessful()
-            } finally {
-                sqLiteDatabase.endTransaction()
+                    for (updateCommand in updateCommands)
+                        updateCommand.execute(sqLiteDatabase)
+
+                    for (deleteCommand in deleteCommands)
+                        deleteCommand.execute(sqLiteDatabase)
+
+                    sqLiteDatabase.setTransactionSuccessful()
+                } finally {
+                    sqLiteDatabase.endTransaction()
+                }
+            } catch (e: Exception) {
+                DomainFactory.getDomainFactory(context).reset(context, source)
+                throw e
             }
         }
     }
@@ -45,14 +51,7 @@ class SaveService : JobIntentService() {
         val deleteCommands = intent.getParcelableArrayListExtra<DeleteCommand>(DELETE_COMMAND_KEY)!!
         val source = intent.getSerializableExtra(SOURCE_KEY) as Source
 
-        val sqLiteDatabase = PersistenceManger.getInstance(this).sqLiteDatabase!!
-
-        try {
-            save(sqLiteDatabase, insertCommands, updateCommands, deleteCommands)
-        } catch (e: Exception) {
-            DomainFactory.getDomainFactory(this).reset(this, source)
-            throw e
-        }
+        save(this, insertCommands, updateCommands, deleteCommands, source)
     }
 
     abstract class Factory {

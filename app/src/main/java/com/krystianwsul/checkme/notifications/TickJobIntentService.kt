@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.notifications
 import android.content.Intent
 import android.support.v4.app.JobIntentService
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.persistencemodel.SaveService
 
 class TickJobIntentService : JobIntentService() {
 
@@ -15,6 +14,6 @@ class TickJobIntentService : JobIntentService() {
     }
 
     override fun onHandleWork(intent: Intent) {
-        TickService.tick(SaveService.Source.SERVICE, intent)
+        TickService.tick(intent)
     }
 }

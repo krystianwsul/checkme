@@ -82,7 +82,7 @@ public class InstanceDoneService extends IntentService {
             if (firebaseUser == null)
                 throw new NeedsFirebaseException();
 
-            domainFactory.setUserInfo(context.getApplicationContext(), new UserInfo(firebaseUser));
+            domainFactory.setUserInfo(context.getApplicationContext(), SaveService.Source.SERVICE, new UserInfo(firebaseUser));
         }
 
         domainFactory.addFirebaseListener(firebaseListener);

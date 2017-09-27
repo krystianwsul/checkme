@@ -56,6 +56,7 @@ import com.krystianwsul.checkme.gui.projects.ProjectListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.MainLoader;
 import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 
 import junit.framework.Assert;
 
@@ -148,7 +149,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         if (firebaseUser != null) {
             sUserInfo = new UserInfo(firebaseUser);
 
-            DomainFactory.getDomainFactory(this).setUserInfo(this, sUserInfo);
+            DomainFactory.getDomainFactory(this).setUserInfo(this, SaveService.Source.GUI, sUserInfo);
 
             Log.e("asdf", "firebase logged in");
         } else {

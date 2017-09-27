@@ -15,6 +15,7 @@ class SaveService : JobIntentService() {
         private val INSERT_COMMAND_KEY = "insertCommands"
         private val UPDATE_COMMAND_KEY = "updateCommands"
         private val DELETE_COMMAND_KEY = "deleteCommands"
+        private val SOURCE_KEY = "source"
 
         private fun save(sqLiteDatabase: SQLiteDatabase, insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>) {
             Log.e("asdf", "SaveService.save")
@@ -42,13 +43,14 @@ class SaveService : JobIntentService() {
         val insertCommands = intent.getParcelableArrayListExtra<InsertCommand>(INSERT_COMMAND_KEY)!!
         val updateCommands = intent.getParcelableArrayListExtra<UpdateCommand>(UPDATE_COMMAND_KEY)!!
         val deleteCommands = intent.getParcelableArrayListExtra<DeleteCommand>(DELETE_COMMAND_KEY)!!
+        val source = intent.getSerializableExtra(SOURCE_KEY) as Source
 
         val sqLiteDatabase = PersistenceManger.getInstance(this).sqLiteDatabase!!
 
         try {
             save(sqLiteDatabase, insertCommands, updateCommands, deleteCommands)
         } catch (e: Exception) {
-            DomainFactory.getDomainFactory(this).reset(this)
+            DomainFactory.getDomainFactory(this).reset(this, source)
             throw e
         }
     }
@@ -90,10 +92,12 @@ class SaveService : JobIntentService() {
 
                 val deleteCommands = ArrayList(collections.map { delete(it) }.flatten())
 
-                val intent = Intent(context, SaveService::class.java)
-                intent.putParcelableArrayListExtra(INSERT_COMMAND_KEY, insertCommands)
-                intent.putParcelableArrayListExtra(UPDATE_COMMAND_KEY, updateCommands)
-                intent.putParcelableArrayListExtra(DELETE_COMMAND_KEY, deleteCommands)
+                val intent = Intent(context, SaveService::class.java).apply {
+                    putExtra(INSERT_COMMAND_KEY, insertCommands)
+                    putExtra(UPDATE_COMMAND_KEY, updateCommands)
+                    putExtra(DELETE_COMMAND_KEY, deleteCommands)
+                    putExtra(SOURCE_KEY, source)
+                }
 
                 JobIntentService.enqueueWork(context, SaveService::class.java, 0, intent)
             }
@@ -109,6 +113,6 @@ class SaveService : JobIntentService() {
     }
 
     enum class Source {
-        GUI, NOTIFICATION, SERVICE, FIREBASE
+        GUI, NOTIFICATION, SERVICE
     }
 }

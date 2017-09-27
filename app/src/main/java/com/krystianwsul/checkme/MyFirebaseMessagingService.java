@@ -41,7 +41,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                 DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
 
-                domainFactory.setUserInfo(this, userInfo);
+                domainFactory.setUserInfo(this, SaveService.Source.SERVICE, userInfo);
 
                 domainFactory.setFirebaseTickListener(this, SaveService.Source.SERVICE, new DomainFactory.TickData(false, "MyFirebaseMessagingService", this));
             }

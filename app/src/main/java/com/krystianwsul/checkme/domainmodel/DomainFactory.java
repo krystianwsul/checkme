@@ -180,7 +180,7 @@ public class DomainFactory {
         return (sStop.getLong() - sRead.getLong());
     }
 
-    public synchronized void reset(@NonNull Context context) {
+    public synchronized void reset(@NonNull Context context, @NonNull SaveService.Source source) {
         UserInfo userInfo = mUserInfo;
         clearUserInfo(context);
 
@@ -188,7 +188,7 @@ public class DomainFactory {
         mLocalFactory.reset();
 
         if (userInfo != null)
-            setUserInfo(context, userInfo);
+            setUserInfo(context, source, userInfo);
 
         ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
 
@@ -233,7 +233,7 @@ public class DomainFactory {
 
     // firebase
 
-    public synchronized void setUserInfo(@NonNull Context context, @NonNull UserInfo userInfo) {
+    public synchronized void setUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
         if (mUserInfo != null) {
             Assert.assertTrue(mRecordQuery != null);
             Assert.assertTrue(mFriendQuery != null);
@@ -270,7 +270,7 @@ public class DomainFactory {
                 Log.e("asdf", "DomainFactory.mRecordListener.onDataChange, dataSnapshot: " + dataSnapshot);
                 Assert.assertTrue(dataSnapshot != null);
 
-                setRemoteTaskRecords(applicationContext, dataSnapshot, SaveService.Source.FIREBASE);
+                setRemoteTaskRecords(applicationContext, dataSnapshot, source);
             }
 
             @Override

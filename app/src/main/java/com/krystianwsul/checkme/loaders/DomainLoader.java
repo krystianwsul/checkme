@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.ObserverHolder;
 import com.krystianwsul.checkme.domainmodel.UserInfo;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 
 import junit.framework.Assert;
 
@@ -96,7 +97,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                     if (firebaseUser != null && !mDomainFactory.isConnected()) {
                         UserInfo userInfo = new UserInfo(firebaseUser);
 
-                        mDomainFactory.setUserInfo(getContext().getApplicationContext(), userInfo);
+                        mDomainFactory.setUserInfo(getContext().getApplicationContext(), SaveService.Source.GUI, userInfo);
                     }
 
                     break;
@@ -111,7 +112,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
 
                         UserInfo userInfo = new UserInfo(firebaseUser);
 
-                        mDomainFactory.setUserInfo(getContext().getApplicationContext(), userInfo);
+                        mDomainFactory.setUserInfo(getContext().getApplicationContext(), SaveService.Source.GUI, userInfo);
                         mDomainFactory.addFirebaseListener(mFirebaseListener);
                     }
 
@@ -125,7 +126,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
                         if (firebaseUser != null) {
                             UserInfo userInfo = new UserInfo(firebaseUser);
 
-                            mDomainFactory.setUserInfo(getContext().getApplicationContext(), userInfo);
+                            mDomainFactory.setUserInfo(getContext().getApplicationContext(), SaveService.Source.GUI, userInfo);
                             mDomainFactory.addFriendFirebaseListener(mFirebaseListener);
                         }
                     }

@@ -9,6 +9,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.krystianwsul.checkme.domainmodel.UserInfo;
 import com.krystianwsul.checkme.notifications.InstanceDoneService;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 
 public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
     @Override
@@ -21,7 +22,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
         UserInfo userInfo = new UserInfo(firebaseUser);
 
-        InstanceDoneService.throttleFirebase(this, true, domainFactory -> domainFactory.updateUserInfo(this, userInfo));
+        InstanceDoneService.throttleFirebase(this, true, domainFactory -> domainFactory.updateUserInfo(this, SaveService.Source.SERVICE, userInfo));
     }
 
     @Nullable

@@ -28,6 +28,7 @@ import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.loaders.ProjectListLoader;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.treeadapter.ModelNode;
 import com.krystianwsul.treeadapter.TreeModelAdapter;
 import com.krystianwsul.treeadapter.TreeNode;
@@ -94,7 +95,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                         decrementSelected();
                     }
 
-                    DomainFactory.getDomainFactory(getActivity()).setProjectEndTimeStamps(getActivity(), mDataId, projectIds);
+                    DomainFactory.getDomainFactory(getActivity()).setProjectEndTimeStamps(getActivity(), mDataId, SaveService.Source.GUI, projectIds);
 
                     break;
                 default:
@@ -173,13 +174,13 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_project_list, container, false);
 
-        mProjectListProgress = (ProgressBar) view.findViewById(R.id.projectListProgress);
+        mProjectListProgress = view.findViewById(R.id.projectListProgress);
         Assert.assertTrue(mProjectListProgress != null);
 
-        mEmptyText = (TextView) view.findViewById(R.id.empty_text);
+        mEmptyText = view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
-        mProjectListRecycler = (RecyclerView) view.findViewById(R.id.projectListRecycler);
+        mProjectListRecycler = view.findViewById(R.id.projectListRecycler);
         Assert.assertTrue(mProjectListRecycler != null);
 
         return view;
@@ -435,10 +436,10 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         Holder(View itemView) {
             super(itemView);
 
-            mProjectName = (TextView) itemView.findViewById(R.id.project_name);
+            mProjectName = itemView.findViewById(R.id.project_name);
             Assert.assertTrue(mProjectName != null);
 
-            mProjectUsers = (TextView) itemView.findViewById(R.id.project_users);
+            mProjectUsers = itemView.findViewById(R.id.project_users);
             Assert.assertTrue(mProjectUsers != null);
         }
     }

@@ -460,8 +460,8 @@ public class PersistenceManger {
         return instanceRecord;
     }
 
-    public void save(@NonNull Context context) {
-        SaveService.Factory.Companion.getInstance().startService(context, this);
+    public void save(@NonNull Context context, @NonNull SaveService.Source source) {
+        SaveService.Factory.Companion.getInstance().startService(context, this, source);
     }
 
     SQLiteDatabase getSQLiteDatabase() {

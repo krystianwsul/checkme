@@ -59,6 +59,7 @@ import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.notifications.TickService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.ScheduleKey;
@@ -212,17 +213,17 @@ public class DomainFactory {
         return getCustomTimes().size();
     }
 
-    private void save(@NonNull Context context, int dataId) {
+    private void save(@NonNull Context context, int dataId, @NonNull SaveService.Source source) {
         ArrayList<Integer> dataIds = new ArrayList<>();
         dataIds.add(dataId);
-        save(context, dataIds);
+        save(context, dataIds, source);
     }
 
-    private void save(@NonNull Context context, @NonNull List<Integer> dataIds) {
+    private void save(@NonNull Context context, @NonNull List<Integer> dataIds, @NonNull SaveService.Source source) {
         if (mSkipSave)
             return;
 
-        mLocalFactory.save(context);
+        mLocalFactory.save(context, source);
 
         if (mRemoteProjectFactory != null)
             mRemoteProjectFactory.save();
@@ -269,7 +270,7 @@ public class DomainFactory {
                 Log.e("asdf", "DomainFactory.mRecordListener.onDataChange, dataSnapshot: " + dataSnapshot);
                 Assert.assertTrue(dataSnapshot != null);
 
-                setRemoteTaskRecords(applicationContext, dataSnapshot);
+                setRemoteTaskRecords(applicationContext, dataSnapshot, SaveService.Source.FIREBASE);
             }
 
             @Override
@@ -371,7 +372,7 @@ public class DomainFactory {
         }
     }
 
-    private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot) {
+    private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot, @NonNull SaveService.Source source) {
         Assert.assertTrue(mUserInfo != null);
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -386,14 +387,14 @@ public class DomainFactory {
         if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
             updateNotifications(context, firstThereforeSilent, ExactTimeStamp.getNow(), new ArrayList<>());
 
-            save(context, new ArrayList<>());
+            save(context, 0, source);
         } else {
             mSkipSave = true;
 
             if (mTickData == null) {
                 updateNotifications(context, firstThereforeSilent, ExactTimeStamp.getNow(), new ArrayList<>());
             } else {
-                updateNotificationsTick(context, mTickData.mSilent, mTickData.mSource);
+                updateNotificationsTick(context, source, mTickData.mSilent, mTickData.mSource);
 
                 if (!firstThereforeSilent) {
                     Log.e("asdf", "not first, clearing mTickData");
@@ -412,7 +413,7 @@ public class DomainFactory {
 
             mSkipSave = false;
 
-            save(context, new ArrayList<>());
+            save(context, 0, source);
         }
     }
 
@@ -461,11 +462,11 @@ public class DomainFactory {
         mNotTickFirebaseListeners.remove(firebaseListener);
     }
 
-    public synchronized void setFirebaseTickListener(@NonNull Context context, @NonNull TickData tickData) {
+    public synchronized void setFirebaseTickListener(@NonNull Context context, @NonNull SaveService.Source source, @NonNull TickData tickData) {
         Assert.assertTrue(FirebaseAuth.getInstance().getCurrentUser() != null);
 
         if ((mRemoteProjectFactory != null) && !mRemoteProjectFactory.isSaved() && (mTickData == null)) {
-            updateNotificationsTick(context, tickData.mSilent, tickData.mSource);
+            updateNotificationsTick(context, source, tickData.mSilent, tickData.mSource);
 
             tickData.release();
         } else {
@@ -1051,7 +1052,7 @@ public class DomainFactory {
 
     // sets
 
-    public synchronized void setInstanceDateTime(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
+    public synchronized void setInstanceDateTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
         MyCrashlytics.log("DomainFactory.setInstanceDateTime");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1063,12 +1064,12 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, instance.getRemoteNullableProject());
     }
 
-    public synchronized void setInstancesDateTime(@NonNull Context context, int dataId, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
+    public synchronized void setInstancesDateTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
         MyCrashlytics.log("DomainFactory.setInstancesDateTime");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1090,12 +1091,12 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, remoteProjects);
     }
 
-    public synchronized void setInstanceAddHourService(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceAddHourService(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourService");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1113,12 +1114,12 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, instance.getRemoteNullableProject());
     }
 
-    public synchronized void setInstanceAddHourActivity(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceAddHourActivity(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1135,12 +1136,12 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, instance.getRemoteNullableProject());
     }
 
-    public synchronized void setInstancesAddHourActivity(@NonNull Context context, int dataId, @NonNull Collection<InstanceKey> instanceKeys) {
+    public synchronized void setInstancesAddHourActivity(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Collection<InstanceKey> instanceKeys) {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1159,7 +1160,7 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         Set<RemoteProject> remoteProjects = Stream.of(instances).map(Instance::getRemoteNullableProject)
                 .filter(remoteProject -> remoteProject != null)
@@ -1168,7 +1169,7 @@ public class DomainFactory {
         notifyCloud(context, remoteProjects);
     }
 
-    public synchronized void setInstanceNotificationDone(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceNotificationDone(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotificationDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1181,13 +1182,13 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, instance.getRemoteNullableProject());
     }
 
     @NonNull
-    public synchronized ExactTimeStamp setInstancesDone(@NonNull Context context, int dataId, @NonNull List<InstanceKey> instanceKeys) {
+    public synchronized ExactTimeStamp setInstancesDone(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.log("DomainFactory.setInstancesDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1207,25 +1208,25 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, remoteProjects);
 
         return now;
     }
 
-    public synchronized ExactTimeStamp setInstanceDone(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey, boolean done) {
+    public synchronized ExactTimeStamp setInstanceDone(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, boolean done) {
         MyCrashlytics.log("DomainFactory.setInstanceDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        Instance instance = setInstanceDone(context, now, dataId, instanceKey, done);
+        Instance instance = setInstanceDone(context, now, dataId, source, instanceKey, done);
 
         return instance.getDone();
     }
 
-    public synchronized void setInstancesNotified(@NonNull Context context, int dataId, @NonNull List<InstanceKey> instanceKeys) {
+    public synchronized void setInstancesNotified(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.log("DomainFactory.setInstancesNotified");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1236,20 +1237,20 @@ public class DomainFactory {
         for (InstanceKey instanceKey : instanceKeys)
             setInstanceNotified(instanceKey, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
     }
 
-    public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotified");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         setInstanceNotified(instanceKey, ExactTimeStamp.getNow());
 
-        save(context, dataId);
+        save(context, dataId, source);
     }
 
     @NonNull
-    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
@@ -1264,24 +1265,24 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, task.getRemoteNullableProject());
 
         return task;
     }
 
-    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createScheduleRootTask(context, now, dataId, name, scheduleDatas, note, projectId);
+        createScheduleRootTask(context, now, dataId, source, name, scheduleDatas, note, projectId);
     }
 
     @NonNull
-    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
@@ -1303,7 +1304,7 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, task.getRemoteNullableProject());
 
@@ -1311,7 +1312,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.updateScheduleTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1320,10 +1321,10 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return updateScheduleTask(context, now, dataId, taskKey, name, scheduleDatas, note, projectId);
+        return updateScheduleTask(context, now, dataId, source, taskKey, name, scheduleDatas, note, projectId);
     }
 
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1372,12 +1373,12 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, newParentTask.getRemoteNullableProject());
     }
 
-    Task createChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
+    Task createChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Task parentTask = getTaskForce(parentTaskKey);
@@ -1387,23 +1388,23 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, childTask.getRemoteNullableProject());
 
         return childTask;
     }
 
-    public synchronized void createChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
+    public synchronized void createChildTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createChildTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createChildTask(context, now, dataId, parentTaskKey, name, note);
+        createChildTask(context, now, dataId, source, parentTaskKey, name, note);
     }
 
-    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
+    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.createJoinChildTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1431,13 +1432,13 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, childTask.getRemoteNullableProject());
     }
 
     @NonNull
-    public synchronized TaskKey updateChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
+    public synchronized TaskKey updateChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
         MyCrashlytics.log("DomainFactory.updateChildTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1468,14 +1469,14 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
 
-    public synchronized void setTaskEndTimeStamp(@NonNull Context context, int dataId, @NonNull TaskKey taskKey) {
+    public synchronized void setTaskEndTimeStamp(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey) {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1488,12 +1489,12 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, task.getRemoteNullableProject());
     }
 
-    public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull ArrayList<TaskKey> taskKeys) {
+    public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull ArrayList<TaskKey> taskKeys) {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1518,12 +1519,12 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, remoteProjects);
     }
 
-    public synchronized int createCustomTime(@NonNull Context context, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
+    public synchronized int createCustomTime(@NonNull Context context, @NonNull SaveService.Source source, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         MyCrashlytics.log("DomainFactory.createCustomTime");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1539,12 +1540,12 @@ public class DomainFactory {
 
         LocalCustomTime localCustomTime = mLocalFactory.createLocalCustomTime(this, name, hourMinutes);
 
-        save(context, 0);
+        save(context, 0, source);
 
         return localCustomTime.getId();
     }
 
-    public synchronized void updateCustomTime(@NonNull Context context, int dataId, int localCustomTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
+    public synchronized void updateCustomTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, int localCustomTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         MyCrashlytics.log("DomainFactory.updateCustomTime");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1562,10 +1563,10 @@ public class DomainFactory {
                 localCustomTime.setHourMinute(dayOfWeek, hourMinute);
         }
 
-        save(context, dataId);
+        save(context, dataId, source);
     }
 
-    public synchronized void setCustomTimeCurrent(@NonNull Context context, int dataId, @NonNull List<Integer> localCustomTimeIds) {
+    public synchronized void setCustomTimeCurrent(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull List<Integer> localCustomTimeIds) {
         MyCrashlytics.log("DomainFactory.setCustomTimeCurrent");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1577,11 +1578,11 @@ public class DomainFactory {
             localCustomTime.setCurrent();
         }
 
-        save(context, dataId);
+        save(context, dataId, source);
     }
 
     @NonNull
-    Task createRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull String name, @Nullable String note, @Nullable String projectId) {
+    Task createRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         Task task;
@@ -1595,23 +1596,23 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, task.getRemoteNullableProject());
 
         return task;
     }
 
-    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull String name, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.createRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        createRootTask(context, now, dataId, name, note, projectId);
+        createRootTask(context, now, dataId, source, name, note, projectId);
     }
 
-    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.createJoinRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1661,13 +1662,13 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, newParentTask.getRemoteNullableProject());
     }
 
     @NonNull
-    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @Nullable String projectId) {
+    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.log("DomainFactory.updateRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1691,7 +1692,7 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, task.getRemoteNullableProject());
 
@@ -1699,7 +1700,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, boolean silent) {
+    Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull SaveService.Source source, boolean silent) {
         updateNotifications(context, silent, now, new ArrayList<>());
 
         Irrelevant irrelevant = setIrrelevant(now);
@@ -1707,18 +1708,18 @@ public class DomainFactory {
         if (mRemoteProjectFactory != null)
             mLocalFactory.deleteInstanceShownRecords(mRemoteProjectFactory.getTaskKeys());
 
-        save(context, 0);
+        save(context, 0, source);
 
         return irrelevant;
     }
 
-    public synchronized void updateNotificationsTick(@NonNull Context context, boolean silent, @NonNull String source) {
-        MyCrashlytics.log("DomainFactory.updateNotificationsTick source: " + source);
+    public synchronized void updateNotificationsTick(@NonNull Context context, @NonNull SaveService.Source source, boolean silent, @NonNull String sourceName) {
+        MyCrashlytics.log("DomainFactory.updateNotificationsTick source: " + sourceName);
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        updateNotificationsTick(context, now, silent);
+        updateNotificationsTick(context, now, source, silent);
     }
 
     public synchronized void removeFriends(@NonNull Set<String> keys) {
@@ -1735,7 +1736,7 @@ public class DomainFactory {
         mRemoteFriendFactory.save();
     }
 
-    public synchronized void updateUserInfo(@NonNull Context context, @NonNull UserInfo userInfo) {
+    public synchronized void updateUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
         MyCrashlytics.log("DomainFactory.updateUserInfo");
         Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(mRemoteProjectFactory != null);
@@ -1748,10 +1749,10 @@ public class DomainFactory {
 
         mRemoteProjectFactory.updateUserInfo(userInfo);
 
-        save(context, 0);
+        save(context, 0, source);
     }
 
-    public synchronized void updateProject(@NonNull Context context, int dataId, @NonNull String projectId, @NonNull String name, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+    public synchronized void updateProject(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String projectId, @NonNull String name, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         MyCrashlytics.log("DomainFactory.updateProject");
 
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
@@ -1770,12 +1771,12 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, remoteProject, removedFriends);
     }
 
-    public synchronized void createProject(@NonNull Context context, int dataId, @NonNull String name, @NonNull Set<String> friends) {
+    public synchronized void createProject(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull Set<String> friends) {
         MyCrashlytics.log("DomainFactory.createProject");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1793,12 +1794,12 @@ public class DomainFactory {
 
         RemoteProject remoteProject = mRemoteProjectFactory.createRemoteProject(name, now, recordOf, mRemoteRootUser);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, remoteProject);
     }
 
-    public synchronized void setProjectEndTimeStamps(@NonNull Context context, int dataId, @NonNull Set<String> projectIds) {
+    public synchronized void setProjectEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Set<String> projectIds) {
         MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps");
 
         Assert.assertTrue(mRemoteProjectFactory != null);
@@ -1819,7 +1820,7 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, remoteProjects);
     }
@@ -2346,14 +2347,14 @@ public class DomainFactory {
     }
 
     @NonNull
-    Instance setInstanceDone(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull InstanceKey instanceKey, boolean done) {
+    Instance setInstanceDone(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, boolean done) {
         Instance instance = getInstance(instanceKey);
 
         instance.setDone(done, now);
 
         updateNotifications(context, now);
 
-        save(context, dataId);
+        save(context, dataId, source);
 
         notifyCloud(context, instance.getRemoteNullableProject());
 

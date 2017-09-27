@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 
@@ -50,7 +51,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_task);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -60,7 +61,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
         mActionBar.setTitle(null);
 
-        FloatingActionButton showTaskFab = (FloatingActionButton) findViewById(R.id.show_task_fab);
+        FloatingActionButton showTaskFab = findViewById(R.id.show_task_fab);
         Assert.assertTrue(showTaskFab != null);
 
         if (savedInstanceState != null) {
@@ -153,7 +154,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, mData.DataId, mTaskKey);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, mData.DataId, SaveService.Source.GUI, mTaskKey);
 
                 finish();
                 break;

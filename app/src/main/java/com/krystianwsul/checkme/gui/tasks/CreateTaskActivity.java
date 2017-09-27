@@ -33,6 +33,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -178,7 +179,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     private final RecyclerView.OnChildAttachStateChangeListener mOnChildAttachStateChangeListener = new RecyclerView.OnChildAttachStateChangeListener() { // keyboard hack
         @Override
         public void onChildViewAttachedToWindow(View view) {
-            EditText noteText = (EditText) view.findViewById(R.id.note_text);
+            EditText noteText = view.findViewById(R.id.note_text);
             if (noteText != null) {
                 removeListenerHelper();
 
@@ -294,7 +295,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, mTaskKey, name, getScheduleDatas(), mNote, projectId);
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData.DataId, SaveService.Source.GUI, mTaskKey, name, getScheduleDatas(), mNote, projectId);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);
@@ -306,13 +307,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskKeys.size() > 1);
 
-                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData.DataId, name, getScheduleDatas(), mTaskKeys, mNote, projectId);
+                        DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData.DataId, SaveService.Source.GUI, name, getScheduleDatas(), mTaskKeys, mNote, projectId);
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, name, getScheduleDatas(), mNote, projectId);
+                        DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData.DataId, SaveService.Source.GUI, name, getScheduleDatas(), mNote, projectId);
 
                         finish();
                     }
@@ -325,7 +326,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateChildTask(this, ExactTimeStamp.getNow(), mData.DataId, mTaskKey, name, parentTaskKey, mNote);
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateChildTask(this, ExactTimeStamp.getNow(), mData.DataId, SaveService.Source.GUI, mTaskKey, name, parentTaskKey, mNote);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);
@@ -337,13 +338,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData == null);
                         Assert.assertTrue(mTaskKeys.size() > 1);
 
-                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, parentTaskKey, name, mTaskKeys, mNote);
+                        DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData.DataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys, mNote);
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, parentTaskKey, name, mNote);
+                        DomainFactory.getDomainFactory(this).createChildTask(this, mData.DataId, SaveService.Source.GUI, parentTaskKey, name, mNote);
 
                         finish();
                     }
@@ -356,7 +357,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                         Assert.assertTrue(mData.TaskData != null);
                         Assert.assertTrue(mTaskKeys == null);
 
-                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, mTaskKey, name, mNote, projectId);
+                        TaskKey taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData.DataId, SaveService.Source.GUI, mTaskKey, name, mNote, projectId);
 
                         Intent result = new Intent();
                         result.putExtra(ShowTaskActivity.TASK_KEY_KEY, (Parcelable) taskKey);
@@ -367,13 +368,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     } else if (mTaskKeys != null) {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, name, mTaskKeys, mNote, projectId);
+                        DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData.DataId, SaveService.Source.GUI, name, mTaskKeys, mNote, projectId);
 
                         finish();
                     } else {
                         Assert.assertTrue(mData.TaskData == null);
 
-                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, name, mNote, projectId);
+                        DomainFactory.getDomainFactory(this).createRootTask(this, mData.DataId, SaveService.Source.GUI, name, mNote, projectId);
 
                         finish();
                     }
@@ -395,7 +396,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_task);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -408,13 +409,13 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         mSavedInstanceState = savedInstanceState;
 
-        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
+        mToolbarLayout = findViewById(R.id.toolbar_layout);
         Assert.assertTrue(mToolbarLayout != null);
 
-        mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
+        mToolbarEditText = findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
 
-        mScheduleTimes = (RecyclerView) findViewById(R.id.schedule_recycler);
+        mScheduleTimes = findViewById(R.id.schedule_recycler);
         Assert.assertTrue(mScheduleTimes != null);
 
         mScheduleTimes.setLayoutManager(new LinearLayoutManager(this));
@@ -1200,10 +1201,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 mScheduleMargin = scheduleRow.findViewById(R.id.schedule_margin);
                 Assert.assertTrue(mScheduleMargin != null);
 
-                mScheduleLayout = (TextInputLayout) scheduleRow.findViewById(R.id.schedule_layout);
+                mScheduleLayout = scheduleRow.findViewById(R.id.schedule_layout);
                 Assert.assertTrue(mScheduleLayout != null);
 
-                mScheduleText = (EditText) scheduleRow.findViewById(R.id.schedule_text);
+                mScheduleText = scheduleRow.findViewById(R.id.schedule_text);
                 Assert.assertTrue(mScheduleText != null);
             }
 
@@ -1232,10 +1233,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             NoteHolder(@NonNull View scheduleRow) {
                 super(scheduleRow);
 
-                mNoteLayout = (TextInputLayout) scheduleRow.findViewById(R.id.note_layout);
+                mNoteLayout = scheduleRow.findViewById(R.id.note_layout);
                 Assert.assertTrue(mNoteLayout != null);
 
-                mNoteText = (EditText) scheduleRow.findViewById(R.id.note_text);
+                mNoteText = scheduleRow.findViewById(R.id.note_text);
                 Assert.assertTrue(mNoteText != null);
             }
         }

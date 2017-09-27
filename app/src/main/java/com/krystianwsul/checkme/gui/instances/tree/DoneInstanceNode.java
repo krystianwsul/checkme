@@ -11,6 +11,7 @@ import android.view.View;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.treeadapter.ModelNode;
 import com.krystianwsul.treeadapter.TreeNode;
@@ -235,7 +236,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
         return v -> {
             v.setOnClickListener(null);
 
-            mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, mInstanceData.InstanceKey, false);
+            mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, SaveService.Source.GUI, mInstanceData.InstanceKey, false);
             Assert.assertTrue(mInstanceData.Done == null);
 
             dividerNode.remove(this);

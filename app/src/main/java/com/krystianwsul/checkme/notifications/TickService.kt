@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import junit.framework.Assert
 
 class TickService : WakefulIntentService("TickService") {
@@ -43,41 +44,41 @@ class TickService : WakefulIntentService("TickService") {
             return intent
         }
 
-        fun tick(intent: Intent) {
+        fun tick(source: SaveService.Source, intent: Intent) {
             Assert.assertTrue(intent.hasExtra(SILENT_KEY))
             Assert.assertTrue(intent.hasExtra(SOURCE_KEY))
 
             val silent = intent.getBooleanExtra(SILENT_KEY, false)
 
-            val source = intent.getStringExtra(SOURCE_KEY)
-            Assert.assertTrue(!TextUtils.isEmpty(source))
+            val sourceName = intent.getStringExtra(SOURCE_KEY)
+            Assert.assertTrue(!TextUtils.isEmpty(sourceName))
 
-            tick(silent, source)
+            tick(source, silent, sourceName)
         }
 
-        fun tick(silent: Boolean, source: String) {
+        fun tick(source: SaveService.Source, silent: Boolean, sourceName: String) {
             val domainFactory = DomainFactory.getDomainFactory(MyApplication.instance)
 
             if (domainFactory.isConnected) {
                 if (domainFactory.isSaved) {
-                    domainFactory.setFirebaseTickListener(MyApplication.instance, DomainFactory.TickData(silent, source, MyApplication.instance))
+                    domainFactory.setFirebaseTickListener(MyApplication.instance, source, DomainFactory.TickData(silent, sourceName, MyApplication.instance))
                 } else {
-                    domainFactory.updateNotificationsTick(MyApplication.instance, silent, source)
+                    domainFactory.updateNotificationsTick(MyApplication.instance, source, silent, sourceName)
                 }
             } else {
-                domainFactory.updateNotificationsTick(MyApplication.instance, silent, source)
+                domainFactory.updateNotificationsTick(MyApplication.instance, source, silent, sourceName)
 
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 if (firebaseUser != null) {
                     domainFactory.setUserInfo(MyApplication.instance, UserInfo(firebaseUser))
 
-                    domainFactory.setFirebaseTickListener(MyApplication.instance, DomainFactory.TickData(silent, source, MyApplication.instance))
+                    domainFactory.setFirebaseTickListener(MyApplication.instance, source, DomainFactory.TickData(silent, sourceName, MyApplication.instance))
                 }
             }
         }
     }
 
     override fun doWakefulWork(intent: Intent) {
-        tick(intent)
+        tick(SaveService.Source.SERVICE, intent)
     }
 }

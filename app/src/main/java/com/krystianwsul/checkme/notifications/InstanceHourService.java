@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 
@@ -49,6 +50,6 @@ public class InstanceHourService extends IntentService {
     }
 
     private void setInstanceAddHour(@NonNull DomainFactory domainFactory, @NonNull InstanceKey instanceKey) {
-        domainFactory.setInstanceAddHourService(this, 0, instanceKey);
+        domainFactory.setInstanceAddHourService(this, 0, SaveService.Source.SERVICE, instanceKey);
     }
 }

@@ -7,6 +7,7 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 
@@ -35,6 +36,6 @@ public class InstanceNotificationDeleteService extends IntentService {
         Assert.assertTrue(instanceKey != null);
 
         DomainFactory.getDomainFactory(this)
-                .setInstanceNotified(this, 0, instanceKey);
+                .setInstanceNotified(this, 0, SaveService.Source.SERVICE, instanceKey);
     }
 }

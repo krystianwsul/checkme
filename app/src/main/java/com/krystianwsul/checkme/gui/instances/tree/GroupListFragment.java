@@ -38,6 +38,7 @@ import com.krystianwsul.checkme.gui.instances.EditInstanceActivity;
 import com.krystianwsul.checkme.gui.instances.EditInstancesActivity;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -171,7 +172,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                         decrementSelected();
                     } while (!(selectedTreeNodes = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), ((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, taskKeys);
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), ((GroupAdapter) mTreeViewAdapter.getTreeModelAdapter()).mDataId, SaveService.Source.GUI, taskKeys);
 
                     updateSelectAll();
 
@@ -215,7 +216,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
                             .map(instanceData -> instanceData.InstanceKey)
                             .collect(Collectors.toList());
 
-                    ExactTimeStamp done = DomainFactory.getDomainFactory(getActivity()).setInstancesDone(getActivity(), mDataId, instanceKeys);
+                    ExactTimeStamp done = DomainFactory.getDomainFactory(getActivity()).setInstancesDone(getActivity(), mDataId, SaveService.Source.GUI, instanceKeys);
 
                     List<TreeNode> selectedTreeNodes = mTreeViewAdapter.getSelectedNodes();
                     Assert.assertTrue(!selectedTreeNodes.isEmpty());

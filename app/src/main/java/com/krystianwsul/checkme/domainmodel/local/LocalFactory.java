@@ -24,6 +24,7 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.MonthlyDayScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.MonthlyWeekScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.SingleScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
@@ -225,8 +226,8 @@ public class LocalFactory {
         return new MonthlyWeekSchedule(domainFactory, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord));
     }
 
-    public void save(@NonNull Context context) {
-        mPersistenceManager.save(context);
+    public void save(@NonNull Context context, @NonNull SaveService.Source source) {
+        mPersistenceManager.save(context, source);
     }
 
     @Nullable

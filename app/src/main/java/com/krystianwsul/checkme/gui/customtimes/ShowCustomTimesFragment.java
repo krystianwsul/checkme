@@ -28,6 +28,7 @@ import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 
 import junit.framework.Assert;
 
@@ -138,10 +139,10 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         View view = getView();
         Assert.assertTrue(view != null);
 
-        mShowTimesList = (RecyclerView) view.findViewById(R.id.show_times_list);
+        mShowTimesList = view.findViewById(R.id.show_times_list);
         mShowTimesList.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mEmptyText = (TextView) view.findViewById(R.id.empty_text);
+        mEmptyText = view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null) {
@@ -291,7 +292,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
             LayoutInflater layoutInflater = LayoutInflater.from(mShowCustomTimesFragment.getActivity());
             View showCustomTimesRow = layoutInflater.inflate(R.layout.row_show_custom_times, parent, false);
 
-            TextView timesRowName = (TextView) showCustomTimesRow.findViewById(R.id.times_row_name);
+            TextView timesRowName = showCustomTimesRow.findViewById(R.id.times_row_name);
 
             return new CustomTimeHolder(showCustomTimesRow, timesRowName);
         }
@@ -343,7 +344,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
                     .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
                     .collect(Collectors.toList());
 
-            DomainFactory.getDomainFactory(mShowCustomTimesFragment.getActivity()).setCustomTimeCurrent(mShowCustomTimesFragment.getActivity(), mDataId, selectedCustomTimeIds);
+            DomainFactory.getDomainFactory(mShowCustomTimesFragment.getActivity()).setCustomTimeCurrent(mShowCustomTimesFragment.getActivity(), mDataId, SaveService.Source.GUI, selectedCustomTimeIds);
         }
 
         class CustomTimeHolder extends RecyclerView.ViewHolder {

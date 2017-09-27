@@ -31,6 +31,7 @@ import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
 import com.krystianwsul.checkme.gui.tasks.FriendPickerFragment;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 
 import junit.framework.Assert;
 
@@ -157,15 +158,15 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         RelativeLayout friendListLayout = (RelativeLayout) getView();
         Assert.assertTrue(friendListLayout != null);
 
-        mFriendListProgress = (ProgressBar) friendListLayout.findViewById(R.id.friend_list_progress);
+        mFriendListProgress = friendListLayout.findViewById(R.id.friend_list_progress);
         Assert.assertTrue(mFriendListProgress != null);
 
-        mFriendListRecycler = (RecyclerView) friendListLayout.findViewById(R.id.friend_list_recycler);
+        mFriendListRecycler = friendListLayout.findViewById(R.id.friend_list_recycler);
         Assert.assertTrue(mFriendListRecycler != null);
 
         mFriendListRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mEmptyText = (TextView) friendListLayout.findViewById(R.id.empty_text);
+        mEmptyText = friendListLayout.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVE_STATE_KEY)) {
@@ -272,9 +273,9 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         if (TextUtils.isEmpty(mProjectId)) {
             Assert.assertTrue(saveState.mRemovedIds.isEmpty());
 
-            DomainFactory.getDomainFactory(getActivity()).createProject(getActivity(), mData.DataId, name, saveState.mAddedIds);
+            DomainFactory.getDomainFactory(getActivity()).createProject(getActivity(), mData.DataId, SaveService.Source.GUI, name, saveState.mAddedIds);
         } else {
-            DomainFactory.getDomainFactory(getActivity()).updateProject(getActivity(), mData.DataId, mProjectId, name, saveState.mAddedIds, saveState.mRemovedIds);
+            DomainFactory.getDomainFactory(getActivity()).updateProject(getActivity(), mData.DataId, SaveService.Source.GUI, mProjectId, name, saveState.mAddedIds, saveState.mRemovedIds);
         }
     }
 
@@ -357,10 +358,10 @@ public class UserListFragment extends AbstractFragment implements FabUser {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View friendRow = layoutInflater.inflate(R.layout.row_friend, parent, false);
 
-            TextView friendName = (TextView) friendRow.findViewById(R.id.friend_name);
+            TextView friendName = friendRow.findViewById(R.id.friend_name);
             Assert.assertTrue(friendName != null);
 
-            TextView friendEmail = (TextView) friendRow.findViewById(R.id.friend_email);
+            TextView friendEmail = friendRow.findViewById(R.id.friend_email);
             Assert.assertTrue(friendEmail != null);
 
             return new FriendHolder(friendRow, friendName, friendEmail);

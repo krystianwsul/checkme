@@ -51,7 +51,6 @@ class SaveService : JobIntentService() {
             DomainFactory.getDomainFactory(this).reset(this)
             throw e
         }
-
     }
 
     abstract class Factory {
@@ -61,11 +60,11 @@ class SaveService : JobIntentService() {
             var instance: Factory = FactoryImpl()
         }
 
-        abstract fun startService(context: Context, persistenceManger: PersistenceManger)
+        abstract fun startService(context: Context, persistenceManger: PersistenceManger, source: Source)
 
         private class FactoryImpl : Factory() {
 
-            override fun startService(context: Context, persistenceManger: PersistenceManger) {
+            override fun startService(context: Context, persistenceManger: PersistenceManger, source: Source) {
                 val collections = listOf(
                         persistenceManger.mCustomTimeRecords,
                         persistenceManger.mTaskRecords,
@@ -107,5 +106,9 @@ class SaveService : JobIntentService() {
                 return deleted.map { it.deleteCommand }
             }
         }
+    }
+
+    enum class Source {
+        GUI, NOTIFICATION, SERVICE, FIREBASE
     }
 }

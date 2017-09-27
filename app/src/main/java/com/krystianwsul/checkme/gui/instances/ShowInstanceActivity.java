@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity;
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
@@ -154,7 +155,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 if (!mInstanceData.mExists)
                     getSupportLoaderManager().destroyLoader(0);
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, mDataId, mInstanceKey.mTaskKey);
+                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, mDataId, SaveService.Source.GUI, mInstanceKey.mTaskKey);
 
                 if (!mInstanceData.mExists)
                     finish();
@@ -233,7 +234,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && mFirst) {
             mFirst = false;
-            DomainFactory.getDomainFactory(this).setInstanceNotified(this, data.DataId, mInstanceKey);
+            DomainFactory.getDomainFactory(this).setInstanceNotified(this, data.DataId, SaveService.Source.GUI, mInstanceKey);
         }
 
         mActionBar.setTitle(mInstanceData.Name);
@@ -249,7 +250,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
     }
 
     private void setDone(boolean done) {
-        DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(this, mDataId, mInstanceKey, done);
+        DomainFactory.getDomainFactory(ShowInstanceActivity.this).setInstanceDone(this, mDataId, SaveService.Source.GUI, mInstanceKey, done);
         mInstanceData.Done = done;
 
         invalidateOptionsMenu();

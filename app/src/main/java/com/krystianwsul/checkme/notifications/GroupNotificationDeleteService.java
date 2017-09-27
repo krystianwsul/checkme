@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 
@@ -44,6 +45,6 @@ public class GroupNotificationDeleteService extends IntentService {
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         DomainFactory.getDomainFactory(this)
-                .setInstancesNotified(this, 0, instanceKeys);
+                .setInstancesNotified(this, 0, SaveService.Source.SERVICE, instanceKeys);
     }
 }

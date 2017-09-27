@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity;
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -432,7 +433,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         return v -> {
             v.setOnClickListener(null);
 
-            instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, instanceData.InstanceKey, true);
+            instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true);
             Assert.assertTrue(instanceData.Done != null);
 
             GroupListFragment.recursiveExists(instanceData);
@@ -895,7 +896,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
                 Assert.assertTrue(notDoneGroupTreeNode.expanded());
 
-                mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, mInstanceData.InstanceKey, true);
+                mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, SaveService.Source.GUI, mInstanceData.InstanceKey, true);
                 Assert.assertTrue(mInstanceData.Done != null);
 
                 GroupListFragment.recursiveExists(mInstanceData);

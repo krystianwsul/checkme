@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.loaders.EditInstancesLoader
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.*
@@ -102,7 +103,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
                 supportLoaderManager.destroyLoader(0)
 
-                DomainFactory.getDomainFactory(this).setInstancesAddHourActivity(this, mData!!.DataId, mData!!.InstanceDatas.keys)
+                DomainFactory.getDomainFactory(this).setInstancesAddHourActivity(this, mData!!.DataId, SaveService.Source.GUI, mData!!.InstanceDatas.keys)
 
                 finish()
             }
@@ -111,7 +112,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
                 Assert.assertTrue(mData != null)
 
                 if (isValidDateTime) {
-                    DomainFactory.getDomainFactory(this).setInstancesDateTime(this, mData!!.DataId, mData!!.InstanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
+                    DomainFactory.getDomainFactory(this).setInstancesDateTime(this, mData!!.DataId, SaveService.Source.GUI, mData!!.InstanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
 
                     finish()
                 }

@@ -24,6 +24,7 @@ import com.krystianwsul.checkme.gui.AbstractActivity;
 import com.krystianwsul.checkme.gui.DiscardDialogFragment;
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 
@@ -122,9 +123,9 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
                 getSupportLoaderManager().destroyLoader(0);
 
                 if (mData != null) {
-                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(ShowCustomTimeActivity.this, mData.DataId, mData.Id, name, mHourMinutes);
+                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(ShowCustomTimeActivity.this, mData.DataId, SaveService.Source.GUI, mData.Id, name, mHourMinutes);
                 } else {
-                    int customTimeId = DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(ShowCustomTimeActivity.this, name, mHourMinutes);
+                    int customTimeId = DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(ShowCustomTimeActivity.this, SaveService.Source.GUI, name, mHourMinutes);
                     Assert.assertTrue(customTimeId > 0);
 
                     setResult(customTimeId);
@@ -147,7 +148,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_custom_time);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -160,13 +161,13 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
 
         mSavedInstanceState = savedInstanceState;
 
-        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
+        mToolbarLayout = findViewById(R.id.toolbar_layout);
         Assert.assertTrue(mToolbarLayout != null);
 
-        mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
+        mToolbarEditText = findViewById(R.id.toolbar_edit_text);
         Assert.assertTrue(mToolbarEditText != null);
 
-        mShowCustomTimeContainer = (LinearLayout) findViewById(R.id.show_custom_time_container);
+        mShowCustomTimeContainer = findViewById(R.id.show_custom_time_container);
         Assert.assertTrue(mShowCustomTimeContainer != null);
 
         initializeDay(DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time);
@@ -243,12 +244,12 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     private void initializeDay(final DayOfWeek dayOfWeek, int nameId, int timeId) {
         Assert.assertTrue(dayOfWeek != null);
 
-        TextView timeName = (TextView) findViewById(nameId);
+        TextView timeName = findViewById(nameId);
         Assert.assertTrue(timeName != null);
 
         timeName.setText(dayOfWeek.toString());
 
-        TextView timeView = (TextView) findViewById(timeId);
+        TextView timeView = findViewById(timeId);
         Assert.assertTrue(timeView != null);
 
         mTimeViews.put(dayOfWeek, timeView);

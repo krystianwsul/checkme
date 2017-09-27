@@ -29,6 +29,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractFragment;
 import com.krystianwsul.checkme.gui.FabUser;
 import com.krystianwsul.checkme.gui.SelectionCallback;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.Utils;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -122,7 +123,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
                         decrementSelected();
                     } while (!(selected = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), mDataId, taskKeys);
+                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), mDataId, SaveService.Source.GUI, taskKeys);
 
                     updateSelectAll();
 
@@ -355,13 +356,13 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
         View view = inflater.inflate(R.layout.fragment_task_list, container, false);
         Assert.assertTrue(view != null);
 
-        mTaskListProgress = (ProgressBar) view.findViewById(R.id.task_list_progress);
+        mTaskListProgress = view.findViewById(R.id.task_list_progress);
         Assert.assertTrue(mTaskListProgress != null);
 
-        mTaskListFragmentRecycler = (RecyclerView) view.findViewById(R.id.task_list_recycler);
+        mTaskListFragmentRecycler = view.findViewById(R.id.task_list_recycler);
         Assert.assertTrue(mTaskListFragmentRecycler != null);
 
-        mEmptyText = (TextView) view.findViewById(R.id.empty_text);
+        mEmptyText = view.findViewById(R.id.empty_text);
         Assert.assertTrue(mEmptyText != null);
 
         return view;
@@ -598,19 +599,19 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
             LayoutInflater inflater = LayoutInflater.from(mTaskListFragment.getActivity());
             View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
-            LinearLayout taskRowContainer = (LinearLayout) showTaskRow.findViewById(R.id.task_row_container);
+            LinearLayout taskRowContainer = showTaskRow.findViewById(R.id.task_row_container);
             Assert.assertTrue(taskRowContainer != null);
 
-            TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
+            TextView taskRowName = showTaskRow.findViewById(R.id.task_row_name);
             Assert.assertTrue(taskRowName != null);
 
-            TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
+            TextView taskRowDetails = showTaskRow.findViewById(R.id.task_row_details);
             Assert.assertTrue(taskRowDetails != null);
 
-            TextView taskRowChildren = (TextView) showTaskRow.findViewById(R.id.task_row_children);
+            TextView taskRowChildren = showTaskRow.findViewById(R.id.task_row_children);
             Assert.assertTrue(taskRowChildren != null);
 
-            ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
+            ImageView taskRowImage = showTaskRow.findViewById(R.id.task_row_img);
             Assert.assertTrue(taskRowImage != null);
 
             View taskRowSeparator = showTaskRow.findViewById(R.id.task_row_separator);

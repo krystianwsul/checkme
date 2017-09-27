@@ -12,6 +12,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.UserInfo;
+import com.krystianwsul.checkme.persistencemodel.SaveService;
 
 import junit.framework.Assert;
 
@@ -42,7 +43,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                 domainFactory.setUserInfo(this, userInfo);
 
-                domainFactory.setFirebaseTickListener(this, new DomainFactory.TickData(false, "MyFirebaseMessagingService", this));
+                domainFactory.setFirebaseTickListener(this, SaveService.Source.SERVICE, new DomainFactory.TickData(false, "MyFirebaseMessagingService", this));
             }
         } else {
             MyCrashlytics.logException(new UnknownMessageException(data));

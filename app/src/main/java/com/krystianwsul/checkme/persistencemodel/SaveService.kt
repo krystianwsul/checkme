@@ -5,6 +5,8 @@ import android.content.Intent
 import android.support.v4.app.JobIntentService
 import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class SaveService : JobIntentService() {
@@ -91,15 +93,13 @@ class SaveService : JobIntentService() {
 
                 val deleteCommands = ArrayList(collections.map { delete(it) }.flatten())
 
-                val intent = Intent(context, SaveService::class.java).apply {
-                    putExtra(INSERT_COMMAND_KEY, insertCommands)
-                    putExtra(UPDATE_COMMAND_KEY, updateCommands)
-                    putExtra(DELETE_COMMAND_KEY, deleteCommands)
-                    putExtra(SOURCE_KEY, source)
-                }
-
-                JobIntentService.enqueueWork(context, SaveService::class.java, 0, intent)
-            }
+                when (source) {
+                    Source.GUI -> Observable.fromCallable { save(context, insertCommands, updateCommands, deleteCommands, source) }
+                            .subscribeOn(Schedulers.io())
+                            .subscribe()
+                    Source.SERVICE -> save(context, insertCommands, updateCommands, deleteCommands, source)
+                } // todo remove service
+            } // todo move rx stuff to domainFactory call site
 
             private fun delete(collection: MutableCollection<out Record>): List<DeleteCommand> {
                 val deleted = collection.filter { it.needsDelete() }
@@ -112,6 +112,6 @@ class SaveService : JobIntentService() {
     }
 
     enum class Source {
-        GUI, NOTIFICATION, SERVICE
+        GUI, SERVICE
     }
 }

@@ -36,7 +36,8 @@
                 android:textColor="@color/textPrimaryWhite"
                 android:hint="@string/name_hint"
                 android:textColorHint="@color/textDisabledWhite"
-                tools:ignore="Deprecated">
+                tools:ignore="Deprecated"
+                android:importantForAutofill="noExcludeDescendants">
 
                 <requestFocus/>
 

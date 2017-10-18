@@ -75,14 +75,12 @@ class GroupListFragment : AbstractFragment(), FabUser {
         private fun nodesToInstanceDatas(treeNodes: List<TreeNode>): List<InstanceData> {
             val instanceDatas = ArrayList<InstanceData>()
             for (treeNode in treeNodes) {
-                if (treeNode.modelNode is NotDoneGroupNode) {
-                    val instanceData = (treeNode.modelNode as NotDoneGroupNode).singleInstanceData
-
-                    instanceDatas.add(instanceData)
-                } else {
-                    Assert.assertTrue(treeNode.modelNode is NotDoneGroupNode.NotDoneInstanceNode)
-
-                    instanceDatas.add((treeNode.modelNode as NotDoneGroupNode.NotDoneInstanceNode).mInstanceData)
+                treeNode.modelNode.let {
+                    if (it is NotDoneGroupNode) {
+                        instanceDatas.add(it.singleInstanceData)
+                    } else {
+                        instanceDatas.add((it as NotDoneGroupNode.NotDoneInstanceNode).mInstanceData)
+                    }
                 }
             }
 
@@ -245,30 +243,29 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                         val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
 
-                        if (treeNode.modelNode is NotDoneGroupNode) {
-                            val notDoneGroupNode = treeNode.modelNode as NotDoneGroupNode
-                            Assert.assertTrue(notDoneGroupNode.singleInstance())
+                        treeNode.modelNode.let {
+                            if (it is NotDoneGroupNode) {
+                                Assert.assertTrue(it.singleInstance())
 
-                            val instanceData = notDoneGroupNode.singleInstanceData
-                            instanceData.Done = done
+                                val instanceData = it.singleInstanceData
+                                instanceData.Done = done
 
-                            recursiveExists(instanceData)
+                                recursiveExists(instanceData)
 
-                            val nodeCollection = notDoneGroupNode.nodeCollection
+                                val nodeCollection = it.nodeCollection
 
-                            nodeCollection.dividerNode.add(instanceData)
-                            nodeCollection.notDoneGroupCollection.remove(notDoneGroupNode)
-                        } else {
-                            val notDoneInstanceNode = treeNode.modelNode as NotDoneGroupNode.NotDoneInstanceNode
+                                nodeCollection.dividerNode.add(instanceData)
+                                nodeCollection.notDoneGroupCollection.remove(it)
+                            } else {
+                                val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).mInstanceData
+                                instanceData.Done = done
 
-                            val instanceData = notDoneInstanceNode.mInstanceData
-                            instanceData.Done = done
+                                recursiveExists(instanceData)
 
-                            recursiveExists(instanceData)
+                                it.removeFromParent()
 
-                            notDoneInstanceNode.removeFromParent()
-
-                            notDoneInstanceNode.parentNodeCollection.dividerNode.add(instanceData)
+                                it.parentNodeCollection.dividerNode.add(instanceData)
+                            }
                         }
 
                         decrementSelected()
@@ -284,38 +281,39 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         private fun recursiveDelete(treeNode: TreeNode, root: Boolean) {
-            // todo let
-            val instanceData1 = when (treeNode.modelNode) { // todo sealed class
-                is NotDoneGroupNode -> (treeNode.modelNode as NotDoneGroupNode).singleInstanceData
-                is NotDoneGroupNode.NotDoneInstanceNode -> (treeNode.modelNode as NotDoneGroupNode.NotDoneInstanceNode).mInstanceData
-                is DoneInstanceNode -> (treeNode.modelNode as DoneInstanceNode).mInstanceData
-                else -> {
-                    Assert.assertTrue(treeNode.modelNode is DividerNode)
+            treeNode.modelNode.let {
+                val instanceData1 = when (it) {
+                    is NotDoneGroupNode -> it.singleInstanceData
+                    is NotDoneGroupNode.NotDoneInstanceNode -> it.mInstanceData
+                    is DoneInstanceNode -> it.mInstanceData
+                    else -> {
+                        Assert.assertTrue(it is DividerNode)
+
+                        treeNode.allChildren.forEach { recursiveDelete(it, false) }
+
+                        return
+                    }
+                }
+
+                if (instanceData1.Exists || !root) {
+                    instanceData1.TaskCurrent = false
+                    instanceData1.IsRootTask = null
+                } else {
+                    instanceData1.instanceDataParent.remove(instanceData1.InstanceKey)
+                }
+
+                if (instanceData1.Exists || !root) {
+                    treeNode.unselect()
+
+                    treeNode.update()
 
                     treeNode.allChildren.forEach { recursiveDelete(it, false) }
-
-                    return
-                }
-            }
-
-            if (instanceData1.Exists || !root) {
-                instanceData1.TaskCurrent = false
-                instanceData1.IsRootTask = null
-            } else {
-                instanceData1.instanceDataParent.remove(instanceData1.InstanceKey)
-            }
-
-            if (instanceData1.Exists || !root) {
-                treeNode.unselect()
-
-                treeNode.update()
-
-                treeNode.allChildren.forEach { recursiveDelete(it, false) }
-            } else {
-                when (treeNode.modelNode) {
-                    is NotDoneGroupNode -> (treeNode.modelNode as NotDoneGroupNode).removeFromParent()
-                    is NotDoneGroupNode.NotDoneInstanceNode -> (treeNode.modelNode as NotDoneGroupNode.NotDoneInstanceNode).removeFromParent()
-                    else -> (treeNode.modelNode as DoneInstanceNode).removeFromParent()
+                } else {
+                    when (it) {
+                        is NotDoneGroupNode -> it.removeFromParent()
+                        is NotDoneGroupNode.NotDoneInstanceNode -> it.removeFromParent()
+                        else -> (it as DoneInstanceNode).removeFromParent()
+                    }
                 }
             }
         }

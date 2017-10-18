@@ -49,7 +49,7 @@ class NoteNode extends GroupHolderNode implements ModelNode {
 
     @NonNull
     private GroupListFragment getGroupListFragment() {
-        return mGroupAdapter.mGroupListFragment;
+        return mGroupAdapter.getMGroupListFragment();
     }
 
     @Override

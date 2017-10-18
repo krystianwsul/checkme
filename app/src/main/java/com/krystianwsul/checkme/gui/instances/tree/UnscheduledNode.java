@@ -82,7 +82,7 @@ class UnscheduledNode extends GroupHolderNode implements ModelNode, TaskParent {
 
     @NonNull
     private GroupListFragment getGroupListFragment() {
-        return getGroupAdapter().mGroupListFragment;
+        return getGroupAdapter().getMGroupListFragment();
     }
 
     @NonNull

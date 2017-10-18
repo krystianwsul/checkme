@@ -201,7 +201,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_instance_list);
         if (mGroupListFragment == null) {
-            mGroupListFragment = GroupListFragment.newInstance();
+            mGroupListFragment = GroupListFragment.Companion.newInstance();
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.show_instance_list, mGroupListFragment)
@@ -261,7 +261,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
     }
 
     @Override
-    public void onCreateGroupActionMode(ActionMode actionMode) {
+    public void onCreateGroupActionMode(@NonNull ActionMode actionMode) {
 
     }
 

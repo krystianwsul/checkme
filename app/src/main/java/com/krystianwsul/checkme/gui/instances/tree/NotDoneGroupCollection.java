@@ -49,9 +49,9 @@ class NotDoneGroupCollection {
         if (nodeCollection.mUseGroups) {
             HashMap<TimeStamp, ArrayList<GroupListFragment.InstanceData>> instanceDataHash = new HashMap<>();
             for (GroupListFragment.InstanceData instanceData : notDoneInstanceDatas) {
-                if (!instanceDataHash.containsKey(instanceData.InstanceTimeStamp))
-                    instanceDataHash.put(instanceData.InstanceTimeStamp, new ArrayList<>());
-                instanceDataHash.get(instanceData.InstanceTimeStamp).add(instanceData);
+                if (!instanceDataHash.containsKey(instanceData.getInstanceTimeStamp()))
+                    instanceDataHash.put(instanceData.getInstanceTimeStamp(), new ArrayList<>());
+                instanceDataHash.get(instanceData.getInstanceTimeStamp()).add(instanceData);
             }
 
             for (Map.Entry<TimeStamp, ArrayList<GroupListFragment.InstanceData>> entry : instanceDataHash.entrySet()) {
@@ -89,7 +89,7 @@ class NotDoneGroupCollection {
 
         NodeContainer nodeContainer = nodeCollection.getNodeContainer();
 
-        ExactTimeStamp exactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp();
+        ExactTimeStamp exactTimeStamp = instanceData.getInstanceTimeStamp().toExactTimeStamp();
 
         List<NotDoneGroupNode> timeStampNotDoneGroupNodes = Stream.of(mNotDoneGroupNodes)
                 .filter(notDoneGroupNode -> notDoneGroupNode.mExactTimeStamp.equals(exactTimeStamp))

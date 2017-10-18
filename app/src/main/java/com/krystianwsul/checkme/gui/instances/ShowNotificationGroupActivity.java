@@ -48,7 +48,7 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_notification_group);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -60,7 +60,7 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_notification_group_list);
         if (mGroupListFragment == null) {
-            mGroupListFragment = GroupListFragment.newInstance();
+            mGroupListFragment = GroupListFragment.Companion.newInstance();
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.show_notification_group_list, mGroupListFragment)
@@ -96,7 +96,7 @@ public class ShowNotificationGroupActivity extends AbstractActivity implements G
     }
 
     @Override
-    public void onCreateGroupActionMode(ActionMode actionMode) {
+    public void onCreateGroupActionMode(@NonNull ActionMode actionMode) {
 
     }
 

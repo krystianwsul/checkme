@@ -52,7 +52,7 @@ class DividerNode extends GroupHolderNode implements ModelNode {
 
     @NonNull
     private TreeNode newChildTreeNode(@NonNull GroupListFragment.InstanceData instanceData, @Nullable HashMap<InstanceKey, Boolean> expandedInstances) {
-        Assert.assertTrue(instanceData.Done != null);
+        Assert.assertTrue(instanceData.getDone() != null);
 
         DoneInstanceNode doneInstanceNode = new DoneInstanceNode(mDensity, mIndentation, instanceData, this);
 
@@ -222,7 +222,7 @@ class DividerNode extends GroupHolderNode implements ModelNode {
 
     @NonNull
     private GroupListFragment getGroupListFragment() {
-        return getGroupAdapter().mGroupListFragment;
+        return getGroupAdapter().getMGroupListFragment();
     }
 
     @Override

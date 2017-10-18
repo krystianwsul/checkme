@@ -67,61 +67,61 @@ abstract class GroupHolderNode {
 
         int padding = 48 * mIndentation;
 
-        groupHolder.mGroupRowContainer.setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
+        groupHolder.getMGroupRowContainer().setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
 
         int nameVisibility = getNameVisibility();
         //noinspection ResourceType
-        groupHolder.mGroupRowName.setVisibility(nameVisibility);
+        groupHolder.getMGroupRowName().setVisibility(nameVisibility);
         if (nameVisibility == View.VISIBLE) {
-            groupHolder.mGroupRowName.setText(getName());
-            groupHolder.mGroupRowName.setTextColor(getNameColor());
-            groupHolder.mGroupRowName.setSingleLine(getNameSingleLine());
+            groupHolder.getMGroupRowName().setText(getName());
+            groupHolder.getMGroupRowName().setTextColor(getNameColor());
+            groupHolder.getMGroupRowName().setSingleLine(getNameSingleLine());
         }
 
         int detailsVisibility = getDetailsVisibility();
         //noinspection ResourceType
-        groupHolder.mGroupRowDetails.setVisibility(detailsVisibility);
+        groupHolder.getMGroupRowDetails().setVisibility(detailsVisibility);
         if (detailsVisibility == View.VISIBLE) {
-            groupHolder.mGroupRowDetails.setText(getDetails());
-            groupHolder.mGroupRowDetails.setTextColor(getDetailsColor());
+            groupHolder.getMGroupRowDetails().setText(getDetails());
+            groupHolder.getMGroupRowDetails().setTextColor(getDetailsColor());
         }
 
         int childrenVisibility = getChildrenVisibility();
         //noinspection ResourceType
-        groupHolder.mGroupRowChildren.setVisibility(childrenVisibility);
+        groupHolder.getMGroupRowChildren().setVisibility(childrenVisibility);
         if (childrenVisibility == View.VISIBLE) {
-            groupHolder.mGroupRowChildren.setText(getChildren());
-            groupHolder.mGroupRowChildren.setTextColor(getChildrenColor());
+            groupHolder.getMGroupRowChildren().setText(getChildren());
+            groupHolder.getMGroupRowChildren().setTextColor(getChildrenColor());
         }
 
         int expandVisibility = getExpandVisibility();
         //noinspection ResourceType
-        groupHolder.mGroupRowExpand.setVisibility(expandVisibility);
+        groupHolder.getMGroupRowExpand().setVisibility(expandVisibility);
         if (expandVisibility == View.VISIBLE) {
-            groupHolder.mGroupRowExpand.setImageResource(getExpandImageResource());
-            groupHolder.mGroupRowExpand.setOnClickListener(getExpandOnClickListener());
+            groupHolder.getMGroupRowExpand().setImageResource(getExpandImageResource());
+            groupHolder.getMGroupRowExpand().setOnClickListener(getExpandOnClickListener());
         }
 
         int checkBoxVisibility = getCheckBoxVisibility();
         //noinspection ResourceType
-        groupHolder.mGroupRowCheckBox.setVisibility(checkBoxVisibility);
+        groupHolder.getMGroupRowCheckBox().setVisibility(checkBoxVisibility);
         if (checkBoxVisibility == View.VISIBLE) {
-            groupHolder.mGroupRowCheckBox.setChecked(getCheckBoxChecked());
-            groupHolder.mGroupRowCheckBox.setOnClickListener(getCheckBoxOnClickListener());
+            groupHolder.getMGroupRowCheckBox().setChecked(getCheckBoxChecked());
+            groupHolder.getMGroupRowCheckBox().setOnClickListener(getCheckBoxOnClickListener());
         }
 
         //noinspection ResourceType
-        groupHolder.mGroupRowSeparator.setVisibility(getSeparatorVisibility());
+        groupHolder.getMGroupRowSeparator().setVisibility(getSeparatorVisibility());
 
-        groupHolder.mGroupRow.setBackgroundColor(getBackgroundColor());
+        groupHolder.getMGroupRow().setBackgroundColor(getBackgroundColor());
 
-        groupHolder.mGroupRow.setOnLongClickListener(getOnLongClickListener());
+        groupHolder.getMGroupRow().setOnLongClickListener(getOnLongClickListener());
 
-        groupHolder.mGroupRow.setOnClickListener(getOnClickListener());
+        groupHolder.getMGroupRow().setOnClickListener(getOnClickListener());
     }
 
     @SuppressWarnings("unused")
     public final int getItemViewType() {
-        return GroupListFragment.GroupAdapter.TYPE_GROUP;
+        return GroupListFragment.GroupAdapter.Companion.getTYPE_GROUP();
     }
 }

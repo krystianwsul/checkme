@@ -41,13 +41,13 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     TreeNode initialize(TreeNode parentTreeNode, List<TaskKey> expandedTaskKeys) {
         Assert.assertTrue(parentTreeNode != null);
 
-        boolean expanded = (expandedTaskKeys != null && expandedTaskKeys.contains(mTaskData.mTaskKey) && !mTaskData.Children.isEmpty());
+        boolean expanded = (expandedTaskKeys != null && expandedTaskKeys.contains(mTaskData.getMTaskKey()) && !mTaskData.getChildren().isEmpty());
 
         mTreeNode = new TreeNode(this, parentTreeNode, expanded, false);
 
         mTaskNodes = new ArrayList<>();
 
-        List<TreeNode> childTreeNodes = Stream.of(mTaskData.Children)
+        List<TreeNode> childTreeNodes = Stream.of(mTaskData.getChildren())
                 .map(taskData -> newChildTreeNode(taskData, expandedTaskKeys))
                 .collect(Collectors.toList());
 
@@ -78,7 +78,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
 
     @NonNull
     private GroupListFragment getGroupListFragment() {
-        return getGroupAdapter().mGroupListFragment;
+        return getGroupAdapter().getMGroupListFragment();
     }
 
     @NonNull
@@ -101,7 +101,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
             List<TaskKey> expandedTaskKeys = new ArrayList<>();
 
             if (expanded())
-                expandedTaskKeys.add(mTaskData.mTaskKey);
+                expandedTaskKeys.add(mTaskData.getMTaskKey());
 
             return Stream.concat(Stream.of(expandedTaskKeys), Stream.of(mTaskNodes).flatMap(TaskNode::getExpandedTaskKeys));
         }
@@ -112,9 +112,9 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
         TaskNode other = (TaskNode) modelNode;
 
         if (mIndentation == 0) {
-            return -mTaskData.mStartExactTimeStamp.compareTo(other.mTaskData.mStartExactTimeStamp);
+            return -mTaskData.getMStartExactTimeStamp().compareTo(other.mTaskData.getMStartExactTimeStamp());
         } else {
-            return mTaskData.mStartExactTimeStamp.compareTo(other.mTaskData.mStartExactTimeStamp);
+            return mTaskData.getMStartExactTimeStamp().compareTo(other.mTaskData.getMStartExactTimeStamp());
         }
     }
 
@@ -126,7 +126,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     @NonNull
     @Override
     String getName() {
-        return mTaskData.Name;
+        return mTaskData.getName();
     }
 
     @Override
@@ -157,7 +157,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
 
     @Override
     int getChildrenVisibility() {
-        if ((mTaskData.Children.isEmpty() || expanded()) && TextUtils.isEmpty(mTaskData.mNote)) {
+        if ((mTaskData.getChildren().isEmpty() || expanded()) && TextUtils.isEmpty(mTaskData.getMNote())) {
             return View.GONE;
         } else {
             return View.VISIBLE;
@@ -167,28 +167,28 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     @NonNull
     @Override
     String getChildren() {
-        if (!expanded() && !mTaskData.Children.isEmpty()) {
-            return Stream.of(mTaskData.Children)
-                    .sortBy(task -> task.mStartExactTimeStamp)
-                    .map(task -> task.Name)
+        if (!expanded() && !mTaskData.getChildren().isEmpty()) {
+            return Stream.of(mTaskData.getChildren())
+                    .sortBy(GroupListFragment.TaskData::getMStartExactTimeStamp)
+                    .map(GroupListFragment.TaskData::getName)
                     .collect(Collectors.joining(", "));
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(mTaskData.mNote));
+            Assert.assertTrue(!TextUtils.isEmpty(mTaskData.getMNote()));
 
-            return mTaskData.mNote;
+            return mTaskData.getMNote();
         }
     }
 
     @Override
     int getChildrenColor() {
-        Assert.assertTrue((!expanded() && !mTaskData.Children.isEmpty()) || !TextUtils.isEmpty(mTaskData.mNote));
+        Assert.assertTrue((!expanded() && !mTaskData.getChildren().isEmpty()) || !TextUtils.isEmpty(mTaskData.getMNote()));
 
         return ContextCompat.getColor(getGroupListFragment().getActivity(), R.color.textSecondary);
     }
 
     @Override
     int getExpandVisibility() {
-        if (mTaskData.Children.isEmpty()) {
+        if (mTaskData.getChildren().isEmpty()) {
             Assert.assertTrue(!getTreeNode().getExpandVisible());
 
             return View.INVISIBLE;
@@ -205,7 +205,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
 
         Assert.assertTrue(treeNode.getExpandVisible());
 
-        Assert.assertTrue(!mTaskData.Children.isEmpty());
+        Assert.assertTrue(!mTaskData.getChildren().isEmpty());
 
         if (treeNode.expanded())
             return R.drawable.ic_expand_less_black_36dp;
@@ -216,7 +216,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     @NonNull
     @Override
     View.OnClickListener getExpandOnClickListener() {
-        Assert.assertTrue(!mTaskData.Children.isEmpty());
+        Assert.assertTrue(!mTaskData.getChildren().isEmpty());
         Assert.assertTrue(getTreeNode().getExpandVisible());
 
         return getTreeNode().getExpandListener();
@@ -267,7 +267,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     public void onClick() {
         GroupListFragment groupListFragment = getGroupListFragment();
 
-        groupListFragment.getActivity().startActivity(ShowTaskActivity.newIntent(groupListFragment.getActivity(), mTaskData.mTaskKey));
+        groupListFragment.getActivity().startActivity(ShowTaskActivity.newIntent(groupListFragment.getActivity(), mTaskData.getMTaskKey()));
     }
 
     @Override

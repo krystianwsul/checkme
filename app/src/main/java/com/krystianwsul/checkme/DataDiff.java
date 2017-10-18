@@ -21,7 +21,7 @@ public class DataDiff {
     public static void diffData(@NonNull GroupListFragment.DataWrapper oldData, @NonNull GroupListFragment.DataWrapper newData) {
         sDiff = new ArrayList<>();
 
-        diffMap("", oldData.InstanceDatas, newData.InstanceDatas);
+        diffMap("", oldData.getInstanceDatas(), newData.getInstanceDatas());
     }
 
     private static void diffMap(@NonNull String indent, @NonNull Map<InstanceKey, GroupListFragment.InstanceData> oldInstanceDatas, @NonNull Map<InstanceKey, GroupListFragment.InstanceData> newInstanceDatas) {
@@ -31,7 +31,7 @@ public class DataDiff {
 
         for (InstanceKey instanceKey : instanceKeys) {
             if (!oldInstanceDatas.keySet().contains(instanceKey)) {
-                sDiff.add(indent + newInstanceDatas.get(instanceKey).Name + " missing from oldData");
+                sDiff.add(indent + newInstanceDatas.get(instanceKey).getName() + " missing from oldData");
                 continue;
             }
 
@@ -39,7 +39,7 @@ public class DataDiff {
             Assert.assertTrue(oldInstanceData != null);
 
             if (!newInstanceDatas.keySet().contains(instanceKey)) {
-                sDiff.add(indent + oldInstanceData.Name + " missing from newData");
+                sDiff.add(indent + oldInstanceData.getName() + " missing from newData");
                 continue;
             }
 
@@ -47,7 +47,7 @@ public class DataDiff {
             Assert.assertTrue(newInstanceData != null);
 
             if (!oldInstanceData.equals(newInstanceData)) {
-                sDiff.add(indent + "difference in " + oldInstanceData.Name + ":");
+                sDiff.add(indent + "difference in " + oldInstanceData.getName() + ":");
 
                 diffInstance(indent + "\t", oldInstanceData, newInstanceData);
             }
@@ -56,38 +56,38 @@ public class DataDiff {
 
     private static void diffInstance(@NonNull String indent, @NonNull GroupListFragment.InstanceData oldInstanceData, @NonNull GroupListFragment.InstanceData newInstanceData) {
         Assert.assertTrue(!TextUtils.isEmpty(indent));
-        Assert.assertTrue(oldInstanceData.InstanceKey.equals(newInstanceData.InstanceKey));
+        Assert.assertTrue(oldInstanceData.getInstanceKey().equals(newInstanceData.getInstanceKey()));
 
-        if (((oldInstanceData.Done == null) != (newInstanceData.Done == null)) || ((oldInstanceData.Done != null) && !oldInstanceData.Done.equals(newInstanceData.Done)))
-            sDiff.add(indent + "oldInstanceData.Done == " + oldInstanceData.Done + ", newInstanceData.Done == " + newInstanceData.Done);
+        if (((oldInstanceData.getDone() == null) != (newInstanceData.getDone() == null)) || ((oldInstanceData.getDone() != null) && !oldInstanceData.getDone().equals(newInstanceData.getDone())))
+            sDiff.add(indent + "oldInstanceData.Done == " + oldInstanceData.getDone() + ", newInstanceData.Done == " + newInstanceData.getDone());
 
-        if ((TextUtils.isEmpty(oldInstanceData.DisplayText) != TextUtils.isEmpty(newInstanceData.DisplayText)) || (!TextUtils.isEmpty(oldInstanceData.DisplayText) && !oldInstanceData.DisplayText.equals(newInstanceData.DisplayText)))
-            sDiff.add(indent + "oldInstanceData.DisplayText == " + oldInstanceData.DisplayText + ", newInstanceData.DisplayText == " + newInstanceData.DisplayText);
+        if ((TextUtils.isEmpty(oldInstanceData.getDisplayText()) != TextUtils.isEmpty(newInstanceData.getDisplayText())) || (!TextUtils.isEmpty(oldInstanceData.getDisplayText()) && !oldInstanceData.getDisplayText().equals(newInstanceData.getDisplayText())))
+            sDiff.add(indent + "oldInstanceData.DisplayText == " + oldInstanceData.getDisplayText() + ", newInstanceData.DisplayText == " + newInstanceData.getDisplayText());
 
-        if (!oldInstanceData.Name.equals(newInstanceData.Name))
-            sDiff.add(indent + "oldInstanceData.Name == " + oldInstanceData.Name + ", newInstanceData.Name == " + newInstanceData.Name);
+        if (!oldInstanceData.getName().equals(newInstanceData.getName()))
+            sDiff.add(indent + "oldInstanceData.Name == " + oldInstanceData.getName() + ", newInstanceData.Name == " + newInstanceData.getName());
 
-        if (!oldInstanceData.InstanceTimeStamp.equals(newInstanceData.InstanceTimeStamp))
-            sDiff.add(indent + "oldInstanceData.InstanceTimeStamp == " + oldInstanceData.InstanceTimeStamp + ", newInstanceData.InstanceTimeStamp == " + newInstanceData.InstanceTimeStamp);
+        if (!oldInstanceData.getInstanceTimeStamp().equals(newInstanceData.getInstanceTimeStamp()))
+            sDiff.add(indent + "oldInstanceData.InstanceTimeStamp == " + oldInstanceData.getInstanceTimeStamp() + ", newInstanceData.InstanceTimeStamp == " + newInstanceData.getInstanceTimeStamp());
 
-        if (oldInstanceData.TaskCurrent != newInstanceData.TaskCurrent)
-            sDiff.add(indent + "oldInstanceData.TaskCurrent == " + oldInstanceData.TaskCurrent + ", newInstanceData.TaskCurrent == " + newInstanceData.TaskCurrent);
+        if (oldInstanceData.getTaskCurrent() != newInstanceData.getTaskCurrent())
+            sDiff.add(indent + "oldInstanceData.TaskCurrent == " + oldInstanceData.getTaskCurrent() + ", newInstanceData.TaskCurrent == " + newInstanceData.getTaskCurrent());
 
-        if (oldInstanceData.IsRootInstance != newInstanceData.IsRootInstance)
-            sDiff.add(indent + "oldInstanceData.IsRootInstance == " + oldInstanceData.IsRootInstance + ", newInstanceData.IsRootInstance == " + newInstanceData.IsRootInstance);
+        if (oldInstanceData.getIsRootInstance() != newInstanceData.getIsRootInstance())
+            sDiff.add(indent + "oldInstanceData.IsRootInstance == " + oldInstanceData.getIsRootInstance() + ", newInstanceData.IsRootInstance == " + newInstanceData.getIsRootInstance());
 
-        if (((oldInstanceData.IsRootTask == null) != (newInstanceData.IsRootTask == null)) || ((oldInstanceData.IsRootTask != null) && !oldInstanceData.IsRootTask.equals(newInstanceData.IsRootTask)))
-            sDiff.add(indent + "oldInstanceData.IsRootTask == " + oldInstanceData.IsRootTask + ", newInstanceData.IsRootTask == " + newInstanceData.IsRootTask);
+        if (((oldInstanceData.getIsRootTask() == null) != (newInstanceData.getIsRootTask() == null)) || ((oldInstanceData.getIsRootTask() != null) && !oldInstanceData.getIsRootTask().equals(newInstanceData.getIsRootTask())))
+            sDiff.add(indent + "oldInstanceData.IsRootTask == " + oldInstanceData.getIsRootTask() + ", newInstanceData.IsRootTask == " + newInstanceData.getIsRootTask());
 
-        if (oldInstanceData.Exists != newInstanceData.Exists)
-            sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.Exists + ", newInstanceData.mExists == " + newInstanceData.Exists);
+        if (oldInstanceData.getExists() != newInstanceData.getExists())
+            sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.getExists() + ", newInstanceData.mExists == " + newInstanceData.getExists());
 
-        if (!oldInstanceData.InstanceTimePair.equals(newInstanceData.InstanceTimePair))
-            sDiff.add(indent + "oldInstanceData.InstanceTimePair == " + oldInstanceData.InstanceTimePair + ", newInstanceData.InstanceTimePair == " + newInstanceData.InstanceTimePair);
+        if (!oldInstanceData.getInstanceTimePair().equals(newInstanceData.getInstanceTimePair()))
+            sDiff.add(indent + "oldInstanceData.InstanceTimePair == " + oldInstanceData.getInstanceTimePair() + ", newInstanceData.InstanceTimePair == " + newInstanceData.getInstanceTimePair());
 
-        if (!oldInstanceData.Children.equals(newInstanceData.Children)) {
-            sDiff.add(indent + "oldInstanceData.Children != newInstanceData.Children");
-            diffMap(indent + "\t", oldInstanceData.Children, newInstanceData.Children);
+        if (!oldInstanceData.getChildren().equals(newInstanceData.getChildren())) {
+            sDiff.add(indent + "oldInstanceData.children != newInstanceData.children");
+            diffMap(indent + "\t", oldInstanceData.getChildren(), newInstanceData.getChildren());
         }
     }
 

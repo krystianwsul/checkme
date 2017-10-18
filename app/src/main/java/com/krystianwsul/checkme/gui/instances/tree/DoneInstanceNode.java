@@ -42,15 +42,15 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     TreeNode initialize(@NonNull TreeNode dividerTreeNode, @Nullable HashMap<InstanceKey, Boolean> expandedInstances) {
         boolean expanded = false;
         boolean doneExpanded = false;
-        if (expandedInstances != null && expandedInstances.containsKey(mInstanceData.InstanceKey) && !mInstanceData.Children.isEmpty()) {
+        if (expandedInstances != null && expandedInstances.containsKey(mInstanceData.getInstanceKey()) && !mInstanceData.getChildren().isEmpty()) {
             expanded = true;
-            doneExpanded = expandedInstances.get(mInstanceData.InstanceKey);
+            doneExpanded = expandedInstances.get(mInstanceData.getInstanceKey());
         }
 
         mTreeNode = new TreeNode(this, dividerTreeNode, expanded, false);
 
         mNodeCollection = new NodeCollection(mDensity, mIndentation + 1, this, false, mTreeNode, null);
-        mTreeNode.setChildTreeNodes(mNodeCollection.initialize(mInstanceData.Children.values(), null, expandedInstances, doneExpanded, null, false, null, false, null));
+        mTreeNode.setChildTreeNodes(mNodeCollection.initialize(mInstanceData.getChildren().values(), null, expandedInstances, doneExpanded, null, false, null, false, null));
 
         return mTreeNode;
     }
@@ -80,9 +80,9 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
         if (!expanded())
             return;
 
-        Assert.assertTrue(!expandedInstances.containsKey(mInstanceData.InstanceKey));
+        Assert.assertTrue(!expandedInstances.containsKey(mInstanceData.getInstanceKey()));
 
-        expandedInstances.put(mInstanceData.InstanceKey, mNodeCollection.getDoneExpanded());
+        expandedInstances.put(mInstanceData.getInstanceKey(), mNodeCollection.getDoneExpanded());
 
         mNodeCollection.addExpandedInstances(expandedInstances);
     }
@@ -95,7 +95,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     @NonNull
     private GroupListFragment getGroupListFragment() {
-        return getGroupAdapter().mGroupListFragment;
+        return getGroupAdapter().getMGroupListFragment();
     }
 
     @Override
@@ -106,14 +106,14 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     @NonNull
     @Override
     String getName() {
-        return mInstanceData.Name;
+        return mInstanceData.getName();
     }
 
     @Override
     int getNameColor() {
         GroupListFragment groupListFragment = getGroupListFragment();
 
-        if (!mInstanceData.TaskCurrent) {
+        if (!mInstanceData.getTaskCurrent()) {
             return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textDisabled);
         } else {
             return ContextCompat.getColor(groupListFragment.getActivity(), R.color.textPrimary);
@@ -127,7 +127,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     @Override
     int getDetailsVisibility() {
-        if (TextUtils.isEmpty(mInstanceData.DisplayText)) {
+        if (TextUtils.isEmpty(mInstanceData.getDisplayText())) {
             return View.GONE;
         } else {
             return View.VISIBLE;
@@ -137,22 +137,22 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     @NonNull
     @Override
     String getDetails() {
-        Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.DisplayText));
-        return mInstanceData.DisplayText;
+        Assert.assertTrue(!TextUtils.isEmpty(mInstanceData.getDisplayText()));
+        return mInstanceData.getDisplayText();
     }
 
     @Override
     int getDetailsColor() {
-        if (!mInstanceData.TaskCurrent) {
-            return ContextCompat.getColor(mDividerNode.getGroupAdapter().mGroupListFragment.getActivity(), R.color.textDisabled);
+        if (!mInstanceData.getTaskCurrent()) {
+            return ContextCompat.getColor(mDividerNode.getGroupAdapter().getMGroupListFragment().getActivity(), R.color.textDisabled);
         } else {
-            return ContextCompat.getColor(mDividerNode.getGroupAdapter().mGroupListFragment.getActivity(), R.color.textSecondary);
+            return ContextCompat.getColor(mDividerNode.getGroupAdapter().getMGroupListFragment().getActivity(), R.color.textSecondary);
         }
     }
 
     @Override
     int getChildrenVisibility() {
-        if ((mInstanceData.Children.isEmpty() || expanded()) && TextUtils.isEmpty(mInstanceData.mNote)) {
+        if ((mInstanceData.getChildren().isEmpty() || expanded()) && TextUtils.isEmpty(mInstanceData.getMNote())) {
             return View.GONE;
         } else {
             return View.VISIBLE;
@@ -162,19 +162,19 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     @NonNull
     @Override
     String getChildren() {
-        Assert.assertTrue((!mInstanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.mNote));
+        Assert.assertTrue((!mInstanceData.getChildren().isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.getMNote()));
 
-        return GroupListFragment.getChildrenText(expanded(), mInstanceData.Children.values(), mInstanceData.mNote);
+        return GroupListFragment.Companion.getChildrenText(expanded(), mInstanceData.getChildren().values(), mInstanceData.getMNote());
     }
 
     @Override
     int getChildrenColor() {
-        Assert.assertTrue((!mInstanceData.Children.isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.mNote));
+        Assert.assertTrue((!mInstanceData.getChildren().isEmpty() && !expanded()) || !TextUtils.isEmpty(mInstanceData.getMNote()));
 
         Activity activity = getGroupListFragment().getActivity();
         Assert.assertTrue(activity != null);
 
-        if (!mInstanceData.TaskCurrent) {
+        if (!mInstanceData.getTaskCurrent()) {
             return ContextCompat.getColor(activity, R.color.textDisabled);
         } else {
             return ContextCompat.getColor(activity, R.color.textSecondary);
@@ -183,7 +183,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     @Override
     int getExpandVisibility() {
-        if (mInstanceData.Children.isEmpty()) {
+        if (mInstanceData.getChildren().isEmpty()) {
             Assert.assertTrue(!getTreeNode().getExpandVisible());
 
             return View.INVISIBLE;
@@ -196,7 +196,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     @Override
     int getExpandImageResource() {
-        Assert.assertTrue(!mInstanceData.Children.isEmpty());
+        Assert.assertTrue(!mInstanceData.getChildren().isEmpty());
         Assert.assertTrue(getTreeNode().getExpandVisible());
 
         if (getTreeNode().expanded())
@@ -208,7 +208,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     @NonNull
     @Override
     View.OnClickListener getExpandOnClickListener() {
-        Assert.assertTrue(!mInstanceData.Children.isEmpty());
+        Assert.assertTrue(!mInstanceData.getChildren().isEmpty());
         Assert.assertTrue(getTreeNode().getExpandVisible());
 
         return getTreeNode().getExpandListener();
@@ -236,14 +236,14 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
         return v -> {
             v.setOnClickListener(null);
 
-            mInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.getActivity()).setInstanceDone(groupAdapter.mGroupListFragment.getActivity(), groupAdapter.mDataId, SaveService.Source.GUI, mInstanceData.InstanceKey, false);
-            Assert.assertTrue(mInstanceData.Done == null);
+            mInstanceData.setDone(DomainFactory.getDomainFactory(groupAdapter.getMGroupListFragment().getActivity()).setInstanceDone(groupAdapter.getMGroupListFragment().getActivity(), groupAdapter.getMDataId(), SaveService.Source.GUI, mInstanceData.getInstanceKey(), false));
+            Assert.assertTrue(mInstanceData.getDone() == null);
 
             dividerNode.remove(this);
 
             nodeCollection.getNotDoneGroupCollection().add(mInstanceData);
 
-            groupAdapter.mGroupListFragment.updateSelectAll();
+            groupAdapter.getMGroupListFragment().updateSelectAll();
         };
     }
 
@@ -271,12 +271,12 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
 
     @Override
     public int compareTo(@NonNull ModelNode another) {
-        Assert.assertTrue(mInstanceData.Done != null);
+        Assert.assertTrue(mInstanceData.getDone() != null);
 
         DoneInstanceNode doneInstanceNode = (DoneInstanceNode) another;
-        Assert.assertTrue(doneInstanceNode.mInstanceData.Done != null);
+        Assert.assertTrue(doneInstanceNode.mInstanceData.getDone() != null);
 
-        return -mInstanceData.Done.compareTo(doneInstanceNode.mInstanceData.Done); // negate
+        return -mInstanceData.getDone().compareTo(doneInstanceNode.mInstanceData.getDone()); // negate
     }
 
     @Override
@@ -288,7 +288,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     public void onClick() {
         GroupListFragment groupListFragment = getGroupListFragment();
 
-        groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), mInstanceData.InstanceKey));
+        groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), mInstanceData.getInstanceKey()));
     }
 
     @Override

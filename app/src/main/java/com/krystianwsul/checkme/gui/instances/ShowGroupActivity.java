@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -43,7 +44,7 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_group);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -53,7 +54,7 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
 
         mActionBar.setTitle(null);
 
-        FloatingActionButton showGroupFab = (FloatingActionButton) findViewById(R.id.show_group_fab);
+        FloatingActionButton showGroupFab = findViewById(R.id.show_group_fab);
         Assert.assertTrue(showGroupFab != null);
 
         Intent intent = getIntent();
@@ -64,7 +65,7 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
 
         mGroupListFragment = (GroupListFragment) getSupportFragmentManager().findFragmentById(R.id.show_group_list);
         if (mGroupListFragment == null) {
-            mGroupListFragment = GroupListFragment.newInstance();
+            mGroupListFragment = GroupListFragment.Companion.newInstance();
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.show_group_list, mGroupListFragment)
@@ -101,7 +102,7 @@ public class ShowGroupActivity extends AbstractActivity implements LoaderManager
     }
 
     @Override
-    public void onCreateGroupActionMode(ActionMode actionMode) {
+    public void onCreateGroupActionMode(@NonNull ActionMode actionMode) {
 
     }
 

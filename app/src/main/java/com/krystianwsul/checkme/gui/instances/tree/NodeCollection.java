@@ -49,7 +49,7 @@ class NodeCollection {
         ArrayList<GroupListFragment.InstanceData> notDoneInstanceDatas = new ArrayList<>();
         ArrayList<GroupListFragment.InstanceData> doneInstanceDatas = new ArrayList<>();
         for (GroupListFragment.InstanceData instanceData : instanceDatas) {
-            if (instanceData.Done == null)
+            if (instanceData.getDone() == null)
                 notDoneInstanceDatas.add(instanceData);
             else
                 doneInstanceDatas.add(instanceData);

@@ -17,6 +17,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.krystianwsul.checkme.DataDiff
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
@@ -702,6 +703,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
+        MyCrashlytics.log(javaClass.simpleName + ".setFab " + hashCode())
         mFloatingActionButton = floatingActionButton
 
         mFloatingActionButton!!.setOnClickListener {
@@ -798,6 +800,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     override fun clearFab() {
+        MyCrashlytics.log(javaClass.simpleName + ".clearFab " + hashCode())
         if (mFloatingActionButton == null)
             return
 

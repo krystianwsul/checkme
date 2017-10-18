@@ -830,7 +830,7 @@ public class GroupListFragment extends AbstractFragment implements FabUser {
             Assert.assertTrue(mInstanceKeys == null);
 
             Activity activity = getActivity();
-            Assert.assertTrue(activity != null);
+            Assert.assertTrue(activity != null); // todo how the fuck is this null?
 
             if (mPosition != null) {
                 Assert.assertTrue(mTimeRange != null);

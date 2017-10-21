@@ -14,6 +14,10 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 apply plugin: 'me.tatarka.retrolambda'
 
+androidExtensions {
+    experimental = true
+}
+
 repositories {
     maven { url 'https://maven.fabric.io/public' }
     maven {

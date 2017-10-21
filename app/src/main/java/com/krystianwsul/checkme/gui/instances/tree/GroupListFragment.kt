@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Parcel
 import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
@@ -39,6 +38,7 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import junit.framework.Assert
+import kotlinx.android.parcel.Parcelize
 import org.apache.commons.lang3.StringUtils
 import java.util.*
 
@@ -909,55 +909,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
         class GroupHolder(val mGroupRow: LinearLayout, val mGroupRowContainer: LinearLayout, val mGroupRowName: TextView, val mGroupRowDetails: TextView, val mGroupRowChildren: TextView, val mGroupRowExpand: ImageView, val mGroupRowCheckBox: CheckBox, val mGroupRowSeparator: View) : RecyclerView.ViewHolder(mGroupRow)
     }
 
-    class ExpansionState(val DoneExpanded: Boolean, val ExpandedGroups: List<TimeStamp>, val ExpandedInstances: HashMap<InstanceKey, Boolean>, val UnscheduledExpanded: Boolean, val ExpandedTaskKeys: List<TaskKey>?) : Parcelable {
-
-        override fun describeContents() = 0
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {
-            dest.writeInt(if (DoneExpanded) 1 else 0)
-            dest.writeTypedList(ExpandedGroups)
-            dest.writeSerializable(ExpandedInstances)
-
-            dest.writeInt(if (UnscheduledExpanded) 1 else 0)
-
-            if (ExpandedTaskKeys == null) {
-                dest.writeInt(0)
-            } else {
-                dest.writeInt(1)
-                dest.writeList(ExpandedTaskKeys)
-            }
-        }
-
-        companion object {
-
-            var CREATOR: Parcelable.Creator<ExpansionState> = object : Parcelable.Creator<ExpansionState> {
-                override fun createFromParcel(source: Parcel): ExpansionState {
-                    val doneExpanded = source.readInt() == 1
-
-                    val expandedGroups = ArrayList<TimeStamp>()
-                    source.readTypedList(expandedGroups, TimeStamp.CREATOR)
-
-                    @Suppress("UNCHECKED_CAST")
-                    val expandedInstances = source.readSerializable() as HashMap<InstanceKey, Boolean>
-
-                    val unscheduledExpanded = source.readInt() == 1
-
-                    val hasTasks = source.readInt() == 1
-                    val expandedTaskKeys: List<TaskKey>?
-                    if (hasTasks) {
-                        expandedTaskKeys = ArrayList()
-                        source.readList(expandedTaskKeys, TaskKey::class.java.classLoader)
-                    } else {
-                        expandedTaskKeys = null
-                    }
-
-                    return ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys)
-                }
-
-                override fun newArray(size: Int): Array<ExpansionState?> = arrayOfNulls(size)
-            }
-        }
-    }
+    @Parcelize
+    class ExpansionState(val DoneExpanded: Boolean, val ExpandedGroups: List<TimeStamp>, val ExpandedInstances: HashMap<InstanceKey, Boolean>, val UnscheduledExpanded: Boolean, val ExpandedTaskKeys: List<TaskKey>?) : Parcelable
 
     interface GroupListListener {
 

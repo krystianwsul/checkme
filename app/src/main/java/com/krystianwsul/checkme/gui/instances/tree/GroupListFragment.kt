@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
@@ -38,8 +37,9 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import junit.framework.Assert
-import kotlinx.android.parcel.Parcelize
 import org.apache.commons.lang3.StringUtils
+import paperparcel.PaperParcel
+import paperparcel.PaperParcelable
 import java.util.*
 
 class GroupListFragment : AbstractFragment(), FabUser {
@@ -909,8 +909,15 @@ class GroupListFragment : AbstractFragment(), FabUser {
         class GroupHolder(val mGroupRow: LinearLayout, val mGroupRowContainer: LinearLayout, val mGroupRowName: TextView, val mGroupRowDetails: TextView, val mGroupRowChildren: TextView, val mGroupRowExpand: ImageView, val mGroupRowCheckBox: CheckBox, val mGroupRowSeparator: View) : RecyclerView.ViewHolder(mGroupRow)
     }
 
-    @Parcelize
-    class ExpansionState(val DoneExpanded: Boolean, val ExpandedGroups: List<TimeStamp>, val ExpandedInstances: HashMap<InstanceKey, Boolean>, val UnscheduledExpanded: Boolean, val ExpandedTaskKeys: List<TaskKey>?) : Parcelable
+    @PaperParcel
+    class ExpansionState(val DoneExpanded: Boolean, val ExpandedGroups: List<TimeStamp>, val ExpandedInstances: HashMap<InstanceKey, Boolean>, val UnscheduledExpanded: Boolean, val ExpandedTaskKeys: List<TaskKey>?) : PaperParcelable {
+
+        companion object {
+
+            @JvmField
+            val CREATOR = PaperParcelGroupListFragment_ExpansionState.CREATOR
+        }
+    }
 
     interface GroupListListener {
 
@@ -965,5 +972,4 @@ class GroupListFragment : AbstractFragment(), FabUser {
             Assert.assertTrue(!TextUtils.isEmpty(Name))
         }
     }
-
 }

@@ -77,7 +77,7 @@ public class LocalInstance extends Instance {
 
     @NonNull
     @Override
-    protected Date getScheduleDate() {
+    public Date getScheduleDate() {
         if (mInstanceRecord != null) {
             Assert.assertTrue(mTaskId == null);
             Assert.assertTrue(mScheduleDateTime == null);
@@ -106,7 +106,7 @@ public class LocalInstance extends Instance {
             Assert.assertTrue((customTimeId == null) != (hour == null));
 
             if (customTimeId != null) {
-                return mDomainFactory.getCustomTime(new CustomTimeKey(customTimeId));
+                return getDomainFactory().getCustomTime(new CustomTimeKey(customTimeId));
             } else {
                 return new NormalTime(hour, minute);
             }
@@ -150,7 +150,7 @@ public class LocalInstance extends Instance {
             Assert.assertTrue((mInstanceRecord.getInstanceHour() == null) || (mInstanceRecord.getInstanceCustomTimeId() == null));
 
             if (mInstanceRecord.getInstanceCustomTimeId() != null) {
-                return mDomainFactory.getCustomTime(new CustomTimeKey(mInstanceRecord.getInstanceCustomTimeId()));
+                return getDomainFactory().getCustomTime(new CustomTimeKey(mInstanceRecord.getInstanceCustomTimeId()));
             } else if (mInstanceRecord.getInstanceHour() != null) {
                 return new NormalTime(mInstanceRecord.getInstanceHour(), mInstanceRecord.getInstanceMinute());
             } else {
@@ -239,7 +239,7 @@ public class LocalInstance extends Instance {
     private void createInstanceRecord(@NonNull ExactTimeStamp now) {
         LocalTask localTask = getTask();
 
-        mInstanceRecord = mDomainFactory.getLocalFactory().createInstanceRecord(localTask, this, getScheduleDate(), getScheduleTimePair(), now);
+        mInstanceRecord = getDomainFactory().getLocalFactory().createInstanceRecord(localTask, this, getScheduleDate(), getScheduleTimePair(), now);
 
         mTaskId = null;
         mScheduleDateTime = null;
@@ -292,14 +292,14 @@ public class LocalInstance extends Instance {
     public void delete() {
         Assert.assertTrue(mInstanceRecord != null);
 
-        mDomainFactory.getLocalFactory().deleteInstance(this);
+        getDomainFactory().getLocalFactory().deleteInstance(this);
 
         mInstanceRecord.delete();
     }
 
     @Nullable
     @Override
-    protected CustomTimeKey getScheduleCustomTimeKey() {
+    public CustomTimeKey getScheduleCustomTimeKey() {
         if (mInstanceRecord != null) {
             Assert.assertTrue(mTaskId == null);
             Assert.assertTrue(mScheduleDateTime == null);
@@ -349,7 +349,7 @@ public class LocalInstance extends Instance {
     @NonNull
     @Override
     public LocalTask getTask() {
-        return mDomainFactory.getLocalFactory().getTaskForce(getTaskId());
+        return getDomainFactory().getLocalFactory().getTaskForce(getTaskId());
     }
 
     @Override
@@ -371,7 +371,7 @@ public class LocalInstance extends Instance {
 
     @Nullable
     @Override
-    protected Pair<String, String> getRemoteCustomTimeKey() {
+    public Pair<String, String> getRemoteCustomTimeKey() {
         return null;
     }
 }

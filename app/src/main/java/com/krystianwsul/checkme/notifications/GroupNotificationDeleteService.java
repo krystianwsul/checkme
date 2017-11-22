@@ -23,6 +23,7 @@ public class GroupNotificationDeleteService extends IntentService {
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
+        //noinspection Convert2MethodRef
         Assert.assertTrue(Stream.of(instanceKeys)
                 .filter(instanceKey -> instanceKey.getType() == TaskKey.Type.REMOTE)
                 .map(instanceKey -> instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey)
@@ -45,6 +46,6 @@ public class GroupNotificationDeleteService extends IntentService {
         Assert.assertTrue(!instanceKeys.isEmpty());
 
         DomainFactory.getDomainFactory(this)
-                .setInstancesNotified(this, 0, SaveService.Source.SERVICE, instanceKeys);
+                .setInstancesNotified(this, SaveService.Source.SERVICE, instanceKeys);
     }
 }

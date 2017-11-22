@@ -53,7 +53,7 @@ public class InstanceDoneService extends IntentService {
     }
 
     private void setInstanceNotificationDone(@NonNull DomainFactory domainFactory, @NonNull InstanceKey instanceKey) {
-        domainFactory.setInstanceNotificationDone(this, 0, SaveService.Source.SERVICE, instanceKey);
+        domainFactory.setInstanceNotificationDone(this, SaveService.Source.SERVICE, instanceKey);
     }
 
     public static void throttleFirebase(@NonNull Context context, boolean needsFirebase, @NonNull DomainFactory.FirebaseListener firebaseListener) {

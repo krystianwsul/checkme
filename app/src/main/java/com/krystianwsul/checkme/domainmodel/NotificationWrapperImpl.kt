@@ -119,7 +119,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val done = childInstances.filter { it.done != null }.sortedBy { it.done!!.long }
 
-        return (notDone + done).map(Instance::getName)
+        return (notDone + done).map(Instance::name)
     }
 
     protected open fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {

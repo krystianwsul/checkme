@@ -81,7 +81,7 @@ public class RemoteInstance extends Instance {
     }
 
     @NonNull
-    protected Date getScheduleDate() {
+    public Date getScheduleDate() {
         if (mRemoteInstanceRecord != null) {
             Assert.assertTrue(TextUtils.isEmpty(mTaskId));
             Assert.assertTrue(mScheduleDateTime == null);
@@ -239,7 +239,7 @@ public class RemoteInstance extends Instance {
 
     @NonNull
     private RemoteProjectFactory getRemoteFactory() {
-        RemoteProjectFactory remoteProjectFactory = mDomainFactory.getRemoteFactory();
+        RemoteProjectFactory remoteProjectFactory = getDomainFactory().getRemoteFactory();
         Assert.assertTrue(remoteProjectFactory != null);
 
         return remoteProjectFactory;
@@ -248,7 +248,7 @@ public class RemoteInstance extends Instance {
     private void createInstanceShownRecord() {
         Assert.assertTrue(mInstanceShownRecord == null);
 
-        mInstanceShownRecord = mDomainFactory.getLocalFactory().createInstanceShownRecord(mDomainFactory, getTaskId(), getScheduleDateTime(), getTask().getRemoteProject().getId());
+        mInstanceShownRecord = getDomainFactory().getLocalFactory().createInstanceShownRecord(getDomainFactory(), getTaskId(), getScheduleDateTime(), getTask().getRemoteProject().getId());
     }
 
     @Override
@@ -269,7 +269,7 @@ public class RemoteInstance extends Instance {
 
         DateTime scheduleDateTime = getScheduleDateTime();
 
-        RemoteProjectFactory remoteProjectFactory = mDomainFactory.getRemoteFactory();
+        RemoteProjectFactory remoteProjectFactory = getDomainFactory().getRemoteFactory();
         Assert.assertTrue(remoteProjectFactory != null);
 
         mRemoteInstanceRecord = ((RemoteTask) task).createRemoteInstanceRecord(this, scheduleDateTime, now);
@@ -326,7 +326,7 @@ public class RemoteInstance extends Instance {
     public void delete() {
         Assert.assertTrue(mRemoteInstanceRecord != null);
 
-        RemoteProjectFactory remoteProjectFactory = mDomainFactory.getRemoteFactory();
+        RemoteProjectFactory remoteProjectFactory = getDomainFactory().getRemoteFactory();
         Assert.assertTrue(remoteProjectFactory != null);
 
         getTask().deleteInstance(this);
@@ -341,7 +341,7 @@ public class RemoteInstance extends Instance {
 
     @Nullable
     @Override
-    protected CustomTimeKey getScheduleCustomTimeKey() {
+    public CustomTimeKey getScheduleCustomTimeKey() {
         if (mRemoteInstanceRecord != null) {
             Assert.assertTrue(TextUtils.isEmpty(mTaskId));
             Assert.assertTrue(mScheduleDateTime == null);
@@ -349,7 +349,7 @@ public class RemoteInstance extends Instance {
             String customTimeId = mRemoteInstanceRecord.getScheduleCustomTimeId();
 
             if (customTimeId != null) {
-                return mDomainFactory.getCustomTimeKey(mRemoteProject.getId(), customTimeId);
+                return getDomainFactory().getCustomTimeKey(mRemoteProject.getId(), customTimeId);
             } else {
                 return null;
             }
@@ -413,7 +413,7 @@ public class RemoteInstance extends Instance {
 
     @Nullable
     @Override
-    protected Pair<String, String> getRemoteCustomTimeKey() {
+    public Pair<String, String> getRemoteCustomTimeKey() {
         if (mRemoteInstanceRecord != null) {
             if (TextUtils.isEmpty(mRemoteInstanceRecord.getInstanceCustomTimeId()))
                 return null;

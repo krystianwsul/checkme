@@ -978,7 +978,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        return new MainLoader.Data(getMainData(now, context, null));
+        return new MainLoader.Data(getMainData(now, context));
     }
 
     @NonNull
@@ -1098,7 +1098,7 @@ public class DomainFactory {
         notifyCloud(context, remoteProjects);
     }
 
-    public synchronized void setInstanceAddHourService(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceAddHourService(@NonNull Context context, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourService");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1116,7 +1116,7 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId, source);
+        save(context, 0, source);
 
         notifyCloud(context, instance.getRemoteNullableProject());
     }
@@ -1158,20 +1158,20 @@ public class DomainFactory {
                 .map(this::getInstance)
                 .collect(Collectors.toList());
 
-        instances.forEach(instance -> instance.setInstanceDateTime(date, new TimePair(hourMinute), now));
+        Stream.of(instances).forEach(instance -> instance.setInstanceDateTime(date, new TimePair(hourMinute), now));
 
         updateNotifications(context, now);
 
         save(context, dataId, source);
 
-        Set<RemoteProject> remoteProjects = Stream.of(instances).map(Instance::getRemoteNullableProject)
+        @SuppressWarnings("Convert2MethodRef") Set<RemoteProject> remoteProjects = Stream.of(instances).map(Instance::getRemoteNullableProject)
                 .filter(remoteProject -> remoteProject != null)
                 .collect(Collectors.toSet());
 
         notifyCloud(context, remoteProjects);
     }
 
-    public synchronized void setInstanceNotificationDone(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceNotificationDone(@NonNull Context context, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotificationDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1184,7 +1184,7 @@ public class DomainFactory {
 
         updateNotifications(context, now);
 
-        save(context, dataId, source);
+        save(context, 0, source);
 
         notifyCloud(context, instance.getRemoteNullableProject());
     }
@@ -1228,7 +1228,7 @@ public class DomainFactory {
         return instance.getDone();
     }
 
-    public synchronized void setInstancesNotified(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
+    public synchronized void setInstancesNotified(@NonNull Context context, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.log("DomainFactory.setInstancesNotified");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1239,7 +1239,7 @@ public class DomainFactory {
         for (InstanceKey instanceKey : instanceKeys)
             setInstanceNotified(instanceKey, now);
 
-        save(context, dataId, source);
+        save(context, 0, source);
     }
 
     public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
@@ -2318,35 +2318,19 @@ public class DomainFactory {
     }
 
     @NonNull
-    TaskListFragment.TaskData getMainData(@NonNull ExactTimeStamp now, @NonNull Context context, @Nullable TaskKey taskKey) {
+    private TaskListFragment.TaskData getMainData(@NonNull ExactTimeStamp now, @NonNull Context context) {
         List<TaskListFragment.ChildTaskData> childTaskDatas;
-        String note;
 
-        if (taskKey != null) {
-            Task task = getTaskForce(taskKey);
+        childTaskDatas = getTasks()
+                .filter(task -> task.current(now))
+                .filter(task -> task.isVisible(now))
+                .filter(task -> task.isRootTask(now))
+                .map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+                .collect(Collectors.toList());
 
-            List<Task> childTasks = task.getChildTasks(now);
-            childTaskDatas = Stream.of(childTasks)
-                    .map(childTask -> new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
-                    .collect(Collectors.toList());
+        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> -lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
 
-            note = task.getNote();
-        } else {
-            childTaskDatas = getTasks()
-                    .filter(task -> task.current(now))
-                    .filter(task -> task.isVisible(now))
-                    .filter(task -> task.isRootTask(now))
-                    .map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
-                    .collect(Collectors.toList());
-
-            note = null;
-        }
-
-        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
-        if (taskKey == null)
-            Collections.reverse(childTaskDatas);
-
-        return new TaskListFragment.TaskData(childTaskDatas, note);
+        return new TaskListFragment.TaskData(childTaskDatas, null);
     }
 
     @NonNull
@@ -2586,7 +2570,7 @@ public class DomainFactory {
 
             shownInstanceKeys.add(instanceKey);
 
-            instanceShownRecordNotificationDatas.put(instanceKey, new Pair<>(Instance.getNotificationId(scheduleDate, customTimeKey, hourMinute, taskKey), instanceShownRecord));
+            instanceShownRecordNotificationDatas.put(instanceKey, new Pair<>(Instance.Companion.getNotificationId(scheduleDate, customTimeKey, hourMinute, taskKey), instanceShownRecord));
         }
 
         List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
@@ -2747,6 +2731,7 @@ public class DomainFactory {
         if (minInstancesTimeStamp.isPresent())
             nextAlarm = minInstancesTimeStamp.get();
 
+        //noinspection Convert2MethodRef
         Optional<TimeStamp> minSchedulesTimeStamp = getTasks()
                 .filter(task -> task.current(now))
                 .filter(task -> task.isRootTask(now))
@@ -3018,6 +3003,7 @@ public class DomainFactory {
         void setRemoteRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull Map<String, RemoteProjectRelevance> remoteProjectRelevances) {
             Assert.assertTrue(mRelevant);
 
+            //noinspection Convert2MethodRef
             Stream.of(mTask.getSchedules())
                     .map(Schedule::getRemoteCustomTimeKey)
                     .filter(pair -> pair != null)
@@ -3233,6 +3219,8 @@ public class DomainFactory {
             mSource = source;
 
             PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            Assert.assertTrue(powerManager != null);
+
             mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
             mWakelock.acquire(30 * 1000);
         }

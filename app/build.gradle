@@ -24,7 +24,7 @@ repositories {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 17
@@ -76,7 +76,7 @@ dependencies {
         transitive = true
     }
     compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
-        transitive = true;
+        transitive = true
     }
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"

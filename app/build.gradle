@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.22.2'
+        classpath 'io.fabric.tools:gradle:1.24.2'
     }
 }
 apply plugin: 'com.android.application'
@@ -61,8 +61,8 @@ kapt {
 }
 
 ext {
-    supportLibVersion = '26.0.1'
-    firebaseVersion = '11.0.4'
+    supportLibVersion = '26.1.0'
+    firebaseVersion = '11.6.0'
 }
 
 dependencies {

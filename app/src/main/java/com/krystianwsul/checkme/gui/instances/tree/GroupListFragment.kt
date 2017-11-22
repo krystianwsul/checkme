@@ -37,7 +37,6 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import junit.framework.Assert
-import org.apache.commons.lang3.StringUtils
 import paperparcel.PaperParcel
 import paperparcel.PaperParcelable
 import java.util.*
@@ -480,7 +479,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun printTree(lines: MutableList<String>, indentation: Int, instanceData: InstanceData) {
-        lines.add(StringUtils.repeat("-", indentation) + instanceData.Name)
+        lines.add("-".repeat(indentation) + instanceData.Name)
 
         instanceData.children
                 .values

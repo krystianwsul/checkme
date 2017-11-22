@@ -327,7 +327,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         Assert.assertTrue(context instanceof TaskListListener);
     }

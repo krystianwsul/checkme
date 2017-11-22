@@ -26,7 +26,8 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
             if (statusBarNotifications.size > 2) {
                 cancelNotification(lastNotificationId)
             } else if (statusBarNotifications.size < 2) {
-                Assert.assertTrue(statusBarNotifications.isEmpty())
+                if (statusBarNotifications.isNotEmpty())
+                    NotificationException.throwException(lastNotificationId, statusBarNotifications)
             } else {
                 Assert.assertTrue(statusBarNotifications.size == 2)
 

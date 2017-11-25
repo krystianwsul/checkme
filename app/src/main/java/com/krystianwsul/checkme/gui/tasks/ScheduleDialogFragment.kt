@@ -28,6 +28,7 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import junit.framework.Assert
+import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.math.BigDecimal
 import java.util.*
 
@@ -44,48 +45,44 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
         private val DAY_NUMBER_PICKER_TAG = "day_number_dialog"
 
-        fun newInstance(scheduleDialogData: ScheduleDialogData, showDelete: Boolean): ScheduleDialogFragment {
-            val scheduleDialogFragment = ScheduleDialogFragment()
-
-            val args = Bundle()
-            args.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData)
-            args.putBoolean(SHOW_DELETE_KEY, showDelete)
-            scheduleDialogFragment.arguments = args
-
-            return scheduleDialogFragment
+        fun newInstance(scheduleDialogData: ScheduleDialogData, showDelete: Boolean) = ScheduleDialogFragment().apply {
+            arguments = Bundle().apply {
+                putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData)
+                putBoolean(SHOW_DELETE_KEY, showDelete)
+            }
         }
     }
 
-    private var mScheduleType: Spinner? = null
+    private lateinit var mScheduleType: Spinner
 
-    private var mScheduleDialogDateLayout: TextInputLayout? = null
-    private var mScheduleDialogDate: TextView? = null
+    private lateinit var mScheduleDialogDateLayout: TextInputLayout
+    private lateinit var mScheduleDialogDate: TextView
 
-    private var mScheduleDialogDay: Spinner? = null
+    private lateinit var mScheduleDialogDay: Spinner
 
-    private var mScheduleDialogMonthLayout: LinearLayout? = null
+    private lateinit var mScheduleDialogMonthLayout: LinearLayout
 
-    private var mScheduleDialogMonthDayRadio: RadioButton? = null
-    private var mScheduleDialogMonthDayNumber: TextView? = null
-    private var mScheduleDialogMonthDayLabel: TextView? = null
+    private lateinit var mScheduleDialogMonthDayRadio: RadioButton
+    private lateinit var mScheduleDialogMonthDayNumber: TextView
+    private lateinit var mScheduleDialogMonthDayLabel: TextView
 
-    private var mScheduleDialogMonthWeekRadio: RadioButton? = null
-    private var mScheduleDialogMonthWeekNumber: Spinner? = null
-    private var mScheduleDialogMonthWeekDay: Spinner? = null
+    private lateinit var mScheduleDialogMonthWeekRadio: RadioButton
+    private lateinit var mScheduleDialogMonthWeekNumber: Spinner
+    private lateinit var mScheduleDialogMonthWeekDay: Spinner
 
-    private var mScheduleDialogMonthEnd: Spinner? = null
+    private lateinit var mScheduleDialogMonthEnd: Spinner
 
-    private var mScheduleDialogDailyPadding: View? = null
+    private lateinit var mScheduleDialogDailyPadding: View
 
-    private var mScheduleDialogTimeLayout: TextInputLayout? = null
-    private var mScheduleDialogTime: TextView? = null
+    private lateinit var mScheduleDialogTimeLayout: TextInputLayout
+    private lateinit var mScheduleDialogTime: TextView
 
-    private var mButton: MDButton? = null
+    private lateinit var mButton: MDButton
 
     private var mCustomTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>? = null
     private var mScheduleDialogListener: ScheduleDialogListener? = null
 
-    private var mScheduleDialogData: ScheduleDialogData? = null
+    private lateinit var mScheduleDialogData: ScheduleDialogData
 
     private var mBroadcastReceiver: BroadcastReceiver? = null
 
@@ -93,7 +90,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
             Assert.assertTrue(mCustomTimeDatas != null)
 
-            mScheduleDialogData!!.mTimePairPersist.setCustomTimeKey(customTimeKey)
+            mScheduleDialogData.mTimePairPersist.setCustomTimeKey(customTimeKey)
 
             updateFields()
         }
@@ -101,9 +98,10 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         override fun onOtherSelected() {
             Assert.assertTrue(mCustomTimeDatas != null)
 
-            val timePickerDialogFragment = TimePickerDialogFragment.newInstance(mScheduleDialogData!!.mTimePairPersist.hourMinute)
-            timePickerDialogFragment.setListener(mTimePickerDialogFragmentListener)
-            timePickerDialogFragment.show(childFragmentManager, TIME_PICKER_TAG)
+            TimePickerDialogFragment.newInstance(mScheduleDialogData.mTimePairPersist.hourMinute).let {
+                it.setListener(mTimePickerDialogFragmentListener)
+                it.show(childFragmentManager, TIME_PICKER_TAG)
+            }
         }
 
         override fun onAddSelected() {
@@ -114,55 +112,50 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private val mTimePickerDialogFragmentListener = { hourMinute: HourMinute ->
         Assert.assertTrue(mCustomTimeDatas != null)
 
-        mScheduleDialogData!!.mTimePairPersist.hourMinute = hourMinute
+        mScheduleDialogData.mTimePairPersist.hourMinute = hourMinute
         updateFields()
     }
 
     private val mDayNumberPickerDialogHandlerV2 = NumberPickerDialogFragment.NumberPickerDialogHandlerV2 { _, _, _, _, fullNumber ->
-        mScheduleDialogData!!.mMonthDayNumber = fullNumber.toInt()
-        Assert.assertTrue(mScheduleDialogData!!.mMonthDayNumber > 0)
-        Assert.assertTrue(mScheduleDialogData!!.mMonthDayNumber < 29)
+        mScheduleDialogData.mMonthDayNumber = fullNumber.toInt()
+        Assert.assertTrue(mScheduleDialogData.mMonthDayNumber > 0)
+        Assert.assertTrue(mScheduleDialogData.mMonthDayNumber < 29)
 
         updateFields()
     }
 
     private val mDatePickerDialogFragmentListener = { date: Date ->
-        Assert.assertTrue(mScheduleDialogData!!.mScheduleType == ScheduleType.SINGLE)
+        Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE)
 
-        mScheduleDialogData!!.mDate = date
+        mScheduleDialogData.mDate = date
         updateFields()
     }
 
-    private//cached data doesn't contain new custom time
-    val isValid: Boolean
+    //cached data doesn't contain new custom time
+    private val isValid: Boolean
         get() {
             if (mCustomTimeDatas == null)
                 return false
 
-            if (mScheduleDialogData == null)
-                return false
-
-            if (mScheduleDialogData!!.mScheduleType != ScheduleType.SINGLE)
+            if (mScheduleDialogData.mScheduleType != ScheduleType.SINGLE)
                 return true
 
-            val hourMinute = if (mScheduleDialogData!!.mTimePairPersist.customTimeKey != null) {
-                if (!mCustomTimeDatas!!.containsKey(mScheduleDialogData!!.mTimePairPersist.customTimeKey))
+            val hourMinute = if (mScheduleDialogData.mTimePairPersist.customTimeKey != null) {
+                if (!mCustomTimeDatas!!.containsKey(mScheduleDialogData.mTimePairPersist.customTimeKey!!))
                     return false
 
-                mCustomTimeDatas!![mScheduleDialogData!!.mTimePairPersist.customTimeKey]!!.HourMinutes[mScheduleDialogData!!.mDate.dayOfWeek]!!
+                mCustomTimeDatas!![mScheduleDialogData.mTimePairPersist.customTimeKey!!]!!.HourMinutes[mScheduleDialogData.mDate.dayOfWeek]!!
             } else {
-                mScheduleDialogData!!.mTimePairPersist.hourMinute
+                mScheduleDialogData.mTimePairPersist.hourMinute
             }
 
-            return TimeStamp(mScheduleDialogData!!.mDate, hourMinute) > TimeStamp.getNow()
+            return TimeStamp(mScheduleDialogData.mDate, hourMinute) > TimeStamp.getNow()
         }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val args = arguments
-        Assert.assertTrue(args != null)
-        Assert.assertTrue(args!!.containsKey(SHOW_DELETE_KEY))
+        Assert.assertTrue(arguments.containsKey(SHOW_DELETE_KEY))
 
-        val showDelete = args.getBoolean(SHOW_DELETE_KEY)
+        val showDelete = arguments.getBoolean(SHOW_DELETE_KEY)
 
         val builder = MaterialDialog.Builder(activity)
                 .customView(R.layout.fragment_schedule_dialog, false)
@@ -174,163 +167,110 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                     Assert.assertTrue(mScheduleDialogListener != null)
                     Assert.assertTrue(isValid)
 
-                    mScheduleDialogListener!!.onScheduleDialogResult(mScheduleDialogData!!)
+                    mScheduleDialogListener!!.onScheduleDialogResult(mScheduleDialogData)
                 }
 
         if (showDelete)
             builder.neutralText(R.string.delete).onNeutral { _, _ -> mScheduleDialogListener!!.onScheduleDialogDelete() }
 
-        val materialDialog = builder.build()
+        return builder.build().apply {
+            customView!!.run {
+                mScheduleType = scheduleType
+                mScheduleDialogDateLayout = scheduleDialogDateLayout
+                mScheduleDialogDate = scheduleDialogDate
+                mScheduleDialogDay = schedule_dialog_day
+                mScheduleDialogMonthLayout = scheduleDialogMonthLayout
+                mScheduleDialogMonthDayRadio = scheduleDialogMonthDayRadio
+                mScheduleDialogMonthDayNumber = scheduleDialogMonthDayNumber
+                mScheduleDialogMonthDayLabel = scheduleDialogMonthDayLabel
+                mScheduleDialogMonthWeekRadio = scheduleDialogMonthWeekRadio
+                mScheduleDialogMonthWeekNumber = scheduleDialogMonthWeekNumber
+                mScheduleDialogMonthWeekDay = scheduleDialogMonthWeekDay
+                mScheduleDialogMonthEnd = scheduleDialogMonthEnd
+                mScheduleDialogDailyPadding = scheduleDialogDailyPadding
+                mScheduleDialogTimeLayout = scheduleDialogTimeLayout
+                mScheduleDialogTime = scheduleDialogTime
+            }
 
-        val view = materialDialog.customView
-        Assert.assertTrue(view != null)
-
-        mScheduleType = view!!.findViewById<View>(R.id.schedule_type) as Spinner
-        Assert.assertTrue(mScheduleType != null)
-
-        mScheduleDialogDateLayout = view.findViewById<View>(R.id.schedule_dialog_date_layout) as TextInputLayout
-        Assert.assertTrue(mScheduleDialogDateLayout != null)
-
-        mScheduleDialogDate = view.findViewById<View>(R.id.schedule_dialog_date) as TextView
-        Assert.assertTrue(mScheduleDialogDate != null)
-
-        mScheduleDialogDay = view.findViewById<View>(R.id.schedule_dialog_day) as Spinner
-        Assert.assertTrue(mScheduleDialogDay != null)
-
-        mScheduleDialogMonthLayout = view.findViewById<View>(R.id.schedule_dialog_month_layout) as LinearLayout
-        Assert.assertTrue(mScheduleDialogMonthLayout != null)
-
-        mScheduleDialogMonthDayRadio = view.findViewById<View>(R.id.schedule_dialog_month_day_radio) as RadioButton
-        Assert.assertTrue(mScheduleDialogMonthDayRadio != null)
-
-        mScheduleDialogMonthDayNumber = view.findViewById<View>(R.id.schedule_dialog_month_day_number) as TextView
-        Assert.assertTrue(mScheduleDialogMonthDayNumber != null)
-
-        mScheduleDialogMonthDayLabel = view.findViewById<View>(R.id.schedule_dialog_month_day_label) as TextView
-        Assert.assertTrue(mScheduleDialogMonthDayLabel != null)
-
-        mScheduleDialogMonthWeekRadio = view.findViewById<View>(R.id.schedule_dialog_month_week_radio) as RadioButton
-        Assert.assertTrue(mScheduleDialogMonthWeekRadio != null)
-
-        mScheduleDialogMonthWeekNumber = view.findViewById<View>(R.id.schedule_dialog_month_week_number) as Spinner
-        Assert.assertTrue(mScheduleDialogMonthWeekNumber != null)
-
-        mScheduleDialogMonthWeekDay = view.findViewById<View>(R.id.schedule_dialog_month_week_day) as Spinner
-        Assert.assertTrue(mScheduleDialogMonthWeekDay != null)
-
-        mScheduleDialogMonthEnd = view.findViewById<View>(R.id.schedule_dialog_month_end) as Spinner
-        Assert.assertTrue(mScheduleDialogMonthEnd != null)
-
-        mScheduleDialogDailyPadding = view.findViewById(R.id.schedule_dialog_daily_padding)
-        Assert.assertTrue(mScheduleDialogDailyPadding != null)
-
-        mScheduleDialogTimeLayout = view.findViewById<View>(R.id.schedule_dialog_time_layout) as TextInputLayout
-        Assert.assertTrue(mScheduleDialogTimeLayout != null)
-
-        mScheduleDialogTime = view.findViewById<View>(R.id.schedule_dialog_time) as TextView
-        Assert.assertTrue(mScheduleDialogTime != null)
-
-        mButton = materialDialog.getActionButton(DialogAction.POSITIVE)
-        Assert.assertTrue(mButton != null)
-
-        return materialDialog
+            mButton = getActionButton(DialogAction.POSITIVE)!!
+        }
     }
 
     @SuppressLint("SetTextI18n")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (savedInstanceState != null) {
-            Assert.assertTrue(savedInstanceState.containsKey(SCHEDULE_DIALOG_DATA_KEY))
+        mScheduleDialogData = (savedInstanceState ?: arguments).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
 
-            mScheduleDialogData = savedInstanceState.getParcelable(SCHEDULE_DIALOG_DATA_KEY)
-        } else {
-            val args = arguments
-            Assert.assertTrue(args != null)
-            Assert.assertTrue(args!!.containsKey(SCHEDULE_DIALOG_DATA_KEY))
+        mScheduleType.run {
+            adapter = ArrayAdapter.createFromResource(activity, R.array.schedule_types, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
-            mScheduleDialogData = args.getParcelable(SCHEDULE_DIALOG_DATA_KEY)
-            Assert.assertTrue(mScheduleDialogData != null)
-        }
+            setSelection(when (mScheduleDialogData.mScheduleType) {
+                ScheduleType.SINGLE -> 0
+                ScheduleType.DAILY -> 1
+                ScheduleType.WEEKLY -> 2
+                ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 3
+            })
 
-        val typeAdapter = ArrayAdapter.createFromResource(activity, R.array.schedule_types, R.layout.spinner_no_padding)
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mScheduleType!!.adapter = typeAdapter
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, i: Int, l: Long) {
+                    mScheduleDialogData.mScheduleType = when (i) {
+                        0 -> ScheduleType.SINGLE
+                        1 -> ScheduleType.DAILY
+                        2 -> ScheduleType.WEEKLY
+                        3 -> if (mScheduleDialogData.mMonthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
+                        else -> throw UnsupportedOperationException()
+                    }
 
-        when (mScheduleDialogData!!.mScheduleType) {
-            ScheduleType.SINGLE -> mScheduleType!!.setSelection(0)
-            ScheduleType.DAILY -> mScheduleType!!.setSelection(1)
-            ScheduleType.WEEKLY -> mScheduleType!!.setSelection(2)
-            ScheduleType.MONTHLY_DAY -> mScheduleType!!.setSelection(3)
-            ScheduleType.MONTHLY_WEEK -> mScheduleType!!.setSelection(3)
-        }
-
-        mScheduleType!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
-                when (i) {
-                    0 -> mScheduleDialogData!!.mScheduleType = ScheduleType.SINGLE
-                    1 -> mScheduleDialogData!!.mScheduleType = ScheduleType.DAILY
-                    2 -> mScheduleDialogData!!.mScheduleType = ScheduleType.WEEKLY
-                    3 -> if (mScheduleDialogData!!.mMonthlyDay)
-                        mScheduleDialogData!!.mScheduleType = ScheduleType.MONTHLY_DAY
-                    else
-                        mScheduleDialogData!!.mScheduleType = ScheduleType.MONTHLY_WEEK
-                    else -> throw UnsupportedOperationException()
+                    if (activity != null && mCustomTimeDatas != null)
+                        initialize()
                 }
 
-                if (activity != null && mCustomTimeDatas != null)
-                    initialize()
-            }
-
-            override fun onNothingSelected(adapterView: AdapterView<*>) {
-
+                override fun onNothingSelected(adapterView: AdapterView<*>) = Unit
             }
         }
 
-        mScheduleDialogTime!!.setOnClickListener {
+        mScheduleDialogTime.setOnClickListener {
             Assert.assertTrue(mCustomTimeDatas != null)
 
-            val customTimeDatas = when (mScheduleDialogData!!.mScheduleType) {
+            val customTimeDatas = when (mScheduleDialogData.mScheduleType) {
                 ScheduleType.SINGLE -> mCustomTimeDatas!!.values
                         .filter { it.mCustomTimeKey.mLocalCustomTimeId != null }
-                        .sortedBy { it.HourMinutes[mScheduleDialogData!!.mDate.dayOfWeek] }
-                        .map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name + " (" + customTimeData.HourMinutes[mScheduleDialogData!!.mDate.dayOfWeek] + ")") }
+                        .sortedBy { it.HourMinutes[mScheduleDialogData.mDate.dayOfWeek] }
+                        .map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name + " (" + customTimeData.HourMinutes[mScheduleDialogData.mDate.dayOfWeek] + ")") }
                 ScheduleType.DAILY, ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> mCustomTimeDatas!!.values
                         .filter { it.mCustomTimeKey.mLocalCustomTimeId != null }
                         .sortedBy { it.HourMinutes.values.map { it.hour * 60 + it.minute }.sum() }
                         .map { TimeDialogFragment.CustomTimeData(it.mCustomTimeKey, it.Name) }
                 ScheduleType.WEEKLY -> mCustomTimeDatas!!.values
                         .filter { it.mCustomTimeKey.mLocalCustomTimeId != null }
-                        .sortedBy { it.HourMinutes[mScheduleDialogData!!.mDayOfWeek] }
-                        .map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name + " (" + customTimeData.HourMinutes[mScheduleDialogData!!.mDayOfWeek] + ")") }
+                        .sortedBy { it.HourMinutes[mScheduleDialogData.mDayOfWeek] }
+                        .map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.mCustomTimeKey, customTimeData.Name + " (" + customTimeData.HourMinutes[mScheduleDialogData.mDayOfWeek] + ")") }
             }
 
-            val timeDialogFragment = TimeDialogFragment.newInstance(ArrayList(customTimeDatas))
-
-            timeDialogFragment.setTimeDialogListener(mTimeDialogListener)
-
-            timeDialogFragment.show(childFragmentManager, TIME_LIST_FRAGMENT_TAG)
+            TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {
+                it.setTimeDialogListener(mTimeDialogListener)
+                it.show(childFragmentManager, TIME_LIST_FRAGMENT_TAG)
+            }
         }
 
-        val timeDialogFragment = childFragmentManager.findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment
-        timeDialogFragment?.setTimeDialogListener(mTimeDialogListener)
+        (childFragmentManager.findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.setTimeDialogListener(mTimeDialogListener)
 
-        val timePickerDialogFragment = childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment
-        timePickerDialogFragment?.setListener(mTimePickerDialogFragmentListener)
+        (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.setListener(mTimePickerDialogFragmentListener)
 
-        mScheduleDialogDate!!.setOnClickListener {
-            Assert.assertTrue(mScheduleDialogData!!.mScheduleType == ScheduleType.SINGLE)
+        mScheduleDialogDate.setOnClickListener {
+            Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE)
 
-            val datePickerDialogFragment = DatePickerDialogFragment.newInstance(mScheduleDialogData!!.mDate)
-            datePickerDialogFragment.setListener(mDatePickerDialogFragmentListener)
-            datePickerDialogFragment.show(childFragmentManager, DATE_FRAGMENT_TAG)
+            DatePickerDialogFragment.newInstance(mScheduleDialogData.mDate).let {
+                it.setListener(mDatePickerDialogFragmentListener)
+                it.show(childFragmentManager, DATE_FRAGMENT_TAG)
+            }
         }
 
-        val datePickerDialogFragment = childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment
-        if (datePickerDialogFragment != null) {
-            Assert.assertTrue(mScheduleDialogData!!.mScheduleType == ScheduleType.SINGLE)
+        (childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment)?.run {
+            Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE)
 
-            datePickerDialogFragment.setListener(mDatePickerDialogFragmentListener)
+            setListener(mDatePickerDialogFragmentListener)
         }
 
         mBroadcastReceiver = object : BroadcastReceiver() {
@@ -340,48 +280,46 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
         }
 
-        val dayOfWeekAdapter = ArrayAdapter(context, R.layout.spinner_no_padding, DayOfWeek.values())
-        dayOfWeekAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mScheduleDialogDay!!.adapter = dayOfWeekAdapter
-        mScheduleDialogDay!!.setSelection(dayOfWeekAdapter.getPosition(mScheduleDialogData!!.mDayOfWeek))
-        mScheduleDialogDay!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val dayOfWeek = dayOfWeekAdapter.getItem(position)
-                Assert.assertTrue(dayOfWeek != null)
+        mScheduleDialogDay.run {
+            val dayOfWeekAdapter = ArrayAdapter(context, R.layout.spinner_no_padding, DayOfWeek.values()).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            adapter = dayOfWeekAdapter
+            setSelection(dayOfWeekAdapter.getPosition(mScheduleDialogData.mDayOfWeek))
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    mScheduleDialogData.mDayOfWeek = dayOfWeekAdapter.getItem(position)!!
 
-                mScheduleDialogData!!.mDayOfWeek = dayOfWeek
+                    updateFields()
+                }
 
-                updateFields()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-
+                override fun onNothingSelected(parent: AdapterView<*>) = Unit
             }
         }
 
         val textPrimary = ContextCompat.getColor(activity, R.color.textPrimary)
         val textDisabledSpinner = ContextCompat.getColor(activity, R.color.textDisabledSpinner)
 
-        mScheduleDialogMonthDayRadio!!.setOnCheckedChangeListener { _, isChecked ->
-            if (!isChecked)
-                return@setOnCheckedChangeListener
+        mScheduleDialogMonthDayRadio.run {
+            setOnCheckedChangeListener { _, isChecked ->
+                if (!isChecked)
+                    return@setOnCheckedChangeListener
 
-            mScheduleDialogData!!.mScheduleType = ScheduleType.MONTHLY_DAY
+                mScheduleDialogData.mScheduleType = ScheduleType.MONTHLY_DAY
 
-            mScheduleDialogMonthWeekRadio!!.isChecked = false
+                mScheduleDialogMonthWeekRadio.isChecked = false
 
-            mScheduleDialogData!!.mMonthlyDay = true
+                mScheduleDialogData.mMonthlyDay = true
 
-            mScheduleDialogMonthDayNumber!!.isEnabled = true
-            mScheduleDialogMonthDayLabel!!.setTextColor(textPrimary)
+                mScheduleDialogMonthDayNumber.isEnabled = true
+                mScheduleDialogMonthDayLabel.setTextColor(textPrimary)
 
-            mScheduleDialogMonthWeekNumber!!.isEnabled = false
-            mScheduleDialogMonthWeekDay!!.isEnabled = false
+                mScheduleDialogMonthWeekNumber.isEnabled = false
+                mScheduleDialogMonthWeekDay.isEnabled = false
+            }
+
+            isChecked = mScheduleDialogData.mMonthlyDay
         }
 
-        mScheduleDialogMonthDayRadio!!.isChecked = mScheduleDialogData!!.mMonthlyDay
-
-        mScheduleDialogMonthDayNumber!!.setOnClickListener {
+        mScheduleDialogMonthDayNumber.setOnClickListener {
             NumberPickerBuilder()
                     .setPlusMinusVisibility(View.GONE)
                     .setDecimalVisibility(View.GONE)
@@ -393,79 +331,75 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                     .show()
         }
 
-        val dayNumberPickerDialogFragment = childFragmentManager.findFragmentByTag(DAY_NUMBER_PICKER_TAG) as? NumberPickerDialogFragment
-        dayNumberPickerDialogFragment?.setNumberPickerDialogHandlersV2(Vector<NumberPickerDialogFragment.NumberPickerDialogHandlerV2>(listOf(mDayNumberPickerDialogHandlerV2)))
+        (childFragmentManager.findFragmentByTag(DAY_NUMBER_PICKER_TAG) as? NumberPickerDialogFragment)?.setNumberPickerDialogHandlersV2(Vector<NumberPickerDialogFragment.NumberPickerDialogHandlerV2>(listOf(mDayNumberPickerDialogHandlerV2)))
 
-        mScheduleDialogMonthWeekRadio!!.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
-            if (!isChecked)
-                return@setOnCheckedChangeListener
+        mScheduleDialogMonthWeekRadio.run {
+            setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
+                if (!isChecked)
+                    return@setOnCheckedChangeListener
 
-            mScheduleDialogData!!.mScheduleType = ScheduleType.MONTHLY_WEEK
+                mScheduleDialogData.mScheduleType = ScheduleType.MONTHLY_WEEK
 
-            mScheduleDialogMonthDayRadio!!.isChecked = false
+                mScheduleDialogMonthDayRadio.isChecked = false
 
-            mScheduleDialogData!!.mMonthlyDay = false
+                mScheduleDialogData.mMonthlyDay = false
 
-            mScheduleDialogMonthDayNumber!!.isEnabled = false
-            mScheduleDialogMonthDayLabel!!.setTextColor(textDisabledSpinner)
+                mScheduleDialogMonthDayNumber.isEnabled = false
+                mScheduleDialogMonthDayLabel.setTextColor(textDisabledSpinner)
 
-            mScheduleDialogMonthWeekNumber!!.isEnabled = true
-            mScheduleDialogMonthWeekDay!!.isEnabled = true
+                mScheduleDialogMonthWeekNumber.isEnabled = true
+                mScheduleDialogMonthWeekDay.isEnabled = true
+            }
+
+            isChecked = !mScheduleDialogData.mMonthlyDay
         }
 
-        mScheduleDialogMonthWeekRadio!!.isChecked = !mScheduleDialogData!!.mMonthlyDay
+        mScheduleDialogMonthWeekNumber.run {
+            adapter = ArrayAdapter(activity, R.layout.spinner_no_padding, listOf(1, 2, 3, 4).map { Utils.ordinal(it) }).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            setSelection(mScheduleDialogData.mMonthWeekNumber - 1)
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    Assert.assertTrue(position >= 0)
+                    Assert.assertTrue(position <= 3)
 
-        val monthWeekNumberAdapter = ArrayAdapter(activity, R.layout.spinner_no_padding, listOf(1, 2, 3, 4).map { Utils.ordinal(it) })
-        monthWeekNumberAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mScheduleDialogMonthWeekNumber!!.adapter = monthWeekNumberAdapter
-        mScheduleDialogMonthWeekNumber!!.setSelection(mScheduleDialogData!!.mMonthWeekNumber - 1)
-        mScheduleDialogMonthWeekNumber!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                Assert.assertTrue(position >= 0)
-                Assert.assertTrue(position <= 3)
+                    mScheduleDialogData.mMonthWeekNumber = position + 1
+                }
 
-                mScheduleDialogData!!.mMonthWeekNumber = position + 1
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-
-            }
-        }
-
-        val monthWeekDayAdapter = ArrayAdapter(context, R.layout.spinner_no_padding, DayOfWeek.values())
-        monthWeekDayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mScheduleDialogMonthWeekDay!!.adapter = monthWeekDayAdapter
-        mScheduleDialogMonthWeekDay!!.setSelection(monthWeekDayAdapter.getPosition(mScheduleDialogData!!.mMonthWeekDay))
-        mScheduleDialogMonthWeekDay!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val dayOfWeek = monthWeekDayAdapter.getItem(position)
-                Assert.assertTrue(dayOfWeek != null)
-
-                mScheduleDialogData!!.mMonthWeekDay = dayOfWeek
-
-                updateFields()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-
+                override fun onNothingSelected(parent: AdapterView<*>) = Unit
             }
         }
 
-        val monthEndAdapter = ArrayAdapter.createFromResource(activity, R.array.month, R.layout.spinner_no_padding)
-        monthEndAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mScheduleDialogMonthEnd!!.adapter = monthEndAdapter
+        mScheduleDialogMonthWeekDay.run {
+            val monthWeekDayAdapter = ArrayAdapter(context, R.layout.spinner_no_padding, DayOfWeek.values()).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            adapter = monthWeekDayAdapter
+            setSelection(monthWeekDayAdapter.getPosition(mScheduleDialogData.mMonthWeekDay))
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val dayOfWeek = monthWeekDayAdapter.getItem(position)
+                    Assert.assertTrue(dayOfWeek != null)
 
-        mScheduleDialogMonthEnd!!.setSelection(if (mScheduleDialogData!!.mBeginningOfMonth) 0 else 1)
+                    mScheduleDialogData.mMonthWeekDay = dayOfWeek
 
-        mScheduleDialogMonthEnd!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                Assert.assertTrue(position == 0 || position == 1)
+                    updateFields()
+                }
 
-                mScheduleDialogData!!.mBeginningOfMonth = position == 0
+                override fun onNothingSelected(parent: AdapterView<*>) = Unit
             }
+        }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
+        mScheduleDialogMonthEnd.run {
+            adapter = ArrayAdapter.createFromResource(activity, R.array.month, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
+            setSelection(if (mScheduleDialogData.mBeginningOfMonth) 0 else 1)
+
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    Assert.assertTrue(position == 0 || position == 1)
+
+                    mScheduleDialogData.mBeginningOfMonth = position == 0
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) = Unit
             }
         }
 
@@ -493,42 +427,40 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private fun initialize() {
         Assert.assertTrue(mCustomTimeDatas != null)
         Assert.assertTrue(mScheduleDialogListener != null)
-        Assert.assertTrue(mScheduleDialogData != null)
-        Assert.assertTrue(mScheduleDialogTime != null)
         Assert.assertTrue(activity != null)
 
-        when (mScheduleDialogData!!.mScheduleType) {
+        when (mScheduleDialogData.mScheduleType) {
             ScheduleType.SINGLE -> {
-                mScheduleDialogDateLayout!!.visibility = View.VISIBLE
-                mScheduleDialogDay!!.visibility = View.GONE
-                mScheduleDialogMonthLayout!!.visibility = View.GONE
-                mScheduleDialogDailyPadding!!.visibility = View.GONE
-                mScheduleDialogTimeLayout!!.visibility = View.VISIBLE
-                mScheduleDialogTimeLayout!!.isErrorEnabled = true
+                mScheduleDialogDateLayout.visibility = View.VISIBLE
+                mScheduleDialogDay.visibility = View.GONE
+                mScheduleDialogMonthLayout.visibility = View.GONE
+                mScheduleDialogDailyPadding.visibility = View.GONE
+                mScheduleDialogTimeLayout.visibility = View.VISIBLE
+                mScheduleDialogTimeLayout.isErrorEnabled = true
             }
             ScheduleType.DAILY -> {
-                mScheduleDialogDateLayout!!.visibility = View.GONE
-                mScheduleDialogDay!!.visibility = View.GONE
-                mScheduleDialogMonthLayout!!.visibility = View.GONE
-                mScheduleDialogDailyPadding!!.visibility = View.VISIBLE
-                mScheduleDialogTimeLayout!!.visibility = View.VISIBLE
-                mScheduleDialogTimeLayout!!.isErrorEnabled = false
+                mScheduleDialogDateLayout.visibility = View.GONE
+                mScheduleDialogDay.visibility = View.GONE
+                mScheduleDialogMonthLayout.visibility = View.GONE
+                mScheduleDialogDailyPadding.visibility = View.VISIBLE
+                mScheduleDialogTimeLayout.visibility = View.VISIBLE
+                mScheduleDialogTimeLayout.isErrorEnabled = false
             }
             ScheduleType.WEEKLY -> {
-                mScheduleDialogDateLayout!!.visibility = View.GONE
-                mScheduleDialogDay!!.visibility = View.VISIBLE
-                mScheduleDialogMonthLayout!!.visibility = View.GONE
-                mScheduleDialogDailyPadding!!.visibility = View.VISIBLE
-                mScheduleDialogTimeLayout!!.visibility = View.VISIBLE
-                mScheduleDialogTimeLayout!!.isErrorEnabled = false
+                mScheduleDialogDateLayout.visibility = View.GONE
+                mScheduleDialogDay.visibility = View.VISIBLE
+                mScheduleDialogMonthLayout.visibility = View.GONE
+                mScheduleDialogDailyPadding.visibility = View.VISIBLE
+                mScheduleDialogTimeLayout.visibility = View.VISIBLE
+                mScheduleDialogTimeLayout.isErrorEnabled = false
             }
             ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
-                mScheduleDialogDateLayout!!.visibility = View.GONE
-                mScheduleDialogDay!!.visibility = View.GONE
-                mScheduleDialogMonthLayout!!.visibility = View.VISIBLE
-                mScheduleDialogDailyPadding!!.visibility = View.GONE
-                mScheduleDialogTimeLayout!!.visibility = View.VISIBLE
-                mScheduleDialogTimeLayout!!.isErrorEnabled = false
+                mScheduleDialogDateLayout.visibility = View.GONE
+                mScheduleDialogDay.visibility = View.GONE
+                mScheduleDialogMonthLayout.visibility = View.VISIBLE
+                mScheduleDialogDailyPadding.visibility = View.GONE
+                mScheduleDialogTimeLayout.visibility = View.VISIBLE
+                mScheduleDialogTimeLayout.isErrorEnabled = false
             }
         }
 
@@ -541,10 +473,10 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         activity.unregisterReceiver(mBroadcastReceiver)
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState!!.putParcelable(SCHEDULE_DIALOG_DATA_KEY, mScheduleDialogData)
+        outState.putParcelable(SCHEDULE_DIALOG_DATA_KEY, mScheduleDialogData)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -554,75 +486,64 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
         if (resultCode > 0) {
             mCustomTimeDatas = null
-            mScheduleDialogData!!.mTimePairPersist.setCustomTimeKey(CustomTimeKey(resultCode))
+            mScheduleDialogData.mTimePairPersist.setCustomTimeKey(CustomTimeKey(resultCode))
         }
     }
 
     @SuppressLint("SetTextI18n")
     private fun updateFields() {
-        Assert.assertTrue(mScheduleDialogData != null)
-        Assert.assertTrue(mScheduleDialogDate != null)
-        Assert.assertTrue(mScheduleDialogTime != null)
         Assert.assertTrue(mCustomTimeDatas != null)
 
-        when (mScheduleDialogData!!.mScheduleType) {
+        when (mScheduleDialogData.mScheduleType) {
             ScheduleType.SINGLE -> {
-                mScheduleDialogDate!!.text = mScheduleDialogData!!.mDate.getDisplayText(context)
+                mScheduleDialogDate.text = mScheduleDialogData.mDate.getDisplayText(context)
 
-                if (mScheduleDialogData!!.mTimePairPersist.customTimeKey != null) {
-                    val customTimeData = mCustomTimeDatas!![mScheduleDialogData!!.mTimePairPersist.customTimeKey]
-                    Assert.assertTrue(customTimeData != null)
+                mScheduleDialogTime.text = if (mScheduleDialogData.mTimePairPersist.customTimeKey != null) {
+                    val customTimeData = mCustomTimeDatas!![mScheduleDialogData.mTimePairPersist.customTimeKey!!]!!
 
-                    mScheduleDialogTime!!.text = customTimeData!!.Name + " (" + customTimeData.HourMinutes[mScheduleDialogData!!.mDate.dayOfWeek] + ")"
+                    customTimeData.Name + " (" + customTimeData.HourMinutes[mScheduleDialogData.mDate.dayOfWeek] + ")"
                 } else {
-                    mScheduleDialogTime!!.text = mScheduleDialogData!!.mTimePairPersist.hourMinute.toString()
+                    mScheduleDialogData.mTimePairPersist.hourMinute.toString()
                 }
             }
-            ScheduleType.DAILY -> if (mScheduleDialogData!!.mTimePairPersist.customTimeKey != null) {
-                val customTimeData = mCustomTimeDatas!![mScheduleDialogData!!.mTimePairPersist.customTimeKey]
-                Assert.assertTrue(customTimeData != null)
-
-                mScheduleDialogTime!!.text = customTimeData!!.Name
+            ScheduleType.DAILY -> mScheduleDialogTime.text = if (mScheduleDialogData.mTimePairPersist.customTimeKey != null) {
+                mCustomTimeDatas!![mScheduleDialogData.mTimePairPersist.customTimeKey!!]!!.Name
             } else {
-                mScheduleDialogTime!!.text = mScheduleDialogData!!.mTimePairPersist.hourMinute.toString()
+                mScheduleDialogData.mTimePairPersist.hourMinute.toString()
             }
-            ScheduleType.WEEKLY -> if (mScheduleDialogData!!.mTimePairPersist.customTimeKey != null) {
-                val customTimeData = mCustomTimeDatas!![mScheduleDialogData!!.mTimePairPersist.customTimeKey]
-                Assert.assertTrue(customTimeData != null)
+            ScheduleType.WEEKLY -> mScheduleDialogTime.text = if (mScheduleDialogData.mTimePairPersist.customTimeKey != null) {
+                val customTimeData = mCustomTimeDatas!![mScheduleDialogData.mTimePairPersist.customTimeKey!!]!!
 
-                mScheduleDialogTime!!.text = customTimeData!!.Name + " (" + customTimeData.HourMinutes[mScheduleDialogData!!.mDayOfWeek] + ")"
+                customTimeData.Name + " (" + customTimeData.HourMinutes[mScheduleDialogData.mDayOfWeek] + ")"
             } else {
-                mScheduleDialogTime!!.text = mScheduleDialogData!!.mTimePairPersist.hourMinute.toString()
+                mScheduleDialogData.mTimePairPersist.hourMinute.toString()
             }
             ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
-                mScheduleDialogMonthDayNumber!!.text = Utils.ordinal(mScheduleDialogData!!.mMonthDayNumber)
+                mScheduleDialogMonthDayNumber.text = Utils.ordinal(mScheduleDialogData.mMonthDayNumber)
 
-                if (mScheduleDialogData!!.mTimePairPersist.customTimeKey != null) {
-                    val customTimeData = mCustomTimeDatas!![mScheduleDialogData!!.mTimePairPersist.customTimeKey]
-                    Assert.assertTrue(customTimeData != null)
-
-                    mScheduleDialogTime!!.text = customTimeData!!.Name
+                mScheduleDialogTime.text = if (mScheduleDialogData.mTimePairPersist.customTimeKey != null) {
+                    mCustomTimeDatas!![mScheduleDialogData.mTimePairPersist.customTimeKey!!]!!.Name
                 } else {
-                    mScheduleDialogTime!!.text = mScheduleDialogData!!.mTimePairPersist.hourMinute.toString()
+                    mScheduleDialogData.mTimePairPersist.hourMinute.toString()
                 }
             }
         }
 
         if (isValid) {
-            mButton!!.isEnabled = true
+            mButton.isEnabled = true
 
-            mScheduleDialogDateLayout!!.error = null
-            mScheduleDialogTimeLayout!!.error = null
+            mScheduleDialogDateLayout.error = null
+            mScheduleDialogTimeLayout.error = null
         } else {
-            Assert.assertTrue(mScheduleDialogData!!.mScheduleType == ScheduleType.SINGLE)
-            mButton!!.isEnabled = false
+            Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE)
+            mButton.isEnabled = false
 
-            if (mScheduleDialogData!!.mDate >= Date.today()) {
-                mScheduleDialogDateLayout!!.error = null
-                mScheduleDialogTimeLayout!!.error = getString(R.string.error_time)
+            if (mScheduleDialogData.mDate >= Date.today()) {
+                mScheduleDialogDateLayout.error = null
+                mScheduleDialogTimeLayout.error = getString(R.string.error_time)
             } else {
-                mScheduleDialogDateLayout!!.error = getString(R.string.error_date)
-                mScheduleDialogTimeLayout!!.error = null
+                mScheduleDialogDateLayout.error = getString(R.string.error_date)
+                mScheduleDialogTimeLayout.error = null
             }
         }
     }
@@ -645,15 +566,17 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         override fun writeToParcel(dest: Parcel, flags: Int) {
-            dest.writeParcelable(mDate, flags)
-            dest.writeSerializable(mDayOfWeek)
-            dest.writeInt(if (mMonthlyDay) 1 else 0)
-            dest.writeInt(mMonthDayNumber)
-            dest.writeInt(mMonthWeekNumber)
-            dest.writeSerializable(mMonthWeekDay)
-            dest.writeInt(if (mBeginningOfMonth) 1 else 0)
-            dest.writeParcelable(mTimePairPersist, flags)
-            dest.writeSerializable(mScheduleType)
+            dest.run {
+                writeParcelable(mDate, flags)
+                writeSerializable(mDayOfWeek)
+                writeInt(if (mMonthlyDay) 1 else 0)
+                writeInt(mMonthDayNumber)
+                writeInt(mMonthWeekNumber)
+                writeSerializable(mMonthWeekDay)
+                writeInt(if (mBeginningOfMonth) 1 else 0)
+                writeParcelable(mTimePairPersist, flags)
+                writeSerializable(mScheduleType)
+            }
         }
 
         override fun describeContents() = 0
@@ -662,17 +585,19 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
             val CREATOR: Parcelable.Creator<ScheduleDialogData> = object : Parcelable.Creator<ScheduleDialogData> {
                 override fun createFromParcel(parcel: Parcel): ScheduleDialogData {
-                    val date = parcel.readParcelable<Date>(Date::class.java.classLoader)
-                    val dayOfWeek = parcel.readSerializable() as DayOfWeek
-                    val monthDay = parcel.readInt() == 1
-                    val monthDayNumber = parcel.readInt()
-                    val monthWeekNumber = parcel.readInt()
-                    val monthWeekDay = parcel.readSerializable() as DayOfWeek
-                    val beginningOfMonth = parcel.readInt() == 1
-                    val timePairPersist = parcel.readParcelable<TimePairPersist>(TimePairPersist::class.java.classLoader)
-                    val scheduleType = parcel.readSerializable() as ScheduleType
+                    parcel.run {
+                        val date = readParcelable<Date>(Date::class.java.classLoader)
+                        val dayOfWeek = readSerializable() as DayOfWeek
+                        val monthDay = readInt() == 1
+                        val monthDayNumber = readInt()
+                        val monthWeekNumber = readInt()
+                        val monthWeekDay = readSerializable() as DayOfWeek
+                        val beginningOfMonth = readInt() == 1
+                        val timePairPersist = readParcelable<TimePairPersist>(TimePairPersist::class.java.classLoader)
+                        val scheduleType = readSerializable() as ScheduleType
 
-                    return ScheduleDialogData(date, dayOfWeek, monthDay, monthDayNumber, monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist, scheduleType)
+                        return ScheduleDialogData(date, dayOfWeek, monthDay, monthDayNumber, monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist, scheduleType)
+                    }
                 }
 
                 override fun newArray(size: Int) = arrayOfNulls<ScheduleDialogData>(size)
@@ -681,10 +606,9 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     }
 
     interface ScheduleDialogListener {
+
         fun onScheduleDialogResult(scheduleDialogData: ScheduleDialogData)
-
         fun onScheduleDialogDelete()
-
         fun onScheduleDialogCancel()
     }
 }

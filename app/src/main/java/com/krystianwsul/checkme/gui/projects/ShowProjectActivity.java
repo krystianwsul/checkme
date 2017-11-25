@@ -118,10 +118,10 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
-        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbar_layout);
+        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbarLayout);
         Assert.assertTrue(mToolbarLayout != null);
 
-        mToolbarEditText = (EditText) findViewById(R.id.toolbar_edit_text);
+        mToolbarEditText = (EditText) findViewById(R.id.toolbarEditText);
         Assert.assertTrue(mToolbarEditText != null);
 
         FloatingActionButton showProjectFab = (FloatingActionButton) findViewById(R.id.show_project_fab);

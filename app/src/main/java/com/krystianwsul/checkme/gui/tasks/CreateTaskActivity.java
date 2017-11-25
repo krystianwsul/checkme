@@ -70,8 +70,8 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     private Bundle mSavedInstanceState;
 
-    private TextInputLayout mToolbarLayout;
-    private EditText mToolbarEditText;
+    private TextInputLayout toolbarLayout;
+    private EditText toolbarEditText;
 
     private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = CreateTaskActivity.this::finish;
 
@@ -87,7 +87,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     private CreateTaskLoader.ParentTreeData mParent;
 
-    private RecyclerView mScheduleTimes;
+    private RecyclerView scheduleRecycler;
     private CreateTaskAdapter mCreateTaskAdapter;
 
     private Integer mHourMinutePickerPosition = null;
@@ -113,10 +113,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
             mParent = null;
 
-            View view = mScheduleTimes.getChildAt(mCreateTaskAdapter.elementsBeforeSchedules() - 1);
+            View view = scheduleRecycler.getChildAt(mCreateTaskAdapter.elementsBeforeSchedules() - 1);
             Assert.assertTrue(view != null);
 
-            CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
+            CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) scheduleRecycler.getChildViewHolder(view);
             Assert.assertTrue(scheduleHolder != null);
 
             scheduleHolder.mScheduleText.setText(null);
@@ -260,7 +260,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Assert.assertTrue(mToolbarEditText != null);
+        Assert.assertTrue(toolbarEditText != null);
 
         menu.findItem(R.id.action_save).setVisible(mData != null);
 
@@ -274,12 +274,12 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         switch (item.getItemId()) {
             case R.id.action_save:
                 Assert.assertTrue(mData != null);
-                Assert.assertTrue(mToolbarEditText != null);
+                Assert.assertTrue(toolbarEditText != null);
 
                 if (updateError())
                     break;
 
-                String name = mToolbarEditText.getText().toString().trim();
+                String name = toolbarEditText.getText().toString().trim();
                 Assert.assertTrue(!TextUtils.isEmpty(name));
 
                 getSupportLoaderManager().destroyLoader(0);
@@ -409,16 +409,16 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
 
         mSavedInstanceState = savedInstanceState;
 
-        mToolbarLayout = findViewById(R.id.toolbar_layout);
-        Assert.assertTrue(mToolbarLayout != null);
+        toolbarLayout = findViewById(R.id.toolbarLayout);
+        Assert.assertTrue(toolbarLayout != null);
 
-        mToolbarEditText = findViewById(R.id.toolbar_edit_text);
-        Assert.assertTrue(mToolbarEditText != null);
+        toolbarEditText = findViewById(R.id.toolbarEditText);
+        Assert.assertTrue(toolbarEditText != null);
 
-        mScheduleTimes = findViewById(R.id.schedule_recycler);
-        Assert.assertTrue(mScheduleTimes != null);
+        scheduleRecycler = findViewById(R.id.scheduleRecycler);
+        Assert.assertTrue(scheduleRecycler != null);
 
-        mScheduleTimes.setLayoutManager(new LinearLayoutManager(this));
+        scheduleRecycler.setLayoutManager(new LinearLayoutManager(this));
 
         Intent intent = getIntent();
         if (intent.hasExtra(TASK_KEY_KEY)) {
@@ -510,26 +510,26 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     public void onLoadFinished(Loader<CreateTaskLoader.Data> loader, final CreateTaskLoader.Data data) {
         mData = data;
 
-        mToolbarLayout.setVisibility(View.VISIBLE);
+        toolbarLayout.setVisibility(View.VISIBLE);
 
         if (mSavedInstanceState == null) {
             if (mData.TaskData != null) {
                 Assert.assertTrue(mTaskKey != null);
 
-                mToolbarEditText.setText(mData.TaskData.Name);
+                toolbarEditText.setText(mData.TaskData.Name);
             } else if (!TextUtils.isEmpty(mNameHint)) {
                 Assert.assertTrue(mTaskKey == null);
                 Assert.assertTrue(mTaskKeys == null);
                 Assert.assertTrue(mParentTaskKeyHint == null);
                 Assert.assertTrue(mScheduleHint == null);
 
-                mToolbarEditText.setText(mNameHint);
+                toolbarEditText.setText(mNameHint);
             }
         }
 
-        mToolbarLayout.setHintAnimationEnabled(true);
+        toolbarLayout.setHintAnimationEnabled(true);
 
-        mToolbarEditText.addTextChangedListener(new TextWatcher() {
+        toolbarEditText.addTextChangedListener(new TextWatcher() {
             private boolean mSkip = (mSavedInstanceState != null);
 
             @Override
@@ -638,14 +638,14 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             singleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
 
         mCreateTaskAdapter = new CreateTaskAdapter();
-        mScheduleTimes.setAdapter(mCreateTaskAdapter);
+        scheduleRecycler.setAdapter(mCreateTaskAdapter);
 
         if (mNoteHasFocus) { // keyboard hack
             int notePosition = mScheduleEntries.size() + 1 + mCreateTaskAdapter.elementsBeforeSchedules();
 
-            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mScheduleTimes.getLayoutManager();
+            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) scheduleRecycler.getLayoutManager();
 
-            mScheduleTimes.addOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
+            scheduleRecycler.addOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
 
             linearLayoutManager.scrollToPosition(notePosition);
         }
@@ -681,18 +681,18 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     private boolean updateError() {
         Assert.assertTrue(mData != null);
         Assert.assertTrue(mScheduleEntries != null);
-        Assert.assertTrue(mToolbarEditText != null);
-        Assert.assertTrue(mToolbarLayout != null);
-        Assert.assertTrue(mScheduleTimes != null);
+        Assert.assertTrue(toolbarEditText != null);
+        Assert.assertTrue(toolbarLayout != null);
+        Assert.assertTrue(scheduleRecycler != null);
 
         boolean hasError = false;
 
-        if (TextUtils.isEmpty(mToolbarEditText.getText())) {
-            mToolbarLayout.setError(getString(R.string.nameError));
+        if (TextUtils.isEmpty(toolbarEditText.getText())) {
+            toolbarLayout.setError(getString(R.string.nameError));
 
             hasError = true;
         } else {
-            mToolbarLayout.setError(null);
+            toolbarLayout.setError(null);
         }
 
         for (ScheduleEntry scheduleEntry : mScheduleEntries) {
@@ -747,9 +747,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         int index = mScheduleEntries.indexOf(scheduleEntry);
         Assert.assertTrue(index >= 0);
 
-        View view = mScheduleTimes.getChildAt(index + mCreateTaskAdapter.elementsBeforeSchedules());
+        View view = scheduleRecycler.getChildAt(index + mCreateTaskAdapter.elementsBeforeSchedules());
         if (view != null) {
-            CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
+            CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) scheduleRecycler.getChildViewHolder(view);
             Assert.assertTrue(scheduleHolder != null);
 
             scheduleHolder.mScheduleLayout.setError(scheduleEntry.mError);
@@ -769,7 +769,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
             Assert.assertTrue(mParentTaskKeyHint == null);
             Assert.assertTrue(mScheduleHint == null);
 
-            if (!mToolbarEditText.getText().toString().equals(mData.TaskData.Name))
+            if (!toolbarEditText.getText().toString().equals(mData.TaskData.Name))
                 return true;
 
             if (!Utils.stringEquals(mNote, mData.TaskData.mNote))
@@ -798,7 +798,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 return false;
             }
         } else {
-            if (!TextUtils.isEmpty(mToolbarEditText.getText()))
+            if (!TextUtils.isEmpty(toolbarEditText.getText()))
                 return true;
 
             if (!TextUtils.isEmpty(mNote))
@@ -862,11 +862,11 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     private void updateParentView() {
-        View view = mScheduleTimes.getChildAt(mCreateTaskAdapter.elementsBeforeSchedules() - 1);
+        View view = scheduleRecycler.getChildAt(mCreateTaskAdapter.elementsBeforeSchedules() - 1);
         if (view == null)
             return;
 
-        CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) mScheduleTimes.getChildViewHolder(view);
+        CreateTaskAdapter.ScheduleHolder scheduleHolder = (CreateTaskAdapter.ScheduleHolder) scheduleRecycler.getChildViewHolder(view);
         Assert.assertTrue(scheduleHolder != null);
 
         scheduleHolder.mScheduleText.setText(mParent != null ? mParent.Name : null);
@@ -935,9 +935,9 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
     }
 
     private void removeListenerHelper() { // keyboard hack
-        Assert.assertTrue(mScheduleTimes != null);
+        Assert.assertTrue(scheduleRecycler != null);
 
-        mScheduleTimes.removeOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
+        scheduleRecycler.removeOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener);
     }
 
     public static class ScheduleHint implements Parcelable {

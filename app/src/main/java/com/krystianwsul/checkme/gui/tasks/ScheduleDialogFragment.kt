@@ -58,7 +58,8 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private lateinit var mScheduleDialogDateLayout: TextInputLayout
     private lateinit var mScheduleDialogDate: TextView
 
-    private lateinit var mScheduleDialogDay: Spinner
+    private lateinit var mScheduleDialogDayLayout: LinearLayout
+    private val mScheduleDialogDays = mutableMapOf<DayOfWeek, RadioButton>()
 
     private lateinit var mScheduleDialogMonthLayout: LinearLayout
 
@@ -178,7 +179,18 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleType = scheduleType
                 mScheduleDialogDateLayout = scheduleDialogDateLayout
                 mScheduleDialogDate = scheduleDialogDate
-                mScheduleDialogDay = schedule_dialog_day
+                mScheduleDialogDayLayout = scheduleDialogDayLayout
+
+                mScheduleDialogDays[DayOfWeek.SUNDAY] = scheduleDialogSunday
+                mScheduleDialogDays[DayOfWeek.MONDAY] = scheduleDialogMonday
+                mScheduleDialogDays[DayOfWeek.TUESDAY] = scheduleDialogTuesday
+                mScheduleDialogDays[DayOfWeek.WEDNESDAY] = scheduleDialogWednesday
+                mScheduleDialogDays[DayOfWeek.THURSDAY] = scheduleDialogThursday
+                mScheduleDialogDays[DayOfWeek.FRIDAY] = scheduleDialogFriday
+                mScheduleDialogDays[DayOfWeek.SATURDAY] = scheduleDialogSaturday
+
+                mScheduleDialogDays.forEach { (day, view) -> view.text = day.toString() }
+
                 mScheduleDialogMonthLayout = scheduleDialogMonthLayout
                 mScheduleDialogMonthDayRadio = scheduleDialogMonthDayRadio
                 mScheduleDialogMonthDayNumber = scheduleDialogMonthDayNumber
@@ -280,20 +292,14 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
         }
 
-        mScheduleDialogDay.run {
-            val dayOfWeekAdapter = ArrayAdapter(context, R.layout.spinner_no_padding, DayOfWeek.values()).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-            adapter = dayOfWeekAdapter
-            setSelection(dayOfWeekAdapter.getPosition(mScheduleDialogData.mDayOfWeek))
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    mScheduleDialogData.mDayOfWeek = dayOfWeekAdapter.getItem(position)!!
+        val dayListener = { day: DayOfWeek ->
+            mScheduleDialogData.mDayOfWeek = day
 
-                    updateFields()
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>) = Unit
-            }
+            updateFields()
         }
+
+        mScheduleDialogDays[mScheduleDialogData.mDayOfWeek]!!.isChecked = true
+        mScheduleDialogDays.forEach { (day, view) -> view.setOnClickListener { dayListener(day) } }
 
         val textPrimary = ContextCompat.getColor(activity, R.color.textPrimary)
         val textDisabledSpinner = ContextCompat.getColor(activity, R.color.textDisabledSpinner)
@@ -432,7 +438,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         when (mScheduleDialogData.mScheduleType) {
             ScheduleType.SINGLE -> {
                 mScheduleDialogDateLayout.visibility = View.VISIBLE
-                mScheduleDialogDay.visibility = View.GONE
+                mScheduleDialogDayLayout.visibility = View.GONE
                 mScheduleDialogMonthLayout.visibility = View.GONE
                 mScheduleDialogDailyPadding.visibility = View.GONE
                 mScheduleDialogTimeLayout.visibility = View.VISIBLE
@@ -440,7 +446,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
             ScheduleType.DAILY -> {
                 mScheduleDialogDateLayout.visibility = View.GONE
-                mScheduleDialogDay.visibility = View.GONE
+                mScheduleDialogDayLayout.visibility = View.GONE
                 mScheduleDialogMonthLayout.visibility = View.GONE
                 mScheduleDialogDailyPadding.visibility = View.VISIBLE
                 mScheduleDialogTimeLayout.visibility = View.VISIBLE
@@ -448,7 +454,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
             ScheduleType.WEEKLY -> {
                 mScheduleDialogDateLayout.visibility = View.GONE
-                mScheduleDialogDay.visibility = View.VISIBLE
+                mScheduleDialogDayLayout.visibility = View.VISIBLE
                 mScheduleDialogMonthLayout.visibility = View.GONE
                 mScheduleDialogDailyPadding.visibility = View.VISIBLE
                 mScheduleDialogTimeLayout.visibility = View.VISIBLE
@@ -456,7 +462,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
             ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
                 mScheduleDialogDateLayout.visibility = View.GONE
-                mScheduleDialogDay.visibility = View.GONE
+                mScheduleDialogDayLayout.visibility = View.GONE
                 mScheduleDialogMonthLayout.visibility = View.VISIBLE
                 mScheduleDialogDailyPadding.visibility = View.GONE
                 mScheduleDialogTimeLayout.visibility = View.VISIBLE

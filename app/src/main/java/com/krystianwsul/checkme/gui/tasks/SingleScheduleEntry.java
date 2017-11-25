@@ -37,11 +37,11 @@ class SingleScheduleEntry extends ScheduleEntry {
 
             mDate = pair.first;
             mTimePair = new TimePair(pair.second);
-        } else if (scheduleHint.mTimePair != null) { // for instance group or instance join
-            mDate = scheduleHint.mDate;
-            mTimePair = scheduleHint.mTimePair.copy();
+        } else if (scheduleHint.getMTimePair() != null) { // for instance group or instance join
+            mDate = scheduleHint.getMDate();
+            mTimePair = scheduleHint.getMTimePair().copy();
         } else { // for group root
-            Pair<Date, HourMinute> pair = HourMinute.getNextHour(scheduleHint.mDate);
+            Pair<Date, HourMinute> pair = HourMinute.getNextHour(scheduleHint.getMDate());
 
             mDate = pair.first;
             mTimePair = new TimePair(pair.second);

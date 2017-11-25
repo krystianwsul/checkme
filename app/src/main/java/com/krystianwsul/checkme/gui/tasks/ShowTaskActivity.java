@@ -134,7 +134,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
             case R.id.task_menu_edit:
                 getSupportLoaderManager().destroyLoader(0);
 
-                startActivityForResult(CreateTaskActivity.getEditIntent(ShowTaskActivity.this, mTaskKey), REQUEST_EDIT_TASK);
+                startActivityForResult(CreateTaskActivity.Companion.getEditIntent(ShowTaskActivity.this, mTaskKey), REQUEST_EDIT_TASK);
                 break;
             case R.id.task_menu_share:
                 Assert.assertTrue(mData != null);

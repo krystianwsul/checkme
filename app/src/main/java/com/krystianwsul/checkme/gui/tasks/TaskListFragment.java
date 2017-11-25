@@ -101,13 +101,13 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
                     ChildTaskData childTaskData = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
 
-                    startActivity(CreateTaskActivity.getEditIntent(getActivity(), childTaskData.mTaskKey));
+                    startActivity(CreateTaskActivity.Companion.getEditIntent(getActivity(), childTaskData.mTaskKey));
                     break;
                 case R.id.action_task_join:
                     if (mTaskKey == null)
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys));
+                        startActivity(CreateTaskActivity.Companion.getJoinIntent(getActivity(), taskKeys));
                     else
-                        startActivity(CreateTaskActivity.getJoinIntent(getActivity(), taskKeys, mTaskKey));
+                        startActivity(CreateTaskActivity.Companion.getJoinIntent(getActivity(), taskKeys, mTaskKey));
                     break;
                 case R.id.action_task_delete:
                     Assert.assertTrue(mDataId != null);
@@ -134,7 +134,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
                     ChildTaskData childTaskData1 = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
                     Assert.assertTrue(childTaskData1 != null);
 
-                    startActivity(CreateTaskActivity.getCreateIntent(getActivity(), childTaskData1.mTaskKey));
+                    startActivity(CreateTaskActivity.Companion.getCreateIntent(getActivity(), childTaskData1.mTaskKey));
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -500,9 +500,9 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
         mTaskListFragmentFab.setOnClickListener(v -> {
             if (mTaskKey == null)
-                startActivity(CreateTaskActivity.getCreateIntent(getContext()));
+                startActivity(CreateTaskActivity.Companion.getCreateIntent(getContext()));
             else
-                startActivity(CreateTaskActivity.getCreateIntent(getActivity(), mTaskKey));
+                startActivity(CreateTaskActivity.Companion.getCreateIntent(getActivity(), mTaskKey));
         });
 
         updateFabVisibility();
@@ -1032,7 +1032,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
     public static class TaskData {
         @NonNull
-        public final List<ChildTaskData> mChildTaskDatas;
+        final List<ChildTaskData> mChildTaskDatas;
 
         @Nullable
         final String mNote;
@@ -1082,7 +1082,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
         final String ScheduleText;
 
         @NonNull
-        public final List<ChildTaskData> Children;
+        final List<ChildTaskData> Children;
 
         @Nullable
         final String mNote;

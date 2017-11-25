@@ -70,7 +70,7 @@ class WeeklyScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(@NonNull Date today, @Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
-        Date date = (scheduleHint != null ? scheduleHint.mDate : today);
+        Date date = (scheduleHint != null ? scheduleHint.getMDate() : today);
 
         int monthDayNumber = date.getDay();
         boolean beginningOfMonth = true;

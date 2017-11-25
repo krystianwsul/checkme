@@ -32,9 +32,9 @@ class DailyScheduleEntry extends ScheduleEntry {
     }
 
     DailyScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.DAILY);
+        Assert.assertTrue(scheduleDialogData.getMScheduleType() == ScheduleType.DAILY);
 
-        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
+        mTimePair = scheduleDialogData.getMTimePairPersist().getTimePair();
     }
 
     @NonNull

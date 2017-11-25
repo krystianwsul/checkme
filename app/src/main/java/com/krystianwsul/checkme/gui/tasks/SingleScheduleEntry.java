@@ -56,10 +56,10 @@ class SingleScheduleEntry extends ScheduleEntry {
     }
 
     SingleScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE);
+        Assert.assertTrue(scheduleDialogData.getMScheduleType() == ScheduleType.SINGLE);
 
-        mDate = scheduleDialogData.mDate;
-        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
+        mDate = scheduleDialogData.getMDate();
+        mTimePair = scheduleDialogData.getMTimePairPersist().getTimePair();
     }
 
     @NonNull

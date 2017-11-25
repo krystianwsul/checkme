@@ -47,13 +47,13 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     }
 
     MonthlyWeekScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_WEEK);
-        Assert.assertTrue(!scheduleDialogData.mMonthlyDay);
+        Assert.assertTrue(scheduleDialogData.getMScheduleType() == ScheduleType.MONTHLY_WEEK);
+        Assert.assertTrue(!scheduleDialogData.getMMonthlyDay());
 
-        mMonthWeekNumber = scheduleDialogData.mMonthWeekNumber;
-        mMonthWeekDay = scheduleDialogData.mMonthWeekDay;
-        mBeginningOfMonth = scheduleDialogData.mBeginningOfMonth;
-        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
+        mMonthWeekNumber = scheduleDialogData.getMMonthWeekNumber();
+        mMonthWeekDay = scheduleDialogData.getMMonthWeekDay();
+        mBeginningOfMonth = scheduleDialogData.getMBeginningOfMonth();
+        mTimePair = scheduleDialogData.getMTimePairPersist().getTimePair();
     }
 
     @NonNull

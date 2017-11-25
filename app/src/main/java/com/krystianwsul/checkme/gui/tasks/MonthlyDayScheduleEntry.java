@@ -40,12 +40,12 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
     }
 
     MonthlyDayScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_DAY);
-        Assert.assertTrue(scheduleDialogData.mMonthlyDay);
+        Assert.assertTrue(scheduleDialogData.getMScheduleType() == ScheduleType.MONTHLY_DAY);
+        Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
 
-        mMonthDayNumber = scheduleDialogData.mMonthDayNumber;
-        mBeginningOfMonth = scheduleDialogData.mBeginningOfMonth;
-        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
+        mMonthDayNumber = scheduleDialogData.getMMonthDayNumber();
+        mBeginningOfMonth = scheduleDialogData.getMBeginningOfMonth();
+        mTimePair = scheduleDialogData.getMTimePairPersist().getTimePair();
     }
 
     @NonNull

@@ -17,7 +17,7 @@ abstract class ScheduleEntry implements Parcelable {
     String mError;
 
     static ScheduleEntry fromScheduleDialogData(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        switch (scheduleDialogData.mScheduleType) {
+        switch (scheduleDialogData.getMScheduleType()) {
             case SINGLE:
                 return new SingleScheduleEntry(scheduleDialogData);
             case DAILY:

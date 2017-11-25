@@ -38,10 +38,10 @@ class WeeklyScheduleEntry extends ScheduleEntry {
     }
 
     WeeklyScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY);
+        Assert.assertTrue(scheduleDialogData.getMScheduleType() == ScheduleType.WEEKLY);
 
-        mDayOfWeek = scheduleDialogData.mDayOfWeek;
-        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
+        mDayOfWeek = scheduleDialogData.getMDayOfWeek();
+        mTimePair = scheduleDialogData.getMTimePairPersist().getTimePair();
     }
 
     @NonNull

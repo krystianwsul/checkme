@@ -128,10 +128,10 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
         public void onScheduleDialogResult(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
             Assert.assertTrue(mData != null);
 
-            if (scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_DAY) {
-                Assert.assertTrue(scheduleDialogData.mMonthlyDay);
-            } else if (scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_WEEK) {
-                Assert.assertTrue(!scheduleDialogData.mMonthlyDay);
+            if (scheduleDialogData.getMScheduleType() == ScheduleType.MONTHLY_DAY) {
+                Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
+            } else if (scheduleDialogData.getMScheduleType() == ScheduleType.MONTHLY_WEEK) {
+                Assert.assertTrue(!scheduleDialogData.getMMonthlyDay());
             }
 
             if (mHourMinutePickerPosition == null) {
@@ -1127,7 +1127,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                     Assert.assertTrue(mCreateTaskAdapter != null);
                     Assert.assertTrue(mHourMinutePickerPosition == null);
 
-                    ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), mScheduleHint), false);
+                    ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.Companion.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), mScheduleHint), false);
                     scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
                     scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
                 });
@@ -1217,7 +1217,7 @@ public class CreateTaskActivity extends AbstractActivity implements LoaderManage
                 ScheduleEntry scheduleEntry = mScheduleEntries.get(mHourMinutePickerPosition - mCreateTaskAdapter.elementsBeforeSchedules());
                 Assert.assertTrue(scheduleEntry != null);
 
-                ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), mScheduleHint), true);
+                ScheduleDialogFragment scheduleDialogFragment = ScheduleDialogFragment.Companion.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), mScheduleHint), true);
                 scheduleDialogFragment.initialize(mData.CustomTimeDatas, mScheduleDialogListener);
                 scheduleDialogFragment.show(getSupportFragmentManager(), SCHEDULE_DIALOG_TAG);
             }

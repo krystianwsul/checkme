@@ -584,22 +584,22 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
         companion object {
 
+            @JvmField
             val CREATOR: Parcelable.Creator<ScheduleDialogData> = object : Parcelable.Creator<ScheduleDialogData> {
-                override fun createFromParcel(parcel: Parcel): ScheduleDialogData {
-                    parcel.run {
-                        val date = readParcelable<Date>(Date::class.java.classLoader)
-                        @Suppress("UNCHECKED_CAST")
-                        val daysOfWeek = readSerializable() as HashSet<DayOfWeek>
-                        val monthDay = readInt() == 1
-                        val monthDayNumber = readInt()
-                        val monthWeekNumber = readInt()
-                        val monthWeekDay = readSerializable() as DayOfWeek
-                        val beginningOfMonth = readInt() == 1
-                        val timePairPersist = readParcelable<TimePairPersist>(TimePairPersist::class.java.classLoader)
-                        val scheduleType = readSerializable() as ScheduleType
 
-                        return ScheduleDialogData(date, daysOfWeek, monthDay, monthDayNumber, monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist, scheduleType)
-                    }
+                override fun createFromParcel(parcel: Parcel) = parcel.run {
+                    val date = readParcelable<Date>(Date::class.java.classLoader)
+                    @Suppress("UNCHECKED_CAST")
+                    val daysOfWeek = readSerializable() as HashSet<DayOfWeek>
+                    val monthDay = readInt() == 1
+                    val monthDayNumber = readInt()
+                    val monthWeekNumber = readInt()
+                    val monthWeekDay = readSerializable() as DayOfWeek
+                    val beginningOfMonth = readInt() == 1
+                    val timePairPersist = readParcelable<TimePairPersist>(TimePairPersist::class.java.classLoader)
+                    val scheduleType = readSerializable() as ScheduleType
+
+                    ScheduleDialogData(date, daysOfWeek, monthDay, monthDayNumber, monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist, scheduleType)
                 }
 
                 override fun newArray(size: Int) = arrayOfNulls<ScheduleDialogData>(size)

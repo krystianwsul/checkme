@@ -748,17 +748,16 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
         companion object {
 
-            val CREATOR: Parcelable.Creator<*> = object : Parcelable.Creator<ScheduleHint> {
+            @JvmField
+            val CREATOR: Parcelable.Creator<ScheduleHint> = object : Parcelable.Creator<ScheduleHint> {
 
-                override fun createFromParcel(source: Parcel): ScheduleHint {
-                    source.run {
-                        val date = readParcelable<Date>(Date::class.java.classLoader)!!
+                override fun createFromParcel(source: Parcel) = source.run {
+                    val date = readParcelable<Date>(Date::class.java.classLoader)!!
 
-                        val hasTimePair = readInt() == 1
-                        val timePair = if (hasTimePair) readParcelable<TimePair>(HourMinute::class.java.classLoader)!! else null
+                    val hasTimePair = readInt() == 1
+                    val timePair = if (hasTimePair) readParcelable<TimePair>(HourMinute::class.java.classLoader)!! else null
 
-                        return ScheduleHint(date, timePair)
-                    }
+                    ScheduleHint(date, timePair)
                 }
 
                 override fun newArray(size: Int) = arrayOfNulls<ScheduleHint>(size)

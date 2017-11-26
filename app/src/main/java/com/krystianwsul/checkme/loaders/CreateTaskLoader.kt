@@ -69,6 +69,7 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
 
             companion object {
 
+                @JvmField
                 val CREATOR: Parcelable.Creator<ProjectParentKey> = object : Parcelable.Creator<ProjectParentKey> {
 
                     override fun createFromParcel(parcel: Parcel): ProjectParentKey {
@@ -95,6 +96,7 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
 
             companion object {
 
+                @JvmField
                 val CREATOR: Parcelable.Creator<TaskParentKey> = object : Parcelable.Creator<TaskParentKey> {
 
                     override fun createFromParcel(parcel: Parcel): TaskParentKey {

@@ -250,14 +250,10 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                         .filter { it.customTimeKey.mLocalCustomTimeId != null }
                         .sortedBy { it.hourMinutes[mScheduleDialogData.mDate.dayOfWeek] }
                         .map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.customTimeKey, customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.mDate.dayOfWeek] + ")") }
-                ScheduleType.DAILY, ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> mCustomTimeDatas!!.values
+                ScheduleType.DAILY, ScheduleType.WEEKLY, ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> mCustomTimeDatas!!.values
                         .filter { it.customTimeKey.mLocalCustomTimeId != null }
                         .sortedBy { it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum() }
                         .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name) }
-                ScheduleType.WEEKLY -> mCustomTimeDatas!!.values
-                        .filter { it.customTimeKey.mLocalCustomTimeId != null }
-                        .sortedBy { it.hourMinutes[mScheduleDialogData.mDayOfWeek] }
-                        .map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.customTimeKey, customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.mDayOfWeek] + ")") }
             }
 
             TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {
@@ -292,14 +288,14 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
         }
 
-        val dayListener = { day: DayOfWeek ->
-            mScheduleDialogData.mDayOfWeek = day
+        val dayListener = { day: DayOfWeek, isChecked: Boolean ->
+            mScheduleDialogData.mDaysOfWeek.run { if (isChecked) add(day) else remove(day) }
 
             updateFields()
         }
 
-        mScheduleDialogDays[mScheduleDialogData.mDayOfWeek]!!.isChecked = true
-        mScheduleDialogDays.forEach { (day, view) -> view.setOnClickListener { dayListener(day) } }
+        mScheduleDialogData.mDaysOfWeek.forEach { mScheduleDialogDays[it]!!.isChecked = true }
+        mScheduleDialogDays.forEach { (day, view) -> view.setOnCheckedChangeListener { _, isChecked -> dayListener(day, isChecked) } }
 
         val textPrimary = ContextCompat.getColor(activity, R.color.textPrimary)
         val textDisabledSpinner = ContextCompat.getColor(activity, R.color.textDisabledSpinner)
@@ -520,7 +516,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             ScheduleType.WEEKLY -> mScheduleDialogTime.text = if (mScheduleDialogData.mTimePairPersist.customTimeKey != null) {
                 val customTimeData = mCustomTimeDatas!![mScheduleDialogData.mTimePairPersist.customTimeKey!!]!!
 
-                customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.mDayOfWeek] + ")"
+                customTimeData.name
             } else {
                 mScheduleDialogData.mTimePairPersist.hourMinute.toString()
             }
@@ -562,7 +558,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         mScheduleDialogListener!!.onScheduleDialogCancel()
     }
 
-    class ScheduleDialogData(var mDate: Date, var mDayOfWeek: DayOfWeek, var mMonthlyDay: Boolean, var mMonthDayNumber: Int, var mMonthWeekNumber: Int, var mMonthWeekDay: DayOfWeek, var mBeginningOfMonth: Boolean, val mTimePairPersist: TimePairPersist, var mScheduleType: ScheduleType) : Parcelable {
+    class ScheduleDialogData(var mDate: Date, var mDaysOfWeek: MutableSet<DayOfWeek>, var mMonthlyDay: Boolean, var mMonthDayNumber: Int, var mMonthWeekNumber: Int, var mMonthWeekDay: DayOfWeek, var mBeginningOfMonth: Boolean, val mTimePairPersist: TimePairPersist, var mScheduleType: ScheduleType) : Parcelable {
 
         init {
             Assert.assertTrue(mMonthDayNumber > 0)
@@ -574,7 +570,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         override fun writeToParcel(dest: Parcel, flags: Int) {
             dest.run {
                 writeParcelable(mDate, flags)
-                writeSerializable(mDayOfWeek)
+                writeSerializable(HashSet(mDaysOfWeek))
                 writeInt(if (mMonthlyDay) 1 else 0)
                 writeInt(mMonthDayNumber)
                 writeInt(mMonthWeekNumber)
@@ -593,7 +589,8 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 override fun createFromParcel(parcel: Parcel): ScheduleDialogData {
                     parcel.run {
                         val date = readParcelable<Date>(Date::class.java.classLoader)
-                        val dayOfWeek = readSerializable() as DayOfWeek
+                        @Suppress("UNCHECKED_CAST")
+                        val daysOfWeek = readSerializable() as HashSet<DayOfWeek>
                         val monthDay = readInt() == 1
                         val monthDayNumber = readInt()
                         val monthWeekNumber = readInt()
@@ -602,7 +599,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                         val timePairPersist = readParcelable<TimePairPersist>(TimePairPersist::class.java.classLoader)
                         val scheduleType = readSerializable() as ScheduleType
 
-                        return ScheduleDialogData(date, dayOfWeek, monthDay, monthDayNumber, monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist, scheduleType)
+                        return ScheduleDialogData(date, daysOfWeek, monthDay, monthDayNumber, monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist, scheduleType)
                     }
                 }
 

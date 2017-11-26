@@ -387,14 +387,16 @@ public class LocalFactory {
                 case WEEKLY: {
                     CreateTaskLoader.ScheduleData.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.ScheduleData.WeeklyScheduleData) scheduleData;
 
-                    DayOfWeek dayOfWeek = weeklyScheduleData.getDayOfWeek();
                     Time time = domainFactory.getTime(weeklyScheduleData.getTimePair());
 
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
+                    for (DayOfWeek dayOfWeek : weeklyScheduleData.getDaysOfWeek()) {
+                        ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
 
-                    WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
+                        WeeklyScheduleRecord weeklyScheduleRecord = mPersistenceManager.createWeeklyScheduleRecord(scheduleRecord.getId(), dayOfWeek, time);
 
-                    schedules.add(new WeeklySchedule(domainFactory, new LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord)));
+                        schedules.add(new WeeklySchedule(domainFactory, new LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord)));
+                    }
+
                     break;
                 }
                 case MONTHLY_DAY: {

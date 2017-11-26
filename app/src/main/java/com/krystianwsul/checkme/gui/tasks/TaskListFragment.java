@@ -1032,7 +1032,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
     public static class TaskData {
         @NonNull
-        final List<ChildTaskData> mChildTaskDatas;
+        public final List<ChildTaskData> mChildTaskDatas;
 
         @Nullable
         final String mNote;
@@ -1082,7 +1082,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
         final String ScheduleText;
 
         @NonNull
-        final List<ChildTaskData> Children;
+        public final List<ChildTaskData> Children;
 
         @Nullable
         final String mNote;

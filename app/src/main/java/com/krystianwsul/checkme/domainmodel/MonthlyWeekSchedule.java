@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.krystianwsul.checkme.R;
-import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.Utils;
@@ -158,12 +157,6 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
     @Override
     public CustomTimeKey getCustomTimeKey() {
         return mMonthlyWeekScheduleBridge.getCustomTimeKey();
-    }
-
-    @NonNull
-    @Override
-    public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData(getDayOfMonth(), getDayOfWeek(), getBeginningOfMonth(), getTimePair());
     }
 
     @NonNull

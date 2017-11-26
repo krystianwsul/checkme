@@ -15,58 +15,58 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist
 
 import junit.framework.Assert
 
-internal class WeeklyScheduleEntry : ScheduleEntry {
+class WeeklyScheduleEntry : ScheduleEntry {
 
     companion object {
 
         val CREATOR: Parcelable.Creator<WeeklyScheduleEntry> = object : Parcelable.Creator<WeeklyScheduleEntry> {
 
             override fun createFromParcel(parcel: Parcel) = parcel.run {
-                val dayOfWeek = readSerializable() as DayOfWeek
+                @Suppress("UNCHECKED_CAST")
+                val daysOfWeek = readSerializable() as HashSet<DayOfWeek>
                 val timePair = readParcelable<TimePair>(TimePair::class.java.classLoader)!!
                 val error = readString()
 
-                WeeklyScheduleEntry(dayOfWeek, timePair, error)
+                WeeklyScheduleEntry(daysOfWeek, timePair, error)
             }
 
             override fun newArray(size: Int) = arrayOfNulls<WeeklyScheduleEntry>(size)
         }
     }
 
-    private val mDayOfWeek: DayOfWeek
-
-    private val mTimePair: TimePair
+    private val daysOfWeek: Set<DayOfWeek>
+    private val timePair: TimePair
 
     constructor(weeklyScheduleData: CreateTaskLoader.ScheduleData.WeeklyScheduleData) {
-        mDayOfWeek = weeklyScheduleData.dayOfWeek
-        mTimePair = weeklyScheduleData.timePair.copy()
+        daysOfWeek = weeklyScheduleData.daysOfWeek
+        timePair = weeklyScheduleData.timePair.copy()
     }
 
-    private constructor(dayOfWeek: DayOfWeek, timePair: TimePair, error: String?) : super(error) {
-        mDayOfWeek = dayOfWeek
-        mTimePair = timePair
+    private constructor(daysOfWeek: Set<DayOfWeek>, timePair: TimePair, error: String?) : super(error) {
+        this.daysOfWeek = daysOfWeek
+        this.timePair = timePair
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
         Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY)
 
-        mDayOfWeek = scheduleDialogData.mDayOfWeek
-        mTimePair = scheduleDialogData.mTimePairPersist.timePair
+        daysOfWeek = scheduleDialogData.mDaysOfWeek
+        timePair = scheduleDialogData.mTimePairPersist.timePair
     }
 
     internal override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
-        return mDayOfWeek.toString() + ", " + if (mTimePair.mCustomTimeKey != null) {
-            Assert.assertTrue(mTimePair.mHourMinute == null)
+        return daysOfWeek.toString() + ", " + if (timePair.mCustomTimeKey != null) {
+            Assert.assertTrue(timePair.mHourMinute == null)
 
-            customTimeDatas[mTimePair.mCustomTimeKey]!!.let { it.name + " (" + it.hourMinutes[mDayOfWeek].toString() + ")" }
+            customTimeDatas[timePair.mCustomTimeKey]!!.name
         } else {
-            Assert.assertTrue(mTimePair.mHourMinute != null)
+            Assert.assertTrue(timePair.mHourMinute != null)
 
-            mTimePair.mHourMinute!!.toString()
+            timePair.mHourMinute!!.toString()
         }
     }
 
-    internal override fun getScheduleData() = CreateTaskLoader.ScheduleData.WeeklyScheduleData(mDayOfWeek, mTimePair)
+    internal override fun getScheduleData() = CreateTaskLoader.ScheduleData.WeeklyScheduleData(daysOfWeek, timePair)
 
     internal override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.ScheduleHint?): ScheduleDialogFragment.ScheduleDialogData {
         val date = scheduleHint?.mDate ?: today
@@ -79,7 +79,7 @@ internal class WeeklyScheduleEntry : ScheduleEntry {
         }
         val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
 
-        return ScheduleDialogFragment.ScheduleDialogData(date, mDayOfWeek, true, monthDayNumber, monthWeekNumber, date.dayOfWeek, beginningOfMonth, TimePairPersist(mTimePair), ScheduleType.WEEKLY)
+        return ScheduleDialogFragment.ScheduleDialogData(date, daysOfWeek.toMutableSet(), true, monthDayNumber, monthWeekNumber, date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.WEEKLY)
     }
 
     internal override fun getScheduleType() = ScheduleType.WEEKLY
@@ -88,8 +88,8 @@ internal class WeeklyScheduleEntry : ScheduleEntry {
 
     override fun writeToParcel(parcel: Parcel, i: Int) {
         parcel.run {
-            writeSerializable(mDayOfWeek)
-            writeParcelable(mTimePair, 0)
+            writeSerializable(HashSet(daysOfWeek))
+            writeParcelable(timePair, 0)
             writeString(mError)
         }
     }

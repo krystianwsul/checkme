@@ -22,6 +22,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.Collections;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({TextUtils.class, android.util.Log.class, Context.class})
 public class ScheduleEntryTest {
@@ -51,7 +53,7 @@ public class ScheduleEntryTest {
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.FRIDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.FRIDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 1);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -69,7 +71,7 @@ public class ScheduleEntryTest {
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 1);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -87,7 +89,7 @@ public class ScheduleEntryTest {
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.WEDNESDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.WEDNESDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 7);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -105,7 +107,7 @@ public class ScheduleEntryTest {
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 8);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 2);
@@ -123,7 +125,7 @@ public class ScheduleEntryTest {
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.WEDNESDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.WEDNESDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 28);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 4);
@@ -141,7 +143,7 @@ public class ScheduleEntryTest {
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 2);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -162,7 +164,7 @@ public class ScheduleEntryTest {
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(hintDate));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 2);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -179,12 +181,12 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_30_noon() {
         Date scheduleDate = new Date(2016, 9, 30); // last friday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(scheduleDate));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.FRIDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.FRIDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 1);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -199,12 +201,12 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_1_noon() {
         Date scheduleDate = new Date(2016, 9, 1); // first thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(scheduleDate));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 1);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -219,12 +221,12 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_7_noon() {
         Date scheduleDate = new Date(2016, 9, 7); // first wednesday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(scheduleDate));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.WEDNESDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.WEDNESDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 7);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -239,12 +241,12 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_8_noon() {
         Date scheduleDate = new Date(2016, 9, 8); // second thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(scheduleDate));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 8);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 2);
@@ -259,12 +261,12 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_28_noon() {
         Date scheduleDate = new Date(2016, 9, 28); // fourth wednesday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(scheduleDate));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.WEDNESDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.WEDNESDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 28);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 4);
@@ -279,12 +281,12 @@ public class ScheduleEntryTest {
     public void testSingle_record_2016_9_29_noon() {
         Date scheduleDate = new Date(2016, 9, 29); // last thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
-        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new SingleScheduleEntry(new CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(scheduleDate));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 2);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -302,12 +304,12 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 30); // last friday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.ScheduleData.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.FRIDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.FRIDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 1);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -323,12 +325,12 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 1); // first thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.ScheduleData.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 1);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -344,12 +346,12 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 7); // first wednesday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.ScheduleData.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.WEDNESDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.WEDNESDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 7);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -365,12 +367,12 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 8); // second thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.ScheduleData.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 8);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 2);
@@ -386,12 +388,12 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 28); // fourth wednesday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.ScheduleData.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.WEDNESDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.WEDNESDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 28);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 4);
@@ -407,12 +409,12 @@ public class ScheduleEntryTest {
         Date today = new Date(2016, 9, 29); // last thursday of the month
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.DailyScheduleData(new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new DailyScheduleEntry(new CreateTaskLoader.ScheduleData.DailyScheduleData(new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(DayOfWeek.THURSDAY));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(DayOfWeek.THURSDAY)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 2);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -431,12 +433,12 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.FRIDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(Collections.singleton(dayOfWeek), new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(dayOfWeek));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(dayOfWeek)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 1);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -453,12 +455,12 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.FRIDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(Collections.singleton(dayOfWeek), new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(dayOfWeek));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(dayOfWeek)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 1);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -475,12 +477,12 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.THURSDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(Collections.singleton(dayOfWeek), new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(dayOfWeek));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(dayOfWeek)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 7);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);
@@ -497,12 +499,12 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.SATURDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(Collections.singleton(dayOfWeek), new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(dayOfWeek));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(dayOfWeek)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 8);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 2);
@@ -519,12 +521,12 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.SUNDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(Collections.singleton(dayOfWeek), new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(dayOfWeek));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(dayOfWeek)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 28);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 4);
@@ -541,12 +543,12 @@ public class ScheduleEntryTest {
         DayOfWeek dayOfWeek = DayOfWeek.MONDAY;
         HourMinute hourMinute = new HourMinute(12, 0);
         CreateTaskActivity.ScheduleHint scheduleHint = new CreateTaskActivity.ScheduleHint(today);
-        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.WeeklyScheduleData(dayOfWeek, new TimePair(hourMinute)));
+        ScheduleEntry scheduleEntry = new WeeklyScheduleEntry(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(Collections.singleton(dayOfWeek), new TimePair(hourMinute)));
 
         ScheduleDialogFragment.ScheduleDialogData scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint);
 
         Assert.assertTrue(scheduleDialogData.getMDate().equals(today));
-        Assert.assertTrue(scheduleDialogData.getMDayOfWeek().equals(dayOfWeek));
+        Assert.assertTrue(scheduleDialogData.getMDaysOfWeek().equals(Collections.singleton(dayOfWeek)));
         Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
         Assert.assertTrue(scheduleDialogData.getMMonthDayNumber() == 2);
         Assert.assertTrue(scheduleDialogData.getMMonthWeekNumber() == 1);

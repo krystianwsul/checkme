@@ -285,11 +285,12 @@ public abstract class Task {
         List<CreateTaskLoader.ScheduleData> addScheduleDatas = new ArrayList<>(newScheduleDatas);
 
         List<Schedule> oldSchedules = getCurrentSchedules(now);
-        for (Schedule schedule : oldSchedules) {
-            if (addScheduleDatas.contains(schedule.getScheduleData())) {
-                addScheduleDatas.remove(schedule.getScheduleData());
+        Map<CreateTaskLoader.ScheduleData, List<Schedule>> scheduleDatas = mDomainFactory.getScheduleDatas(oldSchedules, now).second;
+        for (Map.Entry<CreateTaskLoader.ScheduleData, List<Schedule>> entry : scheduleDatas.entrySet()) {
+            if (addScheduleDatas.contains(entry.getKey())) {
+                addScheduleDatas.remove(entry.getKey());
             } else {
-                removeSchedules.add(schedule);
+                removeSchedules.addAll(entry.getValue());
             }
         }
 

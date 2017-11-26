@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
+import java.util.Collections;
 import java.util.Map;
 
 class MonthlyWeekScheduleEntry extends ScheduleEntry {
@@ -88,7 +89,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
 
         date = Utils.getDateInMonth(date.getYear(), date.getMonth(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth);
 
-        return new ScheduleDialogFragment.ScheduleDialogData(date, mMonthWeekDay, false, date.getDay(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.MONTHLY_WEEK);
+        return new ScheduleDialogFragment.ScheduleDialogData(date, Collections.singleton(mMonthWeekDay), false, date.getDay(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.MONTHLY_WEEK);
     }
 
     @NonNull

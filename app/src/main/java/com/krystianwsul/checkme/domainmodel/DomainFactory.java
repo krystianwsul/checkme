@@ -795,6 +795,91 @@ public class DomainFactory {
     }
 
     @NonNull
+    Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskLoader.ScheduleData, List<Schedule>>> getScheduleDatas(List<Schedule> schedules, ExactTimeStamp now) {
+        Map<CustomTimeKey, CustomTime> customTimes = new HashMap<>();
+
+        Map<CreateTaskLoader.ScheduleData, List<Schedule>> scheduleDatas = new HashMap<>();
+
+        Map<TimePair, List<WeeklySchedule>> weeklySchedules = new HashMap<>();
+
+        for (Schedule schedule : schedules) {
+            Assert.assertTrue(schedule != null);
+            Assert.assertTrue(schedule.current(now));
+
+            switch (schedule.getType()) {
+                case SINGLE: {
+                    SingleSchedule singleSchedule = (SingleSchedule) schedule;
+
+                    scheduleDatas.put(new CreateTaskLoader.ScheduleData.SingleScheduleData(singleSchedule.getDate(), singleSchedule.getTimePair()), Collections.singletonList(schedule));
+
+                    CustomTimeKey customTimeKey = singleSchedule.getCustomTimeKey();
+                    if (customTimeKey != null)
+                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+
+                    break;
+                }
+                case DAILY: { // todo merge with weekly
+                    DailySchedule dailySchedule = (DailySchedule) schedule;
+
+                    scheduleDatas.put(new CreateTaskLoader.ScheduleData.DailyScheduleData(dailySchedule.getTimePair()), Collections.singletonList(schedule));
+
+                    CustomTimeKey customTimeKey = dailySchedule.getCustomTimeKey();
+                    if (customTimeKey != null)
+                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+
+                    break;
+                }
+                case WEEKLY: {
+                    WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
+
+                    TimePair timePair = weeklySchedule.getTimePair();
+                    if (!weeklySchedules.containsKey(timePair))
+                        weeklySchedules.put(timePair, new ArrayList<>());
+                    weeklySchedules.get(timePair).add(weeklySchedule);
+
+                    CustomTimeKey customTimeKey = weeklySchedule.getCustomTimeKey();
+                    if (customTimeKey != null)
+                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+
+                    break;
+                }
+                case MONTHLY_DAY: {
+                    MonthlyDaySchedule monthlyDaySchedule = (MonthlyDaySchedule) schedule;
+
+                    scheduleDatas.put(new CreateTaskLoader.ScheduleData.MonthlyDayScheduleData(monthlyDaySchedule.getDayOfMonth(), monthlyDaySchedule.getBeginningOfMonth(), monthlyDaySchedule.getTimePair()), Collections.singletonList(schedule));
+
+                    CustomTimeKey customTimeKey = monthlyDaySchedule.getCustomTimeKey();
+                    if (customTimeKey != null)
+                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+
+                    break;
+                }
+                case MONTHLY_WEEK: {
+                    MonthlyWeekSchedule monthlyWeekSchedule = (MonthlyWeekSchedule) schedule;
+
+                    scheduleDatas.put(new CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData(monthlyWeekSchedule.getDayOfMonth(), monthlyWeekSchedule.getDayOfWeek(), monthlyWeekSchedule.getBeginningOfMonth(), monthlyWeekSchedule.getTimePair()), Collections.singletonList(schedule));
+
+                    CustomTimeKey customTimeKey = monthlyWeekSchedule.getCustomTimeKey();
+                    if (customTimeKey != null)
+                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+
+                    break;
+                }
+                default: {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        }
+
+        for (Map.Entry<TimePair, List<WeeklySchedule>> entry : weeklySchedules.entrySet()) {
+            Set<DayOfWeek> daysOfWeek = Stream.of(entry.getValue()).map(WeeklySchedule::getDayOfWeek).collect(Collectors.toSet());
+            scheduleDatas.put(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(daysOfWeek, entry.getKey()), new ArrayList<>(entry.getValue()));
+        }
+
+        return new Pair<>(customTimes, scheduleDatas);
+    }
+
+    @NonNull
     public synchronized CreateTaskLoader.Data getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @Nullable List<TaskKey> joinTaskKeys) {
         fakeDelay();
 
@@ -827,73 +912,9 @@ public class DomainFactory {
                 taskParentKey = null;
 
                 if (!schedules.isEmpty()) {
-                    scheduleDatas = new ArrayList<>();
-
-                    for (Schedule schedule : schedules) {
-                        Assert.assertTrue(schedule != null);
-                        Assert.assertTrue(schedule.current(now));
-
-                        switch (schedule.getType()) {
-                            case SINGLE: {
-                                SingleSchedule singleSchedule = (SingleSchedule) schedule;
-
-                                scheduleDatas.add(singleSchedule.getScheduleData());
-
-                                CustomTimeKey customTimeKey = singleSchedule.getCustomTimeKey();
-                                if (customTimeKey != null)
-                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
-
-                                break;
-                            }
-                            case DAILY: {
-                                DailySchedule dailySchedule = (DailySchedule) schedule;
-
-                                scheduleDatas.add(dailySchedule.getScheduleData());
-
-                                CustomTimeKey customTimeKey = dailySchedule.getCustomTimeKey();
-                                if (customTimeKey != null)
-                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
-
-                                break;
-                            }
-                            case WEEKLY: {
-                                WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
-
-                                scheduleDatas.add(weeklySchedule.getScheduleData());
-
-                                CustomTimeKey customTimeKey = weeklySchedule.getCustomTimeKey();
-                                if (customTimeKey != null)
-                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
-
-                                break;
-                            }
-                            case MONTHLY_DAY: {
-                                MonthlyDaySchedule monthlyDaySchedule = (MonthlyDaySchedule) schedule;
-
-                                scheduleDatas.add(monthlyDaySchedule.getScheduleData());
-
-                                CustomTimeKey customTimeKey = monthlyDaySchedule.getCustomTimeKey();
-                                if (customTimeKey != null)
-                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
-
-                                break;
-                            }
-                            case MONTHLY_WEEK: {
-                                MonthlyWeekSchedule monthlyWeekSchedule = (MonthlyWeekSchedule) schedule;
-
-                                scheduleDatas.add(monthlyWeekSchedule.getScheduleData());
-
-                                CustomTimeKey customTimeKey = monthlyWeekSchedule.getCustomTimeKey();
-                                if (customTimeKey != null)
-                                    customTimes.put(customTimeKey, getCustomTime(customTimeKey));
-
-                                break;
-                            }
-                            default: {
-                                throw new UnsupportedOperationException();
-                            }
-                        }
-                    }
+                    Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskLoader.ScheduleData, List<Schedule>>> pair = getScheduleDatas(schedules, now);
+                    customTimes.putAll(pair.first);
+                    scheduleDatas = new ArrayList<>(pair.second.keySet());
                 }
             } else {
                 Task parentTask = task.getParentTask(now);
@@ -2318,7 +2339,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    private TaskListFragment.TaskData getMainData(@NonNull ExactTimeStamp now, @NonNull Context context) {
+    TaskListFragment.TaskData getMainData(@NonNull ExactTimeStamp now, @NonNull Context context) {
         List<TaskListFragment.ChildTaskData> childTaskDatas;
 
         childTaskDatas = getTasks()

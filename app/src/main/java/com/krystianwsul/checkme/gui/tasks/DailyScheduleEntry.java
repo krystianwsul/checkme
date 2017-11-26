@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
+import java.util.Collections;
 import java.util.Map;
 
 class DailyScheduleEntry extends ScheduleEntry {
@@ -73,7 +74,7 @@ class DailyScheduleEntry extends ScheduleEntry {
         }
         int monthWeekNumber = (monthDayNumber - 1) / 7 + 1;
 
-        return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, monthDayNumber, monthWeekNumber, date.getDayOfWeek(), beginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.DAILY);
+        return new ScheduleDialogFragment.ScheduleDialogData(date, Collections.singleton(date.getDayOfWeek()), true, monthDayNumber, monthWeekNumber, date.getDayOfWeek(), beginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.DAILY);
     }
 
     @NonNull

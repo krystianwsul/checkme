@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
@@ -137,12 +136,6 @@ public class SingleSchedule extends Schedule {
         Assert.assertTrue(current(now));
 
         return getInstance(task).isVisible(now);
-    }
-
-    @NonNull
-    @Override
-    public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.ScheduleData.SingleScheduleData(getDate(), getTimePair());
     }
 
     @NonNull

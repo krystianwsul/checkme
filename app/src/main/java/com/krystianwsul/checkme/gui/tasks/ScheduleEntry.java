@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.utils.time.Date;
 
 import java.util.Map;
 
-abstract class ScheduleEntry implements Parcelable {
+public abstract class ScheduleEntry implements Parcelable {
     @Nullable
     String mError;
 

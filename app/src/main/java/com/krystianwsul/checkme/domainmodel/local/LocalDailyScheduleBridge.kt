@@ -1,20 +1,25 @@
 package com.krystianwsul.checkme.domainmodel.local
 
-import com.krystianwsul.checkme.domainmodel.DailyScheduleBridge
+import com.krystianwsul.checkme.domainmodel.WeeklyScheduleBridge
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.time.DayOfWeek
 
-internal class LocalDailyScheduleBridge(scheduleRecord: ScheduleRecord, private val mDailyScheduleRecord: DailyScheduleRecord) : LocalScheduleBridge(scheduleRecord), DailyScheduleBridge {
+internal class LocalDailyScheduleBridge(scheduleRecord: ScheduleRecord, private val mDailyScheduleRecord: DailyScheduleRecord) : LocalScheduleBridge(scheduleRecord), WeeklyScheduleBridge {
 
-    override fun getCustomTimeKey() = mDailyScheduleRecord.customTimeId?.let { CustomTimeKey(it) }
+    override val customTimeKey get() = mDailyScheduleRecord.customTimeId?.let { CustomTimeKey(it) }
 
-    override fun getHour() = mDailyScheduleRecord.hour
+    override val hour get() = mDailyScheduleRecord.hour
 
-    override fun getMinute() = mDailyScheduleRecord.minute
+    override val minute get() = mDailyScheduleRecord.minute
 
     override fun delete() {
         mScheduleRecord.delete()
         mDailyScheduleRecord.delete()
     }
+
+    override val daysOfWeek = DayOfWeek.values()
+            .map { it.ordinal }
+            .toSet()
 }

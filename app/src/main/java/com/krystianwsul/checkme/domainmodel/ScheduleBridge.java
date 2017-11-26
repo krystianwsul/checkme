@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
-import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
 public interface ScheduleBridge {
@@ -17,9 +16,6 @@ public interface ScheduleBridge {
 
     @NonNull
     TaskKey getRootTaskKey();
-
-    @NonNull
-    ScheduleType getScheduleType();
 
     void delete();
 

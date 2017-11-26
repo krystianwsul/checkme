@@ -7,7 +7,6 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
@@ -16,7 +15,6 @@ import com.krystianwsul.checkme.domainmodel.SingleSchedule;
 import com.krystianwsul.checkme.domainmodel.Task;
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
-import com.krystianwsul.checkme.firebase.json.DailyScheduleJson;
 import com.krystianwsul.checkme.firebase.json.InstanceJson;
 import com.krystianwsul.checkme.firebase.json.MonthlyDayScheduleJson;
 import com.krystianwsul.checkme.firebase.json.MonthlyWeekScheduleJson;
@@ -24,7 +22,6 @@ import com.krystianwsul.checkme.firebase.json.ScheduleWrapper;
 import com.krystianwsul.checkme.firebase.json.SingleScheduleJson;
 import com.krystianwsul.checkme.firebase.json.TaskJson;
 import com.krystianwsul.checkme.firebase.json.WeeklyScheduleJson;
-import com.krystianwsul.checkme.firebase.records.RemoteDailyScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteMonthlyDayScheduleRecord;
 import com.krystianwsul.checkme.firebase.records.RemoteMonthlyWeekScheduleRecord;
@@ -77,7 +74,7 @@ public class RemoteTask extends Task {
                 .collect(Collectors.toList()));
 
         mRemoteSchedules.addAll(Stream.of(mRemoteTaskRecord.mRemoteDailyScheduleRecords.values())
-                .map(remoteDailyScheduleRecord -> new DailySchedule(domainFactory, new RemoteDailyScheduleBridge(domainFactory, remoteDailyScheduleRecord)))
+                .map(remoteDailyScheduleRecord -> new WeeklySchedule(domainFactory, new RemoteDailyScheduleBridge(domainFactory, remoteDailyScheduleRecord)))
                 .collect(Collectors.toList()));
 
         mRemoteSchedules.addAll(Stream.of(mRemoteTaskRecord.mRemoteWeeklyScheduleRecords.values())
@@ -413,31 +410,7 @@ public class RemoteTask extends Task {
                     break;
                 }
                 case DAILY: {
-                    DailySchedule dailySchedule = (DailySchedule) schedule;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-
-                    TimePair timePair = dailySchedule.getTimePair();
-                    if (timePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(timePair.mHourMinute == null);
-
-                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(timePair.mCustomTimeKey, mRemoteProject);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(timePair.mHourMinute != null);
-
-                        remoteCustomTimeId = null;
-                        hour = timePair.mHourMinute.getHour();
-                        minute = timePair.mHourMinute.getMinute();
-                    }
-
-                    RemoteDailyScheduleRecord remoteDailyScheduleRecord = mRemoteTaskRecord.newRemoteDailyScheduleRecord(new ScheduleWrapper(new DailyScheduleJson(schedule.getStartTime(), schedule.getEndTime(), remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.add(new DailySchedule(mDomainFactory, new RemoteDailyScheduleBridge(mDomainFactory, remoteDailyScheduleRecord)));
-                    break;
+                    throw new UnsupportedOperationException();
                 }
                 case WEEKLY: {
                     WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;

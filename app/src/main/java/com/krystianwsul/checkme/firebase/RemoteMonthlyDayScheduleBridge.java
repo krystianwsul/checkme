@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MonthlyDayScheduleBridge;
 import com.krystianwsul.checkme.firebase.records.RemoteMonthlyDayScheduleRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
-import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
 class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge {
@@ -44,12 +43,6 @@ class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge {
     @Override
     public TaskKey getRootTaskKey() {
         return new TaskKey(mRemoteMonthlyDayScheduleRecord.getProjectId(), mRemoteMonthlyDayScheduleRecord.getTaskId());
-    }
-
-    @NonNull
-    @Override
-    public ScheduleType getScheduleType() {
-        return ScheduleType.MONTHLY_DAY;
     }
 
     @Override

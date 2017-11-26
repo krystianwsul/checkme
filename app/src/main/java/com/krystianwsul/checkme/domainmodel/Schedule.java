@@ -60,11 +60,6 @@ public abstract class Schedule {
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    @NonNull
-    ScheduleType getType() {
-        return getScheduleBridge().getScheduleType();
-    }
-
     @Nullable
     public abstract CustomTimeKey getCustomTimeKey();
 

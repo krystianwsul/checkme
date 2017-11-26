@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.SingleScheduleBridge;
 import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
-import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
 
 class RemoteSingleScheduleBridge implements SingleScheduleBridge {
@@ -80,12 +79,6 @@ class RemoteSingleScheduleBridge implements SingleScheduleBridge {
     @Override
     public TaskKey getRootTaskKey() {
         return new TaskKey(mRemoteSingleScheduleRecord.getProjectId(), mRemoteSingleScheduleRecord.getTaskId());
-    }
-
-    @NonNull
-    @Override
-    public ScheduleType getScheduleType() {
-        return ScheduleType.SINGLE;
     }
 
     @Override

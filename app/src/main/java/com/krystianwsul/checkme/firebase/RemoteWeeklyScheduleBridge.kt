@@ -4,7 +4,6 @@ import android.support.v4.util.Pair
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.WeeklyScheduleBridge
 import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord
-import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 
 internal class RemoteWeeklyScheduleBridge(private val mDomainFactory: DomainFactory, private val mRemoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord) : WeeklyScheduleBridge {
@@ -26,8 +25,6 @@ internal class RemoteWeeklyScheduleBridge(private val mDomainFactory: DomainFact
     }
 
     override fun getRootTaskKey() = mRemoteWeeklyScheduleRecord.run { TaskKey(projectId, taskId) }
-
-    override fun getScheduleType() = ScheduleType.WEEKLY
 
     override fun delete() {
         mRemoteWeeklyScheduleRecord.delete()

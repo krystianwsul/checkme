@@ -9,7 +9,6 @@ import android.text.TextUtils;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.domainmodel.DailySchedule;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
@@ -195,11 +194,11 @@ public class LocalFactory {
     }
 
     @NonNull
-    private DailySchedule loadDailySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
+    private WeeklySchedule loadDailySchedule(@NonNull DomainFactory domainFactory, @NonNull ScheduleRecord scheduleRecord) {
         DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.getDailyScheduleRecord(scheduleRecord.getId());
         Assert.assertTrue(dailyScheduleRecord != null);
 
-        return new DailySchedule(domainFactory, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord));
+        return new WeeklySchedule(domainFactory, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord));
     }
 
     @NonNull

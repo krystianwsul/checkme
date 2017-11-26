@@ -6,10 +6,7 @@ import android.support.v4.util.Pair;
 
 import com.krystianwsul.checkme.domainmodel.ScheduleBridge;
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord;
-import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.TaskKey;
-
-import junit.framework.Assert;
 
 abstract class LocalScheduleBridge implements ScheduleBridge {
     @NonNull
@@ -39,15 +36,6 @@ abstract class LocalScheduleBridge implements ScheduleBridge {
     @Override
     public TaskKey getRootTaskKey() {
         return new TaskKey(mScheduleRecord.getRootTaskId());
-    }
-
-    @NonNull
-    @Override
-    public ScheduleType getScheduleType() {
-        ScheduleType scheduleType = ScheduleType.values()[mScheduleRecord.getType()];
-        Assert.assertTrue(scheduleType != null);
-
-        return scheduleType;
     }
 
     @Nullable

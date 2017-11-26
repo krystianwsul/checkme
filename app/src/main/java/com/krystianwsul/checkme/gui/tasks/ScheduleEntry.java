@@ -20,8 +20,6 @@ public abstract class ScheduleEntry implements Parcelable {
         switch (scheduleDialogData.getMScheduleType()) {
             case SINGLE:
                 return new SingleScheduleEntry(scheduleDialogData);
-            case DAILY:
-                return new DailyScheduleEntry(scheduleDialogData);
             case WEEKLY:
                 return new WeeklyScheduleEntry(scheduleDialogData);
             case MONTHLY_DAY:

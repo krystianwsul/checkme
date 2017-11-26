@@ -800,7 +800,7 @@ public class DomainFactory {
 
         Map<CreateTaskLoader.ScheduleData, List<Schedule>> scheduleDatas = new HashMap<>();
 
-        Map<TimePair, List<WeeklySchedule>> weeklySchedules = new HashMap<>();
+        Map<TimePair, List<Schedule>> weeklySchedules = new HashMap<>();
 
         for (Schedule schedule : schedules) {
             Assert.assertTrue(schedule != null);
@@ -821,7 +821,10 @@ public class DomainFactory {
                 case DAILY: { // todo merge with weekly
                     DailySchedule dailySchedule = (DailySchedule) schedule;
 
-                    scheduleDatas.put(new CreateTaskLoader.ScheduleData.DailyScheduleData(dailySchedule.getTimePair()), Collections.singletonList(schedule));
+                    TimePair timePair = dailySchedule.getTimePair();
+                    if (!weeklySchedules.containsKey(timePair))
+                        weeklySchedules.put(timePair, new ArrayList<>());
+                    weeklySchedules.get(timePair).add(dailySchedule);
 
                     CustomTimeKey customTimeKey = dailySchedule.getCustomTimeKey();
                     if (customTimeKey != null)
@@ -871,9 +874,19 @@ public class DomainFactory {
             }
         }
 
-        for (Map.Entry<TimePair, List<WeeklySchedule>> entry : weeklySchedules.entrySet()) {
-            Set<DayOfWeek> daysOfWeek = Stream.of(entry.getValue()).map(WeeklySchedule::getDayOfWeek).collect(Collectors.toSet());
-            scheduleDatas.put(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(daysOfWeek, entry.getKey()), new ArrayList<>(entry.getValue()));
+        for (Map.Entry<TimePair, List<Schedule>> entry : weeklySchedules.entrySet()) {
+            Set<DayOfWeek> daysOfWeek = Stream.of(entry.getValue())
+                    .map(schedule -> {
+                        if (schedule instanceof DailySchedule) {
+                            return Arrays.asList(DayOfWeek.values());
+                        } else {
+                            Assert.assertTrue(schedule instanceof WeeklySchedule);
+                            return Collections.singletonList(((WeeklySchedule) schedule).getDayOfWeek());
+                        }
+                    })
+                    .flatMap(Stream::of)
+                    .collect(Collectors.toSet());
+            scheduleDatas.put(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(daysOfWeek, entry.getKey()), entry.getValue());
         }
 
         return new Pair<>(customTimes, scheduleDatas);

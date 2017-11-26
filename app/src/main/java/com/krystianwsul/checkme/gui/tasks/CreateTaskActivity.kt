@@ -505,7 +505,6 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                                 .map { scheduleData ->
                                     when (scheduleData) {
                                         is CreateTaskLoader.ScheduleData.SingleScheduleData -> SingleScheduleEntry(scheduleData)
-                                        is CreateTaskLoader.ScheduleData.DailyScheduleData -> DailyScheduleEntry(scheduleData)
                                         is CreateTaskLoader.ScheduleData.WeeklyScheduleData -> WeeklyScheduleEntry(scheduleData)
                                         is CreateTaskLoader.ScheduleData.MonthlyDayScheduleData -> MonthlyDayScheduleEntry(scheduleData)
                                         is CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData -> MonthlyWeekScheduleEntry(scheduleData)

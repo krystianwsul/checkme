@@ -373,16 +373,7 @@ public class LocalFactory {
                     break;
                 }
                 case DAILY: {
-                    CreateTaskLoader.ScheduleData.DailyScheduleData dailyScheduleData = (CreateTaskLoader.ScheduleData.DailyScheduleData) scheduleData;
-
-                    Time time = domainFactory.getTime(dailyScheduleData.getTimePair());
-
-                    ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.DAILY, startExactTimeStamp);
-
-                    DailyScheduleRecord dailyScheduleRecord = mPersistenceManager.createDailyScheduleRecord(scheduleRecord.getId(), time);
-
-                    schedules.add(new DailySchedule(domainFactory, new LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord)));
-                    break;
+                    throw new UnsupportedOperationException();
                 }
                 case WEEKLY: {
                     CreateTaskLoader.ScheduleData.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.ScheduleData.WeeklyScheduleData) scheduleData;

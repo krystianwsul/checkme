@@ -219,18 +219,17 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
             setSelection(when (mScheduleDialogData.mScheduleType) {
                 ScheduleType.SINGLE -> 0
-                ScheduleType.DAILY -> 1
-                ScheduleType.WEEKLY -> 2
-                ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 3
+                ScheduleType.DAILY -> throw UnsupportedOperationException()
+                ScheduleType.WEEKLY -> 1
+                ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 2
             })
 
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, i: Int, l: Long) {
                     mScheduleDialogData.mScheduleType = when (i) {
                         0 -> ScheduleType.SINGLE
-                        1 -> ScheduleType.DAILY
-                        2 -> ScheduleType.WEEKLY
-                        3 -> if (mScheduleDialogData.mMonthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
+                        1 -> ScheduleType.WEEKLY
+                        2 -> if (mScheduleDialogData.mMonthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
                         else -> throw UnsupportedOperationException()
                     }
 

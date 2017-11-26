@@ -292,29 +292,7 @@ public class RemoteTask extends Task {
                     break;
                 }
                 case DAILY: {
-                    CreateTaskLoader.ScheduleData.DailyScheduleData dailyScheduleData = (CreateTaskLoader.ScheduleData.DailyScheduleData) scheduleData;
-
-                    String remoteCustomTimeId;
-                    Integer hour;
-                    Integer minute;
-                    if (dailyScheduleData.getTimePair().mCustomTimeKey != null) {
-                        Assert.assertTrue(dailyScheduleData.getTimePair().mHourMinute == null);
-
-                        remoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(dailyScheduleData.getTimePair().mCustomTimeKey, mRemoteProject);
-                        hour = null;
-                        minute = null;
-                    } else {
-                        Assert.assertTrue(dailyScheduleData.getTimePair().mHourMinute != null);
-
-                        remoteCustomTimeId = null;
-                        hour = dailyScheduleData.getTimePair().mHourMinute.getHour();
-                        minute = dailyScheduleData.getTimePair().mHourMinute.getMinute();
-                    }
-
-                    RemoteDailyScheduleRecord remoteDailyScheduleRecord = mRemoteTaskRecord.newRemoteDailyScheduleRecord(new ScheduleWrapper(new DailyScheduleJson(now.getLong(), null, remoteCustomTimeId, hour, minute)));
-
-                    mRemoteSchedules.add(new DailySchedule(mDomainFactory, new RemoteDailyScheduleBridge(mDomainFactory, remoteDailyScheduleRecord)));
-                    break;
+                    throw new UnsupportedOperationException();
                 }
                 case WEEKLY: {
                     CreateTaskLoader.ScheduleData.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.ScheduleData.WeeklyScheduleData) scheduleData;

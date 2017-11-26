@@ -37,11 +37,6 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
             override val scheduleType = ScheduleType.SINGLE
         }
 
-        data class DailyScheduleData(val timePair: TimePair) : ScheduleData() {
-
-            override val scheduleType = ScheduleType.DAILY
-        }
-
         data class WeeklyScheduleData(val daysOfWeek: Set<DayOfWeek>, val timePair: TimePair) : ScheduleData() {
 
             override val scheduleType = ScheduleType.WEEKLY

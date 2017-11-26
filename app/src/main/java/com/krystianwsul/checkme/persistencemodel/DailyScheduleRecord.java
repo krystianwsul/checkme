@@ -86,10 +86,12 @@ public class DailyScheduleRecord extends Record {
         return mCustomTimeId;
     }
 
+    @NonNull
     public Integer getHour() {
         return mHour;
     }
 
+    @NonNull
     public Integer getMinute() {
         return mMinute;
     }

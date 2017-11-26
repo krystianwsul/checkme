@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-abstract class RepeatingSchedule extends Schedule {
+public abstract class RepeatingSchedule extends Schedule {
     RepeatingSchedule(@NonNull DomainFactory domainFactory) {
         super(domainFactory);
     }
@@ -61,6 +61,7 @@ abstract class RepeatingSchedule extends Schedule {
             instances.add(getInstanceInDate(task, endExactTimeStamp.getDate(), null, endExactTimeStamp.getHourMilli()));
         }
 
+        //noinspection Convert2MethodRef
         return Stream.of(instances)
                 .filter(instance -> instance != null)
                 .collect(Collectors.toList());

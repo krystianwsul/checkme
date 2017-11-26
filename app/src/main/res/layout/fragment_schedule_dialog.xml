@@ -158,7 +158,7 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <RadioGroup
+            <LinearLayout
                 android:id="@+id/scheduleDialogDayLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -166,42 +166,42 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <RadioButton
+                <CheckBox
                     android:id="@+id/scheduleDialogSunday"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
-                <RadioButton
+                <CheckBox
                     android:id="@+id/scheduleDialogMonday"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
-                <RadioButton
+                <CheckBox
                     android:id="@+id/scheduleDialogTuesday"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
-                <RadioButton
+                <CheckBox
                     android:id="@+id/scheduleDialogWednesday"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
-                <RadioButton
+                <CheckBox
                     android:id="@+id/scheduleDialogThursday"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
-                <RadioButton
+                <CheckBox
                     android:id="@+id/scheduleDialogFriday"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
-                <RadioButton
+                <CheckBox
                     android:id="@+id/scheduleDialogSaturday"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
-            </RadioGroup>
+            </LinearLayout>
 
             <RadioGroup
                 android:id="@+id/scheduleDialogMonthLayout"

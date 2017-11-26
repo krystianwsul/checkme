@@ -59,7 +59,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private lateinit var mScheduleDialogDate: TextView
 
     private lateinit var mScheduleDialogDayLayout: LinearLayout
-    private val mScheduleDialogDays = mutableMapOf<DayOfWeek, RadioButton>()
+    private val mScheduleDialogDays = mutableMapOf<DayOfWeek, CheckBox>()
 
     private lateinit var mScheduleDialogMonthLayout: LinearLayout
 

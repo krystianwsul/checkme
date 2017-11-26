@@ -89,17 +89,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof Data))
+            if (!(other instanceof Data))
                 return false;
 
-            Data data = (Data) object;
+            Data data = (Data) other;
 
             if ((TaskData == null) != (data.TaskData == null))
                 return false;
@@ -167,17 +167,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof TaskData))
+            if (!(other instanceof TaskData))
                 return false;
 
-            TaskData taskData = (TaskData) object;
+            TaskData taskData = (TaskData) other;
 
             if (!Name.equals(taskData.Name))
                 return false;
@@ -248,17 +248,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof ParentTreeData))
+            if (!(other instanceof ParentTreeData))
                 return false;
 
-            ParentTreeData parentTreeData = (ParentTreeData) object;
+            ParentTreeData parentTreeData = (ParentTreeData) other;
 
             if (!Name.equals(parentTreeData.Name))
                 return false;
@@ -303,17 +303,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         }
 
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof SingleScheduleData))
+            if (!(other instanceof SingleScheduleData))
                 return false;
 
-            SingleScheduleData singleScheduleData = (SingleScheduleData) object;
+            SingleScheduleData singleScheduleData = (SingleScheduleData) other;
 
             return (Date.equals(singleScheduleData.Date) && TimePair.equals(singleScheduleData.TimePair));
         }
@@ -350,17 +350,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @SuppressWarnings("SimplifiableIfStatement")
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof CustomTimeData))
+            if (!(other instanceof CustomTimeData))
                 return false;
 
-            CustomTimeData customTimeData = (CustomTimeData) object;
+            CustomTimeData customTimeData = (CustomTimeData) other;
 
             if (!mCustomTimeKey.equals(customTimeData.mCustomTimeKey))
                 return false;
@@ -386,17 +386,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         }
 
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof DailyScheduleData))
+            if (!(other instanceof DailyScheduleData))
                 return false;
 
-            DailyScheduleData dailyScheduleData = (DailyScheduleData) object;
+            DailyScheduleData dailyScheduleData = (DailyScheduleData) other;
 
             return TimePair.equals(dailyScheduleData.TimePair);
         }
@@ -425,17 +425,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         }
 
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof WeeklyScheduleData))
+            if (!(other instanceof WeeklyScheduleData))
                 return false;
 
-            WeeklyScheduleData weeklyScheduleData = (WeeklyScheduleData) object;
+            WeeklyScheduleData weeklyScheduleData = (WeeklyScheduleData) other;
 
             return (DayOfWeek.equals(weeklyScheduleData.DayOfWeek) && TimePair.equals(weeklyScheduleData.TimePair));
         }
@@ -469,17 +469,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof MonthlyDayScheduleData))
+            if (!(other instanceof MonthlyDayScheduleData))
                 return false;
 
-            MonthlyDayScheduleData monthlyDayScheduleData = (MonthlyDayScheduleData) object;
+            MonthlyDayScheduleData monthlyDayScheduleData = (MonthlyDayScheduleData) other;
 
             if (mDayOfMonth != monthlyDayScheduleData.mDayOfMonth)
                 return false;
@@ -528,17 +528,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object object) {
-            if (object == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (object == this)
+            if (other == this)
                 return true;
 
-            if (!(object instanceof MonthlyWeekScheduleData))
+            if (!(other instanceof MonthlyWeekScheduleData))
                 return false;
 
-            MonthlyWeekScheduleData monthlyWeekScheduleData = (MonthlyWeekScheduleData) object;
+            MonthlyWeekScheduleData monthlyWeekScheduleData = (MonthlyWeekScheduleData) other;
 
             if (mDayOfMonth != monthlyWeekScheduleData.mDayOfMonth)
                 return false;
@@ -592,17 +592,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (obj == this)
+            if (other == this)
                 return true;
 
-            if (!(obj instanceof ProjectParentKey))
+            if (!(other instanceof ProjectParentKey))
                 return false;
 
-            ProjectParentKey projectParentKey = (ProjectParentKey) obj;
+            ProjectParentKey projectParentKey = (ProjectParentKey) other;
 
             return mProjectId.equals(projectParentKey.mProjectId);
         }
@@ -619,8 +619,8 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         public static final Parcelable.Creator<ProjectParentKey> CREATOR = new Creator<ProjectParentKey>() {
             @Override
-            public ProjectParentKey createFromParcel(Parcel in) {
-                String projectId = in.readString();
+            public ProjectParentKey createFromParcel(Parcel parcel) {
+                String projectId = parcel.readString();
                 Assert.assertTrue(!TextUtils.isEmpty(projectId));
 
                 return new ProjectParentKey(projectId);
@@ -654,17 +654,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object obj) {
-            if (obj == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (obj == this)
+            if (other == this)
                 return true;
 
-            if (!(obj instanceof TaskParentKey))
+            if (!(other instanceof TaskParentKey))
                 return false;
 
-            TaskParentKey taskParentKey = (TaskParentKey) obj;
+            TaskParentKey taskParentKey = (TaskParentKey) other;
 
             if (!mTaskKey.equals(taskParentKey.mTaskKey))
                 return false;
@@ -684,8 +684,8 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         public static final Parcelable.Creator<TaskParentKey> CREATOR = new Creator<TaskParentKey>() {
             @Override
-            public TaskParentKey createFromParcel(Parcel in) {
-                TaskKey taskKey = in.readParcelable(TaskKey.class.getClassLoader());
+            public TaskParentKey createFromParcel(Parcel parcel) {
+                TaskKey taskKey = parcel.readParcelable(TaskKey.class.getClassLoader());
                 Assert.assertTrue(taskKey != null);
 
                 return new TaskParentKey(taskKey);
@@ -719,17 +719,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (obj == this)
+            if (other == this)
                 return true;
 
-            if (!(obj instanceof ProjectSortKey))
+            if (!(other instanceof ProjectSortKey))
                 return false;
 
-            ProjectSortKey projectSortKey = (ProjectSortKey) obj;
+            ProjectSortKey projectSortKey = (ProjectSortKey) other;
 
             return mProjectId.equals(projectSortKey.mProjectId);
         }
@@ -762,17 +762,17 @@ public class CreateTaskLoader extends DomainLoader<CreateTaskLoader.Data> {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object obj) {
-            if (obj == null)
+        public boolean equals(Object other) {
+            if (other == null)
                 return false;
 
-            if (obj == this)
+            if (other == this)
                 return true;
 
-            if (!(obj instanceof TaskSortKey))
+            if (!(other instanceof TaskSortKey))
                 return false;
 
-            TaskSortKey taskSortKey = (TaskSortKey) obj;
+            TaskSortKey taskSortKey = (TaskSortKey) other;
 
             if (!mStartExactTimeStamp.equals(taskSortKey.mStartExactTimeStamp))
                 return false;

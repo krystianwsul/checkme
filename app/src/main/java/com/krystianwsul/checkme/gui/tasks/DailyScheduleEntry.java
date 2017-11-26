@@ -21,8 +21,8 @@ class DailyScheduleEntry extends ScheduleEntry {
     @NonNull
     private final TimePair mTimePair;
 
-    DailyScheduleEntry(@NonNull CreateTaskLoader.DailyScheduleData dailyScheduleData) {
-        mTimePair = dailyScheduleData.TimePair.copy();
+    DailyScheduleEntry(@NonNull CreateTaskLoader.ScheduleData.DailyScheduleData dailyScheduleData) {
+        mTimePair = dailyScheduleData.getTimePair().copy();
     }
 
     private DailyScheduleEntry(@NonNull TimePair timePair, @Nullable String error) {
@@ -46,7 +46,7 @@ class DailyScheduleEntry extends ScheduleEntry {
             CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeKey);
             Assert.assertTrue(customTimeData != null);
 
-            return customTimeData.Name;
+            return customTimeData.getName();
         } else {
             Assert.assertTrue(mTimePair.mHourMinute != null);
 
@@ -57,7 +57,7 @@ class DailyScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.DailyScheduleData(mTimePair);
+        return new CreateTaskLoader.ScheduleData.DailyScheduleData(mTimePair);
     }
 
     @NonNull

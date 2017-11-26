@@ -360,10 +360,10 @@ public class LocalFactory {
 
             switch (scheduleData.getScheduleType()) {
                 case SINGLE: {
-                    CreateTaskLoader.SingleScheduleData singleScheduleData = (CreateTaskLoader.SingleScheduleData) scheduleData;
+                    CreateTaskLoader.ScheduleData.SingleScheduleData singleScheduleData = (CreateTaskLoader.ScheduleData.SingleScheduleData) scheduleData;
 
-                    Date date = singleScheduleData.Date;
-                    Time time = domainFactory.getTime(singleScheduleData.TimePair);
+                    Date date = singleScheduleData.getDate();
+                    Time time = domainFactory.getTime(singleScheduleData.getTimePair());
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp);
 
@@ -373,9 +373,9 @@ public class LocalFactory {
                     break;
                 }
                 case DAILY: {
-                    CreateTaskLoader.DailyScheduleData dailyScheduleData = (CreateTaskLoader.DailyScheduleData) scheduleData;
+                    CreateTaskLoader.ScheduleData.DailyScheduleData dailyScheduleData = (CreateTaskLoader.ScheduleData.DailyScheduleData) scheduleData;
 
-                    Time time = domainFactory.getTime(dailyScheduleData.TimePair);
+                    Time time = domainFactory.getTime(dailyScheduleData.getTimePair());
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.DAILY, startExactTimeStamp);
 
@@ -385,10 +385,10 @@ public class LocalFactory {
                     break;
                 }
                 case WEEKLY: {
-                    CreateTaskLoader.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.WeeklyScheduleData) scheduleData;
+                    CreateTaskLoader.ScheduleData.WeeklyScheduleData weeklyScheduleData = (CreateTaskLoader.ScheduleData.WeeklyScheduleData) scheduleData;
 
-                    DayOfWeek dayOfWeek = weeklyScheduleData.DayOfWeek;
-                    Time time = domainFactory.getTime(weeklyScheduleData.TimePair);
+                    DayOfWeek dayOfWeek = weeklyScheduleData.getDayOfWeek();
+                    Time time = domainFactory.getTime(weeklyScheduleData.getTimePair());
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp);
 
@@ -398,21 +398,21 @@ public class LocalFactory {
                     break;
                 }
                 case MONTHLY_DAY: {
-                    CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.MonthlyDayScheduleData) scheduleData;
+                    CreateTaskLoader.ScheduleData.MonthlyDayScheduleData monthlyDayScheduleData = (CreateTaskLoader.ScheduleData.MonthlyDayScheduleData) scheduleData;
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp);
 
-                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.mDayOfMonth, monthlyDayScheduleData.mBeginningOfMonth, domainFactory.getTime(monthlyDayScheduleData.TimePair));
+                    MonthlyDayScheduleRecord monthlyDayScheduleRecord = mPersistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.getId(), monthlyDayScheduleData.getDayOfMonth(), monthlyDayScheduleData.getBeginningOfMonth(), domainFactory.getTime(monthlyDayScheduleData.getTimePair()));
 
                     schedules.add(new MonthlyDaySchedule(domainFactory, new LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)));
                     break;
                 }
                 case MONTHLY_WEEK: {
-                    CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.MonthlyWeekScheduleData) scheduleData;
+                    CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData monthlyWeekScheduleData = (CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData) scheduleData;
 
                     ScheduleRecord scheduleRecord = mPersistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp);
 
-                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.mDayOfMonth, monthlyWeekScheduleData.mDayOfWeek, monthlyWeekScheduleData.mBeginningOfMonth, domainFactory.getTime(monthlyWeekScheduleData.TimePair));
+                    MonthlyWeekScheduleRecord monthlyWeekScheduleRecord = mPersistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.getId(), monthlyWeekScheduleData.getDayOfMonth(), monthlyWeekScheduleData.getDayOfWeek(), monthlyWeekScheduleData.getBeginningOfMonth(), domainFactory.getTime(monthlyWeekScheduleData.getTimePair()));
 
                     schedules.add(new MonthlyWeekSchedule(domainFactory, new LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)));
                     break;

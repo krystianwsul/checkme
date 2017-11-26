@@ -134,7 +134,7 @@ public class WeeklySchedule extends RepeatingSchedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.WeeklyScheduleData(getDayOfWeek(), getTimePair());
+        return new CreateTaskLoader.ScheduleData.WeeklyScheduleData(getDayOfWeek(), getTimePair());
     }
 
     @NonNull

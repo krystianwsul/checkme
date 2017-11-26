@@ -142,7 +142,7 @@ public class SingleSchedule extends Schedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.SingleScheduleData(getDate(), getTimePair());
+        return new CreateTaskLoader.ScheduleData.SingleScheduleData(getDate(), getTimePair());
     }
 
     @NonNull

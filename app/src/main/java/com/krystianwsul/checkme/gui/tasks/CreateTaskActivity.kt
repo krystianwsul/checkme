@@ -112,7 +112,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
     private val mParentFragmentListener = object : ParentPickerFragment.Listener {
         override fun onTaskSelected(parentTreeData: CreateTaskLoader.ParentTreeData) {
-            if (parentTreeData.mParentKey.type == CreateTaskLoader.ParentType.TASK)
+            if (parentTreeData.parentKey.type == CreateTaskLoader.ParentType.TASK)
                 clearSchedules()
 
             mParent = parentTreeData
@@ -234,10 +234,10 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                     if (hasValueSchedule()) {
                         Assert.assertTrue(!hasValueParentTask())
 
-                        val projectId = if (hasValueParentInGeneral()) (mParent!!.mParentKey as CreateTaskLoader.ProjectParentKey).mProjectId else null
+                        val projectId = if (hasValueParentInGeneral()) (mParent!!.parentKey as CreateTaskLoader.ParentKey.ProjectParentKey).projectId else null
 
                         if (mTaskKey != null) {
-                            Assert.assertTrue(mData!!.TaskData != null)
+                            Assert.assertTrue(mData!!.taskData != null)
                             Assert.assertTrue(mTaskKeys == null)
 
                             val taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, scheduleDatas, mNote, projectId)
@@ -246,14 +246,14 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
                             finish()
                         } else if (mTaskKeys != null) {
-                            Assert.assertTrue(mData!!.TaskData == null)
+                            Assert.assertTrue(mData!!.taskData == null)
                             Assert.assertTrue(mTaskKeys!!.size > 1)
 
                             DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData!!.DataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {
-                            Assert.assertTrue(mData!!.TaskData == null)
+                            Assert.assertTrue(mData!!.taskData == null)
 
                             DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, scheduleDatas, mNote, projectId)
 
@@ -262,10 +262,10 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                     } else if (hasValueParentTask()) {
                         Assert.assertTrue(mParent != null)
 
-                        val parentTaskKey = (mParent!!.mParentKey as CreateTaskLoader.TaskParentKey).mTaskKey
+                        val parentTaskKey = (mParent!!.parentKey as CreateTaskLoader.ParentKey.TaskParentKey).taskKey
 
                         if (mTaskKey != null) {
-                            Assert.assertTrue(mData!!.TaskData != null)
+                            Assert.assertTrue(mData!!.taskData != null)
                             Assert.assertTrue(mTaskKeys == null)
 
                             val taskKey = DomainFactory.getDomainFactory(this).updateChildTask(this, ExactTimeStamp.getNow(), mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, parentTaskKey, mNote)
@@ -274,24 +274,24 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
                             finish()
                         } else if (mTaskKeys != null) {
-                            Assert.assertTrue(mData!!.TaskData == null)
+                            Assert.assertTrue(mData!!.taskData == null)
                             Assert.assertTrue(mTaskKeys!!.size > 1)
 
                             DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData!!.DataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys!!, mNote)
 
                             finish()
                         } else {
-                            Assert.assertTrue(mData!!.TaskData == null)
+                            Assert.assertTrue(mData!!.taskData == null)
 
                             DomainFactory.getDomainFactory(this).createChildTask(this, mData!!.DataId, SaveService.Source.GUI, parentTaskKey, name, mNote)
 
                             finish()
                         }
                     } else {  // no reminder
-                        val projectId = if (hasValueParentInGeneral()) (mParent!!.mParentKey as CreateTaskLoader.ProjectParentKey).mProjectId else null
+                        val projectId = if (hasValueParentInGeneral()) (mParent!!.parentKey as CreateTaskLoader.ParentKey.ProjectParentKey).projectId else null
 
                         if (mTaskKey != null) {
-                            Assert.assertTrue(mData!!.TaskData != null)
+                            Assert.assertTrue(mData!!.taskData != null)
                             Assert.assertTrue(mTaskKeys == null)
 
                             val taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, mNote, projectId)
@@ -300,13 +300,13 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
                             finish()
                         } else if (mTaskKeys != null) {
-                            Assert.assertTrue(mData!!.TaskData == null)
+                            Assert.assertTrue(mData!!.taskData == null)
 
                             DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {
-                            Assert.assertTrue(mData!!.TaskData == null)
+                            Assert.assertTrue(mData!!.taskData == null)
 
                             DomainFactory.getDomainFactory(this).createRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, mNote, projectId)
 
@@ -396,7 +396,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                 }
 
                 if (mParent != null) {
-                    putParcelable(PARENT_KEY_KEY, mParent!!.mParentKey)
+                    putParcelable(PARENT_KEY_KEY, mParent!!.parentKey)
                 }
 
                 if (!mNote.isNullOrEmpty())
@@ -419,10 +419,10 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
         toolbarEditText.run {
             if (mSavedInstanceState == null) {
-                if (mData!!.TaskData != null) {
+                if (mData!!.taskData != null) {
                     Assert.assertTrue(mTaskKey != null)
 
-                    setText(mData!!.TaskData!!.Name)
+                    setText(mData!!.taskData!!.name)
                 } else if (!TextUtils.isEmpty(mNameHint)) {
                     Assert.assertTrue(mTaskKey == null)
                     Assert.assertTrue(mTaskKeys == null)
@@ -471,23 +471,23 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
             }
         } else {
             mData!!.run {
-                if (TaskData?.mTaskParentKey != null) {
+                if (taskData?.taskParentKey != null) {
                     Assert.assertTrue(mParentTaskKeyHint == null)
                     Assert.assertTrue(mTaskKeys == null)
                     Assert.assertTrue(mTaskKey != null)
 
-                    mParent = findTaskData(TaskData.mTaskParentKey)
+                    mParent = findTaskData(taskData.taskParentKey)
                 } else if (mParentTaskKeyHint != null) {
                     Assert.assertTrue(mTaskKey == null)
 
-                    mParent = findTaskData(CreateTaskLoader.TaskParentKey(mParentTaskKeyHint!!))
+                    mParent = findTaskData(CreateTaskLoader.ParentKey.TaskParentKey(mParentTaskKeyHint!!))
                 }
 
-                TaskData?.let { mNote = it.mNote }
+                taskData?.let { mNote = it.note }
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(mData!!.mParentTreeDatas, mParentFragmentListener)
+        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(mData!!.parentTreeDatas, mParentFragmentListener)
 
         invalidateOptionsMenu()
 
@@ -497,19 +497,18 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
             mScheduleEntries = ArrayList()
 
             mData!!.run {
-                if (TaskData != null) {
-                    if (TaskData.ScheduleDatas != null) {
-                        Assert.assertTrue(!TaskData.ScheduleDatas.isEmpty())
+                if (taskData != null) {
+                    if (taskData.scheduleDatas != null) {
+                        Assert.assertTrue(!taskData.scheduleDatas.isEmpty())
 
-                        mScheduleEntries = TaskData.ScheduleDatas
+                        mScheduleEntries = taskData.scheduleDatas
                                 .map { scheduleData ->
                                     when (scheduleData) {
-                                        is CreateTaskLoader.SingleScheduleData -> SingleScheduleEntry(scheduleData)
-                                        is CreateTaskLoader.DailyScheduleData -> DailyScheduleEntry(scheduleData)
-                                        is CreateTaskLoader.WeeklyScheduleData -> WeeklyScheduleEntry(scheduleData)
-                                        is CreateTaskLoader.MonthlyDayScheduleData -> MonthlyDayScheduleEntry(scheduleData)
-                                        is CreateTaskLoader.MonthlyWeekScheduleData -> MonthlyWeekScheduleEntry(scheduleData)
-                                        else -> throw UnsupportedOperationException()
+                                        is CreateTaskLoader.ScheduleData.SingleScheduleData -> SingleScheduleEntry(scheduleData)
+                                        is CreateTaskLoader.ScheduleData.DailyScheduleData -> DailyScheduleEntry(scheduleData)
+                                        is CreateTaskLoader.ScheduleData.WeeklyScheduleData -> WeeklyScheduleEntry(scheduleData)
+                                        is CreateTaskLoader.ScheduleData.MonthlyDayScheduleData -> MonthlyDayScheduleEntry(scheduleData)
+                                        is CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData -> MonthlyWeekScheduleEntry(scheduleData)
                                     }
                                 }
                                 .toMutableList()
@@ -521,7 +520,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(mData!!.CustomTimeDatas, mScheduleDialogListener)
+        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(mData!!.customTimeDatas, mScheduleDialogListener)
 
         mCreateTaskAdapter = CreateTaskAdapter()
         scheduleRecycler.adapter = mCreateTaskAdapter
@@ -578,7 +577,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
             val singleScheduleEntry = scheduleEntry as SingleScheduleEntry
 
-            if (mData!!.TaskData != null && mData!!.TaskData!!.ScheduleDatas != null && mData!!.TaskData!!.ScheduleDatas!!.contains(scheduleEntry.scheduleData))
+            if (mData!!.taskData != null && mData!!.taskData!!.scheduleDatas != null && mData!!.taskData!!.scheduleDatas!!.contains(scheduleEntry.scheduleData))
                 continue
 
             if (singleScheduleEntry.mDate > Date.today())
@@ -595,7 +594,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
             val hourMinute = if (timePair.mCustomTimeKey != null) {
                 Assert.assertTrue(timePair.mHourMinute == null)
 
-                mData!!.CustomTimeDatas[timePair.mCustomTimeKey]!!.HourMinutes[singleScheduleEntry.mDate.dayOfWeek]
+                mData!!.customTimeDatas[timePair.mCustomTimeKey]!!.hourMinutes[singleScheduleEntry.mDate.dayOfWeek]
             } else {
                 Assert.assertTrue(timePair.mHourMinute != null)
 
@@ -631,23 +630,23 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         Assert.assertTrue(!hasValueParentTask() || !hasValueSchedule())
 
         if (mTaskKey != null) {
-            Assert.assertTrue(mData!!.TaskData != null)
+            Assert.assertTrue(mData!!.taskData != null)
             Assert.assertTrue(mTaskKeys == null)
             Assert.assertTrue(mParentTaskKeyHint == null)
             Assert.assertTrue(mScheduleHint == null)
 
-            if (toolbarEditText.text.toString() != mData!!.TaskData!!.Name)
+            if (toolbarEditText.text.toString() != mData!!.taskData!!.name)
                 return true
 
-            if (!Utils.stringEquals(mNote, mData!!.TaskData!!.mNote))
+            if (!Utils.stringEquals(mNote, mData!!.taskData!!.note))
                 return true
 
-            if (mData!!.TaskData!!.mTaskParentKey != null) {
+            if (mData!!.taskData!!.taskParentKey != null) {
                 if (!hasValueParentInGeneral())
                     return true
 
-                return mParent!!.mParentKey != mData!!.TaskData!!.mTaskParentKey
-            } else if (mData!!.TaskData!!.ScheduleDatas != null) {
+                return mParent!!.parentKey != mData!!.taskData!!.taskParentKey
+            } else if (mData!!.taskData!!.scheduleDatas != null) {
                 if (!hasValueSchedule())
                     return true
 
@@ -668,7 +667,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                 if (!hasValueParentTask())
                     return true
 
-                return mParent == null || mParent!!.mParentKey != CreateTaskLoader.TaskParentKey(mParentTaskKeyHint!!)
+                return mParent == null || mParent!!.parentKey != CreateTaskLoader.ParentKey.TaskParentKey(mParentTaskKeyHint!!)
             } else {
                 if (!hasValueSchedule())
                     return true
@@ -681,7 +680,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
     private fun findTaskData(parentKey: CreateTaskLoader.ParentKey): CreateTaskLoader.ParentTreeData {
         Assert.assertTrue(mData != null)
 
-        return findTaskDataHelper(mData!!.mParentTreeDatas, parentKey).single()
+        return findTaskDataHelper(mData!!.parentTreeDatas, parentKey).single()
     }
 
     private fun findTaskDataHelper(taskDatas: Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData>, parentKey: CreateTaskLoader.ParentKey): Iterable<CreateTaskLoader.ParentTreeData> {
@@ -689,12 +688,12 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
             return listOf(taskDatas[parentKey]!!)
 
         return taskDatas.values
-                .map { findTaskDataHelper(it.mParentTreeDatas, parentKey) }
+                .map { findTaskDataHelper(it.parentTreeDatas, parentKey) }
                 .flatten()
     }
 
     private fun clearParent() {
-        if (mParent == null || mParent!!.mParentKey.type == CreateTaskLoader.ParentType.PROJECT)
+        if (mParent == null || mParent!!.parentKey.type == CreateTaskLoader.ParentType.PROJECT)
             return
 
         mParent = null
@@ -707,12 +706,12 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
         val scheduleHolder = scheduleRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
 
-        scheduleHolder.mScheduleText.setText(if (mParent != null) mParent!!.Name else null)
+        scheduleHolder.mScheduleText.setText(if (mParent != null) mParent!!.name else null)
     }
 
     private fun hasValueParentInGeneral() = mParent != null
 
-    private fun hasValueParentTask() = mParent?.mParentKey?.type == CreateTaskLoader.ParentType.TASK
+    private fun hasValueParentTask() = mParent?.parentKey?.type == CreateTaskLoader.ParentType.TASK
 
     private fun hasValueSchedule() = !mScheduleEntries.isEmpty()
 
@@ -722,8 +721,8 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         if (mData == null)
             return false
 
-        val oldScheduleDatas = HashMultiset.create<CreateTaskLoader.ScheduleData>(if (mData!!.TaskData != null) {
-            mData!!.TaskData!!.ScheduleDatas ?: listOf()
+        val oldScheduleDatas = HashMultiset.create<CreateTaskLoader.ScheduleData>(if (mData!!.taskData != null) {
+            mData!!.taskData!!.scheduleDatas ?: listOf()
         } else {
             listOf(firstScheduleEntry().scheduleData)
         })
@@ -824,8 +823,8 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         init {
             Assert.assertTrue(mData != null)
 
-            mProjectName = if (mData!!.TaskData != null && !TextUtils.isEmpty(mData!!.TaskData!!.mProjectName)) {
-                mData!!.TaskData!!.mProjectName
+            mProjectName = if (mData!!.taskData != null && !TextUtils.isEmpty(mData!!.taskData!!.projectName)) {
+                mData!!.taskData!!.projectName
             } else {
                 null
             }
@@ -868,14 +867,14 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                     }
 
                     mScheduleText.run {
-                        setText(mParent?.Name)
+                        setText(mParent?.name)
 
                         isEnabled = true
 
                         setOnClickListener {
                             ParentPickerFragment.newInstance(mParent != null).let {
                                 it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                                it.initialize(mData!!.mParentTreeDatas, mParentFragmentListener)
+                                it.initialize(mData!!.parentTreeDatas, mParentFragmentListener)
                             }
                         }
                     }
@@ -893,7 +892,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                     }
 
                     mScheduleText.run {
-                        setText(scheduleEntry.getText(mData!!.CustomTimeDatas, this@CreateTaskActivity))
+                        setText(scheduleEntry.getText(mData!!.customTimeDatas, this@CreateTaskActivity))
                         isEnabled = true
                         setOnClickListener { onTextClick() }
                     }
@@ -915,7 +914,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             Assert.assertTrue(mHourMinutePickerPosition == null)
 
                             ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), mScheduleHint), false).let {
-                                it.initialize(mData!!.CustomTimeDatas, mScheduleDialogListener)
+                                it.initialize(mData!!.customTimeDatas, mScheduleDialogListener)
                                 it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                             }
                         }
@@ -979,7 +978,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                 val scheduleEntry = mScheduleEntries[mHourMinutePickerPosition!! - mCreateTaskAdapter.elementsBeforeSchedules()]
 
                 ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), mScheduleHint), true).let {
-                    it.initialize(mData!!.CustomTimeDatas, mScheduleDialogListener)
+                    it.initialize(mData!!.customTimeDatas, mScheduleDialogListener)
                     it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                 }
             }

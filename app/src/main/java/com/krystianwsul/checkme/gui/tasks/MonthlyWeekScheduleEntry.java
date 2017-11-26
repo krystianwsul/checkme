@@ -30,11 +30,11 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     @NonNull
     private final TimePair mTimePair;
 
-    MonthlyWeekScheduleEntry(@NonNull CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData) {
-        mMonthWeekNumber = monthlyWeekScheduleData.mDayOfMonth;
-        mMonthWeekDay = monthlyWeekScheduleData.mDayOfWeek;
-        mBeginningOfMonth = monthlyWeekScheduleData.mBeginningOfMonth;
-        mTimePair = monthlyWeekScheduleData.TimePair.copy();
+    MonthlyWeekScheduleEntry(@NonNull CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData monthlyWeekScheduleData) {
+        mMonthWeekNumber = monthlyWeekScheduleData.getDayOfMonth();
+        mMonthWeekDay = monthlyWeekScheduleData.getDayOfWeek();
+        mBeginningOfMonth = monthlyWeekScheduleData.getBeginningOfMonth();
+        mTimePair = monthlyWeekScheduleData.getTimePair().copy();
     }
 
     private MonthlyWeekScheduleEntry(int monthWeekNumber, @NonNull DayOfWeek monthWeekDay, boolean beginningOfMonth, @NonNull TimePair timePair, @Nullable String error) {
@@ -67,7 +67,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
             CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeKey);
             Assert.assertTrue(customTimeData != null);
 
-            return day + ", " + customTimeData.Name;
+            return day + ", " + customTimeData.getName();
         } else {
             Assert.assertTrue(mTimePair.mHourMinute != null);
 
@@ -78,7 +78,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.MonthlyWeekScheduleData(mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, mTimePair);
+        return new CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData(mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, mTimePair);
     }
 
     @NonNull

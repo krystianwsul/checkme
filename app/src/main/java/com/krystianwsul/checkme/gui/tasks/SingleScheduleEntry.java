@@ -26,9 +26,9 @@ class SingleScheduleEntry extends ScheduleEntry {
     @NonNull
     final TimePair mTimePair;
 
-    SingleScheduleEntry(@NonNull CreateTaskLoader.SingleScheduleData singleScheduleData) {
-        mDate = singleScheduleData.Date;
-        mTimePair = singleScheduleData.TimePair.copy();
+    SingleScheduleEntry(@NonNull CreateTaskLoader.ScheduleData.SingleScheduleData singleScheduleData) {
+        mDate = singleScheduleData.getDate();
+        mTimePair = singleScheduleData.getTimePair().copy();
     }
 
     SingleScheduleEntry(@Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
@@ -71,7 +71,7 @@ class SingleScheduleEntry extends ScheduleEntry {
             CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeKey);
             Assert.assertTrue(customTimeData != null);
 
-            return mDate.getDisplayText(context) + ", " + customTimeData.Name + " (" + customTimeData.HourMinutes.get(mDate.getDayOfWeek()) + ")";
+            return mDate.getDisplayText(context) + ", " + customTimeData.getName() + " (" + customTimeData.getHourMinutes().get(mDate.getDayOfWeek()) + ")";
         } else {
             Assert.assertTrue(mTimePair.mHourMinute != null);
 
@@ -82,7 +82,7 @@ class SingleScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.SingleScheduleData(mDate, mTimePair);
+        return new CreateTaskLoader.ScheduleData.SingleScheduleData(mDate, mTimePair);
     }
 
     @NonNull

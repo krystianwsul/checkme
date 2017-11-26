@@ -198,19 +198,19 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             LayoutInflater inflater = LayoutInflater.from(mParentPickerFragment.getActivity());
             View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
-            LinearLayout taskRowContainer = (LinearLayout) showTaskRow.findViewById(R.id.task_row_container);
+            LinearLayout taskRowContainer = showTaskRow.findViewById(R.id.task_row_container);
             Assert.assertTrue(taskRowContainer != null);
 
-            TextView taskRowName = (TextView) showTaskRow.findViewById(R.id.task_row_name);
+            TextView taskRowName = showTaskRow.findViewById(R.id.task_row_name);
             Assert.assertTrue(taskRowName != null);
 
-            TextView taskRowDetails = (TextView) showTaskRow.findViewById(R.id.task_row_details);
+            TextView taskRowDetails = showTaskRow.findViewById(R.id.task_row_details);
             Assert.assertTrue(taskRowDetails != null);
 
-            TextView taskRowChildren = (TextView) showTaskRow.findViewById(R.id.task_row_children);
+            TextView taskRowChildren = showTaskRow.findViewById(R.id.task_row_children);
             Assert.assertTrue(taskRowChildren != null);
 
-            ImageView taskRowImage = (ImageView) showTaskRow.findViewById(R.id.task_row_img);
+            ImageView taskRowImage = showTaskRow.findViewById(R.id.task_row_img);
             Assert.assertTrue(taskRowImage != null);
 
             View taskRowSeparator = showTaskRow.findViewById(R.id.task_row_separator);
@@ -278,7 +278,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
                 boolean expanded = false;
                 if (expandedParentKeys != null) {
                     Assert.assertTrue(!expandedParentKeys.isEmpty());
-                    expanded = expandedParentKeys.contains(mParentTreeData.mParentKey);
+                    expanded = expandedParentKeys.contains(mParentTreeData.getParentKey());
                 }
 
                 mTreeNode = new TreeNode(this, nodeContainer, expanded, false);
@@ -287,7 +287,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                 List<TreeNode> treeNodes = new ArrayList<>();
 
-                for (CreateTaskLoader.ParentTreeData parentTreeData : mParentTreeData.mParentTreeDatas.values()) {
+                for (CreateTaskLoader.ParentTreeData parentTreeData : mParentTreeData.getParentTreeDatas().values()) {
                     TaskWrapper taskWrapper = new TaskWrapper(mDensity, mIndentation + 1, this, parentTreeData);
 
                     treeNodes.add(taskWrapper.initialize(mTreeNode, expandedParentKeys));
@@ -341,7 +341,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                 taskHolder.mTaskRowContainer.setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
 
-                if (mParentTreeData.mParentTreeDatas.isEmpty()) {
+                if (mParentTreeData.getParentTreeDatas().isEmpty()) {
                     Assert.assertTrue(!getTreeNode().getExpandVisible());
 
                     taskHolder.mTaskRowImg.setVisibility(View.INVISIBLE);
@@ -358,29 +358,29 @@ public class ParentPickerFragment extends AbstractDialogFragment {
                     taskHolder.mTaskRowImg.setOnClickListener(treeNode.getExpandListener());
                 }
 
-                taskHolder.mTaskRowName.setText(mParentTreeData.Name);
+                taskHolder.mTaskRowName.setText(mParentTreeData.getName());
 
-                if (TextUtils.isEmpty(mParentTreeData.ScheduleText)) {
+                if (TextUtils.isEmpty(mParentTreeData.getScheduleText())) {
                     taskHolder.mTaskRowDetails.setVisibility(View.GONE);
                 } else {
                     taskHolder.mTaskRowDetails.setVisibility(View.VISIBLE);
-                    taskHolder.mTaskRowDetails.setText(mParentTreeData.ScheduleText);
+                    taskHolder.mTaskRowDetails.setText(mParentTreeData.getScheduleText());
                 }
 
-                if ((mParentTreeData.mParentTreeDatas.isEmpty() || treeNode.expanded()) && TextUtils.isEmpty(mParentTreeData.mNote)) {
+                if ((mParentTreeData.getParentTreeDatas().isEmpty() || treeNode.expanded()) && TextUtils.isEmpty(mParentTreeData.getNote())) {
                     taskHolder.mTaskRowChildren.setVisibility(View.GONE);
                 } else {
                     taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
 
                     String text;
-                    if (!mParentTreeData.mParentTreeDatas.isEmpty() && !treeNode.expanded()) {
-                        text = Stream.of(mParentTreeData.mParentTreeDatas.values())
-                                .map(taskData -> taskData.Name)
+                    if (!mParentTreeData.getParentTreeDatas().isEmpty() && !treeNode.expanded()) {
+                        text = Stream.of(mParentTreeData.getParentTreeDatas().values())
+                                .map(CreateTaskLoader.ParentTreeData::getName)
                                 .collect(Collectors.joining(", "));
                     } else {
-                        Assert.assertTrue(!TextUtils.isEmpty(mParentTreeData.mNote));
+                        Assert.assertTrue(!TextUtils.isEmpty(mParentTreeData.getNote()));
 
-                        text = mParentTreeData.mNote;
+                        text = mParentTreeData.getNote();
                     }
 
                     Assert.assertTrue(!TextUtils.isEmpty(text));
@@ -429,7 +429,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
             @Override
             public int compareTo(@NonNull ModelNode another) {
-                int comparison = mParentTreeData.mSortKey.compareTo(((TaskWrapper) another).mParentTreeData.mSortKey);
+                int comparison = mParentTreeData.getSortKey().compareTo(((TaskWrapper) another).mParentTreeData.getSortKey());
                 if (mIndentation == 0)
                     comparison = -comparison;
 
@@ -443,7 +443,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
                 TreeNode treeNode = getTreeNode();
 
                 if (treeNode.expanded()) {
-                    expandedParentKeys.add(mParentTreeData.mParentKey);
+                    expandedParentKeys.add(mParentTreeData.getParentKey());
 
                     expandedParentKeys.addAll(Stream.of(mTaskWrappers)
                             .flatMap(TaskWrapper::getExpandedParentKeys)

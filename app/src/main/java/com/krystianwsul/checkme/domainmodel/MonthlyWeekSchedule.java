@@ -163,7 +163,7 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.MonthlyWeekScheduleData(getDayOfMonth(), getDayOfWeek(), getBeginningOfMonth(), getTimePair());
+        return new CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData(getDayOfMonth(), getDayOfWeek(), getBeginningOfMonth(), getTimePair());
     }
 
     @NonNull

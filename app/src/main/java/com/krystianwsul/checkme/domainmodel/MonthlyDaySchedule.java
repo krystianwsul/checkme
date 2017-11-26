@@ -155,7 +155,7 @@ public class MonthlyDaySchedule extends RepeatingSchedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.MonthlyDayScheduleData(getDayOfMonth(), getBeginningOfMonth(), getTimePair());
+        return new CreateTaskLoader.ScheduleData.MonthlyDayScheduleData(getDayOfMonth(), getBeginningOfMonth(), getTimePair());
     }
 
     @NonNull

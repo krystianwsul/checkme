@@ -37,9 +37,9 @@ internal class WeeklyScheduleEntry : ScheduleEntry {
 
     private val mTimePair: TimePair
 
-    constructor(weeklyScheduleData: CreateTaskLoader.WeeklyScheduleData) {
-        mDayOfWeek = weeklyScheduleData.DayOfWeek
-        mTimePair = weeklyScheduleData.TimePair.copy()
+    constructor(weeklyScheduleData: CreateTaskLoader.ScheduleData.WeeklyScheduleData) {
+        mDayOfWeek = weeklyScheduleData.dayOfWeek
+        mTimePair = weeklyScheduleData.timePair.copy()
     }
 
     private constructor(dayOfWeek: DayOfWeek, timePair: TimePair, error: String?) : super(error) {
@@ -58,7 +58,7 @@ internal class WeeklyScheduleEntry : ScheduleEntry {
         return mDayOfWeek.toString() + ", " + if (mTimePair.mCustomTimeKey != null) {
             Assert.assertTrue(mTimePair.mHourMinute == null)
 
-            customTimeDatas[mTimePair.mCustomTimeKey]!!.let { it.Name + " (" + it.HourMinutes[mDayOfWeek].toString() + ")" }
+            customTimeDatas[mTimePair.mCustomTimeKey]!!.let { it.name + " (" + it.hourMinutes[mDayOfWeek].toString() + ")" }
         } else {
             Assert.assertTrue(mTimePair.mHourMinute != null)
 
@@ -66,7 +66,7 @@ internal class WeeklyScheduleEntry : ScheduleEntry {
         }
     }
 
-    internal override fun getScheduleData() = CreateTaskLoader.WeeklyScheduleData(mDayOfWeek, mTimePair)
+    internal override fun getScheduleData() = CreateTaskLoader.ScheduleData.WeeklyScheduleData(mDayOfWeek, mTimePair)
 
     internal override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.ScheduleHint?): ScheduleDialogFragment.ScheduleDialogData {
         val date = scheduleHint?.mDate ?: today

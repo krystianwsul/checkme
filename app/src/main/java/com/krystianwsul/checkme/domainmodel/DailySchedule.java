@@ -128,7 +128,7 @@ public class DailySchedule extends RepeatingSchedule {
     @NonNull
     @Override
     public CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.DailyScheduleData(getTimePair());
+        return new CreateTaskLoader.ScheduleData.DailyScheduleData(getTimePair());
     }
 
     @NonNull

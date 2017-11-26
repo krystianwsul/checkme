@@ -818,7 +818,7 @@ public class DomainFactory {
         if (taskKey != null) {
             Task task = getTaskForce(taskKey);
 
-            CreateTaskLoader.TaskParentKey taskParentKey;
+            CreateTaskLoader.ParentKey.TaskParentKey taskParentKey;
             List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
 
             if (task.isRootTask(now)) {
@@ -899,7 +899,7 @@ public class DomainFactory {
                 Task parentTask = task.getParentTask(now);
                 Assert.assertTrue(parentTask != null);
 
-                taskParentKey = new CreateTaskLoader.TaskParentKey(parentTask.getTaskKey());
+                taskParentKey = new CreateTaskLoader.ParentKey.TaskParentKey(parentTask.getTaskKey());
             }
 
             RemoteProject remoteProject = task.getRemoteNullableProject();
@@ -1935,7 +1935,7 @@ public class DomainFactory {
 
         DateTime dateTime = getDateTime(instanceKey.mScheduleKey.ScheduleDate, instanceKey.mScheduleKey.ScheduleTimePair);
 
-        return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> TimePair
+        return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> timePair
     }
 
     @NonNull
@@ -2068,7 +2068,7 @@ public class DomainFactory {
     private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull Task parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
         return Stream.of(parentTask.getChildTasks(now))
                 .filterNot(childTask -> excludedTaskKeys.contains(childTask.getTaskKey()))
-                .collect(Collectors.toMap(childTask -> new CreateTaskLoader.TaskParentKey(childTask.getTaskKey()), childTask -> new CreateTaskLoader.ParentTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), new CreateTaskLoader.TaskParentKey(childTask.getTaskKey()), childTask.getScheduleText(context, now), childTask.getNote(), new CreateTaskLoader.TaskSortKey(childTask.getStartExactTimeStamp()))));
+                .collect(Collectors.toMap(childTask -> new CreateTaskLoader.ParentKey.TaskParentKey(childTask.getTaskKey()), childTask -> new CreateTaskLoader.ParentTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(childTask.getTaskKey()), childTask.getScheduleText(context, now), childTask.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(childTask.getStartExactTimeStamp()))));
     }
 
     @NonNull
@@ -2080,17 +2080,17 @@ public class DomainFactory {
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
-                .collect(Collectors.toMap(task -> new CreateTaskLoader.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.TaskSortKey(task.getStartExactTimeStamp())))));
+                .collect(Collectors.toMap(task -> new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(task.getStartExactTimeStamp())))));
 
         if (mRemoteProjectFactory != null) {
             parentTreeDatas.putAll(Stream.of(mRemoteProjectFactory.getRemoteProjects())
                     .filter(remoteProject -> remoteProject.current(now))
-                    .collect(Collectors.toMap(remoteProject -> new CreateTaskLoader.ProjectParentKey(remoteProject.getId()), remoteProject -> {
+                    .collect(Collectors.toMap(remoteProject -> new CreateTaskLoader.ParentKey.ProjectParentKey(remoteProject.getId()), remoteProject -> {
                         String users = Stream.of(remoteProject.getUsers())
                                 .map(RemoteProjectUser::getName)
                                 .collect(Collectors.joining(", "));
 
-                        return new CreateTaskLoader.ParentTreeData(remoteProject.getName(), getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys), new CreateTaskLoader.ProjectParentKey(remoteProject.getId()), users, null, new CreateTaskLoader.ProjectSortKey(remoteProject.getId()));
+                        return new CreateTaskLoader.ParentTreeData(remoteProject.getName(), getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys), new CreateTaskLoader.ParentKey.ProjectParentKey(remoteProject.getId()), users, null, new CreateTaskLoader.SortKey.ProjectSortKey(remoteProject.getId()));
                     })));
         }
 
@@ -2104,7 +2104,7 @@ public class DomainFactory {
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
-                .collect(Collectors.toMap(task -> new CreateTaskLoader.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.TaskSortKey(task.getStartExactTimeStamp()))));
+                .collect(Collectors.toMap(task -> new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(task.getStartExactTimeStamp()))));
     }
 
     @NonNull

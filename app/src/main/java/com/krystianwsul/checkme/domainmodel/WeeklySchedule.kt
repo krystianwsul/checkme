@@ -13,16 +13,20 @@ class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBr
 
     val timePair get() = mWeeklyScheduleBridge.run { customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!)) }
 
-    val dayOfWeek get() = DayOfWeek.values()[mWeeklyScheduleBridge.dayOfWeek]
+    val daysOfWeek
+        get() = mWeeklyScheduleBridge.daysOfWeek
+                .map { DayOfWeek.values()[it] }
+                .toSet()
 
     override fun getScheduleBridge() = mWeeklyScheduleBridge
 
-    override fun getScheduleText(context: Context) = dayOfWeek.toString() + ": " + time
+    // todo single tostring
+    override fun getScheduleText(context: Context) = daysOfWeek.joinToString(", ") + ": " + time
 
     override fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance? {
         val day = date.dayOfWeek
 
-        if (dayOfWeek != day)
+        if (!daysOfWeek.contains(day))
             return null
 
         val hourMinute = time.getHourMinute(day)

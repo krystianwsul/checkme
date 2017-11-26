@@ -881,7 +881,7 @@ public class DomainFactory {
                             return Arrays.asList(DayOfWeek.values());
                         } else {
                             Assert.assertTrue(schedule instanceof WeeklySchedule);
-                            return Collections.singletonList(((WeeklySchedule) schedule).getDayOfWeek());
+                            return ((WeeklySchedule) schedule).getDaysOfWeek();
                         }
                     })
                     .flatMap(Stream::of)

@@ -442,8 +442,6 @@ public class RemoteTask extends Task {
                 case WEEKLY: {
                     WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
 
-                    DayOfWeek dayOfWeek = weeklySchedule.getDayOfWeek();
-
                     String remoteCustomTimeId;
                     Integer hour;
                     Integer minute;
@@ -463,9 +461,12 @@ public class RemoteTask extends Task {
                         minute = timePair.mHourMinute.getMinute();
                     }
 
-                    RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteTaskRecord.newRemoteWeeklyScheduleRecord(new ScheduleWrapper(new WeeklyScheduleJson(schedule.getStartTime(), schedule.getEndTime(), dayOfWeek.ordinal(), remoteCustomTimeId, hour, minute)));
+                    for (DayOfWeek dayOfWeek : weeklySchedule.getDaysOfWeek()) {
+                        RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteTaskRecord.newRemoteWeeklyScheduleRecord(new ScheduleWrapper(new WeeklyScheduleJson(schedule.getStartTime(), schedule.getEndTime(), dayOfWeek.ordinal(), remoteCustomTimeId, hour, minute)));
 
-                    mRemoteSchedules.add(new WeeklySchedule(mDomainFactory, new RemoteWeeklyScheduleBridge(mDomainFactory, remoteWeeklyScheduleRecord)));
+                        mRemoteSchedules.add(new WeeklySchedule(mDomainFactory, new RemoteWeeklyScheduleBridge(mDomainFactory, remoteWeeklyScheduleRecord)));
+                    }
+
                     break;
                 }
                 case MONTHLY_DAY: {

@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.utils.CustomTimeKey
 
 interface WeeklyScheduleBridge : ScheduleBridge {
 
-    val dayOfWeek: Int
+    val daysOfWeek: Set<Int>
 
     val customTimeKey: CustomTimeKey?
 

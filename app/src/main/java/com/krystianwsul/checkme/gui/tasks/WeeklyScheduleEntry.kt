@@ -52,6 +52,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
         timePair = scheduleDialogData.mTimePairPersist.timePair
     }
 
+    // todo single tostring
     internal override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
         return daysOfWeek.joinToString(", ") + ": " + if (timePair.mCustomTimeKey != null) {
             Assert.assertTrue(timePair.mHourMinute == null)

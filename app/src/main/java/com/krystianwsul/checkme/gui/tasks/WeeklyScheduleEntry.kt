@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.TimePair
@@ -52,9 +53,8 @@ class WeeklyScheduleEntry : ScheduleEntry {
         timePair = scheduleDialogData.mTimePairPersist.timePair
     }
 
-    // todo single tostring
     internal override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
-        return daysOfWeek.joinToString(", ") + ": " + if (timePair.mCustomTimeKey != null) {
+        return daysOfWeek.prettyPrint() + if (timePair.mCustomTimeKey != null) {
             Assert.assertTrue(timePair.mHourMinute == null)
 
             customTimeDatas[timePair.mCustomTimeKey]!!.name

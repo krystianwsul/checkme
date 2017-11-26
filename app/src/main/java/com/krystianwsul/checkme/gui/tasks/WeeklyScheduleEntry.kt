@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.tasks
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
-
 import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
@@ -12,7 +11,6 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
-
 import junit.framework.Assert
 
 class WeeklyScheduleEntry : ScheduleEntry {
@@ -55,7 +53,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
     }
 
     internal override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
-        return daysOfWeek.toString() + ", " + if (timePair.mCustomTimeKey != null) {
+        return daysOfWeek.joinToString(", ") + ": " + if (timePair.mCustomTimeKey != null) {
             Assert.assertTrue(timePair.mHourMinute == null)
 
             customTimeDatas[timePair.mCustomTimeKey]!!.name

@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
-import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.ScheduleType;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -61,11 +60,6 @@ public abstract class Schedule {
         return (startExactTimeStamp.compareTo(exactTimeStamp) <= 0 && (endExactTimeStamp == null || endExactTimeStamp.compareTo(exactTimeStamp) > 0));
     }
 
-    @NonNull
-    ScheduleType getType() {
-        return getScheduleBridge().getScheduleType();
-    }
-
     @Nullable
     public abstract CustomTimeKey getCustomTimeKey();
 
@@ -84,9 +78,6 @@ public abstract class Schedule {
         mDomainFactory.getTaskForce(getScheduleBridge().getRootTaskKey()).deleteSchedule(this);
         getScheduleBridge().delete();
     }
-
-    @NonNull
-    public abstract CreateTaskLoader.ScheduleData getScheduleData();
 
     @Nullable
     Pair<String, String> getRemoteCustomTimeKey() {

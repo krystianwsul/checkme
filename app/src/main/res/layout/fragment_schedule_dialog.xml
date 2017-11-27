@@ -10,7 +10,7 @@
     android:baselineAligned="false">
 
     <Spinner
-        android:id="@+id/schedule_type"
+        android:id="@+id/scheduleType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/Widget.AppCompat.Spinner.Underlined"/>
@@ -136,7 +136,7 @@
             android:orientation="vertical">
 
             <android.support.design.widget.TextInputLayout
-                android:id="@+id/schedule_dialog_date_layout"
+                android:id="@+id/scheduleDialogDateLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="27dp"
@@ -145,7 +145,7 @@
                 android:visibility="gone">
 
                 <EditText
-                    android:id="@+id/schedule_dialog_date"
+                    android:id="@+id/scheduleDialogDate"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -158,16 +158,53 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <Spinner
-                android:id="@+id/schedule_dialog_day"
+            <LinearLayout
+                android:id="@+id/scheduleDialogDayLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="27dp"
-                style="@style/Widget.AppCompat.Spinner.Underlined"
-                android:visibility="gone"/>
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <CheckBox
+                    android:id="@+id/scheduleDialogSunday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <CheckBox
+                    android:id="@+id/scheduleDialogMonday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <CheckBox
+                    android:id="@+id/scheduleDialogTuesday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <CheckBox
+                    android:id="@+id/scheduleDialogWednesday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <CheckBox
+                    android:id="@+id/scheduleDialogThursday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <CheckBox
+                    android:id="@+id/scheduleDialogFriday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <CheckBox
+                    android:id="@+id/scheduleDialogSaturday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
 
             <RadioGroup
-                android:id="@+id/schedule_dialog_month_layout"
+                android:id="@+id/scheduleDialogMonthLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -179,12 +216,12 @@
                     android:orientation="horizontal">
 
                     <RadioButton
-                        android:id="@+id/schedule_dialog_month_day_radio"
+                        android:id="@+id/scheduleDialogMonthDayRadio"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
                     <EditText
-                        android:id="@+id/schedule_dialog_month_day_number"
+                        android:id="@+id/scheduleDialogMonthDayNumber"
                         style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -196,7 +233,7 @@
                         tools:ignore="LabelFor,TextFields"/>
 
                     <TextView
-                        android:id="@+id/schedule_dialog_month_day_label"
+                        android:id="@+id/scheduleDialogMonthDayLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/textPrimary"
@@ -211,18 +248,18 @@
                     android:orientation="horizontal">
 
                     <RadioButton
-                        android:id="@+id/schedule_dialog_month_week_radio"
+                        android:id="@+id/scheduleDialogMonthWeekRadio"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
 
                     <Spinner
-                        android:id="@+id/schedule_dialog_month_week_number"
+                        android:id="@+id/scheduleDialogMonthWeekNumber"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         style="@style/Widget.AppCompat.Spinner.Underlined"/>
 
                     <Spinner
-                        android:id="@+id/schedule_dialog_month_week_day"
+                        android:id="@+id/scheduleDialogMonthWeekDay"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         style="@style/Widget.AppCompat.Spinner.Underlined"/>
@@ -242,7 +279,7 @@
                         android:text="@string/monthDayStart"/>
 
                     <Spinner
-                        android:id="@+id/schedule_dialog_month_end"
+                        android:id="@+id/scheduleDialogMonthEnd"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         style="@style/Widget.AppCompat.Spinner.Underlined"/>
@@ -259,12 +296,12 @@
             </RadioGroup>
 
             <View
-                android:id="@+id/schedule_dialog_daily_padding"
+                android:id="@+id/scheduleDialogDailyPadding"
                 android:layout_width="match_parent"
                 android:layout_height="27dp"/>
 
             <android.support.design.widget.TextInputLayout
-                android:id="@+id/schedule_dialog_time_layout"
+                android:id="@+id/scheduleDialogTimeLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
@@ -272,7 +309,7 @@
                 app:errorEnabled="true">
 
                 <EditText
-                    android:id="@+id/schedule_dialog_time"
+                    android:id="@+id/scheduleDialogTime"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

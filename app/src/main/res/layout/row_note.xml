@@ -10,7 +10,7 @@
     android:orientation="vertical">
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/note_layout"
+        android:id="@+id/noteLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
@@ -20,7 +20,7 @@
         app:hintAnimationEnabled="false">
 
         <EditText
-            android:id="@+id/note_text"
+            android:id="@+id/noteText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="@dimen/textPrimary"

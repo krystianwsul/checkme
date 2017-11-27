@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
+import java.util.Collections;
 import java.util.Map;
 
 class MonthlyWeekScheduleEntry extends ScheduleEntry {
@@ -30,11 +31,11 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     @NonNull
     private final TimePair mTimePair;
 
-    MonthlyWeekScheduleEntry(@NonNull CreateTaskLoader.MonthlyWeekScheduleData monthlyWeekScheduleData) {
-        mMonthWeekNumber = monthlyWeekScheduleData.mDayOfMonth;
-        mMonthWeekDay = monthlyWeekScheduleData.mDayOfWeek;
-        mBeginningOfMonth = monthlyWeekScheduleData.mBeginningOfMonth;
-        mTimePair = monthlyWeekScheduleData.TimePair.copy();
+    MonthlyWeekScheduleEntry(@NonNull CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData monthlyWeekScheduleData) {
+        mMonthWeekNumber = monthlyWeekScheduleData.getDayOfMonth();
+        mMonthWeekDay = monthlyWeekScheduleData.getDayOfWeek();
+        mBeginningOfMonth = monthlyWeekScheduleData.getBeginningOfMonth();
+        mTimePair = monthlyWeekScheduleData.getTimePair().copy();
     }
 
     private MonthlyWeekScheduleEntry(int monthWeekNumber, @NonNull DayOfWeek monthWeekDay, boolean beginningOfMonth, @NonNull TimePair timePair, @Nullable String error) {
@@ -47,13 +48,13 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     }
 
     MonthlyWeekScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_WEEK);
-        Assert.assertTrue(!scheduleDialogData.mMonthlyDay);
+        Assert.assertTrue(scheduleDialogData.getMScheduleType() == ScheduleType.MONTHLY_WEEK);
+        Assert.assertTrue(!scheduleDialogData.getMMonthlyDay());
 
-        mMonthWeekNumber = scheduleDialogData.mMonthWeekNumber;
-        mMonthWeekDay = scheduleDialogData.mMonthWeekDay;
-        mBeginningOfMonth = scheduleDialogData.mBeginningOfMonth;
-        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
+        mMonthWeekNumber = scheduleDialogData.getMMonthWeekNumber();
+        mMonthWeekDay = scheduleDialogData.getMMonthWeekDay();
+        mBeginningOfMonth = scheduleDialogData.getMBeginningOfMonth();
+        mTimePair = scheduleDialogData.getMTimePairPersist().getTimePair();
     }
 
     @NonNull
@@ -67,7 +68,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
             CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeKey);
             Assert.assertTrue(customTimeData != null);
 
-            return day + ", " + customTimeData.Name;
+            return day + ", " + customTimeData.getName();
         } else {
             Assert.assertTrue(mTimePair.mHourMinute != null);
 
@@ -78,17 +79,17 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.MonthlyWeekScheduleData(mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, mTimePair);
+        return new CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData(mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, mTimePair);
     }
 
     @NonNull
     @Override
     ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(@NonNull Date today, @Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
-        Date date = (scheduleHint != null ? scheduleHint.mDate : today);
+        Date date = (scheduleHint != null ? scheduleHint.getMDate() : today);
 
         date = Utils.getDateInMonth(date.getYear(), date.getMonth(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth);
 
-        return new ScheduleDialogFragment.ScheduleDialogData(date, mMonthWeekDay, false, date.getDay(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.MONTHLY_WEEK);
+        return new ScheduleDialogFragment.ScheduleDialogData(date, Collections.singleton(mMonthWeekDay), false, date.getDay(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.MONTHLY_WEEK);
     }
 
     @NonNull

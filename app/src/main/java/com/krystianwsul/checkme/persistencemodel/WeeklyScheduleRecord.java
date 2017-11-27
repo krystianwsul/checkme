@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
@@ -92,14 +93,17 @@ public class WeeklyScheduleRecord extends Record {
         return mDayOfWeek;
     }
 
+    @Nullable
     public Integer getCustomTimeId() {
         return mCustomTimeId;
     }
 
+    @Nullable
     public Integer getHour() {
         return mHour;
     }
 
+    @Nullable
     public Integer getMinute() {
         return mMinute;
     }

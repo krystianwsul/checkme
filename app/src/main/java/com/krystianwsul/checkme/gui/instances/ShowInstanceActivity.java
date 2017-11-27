@@ -145,7 +145,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                startActivityForResult(CreateTaskActivity.getEditIntent(this, mInstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
+                startActivityForResult(CreateTaskActivity.Companion.getEditIntent(this, mInstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
                 break;
             case R.id.instance_menu_delete_task:
                 Assert.assertTrue(mInstanceData != null);

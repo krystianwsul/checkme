@@ -12,16 +12,14 @@ import com.krystianwsul.checkme.utils.time.Date;
 
 import java.util.Map;
 
-abstract class ScheduleEntry implements Parcelable {
+public abstract class ScheduleEntry implements Parcelable {
     @Nullable
     String mError;
 
     static ScheduleEntry fromScheduleDialogData(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        switch (scheduleDialogData.mScheduleType) {
+        switch (scheduleDialogData.getMScheduleType()) {
             case SINGLE:
                 return new SingleScheduleEntry(scheduleDialogData);
-            case DAILY:
-                return new DailyScheduleEntry(scheduleDialogData);
             case WEEKLY:
                 return new WeeklyScheduleEntry(scheduleDialogData);
             case MONTHLY_DAY:

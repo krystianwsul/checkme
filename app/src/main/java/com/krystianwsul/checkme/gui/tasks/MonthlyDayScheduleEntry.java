@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist;
 
 import junit.framework.Assert;
 
+import java.util.Collections;
 import java.util.Map;
 
 class MonthlyDayScheduleEntry extends ScheduleEntry {
@@ -25,10 +26,10 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
     @NonNull
     private final TimePair mTimePair;
 
-    MonthlyDayScheduleEntry(@NonNull CreateTaskLoader.MonthlyDayScheduleData monthlyDayScheduleData) {
-        mMonthDayNumber = monthlyDayScheduleData.mDayOfMonth;
-        mBeginningOfMonth = monthlyDayScheduleData.mBeginningOfMonth;
-        mTimePair = monthlyDayScheduleData.TimePair.copy();
+    MonthlyDayScheduleEntry(@NonNull CreateTaskLoader.ScheduleData.MonthlyDayScheduleData monthlyDayScheduleData) {
+        mMonthDayNumber = monthlyDayScheduleData.getDayOfMonth();
+        mBeginningOfMonth = monthlyDayScheduleData.getBeginningOfMonth();
+        mTimePair = monthlyDayScheduleData.getTimePair().copy();
     }
 
     private MonthlyDayScheduleEntry(int monthDayNumber, boolean beginningOfMonth, @NonNull TimePair timePair, @Nullable String error) {
@@ -40,12 +41,12 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
     }
 
     MonthlyDayScheduleEntry(@NonNull ScheduleDialogFragment.ScheduleDialogData scheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_DAY);
-        Assert.assertTrue(scheduleDialogData.mMonthlyDay);
+        Assert.assertTrue(scheduleDialogData.getMScheduleType() == ScheduleType.MONTHLY_DAY);
+        Assert.assertTrue(scheduleDialogData.getMMonthlyDay());
 
-        mMonthDayNumber = scheduleDialogData.mMonthDayNumber;
-        mBeginningOfMonth = scheduleDialogData.mBeginningOfMonth;
-        mTimePair = scheduleDialogData.mTimePairPersist.getTimePair();
+        mMonthDayNumber = scheduleDialogData.getMMonthDayNumber();
+        mBeginningOfMonth = scheduleDialogData.getMBeginningOfMonth();
+        mTimePair = scheduleDialogData.getMTimePairPersist().getTimePair();
     }
 
     @NonNull
@@ -59,7 +60,7 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
             CreateTaskLoader.CustomTimeData customTimeData = customTimeDatas.get(mTimePair.mCustomTimeKey);
             Assert.assertTrue(customTimeData != null);
 
-            return day + ", " + customTimeData.Name;
+            return day + ", " + customTimeData.getName();
         } else {
             Assert.assertTrue(mTimePair.mHourMinute != null);
 
@@ -70,17 +71,17 @@ class MonthlyDayScheduleEntry extends ScheduleEntry {
     @NonNull
     @Override
     CreateTaskLoader.ScheduleData getScheduleData() {
-        return new CreateTaskLoader.MonthlyDayScheduleData(mMonthDayNumber, mBeginningOfMonth, mTimePair);
+        return new CreateTaskLoader.ScheduleData.MonthlyDayScheduleData(mMonthDayNumber, mBeginningOfMonth, mTimePair);
     }
 
     @NonNull
     @Override
     ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(@NonNull Date today, @Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
-        Date date = (scheduleHint != null ? scheduleHint.mDate : today);
+        Date date = (scheduleHint != null ? scheduleHint.getMDate() : today);
 
         date = Utils.getDateInMonth(date.getYear(), date.getMonth(), mMonthDayNumber, mBeginningOfMonth);
 
-        return new ScheduleDialogFragment.ScheduleDialogData(date, date.getDayOfWeek(), true, mMonthDayNumber, (mMonthDayNumber - 1) / 7 + 1, date.getDayOfWeek(), mBeginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.MONTHLY_DAY);
+        return new ScheduleDialogFragment.ScheduleDialogData(date, Collections.singleton(date.getDayOfWeek()), true, mMonthDayNumber, (mMonthDayNumber - 1) / 7 + 1, date.getDayOfWeek(), mBeginningOfMonth, new TimePairPersist(mTimePair), ScheduleType.MONTHLY_DAY);
     }
 
     @NonNull

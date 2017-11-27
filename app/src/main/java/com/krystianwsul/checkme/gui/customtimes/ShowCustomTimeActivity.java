@@ -161,10 +161,10 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
 
         mSavedInstanceState = savedInstanceState;
 
-        mToolbarLayout = findViewById(R.id.toolbar_layout);
+        mToolbarLayout = findViewById(R.id.toolbarLayout);
         Assert.assertTrue(mToolbarLayout != null);
 
-        mToolbarEditText = findViewById(R.id.toolbar_edit_text);
+        mToolbarEditText = findViewById(R.id.toolbarEditText);
         Assert.assertTrue(mToolbarEditText != null);
 
         mShowCustomTimeContainer = findViewById(R.id.show_custom_time_container);

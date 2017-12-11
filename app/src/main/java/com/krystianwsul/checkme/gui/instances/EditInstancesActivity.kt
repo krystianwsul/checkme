@@ -47,7 +47,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
             Assert.assertTrue(mData != null)
 
-            mTimePairPersist!!.setCustomTimeKey(customTimeKey)
+            mTimePairPersist!!.customTimeKey = customTimeKey
 
             updateTimeText()
 
@@ -380,7 +380,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         Assert.assertTrue(mTimePairPersist != null)
 
         if (resultCode > 0)
-            mTimePairPersist!!.setCustomTimeKey(CustomTimeKey(resultCode))
+            mTimePairPersist!!.customTimeKey = CustomTimeKey(resultCode)
     }
 
     companion object {

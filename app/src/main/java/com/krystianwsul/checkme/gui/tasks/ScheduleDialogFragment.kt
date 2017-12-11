@@ -91,7 +91,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
             Assert.assertTrue(mCustomTimeDatas != null)
 
-            mScheduleDialogData.mTimePairPersist.setCustomTimeKey(customTimeKey)
+            mScheduleDialogData.mTimePairPersist.customTimeKey = customTimeKey
 
             updateFields()
         }
@@ -487,7 +487,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
         if (resultCode > 0) {
             mCustomTimeDatas = null
-            mScheduleDialogData.mTimePairPersist.setCustomTimeKey(CustomTimeKey(resultCode))
+            mScheduleDialogData.mTimePairPersist.customTimeKey = CustomTimeKey(resultCode)
         }
     }
 

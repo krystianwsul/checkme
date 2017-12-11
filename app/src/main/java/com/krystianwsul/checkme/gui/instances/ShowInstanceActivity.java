@@ -116,7 +116,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
                 Assert.assertTrue(!mInstanceData.Done);
                 Assert.assertTrue(mInstanceData.IsRootInstance);
 
-                startActivity(EditInstanceActivity.Companion.getIntent(this, mInstanceKey));
+                startActivity(EditInstanceActivity.Companion.getIntent(mInstanceKey));
                 break;
             case R.id.instance_menu_share:
                 Assert.assertTrue(mInstanceData != null);
@@ -124,9 +124,9 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
                 String shareData = mGroupListFragment.getShareData();
                 if (TextUtils.isEmpty(shareData))
-                    Utils.share(mInstanceData.Name, this);
+                    Utils.share(mInstanceData.Name);
                 else
-                    Utils.share(mInstanceData.Name + "\n" + shareData, this);
+                    Utils.share(mInstanceData.Name + "\n" + shareData);
 
                 break;
             case R.id.instance_menu_show_task:
@@ -136,7 +136,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                startActivityForResult(ShowTaskActivity.newIntent(this, mInstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
+                startActivityForResult(ShowTaskActivity.newIntent(mInstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
                 break;
             case R.id.instance_menu_edit_task:
                 Assert.assertTrue(mInstanceData != null);
@@ -145,7 +145,7 @@ public class ShowInstanceActivity extends AbstractActivity implements LoaderMana
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                startActivityForResult(CreateTaskActivity.Companion.getEditIntent(this, mInstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
+                startActivityForResult(CreateTaskActivity.Companion.getEditIntent(mInstanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK);
                 break;
             case R.id.instance_menu_delete_task:
                 Assert.assertTrue(mInstanceData != null);

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.tasks;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -15,6 +14,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.krystianwsul.checkme.MyApplication;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.gui.AbstractActivity;
@@ -40,8 +40,8 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
     private TaskListFragment mTaskListFragment;
 
-    public static Intent newIntent(@NonNull Context context, @NonNull TaskKey taskKey) {
-        Intent intent = new Intent(context, ShowTaskActivity.class);
+    public static Intent newIntent(@NonNull TaskKey taskKey) {
+        Intent intent = new Intent(MyApplication.instance, ShowTaskActivity.class);
         intent.putExtra(TASK_KEY_KEY, (Parcelable) taskKey);
         return intent;
     }
@@ -134,7 +134,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
             case R.id.task_menu_edit:
                 getSupportLoaderManager().destroyLoader(0);
 
-                startActivityForResult(CreateTaskActivity.Companion.getEditIntent(ShowTaskActivity.this, mTaskKey), REQUEST_EDIT_TASK);
+                startActivityForResult(CreateTaskActivity.Companion.getEditIntent(mTaskKey), REQUEST_EDIT_TASK);
                 break;
             case R.id.task_menu_share:
                 Assert.assertTrue(mData != null);
@@ -142,11 +142,11 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
                 String shareData = mTaskListFragment.getShareData();
                 if (TextUtils.isEmpty(shareData))
-                    Utils.share(mData.Name, this);
+                    Utils.share(mData.Name);
                 else
-                    Utils.share(mData.Name + "\n" + shareData, this);
+                    Utils.share(mData.Name + "\n" + shareData);
 
-                Utils.share(mData.Name, this);
+                Utils.share(mData.Name);
                 break;
             case R.id.task_menu_delete: {
                 TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);

@@ -93,7 +93,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
             switch (menuItem.getItemId()) {
                 case R.id.action_task_share:
-                    Utils.share(getShareData(childTaskDatas), getActivity());
+                    Utils.share(getShareData(childTaskDatas));
 
                     break;
                 case R.id.action_task_edit:
@@ -101,13 +101,13 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
 
                     ChildTaskData childTaskData = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
 
-                    startActivity(CreateTaskActivity.Companion.getEditIntent(getActivity(), childTaskData.mTaskKey));
+                    startActivity(CreateTaskActivity.Companion.getEditIntent(childTaskData.mTaskKey));
                     break;
                 case R.id.action_task_join:
                     if (mTaskKey == null)
-                        startActivity(CreateTaskActivity.Companion.getJoinIntent(getActivity(), taskKeys));
+                        startActivity(CreateTaskActivity.Companion.getJoinIntent(taskKeys));
                     else
-                        startActivity(CreateTaskActivity.Companion.getJoinIntent(getActivity(), taskKeys, mTaskKey));
+                        startActivity(CreateTaskActivity.Companion.getJoinIntent(taskKeys, mTaskKey));
                     break;
                 case R.id.action_task_delete:
                     Assert.assertTrue(mDataId != null);
@@ -134,7 +134,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
                     ChildTaskData childTaskData1 = ((TaskAdapter.TaskWrapper) selected.get(0).getModelNode()).mChildTaskData;
                     Assert.assertTrue(childTaskData1 != null);
 
-                    startActivity(CreateTaskActivity.Companion.getCreateIntent(getActivity(), childTaskData1.mTaskKey));
+                    startActivity(CreateTaskActivity.Companion.getCreateIntent(childTaskData1.mTaskKey));
                     break;
                 default:
                     throw new UnsupportedOperationException();
@@ -352,7 +352,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_task_list, container, false);
         Assert.assertTrue(view != null);
 
@@ -465,7 +465,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         if (mTreeViewAdapter != null) {
@@ -502,7 +502,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
             if (mTaskKey == null)
                 startActivity(CreateTaskActivity.Companion.getCreateIntent(getContext()));
             else
-                startActivity(CreateTaskActivity.Companion.getCreateIntent(getActivity(), mTaskKey));
+                startActivity(CreateTaskActivity.Companion.getCreateIntent(mTaskKey));
         });
 
         updateFabVisibility();
@@ -834,7 +834,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
                 Activity activity = getTaskListFragment().getActivity();
                 Assert.assertTrue(activity != null);
 
-                activity.startActivity(ShowTaskActivity.newIntent(activity, mChildTaskData.mTaskKey));
+                activity.startActivity(ShowTaskActivity.newIntent(mChildTaskData.mTaskKey));
             }
 
             @Override

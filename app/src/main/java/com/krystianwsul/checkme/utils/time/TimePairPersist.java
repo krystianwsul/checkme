@@ -31,7 +31,7 @@ public class TimePairPersist implements Parcelable {
         if (timePair.mHourMinute != null)
             mHourMinute = timePair.mHourMinute;
         else
-            mHourMinute = HourMinute.getNextHour().second;
+            mHourMinute = HourMinute.getNextHour().getSecond();
     }
 
     public void setCustomTimeKey(@NonNull CustomTimeKey customTimeKey) {

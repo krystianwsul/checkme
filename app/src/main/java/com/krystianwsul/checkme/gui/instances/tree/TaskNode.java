@@ -267,7 +267,7 @@ class TaskNode extends GroupHolderNode implements ModelNode, TaskParent {
     public void onClick() {
         GroupListFragment groupListFragment = getGroupListFragment();
 
-        groupListFragment.getActivity().startActivity(ShowTaskActivity.newIntent(groupListFragment.getActivity(), mTaskData.getMTaskKey()));
+        groupListFragment.getActivity().startActivity(ShowTaskActivity.newIntent(mTaskData.getMTaskKey()));
     }
 
     @Override

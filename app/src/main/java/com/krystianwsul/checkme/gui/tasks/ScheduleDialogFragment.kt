@@ -154,11 +154,11 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        Assert.assertTrue(arguments.containsKey(SHOW_DELETE_KEY))
+        Assert.assertTrue(arguments!!.containsKey(SHOW_DELETE_KEY))
 
-        val showDelete = arguments.getBoolean(SHOW_DELETE_KEY)
+        val showDelete = arguments!!.getBoolean(SHOW_DELETE_KEY)
 
-        val builder = MaterialDialog.Builder(activity)
+        val builder = MaterialDialog.Builder(activity!!)
                 .customView(R.layout.fragment_schedule_dialog, false)
                 .negativeText(android.R.string.cancel)
                 .positiveText(android.R.string.ok)
@@ -212,7 +212,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        mScheduleDialogData = (savedInstanceState ?: arguments).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
+        mScheduleDialogData = (savedInstanceState ?: arguments!!).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
 
         mScheduleType.run {
             adapter = ArrayAdapter.createFromResource(activity, R.array.schedule_types, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
@@ -296,8 +296,8 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         mScheduleDialogData.mDaysOfWeek.forEach { mScheduleDialogDays[it]!!.isChecked = true }
         mScheduleDialogDays.forEach { (day, view) -> view.setOnCheckedChangeListener { _, isChecked -> dayListener(day, isChecked) } }
 
-        val textPrimary = ContextCompat.getColor(activity, R.color.textPrimary)
-        val textDisabledSpinner = ContextCompat.getColor(activity, R.color.textDisabledSpinner)
+        val textPrimary = ContextCompat.getColor(activity!!, R.color.textPrimary)
+        val textDisabledSpinner = ContextCompat.getColor(activity!!, R.color.textDisabledSpinner)
 
         mScheduleDialogMonthDayRadio.run {
             setOnCheckedChangeListener { _, isChecked ->
@@ -411,7 +411,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onResume() {
         super.onResume()
 
-        activity.registerReceiver(mBroadcastReceiver, IntentFilter(Intent.ACTION_TIME_TICK))
+        activity!!.registerReceiver(mBroadcastReceiver, IntentFilter(Intent.ACTION_TIME_TICK))
 
         if (mCustomTimeDatas != null)
             updateFields()
@@ -471,7 +471,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onPause() {
         super.onPause()
 
-        activity.unregisterReceiver(mBroadcastReceiver)
+        activity!!.unregisterReceiver(mBroadcastReceiver)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -497,7 +497,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
         when (mScheduleDialogData.mScheduleType) {
             ScheduleType.SINGLE -> {
-                mScheduleDialogDate.text = mScheduleDialogData.mDate.getDisplayText(context)
+                mScheduleDialogDate.text = mScheduleDialogData.mDate.getDisplayText(context!!)
 
                 mScheduleDialogTime.text = if (mScheduleDialogData.mTimePairPersist.customTimeKey != null) {
                     val customTimeData = mCustomTimeDatas!![mScheduleDialogData.mTimePairPersist.customTimeKey!!]!!

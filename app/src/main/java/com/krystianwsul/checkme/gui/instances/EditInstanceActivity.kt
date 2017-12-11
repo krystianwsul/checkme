@@ -15,6 +15,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
@@ -369,8 +370,8 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         private val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
         private val DISCARD_TAG = "discard"
 
-        fun getIntent(context: Context, instanceKey: InstanceKey): Intent {
-            val intent = Intent(context, EditInstanceActivity::class.java)
+        fun getIntent(instanceKey: InstanceKey): Intent {
+            val intent = Intent(MyApplication.instance, EditInstanceActivity::class.java)
             intent.putExtra(INSTANCE_KEY, instanceKey as Parcelable)
             return intent
         }

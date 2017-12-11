@@ -3,13 +3,14 @@ package com.krystianwsul.checkme.utils.time;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
 
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Calendar;
+
+import kotlin.Pair;
 
 public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializable {
     private final int mHour;
@@ -41,7 +42,7 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializa
         calendar.add(Calendar.HOUR_OF_DAY, 1);
         calendar.set(Calendar.MINUTE, 0);
 
-        return Pair.create(new Date(calendar), new HourMinute(calendar));
+        return new Pair<>(new Date(calendar), new HourMinute(calendar));
     }
 
     public HourMinute(int hour, int minute) {

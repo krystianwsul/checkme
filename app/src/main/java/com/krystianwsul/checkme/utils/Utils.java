@@ -1,11 +1,11 @@
 package com.krystianwsul.checkme.utils;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.krystianwsul.checkme.MyApplication;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
@@ -17,14 +17,14 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 
 public class Utils {
-    public static void share(@NonNull String text, @NonNull Activity activity) {
+    public static void share(@NonNull String text) {
         Assert.assertTrue(!TextUtils.isEmpty(text));
 
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, text);
         intent.setType("text/plain");
 
-        activity.startActivity(Intent.createChooser(intent, activity.getString(R.string.sendTo)));
+        MyApplication.instance.startActivity(Intent.createChooser(intent, MyApplication.instance.getString(R.string.sendTo)));
     }
 
     public static int getDaysInMonth(int year, int month) {

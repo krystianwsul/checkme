@@ -15,6 +15,7 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
 import com.google.common.collect.HashMultiset
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -62,29 +63,29 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
         fun getCreateIntent(context: Context, scheduleHint: ScheduleHint) = Intent(context, CreateTaskActivity::class.java).apply { putExtra(SCHEDULE_HINT_KEY, scheduleHint) }
 
-        fun getCreateIntent(context: Context, parentTaskKeyHint: TaskKey) = Intent(context, CreateTaskActivity::class.java).apply { putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable) }
+        fun getCreateIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable) }
 
-        fun getJoinIntent(context: Context, joinTaskKeys: ArrayList<TaskKey>) = Intent(context, CreateTaskActivity::class.java).apply {
+        fun getJoinIntent(joinTaskKeys: ArrayList<TaskKey>) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             Assert.assertTrue(joinTaskKeys.size > 1)
 
             putParcelableArrayListExtra(TASK_KEYS_KEY, joinTaskKeys)
         }
 
-        fun getJoinIntent(context: Context, joinTaskKeys: ArrayList<TaskKey>, parentTaskKeyHint: TaskKey) = Intent(context, CreateTaskActivity::class.java).apply {
+        fun getJoinIntent(joinTaskKeys: ArrayList<TaskKey>, parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             Assert.assertTrue(joinTaskKeys.size > 1)
 
             putParcelableArrayListExtra(TASK_KEYS_KEY, joinTaskKeys)
             putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable)
         }
 
-        fun getJoinIntent(context: Context, joinTaskKeys: ArrayList<TaskKey>, scheduleHint: ScheduleHint) = Intent(context, CreateTaskActivity::class.java).apply {
+        fun getJoinIntent(joinTaskKeys: ArrayList<TaskKey>, scheduleHint: ScheduleHint) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             Assert.assertTrue(joinTaskKeys.size > 1)
 
             putParcelableArrayListExtra(TASK_KEYS_KEY, joinTaskKeys)
             putExtra(SCHEDULE_HINT_KEY, scheduleHint)
         }
 
-        fun getEditIntent(context: Context, taskKey: TaskKey) = Intent(context, CreateTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
+        fun getEditIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
     }
 
     private var mSavedInstanceState: Bundle? = null

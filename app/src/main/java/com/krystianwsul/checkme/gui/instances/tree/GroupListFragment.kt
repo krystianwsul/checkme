@@ -152,26 +152,24 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         val instanceData = instanceDatas[0]
                         Assert.assertTrue(instanceData.IsRootInstance)
 
-                        startActivity(EditInstanceActivity.getIntent(activity, instanceData.InstanceKey))
+                        startActivity(EditInstanceActivity.getIntent(instanceData.InstanceKey))
                     } else {
                         Assert.assertTrue(instanceDatas.size > 1)
                         Assert.assertTrue(instanceDatas.all { it.IsRootInstance })
 
                         val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
 
-                        startActivity(EditInstancesActivity.getIntent(activity, instanceKeys))
+                        startActivity(EditInstancesActivity.getIntent(instanceKeys))
                     }
                 }
-                R.id.action_group_share -> {
-                    Utils.share(getShareData(instanceDatas), activity)
-                }
+                R.id.action_group_share -> Utils.share(getShareData(instanceDatas))
                 R.id.action_group_show_task -> {
                     Assert.assertTrue(instanceDatas.size == 1)
 
                     val instanceData = instanceDatas[0]
                     Assert.assertTrue(instanceData.TaskCurrent)
 
-                    startActivity(ShowTaskActivity.newIntent(activity, instanceData.InstanceKey.mTaskKey))
+                    startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.mTaskKey))
                 }
                 R.id.action_group_edit_task -> {
                     Assert.assertTrue(instanceDatas.size == 1)
@@ -179,7 +177,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val instanceData = instanceDatas[0]
                     Assert.assertTrue(instanceData.TaskCurrent)
 
-                    startActivity(CreateTaskActivity.getEditIntent(activity, instanceData.InstanceKey.mTaskKey))
+                    startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.mTaskKey))
                 }
                 R.id.action_group_delete_task -> {
                     val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.mTaskKey })
@@ -199,7 +197,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
                     } while (!selectedTreeNodes.isEmpty())
 
-                    DomainFactory.getDomainFactory(activity).setTaskEndTimeStamps(activity, (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getDomainFactory(activity!!).setTaskEndTimeStamps(activity!!, (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -209,7 +207,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val instanceData = instanceDatas[0]
                     Assert.assertTrue(instanceData.TaskCurrent)
 
-                    activity.startActivity(CreateTaskActivity.getCreateIntent(activity, instanceData.InstanceKey.mTaskKey))
+                    activity!!.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.mTaskKey))
                 }
                 R.id.action_group_join -> {
                     val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.mTaskKey })
@@ -222,9 +220,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                         val timePair = firstInstanceData.InstanceTimePair
 
-                        startActivity(CreateTaskActivity.getJoinIntent(activity, taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
+                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
                     } else {
-                        startActivity(CreateTaskActivity.getJoinIntent(activity, taskKeys, mInstanceKey!!.mTaskKey))
+                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, mInstanceKey!!.mTaskKey))
                     }
                 }
                 R.id.action_group_mark_done -> {
@@ -233,7 +231,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getDomainFactory(activity).setInstancesDone(activity, mDataId!!, SaveService.Source.GUI, instanceKeys)
+                    val done = DomainFactory.getDomainFactory(activity!!).setInstancesDone(activity!!, mDataId!!, SaveService.Source.GUI, instanceKeys)
 
                     var selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
                     Assert.assertTrue(!selectedTreeNodes.isEmpty())
@@ -578,11 +576,11 @@ class GroupListFragment : AbstractFragment(), FabUser {
         return mPosition != null
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
         if (mTreeViewAdapter != null) {
-            outState!!.putParcelable(EXPANSION_STATE_KEY, (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState)
+            outState.putParcelable(EXPANSION_STATE_KEY, (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState)
 
             if (mSelectionCallback.hasActionMode()) {
                 val instanceDatas = nodesToInstanceDatas(mTreeViewAdapter!!.selectedNodes)
@@ -739,7 +737,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     Assert.assertTrue(mDataWrapper!!.TaskEditable!!)
 
-                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, mInstanceKey!!.mTaskKey))
+                    startActivity(CreateTaskActivity.getCreateIntent(mInstanceKey!!.mTaskKey))
                 }
             }
         }
@@ -825,7 +823,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         private var mNodeCollection: NodeCollection? = null
 
-        private val mDensity = mGroupListFragment.activity.resources.displayMetrics.density
+        private val mDensity = mGroupListFragment.activity!!.resources.displayMetrics.density
 
         val expansionState: ExpansionState
             get() {

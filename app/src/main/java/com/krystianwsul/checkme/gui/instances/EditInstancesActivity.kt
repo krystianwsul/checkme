@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
@@ -395,11 +396,11 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         private val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
         private val DISCARD_TAG = "discard"
 
-        fun getIntent(context: Context, instanceKeys: ArrayList<InstanceKey>?): Intent {
+        fun getIntent(instanceKeys: ArrayList<InstanceKey>?): Intent {
             Assert.assertTrue(instanceKeys != null)
             Assert.assertTrue(instanceKeys!!.size > 1)
 
-            val intent = Intent(context, EditInstancesActivity::class.java)
+            val intent = Intent(MyApplication.instance, EditInstancesActivity::class.java)
             intent.putParcelableArrayListExtra(INSTANCE_KEYS, instanceKeys)
             return intent
         }

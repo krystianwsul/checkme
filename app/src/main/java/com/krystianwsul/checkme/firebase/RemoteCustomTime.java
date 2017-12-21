@@ -78,7 +78,7 @@ public class RemoteCustomTime implements CustomTime {
 
     @NonNull
     @Override
-    public TimePair getTimePair() {
+    public TimePair getTimePair() { // possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
         return new TimePair(new CustomTimeKey(mRemoteProject.getId(), mRemoteCustomTimeRecord.getId()), null);
     }
 

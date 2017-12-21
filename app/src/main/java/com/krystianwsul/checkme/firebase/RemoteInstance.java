@@ -357,7 +357,18 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue(!TextUtils.isEmpty(mTaskId));
             Assert.assertTrue(mScheduleDateTime != null);
 
-            return mScheduleDateTime.getTime().getTimePair().mCustomTimeKey;
+            CustomTimeKey customTimeKey = mScheduleDateTime.getTime().getTimePair().mCustomTimeKey;
+
+            if (customTimeKey == null)
+                return null;
+
+            if (!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId)) {
+                Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteProjectId));
+
+                return getDomainFactory().getCustomTimeKey(customTimeKey.mRemoteProjectId, customTimeKey.mRemoteCustomTimeId);
+            } else {
+                return customTimeKey;
+            }
         }
     }
 

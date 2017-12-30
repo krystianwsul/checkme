@@ -27,6 +27,28 @@ import java.util.*
 
 open class NotificationWrapperImpl : NotificationWrapper() {
 
+    companion object {
+
+        fun getRemoteCustomTimeFixInstanceKey(domainFactory: DomainFactory, instanceKey: InstanceKey): InstanceKey { // remote custom time key hack
+            if (instanceKey.type == TaskKey.Type.LOCAL)
+                return instanceKey
+
+            if (instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey == null)
+                return instanceKey
+
+            if (instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey.type == TaskKey.Type.REMOTE)
+                return instanceKey
+
+            val projectId = instanceKey.mTaskKey.mRemoteProjectId!!
+
+            val customTimeId = domainFactory.getRemoteCustomTimeId(projectId, instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey)
+
+            val customTimeKey = CustomTimeKey(projectId, customTimeId)
+            val scheduleKey = ScheduleKey(instanceKey.mScheduleKey.ScheduleDate, TimePair(customTimeKey))
+            return InstanceKey(instanceKey.mTaskKey, scheduleKey)
+        }
+    }
+
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
     override fun cancelNotification(id: Int) {
@@ -34,33 +56,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.cancel(id)
     }
 
-    private fun getRemoteCustomTimeFixInstanceKey(domainFactory: DomainFactory, instance: Instance): InstanceKey { // remote custom time key hack
-        val instanceKey = instance.instanceKey
-
-        if (instanceKey.type == TaskKey.Type.LOCAL)
-            return instanceKey
-
-        if (instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey == null)
-            return instanceKey
-
-        if (instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey.type == TaskKey.Type.REMOTE)
-            return instanceKey
-
-        val projectId = instance.task.remoteNonNullProject.id
-
-        val customTimeId = domainFactory.getRemoteCustomTimeId(projectId, instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey)
-
-        val customTimeKey = CustomTimeKey(projectId, customTimeId)
-        val scheduleKey = ScheduleKey(instanceKey.mScheduleKey.ScheduleDate, TimePair(customTimeKey))
-        return InstanceKey(instanceKey.mTaskKey, scheduleKey)
-    }
-
     override fun notifyInstance(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
         val task = instance.task
         val notificationId = instance.notificationId
 
         val instanceKey = instance.instanceKey
-        val remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(domainFactory, instance)
+        val remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(domainFactory, instanceKey)
 
         val deleteIntent = InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey)
         val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
@@ -188,7 +189,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         instances.forEach {
             names.add(it.name)
             instanceKeys.add(it.instanceKey)
-            remoteCustomTimeFixInstanceKeys.add(getRemoteCustomTimeFixInstanceKey(domainFactory, it))
+            remoteCustomTimeFixInstanceKeys.add(getRemoteCustomTimeFixInstanceKey(domainFactory, it.instanceKey))
         }
 
         val deleteIntent = GroupNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKeys)

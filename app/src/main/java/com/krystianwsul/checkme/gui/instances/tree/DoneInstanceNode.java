@@ -288,7 +288,7 @@ class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollect
     public void onClick() {
         GroupListFragment groupListFragment = getGroupListFragment();
 
-        groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), mInstanceData.getInstanceKey()));
+        groupListFragment.getActivity().startActivity(ShowInstanceActivity.Companion.getIntent(groupListFragment.getActivity(), mInstanceData.getInstanceKey()));
     }
 
     @Override

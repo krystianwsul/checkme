@@ -490,7 +490,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         if (singleInstance()) {
             GroupListFragment.InstanceData instanceData = getSingleInstanceData();
 
-            groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), instanceData.getInstanceKey()));
+            groupListFragment.getActivity().startActivity(ShowInstanceActivity.Companion.getIntent(groupListFragment.getActivity(), instanceData.getInstanceKey()));
         } else {
             groupListFragment.getActivity().startActivity(ShowGroupActivity.getIntent(((NotDoneGroupNode) notDoneGroupTreeNode.getModelNode()).mExactTimeStamp, groupListFragment.getActivity()));
         }
@@ -952,7 +952,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
         public void onClick() {
             GroupListFragment groupListFragment = getGroupListFragment();
 
-            groupListFragment.getActivity().startActivity(ShowInstanceActivity.getIntent(groupListFragment.getActivity(), mInstanceData.getInstanceKey()));
+            groupListFragment.getActivity().startActivity(ShowInstanceActivity.Companion.getIntent(groupListFragment.getActivity(), mInstanceData.getInstanceKey()));
         }
 
         @Override

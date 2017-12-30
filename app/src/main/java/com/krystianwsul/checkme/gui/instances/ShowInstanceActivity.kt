@@ -16,6 +16,7 @@ import android.view.MenuItem
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
+import com.krystianwsul.checkme.domainmodel.NotificationWrapperImpl
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
@@ -187,7 +188,12 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
         instanceData = data.mInstanceData.also {
             if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
                 first = false
-                DomainFactory.getDomainFactory(this).setInstanceNotified(this, data.DataId, SaveService.Source.GUI, instanceKey)
+
+                DomainFactory.getDomainFactory(this).let {
+                    val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
+
+                    it.setInstanceNotified(this, data.DataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
+                }
             }
 
             actionBar.run {

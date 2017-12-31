@@ -226,11 +226,11 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
         invalidateOptionsMenu()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Assert.assertTrue(requestCode == ShowTaskActivity.REQUEST_EDIT_TASK)
 
         if (resultCode == Activity.RESULT_OK) {
-            Assert.assertTrue(data.hasExtra(ShowTaskActivity.TASK_KEY_KEY))
+            Assert.assertTrue(data!!.hasExtra(ShowTaskActivity.TASK_KEY_KEY))
 
             val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
 

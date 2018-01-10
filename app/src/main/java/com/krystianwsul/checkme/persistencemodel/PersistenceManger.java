@@ -72,9 +72,9 @@ public class PersistenceManger {
     private PersistenceManger(@NonNull Context context) {
         mSQLiteDatabase = MySQLiteHelper.getDatabase(context);
 
-        mCustomTimeRecords = CustomTimeRecord.getCustomTimeRecords(mSQLiteDatabase);
+        mCustomTimeRecords = CustomTimeRecord.Companion.getCustomTimeRecords(mSQLiteDatabase);
 
-        mCustomTimeMaxId = CustomTimeRecord.getMaxId(mSQLiteDatabase);
+        mCustomTimeMaxId = CustomTimeRecord.Companion.getMaxId(mSQLiteDatabase);
 
         mTaskRecords = TaskRecord.getTaskRecords(mSQLiteDatabase);
         Assert.assertTrue(mTaskRecords != null);

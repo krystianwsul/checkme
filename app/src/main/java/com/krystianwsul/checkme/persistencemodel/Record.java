@@ -9,9 +9,9 @@ import android.util.Log;
 
 import junit.framework.Assert;
 
-abstract class Record {
+abstract public class Record {
     private boolean mCreated;
-    boolean mChanged = false;
+    boolean changed = false;
     private boolean mDeleted = false;
 
     static int getMaxId(@NonNull SQLiteDatabase sqLiteDatabase, @NonNull String tableName, @NonNull String idColumn) {
@@ -49,7 +49,7 @@ abstract class Record {
         Assert.assertTrue(!mCreated);
 
         mCreated = true;
-        mChanged = false;
+        changed = false;
 
         return new InsertCommand(tableName, getContentValues());
     }
@@ -59,9 +59,9 @@ abstract class Record {
         Assert.assertTrue(!TextUtils.isEmpty(tableName));
         Assert.assertTrue(!TextUtils.isEmpty(idColumn));
 
-        Assert.assertTrue(mChanged);
+        Assert.assertTrue(changed);
 
-        mChanged = false;
+        changed = false;
 
         return new UpdateCommand(tableName, getContentValues(), idColumn + " = " + id);
     }
@@ -85,7 +85,7 @@ abstract class Record {
     boolean needsUpdate() {
         Assert.assertTrue(mCreated);
 
-        return (mChanged && !mDeleted);
+        return (changed && !mDeleted);
     }
 
     boolean needsDelete() {

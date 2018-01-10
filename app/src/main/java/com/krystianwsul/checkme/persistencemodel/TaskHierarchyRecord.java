@@ -109,7 +109,7 @@ public class TaskHierarchyRecord extends Record {
         Assert.assertTrue(mStartTime <= endTime);
 
         mEndTime = endTime;
-        mChanged = true;
+        changed = true;
     }
 
     @NonNull

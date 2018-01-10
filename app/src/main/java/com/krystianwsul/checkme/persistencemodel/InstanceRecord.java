@@ -70,13 +70,13 @@ public class InstanceRecord extends Record {
                 + COLUMN_SCHEDULE_YEAR + " INTEGER NOT NULL, "
                 + COLUMN_SCHEDULE_MONTH + " INTEGER NOT NULL, "
                 + COLUMN_SCHEDULE_DAY + " INTEGER NOT NULL, "
-                + COLUMN_SCHEDULE_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
+                + COLUMN_SCHEDULE_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES() + "(" + CustomTimeRecord.Companion.getCOLUMN_ID() + "), "
                 + COLUMN_SCHEDULE_HOUR + " INTEGER, "
                 + COLUMN_SCHEDULE_MINUTE + " INTEGER, "
                 + COLUMN_INSTANCE_YEAR + " INTEGER, "
                 + COLUMN_INSTANCE_MONTH + " INTEGER, "
                 + COLUMN_INSTANCE_DAY + " INTEGER, "
-                + COLUMN_INSTANCE_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
+                + COLUMN_INSTANCE_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES() + "(" + CustomTimeRecord.Companion.getCOLUMN_ID() + "), "
                 + COLUMN_INSTANCE_HOUR + " INTEGER, "
                 + COLUMN_INSTANCE_MINUTE + " INTEGER, "
                 + COLUMN_HIERARCHY_TIME + " INTEGER NOT NULL, "
@@ -285,47 +285,47 @@ public class InstanceRecord extends Record {
 
     public void setDone(Long done) {
         mDone = done;
-        mChanged = true;
+        changed = true;
     }
 
     public void setInstanceYear(int instanceYear) {
         mInstanceYear = instanceYear;
-        mChanged = true;
+        changed = true;
     }
 
     public void setInstanceMonth(int instanceMonth) {
         mInstanceMonth = instanceMonth;
-        mChanged = true;
+        changed = true;
     }
 
     public void setInstanceDay(int instanceDay) {
         mInstanceDay = instanceDay;
-        mChanged = true;
+        changed = true;
     }
 
     public void setInstanceCustomTimeId(Integer instanceCustomTimeId) {
         mInstanceCustomTimeId = instanceCustomTimeId;
-        mChanged = true;
+        changed = true;
     }
 
     public void setInstanceHour(Integer instanceHour) {
         mInstanceHour = instanceHour;
-        mChanged = true;
+        changed = true;
     }
 
     public void setInstanceMinute(Integer instanceMinute) {
         mInstanceMinute = instanceMinute;
-        mChanged = true;
+        changed = true;
     }
 
     public void setNotified(boolean notified) {
         mNotified = notified;
-        mChanged = true;
+        changed = true;
     }
 
     public void setNotificationShown(boolean notificationShown) {
         mNotificationShown = notificationShown;
-        mChanged = true;
+        changed = true;
     }
 
     @NonNull

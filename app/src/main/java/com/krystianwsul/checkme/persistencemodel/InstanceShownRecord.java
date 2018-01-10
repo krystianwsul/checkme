@@ -202,17 +202,17 @@ public class InstanceShownRecord extends Record {
 
     public void setNotified(boolean notified) {
         mNotified = notified;
-        mChanged = true;
+        changed = true;
     }
 
     public void setNotificationShown(boolean notificationShown) {
         mNotificationShown = notificationShown;
-        mChanged = true;
+        changed = true;
     }
 
     public void setProjectId(@NonNull String projectId) {
         mProjectId = projectId;
-        mChanged = true;
+        changed = true;
     }
 
     @NonNull

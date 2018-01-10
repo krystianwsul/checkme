@@ -28,7 +28,7 @@ public class DailyScheduleRecord extends Record {
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_DAILY_SCHEDULES
                 + " (" + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL UNIQUE REFERENCES " + ScheduleRecord.TABLE_SCHEDULES + "(" + ScheduleRecord.COLUMN_ID + "), "
-                + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
+                + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES() + "(" + CustomTimeRecord.Companion.getCOLUMN_ID() + "), "
                 + COLUMN_HOUR + " INTEGER, "
                 + COLUMN_MINUTE + " INTEGER);");
     }

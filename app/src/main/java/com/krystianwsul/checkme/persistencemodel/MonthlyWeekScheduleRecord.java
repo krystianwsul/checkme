@@ -39,7 +39,7 @@ public class MonthlyWeekScheduleRecord extends Record {
                 + COLUMN_DAY_OF_MONTH + " INTEGER NOT NULL, "
                 + COLUMN_DAY_OF_WEEK + " INTEGER NOT NULL, "
                 + COLUMN_BEGINNING_OF_MONTH + " INTEGER NOT NULL, "
-                + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.TABLE_CUSTOM_TIMES + "(" + CustomTimeRecord.COLUMN_ID + "), "
+                + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES() + "(" + CustomTimeRecord.Companion.getCOLUMN_ID() + "), "
                 + COLUMN_HOUR + " INTEGER, "
                 + COLUMN_MINUTE + " INTEGER);");
     }

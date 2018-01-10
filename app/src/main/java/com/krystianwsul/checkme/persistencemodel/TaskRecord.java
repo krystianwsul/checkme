@@ -143,7 +143,7 @@ public class TaskRecord extends Record {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         mName = name;
-        mChanged = true;
+        changed = true;
     }
 
     public void setEndTime(long endTime) {
@@ -151,27 +151,27 @@ public class TaskRecord extends Record {
         Assert.assertTrue(mStartTime <= endTime);
 
         mEndTime = endTime;
-        mChanged = true;
+        changed = true;
     }
 
     public void setOldestVisibleYear(int oldestVisibleYear) {
         mOldestVisibleYear = oldestVisibleYear;
-        mChanged = true;
+        changed = true;
     }
 
     public void setOldestVisibleMonth(int oldestVisibleYearMonth) {
         mOldestVisibleMonth = oldestVisibleYearMonth;
-        mChanged = true;
+        changed = true;
     }
 
     public void setOldestVisibleDay(int oldestVisibleDay) {
         mOldestVisibleDay = oldestVisibleDay;
-        mChanged = true;
+        changed = true;
     }
 
     public void setNote(String note) {
         mNote = note;
-        mChanged = true;
+        changed = true;
     }
 
     @NonNull

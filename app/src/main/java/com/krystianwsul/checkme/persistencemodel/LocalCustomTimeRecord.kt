@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import junit.framework.Assert
 import java.util.*
 import kotlin.properties.Delegates.observable
@@ -25,7 +26,7 @@ class LocalCustomTimeRecord(
         mFridayMinute: Int,
         mSaturdayHour: Int,
         mSaturdayMinute: Int,
-        mCurrent: Boolean) : Record(created) {
+        mCurrent: Boolean) : Record(created), CustomTimeRecord {
 
     companion object {
 
@@ -111,26 +112,26 @@ class LocalCustomTimeRecord(
 
     var name by observable(mName) { _, _, _ -> changed = true }
 
-    var sundayHour by observable(mSundayHour) { _, _, _ -> changed = true }
-    var sundayMinute by observable(mSundayMinute) { _, _, _ -> changed = true }
+    override var sundayHour by observable(mSundayHour) { _, _, _ -> changed = true }
+    override var sundayMinute by observable(mSundayMinute) { _, _, _ -> changed = true }
 
-    var mondayHour by observable(mMondayHour) { _, _, _ -> changed = true }
-    var mondayMinute by observable(mMondayMinute) { _, _, _ -> changed = true }
+    override var mondayHour by observable(mMondayHour) { _, _, _ -> changed = true }
+    override var mondayMinute by observable(mMondayMinute) { _, _, _ -> changed = true }
 
-    var tuesdayHour by observable(mTuesdayHour) { _, _, _ -> changed = true }
-    var tuesdayMinute by observable(mTuesdayMinute) { _, _, _ -> changed = true }
+    override var tuesdayHour by observable(mTuesdayHour) { _, _, _ -> changed = true }
+    override var tuesdayMinute by observable(mTuesdayMinute) { _, _, _ -> changed = true }
 
-    var wednesdayHour by observable(mWednesdayHour) { _, _, _ -> changed = true }
-    var wednesdayMinute by observable(mWednesdayMinute) { _, _, _ -> changed = true }
+    override var wednesdayHour by observable(mWednesdayHour) { _, _, _ -> changed = true }
+    override var wednesdayMinute by observable(mWednesdayMinute) { _, _, _ -> changed = true }
 
-    var thursdayHour by observable(mThursdayHour) { _, _, _ -> changed = true }
-    var thursdayMinute by observable(mThursdayMinute) { _, _, _ -> changed = true }
+    override var thursdayHour by observable(mThursdayHour) { _, _, _ -> changed = true }
+    override var thursdayMinute by observable(mThursdayMinute) { _, _, _ -> changed = true }
 
-    var fridayHour by observable(mFridayHour) { _, _, _ -> changed = true }
-    var fridayMinute by observable(mFridayMinute) { _, _, _ -> changed = true }
+    override var fridayHour by observable(mFridayHour) { _, _, _ -> changed = true }
+    override var fridayMinute by observable(mFridayMinute) { _, _, _ -> changed = true }
 
-    var saturdayHour by observable(mSaturdayHour) { _, _, _ -> changed = true }
-    var saturdayMinute by observable(mSaturdayMinute) { _, _, _ -> changed = true }
+    override var saturdayHour by observable(mSaturdayHour) { _, _, _ -> changed = true }
+    override var saturdayMinute by observable(mSaturdayMinute) { _, _, _ -> changed = true }
 
     var current by observable(mCurrent) { _, _, _ -> changed = true }
 

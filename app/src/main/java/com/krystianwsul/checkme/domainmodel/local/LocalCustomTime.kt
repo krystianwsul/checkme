@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import com.krystianwsul.checkme.domainmodel.CustomTime
+import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.checkme.persistencemodel.LocalCustomTimeRecord
@@ -18,6 +19,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
     val id get() = localCustomTimeRecord.id
 
     val current get() = localCustomTimeRecord.current
+
+    private val customTimeRecords get() = mutableListOf<CustomTimeRecord>(localCustomTimeRecord).apply { addAll(remoteCustomTimeRecords.values) }
 
     override fun getName() = localCustomTimeRecord.name
 
@@ -43,66 +46,45 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
     }
 
     fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
-        when (dayOfWeek) { // todo add a common interface for all custom time records
+        when (dayOfWeek) {
             DayOfWeek.SUNDAY -> {
-                localCustomTimeRecord.sundayHour = hourMinute.hour
-                localCustomTimeRecord.sundayMinute = hourMinute.minute
-
-                remoteCustomTimeRecords.values.forEach {
+                customTimeRecords.forEach {
                     it.sundayHour = hourMinute.hour
                     it.sundayMinute = hourMinute.minute
                 }
             }
             DayOfWeek.MONDAY -> {
-                localCustomTimeRecord.mondayHour = hourMinute.hour
-                localCustomTimeRecord.mondayMinute = hourMinute.minute
-
-                remoteCustomTimeRecords.values.forEach {
+                customTimeRecords.forEach {
                     it.mondayHour = hourMinute.hour
                     it.mondayMinute = hourMinute.minute
                 }
             }
             DayOfWeek.TUESDAY -> {
-                localCustomTimeRecord.tuesdayHour = hourMinute.hour
-                localCustomTimeRecord.tuesdayMinute = hourMinute.minute
-
-                remoteCustomTimeRecords.values.forEach {
+                customTimeRecords.forEach {
                     it.tuesdayHour = hourMinute.hour
                     it.tuesdayMinute = hourMinute.minute
                 }
             }
             DayOfWeek.WEDNESDAY -> {
-                localCustomTimeRecord.wednesdayHour = hourMinute.hour
-                localCustomTimeRecord.wednesdayMinute = hourMinute.minute
-
-                remoteCustomTimeRecords.values.forEach {
+                customTimeRecords.forEach {
                     it.wednesdayHour = hourMinute.hour
                     it.wednesdayMinute = hourMinute.minute
                 }
             }
             DayOfWeek.THURSDAY -> {
-                localCustomTimeRecord.thursdayHour = hourMinute.hour
-                localCustomTimeRecord.thursdayMinute = hourMinute.minute
-
-                remoteCustomTimeRecords.values.forEach {
+                customTimeRecords.forEach {
                     it.thursdayHour = hourMinute.hour
                     it.thursdayMinute = hourMinute.minute
                 }
             }
             DayOfWeek.FRIDAY -> {
-                localCustomTimeRecord.fridayHour = hourMinute.hour
-                localCustomTimeRecord.fridayMinute = hourMinute.minute
-
-                remoteCustomTimeRecords.values.forEach {
+                customTimeRecords.forEach {
                     it.fridayHour = hourMinute.hour
                     it.fridayMinute = hourMinute.minute
                 }
             }
             DayOfWeek.SATURDAY -> {
-                localCustomTimeRecord.saturdayHour = hourMinute.hour
-                localCustomTimeRecord.saturdayMinute = hourMinute.minute
-
-                remoteCustomTimeRecords.values.forEach {
+                customTimeRecords.forEach {
                     it.saturdayHour = hourMinute.hour
                     it.saturdayMinute = hourMinute.minute
                 }

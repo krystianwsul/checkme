@@ -1,10 +1,11 @@
 package com.krystianwsul.checkme.firebase.records
 
+import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import junit.framework.Assert
 
-class RemoteCustomTimeRecord : RemoteRecord {
+class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
 
     companion object {
 
@@ -33,7 +34,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/name", value)
         }
 
-    var sundayHour: Int
+    override var sundayHour: Int
         get() = customTimeJson.sundayHour
         set(value) {
             if (customTimeJson.sundayHour == value)
@@ -43,7 +44,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/sundayHour", value)
         }
 
-    var sundayMinute: Int
+    override var sundayMinute: Int
         get() = customTimeJson.sundayMinute
         set(value) {
             if (customTimeJson.sundayMinute == value)
@@ -53,7 +54,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/sundayMinute", value)
         }
 
-    var mondayHour: Int
+    override var mondayHour: Int
         get() = customTimeJson.mondayHour
         set(value) {
             if (customTimeJson.mondayHour == value)
@@ -63,7 +64,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/mondayHour", value)
         }
 
-    var mondayMinute: Int
+    override var mondayMinute: Int
         get() = customTimeJson.mondayMinute
         set(minute) {
             if (customTimeJson.mondayMinute == minute)
@@ -73,7 +74,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/mondayMinute", minute)
         }
 
-    var tuesdayHour: Int
+    override var tuesdayHour: Int
         get() = customTimeJson.tuesdayHour
         set(hour) {
             if (customTimeJson.tuesdayHour == hour)
@@ -83,7 +84,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/tuesdayHour", hour)
         }
 
-    var tuesdayMinute: Int
+    override var tuesdayMinute: Int
         get() = customTimeJson.tuesdayMinute
         set(minute) {
             if (customTimeJson.tuesdayMinute == minute)
@@ -93,7 +94,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/tuesdayMinute", minute)
         }
 
-    var wednesdayHour: Int
+    override var wednesdayHour: Int
         get() = customTimeJson.wednesdayHour
         set(hour) {
             if (customTimeJson.wednesdayHour == hour)
@@ -103,7 +104,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/wednesdayHour", hour)
         }
 
-    var wednesdayMinute: Int
+    override var wednesdayMinute: Int
         get() = customTimeJson.wednesdayMinute
         set(minute) {
             if (customTimeJson.wednesdayMinute == minute)
@@ -113,7 +114,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/wednesdayMinute", minute)
         }
 
-    var thursdayHour: Int
+    override var thursdayHour: Int
         get() = customTimeJson.thursdayHour
         set(hour) {
             if (customTimeJson.thursdayHour == hour)
@@ -123,7 +124,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/thursdayHour", hour)
         }
 
-    var thursdayMinute: Int
+    override var thursdayMinute: Int
         get() = customTimeJson.thursdayMinute
         set(minute) {
             if (customTimeJson.thursdayMinute == minute)
@@ -133,7 +134,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/thursdayMinute", minute)
         }
 
-    var fridayHour: Int
+    override var fridayHour: Int
         get() = customTimeJson.fridayHour
         set(hour) {
             if (customTimeJson.fridayHour == hour)
@@ -143,7 +144,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/fridayHour", hour)
         }
 
-    var fridayMinute: Int
+    override var fridayMinute: Int
         get() = customTimeJson.fridayMinute
         set(minute) {
             if (customTimeJson.fridayMinute == minute)
@@ -153,7 +154,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/fridayMinute", minute)
         }
 
-    var saturdayHour: Int
+    override var saturdayHour: Int
         get() = customTimeJson.saturdayHour
         set(hour) {
             if (customTimeJson.saturdayHour == hour)
@@ -163,7 +164,7 @@ class RemoteCustomTimeRecord : RemoteRecord {
             addValue(key + "/saturdayHour", hour)
         }
 
-    var saturdayMinute: Int
+    override var saturdayMinute: Int
         get() = customTimeJson.saturdayMinute
         set(minute) {
             if (customTimeJson.sundayMinute == minute)

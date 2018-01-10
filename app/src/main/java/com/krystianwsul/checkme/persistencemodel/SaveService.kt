@@ -69,7 +69,7 @@ class SaveService : JobIntentService() {
 
             override fun startService(context: Context, persistenceManger: PersistenceManger, source: Source) {
                 val collections = listOf(
-                        persistenceManger.mCustomTimeRecords,
+                        persistenceManger.mLocalCustomTimeRecords,
                         persistenceManger.mTaskRecords,
                         persistenceManger.mTaskHierarchyRecords,
                         persistenceManger.mScheduleRecords,

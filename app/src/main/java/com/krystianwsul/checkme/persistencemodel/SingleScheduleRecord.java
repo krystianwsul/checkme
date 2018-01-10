@@ -38,7 +38,7 @@ public class SingleScheduleRecord extends Record {
                 + COLUMN_YEAR + " INTEGER NOT NULL, "
                 + COLUMN_MONTH + " INTEGER NOT NULL, "
                 + COLUMN_DAY + " INTEGER NOT NULL, "
-                + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + CustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES() + "(" + CustomTimeRecord.Companion.getCOLUMN_ID() + "), "
+                + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + LocalCustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES() + "(" + LocalCustomTimeRecord.Companion.getCOLUMN_ID() + "), "
                 + COLUMN_HOUR + " INTEGER, "
                 + COLUMN_MINUTE + " INTEGER);");
     }

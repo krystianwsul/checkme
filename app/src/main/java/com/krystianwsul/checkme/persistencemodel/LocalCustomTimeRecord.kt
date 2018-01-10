@@ -7,7 +7,7 @@ import junit.framework.Assert
 import java.util.*
 import kotlin.properties.Delegates.observable
 
-class CustomTimeRecord(
+class LocalCustomTimeRecord(
         created: Boolean,
         val id: Int,
         mName: String,
@@ -70,8 +70,8 @@ class CustomTimeRecord(
                     + "$COLUMN_CURRENT INTEGER NOT NULL DEFAULT 1);")
         }
 
-        fun getCustomTimeRecords(sqLiteDatabase: SQLiteDatabase): List<CustomTimeRecord> {
-            val customTimeRecords = ArrayList<CustomTimeRecord>()
+        fun getCustomTimeRecords(sqLiteDatabase: SQLiteDatabase): List<LocalCustomTimeRecord> {
+            val customTimeRecords = ArrayList<LocalCustomTimeRecord>()
 
             val cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, null, null, null, null, null)
             cursor.moveToFirst()
@@ -84,7 +84,7 @@ class CustomTimeRecord(
             return customTimeRecords
         }
 
-        private fun cursorToCustomTimeRecord(cursor: Cursor): CustomTimeRecord = cursor.run {
+        private fun cursorToCustomTimeRecord(cursor: Cursor): LocalCustomTimeRecord = cursor.run {
             val id = getInt(0)
             val name = getString(1)
             val sundayHour = getInt(2)
@@ -103,7 +103,7 @@ class CustomTimeRecord(
             val saturdayMinute = getInt(15)
             val current = getInt(16) == 1
 
-            CustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current)
+            LocalCustomTimeRecord(true, id, name, sundayHour, sundayMinute, mondayHour, mondayMinute, tuesdayHour, tuesdayMinute, wednesdayHour, wednesdayMinute, thursdayHour, thursdayMinute, fridayHour, fridayMinute, saturdayHour, saturdayMinute, current)
         }
 
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = Record.getMaxId(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID)

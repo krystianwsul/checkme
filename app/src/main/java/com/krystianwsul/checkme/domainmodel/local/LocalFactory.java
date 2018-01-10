@@ -16,10 +16,10 @@ import com.krystianwsul.checkme.domainmodel.Schedule;
 import com.krystianwsul.checkme.domainmodel.SingleSchedule;
 import com.krystianwsul.checkme.domainmodel.WeeklySchedule;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.DailyScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
+import com.krystianwsul.checkme.persistencemodel.LocalCustomTimeRecord;
 import com.krystianwsul.checkme.persistencemodel.MonthlyDayScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.MonthlyWeekScheduleRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
@@ -93,13 +93,13 @@ public class LocalFactory {
     }
 
     public void initialize(@NonNull DomainFactory domainFactory) {
-        Collection<CustomTimeRecord> customTimeRecords = mPersistenceManager.getCustomTimeRecords();
-        Assert.assertTrue(customTimeRecords != null);
+        Collection<LocalCustomTimeRecord> localCustomTimeRecords = mPersistenceManager.getCustomTimeRecords();
+        Assert.assertTrue(localCustomTimeRecords != null);
 
-        for (CustomTimeRecord customTimeRecord : customTimeRecords) {
-            Assert.assertTrue(customTimeRecord != null);
+        for (LocalCustomTimeRecord localCustomTimeRecord : localCustomTimeRecords) {
+            Assert.assertTrue(localCustomTimeRecord != null);
 
-            LocalCustomTime localCustomTime = new LocalCustomTime(domainFactory, customTimeRecord);
+            LocalCustomTime localCustomTime = new LocalCustomTime(domainFactory, localCustomTimeRecord);
             mLocalCustomTimes.put(localCustomTime.getId(), localCustomTime);
         }
 
@@ -490,10 +490,10 @@ public class LocalFactory {
         Assert.assertTrue(hourMinutes.get(DayOfWeek.FRIDAY) != null);
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
-        CustomTimeRecord customTimeRecord = mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
-        Assert.assertTrue(customTimeRecord != null);
+        LocalCustomTimeRecord localCustomTimeRecord = mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
+        Assert.assertTrue(localCustomTimeRecord != null);
 
-        LocalCustomTime localCustomTime = new LocalCustomTime(domainFactory, customTimeRecord);
+        LocalCustomTime localCustomTime = new LocalCustomTime(domainFactory, localCustomTimeRecord);
         Assert.assertTrue(!mLocalCustomTimes.containsKey(localCustomTime.getId()));
 
         mLocalCustomTimes.put(localCustomTime.getId(), localCustomTime);

@@ -33,7 +33,7 @@ public class PersistenceManger {
 
     private final SQLiteDatabase mSQLiteDatabase;
 
-    final List<CustomTimeRecord> mCustomTimeRecords;
+    final List<LocalCustomTimeRecord> mLocalCustomTimeRecords;
 
     final List<TaskRecord> mTaskRecords;
     final List<TaskHierarchyRecord> mTaskHierarchyRecords;
@@ -72,9 +72,9 @@ public class PersistenceManger {
     private PersistenceManger(@NonNull Context context) {
         mSQLiteDatabase = MySQLiteHelper.getDatabase(context);
 
-        mCustomTimeRecords = CustomTimeRecord.Companion.getCustomTimeRecords(mSQLiteDatabase);
+        mLocalCustomTimeRecords = LocalCustomTimeRecord.Companion.getCustomTimeRecords(mSQLiteDatabase);
 
-        mCustomTimeMaxId = CustomTimeRecord.Companion.getMaxId(mSQLiteDatabase);
+        mCustomTimeMaxId = LocalCustomTimeRecord.Companion.getMaxId(mSQLiteDatabase);
 
         mTaskRecords = TaskRecord.getTaskRecords(mSQLiteDatabase);
         Assert.assertTrue(mTaskRecords != null);
@@ -123,7 +123,7 @@ public class PersistenceManger {
     @SuppressLint("UseSparseArrays")
     public PersistenceManger() {
         mSQLiteDatabase = null;
-        mCustomTimeRecords = new ArrayList<>();
+        mLocalCustomTimeRecords = new ArrayList<>();
         mTaskRecords = new ArrayList<>();
         mTaskHierarchyRecords = new ArrayList<>();
         mScheduleRecords = new ArrayList<>();
@@ -148,8 +148,8 @@ public class PersistenceManger {
         sInstance = null;
     }
 
-    public Collection<CustomTimeRecord> getCustomTimeRecords() {
-        return mCustomTimeRecords;
+    public Collection<LocalCustomTimeRecord> getCustomTimeRecords() {
+        return mLocalCustomTimeRecords;
     }
 
     public Collection<TaskRecord> getTaskRecords() {
@@ -199,7 +199,7 @@ public class PersistenceManger {
         return mInstanceShownRecords;
     }
 
-    public CustomTimeRecord createCustomTimeRecord(String name, Map<DayOfWeek, HourMinute> hourMinutes) {
+    public LocalCustomTimeRecord createCustomTimeRecord(String name, Map<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(hourMinutes != null);
 
@@ -221,9 +221,9 @@ public class PersistenceManger {
 
         int id = ++mCustomTimeMaxId;
 
-        CustomTimeRecord customTimeRecord = new CustomTimeRecord(false, id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute(), true);
-        mCustomTimeRecords.add(customTimeRecord);
-        return customTimeRecord;
+        LocalCustomTimeRecord localCustomTimeRecord = new LocalCustomTimeRecord(false, id, name, sunday.getHour(), sunday.getMinute(), monday.getHour(), monday.getMinute(), tuesday.getHour(), tuesday.getMinute(), wednesday.getHour(), wednesday.getMinute(), thursday.getHour(), thursday.getMinute(), friday.getHour(), friday.getMinute(), saturday.getHour(), saturday.getMinute(), true);
+        mLocalCustomTimeRecords.add(localCustomTimeRecord);
+        return localCustomTimeRecord;
     }
 
     @NonNull

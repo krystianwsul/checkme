@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.local
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
-import com.krystianwsul.checkme.persistencemodel.CustomTimeRecord
+import com.krystianwsul.checkme.persistencemodel.LocalCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
@@ -11,31 +11,31 @@ import com.krystianwsul.checkme.utils.time.TimePair
 import junit.framework.Assert
 import java.util.*
 
-class LocalCustomTime(private val domainFactory: DomainFactory, private val customTimeRecord: CustomTimeRecord) : CustomTime {
+class LocalCustomTime(private val domainFactory: DomainFactory, private val localCustomTimeRecord: LocalCustomTimeRecord) : CustomTime {
 
     private val remoteCustomTimeRecords = HashMap<String, RemoteCustomTimeRecord>()
 
-    val id get() = customTimeRecord.id
+    val id get() = localCustomTimeRecord.id
 
-    val current get() = customTimeRecord.current
+    val current get() = localCustomTimeRecord.current
 
-    override fun getName() = customTimeRecord.name
+    override fun getName() = localCustomTimeRecord.name
 
     fun setName(name: String) {
         Assert.assertTrue(name.isNotEmpty())
-        customTimeRecord.name = name
+        localCustomTimeRecord.name = name
 
         remoteCustomTimeRecords.values.forEach { it.name = name }
     }
 
     override fun getHourMinute(dayOfWeek: DayOfWeek): HourMinute = when (dayOfWeek) {
-        DayOfWeek.SUNDAY -> HourMinute(customTimeRecord.sundayHour, customTimeRecord.sundayMinute)
-        DayOfWeek.MONDAY -> HourMinute(customTimeRecord.mondayHour, customTimeRecord.mondayMinute)
-        DayOfWeek.TUESDAY -> HourMinute(customTimeRecord.tuesdayHour, customTimeRecord.tuesdayMinute)
-        DayOfWeek.WEDNESDAY -> HourMinute(customTimeRecord.wednesdayHour, customTimeRecord.wednesdayMinute)
-        DayOfWeek.THURSDAY -> HourMinute(customTimeRecord.thursdayHour, customTimeRecord.thursdayMinute)
-        DayOfWeek.FRIDAY -> HourMinute(customTimeRecord.fridayHour, customTimeRecord.fridayMinute)
-        DayOfWeek.SATURDAY -> HourMinute(customTimeRecord.saturdayHour, customTimeRecord.saturdayMinute)
+        DayOfWeek.SUNDAY -> HourMinute(localCustomTimeRecord.sundayHour, localCustomTimeRecord.sundayMinute)
+        DayOfWeek.MONDAY -> HourMinute(localCustomTimeRecord.mondayHour, localCustomTimeRecord.mondayMinute)
+        DayOfWeek.TUESDAY -> HourMinute(localCustomTimeRecord.tuesdayHour, localCustomTimeRecord.tuesdayMinute)
+        DayOfWeek.WEDNESDAY -> HourMinute(localCustomTimeRecord.wednesdayHour, localCustomTimeRecord.wednesdayMinute)
+        DayOfWeek.THURSDAY -> HourMinute(localCustomTimeRecord.thursdayHour, localCustomTimeRecord.thursdayMinute)
+        DayOfWeek.FRIDAY -> HourMinute(localCustomTimeRecord.fridayHour, localCustomTimeRecord.fridayMinute)
+        DayOfWeek.SATURDAY -> HourMinute(localCustomTimeRecord.saturdayHour, localCustomTimeRecord.saturdayMinute)
     }
 
     override fun getHourMinutes() = TreeMap<DayOfWeek, HourMinute>().apply {
@@ -45,8 +45,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val cust
     fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
         when (dayOfWeek) { // todo add a common interface for all custom time records
             DayOfWeek.SUNDAY -> {
-                customTimeRecord.sundayHour = hourMinute.hour
-                customTimeRecord.sundayMinute = hourMinute.minute
+                localCustomTimeRecord.sundayHour = hourMinute.hour
+                localCustomTimeRecord.sundayMinute = hourMinute.minute
 
                 remoteCustomTimeRecords.values.forEach {
                     it.sundayHour = hourMinute.hour
@@ -54,8 +54,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val cust
                 }
             }
             DayOfWeek.MONDAY -> {
-                customTimeRecord.mondayHour = hourMinute.hour
-                customTimeRecord.mondayMinute = hourMinute.minute
+                localCustomTimeRecord.mondayHour = hourMinute.hour
+                localCustomTimeRecord.mondayMinute = hourMinute.minute
 
                 remoteCustomTimeRecords.values.forEach {
                     it.mondayHour = hourMinute.hour
@@ -63,8 +63,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val cust
                 }
             }
             DayOfWeek.TUESDAY -> {
-                customTimeRecord.tuesdayHour = hourMinute.hour
-                customTimeRecord.tuesdayMinute = hourMinute.minute
+                localCustomTimeRecord.tuesdayHour = hourMinute.hour
+                localCustomTimeRecord.tuesdayMinute = hourMinute.minute
 
                 remoteCustomTimeRecords.values.forEach {
                     it.tuesdayHour = hourMinute.hour
@@ -72,8 +72,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val cust
                 }
             }
             DayOfWeek.WEDNESDAY -> {
-                customTimeRecord.wednesdayHour = hourMinute.hour
-                customTimeRecord.wednesdayMinute = hourMinute.minute
+                localCustomTimeRecord.wednesdayHour = hourMinute.hour
+                localCustomTimeRecord.wednesdayMinute = hourMinute.minute
 
                 remoteCustomTimeRecords.values.forEach {
                     it.wednesdayHour = hourMinute.hour
@@ -81,8 +81,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val cust
                 }
             }
             DayOfWeek.THURSDAY -> {
-                customTimeRecord.thursdayHour = hourMinute.hour
-                customTimeRecord.thursdayMinute = hourMinute.minute
+                localCustomTimeRecord.thursdayHour = hourMinute.hour
+                localCustomTimeRecord.thursdayMinute = hourMinute.minute
 
                 remoteCustomTimeRecords.values.forEach {
                     it.thursdayHour = hourMinute.hour
@@ -90,8 +90,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val cust
                 }
             }
             DayOfWeek.FRIDAY -> {
-                customTimeRecord.fridayHour = hourMinute.hour
-                customTimeRecord.fridayMinute = hourMinute.minute
+                localCustomTimeRecord.fridayHour = hourMinute.hour
+                localCustomTimeRecord.fridayMinute = hourMinute.minute
 
                 remoteCustomTimeRecords.values.forEach {
                     it.fridayHour = hourMinute.hour
@@ -99,8 +99,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val cust
                 }
             }
             DayOfWeek.SATURDAY -> {
-                customTimeRecord.saturdayHour = hourMinute.hour
-                customTimeRecord.saturdayMinute = hourMinute.minute
+                localCustomTimeRecord.saturdayHour = hourMinute.hour
+                localCustomTimeRecord.saturdayMinute = hourMinute.minute
 
                 remoteCustomTimeRecords.values.forEach {
                     it.saturdayHour = hourMinute.hour
@@ -113,48 +113,48 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val cust
     override fun toString() = name
 
     fun setCurrent() {
-        customTimeRecord.current = false
+        localCustomTimeRecord.current = false
     }
 
-    override fun getTimePair() = TimePair(CustomTimeKey(customTimeRecord.id), null)
+    override fun getTimePair() = TimePair(CustomTimeKey(localCustomTimeRecord.id), null)
 
     fun delete() {
         domainFactory.localFactory.deleteCustomTime(this)
 
-        customTimeRecord.delete()
+        localCustomTimeRecord.delete()
     }
 
     override fun getCustomTimeKey() = CustomTimeKey(id)
 
     fun addRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord) {
-        Assert.assertTrue(remoteCustomTimeRecord.localId == customTimeRecord.id)
+        Assert.assertTrue(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
         Assert.assertTrue(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.projectId))
 
         remoteCustomTimeRecords.put(remoteCustomTimeRecord.projectId, remoteCustomTimeRecord)
 
         // bez zapisywania na razie, dopiero przy następnej okazji
-        remoteCustomTimeRecord.name = customTimeRecord.name
+        remoteCustomTimeRecord.name = localCustomTimeRecord.name
 
-        remoteCustomTimeRecord.sundayHour = customTimeRecord.sundayHour
-        remoteCustomTimeRecord.sundayMinute = customTimeRecord.sundayMinute
+        remoteCustomTimeRecord.sundayHour = localCustomTimeRecord.sundayHour
+        remoteCustomTimeRecord.sundayMinute = localCustomTimeRecord.sundayMinute
 
-        remoteCustomTimeRecord.mondayHour = customTimeRecord.mondayHour
-        remoteCustomTimeRecord.mondayMinute = customTimeRecord.mondayMinute
+        remoteCustomTimeRecord.mondayHour = localCustomTimeRecord.mondayHour
+        remoteCustomTimeRecord.mondayMinute = localCustomTimeRecord.mondayMinute
 
-        remoteCustomTimeRecord.tuesdayHour = customTimeRecord.tuesdayHour
-        remoteCustomTimeRecord.tuesdayMinute = customTimeRecord.tuesdayMinute
+        remoteCustomTimeRecord.tuesdayHour = localCustomTimeRecord.tuesdayHour
+        remoteCustomTimeRecord.tuesdayMinute = localCustomTimeRecord.tuesdayMinute
 
-        remoteCustomTimeRecord.wednesdayHour = customTimeRecord.wednesdayHour
-        remoteCustomTimeRecord.wednesdayMinute = customTimeRecord.wednesdayMinute
+        remoteCustomTimeRecord.wednesdayHour = localCustomTimeRecord.wednesdayHour
+        remoteCustomTimeRecord.wednesdayMinute = localCustomTimeRecord.wednesdayMinute
 
-        remoteCustomTimeRecord.thursdayHour = customTimeRecord.thursdayHour
-        remoteCustomTimeRecord.thursdayMinute = customTimeRecord.thursdayMinute
+        remoteCustomTimeRecord.thursdayHour = localCustomTimeRecord.thursdayHour
+        remoteCustomTimeRecord.thursdayMinute = localCustomTimeRecord.thursdayMinute
 
-        remoteCustomTimeRecord.fridayHour = customTimeRecord.fridayHour
-        remoteCustomTimeRecord.fridayMinute = customTimeRecord.fridayMinute
+        remoteCustomTimeRecord.fridayHour = localCustomTimeRecord.fridayHour
+        remoteCustomTimeRecord.fridayMinute = localCustomTimeRecord.fridayMinute
 
-        remoteCustomTimeRecord.saturdayHour = customTimeRecord.saturdayHour
-        remoteCustomTimeRecord.saturdayMinute = customTimeRecord.saturdayMinute
+        remoteCustomTimeRecord.saturdayHour = localCustomTimeRecord.saturdayHour
+        remoteCustomTimeRecord.saturdayMinute = localCustomTimeRecord.saturdayMinute
     }
 
     fun hasRemoteRecord(projectId: String): Boolean {

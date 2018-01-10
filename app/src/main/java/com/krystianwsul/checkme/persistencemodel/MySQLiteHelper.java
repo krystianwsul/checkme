@@ -26,7 +26,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
-        CustomTimeRecord.Companion.onCreate(sqLiteDatabase);
+        LocalCustomTimeRecord.Companion.onCreate(sqLiteDatabase);
 
         TaskRecord.onCreate(sqLiteDatabase);
         TaskHierarchyRecord.onCreate(sqLiteDatabase);
@@ -52,7 +52,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         try
         {
             if (oldVersion < 17) {
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + CustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + LocalCustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DailyScheduleRecord.TABLE_DAILY_SCHEDULES);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceRecord.TABLE_INSTANCES);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceShownRecord.TABLE_INSTANCES_SHOWN);

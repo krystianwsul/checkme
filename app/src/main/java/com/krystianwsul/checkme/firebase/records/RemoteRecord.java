@@ -9,7 +9,7 @@ import junit.framework.Assert;
 import java.util.HashMap;
 import java.util.Map;
 
-abstract class RemoteRecord {
+abstract public class RemoteRecord {
     boolean mDelete = false;
     boolean mDeleted = false;
 

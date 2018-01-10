@@ -119,7 +119,7 @@ public class DatabaseWrapper {
     public static String getCustomTimeRecordId(@NonNull String projectId) {
         Assert.assertTrue(sRootReference != null);
 
-        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + RemoteCustomTimeRecord.CUSTOM_TIMES).push().getKey();
+        String id = sRootReference.child(RECORDS_KEY + "/" + projectId + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + RemoteCustomTimeRecord.Companion.getCUSTOM_TIMES()).push().getKey();
         Assert.assertTrue(!TextUtils.isEmpty(id));
 
         return id;

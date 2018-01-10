@@ -6,8 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import junit.framework.Assert;
-
 class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "tasks.db";
     private static final int DATABASE_VERSION = 20;
@@ -27,9 +25,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
+    public void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
         CustomTimeRecord.onCreate(sqLiteDatabase);
 
         TaskRecord.onCreate(sqLiteDatabase);
@@ -50,9 +46,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
+    public void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         sqLiteDatabase.beginTransaction();
 
         try

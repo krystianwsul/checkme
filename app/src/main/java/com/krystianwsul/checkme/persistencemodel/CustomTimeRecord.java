@@ -58,9 +58,7 @@ public class CustomTimeRecord extends Record {
 
     private boolean mCurrent;
 
-    public static void onCreate(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
+    public static void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_CUSTOM_TIMES
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_NAME + " TEXT NOT NULL, "
@@ -159,11 +157,12 @@ public class CustomTimeRecord extends Record {
         return mId;
     }
 
+    @NonNull
     public String getName() {
         return mName;
     }
 
-    public void setName(String name) {
+    public void setName(@NonNull String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
         mName = name;

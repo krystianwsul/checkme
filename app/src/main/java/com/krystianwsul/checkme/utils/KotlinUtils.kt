@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.utils
 
+import android.view.View
+import android.view.ViewTreeObserver
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.time.DayOfWeek
@@ -26,6 +28,18 @@ fun Set<DayOfWeek>.prettyPrint(): String {
         }
     } + ": "
 }
+
+fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+
+    override fun onGlobalLayout() {
+
+        @Suppress("DEPRECATION")
+        viewTreeObserver.removeGlobalOnLayoutListener(this)
+
+        action()
+    }
+})
+
 
 object KotlinUtils {
 

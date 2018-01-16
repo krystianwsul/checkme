@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
@@ -24,9 +25,11 @@ public class TaskHierarchyRecord extends Record {
     private final int mChildTaskId;
 
     private final long mStartTime;
+
+    @Nullable
     private Long mEndTime;
 
-    public static void onCreate(SQLiteDatabase sqLiteDatabase) {
+    public static void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_TASK_HIERARCHIES
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_PARENT_TASK_ID + " INTEGER NOT NULL REFERENCES " + TaskRecord.TABLE_TASKS + "(" + TaskRecord.COLUMN_ID + "), "
@@ -35,9 +38,8 @@ public class TaskHierarchyRecord extends Record {
                 + COLUMN_END_TIME + " INTEGER);");
     }
 
-    static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
+    @NonNull
+    static ArrayList<TaskHierarchyRecord> getTaskHierarchyRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
         ArrayList<TaskHierarchyRecord> taskHierarchyRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_TASK_HIERARCHIES, null, null, null, null, null, null);
@@ -51,9 +53,8 @@ public class TaskHierarchyRecord extends Record {
         return taskHierarchyRecords;
     }
 
-    private static TaskHierarchyRecord cursorToTaskHierarchyRecord(Cursor cursor) {
-        Assert.assertTrue(cursor != null);
-
+    @NonNull
+    private static TaskHierarchyRecord cursorToTaskHierarchyRecord(@NonNull Cursor cursor) {
         int id = cursor.getInt(0);
         int parentTaskId = cursor.getInt(1);
         int childTaskId = cursor.getInt(2);
@@ -66,12 +67,11 @@ public class TaskHierarchyRecord extends Record {
         return new TaskHierarchyRecord(true, id, parentTaskId, childTaskId, startTime, endTime);
     }
 
-    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    static int getMaxId(@NonNull SQLiteDatabase sqLiteDatabase) {
         return getMaxId(sqLiteDatabase, TABLE_TASK_HIERARCHIES, COLUMN_ID);
     }
 
-    TaskHierarchyRecord(boolean created, int id, int parentTaskId, int childTaskId, long startTime, Long endTime) {
+    TaskHierarchyRecord(boolean created, int id, int parentTaskId, int childTaskId, long startTime, @Nullable Long endTime) {
         super(created);
 
         Assert.assertTrue(parentTaskId != childTaskId);
@@ -100,6 +100,7 @@ public class TaskHierarchyRecord extends Record {
         return mStartTime;
     }
 
+    @Nullable
     public Long getEndTime() {
         return mEndTime;
     }

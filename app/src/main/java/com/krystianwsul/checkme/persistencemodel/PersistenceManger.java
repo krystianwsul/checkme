@@ -109,8 +109,8 @@ public class PersistenceManger {
         mInstanceRecords = InstanceRecord.Companion.getInstanceRecords(mSQLiteDatabase);
         mInstanceMaxId = InstanceRecord.Companion.getMaxId(mSQLiteDatabase);
 
-        mInstanceShownRecords = InstanceShownRecord.getInstancesShownRecords(mSQLiteDatabase);
-        mInstanceShownMaxId = InstanceShownRecord.getMaxId(mSQLiteDatabase);
+        mInstanceShownRecords = InstanceShownRecord.Companion.getInstancesShownRecords(mSQLiteDatabase);
+        mInstanceShownMaxId = InstanceShownRecord.Companion.getMaxId(mSQLiteDatabase);
 
         mUuidRecord = UuidRecord.getUuidRecord(mSQLiteDatabase);
     }

@@ -29,7 +29,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         LocalCustomTimeRecord.Companion.onCreate(sqLiteDatabase);
 
         TaskRecord.onCreate(sqLiteDatabase);
-        TaskHierarchyRecord.onCreate(sqLiteDatabase);
+        TaskHierarchyRecord.Companion.onCreate(sqLiteDatabase);
 
         ScheduleRecord.onCreate(sqLiteDatabase);
         SingleScheduleRecord.onCreate(sqLiteDatabase);
@@ -60,7 +60,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyWeekScheduleRecord.TABLE_MONTHLY_WEEK_SCHEDULES);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + ScheduleRecord.TABLE_SCHEDULES);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SingleScheduleRecord.TABLE_SINGLE_SCHEDULES);
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskHierarchyRecord.TABLE_TASK_HIERARCHIES);
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskHierarchyRecord.Companion.getTABLE_TASK_HIERARCHIES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskRecord.TABLE_TASKS);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UuidRecord.TABLE_UUID);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WeeklyScheduleRecord.TABLE_WEEKLY_SCHEDULES);

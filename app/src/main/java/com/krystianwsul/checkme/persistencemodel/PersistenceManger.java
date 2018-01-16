@@ -84,10 +84,9 @@ public class PersistenceManger {
         if (mTaskRecords.isEmpty())
             mTaskHierarchyRecords = new ArrayList<>();
         else
-            mTaskHierarchyRecords = TaskHierarchyRecord.getTaskHierarchyRecords(mSQLiteDatabase);
-        Assert.assertTrue(mTaskHierarchyRecords != null);
+            mTaskHierarchyRecords = TaskHierarchyRecord.Companion.getTaskHierarchyRecords(mSQLiteDatabase);
 
-        mTaskHierarchyMaxId = TaskHierarchyRecord.getMaxId(mSQLiteDatabase);
+        mTaskHierarchyMaxId = TaskHierarchyRecord.Companion.getMaxId(mSQLiteDatabase);
 
         mScheduleRecords = ScheduleRecord.getScheduleRecords(mSQLiteDatabase);
         mScheduleMaxId = ScheduleRecord.getMaxId(mSQLiteDatabase);

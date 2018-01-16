@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
@@ -37,24 +38,38 @@ public class InstanceRecord extends Record {
     private final int mId;
     private final int mTaskId;
 
+    @Nullable
     private Long mDone;
 
     private final int mScheduleYear;
     private final int mScheduleMonth;
     private final int mScheduleDay;
 
+    @Nullable
     private final Integer mScheduleCustomTimeId;
 
+    @Nullable
     private final Integer mScheduleHour;
+
+    @Nullable
     private final Integer mScheduleMinute;
 
+    @Nullable
     private Integer mInstanceYear;
+
+    @Nullable
     private Integer mInstanceMonth;
+
+    @Nullable
     private Integer mInstanceDay;
 
+    @Nullable
     private Integer mInstanceCustomTimeId;
 
+    @Nullable
     private Integer mInstanceHour;
+
+    @Nullable
     private Integer mInstanceMinute;
 
     private final long mHierarchyTime;
@@ -62,7 +77,7 @@ public class InstanceRecord extends Record {
     private boolean mNotified;
     private boolean mNotificationShown;
 
-    public static void onCreate(SQLiteDatabase sqLiteDatabase) {
+    public static void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_INSTANCES
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_TASK_ID + " INTEGER NOT NULL REFERENCES " + TaskRecord.TABLE_TASKS + "(" + TaskRecord.COLUMN_ID + "), "
@@ -103,13 +118,8 @@ public class InstanceRecord extends Record {
                 + ")");
     }
 
-    static ArrayList<InstanceRecord> getInstanceRecords(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
-
-        //sqLiteDatabase.delete(TABLE_INSTANCES, COLUMN_TASK_ID + " NOT IN (SELECT " + TaskRecord.COLUMN_ID + " FROM " + TaskRecord.TABLE_TASKS + ")", null);
-
-
+    @NonNull
+    static ArrayList<InstanceRecord> getInstanceRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
         ArrayList<InstanceRecord> instanceRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_INSTANCES, null, null, null, null, null, null);
@@ -124,7 +134,8 @@ public class InstanceRecord extends Record {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static InstanceRecord cursorToInstanceRecord(Cursor cursor) {
+    @NonNull
+    private static InstanceRecord cursorToInstanceRecord(@NonNull Cursor cursor) {
         Assert.assertTrue(cursor != null);
 
         int id = cursor.getInt(0);
@@ -161,12 +172,11 @@ public class InstanceRecord extends Record {
         return new InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown);
     }
 
-    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    static int getMaxId(@NonNull SQLiteDatabase sqLiteDatabase) {
         return getMaxId(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID);
     }
 
-    InstanceRecord(boolean created, int id, int taskId, Long done, int scheduleYear, int scheduleMonth, int scheduleDay, Integer scheduleCustomTimeId, Integer scheduleHour, Integer scheduleMinute, Integer instanceYear, Integer instanceMonth, Integer instanceDay, Integer instanceCustomTimeId, Integer instanceHour, Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown) {
+    InstanceRecord(boolean created, int id, int taskId, @Nullable Long done, int scheduleYear, int scheduleMonth, int scheduleDay, @Nullable Integer scheduleCustomTimeId, @Nullable Integer scheduleHour, @Nullable Integer scheduleMinute, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable Integer instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime, boolean notified, boolean notificationShown) {
         super(created);
 
         Assert.assertTrue((scheduleHour == null) == (scheduleMinute == null));
@@ -235,38 +245,47 @@ public class InstanceRecord extends Record {
         return mScheduleDay;
     }
 
+    @Nullable
     public Integer getScheduleCustomTimeId() {
         return mScheduleCustomTimeId;
     }
 
+    @Nullable
     public Integer getScheduleHour() {
         return mScheduleHour;
     }
 
+    @Nullable
     public Integer getScheduleMinute() {
         return mScheduleMinute;
     }
 
+    @Nullable
     public Integer getInstanceYear() {
         return mInstanceYear;
     }
 
+    @Nullable
     public Integer getInstanceMonth() {
         return mInstanceMonth;
     }
 
+    @Nullable
     public Integer getInstanceDay() {
         return mInstanceDay;
     }
 
+    @Nullable
     public Integer getInstanceCustomTimeId() {
         return mInstanceCustomTimeId;
     }
 
+    @Nullable
     public Integer getInstanceHour() {
         return mInstanceHour;
     }
 
+    @Nullable
     public Integer getInstanceMinute() {
         return mInstanceMinute;
     }
@@ -283,7 +302,7 @@ public class InstanceRecord extends Record {
         return mHierarchyTime;
     }
 
-    public void setDone(Long done) {
+    public void setDone(@Nullable Long done) {
         mDone = done;
         changed = true;
     }
@@ -303,17 +322,17 @@ public class InstanceRecord extends Record {
         changed = true;
     }
 
-    public void setInstanceCustomTimeId(Integer instanceCustomTimeId) {
+    public void setInstanceCustomTimeId(@Nullable Integer instanceCustomTimeId) {
         mInstanceCustomTimeId = instanceCustomTimeId;
         changed = true;
     }
 
-    public void setInstanceHour(Integer instanceHour) {
+    public void setInstanceHour(@Nullable Integer instanceHour) {
         mInstanceHour = instanceHour;
         changed = true;
     }
 
-    public void setInstanceMinute(Integer instanceMinute) {
+    public void setInstanceMinute(@Nullable Integer instanceMinute) {
         mInstanceMinute = instanceMinute;
         changed = true;
     }

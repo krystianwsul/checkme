@@ -492,7 +492,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
 
             groupListFragment.getActivity().startActivity(ShowInstanceActivity.Companion.getIntent(groupListFragment.getActivity(), instanceData.getInstanceKey()));
         } else {
-            groupListFragment.getActivity().startActivity(ShowGroupActivity.getIntent(((NotDoneGroupNode) notDoneGroupTreeNode.getModelNode()).mExactTimeStamp, groupListFragment.getActivity()));
+            groupListFragment.getActivity().startActivity(ShowGroupActivity.Companion.getIntent(((NotDoneGroupNode) notDoneGroupTreeNode.getModelNode()).mExactTimeStamp, groupListFragment.getActivity()));
         }
     }
 

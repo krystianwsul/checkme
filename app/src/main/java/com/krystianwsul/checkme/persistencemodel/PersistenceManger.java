@@ -90,7 +90,6 @@ public class PersistenceManger {
         mTaskHierarchyMaxId = TaskHierarchyRecord.getMaxId(mSQLiteDatabase);
 
         mScheduleRecords = ScheduleRecord.getScheduleRecords(mSQLiteDatabase);
-
         mScheduleMaxId = ScheduleRecord.getMaxId(mSQLiteDatabase);
 
         mSingleScheduleRecords = Stream.of(SingleScheduleRecord.getSingleScheduleRecords(mSQLiteDatabase))
@@ -108,13 +107,10 @@ public class PersistenceManger {
         mMonthlyWeekScheduleRecords = Stream.of(MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(MonthlyWeekScheduleRecord::getScheduleId, monthlyWeekScheduleRecord -> monthlyWeekScheduleRecord));
 
-        mInstanceRecords = InstanceRecord.getInstanceRecords(mSQLiteDatabase);
-        Assert.assertTrue(mInstanceRecords != null);
-
-        mInstanceMaxId = InstanceRecord.getMaxId(mSQLiteDatabase);
+        mInstanceRecords = InstanceRecord.Companion.getInstanceRecords(mSQLiteDatabase);
+        mInstanceMaxId = InstanceRecord.Companion.getMaxId(mSQLiteDatabase);
 
         mInstanceShownRecords = InstanceShownRecord.getInstancesShownRecords(mSQLiteDatabase);
-
         mInstanceShownMaxId = InstanceShownRecord.getMaxId(mSQLiteDatabase);
 
         mUuidRecord = UuidRecord.getUuidRecord(mSQLiteDatabase);
@@ -294,41 +290,6 @@ public class PersistenceManger {
         mSingleScheduleRecords.put(singleScheduleRecord.getScheduleId(), singleScheduleRecord);
 
         return singleScheduleRecord;
-    }
-
-    @NonNull
-    public DailyScheduleRecord createDailyScheduleRecord(int scheduleId, @NonNull Time time) {
-        Assert.assertTrue(!mSingleScheduleRecords.containsKey(scheduleId));
-        Assert.assertTrue(!mDailyScheduleRecords.containsKey(scheduleId));
-        Assert.assertTrue(!mWeeklyScheduleRecords.containsKey(scheduleId));
-        Assert.assertTrue(!mMonthlyDayScheduleRecords.containsKey(scheduleId));
-        Assert.assertTrue(!mMonthlyWeekScheduleRecords.containsKey(scheduleId));
-
-        Integer customTimeId;
-        Integer hour;
-        Integer minute;
-
-        if (time.getTimePair().mCustomTimeKey != null) {
-            Assert.assertTrue(time.getTimePair().mHourMinute == null);
-
-            customTimeId = time.getTimePair().mCustomTimeKey.mLocalCustomTimeId;
-            Assert.assertTrue(customTimeId != null);
-
-            hour = null;
-            minute = null;
-        } else {
-            Assert.assertTrue(time.getTimePair().mHourMinute != null);
-
-            customTimeId = null;
-
-            hour = time.getTimePair().mHourMinute.getHour();
-            minute = time.getTimePair().mHourMinute.getMinute();
-        }
-
-        DailyScheduleRecord dailyScheduleRecord = new DailyScheduleRecord(false, scheduleId, customTimeId, hour, minute);
-        mDailyScheduleRecords.put(scheduleId, dailyScheduleRecord);
-
-        return dailyScheduleRecord;
     }
 
     @NonNull

@@ -38,7 +38,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         MonthlyDayScheduleRecord.onCreate(sqLiteDatabase);
         MonthlyWeekScheduleRecord.onCreate(sqLiteDatabase);
 
-        InstanceRecord.onCreate(sqLiteDatabase);
+        InstanceRecord.Companion.onCreate(sqLiteDatabase);
 
         InstanceShownRecord.onCreate(sqLiteDatabase);
 
@@ -54,7 +54,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
             if (oldVersion < 17) {
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + LocalCustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DailyScheduleRecord.Companion.getTABLE_DAILY_SCHEDULES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceRecord.TABLE_INSTANCES);
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceRecord.Companion.getTABLE_INSTANCES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceShownRecord.TABLE_INSTANCES_SHOWN);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyDayScheduleRecord.TABLE_MONTHLY_DAY_SCHEDULES);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyWeekScheduleRecord.TABLE_MONTHLY_WEEK_SCHEDULES);

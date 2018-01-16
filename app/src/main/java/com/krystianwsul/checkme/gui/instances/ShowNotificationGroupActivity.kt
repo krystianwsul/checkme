@@ -42,9 +42,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
 
         setSupportActionBar(toolbar)
 
-        val actionBar = supportActionBar!!
-
-        actionBar.setTitle(null)
+        supportActionBar!!.title = null
 
         groupListFragment = (supportFragmentManager.findFragmentById(R.id.show_notification_group_list) as? GroupListFragment) ?: GroupListFragment.newInstance().also {
             supportFragmentManager.beginTransaction()

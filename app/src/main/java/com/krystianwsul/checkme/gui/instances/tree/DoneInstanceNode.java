@@ -20,7 +20,7 @@ import junit.framework.Assert;
 
 import java.util.HashMap;
 
-class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollectionParent {
+public class DoneInstanceNode extends GroupHolderNode implements ModelNode, NodeCollectionParent {
     @NonNull
     final GroupListFragment.InstanceData mInstanceData;
 

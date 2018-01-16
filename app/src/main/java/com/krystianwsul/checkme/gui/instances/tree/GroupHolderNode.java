@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-abstract class GroupHolderNode {
+public abstract class GroupHolderNode {
     final float mDensity;
     final int mIndentation;
 

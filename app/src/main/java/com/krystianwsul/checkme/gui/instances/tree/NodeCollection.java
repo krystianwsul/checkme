@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-class NodeCollection {
+public class NodeCollection {
     @NonNull
     private final NodeCollectionParent mNodeCollectionParent;
 

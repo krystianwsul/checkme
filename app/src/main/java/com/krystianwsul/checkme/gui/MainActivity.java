@@ -979,7 +979,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         @Override
         public Fragment getItem(int position) {
-            return DayFragment.newInstance(mTimeRange, position);
+            return DayFragment.Companion.newInstance(mTimeRange, position);
         }
 
         @Override

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import junit.framework.Assert;
 
@@ -25,7 +26,7 @@ public class DailyScheduleRecord extends Record {
     private final Integer mHour;
     private final Integer mMinute;
 
-    public static void onCreate(SQLiteDatabase sqLiteDatabase) {
+    public static void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_DAILY_SCHEDULES
                 + " (" + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL UNIQUE REFERENCES " + ScheduleRecord.TABLE_SCHEDULES + "(" + ScheduleRecord.COLUMN_ID + "), "
                 + COLUMN_CUSTOM_TIME_ID + " INTEGER REFERENCES " + LocalCustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES() + "(" + LocalCustomTimeRecord.Companion.getCOLUMN_ID() + "), "
@@ -48,9 +49,8 @@ public class DailyScheduleRecord extends Record {
         return dailyScheduleTimeRecords;
     }
 
-    private static DailyScheduleRecord cursorToDailyScheduleTimeRecord(Cursor cursor) {
-        Assert.assertTrue(cursor != null);
-
+    @NonNull
+    private static DailyScheduleRecord cursorToDailyScheduleTimeRecord(@NonNull Cursor cursor) {
         int scheduleId = cursor.getInt(0);
         Integer customTimeId = (cursor.isNull(1) ? null : cursor.getInt(1));
         Integer hour = (cursor.isNull(2) ? null : cursor.getInt(2));
@@ -63,7 +63,7 @@ public class DailyScheduleRecord extends Record {
         return new DailyScheduleRecord(true, scheduleId, customTimeId, hour, minute);
     }
 
-    DailyScheduleRecord(boolean created, int scheduleId, Integer customTimeId, Integer hour, Integer minute) {
+    DailyScheduleRecord(boolean created, int scheduleId, @Nullable Integer customTimeId, @Nullable Integer hour, @Nullable Integer minute) {
         super(created);
 
         Assert.assertTrue((hour == null) == (minute == null));
@@ -82,16 +82,17 @@ public class DailyScheduleRecord extends Record {
         return mScheduleId;
     }
 
+    @Nullable
     public Integer getCustomTimeId() {
         return mCustomTimeId;
     }
 
-    @NonNull
+    @Nullable
     public Integer getHour() {
         return mHour;
     }
 
-    @NonNull
+    @Nullable
     public Integer getMinute() {
         return mMinute;
     }

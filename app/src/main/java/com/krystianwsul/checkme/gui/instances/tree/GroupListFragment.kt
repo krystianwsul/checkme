@@ -283,7 +283,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 val instanceData1 = when (it) {
                     is NotDoneGroupNode -> it.singleInstanceData
                     is NotDoneGroupNode.NotDoneInstanceNode -> it.mInstanceData
-                    is DoneInstanceNode -> it.mInstanceData
+                    is DoneInstanceNode -> it.instanceData
                     else -> {
                         Assert.assertTrue(it is DividerNode)
 

@@ -714,9 +714,7 @@ class NotDoneGroupNode extends GroupHolderNode implements ModelNode, NodeCollect
             return getTreeNode().expanded();
         }
 
-        void addExpandedInstances(HashMap<InstanceKey, Boolean> expandedInstances) {
-            Assert.assertTrue(expandedInstances != null);
-
+        void addExpandedInstances(@NonNull HashMap<InstanceKey, Boolean> expandedInstances) {
             if (!expanded())
                 return;
 

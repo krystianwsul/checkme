@@ -79,7 +79,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     if (it is NotDoneGroupNode) {
                         instanceDatas.add(it.singleInstanceData)
                     } else {
-                        instanceDatas.add((it as NotDoneGroupNode.NotDoneInstanceNode).mInstanceData)
+                        instanceDatas.add((it as NotDoneGroupNode.NotDoneInstanceNode).instanceData)
                     }
                 }
             }
@@ -255,7 +255,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                                 nodeCollection.dividerNode.add(instanceData)
                                 nodeCollection.notDoneGroupCollection.remove(it)
                             } else {
-                                val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).mInstanceData
+                                val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
                                 instanceData.Done = done
 
                                 recursiveExists(instanceData)
@@ -282,7 +282,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             treeNode.modelNode.let {
                 val instanceData1 = when (it) {
                     is NotDoneGroupNode -> it.singleInstanceData
-                    is NotDoneGroupNode.NotDoneInstanceNode -> it.mInstanceData
+                    is NotDoneGroupNode.NotDoneInstanceNode -> it.instanceData
                     is DoneInstanceNode -> it.instanceData
                     else -> {
                         Assert.assertTrue(it is DividerNode)

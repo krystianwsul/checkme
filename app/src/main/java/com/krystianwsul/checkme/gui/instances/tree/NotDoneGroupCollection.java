@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class NotDoneGroupCollection {
+public class NotDoneGroupCollection {
     @NonNull
     private final NodeCollection mNodeCollection;
 
@@ -92,7 +92,7 @@ class NotDoneGroupCollection {
         ExactTimeStamp exactTimeStamp = instanceData.getInstanceTimeStamp().toExactTimeStamp();
 
         List<NotDoneGroupNode> timeStampNotDoneGroupNodes = Stream.of(mNotDoneGroupNodes)
-                .filter(notDoneGroupNode -> notDoneGroupNode.mExactTimeStamp.equals(exactTimeStamp))
+                .filter(notDoneGroupNode -> notDoneGroupNode.getExactTimeStamp().equals(exactTimeStamp))
                 .collect(Collectors.toList());
 
         if (timeStampNotDoneGroupNodes.isEmpty() || !nodeCollection.mUseGroups) {
@@ -139,7 +139,7 @@ class NotDoneGroupCollection {
     List<TimeStamp> getExpandedGroups() {
         return Stream.of(mNotDoneGroupNodes)
                 .filter(notDoneGroupNode -> !notDoneGroupNode.singleInstance() && notDoneGroupNode.expanded())
-                .map(notDoneGroupNode -> notDoneGroupNode.mExactTimeStamp.toTimeStamp())
+                .map(notDoneGroupNode -> notDoneGroupNode.getExactTimeStamp().toTimeStamp())
                 .collect(Collectors.toList());
     }
 

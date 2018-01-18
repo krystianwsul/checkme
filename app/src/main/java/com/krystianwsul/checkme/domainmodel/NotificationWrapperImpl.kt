@@ -116,11 +116,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private fun getChildNames(instance: Instance, now: ExactTimeStamp): List<String> {
         val childInstances = instance.getChildInstances(now)
 
-        val notDone = childInstances.filter { it.done == null }.sortedBy { it.task.startExactTimeStamp }
-
-        val done = childInstances.filter { it.done != null }.sortedBy { it.done!!.long }
-
-        return (notDone + done).map(Instance::name)
+        return childInstances.filter { it.done == null }
+                .sortedBy { it.task.startExactTimeStamp }
+                .map { it.name }
     }
 
     protected open fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {

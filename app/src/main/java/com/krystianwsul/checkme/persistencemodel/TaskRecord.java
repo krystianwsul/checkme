@@ -4,11 +4,13 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskRecord extends Record {
     static final String TABLE_TASKS = "tasks";
@@ -22,19 +24,29 @@ public class TaskRecord extends Record {
     private static final String COLUMN_OLDEST_VISIBLE_DAY = "oldestVisibleDay";
     private static final String COLUMN_NOTE = "note";
 
-    private final int mId;
-    private String mName;
+    private final int id;
 
-    private final long mStartTime;
-    private Long mEndTime;
+    @NonNull
+    private String name;
 
-    private Integer mOldestVisibleYear;
-    private Integer mOldestVisibleMonth;
-    private Integer mOldestVisibleDay;
+    private final long startTime;
 
-    private String mNote;
+    @Nullable
+    private Long endTime;
 
-    public static void onCreate(SQLiteDatabase sqLiteDatabase) {
+    @Nullable
+    private Integer oldestVisibleYear;
+
+    @Nullable
+    private Integer oldestVisibleMonth;
+
+    @Nullable
+    private Integer oldestVisibleDay;
+
+    @Nullable
+    private String note;
+
+    public static void onCreate(@NonNull SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_TASKS
                 + " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + COLUMN_NAME + " TEXT NOT NULL, "
@@ -46,9 +58,8 @@ public class TaskRecord extends Record {
                 + COLUMN_NOTE + " TEXT);");
     }
 
-    static ArrayList<TaskRecord> getTaskRecords(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
-
+    @NonNull
+    static List<TaskRecord> getTaskRecords(@NonNull SQLiteDatabase sqLiteDatabase) {
         ArrayList<TaskRecord> taskRecords = new ArrayList<>();
 
         Cursor cursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null);
@@ -62,9 +73,8 @@ public class TaskRecord extends Record {
         return taskRecords;
     }
 
-    private static TaskRecord cursorToTaskRecord(Cursor cursor) {
-        Assert.assertTrue(cursor != null);
-
+    @NonNull
+    private static TaskRecord cursorToTaskRecord(@NonNull Cursor cursor) {
         int id = cursor.getInt(0);
         String name = cursor.getString(1);
         long startTime = cursor.getLong(2);
@@ -82,12 +92,11 @@ public class TaskRecord extends Record {
         return new TaskRecord(true, id, name, startTime, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, note);
     }
 
-    static int getMaxId(SQLiteDatabase sqLiteDatabase) {
-        Assert.assertTrue(sqLiteDatabase != null);
+    static int getMaxId(@NonNull SQLiteDatabase sqLiteDatabase) {
         return getMaxId(sqLiteDatabase, TABLE_TASKS, COLUMN_ID);
     }
 
-    TaskRecord(boolean created, int id, String name, long startTime, Long endTime, Integer oldestVisibleYear, Integer oldestVisibleMonth, Integer oldestVisibleDay, String note) {
+    TaskRecord(boolean created, int id, @NonNull String name, long startTime, @Nullable Long endTime, @Nullable Integer oldestVisibleYear, @Nullable Integer oldestVisibleMonth, @Nullable Integer oldestVisibleDay, @Nullable String note) {
         super(created);
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -95,82 +104,88 @@ public class TaskRecord extends Record {
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleMonth == null));
         Assert.assertTrue((oldestVisibleYear == null) == (oldestVisibleDay == null));
 
-        mId = id;
-        mName = name;
-        mStartTime = startTime;
-        mEndTime = endTime;
+        this.id = id;
+        this.name = name;
+        this.startTime = startTime;
+        this.endTime = endTime;
 
-        mOldestVisibleDay = oldestVisibleDay;
-        mOldestVisibleMonth = oldestVisibleMonth;
-        mOldestVisibleYear = oldestVisibleYear;
+        this.oldestVisibleDay = oldestVisibleDay;
+        this.oldestVisibleMonth = oldestVisibleMonth;
+        this.oldestVisibleYear = oldestVisibleYear;
 
-        mNote = note;
+        this.note = note;
     }
 
     public int getId() {
-        return mId;
+        return id;
     }
 
+    @NonNull
     public String getName() {
-        return mName;
+        return name;
     }
 
     public long getStartTime() {
-        return mStartTime;
+        return startTime;
     }
 
+    @Nullable
     public Long getEndTime() {
-        return mEndTime;
+        return endTime;
     }
 
+    @Nullable
     public Integer getOldestVisibleYear() {
-        return mOldestVisibleYear;
+        return oldestVisibleYear;
     }
 
+    @Nullable
     public Integer getOldestVisibleMonth() {
-        return mOldestVisibleMonth;
+        return oldestVisibleMonth;
     }
 
+    @Nullable
     public Integer getOldestVisibleDay() {
-        return mOldestVisibleDay;
+        return oldestVisibleDay;
     }
 
+    @Nullable
     public String getNote() {
-        return mNote;
+        return note;
     }
 
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        mName = name;
+        this.name = name;
         changed = true;
     }
 
     public void setEndTime(long endTime) {
-        Assert.assertTrue(mEndTime == null);
-        Assert.assertTrue(mStartTime <= endTime);
+        Assert.assertTrue(this.endTime == null);
+        Assert.assertTrue(startTime <= endTime);
 
-        mEndTime = endTime;
+        this.endTime = endTime;
         changed = true;
     }
 
     public void setOldestVisibleYear(int oldestVisibleYear) {
-        mOldestVisibleYear = oldestVisibleYear;
+        this.oldestVisibleYear = oldestVisibleYear;
         changed = true;
     }
 
     public void setOldestVisibleMonth(int oldestVisibleYearMonth) {
-        mOldestVisibleMonth = oldestVisibleYearMonth;
+        oldestVisibleMonth = oldestVisibleYearMonth;
         changed = true;
     }
 
     public void setOldestVisibleDay(int oldestVisibleDay) {
-        mOldestVisibleDay = oldestVisibleDay;
+        this.oldestVisibleDay = oldestVisibleDay;
         changed = true;
     }
 
-    public void setNote(String note) {
-        mNote = note;
+    public void setNote(@Nullable String note) {
+        this.note = note;
         changed = true;
     }
 
@@ -178,20 +193,20 @@ public class TaskRecord extends Record {
     @Override
     ContentValues getContentValues() {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_NAME, mName);
-        contentValues.put(COLUMN_START_TIME, mStartTime);
-        contentValues.put(COLUMN_END_TIME, mEndTime);
-        contentValues.put(COLUMN_OLDEST_VISIBLE_YEAR, mOldestVisibleYear);
-        contentValues.put(COLUMN_OLDEST_VISIBLE_MONTH, mOldestVisibleMonth);
-        contentValues.put(COLUMN_OLDEST_VISIBLE_DAY, mOldestVisibleDay);
-        contentValues.put(COLUMN_NOTE, mNote);
+        contentValues.put(COLUMN_NAME, name);
+        contentValues.put(COLUMN_START_TIME, startTime);
+        contentValues.put(COLUMN_END_TIME, endTime);
+        contentValues.put(COLUMN_OLDEST_VISIBLE_YEAR, oldestVisibleYear);
+        contentValues.put(COLUMN_OLDEST_VISIBLE_MONTH, oldestVisibleMonth);
+        contentValues.put(COLUMN_OLDEST_VISIBLE_DAY, oldestVisibleDay);
+        contentValues.put(COLUMN_NOTE, note);
         return contentValues;
     }
 
     @NonNull
     @Override
     UpdateCommand getUpdateCommand() {
-        return getUpdateCommand(TABLE_TASKS, COLUMN_ID, mId);
+        return getUpdateCommand(TABLE_TASKS, COLUMN_ID, id);
     }
 
     @NonNull
@@ -203,6 +218,6 @@ public class TaskRecord extends Record {
     @NonNull
     @Override
     DeleteCommand getDeleteCommand() {
-        return getDeleteCommand(TABLE_TASKS, COLUMN_ID, mId);
+        return getDeleteCommand(TABLE_TASKS, COLUMN_ID, id);
     }
 }

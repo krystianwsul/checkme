@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.persistencemodel
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
@@ -24,8 +23,6 @@ class PersistenceManger {
             return sInstance!!
         }
     }
-
-    val sqLiteDatabase: SQLiteDatabase?
 
     private val _customTimeRecords: MutableList<LocalCustomTimeRecord>
     private val _taskRecords: MutableList<TaskRecord>
@@ -85,7 +82,7 @@ class PersistenceManger {
 
     @SuppressLint("UseSparseArrays")
     private constructor(context: Context) {
-        sqLiteDatabase = MySQLiteHelper.database
+        val sqLiteDatabase = MySQLiteHelper.database
 
         _customTimeRecords = LocalCustomTimeRecord.getCustomTimeRecords(sqLiteDatabase)
 
@@ -136,7 +133,6 @@ class PersistenceManger {
 
     @SuppressLint("UseSparseArrays")
     constructor() {
-        sqLiteDatabase = null
         _customTimeRecords = ArrayList()
         _taskRecords = ArrayList()
         _taskHierarchyRecords = ArrayList()

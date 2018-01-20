@@ -22,7 +22,7 @@ class SaveService : JobIntentService() {
             Log.e("asdf", "SaveService.save")
 
             try {
-                val sqLiteDatabase = PersistenceManger.getInstance(context).sqLiteDatabase!!
+                val sqLiteDatabase = MySQLiteHelper.database
 
                 sqLiteDatabase.beginTransaction()
 

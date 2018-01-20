@@ -105,6 +105,10 @@ public class DomainFactoryTest {
         MyCrashlytics.initialize();
     }
 
+    private PersistenceManger newPersistenceManger() {
+        return new PersistenceManger();
+    }
+
     @SuppressLint("CommitPrefEdits")
     @Before
     public void setUp() throws Exception {
@@ -144,7 +148,7 @@ public class DomainFactoryTest {
 
     @Test
     public void testRelevantSingleNoChildren() throws Exception {
-        PersistenceManger persistenceManger = new PersistenceManger();
+        PersistenceManger persistenceManger = newPersistenceManger();
 
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
@@ -211,7 +215,7 @@ public class DomainFactoryTest {
 
     @Test
     public void testRelevantSingleWithChildren() throws Exception {
-        PersistenceManger persistenceManger = new PersistenceManger();
+        PersistenceManger persistenceManger = newPersistenceManger();
 
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
@@ -319,7 +323,7 @@ public class DomainFactoryTest {
 
     @Test
     public void testRelevantSingleAndNoReminderNextDay() {
-        PersistenceManger persistenceManger = new PersistenceManger();
+        PersistenceManger persistenceManger = newPersistenceManger();
 
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
@@ -364,7 +368,7 @@ public class DomainFactoryTest {
 
     @Test
     public void testJoinLeavesPreviousInstances() {
-        PersistenceManger persistenceManger = new PersistenceManger();
+        PersistenceManger persistenceManger = newPersistenceManger();
 
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
@@ -406,7 +410,7 @@ public class DomainFactoryTest {
 
     @Test
     public void testSharedChild() {
-        PersistenceManger persistenceManger = new PersistenceManger();
+        PersistenceManger persistenceManger = newPersistenceManger();
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
         // day 1:
@@ -557,7 +561,7 @@ public class DomainFactoryTest {
 
     @Test
     public void testChildAddedToInstanceInPast() {
-        PersistenceManger persistenceManger = new PersistenceManger();
+        PersistenceManger persistenceManger = newPersistenceManger();
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
         // hour 0: check no instances
@@ -614,7 +618,7 @@ public class DomainFactoryTest {
         // hour 5: edit task split, set parent parent
         // hour 6: check two instances, parent has one child
 
-        PersistenceManger persistenceManger = new PersistenceManger();
+        PersistenceManger persistenceManger = newPersistenceManger();
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
         Date date = new Date(2016, 1, 1);
@@ -679,7 +683,7 @@ public class DomainFactoryTest {
         // hour 3: edit task, hour 6
         // hour 4: check one instance, hour 6
 
-        PersistenceManger persistenceManger = new PersistenceManger();
+        PersistenceManger persistenceManger = newPersistenceManger();
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
 
         Date date = new Date(2016, 1, 1);

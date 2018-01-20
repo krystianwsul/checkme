@@ -62,15 +62,16 @@ kapt {
 ext {
     supportLibVersion = '27.0.2'
     firebaseVersion = '11.6.2'
+    powermockVersion = '1.6.6'
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    testCompile "org.powermock:powermock-module-junit4:1.6.2"
-    testCompile "org.powermock:powermock-module-junit4-rule:1.6.2"
-    testCompile "org.powermock:powermock-api-mockito:1.6.2"
-    testCompile "org.powermock:powermock-classloading-xstream:1.6.2"
+    testCompile "org.powermock:powermock-module-junit4:$powermockVersion"
+    testCompile "org.powermock:powermock-module-junit4-rule:$powermockVersion"
+    testCompile "org.powermock:powermock-api-mockito:$powermockVersion"
+    testCompile "org.powermock:powermock-classloading-xstream:$powermockVersion"
     compile('com.github.afollestad.material-dialogs:core:0.8.5.8@aar') {
         transitive = true
     }

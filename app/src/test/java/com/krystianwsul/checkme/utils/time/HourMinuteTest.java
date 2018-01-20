@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.utils.time;
 
-import android.support.v4.util.Pair;
-
 import junit.framework.Assert;
 
 import org.junit.Test;
+
+import kotlin.Pair;
 
 public class HourMinuteTest {
     @Test
@@ -15,8 +15,8 @@ public class HourMinuteTest {
 
         Pair<Date, HourMinute> result = HourMinute.getNextHour(date, now);
 
-        Assert.assertTrue(result.first.equals(date));
-        Assert.assertTrue(result.second.equals(new HourMinute(2, 0)));
+        Assert.assertTrue(result.getFirst().equals(date));
+        Assert.assertTrue(result.getSecond().equals(new HourMinute(2, 0)));
     }
 
     @Test
@@ -27,7 +27,7 @@ public class HourMinuteTest {
 
         Pair<Date, HourMinute> result = HourMinute.getNextHour(date, now);
 
-        Assert.assertTrue(result.first.equals(new Date(2016, 1, 2)));
-        Assert.assertTrue(result.second.equals(new HourMinute(0, 0)));
+        Assert.assertTrue(result.getFirst().equals(new Date(2016, 1, 2)));
+        Assert.assertTrue(result.getSecond().equals(new HourMinute(0, 0)));
     }
 }

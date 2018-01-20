@@ -29,24 +29,43 @@ import java.util.Map;
 import java.util.Set;
 
 public class PersistenceManger {
+    @Nullable
     private static PersistenceManger sInstance;
 
+    @Nullable
     private final SQLiteDatabase mSQLiteDatabase;
 
+    @NonNull
     final List<LocalCustomTimeRecord> mLocalCustomTimeRecords;
 
+    @NonNull
     final List<TaskRecord> mTaskRecords;
+
+    @NonNull
     final List<TaskHierarchyRecord> mTaskHierarchyRecords;
 
+    @NonNull
     final List<ScheduleRecord> mScheduleRecords;
+
+    @NonNull
     final Map<Integer, SingleScheduleRecord> mSingleScheduleRecords;
+
+    @NonNull
     final Map<Integer, DailyScheduleRecord> mDailyScheduleRecords;
+
+    @NonNull
     final Map<Integer, WeeklyScheduleRecord> mWeeklyScheduleRecords;
+
+    @NonNull
     final Map<Integer, MonthlyDayScheduleRecord> mMonthlyDayScheduleRecords;
+
+    @NonNull
     final Map<Integer, MonthlyWeekScheduleRecord> mMonthlyWeekScheduleRecords;
 
+    @NonNull
     final List<InstanceRecord> mInstanceRecords;
 
+    @NonNull
     final List<InstanceShownRecord> mInstanceShownRecords;
 
     @NonNull
@@ -60,9 +79,7 @@ public class PersistenceManger {
     private int mInstanceShownMaxId;
 
     @NonNull
-    public static synchronized PersistenceManger getInstance(Context context) {
-        Assert.assertTrue(context != null);
-
+    public static synchronized PersistenceManger getInstance(@NonNull Context context) {
         if (sInstance == null)
             sInstance = new PersistenceManger(context);
         return sInstance;
@@ -142,18 +159,22 @@ public class PersistenceManger {
         sInstance = null;
     }
 
+    @NonNull
     public Collection<LocalCustomTimeRecord> getCustomTimeRecords() {
         return mLocalCustomTimeRecords;
     }
 
+    @NonNull
     public Collection<TaskRecord> getTaskRecords() {
         return mTaskRecords;
     }
 
+    @NonNull
     public Collection<TaskHierarchyRecord> getTaskHierarchyRecords() {
         return mTaskHierarchyRecords;
     }
 
+    @NonNull
     public List<ScheduleRecord> getScheduleRecords(int localTaskId) {
         return Stream.of(mScheduleRecords)
                 .filter(scheduleRecord -> scheduleRecord.getRootTaskId() == localTaskId)
@@ -185,17 +206,19 @@ public class PersistenceManger {
         return mMonthlyWeekScheduleRecords.get(scheduleId);
     }
 
+    @NonNull
     public Collection<InstanceRecord> getInstanceRecords() {
         return mInstanceRecords;
     }
 
+    @NonNull
     public List<InstanceShownRecord> getInstanceShownRecords() {
         return mInstanceShownRecords;
     }
 
-    public LocalCustomTimeRecord createCustomTimeRecord(String name, Map<DayOfWeek, HourMinute> hourMinutes) {
+    @NonNull
+    public LocalCustomTimeRecord createCustomTimeRecord(@NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         Assert.assertTrue(!TextUtils.isEmpty(name));
-        Assert.assertTrue(hourMinutes != null);
 
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SUNDAY) != null);
         Assert.assertTrue(hourMinutes.get(DayOfWeek.MONDAY) != null);
@@ -232,6 +255,7 @@ public class PersistenceManger {
         return taskRecord;
     }
 
+    @NonNull
     public TaskHierarchyRecord createTaskHierarchyRecord(@NonNull LocalTask parentLocalTask, @NonNull LocalTask childLocalTask, @NonNull ExactTimeStamp startExactTimeStamp) {
         Assert.assertTrue(parentLocalTask.current(startExactTimeStamp));
         Assert.assertTrue(childLocalTask.current(startExactTimeStamp));
@@ -423,6 +447,7 @@ public class PersistenceManger {
         SaveService.Factory.Companion.getInstance().startService(context, this, source);
     }
 
+    @Nullable
     SQLiteDatabase getSQLiteDatabase() {
         return mSQLiteDatabase;
     }

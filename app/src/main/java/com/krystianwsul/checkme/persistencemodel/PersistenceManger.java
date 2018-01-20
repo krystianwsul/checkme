@@ -88,8 +88,8 @@ public class PersistenceManger {
 
         mTaskHierarchyMaxId = TaskHierarchyRecord.Companion.getMaxId(mSQLiteDatabase);
 
-        mScheduleRecords = ScheduleRecord.getScheduleRecords(mSQLiteDatabase);
-        mScheduleMaxId = ScheduleRecord.getMaxId(mSQLiteDatabase);
+        mScheduleRecords = ScheduleRecord.Companion.getScheduleRecords(mSQLiteDatabase);
+        mScheduleMaxId = ScheduleRecord.Companion.getMaxId(mSQLiteDatabase);
 
         mSingleScheduleRecords = Stream.of(SingleScheduleRecord.getSingleScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(SingleScheduleRecord::getScheduleId, singleScheduleRecord -> singleScheduleRecord));

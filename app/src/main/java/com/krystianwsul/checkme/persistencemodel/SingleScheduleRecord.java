@@ -34,7 +34,7 @@ public class SingleScheduleRecord extends Record {
 
     public static void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_SINGLE_SCHEDULES
-                + " (" + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL UNIQUE REFERENCES " + ScheduleRecord.TABLE_SCHEDULES + "(" + ScheduleRecord.COLUMN_ID + "), "
+                + " (" + COLUMN_SCHEDULE_ID + " INTEGER NOT NULL UNIQUE REFERENCES " + ScheduleRecord.Companion.getTABLE_SCHEDULES() + "(" + ScheduleRecord.Companion.getCOLUMN_ID() + "), "
                 + COLUMN_YEAR + " INTEGER NOT NULL, "
                 + COLUMN_MONTH + " INTEGER NOT NULL, "
                 + COLUMN_DAY + " INTEGER NOT NULL, "

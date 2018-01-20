@@ -28,8 +28,8 @@ android {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 17
         targetSdkVersion 27
-        versionCode 78
-        versionName "0.5.4"
+        versionCode 79
+        versionName "0.5.5"
     }
     buildTypes {
         release {
@@ -95,7 +95,7 @@ dependencies {
     compile 'net.danlew:android.joda:2.9.9'
     testCompile 'joda-time:joda-time:2.9.9'
     compile project(path: ':treeadapter')
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'io.reactivex.rxjava2:rxjava:2.1.0'
     compile 'io.reactivex.rxjava2:rxkotlin:2.1.0'

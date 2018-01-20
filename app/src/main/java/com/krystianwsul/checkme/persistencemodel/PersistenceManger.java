@@ -103,7 +103,7 @@ public class PersistenceManger {
         mMonthlyDayScheduleRecords = Stream.of(MonthlyDayScheduleRecord.Companion.getMonthlyDayScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(MonthlyDayScheduleRecord::getScheduleId, monthlyDayScheduleRecord -> monthlyDayScheduleRecord));
 
-        mMonthlyWeekScheduleRecords = Stream.of(MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(mSQLiteDatabase))
+        mMonthlyWeekScheduleRecords = Stream.of(MonthlyWeekScheduleRecord.Companion.getMonthlyWeekScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(MonthlyWeekScheduleRecord::getScheduleId, monthlyWeekScheduleRecord -> monthlyWeekScheduleRecord));
 
         mInstanceRecords = InstanceRecord.Companion.getInstanceRecords(mSQLiteDatabase);

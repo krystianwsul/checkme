@@ -27,15 +27,7 @@ class ScheduleRecord(created: Boolean, val id: Int, val rootTaskId: Int, val sta
                     "$COLUMN_TYPE INTEGER NOT NULL);")
         }
 
-        fun getScheduleRecords(sqLiteDatabase: SQLiteDatabase) = mutableListOf<ScheduleRecord>().apply {
-            sqLiteDatabase.query(TABLE_SCHEDULES, null, null, null, null, null, null).use {
-                it.moveToFirst()
-                while (!it.isAfterLast) {
-                    add(cursorToScheduleRecord(it))
-                    it.moveToNext()
-                }
-            }
-        }
+        fun getScheduleRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_SCHEDULES, this::cursorToScheduleRecord)
 
         private fun cursorToScheduleRecord(cursor: Cursor) = cursor.run {
             val id = getInt(0)
@@ -70,9 +62,9 @@ class ScheduleRecord(created: Boolean, val id: Int, val rootTaskId: Int, val sta
         put(COLUMN_TYPE, type)
     }
 
-    override val updateCommand = getUpdateCommand(TABLE_SCHEDULES, COLUMN_ID, id)
+    override val updateCommand get() = getUpdateCommand(TABLE_SCHEDULES, COLUMN_ID, id)
 
-    override val insertCommand = getInsertCommand(TABLE_SCHEDULES)
+    override val insertCommand get() = getInsertCommand(TABLE_SCHEDULES)
 
-    override val deleteCommand = getDeleteCommand(TABLE_SCHEDULES, COLUMN_ID, id)
+    override val deleteCommand get() = getDeleteCommand(TABLE_SCHEDULES, COLUMN_ID, id)
 }

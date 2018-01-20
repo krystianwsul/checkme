@@ -28,15 +28,7 @@ class MonthlyDayScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfM
                     "$COLUMN_MINUTE INTEGER);")
         }
 
-        fun getMonthlyDayScheduleRecords(sqLiteDatabase: SQLiteDatabase) = mutableListOf<MonthlyDayScheduleRecord>().apply {
-            sqLiteDatabase.query(TABLE_MONTHLY_DAY_SCHEDULES, null, null, null, null, null, null).use {
-                it.moveToFirst()
-                while (!it.isAfterLast) {
-                    add(cursorToWeeklyScheduleRecord(it))
-                    it.moveToNext()
-                }
-            }
-        }
+        fun getMonthlyDayScheduleRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_MONTHLY_DAY_SCHEDULES, this::cursorToWeeklyScheduleRecord)
 
         private fun cursorToWeeklyScheduleRecord(cursor: Cursor) = cursor.run {
             val scheduleId = getInt(0)
@@ -69,9 +61,9 @@ class MonthlyDayScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfM
         put(COLUMN_MINUTE, minute)
     }
 
-    override val updateCommand = getUpdateCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val updateCommand get() = getUpdateCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
 
-    override val insertCommand = getInsertCommand(TABLE_MONTHLY_DAY_SCHEDULES)
+    override val insertCommand get() = getInsertCommand(TABLE_MONTHLY_DAY_SCHEDULES)
 
-    override val deleteCommand = getDeleteCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val deleteCommand get() = getDeleteCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
 }

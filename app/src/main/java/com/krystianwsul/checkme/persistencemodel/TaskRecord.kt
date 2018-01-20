@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import junit.framework.Assert
-import java.util.*
 import kotlin.properties.Delegates.observable
 
 class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Long, _endTime: Long?, _oldestVisibleYear: Int?, _oldestVisibleMonth: Int?, _oldestVisibleDay: Int?, _note: String?) : Record(created) {
@@ -34,19 +33,7 @@ class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Lo
                     "$COLUMN_NOTE TEXT);")
         }
 
-        fun getTaskRecords(sqLiteDatabase: SQLiteDatabase): List<TaskRecord> {
-            val taskRecords = ArrayList<TaskRecord>()
-
-            val cursor = sqLiteDatabase.query(TABLE_TASKS, null, null, null, null, null, null)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                taskRecords.add(cursorToTaskRecord(cursor))
-                cursor.moveToNext()
-            }
-            cursor.close()
-
-            return taskRecords
-        }
+        fun getTaskRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_TASKS, this::cursorToTaskRecord)
 
         private fun cursorToTaskRecord(cursor: Cursor) = cursor.run {
             val id = getInt(0)
@@ -107,9 +94,9 @@ class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Lo
         put(COLUMN_NOTE, note)
     }
 
-    override val updateCommand = getUpdateCommand(TABLE_TASKS, COLUMN_ID, id)
+    override val updateCommand get() = getUpdateCommand(TABLE_TASKS, COLUMN_ID, id)
 
-    override val insertCommand = getInsertCommand(TABLE_TASKS)
+    override val insertCommand get() = getInsertCommand(TABLE_TASKS)
 
-    override val deleteCommand = getDeleteCommand(TABLE_TASKS, COLUMN_ID, id)
+    override val deleteCommand get() = getDeleteCommand(TABLE_TASKS, COLUMN_ID, id)
 }

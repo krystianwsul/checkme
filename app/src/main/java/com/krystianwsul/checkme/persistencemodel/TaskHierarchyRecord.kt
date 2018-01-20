@@ -29,15 +29,7 @@ class TaskHierarchyRecord(created: Boolean, val id: Int, val parentTaskId: Int, 
                     "$COLUMN_END_TIME INTEGER);")
         }
 
-        fun getTaskHierarchyRecords(sqLiteDatabase: SQLiteDatabase) = mutableListOf<TaskHierarchyRecord>().apply {
-            sqLiteDatabase.query(TABLE_TASK_HIERARCHIES, null, null, null, null, null, null).use {
-                it.moveToFirst()
-                while (!it.isAfterLast) {
-                    add(cursorToTaskHierarchyRecord(it))
-                    it.moveToNext()
-                }
-            }
-        }
+        fun getTaskHierarchyRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_TASK_HIERARCHIES, this::cursorToTaskHierarchyRecord)
 
         private fun cursorToTaskHierarchyRecord(cursor: Cursor) = cursor.run {
             val id = getInt(0)
@@ -69,9 +61,9 @@ class TaskHierarchyRecord(created: Boolean, val id: Int, val parentTaskId: Int, 
         put(COLUMN_END_TIME, endTime)
     }
 
-    override val updateCommand = getUpdateCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, id)
+    override val updateCommand get() = getUpdateCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, id)
 
-    override val insertCommand = getInsertCommand(TABLE_TASK_HIERARCHIES)
+    override val insertCommand get() = getInsertCommand(TABLE_TASK_HIERARCHIES)
 
-    override val deleteCommand = getDeleteCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, id)
+    override val deleteCommand get() = getDeleteCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, id)
 }

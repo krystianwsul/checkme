@@ -23,16 +23,7 @@ class UuidRecord(created: Boolean, val uuid: String) : Record(created) {
             UuidRecord(false, newUuid()).insertCommand.execute(sqLiteDatabase)
         }
 
-        fun getUuidRecord(sqLiteDatabase: SQLiteDatabase): UuidRecord {
-            val cursor = sqLiteDatabase.query(TABLE_UUID, null, null, null, null, null, null)
-            cursor.moveToFirst()
-
-            val uuidRecord = cursorToCustomTimeRecord(cursor)
-
-            Assert.assertTrue(cursor.isLast)
-
-            return uuidRecord
-        }
+        fun getUuidRecord(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_UUID, this::cursorToCustomTimeRecord).single()
 
         private fun cursorToCustomTimeRecord(cursor: Cursor): UuidRecord {
             val uuid = cursor.getString(0)
@@ -50,9 +41,9 @@ class UuidRecord(created: Boolean, val uuid: String) : Record(created) {
         put(COLUMN_UUID, uuid)
     }
 
-    override val updateCommand = throw UnsupportedOperationException()
+    override val updateCommand get() = throw UnsupportedOperationException()
 
-    override val insertCommand = getInsertCommand(TABLE_UUID)
+    override val insertCommand get() = getInsertCommand(TABLE_UUID)
 
-    override val deleteCommand = throw UnsupportedOperationException()
+    override val deleteCommand get() = throw UnsupportedOperationException()
 }

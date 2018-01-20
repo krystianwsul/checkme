@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import junit.framework.Assert
-import java.util.*
 import kotlin.properties.Delegates.observable
 
 class InstanceRecord(
@@ -93,15 +92,7 @@ class InstanceRecord(
                     "$COLUMN_SCHEDULE_CUSTOM_TIME_ID)")
         }
 
-        fun getInstanceRecords(sqLiteDatabase: SQLiteDatabase) = ArrayList<InstanceRecord>().apply {
-            sqLiteDatabase.query(TABLE_INSTANCES, null, null, null, null, null, null).use {
-                it.moveToFirst()
-                while (!it.isAfterLast) {
-                    add(cursorToInstanceRecord(it))
-                    it.moveToNext()
-                }
-            }
-        }
+        fun getInstanceRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_INSTANCES, this::cursorToInstanceRecord)
 
         private fun cursorToInstanceRecord(cursor: Cursor) = cursor.run {
             val id = getInt(0)
@@ -194,9 +185,9 @@ class InstanceRecord(
         put(COLUMN_NOTIFICATION_SHOWN, if (notificationShown) 1 else 0)
     }
 
-    override val updateCommand = getUpdateCommand(TABLE_INSTANCES, COLUMN_ID, id)
+    override val updateCommand get() = getUpdateCommand(TABLE_INSTANCES, COLUMN_ID, id)
 
-    override val insertCommand = getInsertCommand(TABLE_INSTANCES)
+    override val insertCommand get() = getInsertCommand(TABLE_INSTANCES)
 
-    override val deleteCommand = getDeleteCommand(TABLE_INSTANCES, COLUMN_ID, id)
+    override val deleteCommand get() = getDeleteCommand(TABLE_INSTANCES, COLUMN_ID, id)
 }

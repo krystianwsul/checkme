@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import junit.framework.Assert
-import java.util.*
 
 class WeeklyScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfWeek: Int, val customTimeId: Int?, val hour: Int?, val minute: Int?) : Record(created) {
 
@@ -27,19 +26,7 @@ class WeeklyScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfWeek:
                     "$COLUMN_MINUTE INTEGER);")
         }
 
-        fun getWeeklyScheduleRecords(sqLiteDatabase: SQLiteDatabase): List<WeeklyScheduleRecord> {
-            val weeklyScheduleRecords = ArrayList<WeeklyScheduleRecord>()
-
-            val cursor = sqLiteDatabase.query(TABLE_WEEKLY_SCHEDULES, null, null, null, null, null, null)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                weeklyScheduleRecords.add(cursorToWeeklyScheduleRecord(cursor))
-                cursor.moveToNext()
-            }
-            cursor.close()
-
-            return weeklyScheduleRecords
-        }
+        fun getWeeklyScheduleRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_WEEKLY_SCHEDULES, this::cursorToWeeklyScheduleRecord)
 
         private fun cursorToWeeklyScheduleRecord(cursor: Cursor) = cursor.run {
             val scheduleId = getInt(0)
@@ -70,9 +57,9 @@ class WeeklyScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfWeek:
         put(COLUMN_MINUTE, minute)
     }
 
-    override val updateCommand = getUpdateCommand(TABLE_WEEKLY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val updateCommand get() = getUpdateCommand(TABLE_WEEKLY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
 
-    override val insertCommand = getInsertCommand(TABLE_WEEKLY_SCHEDULES)
+    override val insertCommand get() = getInsertCommand(TABLE_WEEKLY_SCHEDULES)
 
-    override val deleteCommand = getDeleteCommand(TABLE_WEEKLY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val deleteCommand get() = getDeleteCommand(TABLE_WEEKLY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
 }

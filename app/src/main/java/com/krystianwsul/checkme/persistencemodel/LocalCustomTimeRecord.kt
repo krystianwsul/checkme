@@ -5,7 +5,6 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import junit.framework.Assert
-import java.util.*
 import kotlin.properties.Delegates.observable
 
 class LocalCustomTimeRecord(
@@ -71,19 +70,7 @@ class LocalCustomTimeRecord(
                     + "$COLUMN_CURRENT INTEGER NOT NULL DEFAULT 1);")
         }
 
-        fun getCustomTimeRecords(sqLiteDatabase: SQLiteDatabase): List<LocalCustomTimeRecord> {
-            val customTimeRecords = ArrayList<LocalCustomTimeRecord>()
-
-            val cursor = sqLiteDatabase.query(TABLE_CUSTOM_TIMES, null, null, null, null, null, null)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                customTimeRecords.add(cursorToCustomTimeRecord(cursor))
-                cursor.moveToNext()
-            }
-            cursor.close()
-
-            return customTimeRecords
-        }
+        fun getCustomTimeRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_CUSTOM_TIMES, this::cursorToCustomTimeRecord)
 
         private fun cursorToCustomTimeRecord(cursor: Cursor): LocalCustomTimeRecord = cursor.run {
             val id = getInt(0)
@@ -158,9 +145,9 @@ class LocalCustomTimeRecord(
         put(COLUMN_CURRENT, current)
     }
 
-    override val updateCommand = getUpdateCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, id)
+    override val updateCommand get() = getUpdateCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, id)
 
-    override val insertCommand = getInsertCommand(TABLE_CUSTOM_TIMES)
+    override val insertCommand get() = getInsertCommand(TABLE_CUSTOM_TIMES)
 
-    override val deleteCommand = getDeleteCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, id)
+    override val deleteCommand get() = getDeleteCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, id)
 }

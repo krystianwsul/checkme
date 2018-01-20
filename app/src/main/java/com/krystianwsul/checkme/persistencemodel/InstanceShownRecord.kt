@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import junit.framework.Assert
-import java.util.*
 import kotlin.properties.Delegates.observable
 
 class InstanceShownRecord(
@@ -74,15 +73,7 @@ class InstanceShownRecord(
                     "$COLUMN_SCHEDULE_CUSTOM_TIME_ID)")
         }
 
-        fun getInstancesShownRecords(sqLiteDatabase: SQLiteDatabase) = ArrayList<InstanceShownRecord>().apply {
-            sqLiteDatabase.query(TABLE_INSTANCES_SHOWN, null, null, null, null, null, null).use {
-                it.moveToFirst()
-                while (!it.isAfterLast) {
-                    add(cursorToInstanceShownRecord(it))
-                    it.moveToNext()
-                }
-            }
-        }
+        fun getInstancesShownRecords(sqLiteDatabase: SQLiteDatabase) = getRecords(sqLiteDatabase, TABLE_INSTANCES_SHOWN, this::cursorToInstanceShownRecord)
 
         private fun cursorToInstanceShownRecord(cursor: Cursor) = cursor.run {
             val id = getInt(0)
@@ -131,9 +122,9 @@ class InstanceShownRecord(
         put(COLUMN_PROJECT_ID, projectId)
     }
 
-    override val updateCommand = getUpdateCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, id)
+    override val updateCommand get() = getUpdateCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, id)
 
-    override val insertCommand = getInsertCommand(TABLE_INSTANCES_SHOWN)
+    override val insertCommand get() = getInsertCommand(TABLE_INSTANCES_SHOWN)
 
-    override val deleteCommand = getDeleteCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, id)
+    override val deleteCommand get() = getDeleteCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, id)
 }

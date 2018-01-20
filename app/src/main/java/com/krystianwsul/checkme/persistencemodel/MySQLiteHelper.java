@@ -49,82 +49,28 @@ class MySQLiteHelper extends SQLiteOpenHelper {
     public void onUpgrade(@NonNull SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         sqLiteDatabase.beginTransaction();
 
-        try
-        {
-            if (oldVersion < 17) {
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + LocalCustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DailyScheduleRecord.Companion.getTABLE_DAILY_SCHEDULES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceRecord.Companion.getTABLE_INSTANCES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyDayScheduleRecord.Companion.getTABLE_MONTHLY_DAY_SCHEDULES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyWeekScheduleRecord.Companion.getTABLE_MONTHLY_WEEK_SCHEDULES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + ScheduleRecord.Companion.getTABLE_SCHEDULES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SingleScheduleRecord.Companion.getTABLE_SINGLE_SCHEDULES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskHierarchyRecord.Companion.getTABLE_TASK_HIERARCHIES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskRecord.Companion.getTABLE_TASKS());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UuidRecord.Companion.getTABLE_UUID());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WeeklyScheduleRecord.Companion.getTABLE_WEEKLY_SCHEDULES());
+        try {
+            if (oldVersion < 20) {
+                sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.Companion.getINDEX_HOUR_MINUTE() + " ON " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
+                        + "("
+                        + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_HOUR() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MINUTE()
+                        + ")");
 
-                onCreate(sqLiteDatabase);
-            } else {
-                if (oldVersion < 18) {
-                    String columns = InstanceShownRecord.Companion.getCOLUMN_ID() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_CUSTOM_TIME_ID() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_HOUR() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MINUTE() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_NOTIFIED() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_NOTIFICATION_SHOWN();
-
-                    sqLiteDatabase.execSQL("CREATE TEMPORARY TABLE t2_backup(" + columns + ");");
-                    sqLiteDatabase.execSQL("INSERT INTO t2_backup SELECT " + columns + " FROM " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN() + ";");
-                    sqLiteDatabase.execSQL("DROP TABLE " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN() + ";");
-                    sqLiteDatabase.execSQL("CREATE TABLE " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
-                            + " (" + InstanceShownRecord.Companion.getCOLUMN_ID() + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                            + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + " TEXT NOT NULL, "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + " INTEGER NOT NULL, "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + " INTEGER NOT NULL, "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + " INTEGER NOT NULL, "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_CUSTOM_TIME_ID() + " TEXT, "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_HOUR() + " INTEGER, "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MINUTE() + " INTEGER, "
-                            + InstanceShownRecord.Companion.getCOLUMN_NOTIFIED() + " INTEGER NOT NULL DEFAULT 0, "
-                            + InstanceShownRecord.Companion.getCOLUMN_NOTIFICATION_SHOWN() + " INTEGER NOT NULL DEFAULT 0"
-                            + ");");
-                    sqLiteDatabase.execSQL("INSERT INTO " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN() + " SELECT * FROM t2_backup;");
-                    sqLiteDatabase.execSQL("DROP TABLE t2_backup;");
-                }
-
-                if (oldVersion < 19) {
-                    sqLiteDatabase.execSQL("ALTER TABLE " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
-                            + " ADD COLUMN " + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + " TEXT");
-                }
-
-                if (oldVersion < 20) {
-                    sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.Companion.getINDEX_HOUR_MINUTE() + " ON " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
-                            + "("
-                            + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_HOUR() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MINUTE()
-                            + ")");
-
-                    sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.Companion.getINDEX_CUSTOM_TIME_ID() + " ON " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
-                            + "("
-                            + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
-                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_CUSTOM_TIME_ID()
-                            + ")");
-                }
+                sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.Companion.getINDEX_CUSTOM_TIME_ID() + " ON " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
+                        + "("
+                        + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
+                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_CUSTOM_TIME_ID()
+                        + ")");
             }
 
             sqLiteDatabase.setTransactionSuccessful();

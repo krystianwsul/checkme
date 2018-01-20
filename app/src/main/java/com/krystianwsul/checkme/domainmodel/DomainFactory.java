@@ -161,7 +161,7 @@ public class DomainFactory {
     }
 
     private DomainFactory() {
-        mLocalFactory = LocalFactory.getInstance();
+        mLocalFactory = LocalFactory.Companion.getInstance();
     }
 
     DomainFactory(@NonNull PersistenceManger persistenceManger) {
@@ -2134,16 +2134,16 @@ public class DomainFactory {
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask);
 
         updateNotifications(context, true, now, Stream.of(localToRemoteConversion.mLocalTasks.values())
-                .map(pair -> pair.first.getTaskKey())
+                .map(pair -> pair.getFirst().getTaskKey())
                 .collect(Collectors.toList()));
 
         RemoteProject remoteProject = mRemoteProjectFactory.getRemoteProjectForce(projectId);
 
-        for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
+        for (kotlin.Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
             Assert.assertTrue(pair != null);
 
-            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.first, pair.second, now);
-            localToRemoteConversion.mRemoteTasks.put(pair.first.getId(), remoteTask);
+            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.getFirst(), pair.getSecond(), now);
+            localToRemoteConversion.mRemoteTasks.put(pair.getFirst().getId(), remoteTask);
         }
 
         for (LocalTaskHierarchy localTaskHierarchy : localToRemoteConversion.mLocalTaskHierarchies) {
@@ -2159,11 +2159,11 @@ public class DomainFactory {
             localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
         }
 
-        for (Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
-            Stream.of(pair.second)
+        for (kotlin.Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
+            Stream.of(pair.getSecond())
                     .forEach(LocalInstance::delete);
 
-            pair.first.delete();
+            pair.getFirst().delete();
         }
 
         RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(startingLocalTask.getId());
@@ -3207,7 +3207,7 @@ public class DomainFactory {
     }
 
     public static class LocalToRemoteConversion {
-        public final Map<Integer, Pair<LocalTask, List<LocalInstance>>> mLocalTasks = new HashMap<>();
+        public final Map<Integer, kotlin.Pair<LocalTask, List<LocalInstance>>> mLocalTasks = new HashMap<>();
         public final List<LocalTaskHierarchy> mLocalTaskHierarchies = new ArrayList<>();
 
         final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();

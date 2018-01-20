@@ -134,15 +134,15 @@ class PersistenceManger(
 
     fun getScheduleRecords(localTaskId: Int) = _scheduleRecords.filter { it.rootTaskId == localTaskId }
 
-    fun getSingleScheduleRecord(scheduleId: Int) = _singleScheduleRecords[scheduleId]
+    fun getSingleScheduleRecord(scheduleId: Int) = _singleScheduleRecords[scheduleId]!!
 
-    fun getDailyScheduleRecord(scheduleId: Int) = _dailyScheduleRecords[scheduleId]
+    fun getDailyScheduleRecord(scheduleId: Int) = _dailyScheduleRecords[scheduleId]!!
 
-    fun getWeeklyScheduleRecord(scheduleId: Int) = _weeklyScheduleRecords[scheduleId]
+    fun getWeeklyScheduleRecord(scheduleId: Int) = _weeklyScheduleRecords[scheduleId]!!
 
-    fun getMonthlyDayScheduleRecord(scheduleId: Int) = _monthlyDayScheduleRecords[scheduleId]
+    fun getMonthlyDayScheduleRecord(scheduleId: Int) = _monthlyDayScheduleRecords[scheduleId]!!
 
-    fun getMonthlyWeekScheduleRecord(scheduleId: Int) = _monthlyWeekScheduleRecords[scheduleId]
+    fun getMonthlyWeekScheduleRecord(scheduleId: Int) = _monthlyWeekScheduleRecords[scheduleId]!!
 
     fun createCustomTimeRecord(name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTimeRecord {
         Assert.assertTrue(name.isNotEmpty())

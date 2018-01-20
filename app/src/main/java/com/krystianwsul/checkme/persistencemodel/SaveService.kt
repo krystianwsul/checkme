@@ -69,17 +69,17 @@ class SaveService : JobIntentService() {
 
             override fun startService(context: Context, persistenceManger: PersistenceManger, source: Source) {
                 val collections = listOf(
-                        persistenceManger.mLocalCustomTimeRecords,
-                        persistenceManger.mTaskRecords,
-                        persistenceManger.mTaskHierarchyRecords,
-                        persistenceManger.mScheduleRecords,
-                        persistenceManger.mSingleScheduleRecords.values,
-                        persistenceManger.mDailyScheduleRecords.values,
-                        persistenceManger.mWeeklyScheduleRecords.values,
-                        persistenceManger.mMonthlyDayScheduleRecords.values,
-                        persistenceManger.mMonthlyWeekScheduleRecords.values,
-                        persistenceManger.mInstanceRecords,
-                        persistenceManger.mInstanceShownRecords)
+                        persistenceManger.customTimeRecords,
+                        persistenceManger.taskRecords,
+                        persistenceManger.taskHierarchyRecords,
+                        persistenceManger.scheduleRecords,
+                        persistenceManger.singleScheduleRecords,
+                        persistenceManger.dailyScheduleRecords,
+                        persistenceManger.weeklyScheduleRecords,
+                        persistenceManger.monthlyDayScheduleRecords,
+                        persistenceManger.monthlyWeekScheduleRecords,
+                        persistenceManger.instanceRecords,
+                        persistenceManger.instanceShownRecords)
 
                 val insertCommands = ArrayList(collections.flatten()
                         .filter { it.needsInsert() }

@@ -79,7 +79,7 @@ public class LocalFactory {
     }
 
     private LocalFactory(@NonNull Context context) {
-        mPersistenceManager = PersistenceManger.getInstance(context);
+        mPersistenceManager = PersistenceManger.Companion.getInstance(context);
     }
 
     public LocalFactory(@NonNull PersistenceManger persistenceManger) {
@@ -94,7 +94,6 @@ public class LocalFactory {
 
     public void initialize(@NonNull DomainFactory domainFactory) {
         Collection<LocalCustomTimeRecord> localCustomTimeRecords = mPersistenceManager.getCustomTimeRecords();
-        Assert.assertTrue(localCustomTimeRecords != null);
 
         for (LocalCustomTimeRecord localCustomTimeRecord : localCustomTimeRecords) {
             Assert.assertTrue(localCustomTimeRecord != null);
@@ -104,7 +103,6 @@ public class LocalFactory {
         }
 
         Collection<TaskRecord> taskRecords = mPersistenceManager.getTaskRecords();
-        Assert.assertTrue(taskRecords != null);
 
         for (TaskRecord taskRecord : taskRecords) {
             Assert.assertTrue(taskRecord != null);
@@ -120,7 +118,6 @@ public class LocalFactory {
         }
 
         Collection<TaskHierarchyRecord> taskHierarchyRecords = mPersistenceManager.getTaskHierarchyRecords();
-        Assert.assertTrue(taskHierarchyRecords != null);
 
         for (TaskHierarchyRecord taskHierarchyRecord : taskHierarchyRecords) {
             Assert.assertTrue(taskHierarchyRecord != null);
@@ -137,7 +134,6 @@ public class LocalFactory {
         }
 
         Collection<InstanceRecord> instanceRecords = mPersistenceManager.getInstanceRecords();
-        Assert.assertTrue(instanceRecords != null);
 
         for (InstanceRecord instanceRecord : instanceRecords) {
             LocalTask localTask = mLocalTasks.get(instanceRecord.getTaskId());
@@ -151,7 +147,6 @@ public class LocalFactory {
     @NonNull
     private List<Schedule> loadSchedules(@NonNull DomainFactory domainFactory, int localTaskId) {
         List<ScheduleRecord> scheduleRecords = mPersistenceManager.getScheduleRecords(localTaskId);
-        Assert.assertTrue(scheduleRecords != null);
 
         ArrayList<Schedule> schedules = new ArrayList<>();
 
@@ -422,7 +417,6 @@ public class LocalFactory {
         Assert.assertTrue(childLocalTask.current(startExactTimeStamp));
 
         TaskHierarchyRecord taskHierarchyRecord = mPersistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp);
-        Assert.assertTrue(taskHierarchyRecord != null);
 
         LocalTaskHierarchy localTaskHierarchy = new LocalTaskHierarchy(domainFactory, taskHierarchyRecord);
         mLocalTaskHierarchies.add(localTaskHierarchy.getId(), localTaskHierarchy);
@@ -448,7 +442,7 @@ public class LocalFactory {
     }
 
     @NonNull
-    public List<InstanceShownRecord> getInstanceShownRecords() {
+    public Collection<InstanceShownRecord> getInstanceShownRecords() {
         return mPersistenceManager.getInstanceShownRecords();
     }
 
@@ -491,7 +485,6 @@ public class LocalFactory {
         Assert.assertTrue(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
         LocalCustomTimeRecord localCustomTimeRecord = mPersistenceManager.createCustomTimeRecord(name, hourMinutes);
-        Assert.assertTrue(localCustomTimeRecord != null);
 
         LocalCustomTime localCustomTime = new LocalCustomTime(domainFactory, localCustomTimeRecord);
         Assert.assertTrue(!mLocalCustomTimes.containsKey(localCustomTime.getId()));

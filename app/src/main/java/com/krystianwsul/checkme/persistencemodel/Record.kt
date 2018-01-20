@@ -21,7 +21,7 @@ abstract class Record(private var created: Boolean) {
             }
         }
 
-        fun <T> getRecords(sqLiteDatabase: SQLiteDatabase, tableName: String, cursorToRecord: (Cursor) -> T): List<T> where T : Record = mutableListOf<T>().apply {
+        fun <T> getRecords(sqLiteDatabase: SQLiteDatabase, tableName: String, cursorToRecord: (Cursor) -> T) where T : Record = mutableListOf<T>().apply {
             sqLiteDatabase.query(tableName, null, null, null, null, null, null).use {
                 it.moveToFirst()
                 while (!it.isAfterLast) {

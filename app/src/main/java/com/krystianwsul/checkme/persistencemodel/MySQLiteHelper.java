@@ -32,7 +32,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         TaskHierarchyRecord.Companion.onCreate(sqLiteDatabase);
 
         ScheduleRecord.Companion.onCreate(sqLiteDatabase);
-        SingleScheduleRecord.onCreate(sqLiteDatabase);
+        SingleScheduleRecord.Companion.onCreate(sqLiteDatabase);
         DailyScheduleRecord.Companion.onCreate(sqLiteDatabase);
         WeeklyScheduleRecord.onCreate(sqLiteDatabase);
         MonthlyDayScheduleRecord.Companion.onCreate(sqLiteDatabase);
@@ -59,7 +59,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyDayScheduleRecord.Companion.getTABLE_MONTHLY_DAY_SCHEDULES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyWeekScheduleRecord.Companion.getTABLE_MONTHLY_WEEK_SCHEDULES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + ScheduleRecord.Companion.getTABLE_SCHEDULES());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SingleScheduleRecord.TABLE_SINGLE_SCHEDULES);
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SingleScheduleRecord.Companion.getTABLE_SINGLE_SCHEDULES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskHierarchyRecord.Companion.getTABLE_TASK_HIERARCHIES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskRecord.TABLE_TASKS);
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UuidRecord.TABLE_UUID);

@@ -91,7 +91,7 @@ public class PersistenceManger {
         mScheduleRecords = ScheduleRecord.Companion.getScheduleRecords(mSQLiteDatabase);
         mScheduleMaxId = ScheduleRecord.Companion.getMaxId(mSQLiteDatabase);
 
-        mSingleScheduleRecords = Stream.of(SingleScheduleRecord.getSingleScheduleRecords(mSQLiteDatabase))
+        mSingleScheduleRecords = Stream.of(SingleScheduleRecord.Companion.getSingleScheduleRecords(mSQLiteDatabase))
                     .collect(Collectors.toMap(SingleScheduleRecord::getScheduleId, singleScheduleRecord -> singleScheduleRecord));
 
         mDailyScheduleRecords = Stream.of(DailyScheduleRecord.Companion.getDailyScheduleRecords(mSQLiteDatabase))

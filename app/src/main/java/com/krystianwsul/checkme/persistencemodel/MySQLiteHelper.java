@@ -42,7 +42,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
 
         InstanceShownRecord.Companion.onCreate(sqLiteDatabase);
 
-        UuidRecord.onCreate(sqLiteDatabase);
+        UuidRecord.Companion.onCreate(sqLiteDatabase);
     }
 
     @Override
@@ -62,7 +62,7 @@ class MySQLiteHelper extends SQLiteOpenHelper {
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SingleScheduleRecord.Companion.getTABLE_SINGLE_SCHEDULES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskHierarchyRecord.Companion.getTABLE_TASK_HIERARCHIES());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskRecord.Companion.getTABLE_TASKS());
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UuidRecord.TABLE_UUID);
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UuidRecord.Companion.getTABLE_UUID());
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WeeklyScheduleRecord.TABLE_WEEKLY_SCHEDULES);
 
                 onCreate(sqLiteDatabase);

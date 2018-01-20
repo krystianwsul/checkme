@@ -111,7 +111,7 @@ public class PersistenceManger {
         mInstanceShownRecords = InstanceShownRecord.Companion.getInstancesShownRecords(mSQLiteDatabase);
         mInstanceShownMaxId = InstanceShownRecord.Companion.getMaxId(mSQLiteDatabase);
 
-        mUuidRecord = UuidRecord.getUuidRecord(mSQLiteDatabase);
+        mUuidRecord = UuidRecord.Companion.getUuidRecord(mSQLiteDatabase);
     }
 
     @SuppressLint("UseSparseArrays")
@@ -128,7 +128,7 @@ public class PersistenceManger {
         mMonthlyWeekScheduleRecords = new HashMap<>();
         mInstanceRecords = new ArrayList<>();
         mInstanceShownRecords = new ArrayList<>();
-        mUuidRecord = new UuidRecord(true, UuidRecord.newUuid());
+        mUuidRecord = new UuidRecord(true, UuidRecord.Companion.newUuid());
 
         mCustomTimeMaxId = 0;
         mTaskMaxId = 0;

@@ -76,10 +76,9 @@ public class PersistenceManger {
 
         mCustomTimeMaxId = LocalCustomTimeRecord.Companion.getMaxId(mSQLiteDatabase);
 
-        mTaskRecords = TaskRecord.getTaskRecords(mSQLiteDatabase);
-        Assert.assertTrue(mTaskRecords != null);
+        mTaskRecords = TaskRecord.Companion.getTaskRecords(mSQLiteDatabase);
 
-        mTaskMaxId = TaskRecord.getMaxId(mSQLiteDatabase);
+        mTaskMaxId = TaskRecord.Companion.getMaxId(mSQLiteDatabase);
 
         if (mTaskRecords.isEmpty())
             mTaskHierarchyRecords = new ArrayList<>();

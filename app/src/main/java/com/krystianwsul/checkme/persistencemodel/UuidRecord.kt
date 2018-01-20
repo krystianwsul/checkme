@@ -46,13 +46,13 @@ class UuidRecord(created: Boolean, val uuid: String) : Record(created) {
         Assert.assertTrue(uuid.isNotEmpty())
     }
 
-    override fun getContentValues() = ContentValues().apply {
+    override val contentValues = ContentValues().apply {
         put(COLUMN_UUID, uuid)
     }
 
-    override fun getUpdateCommand() = throw UnsupportedOperationException()
+    override val updateCommand = throw UnsupportedOperationException()
 
-    override fun getInsertCommand() = getInsertCommand(TABLE_UUID)
+    override val insertCommand = getInsertCommand(TABLE_UUID)
 
-    override fun getDeleteCommand() = throw UnsupportedOperationException()
+    override val deleteCommand = throw UnsupportedOperationException()
 }

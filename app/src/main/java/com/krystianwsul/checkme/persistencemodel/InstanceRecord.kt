@@ -174,7 +174,7 @@ class InstanceRecord(
         Assert.assertTrue(hasInstanceDate == hasInstanceTime)
     }
 
-    override fun getContentValues() = ContentValues().apply {
+    override val contentValues = ContentValues().apply {
         put(COLUMN_TASK_ID, taskId)
         put(COLUMN_DONE, done)
         put(COLUMN_SCHEDULE_YEAR, scheduleYear)
@@ -194,9 +194,9 @@ class InstanceRecord(
         put(COLUMN_NOTIFICATION_SHOWN, if (notificationShown) 1 else 0)
     }
 
-    override fun getUpdateCommand() = getUpdateCommand(TABLE_INSTANCES, COLUMN_ID, id)
+    override val updateCommand = getUpdateCommand(TABLE_INSTANCES, COLUMN_ID, id)
 
-    override fun getInsertCommand() = getInsertCommand(TABLE_INSTANCES)
+    override val insertCommand = getInsertCommand(TABLE_INSTANCES)
 
-    override fun getDeleteCommand() = getDeleteCommand(TABLE_INSTANCES, COLUMN_ID, id)
+    override val deleteCommand = getDeleteCommand(TABLE_INSTANCES, COLUMN_ID, id)
 }

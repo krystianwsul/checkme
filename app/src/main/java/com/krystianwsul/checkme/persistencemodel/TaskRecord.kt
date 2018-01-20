@@ -97,7 +97,7 @@ class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Lo
         Assert.assertTrue(_oldestVisibleYear == null == (_oldestVisibleDay == null))
     }
 
-    override fun getContentValues() = ContentValues().apply {
+    override val contentValues = ContentValues().apply {
         put(COLUMN_NAME, name)
         put(COLUMN_START_TIME, startTime)
         put(COLUMN_END_TIME, endTime)
@@ -107,9 +107,9 @@ class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Lo
         put(COLUMN_NOTE, note)
     }
 
-    override fun getUpdateCommand() = getUpdateCommand(TABLE_TASKS, COLUMN_ID, id)
+    override val updateCommand = getUpdateCommand(TABLE_TASKS, COLUMN_ID, id)
 
-    override fun getInsertCommand() = getInsertCommand(TABLE_TASKS)
+    override val insertCommand = getInsertCommand(TABLE_TASKS)
 
-    override fun getDeleteCommand() = getDeleteCommand(TABLE_TASKS, COLUMN_ID, id)
+    override val deleteCommand = getDeleteCommand(TABLE_TASKS, COLUMN_ID, id)
 }

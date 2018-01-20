@@ -60,7 +60,7 @@ class MonthlyDayScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfM
         Assert.assertTrue(hour != null || customTimeId != null)
     }
 
-    override fun getContentValues() = ContentValues().apply {
+    override val contentValues = ContentValues().apply {
         put(COLUMN_SCHEDULE_ID, scheduleId)
         put(COLUMN_DAY_OF_MONTH, dayOfMonth)
         put(COLUMN_BEGINNING_OF_MONTH, if (beginningOfMonth) 1 else 0)
@@ -69,9 +69,9 @@ class MonthlyDayScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfM
         put(COLUMN_MINUTE, minute)
     }
 
-    override fun getUpdateCommand() = getUpdateCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val updateCommand = getUpdateCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
 
-    override fun getInsertCommand() = getInsertCommand(TABLE_MONTHLY_DAY_SCHEDULES)
+    override val insertCommand = getInsertCommand(TABLE_MONTHLY_DAY_SCHEDULES)
 
-    override fun getDeleteCommand() = getDeleteCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val deleteCommand = getDeleteCommand(TABLE_MONTHLY_DAY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
 }

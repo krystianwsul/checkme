@@ -139,7 +139,7 @@ class LocalCustomTimeRecord(
         Assert.assertTrue(mName.isNotEmpty())
     }
 
-    override fun getContentValues(): ContentValues = ContentValues().apply {
+    override val contentValues = ContentValues().apply {
         put(COLUMN_NAME, name)
         put(COLUMN_SUNDAY_HOUR, sundayHour)
         put(COLUMN_SUNDAY_MINUTE, sundayMinute)
@@ -158,9 +158,9 @@ class LocalCustomTimeRecord(
         put(COLUMN_CURRENT, current)
     }
 
-    override fun getUpdateCommand() = getUpdateCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, id)
+    override val updateCommand = getUpdateCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, id)
 
-    override fun getInsertCommand() = getInsertCommand(TABLE_CUSTOM_TIMES)
+    override val insertCommand = getInsertCommand(TABLE_CUSTOM_TIMES)
 
-    override fun getDeleteCommand() = getDeleteCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, id)
+    override val deleteCommand = getDeleteCommand(TABLE_CUSTOM_TIMES, COLUMN_ID, id)
 }

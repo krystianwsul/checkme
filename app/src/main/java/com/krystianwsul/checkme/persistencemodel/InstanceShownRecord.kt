@@ -118,7 +118,7 @@ class InstanceShownRecord(
         Assert.assertTrue(mProjectId.isNotEmpty())
     }
 
-    override fun getContentValues() = ContentValues().apply {
+    override val contentValues = ContentValues().apply {
         put(COLUMN_TASK_ID, taskId)
         put(COLUMN_SCHEDULE_YEAR, scheduleYear)
         put(COLUMN_SCHEDULE_MONTH, scheduleMonth)
@@ -131,9 +131,9 @@ class InstanceShownRecord(
         put(COLUMN_PROJECT_ID, projectId)
     }
 
-    override fun getUpdateCommand() = getUpdateCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, id)
+    override val updateCommand = getUpdateCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, id)
 
-    override fun getInsertCommand() = getInsertCommand(TABLE_INSTANCES_SHOWN)
+    override val insertCommand = getInsertCommand(TABLE_INSTANCES_SHOWN)
 
-    override fun getDeleteCommand() = getDeleteCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, id)
+    override val deleteCommand = getDeleteCommand(TABLE_INSTANCES_SHOWN, COLUMN_ID, id)
 }

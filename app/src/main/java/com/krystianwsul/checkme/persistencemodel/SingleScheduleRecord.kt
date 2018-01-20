@@ -68,7 +68,7 @@ class SingleScheduleRecord(created: Boolean, val scheduleId: Int, val year: Int,
         Assert.assertTrue(hour != null || customTimeId != null)
     }
 
-    override fun getContentValues() = ContentValues().apply {
+    override val contentValues = ContentValues().apply {
         put(COLUMN_SCHEDULE_ID, scheduleId)
         put(COLUMN_YEAR, year)
         put(COLUMN_MONTH, month)
@@ -78,9 +78,9 @@ class SingleScheduleRecord(created: Boolean, val scheduleId: Int, val year: Int,
         put(COLUMN_MINUTE, minute)
     }
 
-    override fun getUpdateCommand() = getUpdateCommand(TABLE_SINGLE_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val updateCommand = getUpdateCommand(TABLE_SINGLE_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
 
-    override fun getInsertCommand() = getInsertCommand(TABLE_SINGLE_SCHEDULES)
+    override val insertCommand = getInsertCommand(TABLE_SINGLE_SCHEDULES)
 
-    override fun getDeleteCommand() = getDeleteCommand(TABLE_SINGLE_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val deleteCommand = getDeleteCommand(TABLE_SINGLE_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
 }

@@ -344,7 +344,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
                     .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
                     .collect(Collectors.toList());
 
-            DomainFactory.getDomainFactory(mShowCustomTimesFragment.getActivity()).setCustomTimeCurrent(mShowCustomTimesFragment.getActivity(), mDataId, SaveService.Source.GUI, selectedCustomTimeIds);
+            DomainFactory.getDomainFactory().setCustomTimeCurrent(mShowCustomTimesFragment.getActivity(), mDataId, SaveService.Source.GUI, selectedCustomTimeIds);
         }
 
         class CustomTimeHolder extends RecyclerView.ViewHolder {

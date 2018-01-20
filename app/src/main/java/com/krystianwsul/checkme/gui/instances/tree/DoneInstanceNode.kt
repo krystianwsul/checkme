@@ -162,7 +162,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         return View.OnClickListener { v ->
             v.setOnClickListener(null)
 
-            instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.activity!!).setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
+            instanceData.Done = DomainFactory.getDomainFactory().setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
             Assert.assertTrue(instanceData.Done == null)
 
             dividerNode.remove(this)

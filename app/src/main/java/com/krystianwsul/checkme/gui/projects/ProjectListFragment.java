@@ -95,7 +95,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                         decrementSelected();
                     }
 
-                    DomainFactory.getDomainFactory(getActivity()).setProjectEndTimeStamps(getActivity(), mDataId, SaveService.Source.GUI, projectIds);
+                    DomainFactory.getDomainFactory().setProjectEndTimeStamps(getActivity(), mDataId, SaveService.Source.GUI, projectIds);
 
                     break;
                 default:

@@ -6,44 +6,88 @@ import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
-import com.krystianwsul.checkme.utils.time.Date
 import junit.framework.Assert
-import java.util.*
 
-class PersistenceManger {
+class PersistenceManger(
+        private val _customTimeRecords: MutableList<LocalCustomTimeRecord>,
+        private var customTimeMaxId: Int,
+        private val _taskRecords: MutableList<TaskRecord>,
+        private var taskMaxId: Int,
+        private val _taskHierarchyRecords: MutableList<TaskHierarchyRecord>,
+        private var taskHierarchyMaxId: Int,
+        private val _scheduleRecords: MutableList<ScheduleRecord>,
+        private var scheduleMaxId: Int,
+        private val _singleScheduleRecords: MutableMap<Int, SingleScheduleRecord>,
+        private val _dailyScheduleRecords: MutableMap<Int, DailyScheduleRecord>,
+        private val _weeklyScheduleRecords: MutableMap<Int, WeeklyScheduleRecord>,
+        private val _monthlyDayScheduleRecords: MutableMap<Int, MonthlyDayScheduleRecord>,
+        private val _monthlyWeekScheduleRecords: MutableMap<Int, MonthlyWeekScheduleRecord>,
+        private val _instanceRecords: MutableList<InstanceRecord>,
+        private var instanceMaxId: Int,
+        private val _instanceShownRecords: MutableList<InstanceShownRecord>,
+        private var instanceShownMaxId: Int,
+        private val uuidRecord: UuidRecord
+) {
 
     companion object {
 
         private var sInstance: PersistenceManger? = null
 
-        @Synchronized
-        fun getInstance(context: Context): PersistenceManger {
-            if (sInstance == null)
-                sInstance = PersistenceManger(context)
+        val instance: PersistenceManger
+            get() {
+                if (sInstance == null) {
+                    val sqLiteDatabase = MySQLiteHelper.database
+
+                    val customTimeRecords = LocalCustomTimeRecord.getCustomTimeRecords(sqLiteDatabase)
+                    val customTimeMaxId = LocalCustomTimeRecord.getMaxId(sqLiteDatabase)
+
+                    val taskRecords = TaskRecord.getTaskRecords(sqLiteDatabase)
+                    val taskMaxId = TaskRecord.getMaxId(sqLiteDatabase)
+
+                    val taskHierarchyRecords = if (taskRecords.isEmpty())
+                        mutableListOf()
+                    else
+                        TaskHierarchyRecord.getTaskHierarchyRecords(sqLiteDatabase)
+
+                    val taskHierarchyMaxId = TaskHierarchyRecord.getMaxId(sqLiteDatabase)
+
+                    val scheduleRecords = ScheduleRecord.getScheduleRecords(sqLiteDatabase)
+                    val scheduleMaxId = ScheduleRecord.getMaxId(sqLiteDatabase)
+
+                    val singleScheduleRecords = SingleScheduleRecord.getSingleScheduleRecords(sqLiteDatabase)
+                            .associateBy { it.scheduleId }
+                            .toMutableMap()
+
+                    val dailyScheduleRecords = DailyScheduleRecord.getDailyScheduleRecords(sqLiteDatabase)
+                            .associateBy { it.scheduleId }
+                            .toMutableMap()
+
+                    val weeklyScheduleRecords = WeeklyScheduleRecord.getWeeklyScheduleRecords(sqLiteDatabase)
+                            .associateBy { it.scheduleId }
+                            .toMutableMap()
+
+                    val monthlyDayScheduleRecords = MonthlyDayScheduleRecord.getMonthlyDayScheduleRecords(sqLiteDatabase)
+                            .associateBy { it.scheduleId }
+                            .toMutableMap()
+
+                    val monthlyWeekScheduleRecords = MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(sqLiteDatabase)
+                            .associateBy { it.scheduleId }
+                            .toMutableMap()
+
+                    val instanceRecords = InstanceRecord.getInstanceRecords(sqLiteDatabase)
+                    val instanceMaxId = InstanceRecord.getMaxId(sqLiteDatabase)
+
+                    val instanceShownRecords = InstanceShownRecord.getInstancesShownRecords(sqLiteDatabase)
+                    val instanceShownMaxId = InstanceShownRecord.getMaxId(sqLiteDatabase)
+
+                    val uuidRecord = UuidRecord.getUuidRecord(sqLiteDatabase)
+
+                    sInstance = PersistenceManger(customTimeRecords, customTimeMaxId, taskRecords, taskMaxId, taskHierarchyRecords, taskHierarchyMaxId, scheduleRecords, scheduleMaxId, singleScheduleRecords, dailyScheduleRecords, weeklyScheduleRecords, monthlyDayScheduleRecords, monthlyWeekScheduleRecords, instanceRecords, instanceMaxId, instanceShownRecords, instanceShownMaxId, uuidRecord)
+                }
             return sInstance!!
         }
     }
 
-    private val _customTimeRecords: MutableList<LocalCustomTimeRecord>
-    private val _taskRecords: MutableList<TaskRecord>
-    private val _taskHierarchyRecords: MutableList<TaskHierarchyRecord>
-    private val _scheduleRecords: MutableList<ScheduleRecord>
-    private val _singleScheduleRecords: MutableMap<Int, SingleScheduleRecord>
-    private val _dailyScheduleRecords: MutableMap<Int, DailyScheduleRecord>
-    private val _weeklyScheduleRecords: MutableMap<Int, WeeklyScheduleRecord>
-    private val _monthlyDayScheduleRecords: MutableMap<Int, MonthlyDayScheduleRecord>
-    private val _monthlyWeekScheduleRecords: MutableMap<Int, MonthlyWeekScheduleRecord>
-    private val _instanceRecords: MutableList<InstanceRecord>
-    private val _instanceShownRecords: MutableList<InstanceShownRecord>
-
-    private val uuidRecord: UuidRecord
-
-    private var customTimeMaxId: Int = 0
-    private var taskMaxId: Int = 0
-    private var taskHierarchyMaxId: Int = 0
-    private var scheduleMaxId: Int = 0
-    private var instanceMaxId: Int = 0
-    private var instanceShownMaxId: Int = 0
 
     val customTimeRecords: MutableCollection<LocalCustomTimeRecord>
         get() = _customTimeRecords
@@ -81,78 +125,7 @@ class PersistenceManger {
     val uuid get() = uuidRecord.uuid
 
     @SuppressLint("UseSparseArrays")
-    private constructor(context: Context) {
-        val sqLiteDatabase = MySQLiteHelper.database
-
-        _customTimeRecords = LocalCustomTimeRecord.getCustomTimeRecords(sqLiteDatabase)
-
-        customTimeMaxId = LocalCustomTimeRecord.getMaxId(sqLiteDatabase)
-
-        _taskRecords = TaskRecord.getTaskRecords(sqLiteDatabase)
-
-        taskMaxId = TaskRecord.getMaxId(sqLiteDatabase)
-
-        _taskHierarchyRecords = if (_taskRecords.isEmpty())
-            mutableListOf()
-        else
-            TaskHierarchyRecord.getTaskHierarchyRecords(sqLiteDatabase)
-
-        taskHierarchyMaxId = TaskHierarchyRecord.getMaxId(sqLiteDatabase)
-
-        _scheduleRecords = ScheduleRecord.getScheduleRecords(sqLiteDatabase)
-        scheduleMaxId = ScheduleRecord.getMaxId(sqLiteDatabase)
-
-        _singleScheduleRecords = SingleScheduleRecord.getSingleScheduleRecords(sqLiteDatabase)
-                .associateBy { it.scheduleId }
-                .toMutableMap()
-
-        _dailyScheduleRecords = DailyScheduleRecord.getDailyScheduleRecords(sqLiteDatabase)
-                .associateBy { it.scheduleId }
-                .toMutableMap()
-
-        _weeklyScheduleRecords = WeeklyScheduleRecord.getWeeklyScheduleRecords(sqLiteDatabase)
-                .associateBy { it.scheduleId }
-                .toMutableMap()
-
-        _monthlyDayScheduleRecords = MonthlyDayScheduleRecord.getMonthlyDayScheduleRecords(sqLiteDatabase)
-                .associateBy { it.scheduleId }
-                .toMutableMap()
-
-        _monthlyWeekScheduleRecords = MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(sqLiteDatabase)
-                .associateBy { it.scheduleId }
-                .toMutableMap()
-
-        _instanceRecords = InstanceRecord.getInstanceRecords(sqLiteDatabase)
-        instanceMaxId = InstanceRecord.getMaxId(sqLiteDatabase)
-
-        _instanceShownRecords = InstanceShownRecord.getInstancesShownRecords(sqLiteDatabase)
-        instanceShownMaxId = InstanceShownRecord.getMaxId(sqLiteDatabase)
-
-        uuidRecord = UuidRecord.getUuidRecord(sqLiteDatabase)
-    }
-
-    @SuppressLint("UseSparseArrays")
-    constructor() {
-        _customTimeRecords = ArrayList()
-        _taskRecords = ArrayList()
-        _taskHierarchyRecords = ArrayList()
-        _scheduleRecords = ArrayList()
-        _singleScheduleRecords = HashMap()
-        _dailyScheduleRecords = HashMap()
-        _weeklyScheduleRecords = HashMap()
-        _monthlyDayScheduleRecords = HashMap()
-        _monthlyWeekScheduleRecords = HashMap()
-        _instanceRecords = ArrayList()
-        _instanceShownRecords = ArrayList()
-        uuidRecord = UuidRecord(true, UuidRecord.newUuid())
-
-        customTimeMaxId = 0
-        taskMaxId = 0
-        taskHierarchyMaxId = 0
-        scheduleMaxId = 0
-        instanceMaxId = 0
-        instanceShownMaxId = 0
-    }
+    constructor() : this(mutableListOf(), 0, mutableListOf(), 0, mutableListOf(), 0, mutableListOf(), 0, mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableListOf(), 0, mutableListOf(), 0, UuidRecord(true, UuidRecord.newUuid()))
 
     @Synchronized
     fun reset() {

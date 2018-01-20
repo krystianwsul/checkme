@@ -35,7 +35,7 @@ public abstract class DomainLoader<D extends DomainLoader.Data> extends AsyncTas
     DomainLoader(@NonNull Context context, @NonNull FirebaseLevel firebaseLevel) {
         super(context);
 
-        mDomainFactory = DomainFactory.getDomainFactory(getContext());
+        mDomainFactory = DomainFactory.getDomainFactory();
         mFirebaseLevel = firebaseLevel;
     }
 

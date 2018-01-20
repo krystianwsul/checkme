@@ -39,7 +39,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (firebaseUser != null) {
                 UserInfo userInfo = new UserInfo(firebaseUser);
 
-                DomainFactory domainFactory = DomainFactory.getDomainFactory(this);
+                DomainFactory domainFactory = DomainFactory.getDomainFactory();
 
                 domainFactory.setUserInfo(this, SaveService.Source.SERVICE, userInfo);
 

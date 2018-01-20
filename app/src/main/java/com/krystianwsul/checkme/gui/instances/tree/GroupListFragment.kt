@@ -194,7 +194,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
-                    DomainFactory.getDomainFactory(activity!!).setTaskEndTimeStamps(activity!!, (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getDomainFactory().setTaskEndTimeStamps(activity!!, (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -228,7 +228,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getDomainFactory(activity!!).setInstancesDone(activity!!, mDataId!!, SaveService.Source.GUI, instanceKeys)
+                    val done = DomainFactory.getDomainFactory().setInstancesDone(activity!!, mDataId!!, SaveService.Source.GUI, instanceKeys)
 
                     var selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
                     Assert.assertTrue(selectedTreeNodes.isNotEmpty())

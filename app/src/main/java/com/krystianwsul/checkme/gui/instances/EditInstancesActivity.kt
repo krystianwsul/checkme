@@ -104,7 +104,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
                 supportLoaderManager.destroyLoader(0)
 
-                DomainFactory.getDomainFactory(this).setInstancesAddHourActivity(this, mData!!.DataId, SaveService.Source.GUI, mData!!.InstanceDatas.keys)
+                DomainFactory.getDomainFactory().setInstancesAddHourActivity(this, mData!!.DataId, SaveService.Source.GUI, mData!!.InstanceDatas.keys)
 
                 finish()
             }
@@ -113,7 +113,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
                 Assert.assertTrue(mData != null)
 
                 if (isValidDateTime) {
-                    DomainFactory.getDomainFactory(this).setInstancesDateTime(this, mData!!.DataId, SaveService.Source.GUI, mData!!.InstanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
+                    DomainFactory.getDomainFactory().setInstancesDateTime(this, mData!!.DataId, SaveService.Source.GUI, mData!!.InstanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
 
                     finish()
                 }

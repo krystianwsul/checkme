@@ -41,7 +41,7 @@ class SaveService : JobIntentService() {
                     sqLiteDatabase.endTransaction()
                 }
             } catch (e: Exception) {
-                DomainFactory.getDomainFactory(context).reset(context, source)
+                DomainFactory.getDomainFactory().reset(context, source)
                 throw e
             }
         }

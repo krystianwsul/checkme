@@ -57,7 +57,7 @@ public class InstanceDoneService extends IntentService {
     }
 
     public static void throttleFirebase(@NonNull Context context, boolean needsFirebase, @NonNull DomainFactory.FirebaseListener firebaseListener) {
-        DomainFactory domainFactory = DomainFactory.getDomainFactory(context.getApplicationContext());
+        DomainFactory domainFactory = DomainFactory.getDomainFactory();
 
         if (domainFactory.isConnected()) {
             if (domainFactory.isSaved()) {

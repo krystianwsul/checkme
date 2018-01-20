@@ -144,11 +144,11 @@ public class DomainFactory {
     private final Map<InstanceKey, Long> mLastNotificationBeeps = new HashMap<>();
 
     @NonNull
-    public static synchronized DomainFactory getDomainFactory(@NonNull Context context) {
+    public static synchronized DomainFactory getDomainFactory() {
         if (sDomainFactory == null) {
             sStart = ExactTimeStamp.getNow();
 
-            sDomainFactory = new DomainFactory(context);
+            sDomainFactory = new DomainFactory();
 
             sRead = ExactTimeStamp.getNow();
 
@@ -160,8 +160,8 @@ public class DomainFactory {
         return sDomainFactory;
     }
 
-    private DomainFactory(@NonNull Context context) {
-        mLocalFactory = LocalFactory.getInstance(context);
+    private DomainFactory() {
+        mLocalFactory = LocalFactory.getInstance();
     }
 
     DomainFactory(@NonNull PersistenceManger persistenceManger) {

@@ -279,7 +279,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         return View.OnClickListener {
             it.setOnClickListener(null)
 
-            singleInstanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.activity!!).setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)
+            singleInstanceData.Done = DomainFactory.getDomainFactory().setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)
             Assert.assertTrue(singleInstanceData.Done != null)
 
             GroupListFragment.recursiveExists(singleInstanceData)
@@ -563,7 +563,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
                 Assert.assertTrue(notDoneGroupTreeNode.expanded())
 
-                instanceData.Done = DomainFactory.getDomainFactory(groupAdapter.mGroupListFragment.activity!!).setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)
+                instanceData.Done = DomainFactory.getDomainFactory().setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)
                 Assert.assertTrue(instanceData.Done != null)
 
                 GroupListFragment.recursiveExists(instanceData)

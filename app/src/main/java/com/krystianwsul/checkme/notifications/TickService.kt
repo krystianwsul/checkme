@@ -57,7 +57,7 @@ class TickService : WakefulIntentService("TickService") {
         }
 
         fun tick(silent: Boolean, sourceName: String) {
-            val domainFactory = DomainFactory.getDomainFactory(MyApplication.instance)
+            val domainFactory = DomainFactory.getDomainFactory()
 
             if (domainFactory.isConnected) {
                 if (domainFactory.isSaved) {

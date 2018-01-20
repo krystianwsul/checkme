@@ -45,7 +45,6 @@ public class GroupNotificationDeleteService extends IntentService {
         Assert.assertTrue(instanceKeys != null);
         Assert.assertTrue(!instanceKeys.isEmpty());
 
-        DomainFactory.getDomainFactory(this)
-                .setInstancesNotified(this, SaveService.Source.SERVICE, instanceKeys);
+        DomainFactory.getDomainFactory().setInstancesNotified(this, SaveService.Source.SERVICE, instanceKeys);
     }
 }

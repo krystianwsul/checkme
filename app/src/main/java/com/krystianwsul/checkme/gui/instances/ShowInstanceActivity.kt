@@ -134,7 +134,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                     if (!it.mExists)
                         supportLoaderManager.destroyLoader(0)
 
-                    DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.mTaskKey)
+                    DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.mTaskKey)
 
                     if (!it.mExists)
                         finish()
@@ -189,7 +189,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
             if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
                 first = false
 
-                DomainFactory.getDomainFactory(this).let {
+                DomainFactory.getDomainFactory().let {
                     val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
                     it.setInstanceNotified(this, data.DataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
@@ -208,7 +208,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
     }
 
     private fun setDone(done: Boolean) {
-        DomainFactory.getDomainFactory(this@ShowInstanceActivity).setInstanceDone(this, dataId, SaveService.Source.GUI, instanceKey, done)
+        DomainFactory.getDomainFactory().setInstanceDone(this, dataId, SaveService.Source.GUI, instanceKey, done)
         instanceData!!.Done = done
 
         invalidateOptionsMenu()

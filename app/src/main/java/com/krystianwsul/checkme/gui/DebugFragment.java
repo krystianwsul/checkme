@@ -78,7 +78,7 @@ public class DebugFragment extends AbstractFragment {
             stringBuilder.append("\ntick log:\n");
             stringBuilder.append(tickLog);
 
-            DomainFactory domainFactory = DomainFactory.getDomainFactory(getActivity());
+            DomainFactory domainFactory = DomainFactory.getDomainFactory();
 
             stringBuilder.append("\ndata load time: ");
             stringBuilder.append((domainFactory.getReadMillis() + domainFactory.getInstantiateMillis()));
@@ -96,7 +96,7 @@ public class DebugFragment extends AbstractFragment {
             stringBuilder.append(domainFactory.getCustomTimeCount());
 
             ExactTimeStamp t1 = ExactTimeStamp.getNow();
-            DomainFactory.getDomainFactory(getContext()).getGroupListData(getActivity(), ExactTimeStamp.getNow(), 0, MainActivity.TimeRange.DAY);
+            DomainFactory.getDomainFactory().getGroupListData(getActivity(), ExactTimeStamp.getNow(), 0, MainActivity.TimeRange.DAY);
             ExactTimeStamp t2 = ExactTimeStamp.getNow();
 
             stringBuilder.append("\ntoday: ");

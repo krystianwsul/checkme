@@ -123,7 +123,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
                         decrementSelected();
                     } while (!(selected = mTreeViewAdapter.getSelectedNodes()).isEmpty());
 
-                    DomainFactory.getDomainFactory(getActivity()).setTaskEndTimeStamps(getActivity(), mDataId, SaveService.Source.GUI, taskKeys);
+                    DomainFactory.getDomainFactory().setTaskEndTimeStamps(getActivity(), mDataId, SaveService.Source.GUI, taskKeys);
 
                     updateSelectAll();
 

@@ -154,7 +154,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                DomainFactory.getDomainFactory(this).setTaskEndTimeStamp(this, mData.DataId, SaveService.Source.GUI, mTaskKey);
+                DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, mData.DataId, SaveService.Source.GUI, mTaskKey);
 
                 finish();
                 break;

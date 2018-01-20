@@ -71,15 +71,14 @@ public class LocalFactory {
     @NonNull
     private final InstanceMap<LocalInstance> mExistingLocalInstances = new InstanceMap<>();
 
-    public static LocalFactory getInstance(@NonNull Context context) {
+    public static LocalFactory getInstance() {
         if (sLocalFactory == null)
-            sLocalFactory = new LocalFactory(context);
-
+            sLocalFactory = new LocalFactory();
         return sLocalFactory;
     }
 
-    private LocalFactory(@NonNull Context context) {
-        mPersistenceManager = PersistenceManger.Companion.getInstance(context);
+    private LocalFactory() {
+        mPersistenceManager = PersistenceManger.Companion.getInstance();
     }
 
     public LocalFactory(@NonNull PersistenceManger persistenceManger) {

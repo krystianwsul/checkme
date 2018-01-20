@@ -123,9 +123,9 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
                 getSupportLoaderManager().destroyLoader(0);
 
                 if (mData != null) {
-                    DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).updateCustomTime(ShowCustomTimeActivity.this, mData.DataId, SaveService.Source.GUI, mData.Id, name, mHourMinutes);
+                    DomainFactory.getDomainFactory().updateCustomTime(ShowCustomTimeActivity.this, mData.DataId, SaveService.Source.GUI, mData.Id, name, mHourMinutes);
                 } else {
-                    int customTimeId = DomainFactory.getDomainFactory(ShowCustomTimeActivity.this).createCustomTime(ShowCustomTimeActivity.this, SaveService.Source.GUI, name, mHourMinutes);
+                    int customTimeId = DomainFactory.getDomainFactory().createCustomTime(ShowCustomTimeActivity.this, SaveService.Source.GUI, name, mHourMinutes);
                     Assert.assertTrue(customTimeId > 0);
 
                     setResult(customTimeId);

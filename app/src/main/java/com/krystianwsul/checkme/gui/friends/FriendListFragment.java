@@ -343,7 +343,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
                 notifyItemRemoved(position);
             }
 
-            DomainFactory.getDomainFactory(getActivity())
+            DomainFactory.getDomainFactory()
                     .removeFriends(Stream.of(selectedUserDataWrappers)
                             .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
                             .collect(Collectors.toSet()));

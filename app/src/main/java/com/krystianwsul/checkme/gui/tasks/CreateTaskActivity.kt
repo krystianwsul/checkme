@@ -242,7 +242,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             Assert.assertTrue(mData!!.taskData != null)
                             Assert.assertTrue(mTaskKeys == null)
 
-                            val taskKey = DomainFactory.getDomainFactory(this).updateScheduleTask(this, mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, scheduleDatas, mNote, projectId)
+                            val taskKey = DomainFactory.getDomainFactory().updateScheduleTask(this, mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, scheduleDatas, mNote, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -251,13 +251,13 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             Assert.assertTrue(mData!!.taskData == null)
                             Assert.assertTrue(mTaskKeys!!.size > 1)
 
-                            DomainFactory.getDomainFactory(this).createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData!!.DataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
+                            DomainFactory.getDomainFactory().createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData!!.DataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {
                             Assert.assertTrue(mData!!.taskData == null)
 
-                            DomainFactory.getDomainFactory(this).createScheduleRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, scheduleDatas, mNote, projectId)
+                            DomainFactory.getDomainFactory().createScheduleRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, scheduleDatas, mNote, projectId)
 
                             finish()
                         }
@@ -270,7 +270,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             Assert.assertTrue(mData!!.taskData != null)
                             Assert.assertTrue(mTaskKeys == null)
 
-                            val taskKey = DomainFactory.getDomainFactory(this).updateChildTask(this, ExactTimeStamp.getNow(), mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, parentTaskKey, mNote)
+                            val taskKey = DomainFactory.getDomainFactory().updateChildTask(this, ExactTimeStamp.getNow(), mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, parentTaskKey, mNote)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -279,13 +279,13 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             Assert.assertTrue(mData!!.taskData == null)
                             Assert.assertTrue(mTaskKeys!!.size > 1)
 
-                            DomainFactory.getDomainFactory(this).createJoinChildTask(this, mData!!.DataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys!!, mNote)
+                            DomainFactory.getDomainFactory().createJoinChildTask(this, mData!!.DataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys!!, mNote)
 
                             finish()
                         } else {
                             Assert.assertTrue(mData!!.taskData == null)
 
-                            DomainFactory.getDomainFactory(this).createChildTask(this, mData!!.DataId, SaveService.Source.GUI, parentTaskKey, name, mNote)
+                            DomainFactory.getDomainFactory().createChildTask(this, mData!!.DataId, SaveService.Source.GUI, parentTaskKey, name, mNote)
 
                             finish()
                         }
@@ -296,7 +296,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             Assert.assertTrue(mData!!.taskData != null)
                             Assert.assertTrue(mTaskKeys == null)
 
-                            val taskKey = DomainFactory.getDomainFactory(this).updateRootTask(this, mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, mNote, projectId)
+                            val taskKey = DomainFactory.getDomainFactory().updateRootTask(this, mData!!.DataId, SaveService.Source.GUI, mTaskKey!!, name, mNote, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -304,13 +304,13 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                         } else if (mTaskKeys != null) {
                             Assert.assertTrue(mData!!.taskData == null)
 
-                            DomainFactory.getDomainFactory(this).createJoinRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, mTaskKeys!!, mNote, projectId)
+                            DomainFactory.getDomainFactory().createJoinRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {
                             Assert.assertTrue(mData!!.taskData == null)
 
-                            DomainFactory.getDomainFactory(this).createRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, mNote, projectId)
+                            DomainFactory.getDomainFactory().createRootTask(this, mData!!.DataId, SaveService.Source.GUI, name, mNote, projectId)
 
                             finish()
                         }

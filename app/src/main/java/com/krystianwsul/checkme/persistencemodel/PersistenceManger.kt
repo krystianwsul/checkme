@@ -14,6 +14,7 @@ import java.util.*
 class PersistenceManger {
 
     companion object {
+
         private var sInstance: PersistenceManger? = null
 
         @Synchronized
@@ -84,7 +85,7 @@ class PersistenceManger {
 
     @SuppressLint("UseSparseArrays")
     private constructor(context: Context) {
-        sqLiteDatabase = MySQLiteHelper.getDatabase(context)
+        sqLiteDatabase = MySQLiteHelper.database
 
         _customTimeRecords = LocalCustomTimeRecord.getCustomTimeRecords(sqLiteDatabase)
 

@@ -54,16 +54,15 @@ class TaskHierarchyRecord(created: Boolean, val id: Int, val parentTaskId: Int, 
         Assert.assertTrue(mEndTime == null || startTime <= mEndTime)
     }
 
-    override val contentValues = ContentValues().apply {
+    override val contentValues
+        get() = ContentValues().apply {
         put(COLUMN_PARENT_TASK_ID, parentTaskId)
         put(COLUMN_CHILD_TASK_ID, childTaskId)
         put(COLUMN_START_TIME, startTime)
         put(COLUMN_END_TIME, endTime)
     }
 
-    override val updateCommand get() = getUpdateCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, id)
-
-    override val insertCommand get() = getInsertCommand(TABLE_TASK_HIERARCHIES)
-
-    override val deleteCommand get() = getDeleteCommand(TABLE_TASK_HIERARCHIES, COLUMN_ID, id)
+    override val commandTable = TABLE_TASK_HIERARCHIES
+    override val commandIdColumn = COLUMN_ID
+    override val commandId = id
 }

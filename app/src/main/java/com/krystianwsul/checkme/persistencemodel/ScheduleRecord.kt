@@ -55,16 +55,15 @@ class ScheduleRecord(created: Boolean, val id: Int, val rootTaskId: Int, val sta
         Assert.assertTrue(_endTime == null || startTime <= _endTime)
     }
 
-    override val contentValues = ContentValues().apply {
+    override val contentValues
+        get() = ContentValues().apply {
         put(COLUMN_ROOT_TASK_ID, rootTaskId)
         put(COLUMN_START_TIME, startTime)
         put(COLUMN_END_TIME, endTime)
         put(COLUMN_TYPE, type)
     }
 
-    override val updateCommand get() = getUpdateCommand(TABLE_SCHEDULES, COLUMN_ID, id)
-
-    override val insertCommand get() = getInsertCommand(TABLE_SCHEDULES)
-
-    override val deleteCommand get() = getDeleteCommand(TABLE_SCHEDULES, COLUMN_ID, id)
+    override val commandTable = TABLE_SCHEDULES
+    override val commandIdColumn = COLUMN_ID
+    override val commandId = id
 }

@@ -49,7 +49,8 @@ class WeeklyScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfWeek:
         Assert.assertTrue(hour != null || customTimeId != null)
     }
 
-    override val contentValues = ContentValues().apply {
+    override val contentValues
+        get() = ContentValues().apply {
         put(COLUMN_SCHEDULE_ID, scheduleId)
         put(COLUMN_DAY_OF_WEEK, dayOfWeek)
         put(COLUMN_CUSTOM_TIME_ID, customTimeId)
@@ -57,9 +58,7 @@ class WeeklyScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfWeek:
         put(COLUMN_MINUTE, minute)
     }
 
-    override val updateCommand get() = getUpdateCommand(TABLE_WEEKLY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
-
-    override val insertCommand get() = getInsertCommand(TABLE_WEEKLY_SCHEDULES)
-
-    override val deleteCommand get() = getDeleteCommand(TABLE_WEEKLY_SCHEDULES, COLUMN_SCHEDULE_ID, scheduleId)
+    override val commandTable = TABLE_WEEKLY_SCHEDULES
+    override val commandIdColumn = COLUMN_SCHEDULE_ID
+    override val commandId = scheduleId
 }

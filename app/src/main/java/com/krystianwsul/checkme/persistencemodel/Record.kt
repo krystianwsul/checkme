@@ -38,47 +38,47 @@ abstract class Record(private var created: Boolean) {
     private var deleted = false
 
     abstract val contentValues: ContentValues
+    abstract val commandTable: String
+    abstract val commandIdColumn: String
+    abstract val commandId: Int
 
-    abstract val insertCommand: InsertCommand
+    val insertCommand: InsertCommand
+        get() {
+            Assert.assertTrue(commandTable.isNotEmpty())
 
-    abstract val updateCommand: UpdateCommand
+            Log.e("asdf", toString() + " created? " + created)
 
-    abstract val deleteCommand: DeleteCommand
+            Assert.assertTrue(!created)
 
-    fun getInsertCommand(tableName: String): InsertCommand {
-        Assert.assertTrue(tableName.isNotEmpty())
+            created = true
+            changed = false
 
-        Log.e("asdf", toString() + " created? " + created)
+            return InsertCommand(commandTable, contentValues)
+        }
 
-        Assert.assertTrue(!created)
+    val updateCommand: UpdateCommand
+        get() {
+            Assert.assertTrue(commandTable.isNotEmpty())
+            Assert.assertTrue(commandIdColumn.isNotEmpty())
 
-        created = true
-        changed = false
+            Assert.assertTrue(changed)
 
-        return InsertCommand(tableName, contentValues)
-    }
+            changed = false
 
-    fun getUpdateCommand(tableName: String, idColumn: String, id: Int): UpdateCommand {
-        Assert.assertTrue(tableName.isNotEmpty())
-        Assert.assertTrue(idColumn.isNotEmpty())
+            return UpdateCommand(commandTable, contentValues, commandIdColumn + " = " + commandId)
+        }
 
-        Assert.assertTrue(changed)
+    val deleteCommand: DeleteCommand
+        get() {
+            Assert.assertTrue(commandTable.isNotEmpty())
+            Assert.assertTrue(commandIdColumn.isNotEmpty())
 
-        changed = false
+            Assert.assertTrue(deleted)
 
-        return UpdateCommand(tableName, contentValues, idColumn + " = " + id)
-    }
+            deleted = false
 
-    fun getDeleteCommand(tableName: String, idColumn: String, id: Int): DeleteCommand {
-        Assert.assertTrue(tableName.isNotEmpty())
-        Assert.assertTrue(idColumn.isNotEmpty())
-
-        Assert.assertTrue(deleted)
-
-        deleted = false
-
-        return DeleteCommand(tableName, idColumn + " = " + id)
-    }
+            return DeleteCommand(commandTable, commandIdColumn + " = " + commandId)
+        }
 
     fun needsInsert() = !created
 

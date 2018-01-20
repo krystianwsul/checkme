@@ -50,27 +50,44 @@ class MySQLiteHelper extends SQLiteOpenHelper {
         sqLiteDatabase.beginTransaction();
 
         try {
-            if (oldVersion < 20) {
-                sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.Companion.getINDEX_HOUR_MINUTE() + " ON " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
-                        + "("
-                        + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_HOUR() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MINUTE()
-                        + ")");
+            if (oldVersion < 19) {
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + LocalCustomTimeRecord.Companion.getTABLE_CUSTOM_TIMES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DailyScheduleRecord.Companion.getTABLE_DAILY_SCHEDULES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceRecord.Companion.getTABLE_INSTANCES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyDayScheduleRecord.Companion.getTABLE_MONTHLY_DAY_SCHEDULES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyWeekScheduleRecord.Companion.getTABLE_MONTHLY_WEEK_SCHEDULES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + ScheduleRecord.Companion.getTABLE_SCHEDULES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SingleScheduleRecord.Companion.getTABLE_SINGLE_SCHEDULES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskHierarchyRecord.Companion.getTABLE_TASK_HIERARCHIES());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskRecord.Companion.getTABLE_TASKS());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UuidRecord.Companion.getTABLE_UUID());
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WeeklyScheduleRecord.Companion.getTABLE_WEEKLY_SCHEDULES());
 
-                sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.Companion.getINDEX_CUSTOM_TIME_ID() + " ON " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
-                        + "("
-                        + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
-                        + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_CUSTOM_TIME_ID()
-                        + ")");
+                onCreate(sqLiteDatabase);
+            } else {
+                if (oldVersion < 20) {
+                    sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.Companion.getINDEX_HOUR_MINUTE() + " ON " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
+                            + "("
+                            + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_HOUR() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MINUTE()
+                            + ")");
+
+                    sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.Companion.getINDEX_CUSTOM_TIME_ID() + " ON " + InstanceShownRecord.Companion.getTABLE_INSTANCES_SHOWN()
+                            + "("
+                            + InstanceShownRecord.Companion.getCOLUMN_PROJECT_ID() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_TASK_ID() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_YEAR() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_MONTH() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_DAY() + ", "
+                            + InstanceShownRecord.Companion.getCOLUMN_SCHEDULE_CUSTOM_TIME_ID()
+                            + ")");
+                }
             }
 
             sqLiteDatabase.setTransactionSuccessful();

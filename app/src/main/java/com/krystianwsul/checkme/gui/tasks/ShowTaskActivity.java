@@ -142,11 +142,11 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
                 String shareData = mTaskListFragment.getShareData();
                 if (TextUtils.isEmpty(shareData))
-                    Utils.share(mData.Name);
+                    Utils.share(mData.getName());
                 else
-                    Utils.share(mData.Name + "\n" + shareData);
+                    Utils.share(mData.getName() + "\n" + shareData);
 
-                Utils.share(mData.Name);
+                Utils.share(mData.getName());
                 break;
             case R.id.task_menu_delete: {
                 TaskListFragment taskListFragment = (TaskListFragment) getSupportFragmentManager().findFragmentById(R.id.show_task_fragment);
@@ -182,16 +182,16 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     public void onLoadFinished(Loader<ShowTaskLoader.Data> loader, final ShowTaskLoader.Data data) {
         mData = data;
 
-        mActionBar.setTitle(data.Name);
+        mActionBar.setTitle(data.getName());
 
-        if (TextUtils.isEmpty(data.ScheduleText))
+        if (TextUtils.isEmpty(data.getScheduleText()))
             mActionBar.setSubtitle(null);
         else
-            mActionBar.setSubtitle(data.ScheduleText);
+            mActionBar.setSubtitle(data.getScheduleText());
 
         invalidateOptionsMenu();
 
-        mTaskListFragment.setTaskKey(mTaskKey, data.DataId, data.mTaskData);
+        mTaskListFragment.setTaskKey(mTaskKey, data.DataId, data.getTaskData());
     }
 
     @Override

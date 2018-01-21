@@ -8,7 +8,7 @@ import junit.framework.Assert
 
 class ShowProjectLoader(context: Context, private val projectId: String?) : DomainLoader<ShowProjectLoader.Data>(context, DomainLoader.FirebaseLevel.FRIEND) {
 
-    override fun getName() = "ShowProjectLoader, projectId: " + projectId
+    override val name = "ShowProjectLoader, projectId: " + projectId
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowProjectData(projectId)
 

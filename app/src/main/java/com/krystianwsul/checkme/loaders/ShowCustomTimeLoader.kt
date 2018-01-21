@@ -9,7 +9,7 @@ import java.util.*
 
 class ShowCustomTimeLoader(context: Context, private val customTimeId: Int) : DomainLoader<ShowCustomTimeLoader.Data>(context, DomainLoader.FirebaseLevel.NOTHING) {
 
-    override fun getName() = "ShowCustomTimeLoader, customTimeId: " + customTimeId
+    override val name = "ShowCustomTimeLoader, customTimeId: " + customTimeId
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowCustomTimeData(customTimeId)
 

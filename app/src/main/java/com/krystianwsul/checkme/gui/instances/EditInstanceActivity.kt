@@ -105,7 +105,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
 
                 supportLoaderManager.destroyLoader(0)
 
-                DomainFactory.getDomainFactory().setInstanceAddHourActivity(this, mData!!.DataId, SaveService.Source.GUI, mData!!.instanceKey)
+                DomainFactory.getDomainFactory().setInstanceAddHourActivity(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceKey)
 
                 finish()
             }
@@ -115,7 +115,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
 
                 if (isValidDateTime) {
                     supportLoaderManager.destroyLoader(0)
-                    DomainFactory.getDomainFactory().setInstanceDateTime(this, mData!!.DataId, SaveService.Source.GUI, mData!!.instanceKey, mDate!!, mTimePairPersist!!.timePair)
+                    DomainFactory.getDomainFactory().setInstanceDateTime(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceKey, mDate!!, mTimePairPersist!!.timePair)
                     finish()
                 }
             }

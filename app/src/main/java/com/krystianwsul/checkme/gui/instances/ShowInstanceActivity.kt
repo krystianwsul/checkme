@@ -184,7 +184,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
             return
         }
 
-        dataId = data.DataId
+        dataId = data.dataId
         instanceData = data.instanceData.also {
             if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
                 first = false
@@ -192,7 +192,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                 DomainFactory.getDomainFactory().let {
                     val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
-                    it.setInstanceNotified(this, data.DataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
+                    it.setInstanceNotified(this, data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
                 }
             }
 
@@ -203,7 +203,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
 
             invalidateOptionsMenu()
 
-            groupListFragment.setInstanceKey(instanceKey, data.DataId, it.dataWrapper)
+            groupListFragment.setInstanceKey(instanceKey, data.dataId, it.dataWrapper)
         }
     }
 

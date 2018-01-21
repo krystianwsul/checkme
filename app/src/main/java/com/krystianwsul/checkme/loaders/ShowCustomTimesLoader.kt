@@ -8,7 +8,7 @@ import junit.framework.Assert
 
 class ShowCustomTimesLoader(context: Context) : DomainLoader<ShowCustomTimesLoader.Data>(context, DomainLoader.FirebaseLevel.NOTHING) {
 
-    override fun getName() = "ShowCustomTimesLoader"
+    override val name = "ShowCustomTimesLoader"
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.showCustomTimesData
 

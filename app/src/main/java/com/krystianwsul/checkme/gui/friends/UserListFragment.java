@@ -273,9 +273,9 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         if (TextUtils.isEmpty(mProjectId)) {
             Assert.assertTrue(saveState.mRemovedIds.isEmpty());
 
-            DomainFactory.getDomainFactory().createProject(getActivity(), mData.DataId, SaveService.Source.GUI, name, saveState.mAddedIds);
+            DomainFactory.getDomainFactory().createProject(getActivity(), mData.getDataId(), SaveService.Source.GUI, name, saveState.mAddedIds);
         } else {
-            DomainFactory.getDomainFactory().updateProject(getActivity(), mData.DataId, SaveService.Source.GUI, mProjectId, name, saveState.mAddedIds, saveState.mRemovedIds);
+            DomainFactory.getDomainFactory().updateProject(getActivity(), mData.getDataId(), SaveService.Source.GUI, mProjectId, name, saveState.mAddedIds, saveState.mRemovedIds);
         }
     }
 

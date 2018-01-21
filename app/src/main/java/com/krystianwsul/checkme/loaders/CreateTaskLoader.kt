@@ -24,7 +24,7 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
         }
     }
 
-    internal override fun getName() = "CreateTaskLoader, taskKey: $taskKey, excludedTaskKeys: $joinTaskKeys"
+    override val name = "CreateTaskLoader, taskKey: $taskKey, excludedTaskKeys: $joinTaskKeys"
 
     public override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(taskKey, context, joinTaskKeys)
 

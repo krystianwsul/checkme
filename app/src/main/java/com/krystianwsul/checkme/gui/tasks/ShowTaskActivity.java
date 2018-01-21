@@ -154,7 +154,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
                 getSupportLoaderManager().destroyLoader(0);
 
-                DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, mData.DataId, SaveService.Source.GUI, mTaskKey);
+                DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, mData.getDataId(), SaveService.Source.GUI, mTaskKey);
 
                 finish();
                 break;
@@ -191,7 +191,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
         invalidateOptionsMenu();
 
-        mTaskListFragment.setTaskKey(mTaskKey, data.DataId, data.getTaskData());
+        mTaskListFragment.setTaskKey(mTaskKey, data.getDataId(), data.getTaskData());
     }
 
     @Override

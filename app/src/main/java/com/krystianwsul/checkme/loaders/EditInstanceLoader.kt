@@ -14,7 +14,7 @@ import java.util.*
 
 class EditInstanceLoader(context: Context, private val instanceKey: InstanceKey) : DomainLoader<EditInstanceLoader.Data>(context, if (instanceKey.type == TaskKey.Type.REMOTE) DomainLoader.FirebaseLevel.NEED else DomainLoader.FirebaseLevel.NOTHING) {
 
-    override fun getName() = "EditInstanceLoader, instanceKey: " + instanceKey
+    override val name = "EditInstanceLoader, instanceKey: " + instanceKey
 
     public override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getEditInstanceData(instanceKey)
 

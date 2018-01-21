@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 
 class MainLoader(context: Context) : DomainLoader<MainLoader.Data>(context, DomainLoader.FirebaseLevel.WANT) {
 
-    override fun getName() = "MainLoader"
+    override val name = "MainLoader"
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getMainData(context)
 

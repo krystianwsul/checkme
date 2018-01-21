@@ -257,7 +257,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         private final ShowCustomTimesFragment mShowCustomTimesFragment;
 
         CustomTimesAdapter(@NonNull ShowCustomTimesLoader.Data data, @NonNull ShowCustomTimesFragment showCustomTimesFragment, @Nullable ArrayList<Integer> selectedCustomTimeIds) {
-            mDataId = data.DataId;
+            mDataId = data.getDataId();
             mCustomTimeWrappers = Stream.of(data.getEntries())
                     .map(customTimeData -> new CustomTimeWrapper(customTimeData, selectedCustomTimeIds))
                     .collect(Collectors.toList());

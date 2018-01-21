@@ -8,7 +8,7 @@ import junit.framework.Assert
 
 class ShowTaskLoader(context: Context, private val taskKey: TaskKey) : DomainLoader<ShowTaskLoader.Data>(context, if (taskKey.type == TaskKey.Type.REMOTE) DomainLoader.FirebaseLevel.NEED else DomainLoader.FirebaseLevel.NOTHING) {
 
-    override fun getName() = "ShowTaskLoader, taskKey: " + taskKey
+    override val name = "ShowTaskLoader, taskKey: " + taskKey
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowTaskData(taskKey, context)
 

@@ -27,7 +27,7 @@ class EditInstancesLoader(context: Context, private val instanceKeys: List<Insta
         Assert.assertTrue(instanceKeys.size > 1)
     }
 
-    override fun getName() = "EditInstanceLoader, instanceKeys: " + instanceKeys
+    override val name = "EditInstanceLoader, instanceKeys: " + instanceKeys
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getEditInstancesData(instanceKeys)
 

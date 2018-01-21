@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 class DayLoader(context: Context, private val position: Int, private val timeRange: MainActivity.TimeRange) : DomainLoader<DayLoader.Data>(context, DomainLoader.FirebaseLevel.WANT) {
 
-    override fun getName() = "DayLoader, position: $position, timeRange: $timeRange"
+    override val name = "DayLoader, position: $position, timeRange: $timeRange"
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getGroupListData(context, ExactTimeStamp.getNow(), position, timeRange)
 

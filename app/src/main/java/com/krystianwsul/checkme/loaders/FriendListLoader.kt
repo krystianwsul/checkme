@@ -8,7 +8,7 @@ import junit.framework.Assert
 
 class FriendListLoader(context: Context) : DomainLoader<FriendListLoader.Data>(context, DomainLoader.FirebaseLevel.FRIEND) {
 
-    override fun getName() = "UserListLoader"
+    override val name = "UserListLoader"
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.friendListData
 

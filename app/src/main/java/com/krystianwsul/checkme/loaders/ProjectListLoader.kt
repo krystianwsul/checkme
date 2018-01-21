@@ -7,7 +7,7 @@ import java.util.*
 
 class ProjectListLoader(context: Context) : DomainLoader<ProjectListLoader.Data>(context, DomainLoader.FirebaseLevel.NEED) {
 
-    override fun getName() = "ProjectListLoader"
+    override val name = "ProjectListLoader"
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.projectListData
 

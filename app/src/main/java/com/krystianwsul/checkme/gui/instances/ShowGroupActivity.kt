@@ -80,7 +80,7 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
             return
         }
 
-        groupListFragment.setTimeStamp(timeStamp, data.DataId, data.dataWrapper)
+        groupListFragment.setTimeStamp(timeStamp, data.dataId, data.dataWrapper)
     }
 
     override fun onLoaderReset(loader: Loader<ShowGroupLoader.Data>) = Unit

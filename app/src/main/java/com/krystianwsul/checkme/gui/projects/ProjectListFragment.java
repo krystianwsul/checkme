@@ -204,7 +204,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     public void onLoadFinished(Loader<ProjectListLoader.Data> loader, ProjectListLoader.Data data) {
         Assert.assertTrue(data != null);
 
-        mDataId = data.DataId;
+        mDataId = data.getDataId();
 
         mProjectListProgress.setVisibility(View.GONE);
         if (data.getProjectDatas().isEmpty()) {

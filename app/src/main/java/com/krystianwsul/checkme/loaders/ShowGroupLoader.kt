@@ -10,7 +10,7 @@ import junit.framework.Assert
 
 class ShowGroupLoader(context: Context, private val timeStamp: TimeStamp) : DomainLoader<ShowGroupLoader.Data>(context, DomainLoader.FirebaseLevel.WANT) {
 
-    override fun getName() = "ShowGroupLoader, timeStamp: " + timeStamp
+    override val name = "ShowGroupLoader, timeStamp: " + timeStamp
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowGroupData(context, timeStamp)
 

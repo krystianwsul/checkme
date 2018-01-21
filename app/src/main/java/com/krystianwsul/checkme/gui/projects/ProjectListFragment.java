@@ -78,7 +78,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
                     .collect(Collectors.toList());
 
             Set<String> projectIds = Stream.of(projectNodes)
-                    .map(projectNode -> projectNode.mProjectData.mId)
+                    .map(projectNode -> projectNode.mProjectData.getId())
                     .collect(Collectors.toSet());
 
             switch (menuItem.getItemId()) {
@@ -207,7 +207,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         mDataId = data.DataId;
 
         mProjectListProgress.setVisibility(View.GONE);
-        if (data.mProjectDatas.isEmpty()) {
+        if (data.getProjectDatas().isEmpty()) {
             mProjectListRecycler.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
             mEmptyText.setText(R.string.projects_empty);
@@ -218,10 +218,10 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
         if (mTreeViewAdapter != null)
             mSelectedProjectIds = Stream.of(mTreeViewAdapter.getSelectedNodes())
-                    .map(treeNode -> ((ProjectListAdapter.ProjectNode) treeNode.getModelNode()).mProjectData.mId)
+                    .map(treeNode -> ((ProjectListAdapter.ProjectNode) treeNode.getModelNode()).mProjectData.getId())
                     .collect(Collectors.toSet());
 
-        mTreeViewAdapter = new ProjectListAdapter(getActivity()).initialize(data.mProjectDatas);
+        mTreeViewAdapter = new ProjectListAdapter(getActivity()).initialize(data.getProjectDatas());
         mProjectListRecycler.setAdapter(mTreeViewAdapter);
 
         mSelectionCallback.setSelected(mTreeViewAdapter.getSelectedNodes().size());
@@ -240,7 +240,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
         if (mTreeViewAdapter != null)
             mSelectedProjectIds = Stream.of(mTreeViewAdapter.getSelectedNodes())
-                    .map(treeNode -> ((ProjectListAdapter.ProjectNode) treeNode.getModelNode()).mProjectData.mId)
+                    .map(treeNode -> ((ProjectListAdapter.ProjectNode) treeNode.getModelNode()).mProjectData.getId())
                     .collect(Collectors.toSet());
 
         outState.putStringArrayList(SELECTED_PROJECT_IDS, new ArrayList<>(mSelectedProjectIds));
@@ -358,7 +358,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
             @NonNull
             TreeNode initialize(@NonNull TreeNodeCollection treeNodeCollection) {
-                mTreeNode = new TreeNode(this, treeNodeCollection, false, mSelectedProjectIds.contains(mProjectData.mId));
+                mTreeNode = new TreeNode(this, treeNodeCollection, false, mSelectedProjectIds.contains(mProjectData.getId()));
                 mTreeNode.setChildTreeNodes(new ArrayList<>());
                 return mTreeNode;
             }
@@ -367,9 +367,9 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
                 Holder holder = (Holder) viewHolder;
 
-                holder.mProjectName.setText(mProjectData.mName);
+                holder.mProjectName.setText(mProjectData.getName());
 
-                holder.mProjectUsers.setText(mProjectData.mUsers);
+                holder.mProjectUsers.setText(mProjectData.getUsers());
 
                 holder.itemView.setOnClickListener(mTreeNode.getOnClickListener());
 
@@ -393,7 +393,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
             @Override
             public void onClick() {
-                mContext.startActivity(ShowProjectActivity.newIntent(mContext, mProjectData.mId));
+                mContext.startActivity(ShowProjectActivity.newIntent(mContext, mProjectData.getId()));
             }
 
             @Override
@@ -417,7 +417,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
 
                 ProjectNode projectNode = (ProjectNode) modelNode;
 
-                return mProjectData.mId.compareTo(projectNode.mProjectData.mId);
+                return mProjectData.getId().compareTo(projectNode.mProjectData.getId());
             }
 
             void remove() {

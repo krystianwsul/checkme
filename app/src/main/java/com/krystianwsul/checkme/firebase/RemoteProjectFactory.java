@@ -57,7 +57,7 @@ public class RemoteProjectFactory {
 
         mRemoteProjectManager = new RemoteProjectManager(domainFactory, children);
 
-        mRemoteProjects = Stream.of(mRemoteProjectManager.mRemoteProjectRecords.values())
+        mRemoteProjects = Stream.of(mRemoteProjectManager.getRemoteProjectRecords().values())
                 .map(remoteProjectRecord -> new RemoteProject(domainFactory, remoteProjectRecord, mUserInfo, uuid, now))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> remoteProject));
     }

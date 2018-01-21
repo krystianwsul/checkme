@@ -59,10 +59,10 @@ public class DataDiff {
         Assert.assertTrue(oldInstanceData.getInstanceKey().equals(newInstanceData.getInstanceKey()));
 
         if (((oldInstanceData.getDone() == null) != (newInstanceData.getDone() == null)) || ((oldInstanceData.getDone() != null) && !oldInstanceData.getDone().equals(newInstanceData.getDone())))
-            sDiff.add(indent + "oldInstanceData.Done == " + oldInstanceData.getDone() + ", newInstanceData.Done == " + newInstanceData.getDone());
+            sDiff.add(indent + "oldInstanceData.done == " + oldInstanceData.getDone() + ", newInstanceData.done == " + newInstanceData.getDone());
 
         if ((TextUtils.isEmpty(oldInstanceData.getDisplayText()) != TextUtils.isEmpty(newInstanceData.getDisplayText())) || (!TextUtils.isEmpty(oldInstanceData.getDisplayText()) && !oldInstanceData.getDisplayText().equals(newInstanceData.getDisplayText())))
-            sDiff.add(indent + "oldInstanceData.DisplayText == " + oldInstanceData.getDisplayText() + ", newInstanceData.DisplayText == " + newInstanceData.getDisplayText());
+            sDiff.add(indent + "oldInstanceData.displayText == " + oldInstanceData.getDisplayText() + ", newInstanceData.displayText == " + newInstanceData.getDisplayText());
 
         if (!oldInstanceData.getName().equals(newInstanceData.getName()))
             sDiff.add(indent + "oldInstanceData.name == " + oldInstanceData.getName() + ", newInstanceData.name == " + newInstanceData.getName());
@@ -71,16 +71,16 @@ public class DataDiff {
             sDiff.add(indent + "oldInstanceData.InstanceTimeStamp == " + oldInstanceData.getInstanceTimeStamp() + ", newInstanceData.InstanceTimeStamp == " + newInstanceData.getInstanceTimeStamp());
 
         if (oldInstanceData.getTaskCurrent() != newInstanceData.getTaskCurrent())
-            sDiff.add(indent + "oldInstanceData.TaskCurrent == " + oldInstanceData.getTaskCurrent() + ", newInstanceData.TaskCurrent == " + newInstanceData.getTaskCurrent());
+            sDiff.add(indent + "oldInstanceData.taskCurrent == " + oldInstanceData.getTaskCurrent() + ", newInstanceData.taskCurrent == " + newInstanceData.getTaskCurrent());
 
         if (oldInstanceData.getIsRootInstance() != newInstanceData.getIsRootInstance())
-            sDiff.add(indent + "oldInstanceData.IsRootInstance == " + oldInstanceData.getIsRootInstance() + ", newInstanceData.IsRootInstance == " + newInstanceData.getIsRootInstance());
+            sDiff.add(indent + "oldInstanceData.isRootInstance == " + oldInstanceData.getIsRootInstance() + ", newInstanceData.isRootInstance == " + newInstanceData.getIsRootInstance());
 
         if (((oldInstanceData.getIsRootTask() == null) != (newInstanceData.getIsRootTask() == null)) || ((oldInstanceData.getIsRootTask() != null) && !oldInstanceData.getIsRootTask().equals(newInstanceData.getIsRootTask())))
             sDiff.add(indent + "oldInstanceData.IsRootTask == " + oldInstanceData.getIsRootTask() + ", newInstanceData.IsRootTask == " + newInstanceData.getIsRootTask());
 
         if (oldInstanceData.getExists() != newInstanceData.getExists())
-            sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.getExists() + ", newInstanceData.mExists == " + newInstanceData.getExists());
+            sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.getExists() + ", newInstanceData.exists == " + newInstanceData.getExists());
 
         if (!oldInstanceData.getInstanceTimePair().equals(newInstanceData.getInstanceTimePair()))
             sDiff.add(indent + "oldInstanceData.instanceTimePair == " + oldInstanceData.getInstanceTimePair() + ", newInstanceData.instanceTimePair == " + newInstanceData.getInstanceTimePair());

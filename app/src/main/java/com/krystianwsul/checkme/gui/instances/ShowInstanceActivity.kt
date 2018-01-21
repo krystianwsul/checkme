@@ -66,19 +66,19 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.instance_menu_check).isVisible = instanceData?.Done == false
+        menu.findItem(R.id.instance_menu_check).isVisible = instanceData?.done == false
 
-        menu.findItem(R.id.instance_menu_uncheck).isVisible = instanceData?.Done == true
+        menu.findItem(R.id.instance_menu_uncheck).isVisible = instanceData?.done == true
 
-        menu.findItem(R.id.instance_menu_edit_instance).isVisible = instanceData?.run { !Done && IsRootInstance } == true
+        menu.findItem(R.id.instance_menu_edit_instance).isVisible = instanceData?.run { !done && isRootInstance } == true
 
         menu.findItem(R.id.instance_menu_share).isVisible = instanceData != null
 
-        menu.findItem(R.id.instance_menu_show_task).isVisible = instanceData?.run { !Done && TaskCurrent } == true
+        menu.findItem(R.id.instance_menu_show_task).isVisible = instanceData?.run { !done && taskCurrent } == true
 
-        menu.findItem(R.id.instance_menu_edit_task).isVisible = instanceData?.run { !Done && TaskCurrent } == true
+        menu.findItem(R.id.instance_menu_edit_task).isVisible = instanceData?.run { !done && taskCurrent } == true
 
-        menu.findItem(R.id.instance_menu_delete_task).isVisible = instanceData?.run { !Done && TaskCurrent } == true
+        menu.findItem(R.id.instance_menu_delete_task).isVisible = instanceData?.run { !done && taskCurrent } == true
 
         menu.findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
 
@@ -89,54 +89,54 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
         instanceData!!.let {
             when (item.itemId) {
                 R.id.instance_menu_check -> {
-                    Assert.assertTrue(!it.Done)
+                    Assert.assertTrue(!it.done)
 
                     setDone(true)
                 }
                 R.id.instance_menu_uncheck -> {
-                    Assert.assertTrue(it.Done)
+                    Assert.assertTrue(it.done)
 
                     setDone(false)
                 }
                 R.id.instance_menu_edit_instance -> {
-                    Assert.assertTrue(!it.Done)
-                    Assert.assertTrue(it.IsRootInstance)
+                    Assert.assertTrue(!it.done)
+                    Assert.assertTrue(it.isRootInstance)
 
                     startActivity(EditInstanceActivity.getIntent(instanceKey))
                 }
                 R.id.instance_menu_share -> {
                     val shareData = groupListFragment.shareData
                     if (TextUtils.isEmpty(shareData))
-                        Utils.share(it.Name)
+                        Utils.share(it.name)
                     else
-                        Utils.share(it.Name + "\n" + shareData)
+                        Utils.share(it.name + "\n" + shareData)
                 }
                 R.id.instance_menu_show_task -> {
-                    Assert.assertTrue(!it.Done)
-                    Assert.assertTrue(it.TaskCurrent)
+                    Assert.assertTrue(!it.done)
+                    Assert.assertTrue(it.taskCurrent)
 
                     supportLoaderManager.destroyLoader(0)
 
                     startActivityForResult(ShowTaskActivity.newIntent(instanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
                 R.id.instance_menu_edit_task -> {
-                    Assert.assertTrue(!it.Done)
-                    Assert.assertTrue(it.TaskCurrent)
+                    Assert.assertTrue(!it.done)
+                    Assert.assertTrue(it.taskCurrent)
 
                     supportLoaderManager.destroyLoader(0)
 
                     startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
                 R.id.instance_menu_delete_task -> {
-                    Assert.assertTrue(!it.Done)
-                    Assert.assertTrue(it.TaskCurrent)
+                    Assert.assertTrue(!it.done)
+                    Assert.assertTrue(it.taskCurrent)
 
-                    if (!it.mExists)
+                    if (!it.exists)
                         supportLoaderManager.destroyLoader(0)
 
                     DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.mTaskKey)
 
-                    if (!it.mExists)
+                    if (!it.exists)
                         finish()
                 }
                 R.id.instance_menu_select_all -> groupListFragment.selectAll()
@@ -179,13 +179,13 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowInstanceLoader(this, instanceKey)
 
     override fun onLoadFinished(loader: Loader<ShowInstanceLoader.Data>, data: ShowInstanceLoader.Data) {
-        if (data.mInstanceData == null) {
+        if (data.instanceData == null) {
             finish()
             return
         }
 
         dataId = data.DataId
-        instanceData = data.mInstanceData.also {
+        instanceData = data.instanceData.also {
             if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
                 first = false
 
@@ -197,19 +197,19 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
             }
 
             actionBar.run {
-                title = it.Name
-                subtitle = it.DisplayText
+                title = it.name
+                subtitle = it.displayText
             }
 
             invalidateOptionsMenu()
 
-            groupListFragment.setInstanceKey(instanceKey, data.DataId, it.mDataWrapper)
+            groupListFragment.setInstanceKey(instanceKey, data.DataId, it.dataWrapper)
         }
     }
 
     private fun setDone(done: Boolean) {
         DomainFactory.getDomainFactory().setInstanceDone(this, dataId, SaveService.Source.GUI, instanceKey, done)
-        instanceData!!.Done = done
+        instanceData!!.done = done
 
         invalidateOptionsMenu()
     }

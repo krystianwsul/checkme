@@ -7,16 +7,15 @@ import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 
 class SaveService : JobIntentService() {
 
     companion object {
 
-        private val INSERT_COMMAND_KEY = "insertCommands"
-        private val UPDATE_COMMAND_KEY = "updateCommands"
-        private val DELETE_COMMAND_KEY = "deleteCommands"
-        private val SOURCE_KEY = "source"
+        private const val INSERT_COMMAND_KEY = "insertCommands"
+        private const val UPDATE_COMMAND_KEY = "updateCommands"
+        private const val DELETE_COMMAND_KEY = "deleteCommands"
+        private const val SOURCE_KEY = "source"
 
         private fun save(context: Context, insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>, source: Source) {
             Log.e("asdf", "SaveService.save")
@@ -81,17 +80,19 @@ class SaveService : JobIntentService() {
                         persistenceManger.instanceRecords,
                         persistenceManger.instanceShownRecords)
 
-                val insertCommands = ArrayList(collections.flatten()
+                val insertCommands = collections.flatten()
                         .filter { it.needsInsert() }
-                        .map { it.insertCommand })
+                        .map { it.insertCommand }
 
                 // update
 
-                val updateCommands = ArrayList(collections.flatten()
+                val updateCommands = collections.flatten()
                         .filter { it.needsUpdate() }
-                        .map { it.updateCommand })
+                        .map { it.updateCommand }
 
-                val deleteCommands = ArrayList(collections.map { delete(it) }.flatten())
+                val deleteCommands = collections.map { delete(it) }
+                        .flatten()
+                        .toMutableList()
 
                 when (source) {
                     Source.GUI -> Observable.fromCallable { save(context, insertCommands, updateCommands, deleteCommands, source) }

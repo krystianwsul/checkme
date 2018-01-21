@@ -527,7 +527,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
     public void onLoadFinished(Loader<MainLoader.Data> loader, MainLoader.Data data) {
         Assert.assertTrue(data != null);
 
-        mTaskListFragment.setAllTasks(data.DataId, data.mTaskData);
+        mTaskListFragment.setAllTasks(data.DataId, data.getTaskData());
     }
 
     @Override

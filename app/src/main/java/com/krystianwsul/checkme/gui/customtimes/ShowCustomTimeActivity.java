@@ -55,7 +55,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     private ShowCustomTimeLoader.Data mData;
 
     private final HashMap<DayOfWeek, TextView> mTimeViews = new HashMap<>();
-    private HashMap<DayOfWeek, HourMinute> mHourMinutes;
+    private final HashMap<DayOfWeek, HourMinute> mHourMinutes = new HashMap<>();
 
     private DayOfWeek mEditedDayOfWeek = null;
 
@@ -182,8 +182,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
 
         if (mSavedInstanceState != null && mSavedInstanceState.containsKey(HOUR_MINUTE_SUNDAY_KEY)) {
             Assert.assertTrue(mSavedInstanceState.containsKey(EDITED_DAY_OF_WEEK_KEY));
-            Assert.assertTrue(mHourMinutes == null);
-            mHourMinutes = new HashMap<>();
+            Assert.assertTrue(mHourMinutes.isEmpty());
 
             extractKey(HOUR_MINUTE_SUNDAY_KEY, DayOfWeek.SUNDAY);
             extractKey(HOUR_MINUTE_MONDAY_KEY, DayOfWeek.MONDAY);
@@ -201,8 +200,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
                 Assert.assertTrue(!intent.hasExtra(NEW_KEY));
             } else {
                 Assert.assertTrue(intent.hasExtra(NEW_KEY));
-                Assert.assertTrue(mHourMinutes == null);
-                mHourMinutes = new HashMap<>();
+                Assert.assertTrue(mHourMinutes.isEmpty());
 
                 for (DayOfWeek dayOfWeek : DayOfWeek.values())
                     mHourMinutes.put(dayOfWeek, sDefaultHourMinute);
@@ -231,7 +229,6 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
         Assert.assertTrue(mSavedInstanceState != null);
         Assert.assertTrue(!TextUtils.isEmpty(key));
         Assert.assertTrue(dayOfWeek != null);
-        Assert.assertTrue(mHourMinutes != null);
 
         Assert.assertTrue(mSavedInstanceState.containsKey(key));
 
@@ -259,7 +256,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mHourMinutes != null) {
+        if (!mHourMinutes.isEmpty()) {
             outState.putParcelable(HOUR_MINUTE_SUNDAY_KEY, mHourMinutes.get(DayOfWeek.SUNDAY));
             outState.putParcelable(HOUR_MINUTE_MONDAY_KEY, mHourMinutes.get(DayOfWeek.MONDAY));
             outState.putParcelable(HOUR_MINUTE_TUESDAY_KEY, mHourMinutes.get(DayOfWeek.TUESDAY));
@@ -278,7 +275,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     }
 
     private void updateGui() {
-        Assert.assertTrue(mHourMinutes != null);
+        Assert.assertTrue(!mHourMinutes.isEmpty());
 
         mToolbarLayout.setVisibility(View.VISIBLE);
         mShowCustomTimeContainer.setVisibility(View.VISIBLE);
@@ -338,8 +335,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
         mData = data;
 
         if (mSavedInstanceState == null || !mSavedInstanceState.containsKey(HOUR_MINUTE_SUNDAY_KEY)) {
-            Assert.assertTrue(mHourMinutes == null);
-            mHourMinutes = new HashMap<>();
+            Assert.assertTrue(mHourMinutes.isEmpty());
 
             mToolbarEditText.setText(mData.getName());
 

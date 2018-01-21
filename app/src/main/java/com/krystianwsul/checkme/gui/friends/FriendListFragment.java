@@ -181,7 +181,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         else if (mSelectedIds == null)
             mSelectedIds = new ArrayList<>();
 
-        mFriendListAdapter = new FriendListAdapter(data.mUserListDatas, mSelectedIds);
+        mFriendListAdapter = new FriendListAdapter(data.getUserListDatas(), mSelectedIds);
         mFriendListRecycler.setAdapter(mFriendListAdapter);
 
         mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
@@ -190,7 +190,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         updateFabVisibility();
 
-        if (data.mUserListDatas.isEmpty()) {
+        if (data.getUserListDatas().isEmpty()) {
             mFriendListRecycler.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
             mEmptyText.setText(R.string.friends_empty);
@@ -262,10 +262,10 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
             Assert.assertTrue(mData != null);
 
             Map<String, FriendListLoader.UserListData> userListMap = Stream.of(userListDatas)
-                    .collect(Collectors.toMap(userListData -> userListData.mId, userListData -> userListData));
+                    .collect(Collectors.toMap(userListData -> userListData.getId(), userListData -> userListData));
 
             mUserDataWrappers = Stream.of(userListMap.values())
-                    .sorted((lhs, rhs) -> lhs.mId.compareTo(rhs.mId))
+                    .sorted((lhs, rhs) -> lhs.getId().compareTo(rhs.getId()))
                     .map(userListData -> new UserDataWrapper(userListData, selectedIds))
                     .collect(Collectors.toList());
         }
@@ -303,8 +303,8 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
             UserDataWrapper userDataWrapper = mUserDataWrappers.get(position);
             Assert.assertTrue(userDataWrapper != null);
 
-            friendHolder.mFriendName.setText(userDataWrapper.mUserListData.mName);
-            friendHolder.mFriendEmail.setText(userDataWrapper.mUserListData.mEmail);
+            friendHolder.mFriendName.setText(userDataWrapper.mUserListData.getName());
+            friendHolder.mFriendEmail.setText(userDataWrapper.mUserListData.getEmail());
 
             if (userDataWrapper.mSelected)
                 friendHolder.mFriendRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
@@ -328,7 +328,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         List<String> getSelected() {
             return new ArrayList<>(Stream.of(mUserDataWrappers)
                     .filter(userDataWrapper -> userDataWrapper.mSelected)
-                    .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
+                    .map(userDataWrapper -> userDataWrapper.mUserListData.getId())
                     .collect(Collectors.toList()));
         }
 
@@ -345,7 +345,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
             DomainFactory.getDomainFactory()
                     .removeFriends(Stream.of(selectedUserDataWrappers)
-                            .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
+                            .map(userDataWrapper -> userDataWrapper.mUserListData.getId())
                             .collect(Collectors.toSet()));
         }
 
@@ -395,7 +395,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
         UserDataWrapper(@NonNull FriendListLoader.UserListData userListData, @NonNull List<String> selectedIds) {
             mUserListData = userListData;
 
-            mSelected = selectedIds.contains(mUserListData.mId);
+            mSelected = selectedIds.contains(mUserListData.getId());
         }
 
         void toggleSelect() {

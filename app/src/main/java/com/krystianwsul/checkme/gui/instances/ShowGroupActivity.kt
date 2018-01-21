@@ -72,15 +72,15 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowGroupLoader(this, timeStamp)
 
     override fun onLoadFinished(loader: Loader<ShowGroupLoader.Data>, data: ShowGroupLoader.Data) {
-        actionBar.title = data.mDisplayText
+        actionBar.title = data.displayText
 
-        if (data.mDataWrapper == null) {
+        if (data.dataWrapper == null) {
             finish()
 
             return
         }
 
-        groupListFragment.setTimeStamp(timeStamp, data.DataId, data.mDataWrapper)
+        groupListFragment.setTimeStamp(timeStamp, data.DataId, data.dataWrapper)
     }
 
     override fun onLoaderReset(loader: Loader<ShowGroupLoader.Data>) = Unit

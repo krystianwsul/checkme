@@ -123,7 +123,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
                 getSupportLoaderManager().destroyLoader(0);
 
                 if (mData != null) {
-                    DomainFactory.getDomainFactory().updateCustomTime(ShowCustomTimeActivity.this, mData.DataId, SaveService.Source.GUI, mData.Id, name, mHourMinutes);
+                    DomainFactory.getDomainFactory().updateCustomTime(ShowCustomTimeActivity.this, mData.DataId, SaveService.Source.GUI, mData.getId(), name, mHourMinutes);
                 } else {
                     int customTimeId = DomainFactory.getDomainFactory().createCustomTime(ShowCustomTimeActivity.this, SaveService.Source.GUI, name, mHourMinutes);
                     Assert.assertTrue(customTimeId > 0);
@@ -341,10 +341,10 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
             Assert.assertTrue(mHourMinutes == null);
             mHourMinutes = new HashMap<>();
 
-            mToolbarEditText.setText(mData.Name);
+            mToolbarEditText.setText(mData.getName());
 
             for (DayOfWeek dayOfWeek : DayOfWeek.values())
-                mHourMinutes.put(dayOfWeek, mData.HourMinutes.get(dayOfWeek));
+                mHourMinutes.put(dayOfWeek, mData.getHourMinutes().get(dayOfWeek));
 
             updateGui();
         }
@@ -390,11 +390,11 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
             if (mData == null)
                 return false;
 
-            if (!mToolbarEditText.getText().toString().equals(mData.Name))
+            if (!mToolbarEditText.getText().toString().equals(mData.getName()))
                 return true;
 
             for (DayOfWeek dayOfWeek : DayOfWeek.values())
-                if (!mHourMinutes.get(dayOfWeek).equals(mData.HourMinutes.get(dayOfWeek)))
+                if (!mHourMinutes.get(dayOfWeek).equals(mData.getHourMinutes().get(dayOfWeek)))
                     return true;
 
             return false;

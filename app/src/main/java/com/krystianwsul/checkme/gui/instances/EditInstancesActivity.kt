@@ -92,7 +92,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.action_edit_instance_save).isVisible = mData != null
-        menu.findItem(R.id.action_edit_instance_hour).isVisible = mData != null && mData!!.mShowHour
+        menu.findItem(R.id.action_edit_instance_hour).isVisible = mData != null && mData!!.showHour
         return true
     }
 
@@ -100,11 +100,11 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         when (item.itemId) {
             R.id.action_edit_instance_hour -> {
                 Assert.assertTrue(mData != null)
-                Assert.assertTrue(mData!!.mShowHour)
+                Assert.assertTrue(mData!!.showHour)
 
                 supportLoaderManager.destroyLoader(0)
 
-                DomainFactory.getDomainFactory().setInstancesAddHourActivity(this, mData!!.DataId, SaveService.Source.GUI, mData!!.InstanceDatas.keys)
+                DomainFactory.getDomainFactory().setInstancesAddHourActivity(this, mData!!.DataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
 
                 finish()
             }
@@ -113,7 +113,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
                 Assert.assertTrue(mData != null)
 
                 if (isValidDateTime) {
-                    DomainFactory.getDomainFactory().setInstancesDateTime(this, mData!!.DataId, SaveService.Source.GUI, mData!!.InstanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
+                    DomainFactory.getDomainFactory().setInstancesDateTime(this, mData!!.DataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
 
                     finish()
                 }
@@ -234,12 +234,12 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
             Assert.assertTrue(mTimePairPersist == null)
             Assert.assertTrue(mInitialTimePair == null)
             Assert.assertTrue(mInitialDate == null)
-            Assert.assertTrue(!mData!!.InstanceDatas.isEmpty())
+            Assert.assertTrue(!mData!!.instanceDatas.isEmpty())
 
             mFirst = false
 
-            val dateTime = mData!!.InstanceDatas.values
-                    .map { it.mInstanceDateTime }
+            val dateTime = mData!!.instanceDatas.values
+                    .map { it.instanceDateTime }
                     .sorted()
                     .first()
 
@@ -250,9 +250,9 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
             mInitialDate = mDate
         }
 
-        actionBar.title = mData!!.InstanceDatas
+        actionBar.title = mData!!.instanceDatas
                 .values
-                .joinToString(", ") { it.Name }
+                .joinToString(", ") { it.name }
 
         invalidateOptionsMenu()
 
@@ -263,10 +263,10 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
         editInstanceTime.setOnClickListener {
             Assert.assertTrue(mData != null)
-            val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(mData!!.CustomTimeDatas.values
-                    .filter { it.mCustomTimeKey.mLocalCustomTimeId != null }
-                    .sortedBy { it.HourMinutes[mDate!!.dayOfWeek] }
-                    .map { TimeDialogFragment.CustomTimeData(it.mCustomTimeKey, it.Name + " (" + it.HourMinutes[mDate!!.dayOfWeek] + ")") })
+            val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(mData!!.customTimeDatas.values
+                    .filter { it.customTimeKey.mLocalCustomTimeId != null }
+                    .sortedBy { it.hourMinutes[mDate!!.dayOfWeek] }
+                    .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[mDate!!.dayOfWeek] + ")") })
 
             val timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas)
 
@@ -298,10 +298,10 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         Assert.assertTrue(mDate != null)
 
         if (mTimePairPersist!!.customTimeKey != null) {
-            val customTimeData = mData!!.CustomTimeDatas[mTimePairPersist!!.customTimeKey]
+            val customTimeData = mData!!.customTimeDatas[mTimePairPersist!!.customTimeKey]
             Assert.assertTrue(customTimeData != null)
 
-            editInstanceTime.setText(customTimeData!!.Name + " (" + customTimeData.HourMinutes[mDate!!.dayOfWeek] + ")")
+            editInstanceTime.setText(customTimeData!!.name + " (" + customTimeData.hourMinutes[mDate!!.dayOfWeek] + ")")
         } else {
             editInstanceTime.setText(mTimePairPersist!!.hourMinute.toString())
         }
@@ -319,10 +319,10 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         get() {
             if (mData != null) {
                 val hourMinute = if (mTimePairPersist!!.customTimeKey != null) {
-                    if (!mData!!.CustomTimeDatas.containsKey(mTimePairPersist!!.customTimeKey))
+                    if (!mData!!.customTimeDatas.containsKey(mTimePairPersist!!.customTimeKey))
                         return false
 
-                    mData!!.CustomTimeDatas[mTimePairPersist!!.customTimeKey]!!.HourMinutes[mDate!!.dayOfWeek]!!
+                    mData!!.customTimeDatas[mTimePairPersist!!.customTimeKey]!!.hourMinutes[mDate!!.dayOfWeek]!!
                 } else {
                     mTimePairPersist!!.hourMinute
                 }

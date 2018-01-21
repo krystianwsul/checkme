@@ -545,7 +545,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized EditInstancesLoader.Data getEditInstancesData(@NonNull ArrayList<InstanceKey> instanceKeys) {
+    public synchronized EditInstancesLoader.Data getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.log("DomainFactory.getEditInstancesData");
@@ -577,7 +577,7 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstancesLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        Boolean showHour = Stream.of(instanceDatas.values()).allMatch(instanceData -> instanceData.mInstanceDateTime.getTimeStamp().toExactTimeStamp().compareTo(now) < 0);
+        Boolean showHour = Stream.of(instanceDatas.values()).allMatch(instanceData -> instanceData.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) < 0);
 
         return new EditInstancesLoader.Data(instanceDatas, customTimeDatas, showHour);
     }

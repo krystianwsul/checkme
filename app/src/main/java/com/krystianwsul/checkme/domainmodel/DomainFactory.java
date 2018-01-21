@@ -1047,7 +1047,7 @@ public class DomainFactory {
 
         Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(mRemoteFriendFactory.getFriends())
                 .map(remoteRootUser -> new ShowProjectLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
-                .collect(Collectors.toMap(userData -> userData.mId, userData -> userData));
+                .collect(Collectors.toMap(userData -> userData.getId(), userData -> userData));
 
         String name;
         Set<ShowProjectLoader.UserListData> userListDatas;

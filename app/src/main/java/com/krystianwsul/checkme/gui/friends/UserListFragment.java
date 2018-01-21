@@ -179,20 +179,20 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         Assert.assertTrue(mData != null);
 
         Set<String> userIds = Stream.of(mFriendListAdapter.mUserDataWrappers)
-                .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
+                .map(userDataWrapper -> userDataWrapper.mUserListData.getId())
                 .collect(Collectors.toSet());
 
-        List<FriendPickerFragment.FriendData> friendDatas = Stream.of(mData.mFriendDatas.values())
-                .filterNot(friendData -> userIds.contains(friendData.mId))
-                .map(friendData -> new FriendPickerFragment.FriendData(friendData.mId, friendData.mName, friendData.mEmail))
+        List<FriendPickerFragment.FriendData> friendDatas = Stream.of(mData.getFriendDatas().values())
+                .filterNot(friendData -> userIds.contains(friendData.getId()))
+                .map(friendData -> new FriendPickerFragment.FriendData(friendData.getId(), friendData.getName(), friendData.getEmail()))
                 .collect(Collectors.toList());
 
         friendPickerFragment.initialize(friendDatas, friendId -> {
-            Assert.assertTrue(mData.mFriendDatas.containsKey(friendId));
+            Assert.assertTrue(mData.getFriendDatas().containsKey(friendId));
             Assert.assertTrue(Stream.of(mFriendListAdapter.mUserDataWrappers)
-                    .noneMatch(userDataWrapper -> userDataWrapper.mUserListData.mId.equals(friendId)));
+                    .noneMatch(userDataWrapper -> userDataWrapper.mUserListData.getId().equals(friendId)));
 
-            ShowProjectLoader.UserListData friendData = mData.mFriendDatas.get(friendId);
+            ShowProjectLoader.UserListData friendData = mData.getFriendDatas().get(friendId);
             Assert.assertTrue(friendData != null);
 
             int position = mFriendListAdapter.getItemCount();
@@ -200,7 +200,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
             mFriendListAdapter.mUserDataWrappers.add(new UserDataWrapper(friendData, new HashSet<>()));
             mFriendListAdapter.notifyItemChanged(position);
 
-            if (mData.mUserListDatas.isEmpty()) {
+            if (mData.getUserListDatas().isEmpty()) {
                 mEmptyText.setVisibility(View.GONE);
                 mFriendListRecycler.setVisibility(View.VISIBLE);
             }
@@ -216,7 +216,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         else if (mSaveState == null)
             mSaveState = new SaveState(new HashSet<>(), new HashSet<>(), new HashSet<>());
 
-        mFriendListAdapter = new FriendListAdapter(data.mUserListDatas, mSaveState);
+        mFriendListAdapter = new FriendListAdapter(data.getUserListDatas(), mSaveState);
         mFriendListRecycler.setAdapter(mFriendListAdapter);
 
         mSelectionCallback.setSelected(mFriendListAdapter.getSelected().size());
@@ -322,19 +322,19 @@ public class UserListFragment extends AbstractFragment implements FabUser {
             Assert.assertTrue(mData != null);
 
             Map<String, ShowProjectLoader.UserListData> userListMap = Stream.of(userListDatas)
-                    .collect(Collectors.toMap(userListData -> userListData.mId, userListData -> userListData));
+                    .collect(Collectors.toMap(userListData -> userListData.getId(), userListData -> userListData));
 
             Stream.of(saveState.mRemovedIds)
                     .forEach(userListMap::remove);
 
             if (!saveState.mAddedIds.isEmpty()) {
-                userListMap.putAll(Stream.of(mData.mFriendDatas.values())
-                        .filter(friendData -> saveState.mAddedIds.contains(friendData.mId))
-                        .collect(Collectors.toMap(userListData -> userListData.mId, userListData -> userListData)));
+                userListMap.putAll(Stream.of(mData.getFriendDatas().values())
+                        .filter(friendData -> saveState.mAddedIds.contains(friendData.getId()))
+                        .collect(Collectors.toMap(userListData -> userListData.getId(), userListData -> userListData)));
             }
 
             mUserDataWrappers = Stream.of(userListMap.values())
-                    .sorted((lhs, rhs) -> lhs.mId.compareTo(rhs.mId))
+                    .sorted((lhs, rhs) -> lhs.getId().compareTo(rhs.getId()))
                     .map(userListData -> new UserDataWrapper(userListData, saveState.mSelectedIds))
                     .collect(Collectors.toList());
         }
@@ -372,8 +372,8 @@ public class UserListFragment extends AbstractFragment implements FabUser {
             UserDataWrapper userDataWrapper = mUserDataWrappers.get(position);
             Assert.assertTrue(userDataWrapper != null);
 
-            friendHolder.mFriendName.setText(userDataWrapper.mUserListData.mName);
-            friendHolder.mFriendEmail.setText(userDataWrapper.mUserListData.mEmail);
+            friendHolder.mFriendName.setText(userDataWrapper.mUserListData.getName());
+            friendHolder.mFriendEmail.setText(userDataWrapper.mUserListData.getEmail());
 
             if (userDataWrapper.mSelected)
                 friendHolder.mFriendRow.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.selected));
@@ -396,7 +396,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         ArrayList<String> getSelected() {
             return new ArrayList<>(Stream.of(mUserDataWrappers)
                     .filter(userDataWrapper -> userDataWrapper.mSelected)
-                    .map(userDataWrapper -> userDataWrapper.mUserListData.mEmail)
+                    .map(userDataWrapper -> userDataWrapper.mUserListData.getEmail())
                     .collect(Collectors.toList()));
         }
 
@@ -416,12 +416,12 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         SaveState getSaveState() {
             Assert.assertTrue(mData != null);
 
-            Set<String> oldUserIds = Stream.of(mData.mUserListDatas)
-                    .map(userListData -> userListData.mId)
+            Set<String> oldUserIds = Stream.of(mData.getUserListDatas())
+                    .map(userListData -> userListData.getId())
                     .collect(Collectors.toSet());
 
             Set<String> newUserIds = Stream.of(mUserDataWrappers)
-                    .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
+                    .map(userDataWrapper -> userDataWrapper.mUserListData.getId())
                     .collect(Collectors.toSet());
 
             Set<String> addedIds = Sets.difference(newUserIds, oldUserIds);
@@ -429,7 +429,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
 
             Set<String> selectedIds = Stream.of(mUserDataWrappers)
                     .filter(userDataWrapper -> userDataWrapper.mSelected)
-                    .map(userDataWrapper -> userDataWrapper.mUserListData.mId)
+                    .map(userDataWrapper -> userDataWrapper.mUserListData.getId())
                     .collect(Collectors.toSet());
 
             return new SaveState(addedIds, removedIds, selectedIds);
@@ -473,7 +473,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
         UserDataWrapper(@NonNull ShowProjectLoader.UserListData userListData, @NonNull Set<String> selectedIds) {
             mUserListData = userListData;
 
-            mSelected = selectedIds.contains(mUserListData.mId);
+            mSelected = selectedIds.contains(mUserListData.getId());
         }
 
         void toggleSelect() {

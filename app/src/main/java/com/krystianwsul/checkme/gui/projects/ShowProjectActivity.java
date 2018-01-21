@@ -187,7 +187,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         mData = data;
 
         if (mSavedInstanceState == null) {
-            mToolbarEditText.setText(data.mName);
+            mToolbarEditText.setText(data.getName());
         } else {
             mSavedInstanceState = null;
         }
@@ -228,10 +228,10 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         if (mData == null)
             return false;
 
-        if (TextUtils.isEmpty(mToolbarEditText.getText()) != TextUtils.isEmpty(mData.mName))
+        if (TextUtils.isEmpty(mToolbarEditText.getText()) != TextUtils.isEmpty(mData.getName()))
             return true;
 
-        if (!TextUtils.isEmpty(mToolbarEditText.getText()) && !mToolbarEditText.getText().toString().equals(mData.mName))
+        if (!TextUtils.isEmpty(mToolbarEditText.getText()) && !mToolbarEditText.getText().toString().equals(mData.getName()))
             return true;
 
         return mUserListFragment.dataChanged();

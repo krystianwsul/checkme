@@ -65,7 +65,7 @@ public class DataDiff {
             sDiff.add(indent + "oldInstanceData.DisplayText == " + oldInstanceData.getDisplayText() + ", newInstanceData.DisplayText == " + newInstanceData.getDisplayText());
 
         if (!oldInstanceData.getName().equals(newInstanceData.getName()))
-            sDiff.add(indent + "oldInstanceData.Name == " + oldInstanceData.getName() + ", newInstanceData.Name == " + newInstanceData.getName());
+            sDiff.add(indent + "oldInstanceData.name == " + oldInstanceData.getName() + ", newInstanceData.name == " + newInstanceData.getName());
 
         if (!oldInstanceData.getInstanceTimeStamp().equals(newInstanceData.getInstanceTimeStamp()))
             sDiff.add(indent + "oldInstanceData.InstanceTimeStamp == " + oldInstanceData.getInstanceTimeStamp() + ", newInstanceData.InstanceTimeStamp == " + newInstanceData.getInstanceTimeStamp());
@@ -83,7 +83,7 @@ public class DataDiff {
             sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.getExists() + ", newInstanceData.mExists == " + newInstanceData.getExists());
 
         if (!oldInstanceData.getInstanceTimePair().equals(newInstanceData.getInstanceTimePair()))
-            sDiff.add(indent + "oldInstanceData.InstanceTimePair == " + oldInstanceData.getInstanceTimePair() + ", newInstanceData.InstanceTimePair == " + newInstanceData.getInstanceTimePair());
+            sDiff.add(indent + "oldInstanceData.instanceTimePair == " + oldInstanceData.getInstanceTimePair() + ", newInstanceData.instanceTimePair == " + newInstanceData.getInstanceTimePair());
 
         if (!oldInstanceData.getChildren().equals(newInstanceData.getChildren())) {
             sDiff.add(indent + "oldInstanceData.children != newInstanceData.children");

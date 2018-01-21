@@ -180,7 +180,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
         mSelectionCallback.setSelected(mCustomTimesAdapter.getSelected().size());
 
-        if (data.Entries.isEmpty()) {
+        if (data.getEntries().isEmpty()) {
             mShowTimesList.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.VISIBLE);
             mEmptyText.setText(R.string.custom_times_empty);
@@ -258,7 +258,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
         CustomTimesAdapter(@NonNull ShowCustomTimesLoader.Data data, @NonNull ShowCustomTimesFragment showCustomTimesFragment, @Nullable ArrayList<Integer> selectedCustomTimeIds) {
             mDataId = data.DataId;
-            mCustomTimeWrappers = Stream.of(data.Entries)
+            mCustomTimeWrappers = Stream.of(data.getEntries())
                     .map(customTimeData -> new CustomTimeWrapper(customTimeData, selectedCustomTimeIds))
                     .collect(Collectors.toList());
 
@@ -302,7 +302,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
             CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(position);
             Assert.assertTrue(customTimeWrapper != null);
 
-            customTimeHolder.mTimesRowName.setText(customTimeWrapper.mCustomTimeData.Name);
+            customTimeHolder.mTimesRowName.setText(customTimeWrapper.mCustomTimeData.getName());
 
             if (customTimeWrapper.mSelected)
                 customTimeHolder.mShowCustomTimeRow.setBackgroundColor(ContextCompat.getColor(mShowCustomTimesFragment.getActivity(), R.color.selected));
@@ -325,7 +325,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         ArrayList<Integer> getSelected() {
             return new ArrayList<>(Stream.of(mCustomTimeWrappers)
                 .filter(customTimeWrapper -> customTimeWrapper.mSelected)
-                .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
+                    .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.getId())
                 .collect(Collectors.toList()));
         }
 
@@ -341,7 +341,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
             }
 
             List<Integer> selectedCustomTimeIds = Stream.of(selectedCustomTimeWrappers)
-                    .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.Id)
+                    .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.getId())
                     .collect(Collectors.toList());
 
             DomainFactory.getDomainFactory().setCustomTimeCurrent(mShowCustomTimesFragment.getActivity(), mDataId, SaveService.Source.GUI, selectedCustomTimeIds);
@@ -364,7 +364,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
                 CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(getAdapterPosition());
                 Assert.assertTrue(customTimeWrapper != null);
 
-                mShowCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeWrapper.mCustomTimeData.Id, mShowCustomTimesFragment.getActivity()));
+                mShowCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeWrapper.mCustomTimeData.getId(), mShowCustomTimesFragment.getActivity()));
             }
 
             void onLongClick() {
@@ -390,7 +390,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
             if (selectedCustomTimeIds != null) {
                 Assert.assertTrue(!selectedCustomTimeIds.isEmpty());
 
-                mSelected = selectedCustomTimeIds.contains(mCustomTimeData.Id);
+                mSelected = selectedCustomTimeIds.contains(mCustomTimeData.getId());
             }
         }
 

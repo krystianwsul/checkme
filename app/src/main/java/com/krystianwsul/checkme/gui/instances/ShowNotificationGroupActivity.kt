@@ -63,7 +63,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowNotificationGroupLoader(this, instanceKeys)
 
     override fun onLoadFinished(loader: Loader<ShowNotificationGroupLoader.Data>, data: ShowNotificationGroupLoader.Data) {
-        groupListFragment.setInstanceKeys(instanceKeys, data.DataId, data.mDataWrapper)
+        groupListFragment.setInstanceKeys(instanceKeys, data.DataId, data.dataWrapper)
     }
 
     override fun onLoaderReset(loader: Loader<ShowNotificationGroupLoader.Data>) = Unit

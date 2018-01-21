@@ -699,7 +699,6 @@ class GroupListFragment : AbstractFragment(), FabUser {
             Assert.assertTrue(mDataWrapper != null)
             Assert.assertTrue(mInstanceKeys == null)
 
-            val activity = activity
             Assert.assertTrue(activity != null) // todo how the fuck is this null?
 
             when {

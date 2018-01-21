@@ -112,7 +112,7 @@ class DayFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<DayLoader.
     override fun onCreateLoader(id: Int, args: Bundle?) = DayLoader(activity!!, position, timeRange)
 
     override fun onLoadFinished(loader: Loader<DayLoader.Data>, data: DayLoader.Data) {
-        groupListFragment!!.setAll(timeRange, position, data.DataId, data.mDataWrapper)
+        groupListFragment!!.setAll(timeRange, position, data.DataId, data.dataWrapper)
     }
 
     override fun onLoaderReset(loader: Loader<DayLoader.Data>) = Unit

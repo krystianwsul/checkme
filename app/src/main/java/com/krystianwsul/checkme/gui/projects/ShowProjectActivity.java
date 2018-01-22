@@ -159,7 +159,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
         mUserListFragment = (UserListFragment) getSupportFragmentManager().findFragmentById(R.id.show_project_frame);
         if (mUserListFragment == null) {
-            mUserListFragment = UserListFragment.newInstance();
+            mUserListFragment = UserListFragment.Companion.newInstance();
 
             getSupportFragmentManager()
                     .beginTransaction()

@@ -110,10 +110,10 @@ public class FriendPickerFragment extends AbstractDialogFragment {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View friendRow = layoutInflater.inflate(R.layout.row_friend, parent, false);
 
-            TextView friendName = (TextView) friendRow.findViewById(R.id.friend_name);
+            TextView friendName = (TextView) friendRow.findViewById(R.id.friendName);
             Assert.assertTrue(friendName != null);
 
-            TextView friendEmail = (TextView) friendRow.findViewById(R.id.friend_email);
+            TextView friendEmail = (TextView) friendRow.findViewById(R.id.friendEmail);
             Assert.assertTrue(friendEmail != null);
 
             return new FriendListAdapter.FriendHolder(friendRow, friendName, friendEmail);

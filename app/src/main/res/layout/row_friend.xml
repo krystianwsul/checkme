@@ -11,7 +11,7 @@
     android:paddingRight="16dp">
 
     <TextView
-        android:id="@+id/friend_name"
+        android:id="@+id/friendName"
         android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
         tools:ignore="Deprecated"/>
 
     <TextView
-        android:id="@+id/friend_email"
+        android:id="@+id/friendEmail"
         android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

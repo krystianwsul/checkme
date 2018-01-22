@@ -106,7 +106,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         override fun onAddSelected() {
-            startActivityForResult(ShowCustomTimeActivity.getCreateIntent(activity), ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
+            startActivityForResult(ShowCustomTimeActivity.getCreateIntent(activity!!), ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
         }
     }
 

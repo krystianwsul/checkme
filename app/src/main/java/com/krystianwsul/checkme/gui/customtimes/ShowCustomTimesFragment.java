@@ -223,7 +223,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     public void setFab(@NonNull FloatingActionButton floatingActionButton) {
         mShowTimesFab = floatingActionButton;
 
-        mShowTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.getCreateIntent(getActivity())));
+        mShowTimesFab.setOnClickListener(v -> startActivity(ShowCustomTimeActivity.Companion.getCreateIntent(getActivity())));
 
         updateFabVisibility();
     }
@@ -364,7 +364,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
                 CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(getAdapterPosition());
                 Assert.assertTrue(customTimeWrapper != null);
 
-                mShowCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeWrapper.mCustomTimeData.getId(), mShowCustomTimesFragment.getActivity()));
+                mShowCustomTimesFragment.getActivity().startActivity(ShowCustomTimeActivity.Companion.getEditIntent(customTimeWrapper.mCustomTimeData.getId(), mShowCustomTimesFragment.getActivity()));
             }
 
             void onLongClick() {

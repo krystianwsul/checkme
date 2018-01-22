@@ -67,7 +67,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         }
 
         @Override
-        protected void onMenuClick(MenuItem menuItem) {
+        protected void onMenuClick(@NonNull MenuItem menuItem) {
             Assert.assertTrue(mTreeViewAdapter != null);
 
             List<TreeNode> selected = mTreeViewAdapter.getSelectedNodes();
@@ -171,7 +171,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_project_list, container, false);
 
         mProjectListProgress = view.findViewById(R.id.projectListProgress);
@@ -196,14 +196,13 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     }
 
     @Override
-    public Loader<ProjectListLoader.Data> onCreateLoader(int id, Bundle args) {
+    @NonNull
+    public Loader<ProjectListLoader.Data> onCreateLoader(int id, @Nullable Bundle args) {
         return new ProjectListLoader(getActivity());
     }
 
     @Override
-    public void onLoadFinished(Loader<ProjectListLoader.Data> loader, ProjectListLoader.Data data) {
-        Assert.assertTrue(data != null);
-
+    public void onLoadFinished(@NonNull Loader<ProjectListLoader.Data> loader, @NonNull ProjectListLoader.Data data) {
         mDataId = data.getDataId();
 
         mProjectListProgress.setVisibility(View.GONE);
@@ -230,12 +229,12 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
     }
 
     @Override
-    public void onLoaderReset(Loader<ProjectListLoader.Data> loader) {
+    public void onLoaderReset(@NonNull Loader<ProjectListLoader.Data> loader) {
 
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         if (mTreeViewAdapter != null)
@@ -433,7 +432,7 @@ public class ProjectListFragment extends AbstractFragment implements LoaderManag
         @NonNull
         final TextView mProjectUsers;
 
-        Holder(View itemView) {
+        Holder(@NonNull View itemView) {
             super(itemView);
 
             mProjectName = itemView.findViewById(R.id.project_name);

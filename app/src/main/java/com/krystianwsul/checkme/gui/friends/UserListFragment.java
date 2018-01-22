@@ -166,7 +166,7 @@ public class UserListFragment extends AbstractFragment implements FabUser {
 
         mFriendListRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mEmptyText = friendListLayout.findViewById(R.id.empty_text);
+        mEmptyText = friendListLayout.findViewById(R.id.emptyText);
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVE_STATE_KEY)) {

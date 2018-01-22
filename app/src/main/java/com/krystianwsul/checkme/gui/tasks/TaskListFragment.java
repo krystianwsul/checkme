@@ -362,7 +362,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
         mTaskListFragmentRecycler = view.findViewById(R.id.task_list_recycler);
         Assert.assertTrue(mTaskListFragmentRecycler != null);
 
-        mEmptyText = view.findViewById(R.id.empty_text);
+        mEmptyText = view.findViewById(R.id.emptyText);
         Assert.assertTrue(mEmptyText != null);
 
         return view;

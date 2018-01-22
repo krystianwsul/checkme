@@ -142,7 +142,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         mShowTimesList = view.findViewById(R.id.show_times_list);
         mShowTimesList.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mEmptyText = view.findViewById(R.id.empty_text);
+        mEmptyText = view.findViewById(R.id.emptyText);
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null) {

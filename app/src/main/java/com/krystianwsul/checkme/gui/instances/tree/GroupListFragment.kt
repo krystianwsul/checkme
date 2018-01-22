@@ -509,7 +509,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         mGroupListRecycler!!.layoutManager = LinearLayoutManager(context)
 
-        mEmptyText = view.findViewById(R.id.empty_text)
+        mEmptyText = view.findViewById(R.id.emptyText)
         Assert.assertTrue(mEmptyText != null)
 
         return view

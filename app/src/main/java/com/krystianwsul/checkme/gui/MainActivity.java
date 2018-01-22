@@ -322,7 +322,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(mFriendListFragment == null);
 
             mTaskListFragment = TaskListFragment.newInstance();
-            mProjectListFragment = ProjectListFragment.newInstance();
+            mProjectListFragment = ProjectListFragment.Companion.newInstance();
             mShowCustomTimesFragment = ShowCustomTimesFragment.newInstance();
             mFriendListFragment = FriendListFragment.newInstance();
 

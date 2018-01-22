@@ -154,7 +154,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
 
         mFriendListRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mEmptyText = (TextView) friendListLayout.findViewById(R.id.empty_text);
+        mEmptyText = (TextView) friendListLayout.findViewById(R.id.emptyText);
         Assert.assertTrue(mEmptyText != null);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_IDS_KEY)) {

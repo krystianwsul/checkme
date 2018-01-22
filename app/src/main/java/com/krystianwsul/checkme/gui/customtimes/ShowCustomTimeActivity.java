@@ -3,6 +3,8 @@ package com.krystianwsul.checkme.gui.customtimes;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -51,7 +53,10 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
 
     public static final int CREATE_CUSTOM_TIME_REQUEST_CODE = 1;
 
+    @Nullable
     private Integer mCustomTimeId;
+
+    @Nullable
     private ShowCustomTimeLoader.Data mData;
 
     private final HashMap<DayOfWeek, TextView> mTimeViews = new HashMap<>();
@@ -62,6 +67,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     private TextInputLayout mToolbarLayout;
     private EditText mToolbarEditText;
 
+    @Nullable
     private Bundle mSavedInstanceState;
 
     private static final HourMinute sDefaultHourMinute = new HourMinute(9, 0);
@@ -81,26 +87,28 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
         mEditedDayOfWeek = null;
     };
 
-    public static Intent getEditIntent(int customTimeId, Context context) {
+    @NonNull
+    public static Intent getEditIntent(int customTimeId, @NonNull Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
         intent.putExtra(CUSTOM_TIME_ID_KEY, customTimeId);
         return intent;
     }
 
-    public static Intent getCreateIntent(Context context) {
+    @NonNull
+    public static Intent getCreateIntent(@NonNull Context context) {
         Intent intent = new Intent(context, ShowCustomTimeActivity.class);
         intent.putExtra(NEW_KEY, true);
         return intent;
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         getMenuInflater().inflate(R.menu.menu_save, menu);
         return true;
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         Assert.assertTrue(mToolbarEditText != null);
 
         menu.findItem(R.id.action_save).setVisible((mCustomTimeId == null) || (mData != null));
@@ -109,7 +117,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
                 Assert.assertTrue(!mHourMinutes.isEmpty());
@@ -144,7 +152,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_custom_time);
 
@@ -225,10 +233,9 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
     }
 
-    private void extractKey(String key, DayOfWeek dayOfWeek) {
+    private void extractKey(@NonNull String key, @NonNull DayOfWeek dayOfWeek) {
         Assert.assertTrue(mSavedInstanceState != null);
         Assert.assertTrue(!TextUtils.isEmpty(key));
-        Assert.assertTrue(dayOfWeek != null);
 
         Assert.assertTrue(mSavedInstanceState.containsKey(key));
 
@@ -238,9 +245,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
         mHourMinutes.put(dayOfWeek, hourMinute);
     }
 
-    private void initializeDay(final DayOfWeek dayOfWeek, int nameId, int timeId) {
-        Assert.assertTrue(dayOfWeek != null);
-
+    private void initializeDay(@NonNull final DayOfWeek dayOfWeek, int nameId, int timeId) {
         TextView timeName = findViewById(nameId);
         Assert.assertTrue(timeName != null);
 
@@ -253,7 +258,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         if (!mHourMinutes.isEmpty()) {
@@ -270,7 +275,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     }
 
     @Override
-    public Loader<ShowCustomTimeLoader.Data> onCreateLoader(int id, Bundle args) {
+    public Loader<ShowCustomTimeLoader.Data> onCreateLoader(int id, @Nullable Bundle args) {
         return new ShowCustomTimeLoader(this, mCustomTimeId);
     }
 
@@ -331,7 +336,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     }
 
     @Override
-    public void onLoadFinished(Loader<ShowCustomTimeLoader.Data> loader, ShowCustomTimeLoader.Data data) {
+    public void onLoadFinished(@NonNull Loader<ShowCustomTimeLoader.Data> loader, @NonNull ShowCustomTimeLoader.Data data) {
         mData = data;
 
         if (mSavedInstanceState == null || !mSavedInstanceState.containsKey(HOUR_MINUTE_SUNDAY_KEY)) {
@@ -349,7 +354,7 @@ public class ShowCustomTimeActivity extends AbstractActivity implements LoaderMa
     }
 
     @Override
-    public void onLoaderReset(Loader<ShowCustomTimeLoader.Data> data) {
+    public void onLoaderReset(@NonNull Loader<ShowCustomTimeLoader.Data> data) {
     }
 
     @Override

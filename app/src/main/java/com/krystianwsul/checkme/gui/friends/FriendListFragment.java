@@ -228,7 +228,7 @@ public class FriendListFragment extends AbstractFragment implements LoaderManage
     public void setFab(@NonNull FloatingActionButton floatingActionButton) {
         mFriendListFab = floatingActionButton;
 
-        mFriendListFab.setOnClickListener(v -> startActivity(FindFriendActivity.newIntent(getActivity())));
+        mFriendListFab.setOnClickListener(v -> startActivity(FindFriendActivity.Companion.newIntent(getActivity())));
 
         updateFabVisibility();
     }

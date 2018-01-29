@@ -9,7 +9,7 @@
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/find_friend_toolbar"
+        android:id="@+id/findFriendToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
@@ -18,7 +18,7 @@
         tools:ignore="UnusedAttribute">
 
         <EditText
-            android:id="@+id/find_friend_email"
+            android:id="@+id/findFriendEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
@@ -36,7 +36,7 @@
     </android.support.v7.widget.Toolbar>
 
     <LinearLayout
-        android:id="@+id/find_friend_user_layout"
+        android:id="@+id/findFriendUserLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
@@ -47,7 +47,7 @@
         android:visibility="gone">
 
         <TextView
-            android:id="@+id/find_friend_user_name"
+            android:id="@+id/findFriendUserName"
             android:singleLine="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -56,7 +56,7 @@
             tools:ignore="Deprecated"/>
 
         <TextView
-            android:id="@+id/find_friend_user_email"
+            android:id="@+id/findFriendUserEmail"
             android:singleLine="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/find_friend_progress"
+        android:id="@+id/findFriendProgress"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"

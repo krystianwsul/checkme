@@ -51,9 +51,8 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         }
 
         @Override
-        protected void onMenuClick(MenuItem menuItem) {
+        protected void onMenuClick(@NonNull MenuItem menuItem) {
             ArrayList<Integer> customTimeIds = mCustomTimesAdapter.getSelected();
-            Assert.assertTrue(customTimeIds != null);
             Assert.assertTrue(!customTimeIds.isEmpty());
 
             switch (menuItem.getItemId()) {
@@ -112,6 +111,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
     private ShowCustomTimesLoader.Data mData;
 
+    @NonNull
     public static ShowCustomTimesFragment newInstance() {
         return new ShowCustomTimesFragment();
     }
@@ -121,14 +121,14 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
         Assert.assertTrue(context instanceof CustomTimesListListener);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_show_custom_times, container, false);
     }
 
@@ -157,14 +157,13 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     }
 
     @Override
-    public Loader<ShowCustomTimesLoader.Data> onCreateLoader(int id, Bundle args) {
+    @NonNull
+    public Loader<ShowCustomTimesLoader.Data> onCreateLoader(int id, @Nullable Bundle args) {
         return new ShowCustomTimesLoader(getActivity());
     }
 
     @Override
-    public void onLoadFinished(Loader<ShowCustomTimesLoader.Data> loader, ShowCustomTimesLoader.Data data) {
-        Assert.assertTrue(data != null);
-
+    public void onLoadFinished(@NonNull Loader<ShowCustomTimesLoader.Data> loader, @NonNull ShowCustomTimesLoader.Data data) {
         mData = data;
 
         if (mCustomTimesAdapter != null) {
@@ -195,11 +194,11 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     }
 
     @Override
-    public void onLoaderReset(Loader<ShowCustomTimesLoader.Data> loader) {
+    public void onLoaderReset(@NonNull Loader<ShowCustomTimesLoader.Data> loader) {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         if (mCustomTimesAdapter != null) {
@@ -251,6 +250,8 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
 
     class CustomTimesAdapter extends RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder> {
         private final int mDataId;
+
+        @NonNull
         private final List<CustomTimeWrapper> mCustomTimeWrappers;
 
         @NonNull
@@ -288,7 +289,8 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         }
 
         @Override
-        public CustomTimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        @NonNull
+        public CustomTimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(mShowCustomTimesFragment.getActivity());
             View showCustomTimesRow = layoutInflater.inflate(R.layout.row_show_custom_times, parent, false);
 
@@ -298,7 +300,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         }
 
         @Override
-        public void onBindViewHolder(final CustomTimeHolder customTimeHolder, int position) {
+        public void onBindViewHolder(@NonNull final CustomTimeHolder customTimeHolder, int position) {
             CustomTimeWrapper customTimeWrapper = mCustomTimeWrappers.get(position);
             Assert.assertTrue(customTimeWrapper != null);
 
@@ -322,11 +324,12 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
             });
         }
 
+        @NonNull
         ArrayList<Integer> getSelected() {
             return new ArrayList<>(Stream.of(mCustomTimeWrappers)
-                .filter(customTimeWrapper -> customTimeWrapper.mSelected)
+                    .filter(customTimeWrapper -> customTimeWrapper.mSelected)
                     .map(customTimeWrapper -> customTimeWrapper.mCustomTimeData.getId())
-                .collect(Collectors.toList()));
+                    .collect(Collectors.toList()));
         }
 
         void removeSelected() {
@@ -348,10 +351,13 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
         }
 
         class CustomTimeHolder extends RecyclerView.ViewHolder {
+            @NonNull
             final View mShowCustomTimeRow;
+
+            @NonNull
             final TextView mTimesRowName;
 
-            CustomTimeHolder(View showCustomTimesRow, TextView timesRowName) {
+            CustomTimeHolder(@NonNull View showCustomTimesRow, @NonNull TextView timesRowName) {
                 super(showCustomTimesRow);
 
                 Assert.assertTrue(timesRowName != null);
@@ -379,12 +385,12 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     }
 
     private class CustomTimeWrapper {
+
+        @NonNull
         final ShowCustomTimesLoader.CustomTimeData mCustomTimeData;
         boolean mSelected = false;
 
-        CustomTimeWrapper(ShowCustomTimesLoader.CustomTimeData customTimeData, ArrayList<Integer> selectedCustomTimeIds) {
-            Assert.assertTrue(customTimeData != null);
-
+        CustomTimeWrapper(@NonNull ShowCustomTimesLoader.CustomTimeData customTimeData, @Nullable ArrayList<Integer> selectedCustomTimeIds) {
             mCustomTimeData = customTimeData;
 
             if (selectedCustomTimeIds != null) {
@@ -411,7 +417,7 @@ public class ShowCustomTimesFragment extends AbstractFragment implements LoaderM
     }
 
     public interface CustomTimesListListener {
-        void onCreateCustomTimesActionMode(ActionMode actionMode);
+        void onCreateCustomTimesActionMode(@NonNull ActionMode actionMode);
         void onDestroyCustomTimesActionMode();
         void setCustomTimesSelectAllVisibility(boolean selectAllVisible);
     }

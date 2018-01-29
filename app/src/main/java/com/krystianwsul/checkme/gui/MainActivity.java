@@ -323,7 +323,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
             mTaskListFragment = TaskListFragment.newInstance();
             mProjectListFragment = ProjectListFragment.Companion.newInstance();
-            mShowCustomTimesFragment = ShowCustomTimesFragment.newInstance();
+            mShowCustomTimesFragment = ShowCustomTimesFragment.Companion.newInstance();
             mFriendListFragment = FriendListFragment.newInstance();
 
             fragmentManager.beginTransaction()

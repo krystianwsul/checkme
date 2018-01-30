@@ -46,7 +46,7 @@ public class InstanceHourService extends IntentService {
         NotificationWrapper notificationWrapper = NotificationWrapper.Companion.getInstance();
         notificationWrapper.cleanGroup(notificationId);
 
-        InstanceDoneService.throttleFirebase(this, instanceKey.getType().equals(TaskKey.Type.REMOTE), domainFactory -> setInstanceAddHour(domainFactory, instanceKey));
+        InstanceDoneService.Companion.throttleFirebase(this, instanceKey.getType().equals(TaskKey.Type.REMOTE), domainFactory -> setInstanceAddHour(domainFactory, instanceKey));
     }
 
     private void setInstanceAddHour(@NonNull DomainFactory domainFactory, @NonNull InstanceKey instanceKey) {

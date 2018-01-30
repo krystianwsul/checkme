@@ -63,7 +63,7 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
-public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, FriendListFragment.Listener, LoaderManager.LoaderCallbacks<MainLoader.Data> {
+public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.Data> {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
     private static final String TIME_RANGE_KEY = "timeRange";
@@ -324,7 +324,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             mTaskListFragment = TaskListFragment.newInstance();
             mProjectListFragment = ProjectListFragment.Companion.newInstance();
             mShowCustomTimesFragment = ShowCustomTimesFragment.Companion.newInstance();
-            mFriendListFragment = FriendListFragment.newInstance();
+            mFriendListFragment = FriendListFragment.Companion.newInstance();
 
             fragmentManager.beginTransaction()
                     .add(R.id.main_task_list_frame, mTaskListFragment)
@@ -846,8 +846,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         invalidateOptionsMenu();
     }
-
-    @Override
     public void onCreateUserActionMode(@NonNull ActionMode actionMode) {
         Assert.assertTrue(mDrawerUsersListener == null);
 
@@ -877,7 +875,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         mMainActivityDrawer.addDrawerListener(mDrawerUsersListener);
     }
 
-    @Override
     public void onDestroyUserActionMode() {
         Assert.assertTrue(mDrawerUsersListener != null);
 
@@ -885,7 +882,6 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
         mDrawerUsersListener = null;
     }
 
-    @Override
     public void setUserSelectAllVisibility(boolean selectAllVisible) {
         mUserSelectAllVisible = selectAllVisible;
 

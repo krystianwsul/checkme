@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -40,6 +41,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
 
     private TaskListFragment mTaskListFragment;
 
+    @NonNull
     public static Intent newIntent(@NonNull TaskKey taskKey) {
         Intent intent = new Intent(MyApplication.instance, ShowTaskActivity.class);
         intent.putExtra(TASK_KEY_KEY, (Parcelable) taskKey);
@@ -47,7 +49,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_task);
 
@@ -91,10 +93,11 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         Assert.assertTrue(requestCode == REQUEST_EDIT_TASK);
 
         if (resultCode == RESULT_OK) {
+            Assert.assertTrue(data != null);
             Assert.assertTrue(data.hasExtra(TASK_KEY_KEY));
 
             mTaskKey = data.getParcelableExtra(TASK_KEY_KEY);
@@ -110,13 +113,13 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         getMenuInflater().inflate(R.menu.show_task_menu, menu);
         return true;
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         menu.findItem(R.id.task_menu_edit).setVisible(mData != null);
 
         menu.findItem(R.id.task_menu_share).setVisible(mData != null);
@@ -129,7 +132,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.task_menu_edit:
                 getSupportLoaderManager().destroyLoader(0);
@@ -174,12 +177,13 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     }
 
     @Override
-    public Loader<ShowTaskLoader.Data> onCreateLoader(int id, Bundle args) {
+    @NonNull
+    public Loader<ShowTaskLoader.Data> onCreateLoader(int id, @Nullable Bundle args) {
         return new ShowTaskLoader(this, mTaskKey);
     }
 
     @Override
-    public void onLoadFinished(Loader<ShowTaskLoader.Data> loader, final ShowTaskLoader.Data data) {
+    public void onLoadFinished(@NonNull Loader<ShowTaskLoader.Data> loader, @NonNull final ShowTaskLoader.Data data) {
         mData = data;
 
         mActionBar.setTitle(data.getName());
@@ -195,11 +199,11 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     }
 
     @Override
-    public void onLoaderReset(Loader<ShowTaskLoader.Data> loader) {
+    public void onLoaderReset(@NonNull Loader<ShowTaskLoader.Data> loader) {
     }
 
     @Override
-    public void onCreateTaskActionMode(ActionMode actionMode) {
+    public void onCreateTaskActionMode(@NonNull ActionMode actionMode) {
 
     }
 
@@ -216,7 +220,7 @@ public class ShowTaskActivity extends AbstractActivity implements LoaderManager.
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putParcelable(TASK_KEY_KEY, mTaskKey);

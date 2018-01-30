@@ -17,7 +17,7 @@ import com.krystianwsul.checkme.DataDiff;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.R;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
-import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.notifications.TickJobIntentService;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
@@ -56,7 +56,7 @@ public class DebugFragment extends AbstractFragment {
         Button debugTick = view.findViewById(R.id.debug_tick);
         Assert.assertTrue(debugTick != null);
 
-        debugTick.setOnClickListener(v -> TickService.Companion.startServiceDebug(getActivity(), "DebugFragment: TickService.startServiceDebug"));
+        debugTick.setOnClickListener(v -> TickJobIntentService.Companion.startServiceDebug(getActivity(), "DebugFragment: TickService.startServiceDebug"));
 
         TextView debugData = view.findViewById(R.id.debug_data);
         Assert.assertTrue(debugData != null);
@@ -67,9 +67,9 @@ public class DebugFragment extends AbstractFragment {
         debugLoad.setOnClickListener(v -> {
             StringBuilder stringBuilder = new StringBuilder();
 
-            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(TickService.Companion.getTICK_PREFERENCES(), Context.MODE_PRIVATE);
-            long lastTick = sharedPreferences.getLong(TickService.Companion.getLAST_TICK_KEY(), -1);
-            String tickLog = sharedPreferences.getString(TickService.Companion.getTICK_LOG(), "");
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(TickJobIntentService.Companion.getTICK_PREFERENCES(), Context.MODE_PRIVATE);
+            long lastTick = sharedPreferences.getLong(TickJobIntentService.Companion.getLAST_TICK_KEY(), -1);
+            String tickLog = sharedPreferences.getString(TickJobIntentService.Companion.getTICK_LOG(), "");
 
             ExactTimeStamp lastTickExactTimeStamp = new ExactTimeStamp(lastTick);
 

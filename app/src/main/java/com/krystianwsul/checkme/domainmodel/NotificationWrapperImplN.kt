@@ -11,7 +11,7 @@ import android.util.Log
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.notifications.TickService
+import com.krystianwsul.checkme.notifications.TickJobIntentService
 import junit.framework.Assert
 
 @SuppressLint("NewApi")
@@ -100,7 +100,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
         if (autoCancel)
             builder.setAutoCancel(true)
 
-        builder.setGroup(TickService.GROUP_KEY)
+        builder.setGroup(TickJobIntentService.GROUP_KEY)
 
         if (summary)
             builder.setGroupSummary(true)

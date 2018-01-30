@@ -56,7 +56,7 @@ import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
-import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.notifications.TickJobIntentService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
@@ -2624,8 +2624,8 @@ public class DomainFactory {
         String message = "";
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (notificationInstances.size() > TickService.Companion.getMAX_NOTIFICATIONS()) { // show group
-                if (shownInstanceKeys.size() > TickService.Companion.getMAX_NOTIFICATIONS()) { // group shown
+            if (notificationInstances.size() > TickJobIntentService.Companion.getMAX_NOTIFICATIONS()) { // show group
+                if (shownInstanceKeys.size() > TickJobIntentService.Companion.getMAX_NOTIFICATIONS()) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
                         NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
                     } else {
@@ -2649,7 +2649,7 @@ public class DomainFactory {
                     NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
                 }
             } else { // show instances
-                if (shownInstanceKeys.size() > TickService.Companion.getMAX_NOTIFICATIONS()) { // group shown
+                if (shownInstanceKeys.size() > TickJobIntentService.Companion.getMAX_NOTIFICATIONS()) { // group shown
                     NotificationWrapper.Companion.getInstance().cancelNotification(0);
 
                     for (Instance instance : notificationInstances.values()) {
@@ -2725,10 +2725,10 @@ public class DomainFactory {
                     .forEach(instance -> updateInstance(instance, now));
         }
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(TickService.Companion.getTICK_PREFERENCES(), Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(TickJobIntentService.Companion.getTICK_PREFERENCES(), Context.MODE_PRIVATE);
         Assert.assertTrue(sharedPreferences != null);
 
-        String tickLog = sharedPreferences.getString(TickService.Companion.getTICK_LOG(), "");
+        String tickLog = sharedPreferences.getString(TickJobIntentService.Companion.getTICK_LOG(), "");
         List<String> tickLogArr = Arrays.asList(TextUtils.split(tickLog, "\n"));
         List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 20, 0), tickLogArr.size()));
         tickLogArrTrimmed.add(now.toString() + " s? " + (silent ? "t" : "f") + message);
@@ -2736,7 +2736,7 @@ public class DomainFactory {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         if (!silent)
-            editor.putLong(TickService.Companion.getLAST_TICK_KEY(), now.getLong());
+            editor.putLong(TickJobIntentService.Companion.getLAST_TICK_KEY(), now.getLong());
 
         Optional<TimeStamp> minInstancesTimeStamp = Stream.of(getExistingInstances())
                 .map(existingInstance -> existingInstance.getInstanceDateTime().getTimeStamp())
@@ -2765,7 +2765,7 @@ public class DomainFactory {
             tickLogArrTrimmed.add("next tick: " + nextAlarm.toString());
         }
 
-        editor.putString(TickService.Companion.getTICK_LOG(), TextUtils.join("\n", tickLogArrTrimmed));
+        editor.putString(TickJobIntentService.Companion.getTICK_LOG(), TextUtils.join("\n", tickLogArrTrimmed));
         editor.apply();
     }
 

@@ -55,7 +55,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.MainLoader;
-import com.krystianwsul.checkme.notifications.TickService;
+import com.krystianwsul.checkme.notifications.TickJobIntentService;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 
 import junit.framework.Assert;
@@ -494,7 +494,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
 
         showTab(mVisibleTab);
 
-        TickService.Companion.startServiceRegister(this, "MainActivity: TickService.startServiceRegister");
+        TickJobIntentService.Companion.startServiceRegister(this, "MainActivity: TickJobIntentService.startServiceRegister");
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))

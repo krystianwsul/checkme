@@ -9,6 +9,6 @@ class BootReceiver : BroadcastReceiver() {
 
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) {
-        TickJobIntentService.start(TickService.getIntent(context, true, "BootReceiver"))
+        TickJobIntentService.start(TickJobIntentService.getIntent(context, true, "BootReceiver"))
     }
 }

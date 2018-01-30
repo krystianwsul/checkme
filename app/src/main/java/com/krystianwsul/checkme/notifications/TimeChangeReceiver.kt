@@ -7,6 +7,6 @@ import android.content.Intent
 class TimeChangeReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        TickJobIntentService.start(TickService.getIntent(context, true, "TimeChangeReceiver"))
+        TickJobIntentService.start(TickJobIntentService.getIntent(context, true, "TimeChangeReceiver"))
     }
 }

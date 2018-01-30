@@ -834,7 +834,7 @@ public class TaskListFragment extends AbstractFragment implements FabUser {
                 Activity activity = getTaskListFragment().getActivity();
                 Assert.assertTrue(activity != null);
 
-                activity.startActivity(ShowTaskActivity.newIntent(mChildTaskData.mTaskKey));
+                activity.startActivity(ShowTaskActivity.Companion.newIntent(mChildTaskData.mTaskKey));
             }
 
             @Override

@@ -331,7 +331,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
                     .add(R.id.main_project_frame, mProjectListFragment)
                     .add(R.id.main_friend_list_frame, mFriendListFragment)
                     .add(R.id.main_custom_times_frame, mShowCustomTimesFragment)
-                    .add(R.id.main_debug_frame, DebugFragment.newInstance())
+                    .add(R.id.main_debug_frame, DebugFragment.Companion.newInstance())
                     .commit();
         } else {
             Assert.assertTrue(mShowCustomTimesFragment != null);

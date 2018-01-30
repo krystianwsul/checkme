@@ -59,11 +59,9 @@
         </receiver>
 
         <service
-            android:name=".notifications.TickService"
-            android:exported="false"/>
-        <service
             android:name=".persistencemodel.SaveService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
+
         <service
             android:name=".notifications.TickJobIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>

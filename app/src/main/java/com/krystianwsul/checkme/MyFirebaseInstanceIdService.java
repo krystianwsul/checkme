@@ -22,7 +22,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
         UserInfo userInfo = new UserInfo(firebaseUser);
 
-        InstanceDoneService.throttleFirebase(this, true, domainFactory -> domainFactory.updateUserInfo(this, SaveService.Source.SERVICE, userInfo));
+        InstanceDoneService.Companion.throttleFirebase(this, true, domainFactory -> domainFactory.updateUserInfo(this, SaveService.Source.SERVICE, userInfo));
     }
 
     @Nullable

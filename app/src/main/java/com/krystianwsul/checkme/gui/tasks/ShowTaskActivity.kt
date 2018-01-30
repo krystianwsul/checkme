@@ -63,7 +63,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
                     .beginTransaction()
                     .add(R.id.show_task_fragment, it)
                     .commit()
-        }.apply { setFab(showTaskFab) }
+        }.also { it.setFab(showTaskFab) }
 
         supportLoaderManager.initLoader(0, null, this)
     }

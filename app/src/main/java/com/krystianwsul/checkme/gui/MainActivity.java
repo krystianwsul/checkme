@@ -165,13 +165,13 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
 
     private boolean mDebug = false;
 
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(@NonNull Menu menu) {
         getMenuInflater().inflate(R.menu.menu_select_all, menu);
         return true;
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
+    public boolean onPrepareOptionsMenu(@NonNull Menu menu) {
         if (mVisibleTab == Tab.INSTANCES) {
             boolean visible = false;
             if (mGroupSelectAllVisible.containsKey(mDaysPager.getCurrentItem()))
@@ -192,7 +192,7 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Assert.assertTrue(item.getItemId() == R.id.action_select_all);
 
         switch (mVisibleTab) {
@@ -230,7 +230,7 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
@@ -519,19 +519,18 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
     }
 
     @Override
-    public Loader<MainLoader.Data> onCreateLoader(int id, Bundle args) {
+    @NonNull
+    public Loader<MainLoader.Data> onCreateLoader(int id, @Nullable Bundle args) {
         return new MainLoader(this);
     }
 
     @Override
-    public void onLoadFinished(Loader<MainLoader.Data> loader, MainLoader.Data data) {
-        Assert.assertTrue(data != null);
-
+    public void onLoadFinished(@NonNull Loader<MainLoader.Data> loader, @NonNull MainLoader.Data data) {
         mTaskListFragment.setAllTasks(data.getDataId(), data.getTaskData());
     }
 
     @Override
-    public void onLoaderReset(Loader<MainLoader.Data> loader) {
+    public void onLoaderReset(@NonNull Loader<MainLoader.Data> loader) {
 
     }
 
@@ -551,7 +550,7 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putSerializable(VISIBLE_TAB_KEY, mVisibleTab);
@@ -694,20 +693,20 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
     }
 
     @Override
-    public void onCreateTaskActionMode(final ActionMode actionMode) {
+    public void onCreateTaskActionMode(@NonNull final ActionMode actionMode) {
         Assert.assertTrue(mDrawerTaskListener == null);
         mDrawerTaskListener = new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
 
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
             }
 
             @Override
@@ -736,20 +735,20 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
     }
 
     @Override
-    public void onCreateGroupActionMode(final ActionMode actionMode) {
+    public void onCreateGroupActionMode(@NonNull final ActionMode actionMode) {
         Assert.assertTrue(mDrawerGroupListener == null);
         mDrawerGroupListener = new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
 
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
             }
 
             @Override
@@ -806,20 +805,20 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
     }
 
     @Override
-    public void onCreateCustomTimesActionMode(ActionMode actionMode) {
+    public void onCreateCustomTimesActionMode(@NonNull ActionMode actionMode) {
         Assert.assertTrue(mDrawerCustomTimesListener == null);
         mDrawerCustomTimesListener = new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
 
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
             }
 
             @Override
@@ -846,22 +845,23 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
 
         invalidateOptionsMenu();
     }
+
     public void onCreateUserActionMode(@NonNull ActionMode actionMode) {
         Assert.assertTrue(mDrawerUsersListener == null);
 
         mDrawerUsersListener = new DrawerLayout.DrawerListener() {
             @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
 
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(@NonNull View drawerView) {
 
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(@NonNull View drawerView) {
 
             }
 
@@ -889,7 +889,7 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
@@ -969,7 +969,7 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
         @Nullable
         private FloatingActionButton mFloatingActionButton;
 
-        MyFragmentStatePagerAdapter(FragmentManager fragmentManager) {
+        MyFragmentStatePagerAdapter(@NonNull FragmentManager fragmentManager) {
             super(fragmentManager);
         }
 
@@ -1018,7 +1018,7 @@ public class MainActivity extends AbstractActivity implements GroupListFragment.
         }
 
         @Override
-        public void setPrimaryItem(ViewGroup container, int position, Object object) {
+        public void setPrimaryItem(ViewGroup container, int position, @Nullable Object object) {
             super.setPrimaryItem(container, position, object);
 
             if (mCurrentItem != null) {

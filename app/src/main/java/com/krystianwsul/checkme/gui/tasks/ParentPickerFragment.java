@@ -198,22 +198,22 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             LayoutInflater inflater = LayoutInflater.from(mParentPickerFragment.getActivity());
             View showTaskRow = inflater.inflate(R.layout.row_task_list, parent, false);
 
-            LinearLayout taskRowContainer = showTaskRow.findViewById(R.id.task_row_container);
+            LinearLayout taskRowContainer = showTaskRow.findViewById(R.id.taskRowContainer);
             Assert.assertTrue(taskRowContainer != null);
 
-            TextView taskRowName = showTaskRow.findViewById(R.id.task_row_name);
+            TextView taskRowName = showTaskRow.findViewById(R.id.taskRowName);
             Assert.assertTrue(taskRowName != null);
 
-            TextView taskRowDetails = showTaskRow.findViewById(R.id.task_row_details);
+            TextView taskRowDetails = showTaskRow.findViewById(R.id.taskRowDetails);
             Assert.assertTrue(taskRowDetails != null);
 
-            TextView taskRowChildren = showTaskRow.findViewById(R.id.task_row_children);
+            TextView taskRowChildren = showTaskRow.findViewById(R.id.taskRowChildren);
             Assert.assertTrue(taskRowChildren != null);
 
-            ImageView taskRowImage = showTaskRow.findViewById(R.id.task_row_img);
+            ImageView taskRowImage = showTaskRow.findViewById(R.id.taskRowImg);
             Assert.assertTrue(taskRowImage != null);
 
-            View taskRowSeparator = showTaskRow.findViewById(R.id.task_row_separator);
+            View taskRowSeparator = showTaskRow.findViewById(R.id.taskRowSeparator);
             Assert.assertTrue(taskRowSeparator != null);
 
             return new TaskHolder(showTaskRow, taskRowContainer, taskRowName, taskRowDetails, taskRowChildren, taskRowImage, taskRowSeparator);

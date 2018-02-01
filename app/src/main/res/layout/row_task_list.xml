@@ -13,7 +13,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:orientation="horizontal"
-        android:id="@+id/task_row_container">
+        android:id="@+id/taskRowContainer">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -23,7 +23,7 @@
             android:layout_gravity="center_vertical">
 
             <TextView
-                android:id="@+id/task_row_name"
+                android:id="@+id/taskRowName"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
                 tools:ignore="Deprecated"/>
 
             <TextView
-                android:id="@+id/task_row_details"
+                android:id="@+id/taskRowDetails"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
                 tools:ignore="Deprecated"/>
 
             <TextView
-                android:id="@+id/task_row_children"
+                android:id="@+id/taskRowChildren"
                 android:singleLine="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/task_row_img"
+            android:id="@+id/taskRowImg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -67,7 +67,7 @@
         android:layout_height="1dp"
         android:layout_marginTop="4dp"
         android:visibility="invisible"
-        android:id="@+id/task_row_separator"
+        android:id="@+id/taskRowSeparator"
         android:background="?android:attr/listDivider" />
 
 </LinearLayout>

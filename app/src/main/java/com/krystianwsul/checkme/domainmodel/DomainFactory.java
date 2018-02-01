@@ -981,7 +981,7 @@ public class DomainFactory {
         List<TaskListFragment.ChildTaskData> childTaskDatas = Stream.of(task.getChildTasks(now))
                 .map(childTask -> new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
                 .collect(Collectors.toList());
-        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
+        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> lhs.getStartExactTimeStamp().compareTo(rhs.getStartExactTimeStamp()));
 
         return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()));
     }
@@ -2344,7 +2344,7 @@ public class DomainFactory {
                 .map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
                 .collect(Collectors.toList());
 
-        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> -lhs.mStartExactTimeStamp.compareTo(rhs.mStartExactTimeStamp));
+        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> -lhs.getStartExactTimeStamp().compareTo(rhs.getStartExactTimeStamp()));
 
         return new TaskListFragment.TaskData(childTaskDatas, null);
     }

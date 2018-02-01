@@ -63,7 +63,7 @@ import junit.framework.Assert;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
-public class MainActivity extends AbstractActivity implements TaskListFragment.TaskListListener, GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.Data> {
+public class MainActivity extends AbstractActivity implements GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.Data>, TaskListFragment.TaskListListener {
     private static final String VISIBLE_TAB_KEY = "visibleTab";
     private static final String IGNORE_FIRST_KEY = "ignoreFirst";
     private static final String TIME_RANGE_KEY = "timeRange";
@@ -321,7 +321,7 @@ public class MainActivity extends AbstractActivity implements TaskListFragment.T
             Assert.assertTrue(userListFragment == null);
             Assert.assertTrue(mFriendListFragment == null);
 
-            mTaskListFragment = TaskListFragment.newInstance();
+            mTaskListFragment = TaskListFragment.Companion.newInstance();
             mProjectListFragment = ProjectListFragment.Companion.newInstance();
             mShowCustomTimesFragment = ShowCustomTimesFragment.Companion.newInstance();
             mFriendListFragment = FriendListFragment.Companion.newInstance();

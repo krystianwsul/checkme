@@ -71,7 +71,7 @@ class FindFriendActivity : AppCompatActivity() {
         findFriendUserLayout.setOnClickListener {
             Assert.assertTrue(!loading)
 
-            val myUserInfo = MainActivity.getUserInfo()!!
+            val myUserInfo = MainActivity.userInfo!!
 
             DatabaseWrapper.addFriend(myUserInfo, userData!!)
 

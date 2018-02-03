@@ -8,7 +8,7 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start"
     tools:context=".gui.MainActivity"
-    android:id="@+id/main_activity_drawer">
+    android:id="@+id/mainActivityDrawer">
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/main_coordinator"
@@ -16,7 +16,7 @@
         android:layout_height="match_parent">
 
         <android.support.design.widget.AppBarLayout
-            android:id="@+id/main_activity_app_bar_layout"
+            android:id="@+id/mainActivityAppBarLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:theme="@style/AppTheme.AppBarOverlay"
@@ -25,7 +25,7 @@
             android:fitsSystemWindows="true">
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/main_activity_toolbar"
+                android:id="@+id/mainActivityToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
@@ -34,7 +34,7 @@
                 app:layout_scrollFlags="scroll|enterAlways">
                 
                 <Spinner
-                    android:id="@+id/main_activity_spinner"
+                    android:id="@+id/mainActivitySpinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"/>
@@ -50,40 +50,40 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <android.support.v4.view.ViewPager
-                android:id="@+id/main_pager"
+                android:id="@+id/mainDaysPager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
 
             <FrameLayout
-                android:id="@+id/main_task_list_frame"
+                android:id="@+id/mainTaskListFrame"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:visibility="gone"/>
 
             <FrameLayout
-                android:id="@+id/main_custom_times_frame"
+                android:id="@+id/mainCustomTimesFrame"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:visibility="gone"/>
 
             <FrameLayout
-                android:id="@+id/main_debug_frame"
+                android:id="@+id/mainDebugFrame"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:visibility="gone"/>
 
             <FrameLayout
-                android:id="@+id/main_friend_list_frame"
+                android:id="@+id/mainFriendListFrame"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 android:visibility="gone"/>
 
             <FrameLayout
-                android:id="@+id/main_project_frame"
+                android:id="@+id/mainProjectListFrame"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -92,7 +92,7 @@
         </FrameLayout>
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/main_fab"
+            android:id="@+id/mainFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:useCompatPadding="true"
@@ -105,7 +105,7 @@
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
-        android:id="@+id/main_activity_navigation"
+        android:id="@+id/mainActivityNavigation"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

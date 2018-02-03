@@ -1,0 +1,810 @@
+package com.krystianwsul.checkme.gui
+
+import android.content.Intent
+import android.os.Bundle
+import android.support.design.widget.FloatingActionButton
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.app.LoaderManager
+import android.support.v4.content.Loader
+import android.support.v4.util.ArrayMap
+import android.support.v4.view.GravityCompat
+import android.support.v4.view.ViewCompat
+import android.support.v4.view.ViewPager
+import android.support.v4.widget.DrawerLayout
+import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.view.ActionMode
+import android.support.v7.widget.Toolbar
+import android.text.TextUtils
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.TextView
+import android.widget.Toast
+
+import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
+import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
+import com.krystianwsul.checkme.gui.friends.FriendListFragment
+import com.krystianwsul.checkme.gui.instances.DayFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.projects.ProjectListFragment
+import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.loaders.MainLoader
+import com.krystianwsul.checkme.notifications.TickJobIntentService
+import com.krystianwsul.checkme.persistencemodel.SaveService
+
+import junit.framework.Assert
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.nav_header_main.view.*
+
+import java.lang.ref.WeakReference
+
+class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.Data>, TaskListFragment.TaskListListener {
+
+    companion object {
+
+        private const val VISIBLE_TAB_KEY = "visibleTab"
+        private const val IGNORE_FIRST_KEY = "ignoreFirst"
+        private const val TIME_RANGE_KEY = "timeRange"
+        private const val DEBUG_KEY = "debug"
+
+        private const val RC_SIGN_IN = 1000
+
+        private const val NORMAL_ELEVATION = 6f
+        private const val INSTANCES_ELEVATION = 0f
+
+        var userInfo: UserInfo? = null
+            private set
+    }
+
+    private lateinit var taskListFragment: TaskListFragment
+    private lateinit var projectListFragment: ProjectListFragment
+    private lateinit var showCustomTimesFragment: ShowCustomTimesFragment
+    private lateinit var friendListFragment: FriendListFragment
+
+    private var drawerTaskListener: DrawerLayout.DrawerListener? = null
+    private var drawerGroupListener: DrawerLayout.DrawerListener? = null
+    private var onPageChangeListener: ViewPager.OnPageChangeListener? = null
+    private var drawerCustomTimesListener: DrawerLayout.DrawerListener? = null
+    private var drawerUsersListener: DrawerLayout.DrawerListener? = null
+
+    private var visibleTab = Tab.INSTANCES
+    private var ignoreFirst = false
+
+    private var timeRange = TimeRange.DAY
+
+    private val groupSelectAllVisible = ArrayMap<Int, Boolean>()
+    private var taskSelectAllVisible = false
+    private var customTimesSelectAllVisible = false
+    private var userSelectAllVisible = false
+
+    private lateinit var googleApiClient: GoogleApiClient
+
+    private lateinit var headerName: TextView
+    private lateinit var headerEmail: TextView
+
+    private lateinit var firebaseAuth: FirebaseAuth
+
+    private val mAuthStateListener = { firebaseAuth: FirebaseAuth ->
+        val firebaseUser = firebaseAuth.currentUser
+        if (firebaseUser != null) {
+            userInfo = UserInfo(firebaseUser)
+
+            DomainFactory.getDomainFactory().setUserInfo(this, SaveService.Source.GUI, userInfo!!)
+
+            Log.e("asdf", "firebase logged in")
+        } else {
+            userInfo = null
+
+            DomainFactory.getDomainFactory().clearUserInfo(this)
+
+            Log.e("asdf", "firebase logged out")
+        }
+
+        updateSignInState(firebaseUser)
+    }
+
+    private var debug = false
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_select_all, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) = menu.run {
+        when (visibleTab) {
+            Tab.INSTANCES -> findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentItem] ?: false
+            Tab.TASKS -> findItem(R.id.action_select_all).isVisible = taskSelectAllVisible
+            Tab.CUSTOM_TIMES -> findItem(R.id.action_select_all).isVisible = customTimesSelectAllVisible
+            Tab.FRIENDS -> findItem(R.id.action_select_all).isVisible = userSelectAllVisible
+            else -> findItem(R.id.action_select_all).isVisible = false
+        }
+
+        true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Assert.assertTrue(item.itemId == R.id.action_select_all)
+
+        when (visibleTab) {
+            MainActivity.Tab.INSTANCES -> {
+                val myFragmentStatePagerAdapter = mainDaysPager.adapter as MyFragmentStatePagerAdapter
+                myFragmentStatePagerAdapter.currentItem.selectAll()
+            }
+            MainActivity.Tab.TASKS -> {
+                val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
+                taskListFragment.selectAll()
+            }
+            MainActivity.Tab.CUSTOM_TIMES -> showCustomTimesFragment.selectAll()
+            MainActivity.Tab.FRIENDS -> friendListFragment.selectAll()
+            else -> throw UnsupportedOperationException()
+        }
+
+        return true
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_main)
+
+        val mainActivityToolbar = findViewById<Toolbar>(R.id.mainActivityToolbar)
+        Assert.assertTrue(mainActivityToolbar != null)
+
+        setSupportActionBar(mainActivityToolbar)
+
+        savedInstanceState?.run {
+            Assert.assertTrue(containsKey(VISIBLE_TAB_KEY))
+            visibleTab = getSerializable(VISIBLE_TAB_KEY) as Tab
+
+            if (containsKey(IGNORE_FIRST_KEY)) {
+                Assert.assertTrue(visibleTab == Tab.INSTANCES)
+                ignoreFirst = true
+            }
+
+            Assert.assertTrue(containsKey(TIME_RANGE_KEY))
+            timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
+
+            Assert.assertTrue(containsKey(DEBUG_KEY))
+            debug = getBoolean(DEBUG_KEY)
+        }
+
+        mainActivitySpinner.run {
+            adapter = ArrayAdapter.createFromResource(supportActionBar!!.themedContext, R.array.main_activity_spinner, R.layout.custom_toolbar_spinner).apply {
+                setDropDownViewResource(R.layout.custom_toolbar_spinner_dropdown)
+            }
+
+            setSelection(timeRange.ordinal)
+
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    Assert.assertTrue(visibleTab == Tab.INSTANCES)
+
+                    Assert.assertTrue(position >= 0)
+                    Assert.assertTrue(position < 3)
+
+                    val newTimeRange = TimeRange.values()[position]
+
+                    if (newTimeRange != timeRange) {
+                        timeRange = newTimeRange
+                        mainDaysPager.adapter = MyFragmentStatePagerAdapter(supportFragmentManager)
+
+                        groupSelectAllVisible.clear()
+                        invalidateOptionsMenu()
+                    }
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) = Unit
+            }
+        }
+
+        val toggle = ActionBarDrawerToggle(this, mainActivityDrawer, mainActivityToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        mainActivityDrawer.addDrawerListener(toggle)
+        toggle.syncState()
+
+        var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
+        if (debugFragment != null) {
+            taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
+            projectListFragment = supportFragmentManager.findFragmentById(R.id.mainProjectListFrame) as ProjectListFragment
+            showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
+            friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
+        } else {
+            debugFragment = DebugFragment.newInstance()
+            taskListFragment = TaskListFragment.newInstance()
+            projectListFragment = ProjectListFragment.newInstance()
+            showCustomTimesFragment = ShowCustomTimesFragment.newInstance()
+            friendListFragment = FriendListFragment.newInstance()
+
+            supportFragmentManager.beginTransaction()
+                    .add(R.id.mainDebugFrame, debugFragment)
+                    .add(R.id.mainTaskListFrame, taskListFragment)
+                    .add(R.id.mainProjectListFrame, projectListFragment)
+                    .add(R.id.mainFriendListFrame, friendListFragment)
+                    .add(R.id.mainCustomTimesFrame, showCustomTimesFragment)
+                    .commit()
+        }
+
+        mainDaysPager.run {
+            addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+
+                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) = Unit
+
+                override fun onPageSelected(position: Int) {
+                    invalidateOptionsMenu()
+                }
+
+                override fun onPageScrollStateChanged(state: Int) = Unit
+            })
+
+            adapter = MyFragmentStatePagerAdapter(supportFragmentManager)
+        }
+
+        mainActivityNavigation.run {
+            setCheckedItem(R.id.main_drawer_instances)
+
+            setNavigationItemSelectedListener {
+                mainActivityDrawer.run {
+                    when (it.itemId) {
+                        R.id.main_drawer_instances -> {
+                            drawerTaskListener?.let { removeDrawerListener(it) }
+                            drawerTaskListener = null
+
+                            showTab(Tab.INSTANCES)
+                        }
+                        R.id.main_drawer_tasks -> {
+                            drawerGroupListener?.let { removeDrawerListener(it) }
+                            drawerGroupListener = null
+
+                            showTab(Tab.TASKS)
+                        }
+                        R.id.main_drawer_projects -> {
+                            drawerTaskListener?.let { removeDrawerListener(it) }
+                            drawerTaskListener = null
+
+                            drawerGroupListener?.let { removeDrawerListener(it) }
+                            drawerGroupListener = null
+
+                            showTab(Tab.PROJECTS)
+                        }
+                        R.id.main_drawer_custom_times -> {
+                            drawerTaskListener?.let { removeDrawerListener(it) }
+                            drawerTaskListener = null
+
+                            drawerGroupListener?.let { mainActivityDrawer.removeDrawerListener(it) }
+                            drawerGroupListener = null
+
+                            showTab(Tab.CUSTOM_TIMES)
+                        }
+                        R.id.main_drawer_friends -> showTab(Tab.FRIENDS)
+                        R.id.main_drawer_sign_in -> if (userInfo != null) {
+                            Auth.GoogleSignInApi.signOut(googleApiClient)
+
+                            firebaseAuth.signOut()
+
+                            if (visibleTab == Tab.FRIENDS || visibleTab == Tab.PROJECTS) {
+                                mainActivityNavigation.setCheckedItem(R.id.main_drawer_instances)
+                                showTab(Tab.INSTANCES)
+                            }
+                        } else {
+                            // todo add spinner to grouplistfragment padding
+                            startActivityForResult(Auth.GoogleSignInApi.getSignInIntent(googleApiClient), RC_SIGN_IN)
+                        }
+                        R.id.main_drawer_debug -> {
+                            drawerTaskListener?.let { removeDrawerListener(it) }
+                            drawerTaskListener = null
+
+                            drawerGroupListener?.let { removeDrawerListener(it) }
+                            drawerGroupListener = null
+
+                            showTab(Tab.DEBUG)
+                        }
+                        else -> throw IndexOutOfBoundsException()
+                    }
+
+                    closeDrawer(GravityCompat.START)
+                }
+
+                invalidateOptionsMenu()
+
+                true
+            }
+
+            menu.findItem(R.id.main_drawer_debug).isVisible = debug
+
+            getHeaderView(0)!!.run {
+                setOnLongClickListener {
+                    debug = true
+
+                    mainActivityNavigation.menu.findItem(R.id.main_drawer_debug).isVisible = true
+                    true
+                }
+
+                headerName = navHeaderName
+                headerEmail = navHeaderEmail
+            }
+        }
+
+        showTab(visibleTab)
+
+        TickJobIntentService.startServiceRegister(this, "MainActivity: TickJobIntentService.startServiceRegister")
+
+        val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()
+
+        googleApiClient = GoogleApiClient.Builder(this)
+                .enableAutoManage(this) { mainActivityNavigation.menu.findItem(R.id.main_drawer_sign_in).isVisible = false }
+                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
+                .build()
+
+        firebaseAuth = FirebaseAuth.getInstance()
+
+        supportLoaderManager.initLoader(0, null, this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        firebaseAuth.addAuthStateListener(mAuthStateListener)
+    }
+
+    override fun onCreateLoader(id: Int, args: Bundle?) = MainLoader(this)
+
+    override fun onLoadFinished(loader: Loader<MainLoader.Data>, data: MainLoader.Data) {
+        taskListFragment.setAllTasks(data.dataId, data.taskData)
+    }
+
+    override fun onLoaderReset(loader: Loader<MainLoader.Data>) = Unit
+
+    override fun onStop() {
+        super.onStop()
+
+        firebaseAuth.removeAuthStateListener(mAuthStateListener)
+    }
+
+    override fun onBackPressed() {
+        mainActivityDrawer.run {
+            if (isDrawerOpen(GravityCompat.START))
+                closeDrawer(GravityCompat.START)
+            else
+                super.onBackPressed()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.run {
+            super.onSaveInstanceState(this)
+
+            putSerializable(VISIBLE_TAB_KEY, visibleTab)
+
+            if (visibleTab == Tab.INSTANCES) {
+                Assert.assertTrue(mainDaysPager.visibility == View.VISIBLE)
+                if (mainDaysPager.currentItem != 0 && onPageChangeListener != null)
+                    putInt(IGNORE_FIRST_KEY, 1)
+            }
+
+            putSerializable(TIME_RANGE_KEY, timeRange)
+            putBoolean(DEBUG_KEY, debug)
+        }
+    }
+
+    private fun showTab(tab: Tab) {
+        val density = resources.displayMetrics.density
+
+        when (tab) {
+            MainActivity.Tab.INSTANCES -> {
+                supportActionBar!!.title = null
+                mainDaysPager.visibility = View.VISIBLE
+                mainTaskListFrame.visibility = View.GONE
+                mainProjectListFrame.visibility = View.GONE
+                mainCustomTimesFrame.visibility = View.GONE
+                mainDebugFrame.visibility = View.GONE
+                ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
+                mainActivitySpinner.visibility = View.VISIBLE
+                mainFriendListFrame.visibility = View.GONE
+
+                taskListFragment.clearFab()
+                projectListFragment.clearFab()
+                showCustomTimesFragment.clearFab()
+                friendListFragment.clearFab()
+
+                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).setFab(mainFab)
+            }
+            MainActivity.Tab.TASKS -> {
+                supportActionBar!!.title = getString(R.string.tasks)
+                mainDaysPager.visibility = View.GONE
+                mainTaskListFrame.visibility = View.VISIBLE
+                mainProjectListFrame.visibility = View.GONE
+                mainCustomTimesFrame.visibility = View.GONE
+                mainDebugFrame.visibility = View.GONE
+                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
+                mainActivitySpinner.visibility = View.GONE
+                mainFriendListFrame.visibility = View.GONE
+
+                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
+                projectListFragment.clearFab()
+                showCustomTimesFragment.clearFab()
+                friendListFragment.clearFab()
+
+                taskListFragment.setFab(mainFab)
+            }
+            MainActivity.Tab.PROJECTS -> {
+                supportActionBar!!.title = getString(R.string.projects)
+                mainDaysPager.visibility = View.GONE
+                mainTaskListFrame.visibility = View.GONE
+                mainProjectListFrame.visibility = View.VISIBLE
+                mainCustomTimesFrame.visibility = View.GONE
+                mainDebugFrame.visibility = View.GONE
+                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
+                mainActivitySpinner.visibility = View.GONE
+                mainFriendListFrame.visibility = View.GONE
+
+                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
+                taskListFragment.clearFab()
+                showCustomTimesFragment.clearFab()
+                friendListFragment.clearFab()
+
+                projectListFragment.setFab(mainFab)
+            }
+            MainActivity.Tab.CUSTOM_TIMES -> {
+                supportActionBar!!.title = getString(R.string.times)
+                mainDaysPager.visibility = View.GONE
+                mainTaskListFrame.visibility = View.GONE
+                mainProjectListFrame.visibility = View.GONE
+                mainCustomTimesFrame.visibility = View.VISIBLE
+                mainDebugFrame.visibility = View.GONE
+                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
+                mainActivitySpinner.visibility = View.GONE
+                mainFriendListFrame.visibility = View.GONE
+
+                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
+                taskListFragment.clearFab()
+                projectListFragment.clearFab()
+                friendListFragment.clearFab()
+
+                showCustomTimesFragment.setFab(mainFab)
+            }
+            MainActivity.Tab.FRIENDS -> {
+                Assert.assertTrue(userInfo != null)
+
+                supportActionBar!!.setTitle(R.string.friends)
+                mainDaysPager.visibility = View.GONE
+                mainTaskListFrame.visibility = View.GONE
+                mainProjectListFrame.visibility = View.GONE
+                mainCustomTimesFrame.visibility = View.GONE
+                mainDebugFrame.visibility = View.GONE
+                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
+                mainActivitySpinner.visibility = View.GONE
+                mainFriendListFrame.visibility = View.VISIBLE
+
+                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
+                taskListFragment.clearFab()
+                projectListFragment.clearFab()
+                showCustomTimesFragment.clearFab()
+
+                friendListFragment.setFab(mainFab)
+            }
+            MainActivity.Tab.DEBUG -> {
+                supportActionBar!!.title = "Debug"
+                mainDaysPager.visibility = View.GONE
+                mainTaskListFrame.visibility = View.GONE
+                mainProjectListFrame.visibility = View.GONE
+                mainCustomTimesFrame.visibility = View.GONE
+                mainDebugFrame.visibility = View.VISIBLE
+                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
+                mainActivitySpinner.visibility = View.GONE
+                mainFriendListFrame.visibility = View.GONE
+
+                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
+                taskListFragment.clearFab()
+                projectListFragment.clearFab()
+                showCustomTimesFragment.clearFab()
+                friendListFragment.clearFab()
+                mainFab.hide()
+            }
+        }
+
+        visibleTab = tab
+    }
+
+    override fun onCreateTaskActionMode(actionMode: ActionMode) {
+        Assert.assertTrue(drawerTaskListener == null)
+
+        drawerTaskListener = object : DrawerLayout.DrawerListener {
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
+
+            override fun onDrawerOpened(drawerView: View) = Unit
+
+            override fun onDrawerClosed(drawerView: View) = Unit
+
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_DRAGGING)
+                    actionMode.finish()
+            }
+        }
+        mainActivityDrawer.addDrawerListener(drawerTaskListener!!)
+    }
+
+    override fun onDestroyTaskActionMode() {
+        Assert.assertTrue(drawerTaskListener != null)
+
+        mainActivityDrawer.removeDrawerListener(drawerTaskListener!!)
+        drawerTaskListener = null
+    }
+
+    override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
+        taskSelectAllVisible = selectAllVisible
+
+        invalidateOptionsMenu()
+    }
+
+    override fun onCreateGroupActionMode(actionMode: ActionMode) {
+        Assert.assertTrue(drawerGroupListener == null)
+
+        drawerGroupListener = object : DrawerLayout.DrawerListener {
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
+
+            override fun onDrawerOpened(drawerView: View) = Unit
+
+            override fun onDrawerClosed(drawerView: View) = Unit
+
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_DRAGGING)
+                    actionMode.finish()
+            }
+        }
+        mainActivityDrawer.addDrawerListener(drawerGroupListener!!)
+
+        Assert.assertTrue(onPageChangeListener == null)
+
+        onPageChangeListener = object : ViewPager.OnPageChangeListener {
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) = Unit
+
+            override fun onPageSelected(position: Int) {
+                if (ignoreFirst)
+                    ignoreFirst = false
+                else
+                    actionMode.finish()
+            }
+
+            override fun onPageScrollStateChanged(state: Int) = Unit
+        }
+        mainDaysPager.addOnPageChangeListener(onPageChangeListener!!)
+    }
+
+    override fun onDestroyGroupActionMode() {
+        Assert.assertTrue(drawerGroupListener != null)
+        Assert.assertTrue(onPageChangeListener != null)
+
+        mainActivityDrawer.removeDrawerListener(drawerGroupListener!!)
+        drawerGroupListener = null
+
+        mainDaysPager.removeOnPageChangeListener(onPageChangeListener!!)
+        onPageChangeListener = null
+    }
+
+    override fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean) {
+        Assert.assertTrue(position != null)
+
+        groupSelectAllVisible[position] = selectAllVisible
+
+        invalidateOptionsMenu()
+    }
+
+    override fun onCreateCustomTimesActionMode(actionMode: ActionMode) {
+        Assert.assertTrue(drawerCustomTimesListener == null)
+
+        drawerCustomTimesListener = object : DrawerLayout.DrawerListener {
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
+
+            override fun onDrawerOpened(drawerView: View) = Unit
+
+            override fun onDrawerClosed(drawerView: View) = Unit
+
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_DRAGGING)
+                    actionMode.finish()
+            }
+        }
+        mainActivityDrawer.addDrawerListener(drawerCustomTimesListener!!)
+    }
+
+    override fun onDestroyCustomTimesActionMode() {
+        Assert.assertTrue(drawerCustomTimesListener != null)
+
+        mainActivityDrawer.removeDrawerListener(drawerCustomTimesListener!!)
+        drawerCustomTimesListener = null
+    }
+
+    override fun setCustomTimesSelectAllVisibility(selectAllVisible: Boolean) {
+        customTimesSelectAllVisible = selectAllVisible
+
+        invalidateOptionsMenu()
+    }
+
+    fun onCreateUserActionMode(actionMode: ActionMode) {
+        Assert.assertTrue(drawerUsersListener == null)
+
+        drawerUsersListener = object : DrawerLayout.DrawerListener {
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
+
+            override fun onDrawerOpened(drawerView: View) = Unit
+
+            override fun onDrawerClosed(drawerView: View) = Unit
+
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_DRAGGING)
+                    actionMode.finish()
+            }
+        }
+        mainActivityDrawer.addDrawerListener(drawerUsersListener!!)
+    }
+
+    fun onDestroyUserActionMode() {
+        Assert.assertTrue(drawerUsersListener != null)
+
+        mainActivityDrawer.removeDrawerListener(drawerUsersListener!!)
+        drawerUsersListener = null
+    }
+
+    fun setUserSelectAllVisibility(selectAllVisible: Boolean) {
+        userSelectAllVisible = selectAllVisible
+
+        invalidateOptionsMenu()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_SIGN_IN) {
+            val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
+
+            if (googleSignInResult.isSuccess) {
+                val googleSignInAccount = googleSignInResult.signInAccount!!
+
+                val credential = GoogleAuthProvider.getCredential(googleSignInAccount.idToken, null)
+
+                firebaseAuth.signInWithCredential(credential)
+                        .addOnCompleteListener(this) { task ->
+                            Log.e("asdf", "signInWithCredential:onComplete:" + task.isSuccessful)
+
+                            if (!task.isSuccessful) {
+                                val exception = task.exception
+                                Assert.assertTrue(exception != null)
+
+                                Log.e("asdf", "firebase signin error: " + exception!!)
+
+                                Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
+
+                                MyCrashlytics.logException(exception)
+
+                                Auth.GoogleSignInApi.signOut(googleApiClient)
+                            } else {
+                                Toast.makeText(this, getString(R.string.signInAs) + " " + task.result.user.displayName, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+            } else {
+                val message = "google signin error: " + googleSignInResult
+
+                Log.e("asdf", message)
+
+                Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
+
+                MyCrashlytics.logException(GoogleSignInException("isSuccess: " + googleSignInResult.isSuccess + ", status: " + googleSignInResult.status))
+            }
+        }
+    }
+
+    private fun updateSignInState(firebaseUser: FirebaseUser?) {
+        mainActivityNavigation.menu.run {
+            if (firebaseUser != null) {
+                val displayName = firebaseUser.displayName
+                Assert.assertTrue(!TextUtils.isEmpty(displayName))
+
+                val email = firebaseUser.email
+                Assert.assertTrue(!TextUtils.isEmpty(email))
+
+                headerName.text = displayName
+                headerEmail.text = email
+
+                findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut)
+                findItem(R.id.main_drawer_projects).isEnabled = true
+                findItem(R.id.main_drawer_friends).isEnabled = true
+            } else {
+                headerName.text = null
+                headerEmail.text = null
+
+                findItem(R.id.main_drawer_sign_in).setTitle(R.string.signIn)
+                findItem(R.id.main_drawer_projects).isEnabled = false
+                findItem(R.id.main_drawer_friends).isEnabled = false
+            }
+        }
+    }
+
+    private inner class MyFragmentStatePagerAdapter(fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager), FabUser {
+
+        private var currentItemRef: WeakReference<DayFragment>? = null
+
+        private var floatingActionButton: FloatingActionButton? = null
+
+        val currentItem: DayFragment
+            get() {
+                Assert.assertTrue(currentItemRef != null)
+
+                return currentItemRef!!.get()!!
+            }
+
+        override fun getItem(position: Int) = DayFragment.newInstance(timeRange, position)
+
+        override fun getCount() = Integer.MAX_VALUE
+
+        override fun setFab(floatingActionButton: FloatingActionButton) {
+            this.floatingActionButton = floatingActionButton
+
+            currentItemRef?.let { it.get()!!.setFab(this.floatingActionButton!!) }
+        }
+
+        override fun clearFab() {
+            floatingActionButton = null
+
+            currentItemRef?.let { currentItemRef!!.get()!!.clearFab() }
+        }
+
+        override fun setPrimaryItem(container: ViewGroup, position: Int, obj: Any) {
+            super.setPrimaryItem(container, position, obj)
+
+            currentItemRef?.let {
+                val dayFragment = it.get()!!
+
+                if (dayFragment != obj) {
+                    dayFragment.clearFab()
+                } else {
+                    return
+                }
+            }
+
+            val dayFragment = obj as DayFragment
+
+            floatingActionButton?.let { dayFragment.setFab(it) }
+
+            currentItemRef = WeakReference(dayFragment)
+        }
+    }
+
+    private class GoogleSignInException(message: String) : Exception(message)
+
+    private enum class Tab {
+        INSTANCES,
+        TASKS,
+        PROJECTS,
+        CUSTOM_TIMES,
+        FRIENDS,
+        DEBUG
+    }
+
+    enum class TimeRange {
+        DAY,
+        WEEK,
+        MONTH
+    }
+}

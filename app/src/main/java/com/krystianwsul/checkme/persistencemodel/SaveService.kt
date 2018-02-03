@@ -1,58 +1,39 @@
 package com.krystianwsul.checkme.persistencemodel
 
 import android.content.Context
-import android.content.Intent
-import android.support.v4.app.JobIntentService
 import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
-class SaveService : JobIntentService() {
+object SaveService {
 
-    companion object {
+    private fun save(context: Context, insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>, source: Source) {
+        Log.e("asdf", "SaveService.save")
 
-        private const val INSERT_COMMAND_KEY = "insertCommands"
-        private const val UPDATE_COMMAND_KEY = "updateCommands"
-        private const val DELETE_COMMAND_KEY = "deleteCommands"
-        private const val SOURCE_KEY = "source"
+        try {
+            val sqLiteDatabase = MySQLiteHelper.database
 
-        private fun save(context: Context, insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>, source: Source) {
-            Log.e("asdf", "SaveService.save")
+            sqLiteDatabase.beginTransaction()
 
             try {
-                val sqLiteDatabase = MySQLiteHelper.database
+                for (insertCommand in insertCommands)
+                    insertCommand.execute(sqLiteDatabase)
 
-                sqLiteDatabase.beginTransaction()
+                for (updateCommand in updateCommands)
+                    updateCommand.execute(sqLiteDatabase)
 
-                try {
-                    for (insertCommand in insertCommands)
-                        insertCommand.execute(sqLiteDatabase)
+                for (deleteCommand in deleteCommands)
+                    deleteCommand.execute(sqLiteDatabase)
 
-                    for (updateCommand in updateCommands)
-                        updateCommand.execute(sqLiteDatabase)
-
-                    for (deleteCommand in deleteCommands)
-                        deleteCommand.execute(sqLiteDatabase)
-
-                    sqLiteDatabase.setTransactionSuccessful()
-                } finally {
-                    sqLiteDatabase.endTransaction()
-                }
-            } catch (e: Exception) {
-                DomainFactory.getDomainFactory().reset(context, source)
-                throw e
+                sqLiteDatabase.setTransactionSuccessful()
+            } finally {
+                sqLiteDatabase.endTransaction()
             }
+        } catch (e: Exception) {
+            DomainFactory.getDomainFactory().reset(context, source)
+            throw e
         }
-    }
-
-    override fun onHandleWork(intent: Intent) {
-        val insertCommands = intent.getParcelableArrayListExtra<InsertCommand>(INSERT_COMMAND_KEY)!!
-        val updateCommands = intent.getParcelableArrayListExtra<UpdateCommand>(UPDATE_COMMAND_KEY)!!
-        val deleteCommands = intent.getParcelableArrayListExtra<DeleteCommand>(DELETE_COMMAND_KEY)!!
-        val source = intent.getSerializableExtra(SOURCE_KEY) as Source
-
-        save(this, insertCommands, updateCommands, deleteCommands, source)
     }
 
     abstract class Factory {
@@ -99,8 +80,8 @@ class SaveService : JobIntentService() {
                             .subscribeOn(Schedulers.io())
                             .subscribe()
                     Source.SERVICE -> save(context, insertCommands, updateCommands, deleteCommands, source)
-                } // todo remove service
-            } // todo move rx stuff to domainFactory call site
+                }
+            }
 
             private fun delete(collection: MutableCollection<out Record>): List<DeleteCommand> {
                 val deleted = collection.filter { it.needsDelete() }

@@ -60,7 +60,7 @@ public class NodeCollection {
         if (!TextUtils.isEmpty(mNote)) {
             Assert.assertTrue(mIndentation == 0);
 
-            rootTreeNodes.add(new NoteNode(mDensity, mNote, getGroupAdapter()).initialize(mNodeContainer));
+            rootTreeNodes.add(new NoteNode(mDensity, mNote, getGroupAdapter().getMGroupListFragment()).initialize(mNodeContainer));
         }
 
         mNotDoneGroupCollection = new NotDoneGroupCollection(mDensity, mIndentation, this, mNodeContainer, selectable);

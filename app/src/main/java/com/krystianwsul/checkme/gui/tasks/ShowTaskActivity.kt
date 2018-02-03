@@ -110,7 +110,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
             R.id.task_menu_share -> {
                 Assert.assertTrue(data != null)
 
-                Utils.share(data!!.name + (taskListFragment.shareData?.let { "\n" + it } ?: ""))
+                Utils.share(data!!.name + taskListFragment.shareData.let { "\n" + it })
             }
             R.id.task_menu_delete -> {
                 supportLoaderManager.destroyLoader(0)

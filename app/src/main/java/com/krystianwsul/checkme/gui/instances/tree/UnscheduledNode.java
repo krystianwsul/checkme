@@ -70,7 +70,7 @@ class UnscheduledNode extends GroupHolderNode implements ModelNode, TaskParent {
 
     List<TaskKey> getExpandedTaskKeys() {
         return Stream.of(mTaskNodes)
-                .flatMap(TaskNode::getExpandedTaskKeys)
+                .flatMap(taskNode -> Stream.of(taskNode.getExpandedTaskKeys()))
                 .collect(Collectors.toList());
     }
 

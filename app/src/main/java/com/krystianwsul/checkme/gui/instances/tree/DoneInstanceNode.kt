@@ -11,7 +11,6 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import junit.framework.Assert
-import java.util.*
 
 class DoneInstanceNode(density: Float, indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
 
@@ -24,7 +23,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     private val groupListFragment get() = groupAdapter.mGroupListFragment
 
-    fun initialize(dividerTreeNode: TreeNode, expandedInstances: HashMap<InstanceKey, Boolean>?): TreeNode {
+    fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>?): TreeNode {
         val expanded: Boolean
         val doneExpanded: Boolean
         if (expandedInstances != null && expandedInstances.containsKey(instanceData.InstanceKey) && !instanceData.children.isEmpty()) {
@@ -37,7 +36,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
         treeNode = TreeNode(this, dividerTreeNode, expanded, false)
 
-        nodeCollection = NodeCollection(mDensity, mIndentation + 1, this, false, this.treeNode, null)
+        nodeCollection = NodeCollection(mDensity, mIndentation + 1, groupAdapter, false, this.treeNode, null)
         treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, null, false, null, false, null))
 
         return treeNode
@@ -45,15 +44,15 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     private fun expanded() = treeNode.expanded()
 
-    fun addExpandedInstances(expandedInstances: HashMap<InstanceKey, Boolean>) {
+    fun addExpandedInstances(expandedInstances: Map<InstanceKey, Boolean>) {
         if (!expanded())
             return
 
         Assert.assertTrue(!expandedInstances.containsKey(instanceData.InstanceKey))
 
-        expandedInstances.put(instanceData.InstanceKey, nodeCollection.doneExpanded)
-
-        nodeCollection.addExpandedInstances(expandedInstances)
+        nodeCollection.addExpandedInstances(expandedInstances.toMutableMap().also {
+            it[instanceData.InstanceKey] = nodeCollection.doneExpanded
+        })
     }
 
     override fun getGroupAdapter() = parentNodeCollection.groupAdapter

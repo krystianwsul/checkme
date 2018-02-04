@@ -41,12 +41,12 @@ public class NotDoneGroupCollection {
     }
 
     @NonNull
-    List<TreeNode> initialize(@NonNull List<GroupListFragment.InstanceData> notDoneInstanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable HashMap<InstanceKey, Boolean> expandedInstances, @Nullable ArrayList<InstanceKey> selectedNodes) {
+    List<TreeNode> initialize(@NonNull List<GroupListFragment.InstanceData> notDoneInstanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable Map<InstanceKey, Boolean> expandedInstances, @Nullable List<InstanceKey> selectedNodes) {
         ArrayList<TreeNode> notDoneGroupTreeNodes = new ArrayList<>();
 
         NodeCollection nodeCollection = getNodeCollection();
 
-        if (nodeCollection.mUseGroups) {
+        if (nodeCollection.getUseGroups()) {
             HashMap<TimeStamp, ArrayList<GroupListFragment.InstanceData>> instanceDataHash = new HashMap<>();
             for (GroupListFragment.InstanceData instanceData : notDoneInstanceDatas) {
                 if (!instanceDataHash.containsKey(instanceData.getInstanceTimeStamp()))
@@ -95,7 +95,7 @@ public class NotDoneGroupCollection {
                 .filter(notDoneGroupNode -> notDoneGroupNode.getExactTimeStamp().equals(exactTimeStamp))
                 .collect(Collectors.toList());
 
-        if (timeStampNotDoneGroupNodes.isEmpty() || !nodeCollection.mUseGroups) {
+        if (timeStampNotDoneGroupNodes.isEmpty() || !nodeCollection.getUseGroups()) {
             ArrayList<GroupListFragment.InstanceData> instanceDatas = new ArrayList<>();
             instanceDatas.add(instanceData);
 
@@ -113,7 +113,7 @@ public class NotDoneGroupCollection {
     }
 
     @NonNull
-    private TreeNode newNotDoneGroupNode(@NonNull NotDoneGroupCollection notDoneGroupCollection, @NonNull List<GroupListFragment.InstanceData> instanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable HashMap<InstanceKey, Boolean> expandedInstances, @Nullable ArrayList<InstanceKey> selectedNodes) {
+    private TreeNode newNotDoneGroupNode(@NonNull NotDoneGroupCollection notDoneGroupCollection, @NonNull List<GroupListFragment.InstanceData> instanceDatas, @Nullable List<TimeStamp> expandedGroups, @Nullable Map<InstanceKey, Boolean> expandedInstances, @Nullable List<InstanceKey> selectedNodes) {
         Assert.assertTrue(!instanceDatas.isEmpty());
 
         NotDoneGroupNode notDoneGroupNode = new NotDoneGroupNode(mDensity, mIndentation, notDoneGroupCollection, instanceDatas, mSelectable);
@@ -143,7 +143,7 @@ public class NotDoneGroupCollection {
                 .collect(Collectors.toList());
     }
 
-    void addExpandedInstances(@NonNull HashMap<InstanceKey, Boolean> expandedInstances) {
+    void addExpandedInstances(@NonNull Map<InstanceKey, Boolean> expandedInstances) {
         for (NotDoneGroupNode notDoneGroupNode : mNotDoneGroupNodes)
             notDoneGroupNode.addExpandedInstances(expandedInstances);
     }

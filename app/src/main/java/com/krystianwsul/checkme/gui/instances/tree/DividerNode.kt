@@ -21,7 +21,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     private val groupListFragment get() = groupAdapter.mGroupListFragment
 
-    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, doneInstanceDatas: List<GroupListFragment.InstanceData>, expandedInstances: HashMap<InstanceKey, Boolean>?): TreeNode {
+    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, doneInstanceDatas: List<GroupListFragment.InstanceData>, expandedInstances: Map<InstanceKey, Boolean>?): TreeNode {
         Assert.assertTrue(!expanded || !doneInstanceDatas.isEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
@@ -33,7 +33,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
         return treeNode
     }
 
-    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: HashMap<InstanceKey, Boolean>?): TreeNode {
+    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>?): TreeNode {
         Assert.assertTrue(instanceData.Done != null)
 
         val doneInstanceNode = DoneInstanceNode(mDensity, mIndentation, instanceData, this)
@@ -47,7 +47,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     fun expanded() = treeNode.expanded()
 
-    fun addExpandedInstances(expandedInstances: HashMap<InstanceKey, Boolean>) {
+    fun addExpandedInstances(expandedInstances: Map<InstanceKey, Boolean>) {
         for (doneInstanceNode in doneInstanceNodes)
             doneInstanceNode.addExpandedInstances(expandedInstances)
     }

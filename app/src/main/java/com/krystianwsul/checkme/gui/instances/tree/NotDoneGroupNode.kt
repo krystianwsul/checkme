@@ -46,7 +46,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         Assert.assertTrue(instanceDatas.all { it.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp })
     }
 
-    fun initialize(expandedGroups: List<TimeStamp>?, expandedInstances: HashMap<InstanceKey, Boolean>?, selectedNodes: ArrayList<InstanceKey>?, nodeContainer: NodeContainer): TreeNode {
+    fun initialize(expandedGroups: List<TimeStamp>?, expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?, nodeContainer: NodeContainer): TreeNode {
         val expanded: Boolean
         val doneExpanded: Boolean
         if (instanceDatas.size == 1) {
@@ -69,7 +69,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         treeNode = TreeNode(this, nodeContainer, expanded, selected)
 
         if (instanceDatas.size == 1) {
-            singleInstanceNodeCollection = NodeCollection(mDensity, mIndentation + 1, this, false, treeNode, null)
+            singleInstanceNodeCollection = NodeCollection(mDensity, mIndentation + 1, groupAdapter, false, treeNode, null)
 
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedNodes, selectable, null, false, null))
         } else {
@@ -87,15 +87,16 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         return instanceDatas.size == 1
     }
 
-    fun addExpandedInstances(expandedInstances: HashMap<InstanceKey, Boolean>) {
+    fun addExpandedInstances(expandedInstances: Map<InstanceKey, Boolean>) {
         if (!expanded())
             return
 
         if (singleInstance()) {
             Assert.assertTrue(!expandedInstances.containsKey(singleInstanceData.InstanceKey))
 
-            expandedInstances[singleInstanceData.InstanceKey] = singleInstanceNodeCollection!!.doneExpanded
-            singleInstanceNodeCollection!!.addExpandedInstances(expandedInstances)
+            singleInstanceNodeCollection!!.addExpandedInstances(expandedInstances.toMutableMap().also {
+                it[singleInstanceData.InstanceKey] = singleInstanceNodeCollection!!.doneExpanded
+            })
         } else {
             notDoneInstanceNodes.forEach { it.addExpandedInstances(expandedInstances) }
         }
@@ -344,7 +345,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
             treeNode.remove(childTreeNode1)
 
-            singleInstanceNodeCollection = NodeCollection(mDensity, mIndentation + 1, this, false, treeNode, null)
+            singleInstanceNodeCollection = NodeCollection(mDensity, mIndentation + 1, groupAdapter, false, treeNode, null)
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, selectable, null, false, null)
 
@@ -400,7 +401,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         treeNode.add(newChildTreeNode(instanceData, null, null))
     }
 
-    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: HashMap<InstanceKey, Boolean>?, selectedNodes: ArrayList<InstanceKey>?): TreeNode {
+    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?): TreeNode {
         val notDoneInstanceNode = NotDoneInstanceNode(mDensity, mIndentation, instanceData, this, selectable)
 
         val childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selectedNodes, treeNode)
@@ -437,7 +438,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         private val groupListFragment get() = groupAdapter.mGroupListFragment
 
-        fun initialize(expandedInstances: HashMap<InstanceKey, Boolean>?, selectedNodes: ArrayList<InstanceKey>?, notDoneGroupTreeNode: TreeNode): TreeNode {
+        fun initialize(expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?, notDoneGroupTreeNode: TreeNode): TreeNode {
             val selected = selectedNodes?.contains(instanceData.InstanceKey) == true
 
             val expanded: Boolean
@@ -452,7 +453,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
             treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
 
-            nodeCollection = NodeCollection(mDensity, mIndentation + 1, this, false, treeNode, null)
+            nodeCollection = NodeCollection(mDensity, mIndentation + 1, groupAdapter, false, treeNode, null)
             treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, selectedNodes, selectable, null, false, null))
 
             return this.treeNode
@@ -460,15 +461,15 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         private fun expanded() = treeNode.expanded()
 
-        fun addExpandedInstances(expandedInstances: HashMap<InstanceKey, Boolean>) {
+        fun addExpandedInstances(expandedInstances: Map<InstanceKey, Boolean>) {
             if (!expanded())
                 return
 
             Assert.assertTrue(!expandedInstances.containsKey(instanceData.InstanceKey))
 
-            expandedInstances[instanceData.InstanceKey] = nodeCollection.doneExpanded
-
-            nodeCollection.addExpandedInstances(expandedInstances)
+            nodeCollection.addExpandedInstances(expandedInstances.toMutableMap().also {
+                it[instanceData.InstanceKey] = nodeCollection.doneExpanded
+            })
         }
 
         override fun getGroupAdapter() = parentNotDoneGroupNode.groupAdapter

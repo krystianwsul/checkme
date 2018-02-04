@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree;
 
 import android.support.annotation.NonNull;
 
-interface NodeCollectionParent {
+public interface NodeCollectionParent {
     @NonNull
     GroupListFragment.GroupAdapter getGroupAdapter();
 }

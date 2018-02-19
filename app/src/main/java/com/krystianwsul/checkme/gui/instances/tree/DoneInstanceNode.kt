@@ -98,17 +98,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override fun getChildren() = NotDoneGroupNode.NotDoneInstanceNode.getChildren(treeNode, instanceData)
 
-    override fun getChildrenColor(): Int {
-        Assert.assertTrue(!instanceData.children.isEmpty() && !expanded() || !instanceData.mNote.isNullOrEmpty())
-
-        val activity = groupListFragment.activity!!
-
-        return ContextCompat.getColor(activity, if (!instanceData.TaskCurrent) {
-            R.color.textDisabled
-        } else {
-            R.color.textSecondary
-        })
-    }
+    override fun getChildrenColor() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenColor(treeNode, instanceData, groupListFragment)
 
     override fun getExpandVisibility(): Int {
         return if (instanceData.children.isEmpty()) {

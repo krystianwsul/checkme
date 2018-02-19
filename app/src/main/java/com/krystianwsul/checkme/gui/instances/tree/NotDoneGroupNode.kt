@@ -183,19 +183,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         return NotDoneInstanceNode.getChildren(treeNode, singleInstanceData)
     }
 
-    override fun getChildrenColor(): Int {
-        Assert.assertTrue(singleInstance())
-
-        return ContextCompat.getColor(groupListFragment.activity!!, singleInstanceData.run {
-            Assert.assertTrue(!children.isEmpty() && !expanded() || !mNote.isNullOrEmpty())
-
-            if (!TaskCurrent) {
-                R.color.textDisabled
-            } else {
-                R.color.textSecondary
-            }
-        })
-    }
+    override fun getChildrenColor() = NotDoneInstanceNode.getChildrenColor(treeNode, singleInstanceData, groupListFragment)
 
     override fun getExpandVisibility() = if (singleInstance()) {
         val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
@@ -440,6 +428,16 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             } else {
                 View.VISIBLE
             }
+
+            fun getChildrenColor(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData, groupListFragment: GroupListFragment): Int {
+                Assert.assertTrue(!instanceData.children.isEmpty() && !treeNode.expanded() || !instanceData.mNote.isNullOrEmpty())
+
+                return ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) {
+                    R.color.textDisabled
+                } else {
+                    R.color.textSecondary
+                })
+            }
         }
 
         lateinit var treeNode: TreeNode
@@ -511,15 +509,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override fun getChildren() = Companion.getChildren(treeNode, instanceData)
 
-        override fun getChildrenColor(): Int {
-            Assert.assertTrue(!instanceData.children.isEmpty() && !expanded() || !instanceData.mNote.isNullOrEmpty())
-
-            return ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) {
-                R.color.textDisabled
-            } else {
-                R.color.textSecondary
-            })
-        }
+        override fun getChildrenColor() = Companion.getChildrenColor(treeNode, instanceData, groupListFragment)
 
         override fun getExpandVisibility(): Int {
             val visibleChildren = treeNode.allChildren.any { it.canBeShown() }

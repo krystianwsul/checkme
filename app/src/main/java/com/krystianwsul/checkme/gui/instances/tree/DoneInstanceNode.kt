@@ -106,7 +106,17 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
     override fun getChildren(): String {
         Assert.assertTrue(!instanceData.children.isEmpty() && !expanded() || !instanceData.mNote.isNullOrEmpty())
 
-        return GroupListFragment.getChildrenText(expanded(), instanceData.children.values, instanceData.mNote)
+        val notDoneInstanceDatas = instanceData.children
+                .values
+                .filter { it.Done == null }
+
+        return if (notDoneInstanceDatas.isNotEmpty() && !expanded()) {
+            notDoneInstanceDatas.sortedBy { it.mTaskStartExactTimeStamp }.joinToString(", ") { it.Name }
+        } else {
+            Assert.assertTrue(!instanceData.mNote.isNullOrEmpty())
+
+            instanceData.mNote!!
+        }
     }
 
     override fun getChildrenColor(): Int {

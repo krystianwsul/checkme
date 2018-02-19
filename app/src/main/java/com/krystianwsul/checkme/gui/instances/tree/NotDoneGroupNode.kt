@@ -399,49 +399,25 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         companion object {
 
-            private fun getChildren(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData): String {
-                Assert.assertTrue(!instanceData.children.isEmpty() && !treeNode.expanded() || !instanceData.mNote.isNullOrEmpty())
+            fun getChildrenNew(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData, groupListFragment: GroupListFragment) = instanceData.children
+                    .values
+                    .filter { it.Done == null }
+                    .let {
+                        fun color() = ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) {
+                            R.color.textDisabled
+                        } else {
+                            R.color.textSecondary
+                        })
 
-                val notDoneInstanceDatas = instanceData.children
-                        .values
-                        .filter { it.Done == null }
+                        if (it.isNotEmpty() && !treeNode.expanded()) {
+                            val children = it.sortedBy { it.mTaskStartExactTimeStamp }.joinToString(", ") { it.Name }
 
-                return if (notDoneInstanceDatas.isNotEmpty() && !treeNode.expanded()) {
-                    notDoneInstanceDatas.sortedBy { it.mTaskStartExactTimeStamp }.joinToString(", ") { it.Name }
-                } else {
-                    Assert.assertTrue(!instanceData.mNote.isNullOrEmpty())
-
-                    instanceData.mNote!!
-                }
-            }
-
-            private fun getChildrenVisibility(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData) = if ((instanceData.children.isEmpty() || treeNode.expanded()) && instanceData.mNote.isNullOrEmpty()) {
-                View.GONE
-            } else {
-                View.VISIBLE
-            }
-
-            private fun getChildrenColor(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData, groupListFragment: GroupListFragment): Int {
-                Assert.assertTrue(!instanceData.children.isEmpty() && !treeNode.expanded() || !instanceData.mNote.isNullOrEmpty())
-
-                return ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) {
-                    R.color.textDisabled
-                } else {
-                    R.color.textSecondary
-                })
-            }
-
-            fun getChildrenNew(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData, groupListFragment: GroupListFragment): Pair<String, Int>? {
-                val visibility = getChildrenVisibility(treeNode, instanceData)
-
-                return if (visibility == View.VISIBLE) {
-                    val children = getChildren(treeNode, instanceData)
-                    val color = getChildrenColor(treeNode, instanceData, groupListFragment)
-
-                    Pair(children, color)
-                } else {
-                    null
-                }
+                            Pair(children, color())
+                        } else if (!instanceData.mNote.isNullOrEmpty()) {
+                            Pair(instanceData.mNote!!, color())
+                        } else {
+                            null
+                        }
             }
         }
 

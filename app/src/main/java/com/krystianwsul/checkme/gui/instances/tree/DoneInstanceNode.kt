@@ -94,13 +94,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         })
     }
 
-    override fun getChildrenVisibility(): Int {
-        return if ((instanceData.children.isEmpty() || expanded()) && instanceData.mNote.isNullOrEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
-    }
+    override fun getChildrenVisibility() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenVisibility(treeNode, instanceData)
 
     override fun getChildren() = NotDoneGroupNode.NotDoneInstanceNode.getChildren(treeNode, instanceData)
 

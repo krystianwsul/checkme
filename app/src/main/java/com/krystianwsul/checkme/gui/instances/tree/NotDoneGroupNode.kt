@@ -172,13 +172,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     })
 
     override fun getChildrenVisibility() = if (singleInstance()) {
-        singleInstanceData.run {
-            if ((children.isEmpty() || expanded()) && mNote.isNullOrEmpty()) {
-                View.GONE
-            } else {
-                View.VISIBLE
-            }
-        }
+        NotDoneInstanceNode.getChildrenVisibility(treeNode, singleInstanceData)
     } else {
         View.GONE
     }
@@ -440,6 +434,12 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                     instanceData.mNote!!
                 }
             }
+
+            fun getChildrenVisibility(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData) = if ((instanceData.children.isEmpty() || treeNode.expanded()) && instanceData.mNote.isNullOrEmpty()) {
+                View.GONE
+            } else {
+                View.VISIBLE
+            }
         }
 
         lateinit var treeNode: TreeNode
@@ -507,11 +507,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override fun getDetailsColor() = throw UnsupportedOperationException()
 
-        override fun getChildrenVisibility() = if ((instanceData.children.isEmpty() || expanded()) && instanceData.mNote.isNullOrEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
+        override fun getChildrenVisibility() = Companion.getChildrenVisibility(treeNode, instanceData)
 
         override fun getChildren() = Companion.getChildren(treeNode, instanceData)
 

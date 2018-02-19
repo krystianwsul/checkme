@@ -102,21 +102,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         }
     }
 
-    override fun getChildren(): String {
-        Assert.assertTrue(!instanceData.children.isEmpty() && !expanded() || !instanceData.mNote.isNullOrEmpty())
-
-        val notDoneInstanceDatas = instanceData.children
-                .values
-                .filter { it.Done == null }
-
-        return if (notDoneInstanceDatas.isNotEmpty() && !expanded()) {
-            notDoneInstanceDatas.sortedBy { it.mTaskStartExactTimeStamp }.joinToString(", ") { it.Name }
-        } else {
-            Assert.assertTrue(!instanceData.mNote.isNullOrEmpty())
-
-            instanceData.mNote!!
-        }
-    }
+    override fun getChildren() = NotDoneGroupNode.NotDoneInstanceNode.getChildren(treeNode, instanceData)
 
     override fun getChildrenColor(): Int {
         Assert.assertTrue(!instanceData.children.isEmpty() && !expanded() || !instanceData.mNote.isNullOrEmpty())

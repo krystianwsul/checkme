@@ -66,11 +66,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     override fun getDetailsColor() = throw UnsupportedOperationException()
 
-    override fun getChildrenVisibility() = View.GONE
-
-    override fun getChildren() = throw UnsupportedOperationException()
-
-    override fun getChildrenColor() = throw UnsupportedOperationException()
+    override fun getChildren(): Nothing? = null
 
     override fun getExpandVisibility(): Int {
         Assert.assertTrue(this.treeNode.expandVisible)

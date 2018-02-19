@@ -39,11 +39,7 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
 
     override fun getDetailsColor() = throw UnsupportedOperationException()
 
-    override fun getChildrenVisibility() = View.GONE
-
-    override fun getChildren() = throw UnsupportedOperationException()
-
-    override fun getChildrenColor() = throw UnsupportedOperationException()
+    override fun getChildren(): Nothing? = null
 
     override fun getExpandVisibility() = View.GONE
 

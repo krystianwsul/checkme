@@ -171,19 +171,11 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         R.color.textSecondary
     })
 
-    override fun getChildrenVisibility() = if (singleInstance()) {
-        NotDoneInstanceNode.getChildrenVisibility(treeNode, singleInstanceData)
+    override fun getChildren() = if (singleInstance()) {
+        NotDoneInstanceNode.getChildrenNew(treeNode, singleInstanceData, groupListFragment)
     } else {
-        View.GONE
+        null
     }
-
-    override fun getChildren(): String {
-        Assert.assertTrue(singleInstance())
-
-        return NotDoneInstanceNode.getChildren(treeNode, singleInstanceData)
-    }
-
-    override fun getChildrenColor() = NotDoneInstanceNode.getChildrenColor(treeNode, singleInstanceData, groupListFragment)
 
     override fun getExpandVisibility() = if (singleInstance()) {
         val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
@@ -407,7 +399,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         companion object {
 
-            fun getChildren(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData): String {
+            private fun getChildren(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData): String {
                 Assert.assertTrue(!instanceData.children.isEmpty() && !treeNode.expanded() || !instanceData.mNote.isNullOrEmpty())
 
                 val notDoneInstanceDatas = instanceData.children
@@ -423,13 +415,13 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                 }
             }
 
-            fun getChildrenVisibility(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData) = if ((instanceData.children.isEmpty() || treeNode.expanded()) && instanceData.mNote.isNullOrEmpty()) {
+            private fun getChildrenVisibility(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData) = if ((instanceData.children.isEmpty() || treeNode.expanded()) && instanceData.mNote.isNullOrEmpty()) {
                 View.GONE
             } else {
                 View.VISIBLE
             }
 
-            fun getChildrenColor(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData, groupListFragment: GroupListFragment): Int {
+            private fun getChildrenColor(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData, groupListFragment: GroupListFragment): Int {
                 Assert.assertTrue(!instanceData.children.isEmpty() && !treeNode.expanded() || !instanceData.mNote.isNullOrEmpty())
 
                 return ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) {
@@ -437,6 +429,19 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                 } else {
                     R.color.textSecondary
                 })
+            }
+
+            fun getChildrenNew(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData, groupListFragment: GroupListFragment): Pair<String, Int>? {
+                val visibility = getChildrenVisibility(treeNode, instanceData)
+
+                return if (visibility == View.VISIBLE) {
+                    val children = getChildren(treeNode, instanceData)
+                    val color = getChildrenColor(treeNode, instanceData, groupListFragment)
+
+                    Pair(children, color)
+                } else {
+                    null
+                }
             }
         }
 
@@ -505,11 +510,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override fun getDetailsColor() = throw UnsupportedOperationException()
 
-        override fun getChildrenVisibility() = Companion.getChildrenVisibility(treeNode, instanceData)
-
-        override fun getChildren() = Companion.getChildren(treeNode, instanceData)
-
-        override fun getChildrenColor() = Companion.getChildrenColor(treeNode, instanceData, groupListFragment)
+        override fun getChildren() = Companion.getChildrenNew(treeNode, instanceData, groupListFragment)
 
         override fun getExpandVisibility(): Int {
             val visibleChildren = treeNode.allChildren.any { it.canBeShown() }

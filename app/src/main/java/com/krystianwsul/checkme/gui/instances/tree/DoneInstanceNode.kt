@@ -94,11 +94,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         })
     }
 
-    override fun getChildrenVisibility() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenVisibility(treeNode, instanceData)
-
-    override fun getChildren() = NotDoneGroupNode.NotDoneInstanceNode.getChildren(treeNode, instanceData)
-
-    override fun getChildrenColor() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenColor(treeNode, instanceData, groupListFragment)
+    override fun getChildren() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData, groupListFragment)
 
     override fun getExpandVisibility(): Int {
         return if (instanceData.children.isEmpty()) {

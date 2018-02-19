@@ -76,26 +76,22 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
 
     override fun getDetailsColor() = throw UnsupportedOperationException()
 
-    override fun getChildrenVisibility() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
-        View.GONE
+    override fun getChildren() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
+        null
     } else {
-        View.VISIBLE
-    }
+        val text = if (!expanded() && !taskData.Children.isEmpty()) {
+            taskData.Children
+                    .sortedBy { it.mStartExactTimeStamp }
+                    .joinToString(", ") { it.Name }
+        } else {
+            Assert.assertTrue(!taskData.mNote.isNullOrEmpty())
 
-    override fun getChildren() = if (!expanded() && !taskData.Children.isEmpty()) {
-        taskData.Children
-                .sortedBy { it.mStartExactTimeStamp }
-                .joinToString(", ") { it.Name }
-    } else {
-        Assert.assertTrue(!taskData.mNote.isNullOrEmpty())
+            taskData.mNote!!
+        }
 
-        taskData.mNote!!
-    }
+        val color = ContextCompat.getColor(groupListFragment.activity!!, R.color.textSecondary)
 
-    override fun getChildrenColor(): Int {
-        Assert.assertTrue(!expanded() && !taskData.Children.isEmpty() || !taskData.mNote.isNullOrEmpty())
-
-        return ContextCompat.getColor(groupListFragment.activity!!, R.color.textSecondary)
+        Pair(text, color)
     }
 
     override fun getExpandVisibility() = if (taskData.Children.isEmpty()) {

@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import kotlin.Pair;
+
 public abstract class GroupHolderNode {
     final float mDensity;
     final int mIndentation;
@@ -30,12 +32,8 @@ public abstract class GroupHolderNode {
 
     abstract int getDetailsColor();
 
-    abstract int getChildrenVisibility();
-
-    @NonNull
-    abstract String getChildren();
-
-    abstract int getChildrenColor();
+    @Nullable
+    abstract Pair<String, Integer> getChildren();
 
     abstract int getExpandVisibility();
 
@@ -86,12 +84,13 @@ public abstract class GroupHolderNode {
             groupHolder.getMGroupRowDetails().setTextColor(getDetailsColor());
         }
 
-        int childrenVisibility = getChildrenVisibility();
-        //noinspection ResourceType
-        groupHolder.getMGroupRowChildren().setVisibility(childrenVisibility);
-        if (childrenVisibility == View.VISIBLE) {
-            groupHolder.getMGroupRowChildren().setText(getChildren());
-            groupHolder.getMGroupRowChildren().setTextColor(getChildrenColor());
+        Pair<String, Integer> children = getChildren();
+        if (children != null) {
+            groupHolder.getMGroupRowChildren().setVisibility(View.VISIBLE);
+            groupHolder.getMGroupRowChildren().setText(children.getFirst());
+            groupHolder.getMGroupRowChildren().setTextColor(children.getSecond());
+        } else {
+            groupHolder.getMGroupRowChildren().setVisibility(View.GONE);
         }
 
         int expandVisibility = getExpandVisibility();

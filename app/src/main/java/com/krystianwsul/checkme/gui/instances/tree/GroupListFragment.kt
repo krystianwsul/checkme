@@ -95,18 +95,6 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 Assert.assertTrue(instanceData.instanceDataParent is DataWrapper)
             }
         }
-
-        fun getChildrenText(expanded: Boolean, instanceDatas: Collection<InstanceData>, note: String?): String {
-            val notDoneInstanceDatas = instanceDatas.filter { it.Done == null }
-
-            return if (notDoneInstanceDatas.isNotEmpty() && !expanded) {
-                notDoneInstanceDatas.sortedBy { it.mTaskStartExactTimeStamp }.joinToString(", ") { it.Name }
-            } else {
-                Assert.assertTrue(!note.isNullOrEmpty())
-
-                note!!
-            }
-        }
     }
 
     private var mGroupListProgress: ProgressBar? = null

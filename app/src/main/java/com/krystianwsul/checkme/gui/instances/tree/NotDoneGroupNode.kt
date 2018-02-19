@@ -186,11 +186,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     override fun getChildren(): String {
         Assert.assertTrue(singleInstance())
 
-        return singleInstanceData.run {
-            Assert.assertTrue(!children.isEmpty() && !expanded() || !mNote.isNullOrEmpty())
-
-            GroupListFragment.getChildrenText(expanded(), children.values, mNote)
-        }
+        return NotDoneInstanceNode.getChildren(treeNode, singleInstanceData)
     }
 
     override fun getChildrenColor(): Int {
@@ -427,6 +423,25 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     class NotDoneInstanceNode(density: Float, indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, private val selectable: Boolean) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
 
+        companion object {
+
+            fun getChildren(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData): String {
+                Assert.assertTrue(!instanceData.children.isEmpty() && !treeNode.expanded() || !instanceData.mNote.isNullOrEmpty())
+
+                val notDoneInstanceDatas = instanceData.children
+                        .values
+                        .filter { it.Done == null }
+
+                return if (notDoneInstanceDatas.isNotEmpty() && !treeNode.expanded()) {
+                    notDoneInstanceDatas.sortedBy { it.mTaskStartExactTimeStamp }.joinToString(", ") { it.Name }
+                } else {
+                    Assert.assertTrue(!instanceData.mNote.isNullOrEmpty())
+
+                    instanceData.mNote!!
+                }
+            }
+        }
+
         lateinit var treeNode: TreeNode
             private set
 
@@ -498,11 +513,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             View.VISIBLE
         }
 
-        override fun getChildren(): String {
-            Assert.assertTrue(!instanceData.children.isEmpty() && !expanded() || !instanceData.mNote.isNullOrEmpty())
-
-            return GroupListFragment.getChildrenText(expanded(), instanceData.children.values, instanceData.mNote)
-        }
+        override fun getChildren() = Companion.getChildren(treeNode, instanceData)
 
         override fun getChildrenColor(): Int {
             Assert.assertTrue(!instanceData.children.isEmpty() && !expanded() || !instanceData.mNote.isNullOrEmpty())

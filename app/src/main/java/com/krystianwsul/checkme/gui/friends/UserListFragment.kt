@@ -17,7 +17,6 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
-import com.google.common.collect.Sets
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
@@ -269,8 +268,8 @@ class UserListFragment : AbstractFragment(), FabUser {
 
                 val newUserIds = userDataWrappers.map { it.userListData.id }.toSet()
 
-                val addedIds = Sets.difference(newUserIds, oldUserIds)
-                val removedIds = Sets.difference(oldUserIds, newUserIds)
+                val addedIds = newUserIds.minus(oldUserIds)
+                val removedIds = oldUserIds.minus(newUserIds)
 
                 val selectedIds = userDataWrappers
                         .filter { it.selected }

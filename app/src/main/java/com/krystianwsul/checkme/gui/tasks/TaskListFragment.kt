@@ -27,7 +27,6 @@ import junit.framework.Assert
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
 import kotlinx.android.synthetic.main.row_task_list.view.*
-import org.apache.commons.lang3.StringUtils
 import java.util.*
 
 class TaskListFragment : AbstractFragment(), FabUser {
@@ -242,7 +241,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     private fun printTree(lines: MutableList<String>, indentation: Int, childTaskData: ChildTaskData) {
-        lines.add(StringUtils.repeat("-", indentation) + childTaskData.name)
+        lines.add("-".repeat(indentation) + childTaskData.name)
+
 
         childTaskData.children.forEach { printTree(lines, indentation + 1, it) }
     }

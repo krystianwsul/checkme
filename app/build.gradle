@@ -20,7 +20,7 @@ repositories {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '26.0.3'
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 17
@@ -78,9 +78,8 @@ dependencies {
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
     compile 'com.code-troopers.betterpickers:library:3.1.0'
-    compile 'com.annimon:stream:1.1.7'
-    //noinspection GradleDependency
-    compile 'com.google.guava:guava:20.0'
+    compile 'com.annimon:stream:1.1.9'
+    compile 'com.google.guava:guava:24.0-android'
     compile 'org.apache.commons:commons-lang3:3.5'
     compile "com.google.android.gms:play-services-auth:${firebaseVersion}"
     compile "com.google.firebase:firebase-core:${firebaseVersion}"
@@ -94,7 +93,7 @@ dependencies {
     compile project(path: ':treeadapter')
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
+    compile 'io.reactivex.rxjava2:rxjava:2.1.2'
     compile 'io.reactivex.rxjava2:rxkotlin:2.1.0'
     compile 'nz.bradcampbell:paperparcel:2.0.1'
     compile 'nz.bradcampbell:paperparcel-kotlin:2.0.1'

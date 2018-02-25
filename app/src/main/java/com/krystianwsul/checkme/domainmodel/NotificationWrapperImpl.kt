@@ -7,8 +7,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.app.NotificationCompat
-import com.google.android.gms.gcm.GcmNetworkManager
-import com.google.android.gms.gcm.OneoffTask
+import com.firebase.jobdispatcher.*
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -216,17 +215,19 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (nextAlarm != null) {
             val now = ExactTimeStamp.getNow()
 
-            val delay = (nextAlarm.long - now.long) / 1000
+            val delay = ((nextAlarm.long - now.long) / 1000).toInt()
 
-            GcmNetworkManager.getInstance(MyApplication.instance)
-                    .schedule(OneoffTask.Builder()
-                            .setExecutionWindow(delay, delay + 5)
-                            .setRequiredNetwork(OneoffTask.NETWORK_STATE_ANY)
-                            .setRequiresCharging(false)
-                            .setService(GcmTickService::class.java)
-                            .setTag(tag)
-                            .setUpdateCurrent(true)
-                            .build())
+            val dispatcher = FirebaseJobDispatcher(GooglePlayDriver(MyApplication.instance))
+
+            dispatcher.mustSchedule(dispatcher.newJobBuilder()
+                    .setService(FirebaseTickService::class.java)
+                    .setTag(tag)
+                    .setRecurring(false)
+                    .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                    .setTrigger(Trigger.executionWindow(delay, delay + 5))
+                    .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                    .setReplaceCurrent(true)
+                    .build())
         }
     }
 }

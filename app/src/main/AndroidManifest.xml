@@ -59,10 +59,6 @@
         </receiver>
 
         <service
-            android:name=".persistencemodel.SaveService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-
-        <service
             android:name=".notifications.TickJobIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
 
@@ -115,11 +111,10 @@
         <activity android:name=".gui.projects.ShowProjectActivity"/>
 
         <service
-            android:name=".notifications.GcmTickService"
-            android:exported="true"
-            android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
+            android:name=".notifications.FirebaseTickService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
             </intent-filter>
         </service>
     </application>

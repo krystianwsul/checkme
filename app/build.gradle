@@ -85,7 +85,7 @@ dependencies {
     compile "com.google.firebase:firebase-auth:${firebaseVersion}"
     compile "com.google.firebase:firebase-database:${firebaseVersion}"
     compile "com.google.firebase:firebase-messaging:${firebaseVersion}"
-    compile "com.google.android.gms:play-services-gcm:${firebaseVersion}"
+    implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
     compile 'com.android.volley:volley:1.0.0'
     compile 'net.danlew:android.joda:2.9.9'
     testCompile 'joda-time:joda-time:2.9.9'

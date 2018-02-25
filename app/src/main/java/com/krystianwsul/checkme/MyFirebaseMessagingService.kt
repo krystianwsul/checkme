@@ -33,7 +33,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 DomainFactory.getDomainFactory().let {
                     it.setUserInfo(this, SaveService.Source.SERVICE, userInfo)
 
-                    it.setFirebaseTickListener(this, SaveService.Source.SERVICE, DomainFactory.TickData(false, "MyFirebaseMessagingService", this))
+                    it.setFirebaseTickListener(this, SaveService.Source.SERVICE, DomainFactory.TickData(false, "MyFirebaseMessagingService", this, listOf()))
                 }
             }
         } else {

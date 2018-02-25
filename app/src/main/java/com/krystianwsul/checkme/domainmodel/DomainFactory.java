@@ -280,7 +280,11 @@ public class DomainFactory {
 
                 MyCrashlytics.logException(databaseError.toException());
 
-                mTickData = null;
+                if (mTickData != null) {
+                    mTickData.release();
+                    mTickData = null;
+                }
+
                 mNotTickFirebaseListeners.clear();
                 mFriendFirebaseListeners.clear();
             }
@@ -484,10 +488,13 @@ public class DomainFactory {
 
         String source = "merged (" + oldTickData + ", " + newTickData + ")";
 
-        oldTickData.release();
-        newTickData.release();
+        oldTickData.releaseWakelock();
+        newTickData.releaseWakelock();
 
-        return new TickData(silent, source, context);
+        List<TickData.Listener> listeners = new ArrayList<>(oldTickData.listeners);
+        listeners.addAll(newTickData.listeners);
+
+        return new TickData(silent, source, context, listeners);
     }
 
     public synchronized boolean isConnected() {
@@ -3228,11 +3235,15 @@ public class DomainFactory {
         @NonNull
         private final PowerManager.WakeLock mWakelock;
 
-        public TickData(boolean silent, @NonNull String source, @NonNull Context context) {
+        @NonNull
+        private final List<Listener> listeners;
+
+        public TickData(boolean silent, @NonNull String source, @NonNull Context context, @NonNull List<Listener> listeners) {
             Assert.assertTrue(!TextUtils.isEmpty(source));
 
             mSilent = silent;
             mSource = source;
+            this.listeners = listeners;
 
             PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             Assert.assertTrue(powerManager != null);
@@ -3241,9 +3252,21 @@ public class DomainFactory {
             mWakelock.acquire(30 * 1000);
         }
 
-        void release() {
+        void releaseWakelock() {
             if (mWakelock.isHeld())
                 mWakelock.release();
+        }
+
+        void release() {
+            for (Listener listener : listeners)
+                listener.onTick();
+
+            releaseWakelock();
+        }
+
+        public interface Listener {
+
+            void onTick();
         }
     }
 }

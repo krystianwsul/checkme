@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.app.JobIntentService
 import android.text.TextUtils
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -60,23 +61,36 @@ class TickJobIntentService : JobIntentService() {
             tick(silent, sourceName)
         }
 
-        fun tick(silent: Boolean, sourceName: String) {
+        // still running?
+        fun tick(silent: Boolean, sourceName: String, listener: DomainFactory.TickData.Listener? = null): Boolean {
             val domainFactory = DomainFactory.getDomainFactory()
 
+            val listeners = listOfNotNull(listener)
+
             if (domainFactory.isConnected) {
-                if (domainFactory.isSaved) {
-                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, DomainFactory.TickData(silent, sourceName, MyApplication.instance))
+                return if (domainFactory.isSaved) {
+                    Log.e("asdf", "a");
+                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, DomainFactory.TickData(silent, sourceName, MyApplication.instance, listeners))
+                    true
                 } else {
+                    Log.e("asdf", "b");
                     domainFactory.updateNotificationsTick(MyApplication.instance, SaveService.Source.SERVICE, silent, sourceName)
+                    false
                 }
             } else {
                 domainFactory.updateNotificationsTick(MyApplication.instance, SaveService.Source.SERVICE, silent, sourceName)
 
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
-                if (firebaseUser != null) {
+                return if (firebaseUser != null) {
+                    Log.e("asdf", "c");
                     domainFactory.setUserInfo(MyApplication.instance, SaveService.Source.SERVICE, UserInfo(firebaseUser))
 
-                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, DomainFactory.TickData(silent, sourceName, MyApplication.instance))
+                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, DomainFactory.TickData(silent, sourceName, MyApplication.instance, listeners))
+
+                    true
+                } else {
+                    Log.e("asdf", "d");
+                    false
                 }
             }
         }

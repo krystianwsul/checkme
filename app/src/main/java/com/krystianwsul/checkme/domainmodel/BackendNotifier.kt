@@ -10,14 +10,13 @@ import com.android.volley.toolbox.Volley
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.RemoteProject
-import junit.framework.Assert
 
 object BackendNotifier {
 
     private val PREFIX = "http://check-me-add47.appspot.com/notify?"
 
     fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String?): String {
-        Assert.assertTrue(!projects.isEmpty())
+        check(!projects.isEmpty())
 
         val parameters = projects.map { "projects=" + it }.toMutableSet()
 
@@ -43,13 +42,13 @@ object BackendNotifier {
         val projectIds = remoteProjects.map(RemoteProject::getId).toSet()
 
         val url = getUrl(projectIds, production, userKeys, userInfo.mToken)
-        Assert.assertTrue(url.isNotEmpty())
+        check(url.isNotEmpty())
 
         run(context, url)
     }
 
     private fun run(context: Context, url: String) {
-        Assert.assertTrue(url.isNotEmpty())
+        check(url.isNotEmpty())
 
         val queue = Volley.newRequestQueue(context.applicationContext)
 

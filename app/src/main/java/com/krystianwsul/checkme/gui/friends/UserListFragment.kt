@@ -63,7 +63,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override fun onMenuClick(menuItem: MenuItem) {
             val selectedUserDataEmails = friendListAdapter!!.selected
-            Assert.assertTrue(!selectedUserDataEmails.isEmpty())
+            check(!selectedUserDataEmails.isEmpty())
 
             when (menuItem.itemId) {
                 R.id.action_custom_times_delete -> friendListAdapter!!.removeSelected()

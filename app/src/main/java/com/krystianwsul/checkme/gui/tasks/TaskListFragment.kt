@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
-import junit.framework.Assert
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
 import kotlinx.android.synthetic.main.row_task_list.view.*
@@ -58,7 +57,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun onMenuClick(menuItem: MenuItem) {
             var selected = treeViewAdapter!!.selectedNodes
-            Assert.assertTrue(!selected.isEmpty())
+            check(!selected.isEmpty())
 
             val taskWrappers = selected.map { it.modelNode as TaskAdapter.TaskWrapper }
 
@@ -69,7 +68,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             when (menuItem.itemId) {
                 R.id.action_task_share -> Utils.share(getShareData(childTaskDatas))
                 R.id.action_task_edit -> {
-                    Assert.assertTrue(selected.size == 1)
+                    check(selected.size == 1)
 
                     val childTaskData = (selected[0].modelNode as TaskAdapter.TaskWrapper).childTaskData
 
@@ -80,7 +79,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 else
                     CreateTaskActivity.getJoinIntent(taskKeys, taskKey!!))
                 R.id.action_task_delete -> {
-                    Assert.assertTrue(dataId != null)
+                    checkNotNull(dataId)
 
                     do {
                         val treeNode = selected.first()
@@ -121,13 +120,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun onSecondAdded() {
             val selectedNodes = treeViewAdapter!!.selectedNodes
-            Assert.assertTrue(!selectedNodes.isEmpty())
+            check(!selectedNodes.isEmpty())
 
             val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.mRemoteProjectId }
                     .distinct()
                     .count()
 
-            Assert.assertTrue(projectIdCount > 0)
+            check(projectIdCount > 0)
 
             mActionMode.menu.run {
                 findItem(R.id.action_task_join).isVisible = projectIdCount == 1
@@ -139,13 +138,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun onOtherAdded() {
             val selectedNodes = treeViewAdapter!!.selectedNodes
-            Assert.assertTrue(!selectedNodes.isEmpty())
+            check(!selectedNodes.isEmpty())
 
             val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.mRemoteProjectId }
                     .distinct()
                     .count()
 
-            Assert.assertTrue(projectIdCount > 0)
+            check(projectIdCount > 0)
 
             mActionMode.menu.run {
                 findItem(R.id.action_task_join).isVisible = projectIdCount == 1
@@ -172,13 +171,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun onOtherRemoved() {
             val selectedNodes = treeViewAdapter!!.selectedNodes
-            Assert.assertTrue(selectedNodes.size > 1)
+            check(selectedNodes.size > 1)
 
             val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.mRemoteProjectId }
                     .distinct()
                     .count()
 
-            Assert.assertTrue(projectIdCount > 0)
+            check(projectIdCount > 0)
 
             mActionMode.menu.run {
                 findItem(R.id.action_task_join).isVisible = projectIdCount == 1
@@ -187,7 +186,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
 
         private fun containsLoop(treeNodes: List<TreeNode>): Boolean {
-            Assert.assertTrue(treeNodes.size > 1)
+            check(treeNodes.size > 1)
 
             for (treeNode in treeNodes) {
                 val parents = ArrayList<TreeNode>()
@@ -214,7 +213,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     val shareData
         get() = mutableListOf<String>().also {
-            Assert.assertTrue(taskData != null)
+            checkNotNull(taskData)
 
             for (childTaskData in taskData!!.childTaskDatas)
                 printTree(it, 1, childTaskData)
@@ -225,7 +224,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private var expandedTaskIds: List<TaskKey>? = null
 
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
-        Assert.assertTrue(!childTaskDatas.isEmpty())
+        check(!childTaskDatas.isEmpty())
 
         mutableListOf<ChildTaskData>().apply {
             childTaskDatas.filterNot { inTree(this, it) }.forEach { this.add(it) }
@@ -249,7 +248,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        Assert.assertTrue(context is TaskListListener)
+        check(context is TaskListListener)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -258,12 +257,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
         savedInstanceState?.run {
             if (containsKey(SELECTED_TASK_KEYS_KEY)) {
                 selectedTaskKeys = getParcelableArrayList(SELECTED_TASK_KEYS_KEY)!!
-                Assert.assertTrue(!selectedTaskKeys!!.isEmpty())
+                check(!selectedTaskKeys!!.isEmpty())
             }
 
             if (containsKey(EXPANDED_TASK_KEYS_KEY)) {
                 expandedTaskIds = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
-                Assert.assertTrue(!expandedTaskIds!!.isEmpty())
+                check(!expandedTaskIds!!.isEmpty())
             }
         }
     }
@@ -279,7 +278,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     fun setAllTasks(dataId: Int, taskData: TaskData) {
-        Assert.assertTrue(taskKey == null)
+        check(taskKey == null)
 
         allTasks = true
 
@@ -290,7 +289,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     fun setTaskKey(taskKey: TaskKey, dataId: Int, taskData: TaskData) {
-        Assert.assertTrue(!allTasks)
+        check(!allTasks)
 
         this.taskKey = taskKey
 
@@ -307,16 +306,16 @@ class TaskListFragment : AbstractFragment(), FabUser {
         if (taskData == null)
             return
 
-        Assert.assertTrue(dataId != null)
+        checkNotNull(dataId)
 
         if (treeViewAdapter != null) {
             val selected = treeViewAdapter!!.selectedNodes
 
             selectedTaskKeys = if (selected.isEmpty()) {
-                Assert.assertTrue(!selectionCallback.hasActionMode())
+                check(!selectionCallback.hasActionMode())
                 null
             } else {
-                Assert.assertTrue(selectionCallback.hasActionMode())
+                check(selectionCallback.hasActionMode())
                 selected.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey }
             }
 
@@ -353,7 +352,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateSelectAll() {
-        Assert.assertTrue(treeViewAdapter != null)
+        checkNotNull(treeViewAdapter)
         val taskAdapter = treeViewAdapter!!.treeModelAdapter as TaskAdapter
 
         (activity as TaskListListener).setTaskSelectAllVisibility(!taskAdapter.taskWrappers.isEmpty())
@@ -367,10 +366,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 val selected = treeViewAdapter!!.selectedNodes
 
                 if (!selected.isEmpty()) {
-                    Assert.assertTrue(selectionCallback.hasActionMode())
+                    check(selectionCallback.hasActionMode())
 
                     val taskKeys = ArrayList(selected.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey })
-                    Assert.assertTrue(!taskKeys.isEmpty())
+                    check(!taskKeys.isEmpty())
 
                     putParcelableArrayList(SELECTED_TASK_KEYS_KEY, taskKeys)
                 }
@@ -472,7 +471,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = TaskHolder(taskListFragment.activity!!.layoutInflater.inflate(R.layout.row_task_list, parent, false))
 
         override fun remove(taskWrapper: TaskWrapper) {
-            Assert.assertTrue(taskWrappers.contains(taskWrapper))
+            check(taskWrappers.contains(taskWrapper))
 
             taskWrappers.remove(taskWrapper)
 
@@ -516,14 +515,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             fun initialize(selectedTaskKeys: List<TaskKey>?, nodeContainer: NodeContainer, expandedTaskKeys: List<TaskKey>?): TreeNode {
                 val selected = if (selectedTaskKeys != null) {
-                    Assert.assertTrue(!selectedTaskKeys.isEmpty())
+                    check(!selectedTaskKeys.isEmpty())
                     selectedTaskKeys.contains(childTaskData.taskKey)
                 } else {
                     false
                 }
 
                 val expanded = if (expandedTaskKeys != null) {
-                    Assert.assertTrue(!expandedTaskKeys.isEmpty())
+                    check(!expandedTaskKeys.isEmpty())
                     expandedTaskKeys.contains(childTaskData.taskKey)
                 } else {
                     false
@@ -566,7 +565,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         visibility = if (!treeNode.expandVisible) {
                             View.INVISIBLE
                         } else {
-                            Assert.assertTrue(!childTaskData.children.isEmpty())
+                            check(!childTaskData.children.isEmpty())
 
                             setImageResource(if (treeNode.expanded())
                                 R.drawable.ic_expand_less_black_36dp
@@ -600,11 +599,11 @@ class TaskListFragment : AbstractFragment(), FabUser {
                             text = if (!childTaskData.children.isEmpty() && !treeNode.expanded()) {
                                 childTaskData.children.joinToString(", ") { it.name }
                             } else {
-                                Assert.assertTrue(!childTaskData.note.isNullOrEmpty())
+                                check(!childTaskData.note.isNullOrEmpty())
 
                                 childTaskData.note
                             }.apply {
-                                Assert.assertTrue(!isNullOrEmpty())
+                                check(!isNullOrEmpty())
                             }
 
                             View.VISIBLE
@@ -638,7 +637,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 comparison
             } else {
-                Assert.assertTrue(other is NoteNode)
+                check(other is NoteNode)
 
                 1
             }
@@ -648,7 +647,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun remove(taskWrapper: TaskWrapper) {
-                Assert.assertTrue(taskWrappers.contains(taskWrapper))
+                check(taskWrappers.contains(taskWrapper))
 
                 taskWrappers.remove(taskWrapper)
 
@@ -664,7 +663,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 private set
 
             init {
-                Assert.assertTrue(note.isNotEmpty())
+                check(note.isNotEmpty())
             }
 
             fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
@@ -712,7 +711,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun separatorVisibleWhenNotExpanded() = true
 
             override fun compareTo(other: ModelNode): Int {
-                Assert.assertTrue(other is TaskWrapper)
+                check(other is TaskWrapper)
 
                 return -1
             }

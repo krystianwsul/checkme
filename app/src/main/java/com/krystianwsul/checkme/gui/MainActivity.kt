@@ -25,7 +25,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
-
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.GoogleApiClient
@@ -45,11 +44,8 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.loaders.MainLoader
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
-
-import junit.framework.Assert
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
-
 import java.lang.ref.WeakReference
 
 class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.Data>, TaskListFragment.TaskListListener {
@@ -137,7 +133,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Assert.assertTrue(item.itemId == R.id.action_select_all)
+        check(item.itemId == R.id.action_select_all)
 
         when (visibleTab) {
             MainActivity.Tab.INSTANCES -> {
@@ -162,23 +158,23 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         setContentView(R.layout.activity_main)
 
         val mainActivityToolbar = findViewById<Toolbar>(R.id.mainActivityToolbar)
-        Assert.assertTrue(mainActivityToolbar != null)
+        checkNotNull(mainActivityToolbar)
 
         setSupportActionBar(mainActivityToolbar)
 
         savedInstanceState?.run {
-            Assert.assertTrue(containsKey(VISIBLE_TAB_KEY))
+            check(containsKey(VISIBLE_TAB_KEY))
             visibleTab = getSerializable(VISIBLE_TAB_KEY) as Tab
 
             if (containsKey(IGNORE_FIRST_KEY)) {
-                Assert.assertTrue(visibleTab == Tab.INSTANCES)
+                check(visibleTab == Tab.INSTANCES)
                 ignoreFirst = true
             }
 
-            Assert.assertTrue(containsKey(TIME_RANGE_KEY))
+            check(containsKey(TIME_RANGE_KEY))
             timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
 
-            Assert.assertTrue(containsKey(DEBUG_KEY))
+            check(containsKey(DEBUG_KEY))
             debug = getBoolean(DEBUG_KEY)
         }
 
@@ -192,10 +188,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    Assert.assertTrue(visibleTab == Tab.INSTANCES)
+                    check(visibleTab == Tab.INSTANCES)
 
-                    Assert.assertTrue(position >= 0)
-                    Assert.assertTrue(position < 3)
+                    check(position >= 0)
+                    check(position < 3)
 
                     val newTimeRange = TimeRange.values()[position]
 
@@ -393,7 +389,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             putSerializable(VISIBLE_TAB_KEY, visibleTab)
 
             if (visibleTab == Tab.INSTANCES) {
-                Assert.assertTrue(mainDaysPager.visibility == View.VISIBLE)
+                check(mainDaysPager.visibility == View.VISIBLE)
                 if (mainDaysPager.currentItem != 0 && onPageChangeListener != null)
                     putInt(IGNORE_FIRST_KEY, 1)
             }
@@ -480,7 +476,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 showCustomTimesFragment.setFab(mainFab)
             }
             MainActivity.Tab.FRIENDS -> {
-                Assert.assertTrue(userInfo != null)
+                checkNotNull(userInfo)
 
                 supportActionBar!!.setTitle(R.string.friends)
                 mainDaysPager.visibility = View.GONE
@@ -523,7 +519,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onCreateTaskActionMode(actionMode: ActionMode) {
-        Assert.assertTrue(drawerTaskListener == null)
+        check(drawerTaskListener == null)
 
         drawerTaskListener = object : DrawerLayout.DrawerListener {
 
@@ -542,7 +538,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onDestroyTaskActionMode() {
-        Assert.assertTrue(drawerTaskListener != null)
+        checkNotNull(drawerTaskListener)
 
         mainActivityDrawer.removeDrawerListener(drawerTaskListener!!)
         drawerTaskListener = null
@@ -555,7 +551,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) {
-        Assert.assertTrue(drawerGroupListener == null)
+        check(drawerGroupListener == null)
 
         drawerGroupListener = object : DrawerLayout.DrawerListener {
 
@@ -572,7 +568,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
         mainActivityDrawer.addDrawerListener(drawerGroupListener!!)
 
-        Assert.assertTrue(onPageChangeListener == null)
+        check(onPageChangeListener == null)
 
         onPageChangeListener = object : ViewPager.OnPageChangeListener {
 
@@ -591,8 +587,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onDestroyGroupActionMode() {
-        Assert.assertTrue(drawerGroupListener != null)
-        Assert.assertTrue(onPageChangeListener != null)
+        checkNotNull(drawerGroupListener)
+        checkNotNull(onPageChangeListener)
 
         mainActivityDrawer.removeDrawerListener(drawerGroupListener!!)
         drawerGroupListener = null
@@ -602,7 +598,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean) {
-        Assert.assertTrue(position != null)
+        checkNotNull(position)
 
         groupSelectAllVisible[position] = selectAllVisible
 
@@ -610,7 +606,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onCreateCustomTimesActionMode(actionMode: ActionMode) {
-        Assert.assertTrue(drawerCustomTimesListener == null)
+        check(drawerCustomTimesListener == null)
 
         drawerCustomTimesListener = object : DrawerLayout.DrawerListener {
 
@@ -629,7 +625,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onDestroyCustomTimesActionMode() {
-        Assert.assertTrue(drawerCustomTimesListener != null)
+        checkNotNull(drawerCustomTimesListener)
 
         mainActivityDrawer.removeDrawerListener(drawerCustomTimesListener!!)
         drawerCustomTimesListener = null
@@ -642,7 +638,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     fun onCreateUserActionMode(actionMode: ActionMode) {
-        Assert.assertTrue(drawerUsersListener == null)
+        check(drawerUsersListener == null)
 
         drawerUsersListener = object : DrawerLayout.DrawerListener {
 
@@ -661,7 +657,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     fun onDestroyUserActionMode() {
-        Assert.assertTrue(drawerUsersListener != null)
+        checkNotNull(drawerUsersListener)
 
         mainActivityDrawer.removeDrawerListener(drawerUsersListener!!)
         drawerUsersListener = null
@@ -690,7 +686,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                             if (!task.isSuccessful) {
                                 val exception = task.exception
-                                Assert.assertTrue(exception != null)
+                                checkNotNull(exception)
 
                                 Log.e("asdf", "firebase signin error: " + exception!!)
 
@@ -719,10 +715,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         mainActivityNavigation.menu.run {
             if (firebaseUser != null) {
                 val displayName = firebaseUser.displayName
-                Assert.assertTrue(!TextUtils.isEmpty(displayName))
+                check(!TextUtils.isEmpty(displayName))
 
                 val email = firebaseUser.email
-                Assert.assertTrue(!TextUtils.isEmpty(email))
+                check(!TextUtils.isEmpty(email))
 
                 headerName.text = displayName
                 headerEmail.text = email
@@ -749,7 +745,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         val currentItem: DayFragment
             get() {
-                Assert.assertTrue(currentItemRef != null)
+                checkNotNull(currentItemRef)
 
                 return currentItemRef!!.get()!!
             }

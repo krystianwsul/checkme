@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.persistencemodel.*
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import junit.framework.Assert
 import java.util.*
 
 @SuppressLint("UseSparseArrays")
@@ -100,8 +99,8 @@ class LocalFactory {
         val schedules = mutableListOf<Schedule>()
 
         for (scheduleRecord in scheduleRecords) {
-            Assert.assertTrue(scheduleRecord.type >= 0)
-            Assert.assertTrue(scheduleRecord.type < ScheduleType.values().size)
+            check(scheduleRecord.type >= 0)
+            check(scheduleRecord.type < ScheduleType.values().size)
 
             val scheduleType = ScheduleType.values()[scheduleRecord.type]
 
@@ -154,8 +153,8 @@ class LocalFactory {
     fun getInstanceShownRecord(projectId: String, taskId: String, scheduleYear: Int, scheduleMonth: Int, scheduleDay: Int, scheduleCustomTimeId: String?, scheduleHour: Int?, scheduleMinute: Int?): InstanceShownRecord? {
         val matches: List<InstanceShownRecord>
         if (scheduleCustomTimeId != null) {
-            Assert.assertTrue(scheduleHour == null)
-            Assert.assertTrue(scheduleMinute == null)
+            check(scheduleHour == null)
+            check(scheduleMinute == null)
 
             matches = persistenceManager.instanceShownRecords
                     .filter { it.projectId == projectId }
@@ -165,8 +164,8 @@ class LocalFactory {
                     .filter { it.scheduleDay == scheduleDay }
                     .filter { it.scheduleCustomTimeId == scheduleCustomTimeId }
         } else {
-            Assert.assertTrue(scheduleHour != null)
-            Assert.assertTrue(scheduleMinute != null)
+            checkNotNull(scheduleHour)
+            checkNotNull(scheduleMinute)
 
             matches = persistenceManager.instanceShownRecords
                     .filter { it.projectId == projectId }
@@ -188,14 +187,14 @@ class LocalFactory {
         val hour: Int?
         val minute: Int?
         if (timePair.mHourMinute != null) {
-            Assert.assertTrue(timePair.mCustomTimeKey == null)
+            check(timePair.mCustomTimeKey == null)
 
             remoteCustomTimeId = null
 
             hour = timePair.mHourMinute.hour
             minute = timePair.mHourMinute.minute
         } else {
-            Assert.assertTrue(timePair.mCustomTimeKey != null)
+            checkNotNull(timePair.mCustomTimeKey)
 
             remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(projectId, timePair.mCustomTimeKey!!)
 
@@ -207,7 +206,7 @@ class LocalFactory {
     }
 
     fun deleteTask(localTask: LocalTask) {
-        Assert.assertTrue(localTasks.containsKey(localTask.id))
+        check(localTasks.containsKey(localTask.id))
 
         localTasks.remove(localTask.id)
     }
@@ -221,7 +220,7 @@ class LocalFactory {
     }
 
     fun deleteCustomTime(localCustomTime: LocalCustomTime) {
-        Assert.assertTrue(_localCustomTimes.containsKey(localCustomTime.id))
+        check(_localCustomTimes.containsKey(localCustomTime.id))
 
         _localCustomTimes.remove(localCustomTime.id)
     }
@@ -231,13 +230,13 @@ class LocalFactory {
     }
 
     fun createScheduleRootTask(domainFactory: DomainFactory, now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskLoader.ScheduleData>, note: String?): LocalTask {
-        Assert.assertTrue(name.isNotEmpty())
-        Assert.assertTrue(!scheduleDatas.isEmpty())
+        check(name.isNotEmpty())
+        check(!scheduleDatas.isEmpty())
 
         val rootLocalTask = createLocalTaskHelper(domainFactory, name, now, note)
 
         val schedules = createSchedules(domainFactory, rootLocalTask, scheduleDatas, now)
-        Assert.assertTrue(!schedules.isEmpty())
+        check(!schedules.isEmpty())
 
         rootLocalTask.addSchedules(schedules)
 
@@ -245,21 +244,21 @@ class LocalFactory {
     }
 
     fun createLocalTaskHelper(domainFactory: DomainFactory, name: String, now: ExactTimeStamp, note: String?): LocalTask {
-        Assert.assertTrue(name.isNotEmpty())
+        check(name.isNotEmpty())
 
         val taskRecord = persistenceManager.createTaskRecord(name, now, note)
 
         val rootLocalTask = LocalTask(domainFactory, taskRecord)
 
-        Assert.assertTrue(!localTasks.containsKey(rootLocalTask.id))
+        check(!localTasks.containsKey(rootLocalTask.id))
         localTasks[rootLocalTask.id] = rootLocalTask
 
         return rootLocalTask
     }
 
     fun createSchedules(domainFactory: DomainFactory, rootLocalTask: LocalTask, scheduleDatas: List<CreateTaskLoader.ScheduleData>, startExactTimeStamp: ExactTimeStamp): List<Schedule> {
-        Assert.assertTrue(!scheduleDatas.isEmpty())
-        Assert.assertTrue(rootLocalTask.current(startExactTimeStamp))
+        check(!scheduleDatas.isEmpty())
+        check(rootLocalTask.current(startExactTimeStamp))
 
         return scheduleDatas.map { scheduleData ->
             when (scheduleData.scheduleType) {
@@ -311,8 +310,8 @@ class LocalFactory {
     }
 
     fun createTaskHierarchy(domainFactory: DomainFactory, parentLocalTask: LocalTask, childLocalTask: LocalTask, startExactTimeStamp: ExactTimeStamp) {
-        Assert.assertTrue(parentLocalTask.current(startExactTimeStamp))
-        Assert.assertTrue(childLocalTask.current(startExactTimeStamp))
+        check(parentLocalTask.current(startExactTimeStamp))
+        check(childLocalTask.current(startExactTimeStamp))
 
         val taskHierarchyRecord = persistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp)
 
@@ -321,8 +320,8 @@ class LocalFactory {
     }
 
     fun createChildTask(domainFactory: DomainFactory, now: ExactTimeStamp, parentTask: LocalTask, name: String, note: String?): LocalTask {
-        Assert.assertTrue(name.isNotEmpty())
-        Assert.assertTrue(parentTask.current(now))
+        check(name.isNotEmpty())
+        check(parentTask.current(now))
 
         return createLocalTaskHelper(domainFactory, name, now, note).also {
             createTaskHierarchy(domainFactory, parentTask, it, now)
@@ -355,20 +354,20 @@ class LocalFactory {
     }
 
     fun createLocalCustomTime(domainFactory: DomainFactory, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTime {
-        Assert.assertTrue(name.isNotEmpty())
+        check(name.isNotEmpty())
 
-        Assert.assertTrue(hourMinutes[DayOfWeek.SUNDAY] != null)
-        Assert.assertTrue(hourMinutes[DayOfWeek.MONDAY] != null)
-        Assert.assertTrue(hourMinutes[DayOfWeek.TUESDAY] != null)
-        Assert.assertTrue(hourMinutes[DayOfWeek.WEDNESDAY] != null)
-        Assert.assertTrue(hourMinutes[DayOfWeek.THURSDAY] != null)
-        Assert.assertTrue(hourMinutes[DayOfWeek.FRIDAY] != null)
-        Assert.assertTrue(hourMinutes[DayOfWeek.SATURDAY] != null)
+        checkNotNull(hourMinutes[DayOfWeek.SUNDAY])
+        checkNotNull(hourMinutes[DayOfWeek.MONDAY])
+        checkNotNull(hourMinutes[DayOfWeek.TUESDAY])
+        checkNotNull(hourMinutes[DayOfWeek.WEDNESDAY])
+        checkNotNull(hourMinutes[DayOfWeek.THURSDAY])
+        checkNotNull(hourMinutes[DayOfWeek.FRIDAY])
+        checkNotNull(hourMinutes[DayOfWeek.SATURDAY])
 
         val localCustomTimeRecord = persistenceManager.createCustomTimeRecord(name, hourMinutes)
 
         val localCustomTime = LocalCustomTime(domainFactory, localCustomTimeRecord)
-        Assert.assertTrue(!_localCustomTimes.containsKey(localCustomTime.id))
+        check(!_localCustomTimes.containsKey(localCustomTime.id))
 
         _localCustomTimes[localCustomTime.id] = localCustomTime
 
@@ -376,7 +375,7 @@ class LocalFactory {
     }
 
     fun getLocalCustomTime(localCustomTimeId: Int): LocalCustomTime {
-        Assert.assertTrue(_localCustomTimes.containsKey(localCustomTimeId))
+        check(_localCustomTimes.containsKey(localCustomTimeId))
 
         return _localCustomTimes[localCustomTimeId]!!
     }

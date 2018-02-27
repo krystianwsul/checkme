@@ -19,7 +19,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.gui.MainActivity
-import junit.framework.Assert
 import kotlinx.android.synthetic.main.activity_find_friend.*
 
 class FindFriendActivity : AppCompatActivity() {
@@ -69,7 +68,7 @@ class FindFriendActivity : AppCompatActivity() {
         }
 
         findFriendUserLayout.setOnClickListener {
-            Assert.assertTrue(!loading)
+            check(!loading)
 
             val myUserInfo = MainActivity.userInfo!!
 
@@ -82,7 +81,7 @@ class FindFriendActivity : AppCompatActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
 
-        Assert.assertTrue(savedInstanceState.containsKey(LOADING_KEY))
+        check(savedInstanceState.containsKey(LOADING_KEY))
         loading = savedInstanceState.getBoolean(LOADING_KEY)
 
         if (savedInstanceState.containsKey(USER_KEY))
@@ -99,8 +98,8 @@ class FindFriendActivity : AppCompatActivity() {
     }
 
     private fun loadUser() {
-        Assert.assertTrue(loading)
-        Assert.assertTrue(findFriendEmail.text.isNotEmpty())
+        check(loading)
+        check(findFriendEmail.text.isNotEmpty())
 
         val key = UserData.getKey(findFriendEmail.text.toString())
 
@@ -110,7 +109,7 @@ class FindFriendActivity : AppCompatActivity() {
             override fun onDataChange(dataSnapshot: DataSnapshot?) {
                 Log.e("asdf", "onDataChange " + hashCode())
 
-                Assert.assertTrue(dataSnapshot != null)
+                checkNotNull(dataSnapshot)
 
                 databaseReference!!.removeEventListener(valueEventListener!!)
 
@@ -128,7 +127,7 @@ class FindFriendActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(databaseError: DatabaseError?) {
-                Assert.assertTrue(databaseError != null)
+                checkNotNull(databaseError)
 
                 databaseReference!!.removeEventListener(valueEventListener!!)
 
@@ -157,7 +156,7 @@ class FindFriendActivity : AppCompatActivity() {
 
         when {
             userData != null -> {
-                Assert.assertTrue(!loading)
+                check(!loading)
 
                 findFriendEmail.isEnabled = true
                 findFriendUserLayout.visibility = View.VISIBLE
@@ -185,15 +184,15 @@ class FindFriendActivity : AppCompatActivity() {
         Log.e("asdf", "onStop")
 
         if (loading) {
-            Assert.assertTrue(databaseReference != null)
-            Assert.assertTrue(valueEventListener != null)
+            checkNotNull(databaseReference)
+            checkNotNull(valueEventListener)
 
             Log.e("asdf", "removing listener " + valueEventListener!!.hashCode())
 
             databaseReference!!.removeEventListener(valueEventListener!!)
         } else {
-            Assert.assertTrue(databaseReference == null)
-            Assert.assertTrue(valueEventListener == null)
+            check(databaseReference == null)
+            check(valueEventListener == null)
         }
     }
 

@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.loaders.FriendListLoader
-import junit.framework.Assert
 import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
 
@@ -54,7 +53,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
 
         override fun onMenuClick(menuItem: MenuItem) {
             val selectedUserDataEmails = friendListAdapter!!.selected
-            Assert.assertTrue(!selectedUserDataEmails.isEmpty())
+            check(!selectedUserDataEmails.isEmpty())
 
             when (menuItem.itemId) {
                 R.id.action_custom_times_delete -> {
@@ -149,7 +148,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
     }
 
     private fun updateSelectAll() {
-        Assert.assertTrue(friendListAdapter != null)
+        checkNotNull(friendListAdapter)
 
         (activity as MainActivity).setUserSelectAllVisibility(friendListAdapter!!.itemCount != 0)
     }
@@ -238,7 +237,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
         }
 
         fun selectAll() {
-            Assert.assertTrue(!selectionCallback.hasActionMode())
+            check(!selectionCallback.hasActionMode())
 
             userDataWrappers.filterNot { it.selected }.forEach { it.toggleSelect() }
         }
@@ -268,7 +267,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
             }
 
             val position = friendListAdapter!!.userDataWrappers.indexOf(this)
-            Assert.assertTrue(position >= 0)
+            check(position >= 0)
 
             friendListAdapter!!.notifyItemChanged(position)
         }

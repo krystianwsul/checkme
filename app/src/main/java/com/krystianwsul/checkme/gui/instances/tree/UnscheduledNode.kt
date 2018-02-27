@@ -3,14 +3,11 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import android.view.View
-
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-
-import junit.framework.Assert
 
 class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection) : GroupHolderNode(density, 0), ModelNode, TaskParent {
 
@@ -23,7 +20,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
     private val groupListFragment = groupAdapter.mGroupListFragment
 
     fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>?): TreeNode {
-        Assert.assertTrue(!expanded || !taskDatas.isEmpty())
+        check(!expanded || !taskDatas.isEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
 
@@ -45,7 +42,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
     override fun compareTo(other: ModelNode) = if (other is DividerNode) {
         -1
     } else {
-        Assert.assertTrue(other is NotDoneGroupNode)
+        check(other is NotDoneGroupNode)
 
         1
     }
@@ -67,13 +64,13 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
     override fun getChildren(): Nothing? = null
 
     override fun getExpandVisibility(): Int {
-        Assert.assertTrue(treeNode.expandVisible)
+        check(treeNode.expandVisible)
 
         return View.VISIBLE
     }
 
     override fun getExpandImageResource(): Int {
-        Assert.assertTrue(treeNode.expandVisible)
+        check(treeNode.expandVisible)
 
         return if (treeNode.expanded())
             R.drawable.ic_expand_less_black_36dp
@@ -82,7 +79,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
     }
 
     override fun getExpandOnClickListener(): View.OnClickListener {
-        Assert.assertTrue(treeNode.expandVisible)
+        check(treeNode.expandVisible)
 
         return treeNode.expandListener
     }

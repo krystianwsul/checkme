@@ -5,10 +5,9 @@ import android.view.ViewTreeObserver
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.time.DayOfWeek
-import junit.framework.Assert
 
 fun Set<DayOfWeek>.prettyPrint(): String {
-    Assert.assertTrue(isNotEmpty())
+    check(isNotEmpty())
 
     if (size == 7)
         return MyApplication.instance.getString(R.string.daily) + ", "
@@ -19,7 +18,7 @@ fun Set<DayOfWeek>.prettyPrint(): String {
     val ranges = KotlinUtils.getRanges(this.toList())
 
     return ranges.joinToString(", ") {
-        Assert.assertTrue(it.isNotEmpty())
+        check(it.isNotEmpty())
 
         when (it.size) {
             1 -> it.single().toString()
@@ -45,7 +44,7 @@ object KotlinUtils {
 
     fun getRanges(list: List<DayOfWeek>): List<List<DayOfWeek>> {
         return getRanges(list.sorted(), { x, y ->
-            Assert.assertTrue(x.ordinal < y.ordinal)
+            check(x.ordinal < y.ordinal)
 
             x.ordinal + 1 < y.ordinal
         })

@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
-import junit.framework.Assert
 import java.util.*
 
 class EditInstancesLoader(context: Context, private val instanceKeys: List<InstanceKey>) : DomainLoader<EditInstancesLoader.Data>(context, needsFirebase(instanceKeys)) {
@@ -24,7 +23,7 @@ class EditInstancesLoader(context: Context, private val instanceKeys: List<Insta
     }
 
     init {
-        Assert.assertTrue(instanceKeys.size > 1)
+        check(instanceKeys.size > 1)
     }
 
     override val name = "EditInstanceLoader, instanceKeys: " + instanceKeys
@@ -34,22 +33,22 @@ class EditInstancesLoader(context: Context, private val instanceKeys: List<Insta
     data class Data(val instanceDatas: HashMap<InstanceKey, InstanceData>, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>, val showHour: Boolean) : DomainLoader.Data() {
 
         init {
-            Assert.assertTrue(instanceDatas.size > 1)
+            check(instanceDatas.size > 1)
         }
     }
 
     data class InstanceData(val instanceDateTime: DateTime, val name: String) : DomainLoader.Data() {
 
         init {
-            Assert.assertTrue(name.isNotEmpty())
+            check(name.isNotEmpty())
         }
     }
 
     data class CustomTimeData(val customTimeKey: CustomTimeKey, val name: String, val hourMinutes: TreeMap<DayOfWeek, HourMinute>) {
 
         init {
-            Assert.assertTrue(name.isNotEmpty())
-            Assert.assertTrue(hourMinutes.size == 7)
+            check(name.isNotEmpty())
+            check(hourMinutes.size == 7)
         }
     }
 }

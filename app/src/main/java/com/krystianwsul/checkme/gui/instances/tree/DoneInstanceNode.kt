@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
-import junit.framework.Assert
 
 class DoneInstanceNode(density: Float, indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
 
@@ -48,7 +47,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         if (!expanded())
             return
 
-        Assert.assertTrue(!expandedInstances.containsKey(instanceData.InstanceKey))
+        check(!expandedInstances.containsKey(instanceData.InstanceKey))
 
         nodeCollection.addExpandedInstances(expandedInstances.toMutableMap().also {
             it[instanceData.InstanceKey] = nodeCollection.doneExpanded
@@ -82,7 +81,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
     }
 
     override fun getDetails(): String {
-        Assert.assertTrue(!instanceData.DisplayText.isNullOrEmpty())
+        check(!instanceData.DisplayText.isNullOrEmpty())
         return instanceData.DisplayText!!
     }
 
@@ -98,19 +97,19 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override fun getExpandVisibility(): Int {
         return if (instanceData.children.isEmpty()) {
-            Assert.assertTrue(!this.treeNode.expandVisible)
+            check(!this.treeNode.expandVisible)
 
             View.INVISIBLE
         } else {
-            Assert.assertTrue(this.treeNode.expandVisible)
+            check(this.treeNode.expandVisible)
 
             View.VISIBLE
         }
     }
 
     override fun getExpandImageResource(): Int {
-        Assert.assertTrue(!instanceData.children.isEmpty())
-        Assert.assertTrue(this.treeNode.expandVisible)
+        check(!instanceData.children.isEmpty())
+        check(this.treeNode.expandVisible)
 
         return if (this.treeNode.expanded())
             R.drawable.ic_expand_less_black_36dp
@@ -119,8 +118,8 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
     }
 
     override fun getExpandOnClickListener(): View.OnClickListener {
-        Assert.assertTrue(!instanceData.children.isEmpty())
-        Assert.assertTrue(treeNode.expandVisible)
+        check(!instanceData.children.isEmpty())
+        check(treeNode.expandVisible)
 
         return treeNode.expandListener
     }
@@ -138,7 +137,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
             v.setOnClickListener(null)
 
             instanceData.Done = DomainFactory.getDomainFactory().setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
-            Assert.assertTrue(instanceData.Done == null)
+            check(instanceData.Done == null)
 
             dividerNode.remove(this)
 
@@ -157,10 +156,10 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
     override fun getOnClickListener() = this.treeNode.onClickListener
 
     override fun compareTo(other: ModelNode): Int {
-        Assert.assertTrue(instanceData.Done != null)
+        checkNotNull(instanceData.Done)
 
         val doneInstanceNode = other as DoneInstanceNode
-        Assert.assertTrue(doneInstanceNode.instanceData.Done != null)
+        checkNotNull(doneInstanceNode.instanceData.Done)
 
         return -instanceData.Done!!.compareTo(doneInstanceNode.instanceData.Done!!) // negate
     }

@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import junit.framework.Assert
 
 class MonthlyDayScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfMonth: Int, val beginningOfMonth: Boolean, val customTimeId: Int?, val hour: Int?, val minute: Int?) : Record(created) {
 
@@ -38,18 +37,18 @@ class MonthlyDayScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfM
             val hour = if (isNull(4)) null else getInt(4)
             val minute = if (isNull(5)) null else getInt(5)
 
-            Assert.assertTrue(hour == null == (minute == null))
-            Assert.assertTrue(hour == null || customTimeId == null)
-            Assert.assertTrue(hour != null || customTimeId != null)
+            check(hour == null == (minute == null))
+            check(hour == null || customTimeId == null)
+            check(hour != null || customTimeId != null)
 
             MonthlyDayScheduleRecord(true, scheduleId, dayOfMonth, beginningOfMonth, customTimeId, hour, minute)
         }
     }
 
     init {
-        Assert.assertTrue(hour == null == (minute == null))
-        Assert.assertTrue(hour == null || customTimeId == null)
-        Assert.assertTrue(hour != null || customTimeId != null)
+        check(hour == null == (minute == null))
+        check(hour == null || customTimeId == null)
+        check(hour != null || customTimeId != null)
     }
 
     override val contentValues

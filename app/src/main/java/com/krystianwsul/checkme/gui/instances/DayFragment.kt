@@ -14,7 +14,6 @@ import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.loaders.DayLoader
 import com.krystianwsul.checkme.utils.time.Date
-import junit.framework.Assert
 import kotlinx.android.synthetic.main.fragment_day.*
 import java.text.DateFormatSymbols
 import java.util.*
@@ -27,7 +26,7 @@ class DayFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<DayLoader.
         private val TIME_RANGE_KEY = "timeRange"
 
         fun newInstance(timeRange: MainActivity.TimeRange, day: Int) = DayFragment().apply {
-            Assert.assertTrue(day >= 0)
+            check(day >= 0)
 
             arguments = Bundle().apply {
                 putInt(POSITION_KEY, day)
@@ -46,11 +45,11 @@ class DayFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<DayLoader.
         super.onCreate(savedInstanceState)
 
         arguments!!.run {
-            Assert.assertTrue(containsKey(POSITION_KEY))
+            check(containsKey(POSITION_KEY))
             position = getInt(POSITION_KEY)
-            Assert.assertTrue(position >= 0)
+            check(position >= 0)
 
-            Assert.assertTrue(containsKey(TIME_RANGE_KEY))
+            check(containsKey(TIME_RANGE_KEY))
             timeRange = getSerializable(TIME_RANGE_KEY) as MainActivity.TimeRange
         }
     }
@@ -89,7 +88,7 @@ class DayFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<DayLoader.
 
                 startDate.toString() + " - " + endDate.toString()
             } else {
-                Assert.assertTrue(timeRange == MainActivity.TimeRange.MONTH)
+                check(timeRange == MainActivity.TimeRange.MONTH)
 
                 val month = Calendar.getInstance().run {
                     add(Calendar.MONTH, position)

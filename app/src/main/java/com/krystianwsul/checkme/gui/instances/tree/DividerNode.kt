@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import junit.framework.Assert
 import java.util.*
 
 class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(density, indentation), ModelNode {
@@ -22,7 +21,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     private val groupListFragment get() = groupAdapter.mGroupListFragment
 
     fun initialize(expanded: Boolean, nodeContainer: NodeContainer, doneInstanceDatas: List<GroupListFragment.InstanceData>, expandedInstances: Map<InstanceKey, Boolean>?): TreeNode {
-        Assert.assertTrue(!expanded || !doneInstanceDatas.isEmpty())
+        check(!expanded || !doneInstanceDatas.isEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
 
@@ -34,7 +33,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     }
 
     private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>?): TreeNode {
-        Assert.assertTrue(instanceData.Done != null)
+        checkNotNull(instanceData.Done)
 
         val doneInstanceNode = DoneInstanceNode(mDensity, mIndentation, instanceData, this)
 
@@ -69,13 +68,13 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     override fun getChildren(): Nothing? = null
 
     override fun getExpandVisibility(): Int {
-        Assert.assertTrue(this.treeNode.expandVisible)
+        check(this.treeNode.expandVisible)
 
         return View.VISIBLE
     }
 
     override fun getExpandImageResource(): Int {
-        Assert.assertTrue(this.treeNode.expandVisible)
+        check(this.treeNode.expandVisible)
 
         return if (this.treeNode.expanded())
             R.drawable.ic_expand_less_black_36dp
@@ -84,7 +83,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     }
 
     override fun getExpandOnClickListener(): View.OnClickListener {
-        Assert.assertTrue(this.treeNode.expandVisible)
+        check(this.treeNode.expandVisible)
 
         return this.treeNode.expandListener
     }
@@ -104,7 +103,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     override fun getOnClickListener() = treeNode.onClickListener
 
     fun remove(doneInstanceNode: DoneInstanceNode) {
-        Assert.assertTrue(doneInstanceNodes.contains(doneInstanceNode))
+        check(doneInstanceNodes.contains(doneInstanceNode))
         doneInstanceNodes.remove(doneInstanceNode)
 
         treeNode.remove(doneInstanceNode.treeNode)
@@ -119,7 +118,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     override fun onClick() = Unit
 
     override fun compareTo(other: ModelNode): Int {
-        Assert.assertTrue(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode)
+        check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode)
         return 1
     }
 

@@ -2,14 +2,11 @@ package com.krystianwsul.checkme.loaders
 
 import android.content.Context
 import android.support.v4.content.AsyncTaskLoader
-
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
-
-import junit.framework.Assert
 
 abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val firebaseLevel: FirebaseLevel) : AsyncTaskLoader<D>(context) {
 
@@ -20,7 +17,7 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
     private val domainFactory = DomainFactory.getDomainFactory()
 
     private val firebaseListener = { domainFactory: DomainFactory ->
-        Assert.assertTrue(domainFactory.isConnected)
+        check(domainFactory.isConnected)
 
         if (isStarted)
             forceLoad()

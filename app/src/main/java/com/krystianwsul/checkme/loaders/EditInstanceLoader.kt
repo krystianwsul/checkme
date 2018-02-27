@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
-import junit.framework.Assert
 import java.util.*
 
 class EditInstanceLoader(context: Context, private val instanceKey: InstanceKey) : DomainLoader<EditInstanceLoader.Data>(context, if (instanceKey.type == TaskKey.Type.REMOTE) DomainLoader.FirebaseLevel.NEED else DomainLoader.FirebaseLevel.NOTHING) {
@@ -21,15 +20,15 @@ class EditInstanceLoader(context: Context, private val instanceKey: InstanceKey)
     data class Data(val instanceKey: InstanceKey, val instanceDate: Date, val instanceTimePair: TimePair, val name: String, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>, val done: Boolean, val showHour: Boolean) : DomainLoader.Data() {
 
         init {
-            Assert.assertTrue(name.isNotEmpty())
+            check(name.isNotEmpty())
         }
     }
 
     data class CustomTimeData(val customTimeKey: CustomTimeKey, val name: String, val hourMinutes: TreeMap<DayOfWeek, HourMinute>) {
 
         init {
-            Assert.assertTrue(name.isNotEmpty())
-            Assert.assertTrue(hourMinutes.size == 7)
+            check(name.isNotEmpty())
+            check(hourMinutes.size == 7)
         }
     }
 }

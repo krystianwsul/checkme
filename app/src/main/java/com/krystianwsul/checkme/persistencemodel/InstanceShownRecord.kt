@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import junit.framework.Assert
 import kotlin.properties.Delegates.observable
 
 class InstanceShownRecord(
@@ -88,8 +87,8 @@ class InstanceShownRecord(
             val notificationShown = getInt(9) == 1
             val projectId = getString(10)
 
-            Assert.assertTrue(scheduleHour == null == (scheduleMinute == null))
-            Assert.assertTrue(scheduleHour == null != (scheduleCustomTimeId == null))
+            check(scheduleHour == null == (scheduleMinute == null))
+            check(scheduleHour == null != (scheduleCustomTimeId == null))
 
             InstanceShownRecord(true, id, taskId, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, notified, notificationShown, projectId)
         }
@@ -104,9 +103,9 @@ class InstanceShownRecord(
     var projectId by observable(mProjectId) { _, _, _ -> changed = true }
 
     init {
-        Assert.assertTrue(scheduleHour == null == (scheduleMinute == null))
-        Assert.assertTrue(scheduleHour == null != (scheduleCustomTimeId == null))
-        Assert.assertTrue(mProjectId.isNotEmpty())
+        check(scheduleHour == null == (scheduleMinute == null))
+        check(scheduleHour == null != (scheduleCustomTimeId == null))
+        check(mProjectId.isNotEmpty())
     }
 
     override val contentValues

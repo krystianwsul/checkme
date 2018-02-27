@@ -1,10 +1,7 @@
 package com.krystianwsul.checkme.loaders
 
 import android.content.Context
-
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-
-import junit.framework.Assert
 
 class FriendListLoader(context: Context) : DomainLoader<FriendListLoader.Data>(context, DomainLoader.FirebaseLevel.FRIEND) {
 
@@ -17,9 +14,9 @@ class FriendListLoader(context: Context) : DomainLoader<FriendListLoader.Data>(c
     data class UserListData(val name: String, val email: String, val id: String) {
 
         init {
-            Assert.assertTrue(name.isNotEmpty())
-            Assert.assertTrue(email.isNotEmpty())
-            Assert.assertTrue(id.isNotEmpty())
+            check(name.isNotEmpty())
+            check(email.isNotEmpty())
+            check(id.isNotEmpty())
         }
     }
 }

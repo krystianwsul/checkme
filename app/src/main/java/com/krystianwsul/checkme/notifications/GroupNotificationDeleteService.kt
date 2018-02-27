@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
-import junit.framework.Assert
 import java.util.*
 
 class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteService") {
@@ -17,9 +16,9 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
         private const val INSTANCES_KEY = "instanceKeys"
 
         fun getIntent(context: Context, instanceKeys: ArrayList<InstanceKey>) = Intent(context, GroupNotificationDeleteService::class.java).apply {
-            Assert.assertTrue(!instanceKeys.isEmpty())
+            check(!instanceKeys.isEmpty())
 
-            Assert.assertTrue(instanceKeys.filter { it.type == TaskKey.Type.REMOTE }
+            check(instanceKeys.filter { it.type == TaskKey.Type.REMOTE }
                     .mapNotNull { it.mScheduleKey.ScheduleTimePair.mCustomTimeKey }
                     .all { it.type == TaskKey.Type.REMOTE })
 
@@ -29,7 +28,7 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
 
     override fun onHandleIntent(intent: Intent) {
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!
-        Assert.assertTrue(!instanceKeys.isEmpty())
+        check(!instanceKeys.isEmpty())
 
         DomainFactory.getDomainFactory().setInstancesNotified(this, SaveService.Source.SERVICE, instanceKeys)
     }

@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import junit.framework.Assert
 import java.util.*
 
 class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private val joinTaskKeys: List<TaskKey>?) : DomainLoader<CreateTaskLoader.Data>(context, needsFirebase(taskKey)) {
@@ -74,7 +73,7 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
 
                     override fun createFromParcel(parcel: Parcel): ProjectParentKey {
                         val projectId = parcel.readString()!!
-                        Assert.assertTrue(!TextUtils.isEmpty(projectId))
+                        check(!TextUtils.isEmpty(projectId))
 
                         return ProjectParentKey(projectId)
                     }
@@ -126,7 +125,7 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
         data class ProjectSortKey(private val projectId: String) : SortKey() {
 
             init {
-                Assert.assertTrue(!TextUtils.isEmpty(projectId))
+                check(!TextUtils.isEmpty(projectId))
             }
 
             override fun compareTo(other: SortKey): Int {

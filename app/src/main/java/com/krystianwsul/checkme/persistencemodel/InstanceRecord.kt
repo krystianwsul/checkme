@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import junit.framework.Assert
 import kotlin.properties.Delegates.observable
 
 class InstanceRecord(
@@ -114,18 +113,18 @@ class InstanceRecord(
             val notified = getInt(16) == 1
             val notificationShown = getInt(17) == 1
 
-            Assert.assertTrue(scheduleHour == null == (scheduleMinute == null))
-            Assert.assertTrue(scheduleHour == null != (scheduleCustomTimeId == null))
+            check(scheduleHour == null == (scheduleMinute == null))
+            check(scheduleHour == null != (scheduleCustomTimeId == null))
 
-            Assert.assertTrue(instanceYear == null == (instanceMonth == null))
-            Assert.assertTrue(instanceYear == null == (instanceDay == null))
+            check(instanceYear == null == (instanceMonth == null))
+            check(instanceYear == null == (instanceDay == null))
             val hasInstanceDate = instanceYear != null
 
-            Assert.assertTrue(instanceHour == null == (instanceMinute == null))
-            Assert.assertTrue(instanceHour == null || instanceCustomTimeId == null)
+            check(instanceHour == null == (instanceMinute == null))
+            check(instanceHour == null || instanceCustomTimeId == null)
 
             val hasInstanceTime = instanceHour != null || instanceCustomTimeId != null
-            Assert.assertTrue(hasInstanceDate == hasInstanceTime)
+            check(hasInstanceDate == hasInstanceTime)
 
             InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown)
         }
@@ -152,17 +151,17 @@ class InstanceRecord(
     var notificationShown by observable(mNotificationShown) { _, _, _ -> changed = true }
 
     init {
-        Assert.assertTrue(scheduleHour == null == (scheduleMinute == null))
-        Assert.assertTrue(scheduleHour == null != (scheduleCustomTimeId == null))
+        check(scheduleHour == null == (scheduleMinute == null))
+        check(scheduleHour == null != (scheduleCustomTimeId == null))
 
-        Assert.assertTrue(mInstanceYear == null == (mInstanceMonth == null))
-        Assert.assertTrue(mInstanceYear == null == (mInstanceDay == null))
+        check(mInstanceYear == null == (mInstanceMonth == null))
+        check(mInstanceYear == null == (mInstanceDay == null))
         val hasInstanceDate = mInstanceYear != null
 
-        Assert.assertTrue(mInstanceHour == null == (mInstanceMinute == null))
-        Assert.assertTrue(mInstanceHour == null || mInstanceCustomTimeId == null)
+        check(mInstanceHour == null == (mInstanceMinute == null))
+        check(mInstanceHour == null || mInstanceCustomTimeId == null)
         val hasInstanceTime = mInstanceHour != null || mInstanceCustomTimeId != null
-        Assert.assertTrue(hasInstanceDate == hasInstanceTime)
+        check(hasInstanceDate == hasInstanceTime)
     }
 
     override val contentValues

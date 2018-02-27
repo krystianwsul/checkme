@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
-import junit.framework.Assert
 import kotlin.properties.Delegates.observable
 
 class LocalCustomTimeRecord(
@@ -123,7 +122,7 @@ class LocalCustomTimeRecord(
     var current by observable(mCurrent) { _, _, _ -> changed = true }
 
     init {
-        Assert.assertTrue(mName.isNotEmpty())
+        check(mName.isNotEmpty())
     }
 
     override val contentValues

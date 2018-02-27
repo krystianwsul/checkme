@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import junit.framework.Assert
 import java.util.*
 
 abstract class Instance protected constructor(protected val domainFactory: DomainFactory) {
@@ -17,7 +16,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
     companion object {
 
         fun getNotificationId(scheduleDate: Date, scheduleCustomTimeKey: CustomTimeKey?, scheduleHourMinute: HourMinute?, taskKey: TaskKey): Int {
-            Assert.assertTrue(scheduleCustomTimeKey == null != (scheduleHourMinute == null))
+            check(scheduleCustomTimeKey == null != (scheduleHourMinute == null))
 
             var hash = scheduleDate.month
             hash += 12 * scheduleDate.day
@@ -105,7 +104,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
         val taskHierarchies = task.getTaskHierarchiesByParentTaskKey(task.taskKey)
         val childInstances = HashSet<Instance>()
         for (taskHierarchy in taskHierarchies) {
-            Assert.assertTrue(taskHierarchy != null)
+            checkNotNull(taskHierarchy)
 
             val childTaskKey = taskHierarchy!!.childTaskKey
 

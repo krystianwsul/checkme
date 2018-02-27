@@ -12,7 +12,6 @@ import android.support.v7.view.ActionMode
 import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
-
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
@@ -27,8 +26,6 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.TimePair
-
-import junit.framework.Assert
 import kotlinx.android.synthetic.main.activity_show_instance.*
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -66,21 +63,16 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.instance_menu_check).isVisible = instanceData?.done == false
-
-        menu.findItem(R.id.instance_menu_uncheck).isVisible = instanceData?.done == true
-
-        menu.findItem(R.id.instance_menu_edit_instance).isVisible = instanceData?.run { !done && isRootInstance } == true
-
-        menu.findItem(R.id.instance_menu_share).isVisible = instanceData != null
-
-        menu.findItem(R.id.instance_menu_show_task).isVisible = instanceData?.run { !done && taskCurrent } == true
-
-        menu.findItem(R.id.instance_menu_edit_task).isVisible = instanceData?.run { !done && taskCurrent } == true
-
-        menu.findItem(R.id.instance_menu_delete_task).isVisible = instanceData?.run { !done && taskCurrent } == true
-
-        menu.findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
+        menu.run {
+            findItem(R.id.instance_menu_check).isVisible = instanceData?.done == false
+            findItem(R.id.instance_menu_uncheck).isVisible = instanceData?.done == true
+            findItem(R.id.instance_menu_edit_instance).isVisible = instanceData?.run { !done && isRootInstance } == true
+            findItem(R.id.instance_menu_share).isVisible = instanceData != null
+            findItem(R.id.instance_menu_show_task).isVisible = instanceData?.run { !done && taskCurrent } == true
+            findItem(R.id.instance_menu_edit_task).isVisible = instanceData?.run { !done && taskCurrent } == true
+            findItem(R.id.instance_menu_delete_task).isVisible = instanceData?.run { !done && taskCurrent } == true
+            findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
+        }
 
         return true
     }
@@ -89,18 +81,16 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
         instanceData!!.let {
             when (item.itemId) {
                 R.id.instance_menu_check -> {
-                    Assert.assertTrue(!it.done)
-
-                    setDone(true)
+                    if (!it.done)
+                        setDone(true)
                 }
                 R.id.instance_menu_uncheck -> {
-                    Assert.assertTrue(it.done)
-
-                    setDone(false)
+                    if (it.done)
+                        setDone(false)
                 }
                 R.id.instance_menu_edit_instance -> {
-                    Assert.assertTrue(!it.done)
-                    Assert.assertTrue(it.isRootInstance)
+                    check(!it.done)
+                    check(it.isRootInstance)
 
                     startActivity(EditInstanceActivity.getIntent(instanceKey))
                 }
@@ -112,24 +102,24 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                         Utils.share(it.name + "\n" + shareData)
                 }
                 R.id.instance_menu_show_task -> {
-                    Assert.assertTrue(!it.done)
-                    Assert.assertTrue(it.taskCurrent)
+                    check(!it.done)
+                    check(it.taskCurrent)
 
                     supportLoaderManager.destroyLoader(0)
 
                     startActivityForResult(ShowTaskActivity.newIntent(instanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
                 R.id.instance_menu_edit_task -> {
-                    Assert.assertTrue(!it.done)
-                    Assert.assertTrue(it.taskCurrent)
+                    check(!it.done)
+                    check(it.taskCurrent)
 
                     supportLoaderManager.destroyLoader(0)
 
                     startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
                 R.id.instance_menu_delete_task -> {
-                    Assert.assertTrue(!it.done)
-                    Assert.assertTrue(it.taskCurrent)
+                    check(!it.done)
+                    check(it.taskCurrent)
 
                     if (!it.exists)
                         supportLoaderManager.destroyLoader(0)
@@ -160,7 +150,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
         if (savedInstanceState == null)
             first = true
 
-        Assert.assertTrue(intent.hasExtra(INSTANCE_KEY))
+        check(intent.hasExtra(INSTANCE_KEY))
         instanceKey = intent.getParcelableExtra(INSTANCE_KEY)!!
 
         groupListFragment = supportFragmentManager.findFragmentById(R.id.show_instance_list) as? GroupListFragment ?: GroupListFragment.newInstance().also {
@@ -227,10 +217,10 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Assert.assertTrue(requestCode == ShowTaskActivity.REQUEST_EDIT_TASK)
+        check(requestCode == ShowTaskActivity.REQUEST_EDIT_TASK)
 
         if (resultCode == Activity.RESULT_OK) {
-            Assert.assertTrue(data!!.hasExtra(ShowTaskActivity.TASK_KEY_KEY))
+            check(data!!.hasExtra(ShowTaskActivity.TASK_KEY_KEY))
 
             val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
 

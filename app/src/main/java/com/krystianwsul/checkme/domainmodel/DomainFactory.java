@@ -172,6 +172,13 @@ public class DomainFactory {
         mLocalFactory.initialize(this);
     }
 
+    public boolean isHoldingWakeLock() {
+        if (mTickData != null)
+            return mTickData.mWakelock.isHeld();
+        else
+            return false;
+    }
+
     public long getReadMillis() {
         return (sRead.getLong() - sStart.getLong());
     }
@@ -404,7 +411,6 @@ public class DomainFactory {
                     Log.e("asdf", "not first, clearing mTickData");
 
                     mTickData.release();
-
                     mTickData = null;
                 } else {
                     Log.e("asdf", "first, keeping mTickData");

@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.app.JobIntentService
 import android.text.TextUtils
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -69,11 +68,9 @@ class TickJobIntentService : JobIntentService() {
 
             if (domainFactory.isConnected) {
                 return if (domainFactory.isSaved) {
-                    Log.e("asdf", "a");
                     domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, DomainFactory.TickData(silent, sourceName, MyApplication.instance, listeners))
                     true
                 } else {
-                    Log.e("asdf", "b");
                     domainFactory.updateNotificationsTick(MyApplication.instance, SaveService.Source.SERVICE, silent, sourceName)
                     false
                 }
@@ -82,14 +79,12 @@ class TickJobIntentService : JobIntentService() {
 
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 return if (firebaseUser != null) {
-                    Log.e("asdf", "c");
                     domainFactory.setUserInfo(MyApplication.instance, SaveService.Source.SERVICE, UserInfo(firebaseUser))
 
                     domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, DomainFactory.TickData(silent, sourceName, MyApplication.instance, listeners))
 
                     true
                 } else {
-                    Log.e("asdf", "d");
                     false
                 }
             }

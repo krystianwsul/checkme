@@ -20,13 +20,12 @@ repositories {
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '26.0.3'
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 17
         targetSdkVersion 27
-        versionCode 80
-        versionName "0.5.6"
+        versionCode 81
+        versionName "0.5.7"
     }
     buildTypes {
         release {
@@ -57,7 +56,7 @@ kapt {
 }
 
 ext {
-    supportLibVersion = '27.0.2'
+    supportLibVersion = '27.1.0'
     firebaseVersion = '11.6.2'
     powermockVersion = '1.6.6'
 }
@@ -72,7 +71,7 @@ dependencies {
     compile('com.github.afollestad.material-dialogs:core:0.8.5.8@aar') {
         transitive = true
     }
-    compile('com.crashlytics.sdk.android:crashlytics:2.8.0@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
         transitive = true
     }
     compile "com.android.support:appcompat-v7:${supportLibVersion}"

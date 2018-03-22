@@ -2774,9 +2774,8 @@ public class DomainFactory {
 
         NotificationWrapper.Companion.getInstance().updateAlarm(nextAlarm);
 
-        if (nextAlarm != null) {
-            tickLogArrTrimmed.add("next tick: " + nextAlarm.toString());
-        }
+        if (nextAlarm != null)
+            tickLogArrTrimmed.add("next tick: " + nextAlarm);
 
         editor.putString(TickJobIntentService.Companion.getTICK_LOG(), TextUtils.join("\n", tickLogArrTrimmed));
         editor.apply();

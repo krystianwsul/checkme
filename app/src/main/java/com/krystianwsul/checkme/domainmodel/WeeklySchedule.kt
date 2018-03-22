@@ -46,12 +46,20 @@ class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBr
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp {
         val today = Date.today()
 
-        val dayOfWeek = today.dayOfWeek
+        val nowDayOfWeek = today.dayOfWeek
         val nowHourMinute = HourMinute(now.calendar)
 
-        val ordinalDifference = dayOfWeek.ordinal - dayOfWeek.ordinal
+        val nextDayOfWeek = daysOfWeek.sorted().run {
+            if (time.getHourMinute(nowDayOfWeek) > nowHourMinute) {
+                firstOrNull { it >= nowDayOfWeek }
+            } else {
+                firstOrNull { it > nowDayOfWeek }
+            } ?: first()
+        }
+
+        val ordinalDifference = nextDayOfWeek.ordinal - nowDayOfWeek.ordinal
         val thisCalendar = today.calendar
-        if (ordinalDifference > 0 || ordinalDifference == 0 && time.getHourMinute(dayOfWeek) > nowHourMinute)
+        if (ordinalDifference > 0 || ordinalDifference == 0 && time.getHourMinute(nowDayOfWeek) > nowHourMinute)
             thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference)
         else
             thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference + 7)

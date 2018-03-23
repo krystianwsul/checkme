@@ -136,15 +136,15 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
 
     override fun getOnClickListener() = treeNode.onClickListener
 
-    override fun selectable() = false
+    override val isSelectable = false
 
     override fun onClick() {
         groupListFragment.activity!!.startActivity(ShowTaskActivity.newIntent(taskData.mTaskKey))
     }
 
-    override fun visibleWhenEmpty() = true
+    override val isVisibleWhenEmpty = true
 
-    override fun visibleDuringActionMode() = true
+    override val isVisibleDuringActionMode = true
 
-    override fun separatorVisibleWhenNotExpanded() = false
+    override val isSeparatorVisibleWhenNotExpanded = false
 }

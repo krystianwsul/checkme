@@ -61,15 +61,15 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
 
     override fun getOnClickListener(): View.OnClickListener? = null
 
-    override fun selectable() = false
+    override val isSelectable = false
 
     override fun onClick() = Unit
 
-    override fun visibleWhenEmpty() = true
+    override val isVisibleWhenEmpty = true
 
-    override fun visibleDuringActionMode() = false
+    override val isVisibleDuringActionMode = false
 
-    override fun separatorVisibleWhenNotExpanded() = true
+    override val isSeparatorVisibleWhenNotExpanded = true
 
     override fun compareTo(other: ModelNode): Int {
         Assert.assertTrue(other is NotDoneGroupNode || other is UnscheduledNode || other is DividerNode)

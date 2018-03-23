@@ -650,19 +650,19 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 }
             }
 
-            override fun getItemViewType() = TYPE_TASK
+            override val itemViewType = TYPE_TASK
 
-            override fun selectable() = true
+            override val isSelectable = true
 
             override fun onClick() {
                 taskListFragment.activity!!.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
             }
 
-            override fun visibleWhenEmpty() = true
+            override val isVisibleWhenEmpty = true
 
-            override fun visibleDuringActionMode() = true
+            override val isVisibleDuringActionMode = true
 
-            override fun separatorVisibleWhenNotExpanded() = false
+            override val isSeparatorVisibleWhenNotExpanded = false
 
             override fun compareTo(other: ModelNode) = if (other is TaskWrapper) {
                 val taskListFragment = taskListFragment
@@ -734,17 +734,17 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 }
             }
 
-            override fun getItemViewType() = TYPE_NOTE
+            override val itemViewType = TYPE_NOTE
 
-            override fun selectable() = false
+            override val isSelectable = false
 
             override fun onClick() = Unit
 
-            override fun visibleWhenEmpty() = true
+            override val isVisibleWhenEmpty = true
 
-            override fun visibleDuringActionMode() = false
+            override val isVisibleDuringActionMode = false
 
-            override fun separatorVisibleWhenNotExpanded() = true
+            override val isSeparatorVisibleWhenNotExpanded = true
 
             override fun compareTo(other: ModelNode): Int {
                 check(other is TaskWrapper)

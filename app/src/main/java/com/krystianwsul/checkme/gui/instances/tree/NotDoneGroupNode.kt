@@ -383,13 +383,13 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     fun expanded() = treeNode.expanded()
 
-    override fun selectable() = selectable && notDoneInstanceNodes.isEmpty()
+    override val isSelectable get() = selectable && notDoneInstanceNodes.isEmpty()
 
-    override fun visibleWhenEmpty() = true
+    override val isVisibleWhenEmpty = true
 
-    override fun visibleDuringActionMode() = true
+    override val isVisibleDuringActionMode = true
 
-    override fun separatorVisibleWhenNotExpanded() = false
+    override val isSeparatorVisibleWhenNotExpanded = false
 
     fun removeFromParent() {
         notDoneGroupCollection.remove(this)
@@ -572,13 +572,13 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override fun compareTo(other: ModelNode) = instanceData.mTaskStartExactTimeStamp.compareTo((other as NotDoneInstanceNode).instanceData.mTaskStartExactTimeStamp)
 
-        override fun selectable() = selectable
+        override val isSelectable = selectable
 
-        override fun visibleWhenEmpty() = true
+        override val isVisibleWhenEmpty = true
 
-        override fun visibleDuringActionMode() = true
+        override val isVisibleDuringActionMode = true
 
-        override fun separatorVisibleWhenNotExpanded() = false
+        override val isSeparatorVisibleWhenNotExpanded = false
 
         fun removeFromParent() {
             parentNotDoneGroupNode.remove(this)

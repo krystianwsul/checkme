@@ -399,7 +399,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             }
 
             @Override
-            public boolean selectable() {
+            public boolean isSelectable() {
                 return false;
             }
 
@@ -413,17 +413,17 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             }
 
             @Override
-            public boolean visibleWhenEmpty() {
+            public boolean isVisibleWhenEmpty() {
                 return true;
             }
 
             @Override
-            public boolean visibleDuringActionMode() {
+            public boolean isVisibleDuringActionMode() {
                 return true;
             }
 
             @Override
-            public boolean separatorVisibleWhenNotExpanded() {
+            public boolean isSeparatorVisibleWhenNotExpanded() {
                 return false;
             }
 

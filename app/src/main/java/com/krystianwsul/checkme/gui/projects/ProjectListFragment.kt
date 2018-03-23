@@ -279,19 +279,19 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
                 }
             }
 
-            override fun getItemViewType() = 0
+            override val itemViewType = 0
 
-            override fun selectable() = true
+            override val isSelectable = true
 
             override fun onClick() {
                 activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
             }
 
-            override fun visibleWhenEmpty() = true
+            override val isVisibleWhenEmpty = true
 
-            override fun visibleDuringActionMode() = true
+            override val isVisibleDuringActionMode = true
 
-            override fun separatorVisibleWhenNotExpanded() = false
+            override val isSeparatorVisibleWhenNotExpanded = false
 
             override fun compareTo(other: ModelNode): Int {
                 Assert.assertTrue(other is ProjectNode)

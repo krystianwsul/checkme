@@ -113,7 +113,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
         treeNode.add(newChildTreeNode(instanceData, null))
     }
 
-    override fun selectable() = false
+    override val isSelectable = false
 
     override fun onClick() = Unit
 
@@ -122,9 +122,9 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
         return 1
     }
 
-    override fun visibleWhenEmpty() = false
+    override val isVisibleWhenEmpty = false
 
-    override fun visibleDuringActionMode() = false
+    override val isVisibleDuringActionMode = false
 
-    override fun separatorVisibleWhenNotExpanded() = false
+    override val isSeparatorVisibleWhenNotExpanded = false
 }

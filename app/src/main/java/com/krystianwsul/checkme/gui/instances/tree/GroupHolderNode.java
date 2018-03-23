@@ -5,9 +5,11 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import com.krystianwsul.treeadapter.ModelNode;
+
 import kotlin.Pair;
 
-public abstract class GroupHolderNode {
+public abstract class GroupHolderNode implements ModelNode {
     final float mDensity;
     final int mIndentation;
 

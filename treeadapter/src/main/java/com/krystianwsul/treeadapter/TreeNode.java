@@ -33,10 +33,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     private boolean mSelected = false;
 
     public TreeNode(@NonNull ModelNode modelNode, @NonNull NodeContainer parent, boolean expanded, boolean selected) {
-        if (selected && !modelNode.selectable())
+        if (selected && !modelNode.isSelectable())
             throw new NotSelectableSelectedException();
 
-        if (modelNode.selectable() && !modelNode.visibleDuringActionMode())
+        if (modelNode.isSelectable() && !modelNode.isVisibleDuringActionMode())
             throw new SelectableNotVisibleException();
 
         mModelNode = modelNode;
@@ -123,7 +123,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     private void onLongClick() {
-        if (!mModelNode.selectable())
+        if (!mModelNode.isSelectable())
             return;
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
@@ -174,7 +174,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
 
-        if ((!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!mModelNode.visibleDuringActionMode() && hasActionMode())) {
+        if ((!mModelNode.isVisibleWhenEmpty() && mChildTreeNodes.isEmpty()) || (!mModelNode.isVisibleDuringActionMode() && hasActionMode())) {
             return 0;
         } else {
             if (mExpanded) {
@@ -201,7 +201,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
 
-        if ((!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty())) {
+        if ((!mModelNode.isVisibleWhenEmpty() && mChildTreeNodes.isEmpty())) {
             return 0;
         } else {
             if (mExpanded) {
@@ -230,8 +230,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             throw new SetChildTreeNodesNotCalledException();
 
         Assert.assertTrue(position >= 0);
-        Assert.assertTrue(!mChildTreeNodes.isEmpty() || mModelNode.visibleWhenEmpty());
-        Assert.assertTrue(mModelNode.visibleDuringActionMode() || !hasActionMode());
+        Assert.assertTrue(!mChildTreeNodes.isEmpty() || mModelNode.isVisibleWhenEmpty());
+        Assert.assertTrue(mModelNode.isVisibleDuringActionMode() || !hasActionMode());
         Assert.assertTrue(position < displayedSize());
 
         if (position == 0)
@@ -274,19 +274,19 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     public boolean isSelected() {
-        Assert.assertTrue(!mSelected || mModelNode.selectable());
+        Assert.assertTrue(!mSelected || mModelNode.isSelectable());
 
         return mSelected;
     }
 
     public void unselect() {
-        Assert.assertTrue(!mSelected || mModelNode.selectable());
+        Assert.assertTrue(!mSelected || mModelNode.isSelectable());
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         if (mSelected) {
-            Assert.assertTrue(mModelNode.selectable());
-            Assert.assertTrue(mModelNode.visibleDuringActionMode());
+            Assert.assertTrue(mModelNode.isSelectable());
+            Assert.assertTrue(mModelNode.isVisibleDuringActionMode());
 
             mSelected = false;
             treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
@@ -319,8 +319,8 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        if (mModelNode.selectable()) {
-            Assert.assertTrue(mModelNode.visibleDuringActionMode());
+        if (mModelNode.isSelectable()) {
+            Assert.assertTrue(mModelNode.isVisibleDuringActionMode());
 
             mSelected = true;
 
@@ -347,12 +347,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
 
-        Assert.assertTrue(!mSelected || mModelNode.selectable());
+        Assert.assertTrue(!mSelected || mModelNode.isSelectable());
 
         ArrayList<TreeNode> selectedTreeNodes = new ArrayList<>();
 
         if (mSelected) {
-            Assert.assertTrue(mModelNode.visibleDuringActionMode());
+            Assert.assertTrue(mModelNode.isVisibleDuringActionMode());
             selectedTreeNodes.add(this);
         }
 
@@ -373,10 +373,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mChildTreeNodes == null)
             throw new SetChildTreeNodesNotCalledException();
 
-        if (!mModelNode.visibleDuringActionMode() && hasActionMode())
+        if (!mModelNode.isVisibleDuringActionMode() && hasActionMode())
             return false;
 
-        if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.isEmpty())
+        if (!mModelNode.isVisibleWhenEmpty() && mChildTreeNodes.isEmpty())
             return false;
 
         return true;
@@ -511,14 +511,14 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 mExpanded = false;
 
                 if (oldParentPosition == 0) {
-                    if (mModelNode.visibleWhenEmpty()) {
+                    if (mModelNode.isVisibleWhenEmpty()) {
                         treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
                         treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
                         treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 } else {
-                    if (mModelNode.visibleWhenEmpty()) {
+                    if (mModelNode.isVisibleWhenEmpty()) {
                         treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
                         treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
@@ -550,13 +550,13 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                         }
                     })) {
                 if (oldParentPosition == 0) {
-                    if (mModelNode.visibleWhenEmpty()) {
+                    if (mModelNode.isVisibleWhenEmpty()) {
                         treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
                     } else {
                         treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(oldParentPosition);
                     }
                 } else {
-                    if (mModelNode.visibleWhenEmpty()) {
+                    if (mModelNode.isVisibleWhenEmpty()) {
                         treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
                     } else {
                         treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
@@ -594,7 +594,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
         if (mExpanded) {
-            if (mModelNode.visibleWhenEmpty()) {
+            if (mModelNode.isVisibleWhenEmpty()) {
                 int oldParentPosition = treeNodeCollection.getPosition(this);
                 Assert.assertTrue(oldParentPosition >= 0);
 
@@ -655,11 +655,11 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
             Collections.sort(mChildTreeNodes);
 
-            if (mModelNode.visibleDuringActionMode() || !hasActionMode()) {
+            if (mModelNode.isVisibleDuringActionMode() || !hasActionMode()) {
                 int newParentPosition = treeNodeCollection.getPosition(this);
                 Assert.assertTrue(newParentPosition >= 0);
 
-                if (!mModelNode.visibleWhenEmpty() && mChildTreeNodes.size() == 1) {
+                if (!mModelNode.isVisibleWhenEmpty() && mChildTreeNodes.size() == 1) {
                     treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newParentPosition);
 
                     if (newParentPosition > 0)
@@ -690,7 +690,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeNode nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1);
 
-        return (nextTreeNode.expanded() || mModelNode.separatorVisibleWhenNotExpanded());
+        return (nextTreeNode.expanded() || mModelNode.isSeparatorVisibleWhenNotExpanded());
     }
 
     @NonNull
@@ -733,7 +733,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         int position = treeNodeCollection.getPosition(this);
         Assert.assertTrue(position >= 0);
 
-        if (mModelNode.visibleDuringActionMode()) {
+        if (mModelNode.isVisibleDuringActionMode()) {
             treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
 
             if (mExpanded)
@@ -751,7 +751,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 } else {
                     treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(position);
                 }
-            } else if (mModelNode.visibleWhenEmpty()) {
+            } else if (mModelNode.isVisibleWhenEmpty()) {
                 treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(position);
             }
 
@@ -769,7 +769,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         int position = treeNodeCollection.getPosition(this);
         Assert.assertTrue(position >= 0);
 
-        if (mModelNode.visibleDuringActionMode()) {
+        if (mModelNode.isVisibleDuringActionMode()) {
             treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
 
             if (mExpanded)
@@ -787,7 +787,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 } else {
                     treeNodeCollection.mTreeViewAdapter.notifyItemInserted(position);
                 }
-            } else if (mModelNode.visibleWhenEmpty()) {
+            } else if (mModelNode.isVisibleWhenEmpty()) {
                 treeNodeCollection.mTreeViewAdapter.notifyItemInserted(position);
             }
 
@@ -819,7 +819,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         if (mSelected)
             throw new SelectCalledTwiceException();
 
-        if (!mModelNode.selectable())
+        if (!mModelNode.isSelectable())
             throw new NotSelectableSelectedException();
 
         onLongClick();

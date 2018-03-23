@@ -98,13 +98,13 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
 
     override fun getOnClickListener() = treeNode.onClickListener
 
-    override fun selectable() = false
+    override val isSelectable = false
 
     override fun onClick() = Unit
 
-    override fun visibleWhenEmpty() = false
+    override val isVisibleWhenEmpty = false
 
-    override fun visibleDuringActionMode() = false
+    override val isVisibleDuringActionMode = false
 
-    override fun separatorVisibleWhenNotExpanded() = false
+    override val isSeparatorVisibleWhenNotExpanded = false
 }

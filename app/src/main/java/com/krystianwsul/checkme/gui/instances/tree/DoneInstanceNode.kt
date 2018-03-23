@@ -164,15 +164,15 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         return -instanceData.Done!!.compareTo(doneInstanceNode.instanceData.Done!!) // negate
     }
 
-    override fun selectable() = false
+    override val isSelectable = false
 
     override fun onClick() = groupListFragment.activity!!.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity!!, instanceData.InstanceKey))
 
-    override fun visibleWhenEmpty() = true
+    override val isVisibleWhenEmpty = true
 
-    override fun visibleDuringActionMode() = true
+    override val isVisibleDuringActionMode = true
 
-    override fun separatorVisibleWhenNotExpanded() = false
+    override val isSeparatorVisibleWhenNotExpanded = false
 
     fun removeFromParent() {
         dividerNode.remove(this)

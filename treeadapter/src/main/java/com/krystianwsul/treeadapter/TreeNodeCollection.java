@@ -226,6 +226,21 @@ public class TreeNodeCollection implements NodeContainer {
         return 0;
     }
 
+    void moveItem(int fromPosition, int toPosition) {
+        Assert.assertTrue(mTreeNodes != null);
+
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mTreeNodes, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(mTreeNodes, i, i - 1);
+            }
+        }
+        mTreeViewAdapter.notifyItemMoved(fromPosition, toPosition);
+    }
+
     @SuppressWarnings("WeakerAccess")
     public static class SetTreeNodesNotCalledException extends InitializationException {
         private SetTreeNodesNotCalledException() {

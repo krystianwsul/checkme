@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -47,6 +49,24 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private var taskData: TaskData? = null
 
     private var treeViewAdapter: TreeViewAdapter? = null
+
+    private val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+
+        override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            val from = viewHolder.adapterPosition
+            val to = target.adapterPosition
+
+            Log.e("asdf", "drag from " + from + " to " + to)
+
+            treeViewAdapter!!.moveItem(from, to)
+
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) = Unit
+
+        override fun isItemViewSwipeEnabled() = false
+    })
 
     private val selectionCallback = object : SelectionCallback() {
 
@@ -115,6 +135,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
 
             (activity as TaskListListener).onCreateTaskActionMode(mActionMode)
+
+            itemTouchHelper.attachToRecyclerView(taskListRecycler)
         }
 
         override fun onSecondAdded() {
@@ -133,6 +155,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
                 findItem(R.id.action_task_add).isVisible = false
             }
+
+            itemTouchHelper.attachToRecyclerView(null)
         }
 
         override fun onOtherAdded() {
@@ -157,6 +181,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
 
             (activity as TaskListListener).onDestroyTaskActionMode()
+
+            itemTouchHelper.attachToRecyclerView(null)
         }
 
         override fun onSecondToLastRemoved() {
@@ -166,6 +192,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 findItem(R.id.action_task_delete).isVisible = true
                 findItem(R.id.action_task_add).isVisible = true
             }
+
+            itemTouchHelper.attachToRecyclerView(taskListRecycler)
         }
 
         override fun onOtherRemoved() {
@@ -553,7 +581,15 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         else
                             Color.TRANSPARENT)
 
-                        setOnLongClickListener(treeNode.onLongClickListener)
+                        setOnLongClickListener {
+                            if (taskListFragment.selectionCallback.hasActionMode()) {
+                                Log.e("asdf", "startDrag")
+                                taskListFragment.itemTouchHelper.startDrag(viewHolder)
+                                true
+                            } else {
+                                treeNode.onLongClickListener.onLongClick(it)
+                            }
+                        }
                         setOnClickListener(treeNode.onClickListener)
                     }
 

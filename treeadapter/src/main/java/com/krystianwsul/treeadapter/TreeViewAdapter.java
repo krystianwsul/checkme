@@ -151,6 +151,10 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return mTreeNodeCollection.getItemViewType(position);
     }
 
+    public void moveItem(int from, int to) {
+        mTreeNodeCollection.moveItem(from, to);
+    }
+
     @SuppressWarnings("WeakerAccess")
     public static class SetTreeNodeCollectionNotCalledException extends InitializationException {
         private SetTreeNodeCollectionNotCalledException() {

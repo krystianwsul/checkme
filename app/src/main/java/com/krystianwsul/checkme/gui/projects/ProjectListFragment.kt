@@ -226,7 +226,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
-            treeNodeCollection.setNodes(projectNodes.map { it.initialize(treeNodeCollection) })
+            treeNodeCollection.nodes = projectNodes.map { it.initialize(treeNodeCollection) }
 
             return treeViewAdapter
         }

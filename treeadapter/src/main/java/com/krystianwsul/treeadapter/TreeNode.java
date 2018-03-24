@@ -70,7 +70,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public void update() {
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
 
-        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
     @Override
@@ -144,7 +144,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 parent.updateRecursive();
         }
 
-        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(treeNodeCollection.getPosition(this));
     }
 
     @NonNull
@@ -166,7 +166,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
     @NonNull
     private TreeViewAdapter getTreeViewAdapter() {
-        return getTreeNodeCollection().mTreeViewAdapter;
+        return getTreeNodeCollection().getMTreeViewAdapter();
     }
 
     @Override
@@ -289,7 +289,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             Assert.assertTrue(mModelNode.isVisibleDuringActionMode());
 
             mSelected = false;
-            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+            treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(treeNodeCollection.getPosition(this));
         }
 
         List<TreeNode> selected = getSelectedNodes()
@@ -306,7 +306,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                         }
                     });
 
-            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+            treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(treeNodeCollection.getPosition(this));
         }
     }
 
@@ -324,9 +324,9 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
             mSelected = true;
 
-            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this));
+            treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(treeNodeCollection.getPosition(this));
 
-            treeNodeCollection.mTreeViewAdapter.incrementSelected();
+            treeNodeCollection.getMTreeViewAdapter().incrementSelected();
         }
 
         if (mExpanded) {
@@ -432,16 +432,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                     int displayedSize = displayedSize();
                     mExpanded = false;
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemRangeRemoved(position + 1, displayedSize - 1);
                 } else { // showing
                     mExpanded = true;
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize() - 1);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemRangeInserted(position + 1, displayedSize() - 1);
                 }
 
                 if (position > 0) {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(position - 1, 2);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemRangeChanged(position - 1, 2);
                 } else {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(position);
                 }
             }
         };
@@ -512,28 +512,28 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                 if (oldParentPosition == 0) {
                     if (mModelNode.isVisibleWhenEmpty()) {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 } else {
                     if (mModelNode.isVisibleWhenEmpty()) {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2);
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemRangeChanged(oldParentPosition - 1, 2);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize);
                     } else {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition - 1);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize);
                     }
                 }
             } else {
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
-                treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemRangeRemoved(oldChildPosition, childDisplayedSize);
 
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldChildPosition - 1);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldChildPosition - 1);
 
                 if (oldParentPosition > 0)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition - 1);
             }
         } else {
             if (0 == Stream.of(mChildTreeNodes)
@@ -551,23 +551,23 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                     })) {
                 if (oldParentPosition == 0) {
                     if (mModelNode.isVisibleWhenEmpty()) {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition);
                     } else {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(oldParentPosition);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemRemoved(oldParentPosition);
                     }
                 } else {
                     if (mModelNode.isVisibleWhenEmpty()) {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition);
                     } else {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(oldParentPosition);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition - 1);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemRemoved(oldParentPosition);
                     }
                 }
             } else {
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition);
 
                 if (oldParentPosition > 0)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition - 1);
             }
         }
     }
@@ -605,16 +605,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 int newChildPosition = treeNodeCollection.getPosition(childTreeNode);
                 Assert.assertTrue(newChildPosition >= 0);
 
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
-                treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newChildPosition);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemInserted(newChildPosition);
 
                 boolean last = (oldParentPosition + displayedSize() - 1 == newChildPosition);
 
                 if (last)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newChildPosition - 1);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(newChildPosition - 1);
 
                 if (oldParentPosition > 0)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition - 1);
             } else {
                 if (mChildTreeNodes.isEmpty()) {
                     mChildTreeNodes.add(childTreeNode);
@@ -623,10 +623,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
                     int newParentPosition = treeNodeCollection.getPosition(this);
 
-                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newParentPosition + 1);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemInserted(newParentPosition + 1);
 
                     if (newParentPosition > 0)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition - 1);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(newParentPosition - 1);
                 } else {
                     int oldParentPosition = treeNodeCollection.getPosition(this);
                     Assert.assertTrue(oldParentPosition >= 0);
@@ -638,16 +638,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                     int newChildPosition = treeNodeCollection.getPosition(childTreeNode);
                     Assert.assertTrue(newChildPosition >= 0);
 
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition);
-                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newChildPosition);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemInserted(newChildPosition);
 
                     boolean last = (oldParentPosition + displayedSize() - 1 == newChildPosition);
 
                     if (last)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newChildPosition - 1);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(newChildPosition - 1);
 
                     if (oldParentPosition > 0)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(oldParentPosition - 1);
                 }
             }
         } else {
@@ -660,12 +660,12 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
                 Assert.assertTrue(newParentPosition >= 0);
 
                 if (!mModelNode.isVisibleWhenEmpty() && mChildTreeNodes.size() == 1) {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newParentPosition);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemInserted(newParentPosition);
 
                     if (newParentPosition > 0)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition - 1);
+                        treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(newParentPosition - 1);
                 } else {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(newParentPosition);
                 }
             }
         }
@@ -734,7 +734,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(position >= 0);
 
         if (mModelNode.isVisibleDuringActionMode()) {
-            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
+            treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(position);
 
             if (mExpanded)
                 Stream.of(mChildTreeNodes)
@@ -747,16 +747,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(position, visibleSize());
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemRangeRemoved(position, visibleSize());
                 } else {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(position);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemRemoved(position);
                 }
             } else if (mModelNode.isVisibleWhenEmpty()) {
-                treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(position);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemRemoved(position);
             }
 
             if (position > 0)
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position - 1);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(position - 1);
         }
     }
 
@@ -770,7 +770,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         Assert.assertTrue(position >= 0);
 
         if (mModelNode.isVisibleDuringActionMode()) {
-            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position);
+            treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(position);
 
             if (mExpanded)
                 Stream.of(mChildTreeNodes)
@@ -783,16 +783,16 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         } else {
             if (mChildTreeNodes.size() > 0) {
                 if (mExpanded) {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeInserted(position, displayedSize());
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemRangeInserted(position, displayedSize());
                 } else {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(position);
+                    treeNodeCollection.getMTreeViewAdapter().notifyItemInserted(position);
                 }
             } else if (mModelNode.isVisibleWhenEmpty()) {
-                treeNodeCollection.mTreeViewAdapter.notifyItemInserted(position);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemInserted(position);
             }
 
             if (position > 0)
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position - 1);
+                treeNodeCollection.getMTreeViewAdapter().notifyItemChanged(position - 1);
         }
     }
 

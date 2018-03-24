@@ -848,7 +848,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 unscheduledExpanded = false
             }
 
-            treeNodeCollection.setNodes(mNodeCollection!!.initialize(instanceDatas!!, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTaskKeys))
+            treeNodeCollection.nodes = mNodeCollection!!.initialize(instanceDatas!!, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTaskKeys)
 
             mTreeViewAdapter!!.setTreeNodeCollection(treeNodeCollection)
 

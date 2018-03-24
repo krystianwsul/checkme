@@ -474,7 +474,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 taskWrappers.add(taskWrapper)
             }
 
-            this.treeNodeCollection.setNodes(treeNodes)
+            this.treeNodeCollection.nodes = treeNodes
 
             return treeViewAdapter
         }

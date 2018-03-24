@@ -178,7 +178,7 @@ class PersistenceManger(
 
         val id = ++taskHierarchyMaxId
 
-        return TaskHierarchyRecord(false, id, parentLocalTask.id, childLocalTask.id, startExactTimeStamp.long!!, null).also {
+        return TaskHierarchyRecord(false, id, parentLocalTask.id, childLocalTask.id, startExactTimeStamp.long!!, null, null).also {
             _taskHierarchyRecords.add(it)
         }
     }

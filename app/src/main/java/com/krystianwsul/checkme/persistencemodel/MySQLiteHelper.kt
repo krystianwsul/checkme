@@ -9,7 +9,7 @@ class MySQLiteHelper private constructor() : SQLiteOpenHelper(MyApplication.inst
     companion object {
 
         private const val DATABASE_NAME = "tasks.db"
-        private const val DATABASE_VERSION = 20
+        private const val DATABASE_VERSION = 21
 
         val database by lazy { MySQLiteHelper().writableDatabase!! }
     }
@@ -75,6 +75,10 @@ class MySQLiteHelper private constructor() : SQLiteOpenHelper(MyApplication.inst
                             + InstanceShownRecord.COLUMN_SCHEDULE_DAY + ", "
                             + InstanceShownRecord.COLUMN_SCHEDULE_CUSTOM_TIME_ID
                             + ")")
+                }
+
+                if (oldVersion < 21) {
+                    sqLiteDatabase.execSQL("ALTER TABLE ${TaskHierarchyRecord.TABLE_TASK_HIERARCHIES} ADD COLUMN ${TaskHierarchyRecord.COLUMN_ORDINAL} REAL")
                 }
             }
 

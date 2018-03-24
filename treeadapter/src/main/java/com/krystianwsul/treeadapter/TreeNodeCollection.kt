@@ -1,46 +1,45 @@
 package com.krystianwsul.treeadapter
 
-import android.util.Log
 import com.annimon.stream.Collectors
 import java.util.*
 
 class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer {
 
-    private var mTreeNodes: MutableList<TreeNode>? = null
+    private var treeNodes: MutableList<TreeNode>? = null
 
     val selectedNodes: List<TreeNode>
         get() {
-            if (mTreeNodes == null)
+            if (treeNodes == null)
                 throw SetTreeNodesNotCalledException()
 
-            return mTreeNodes!!.flatMap { it.selectedNodes.collect(Collectors.toList()) }
+            return treeNodes!!.flatMap { it.selectedNodes.collect(Collectors.toList()) }
         }
 
     var nodes: List<TreeNode>
         get() {
-            if (mTreeNodes == null)
+            if (treeNodes == null)
                 throw SetTreeNodesNotCalledException()
 
-            return mTreeNodes!!
+            return treeNodes!!
         }
         set(rootTreeNodes) {
-            if (mTreeNodes != null)
+            if (treeNodes != null)
                 throw SetTreeNodesCalledTwiceException()
 
-            mTreeNodes = ArrayList(rootTreeNodes)
+            treeNodes = ArrayList(rootTreeNodes)
 
-            mTreeNodes!!.sort()
+            treeNodes!!.sort()
         }
 
     fun getNode(position: Int): TreeNode {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
         var currPosition = position
         check(currPosition >= 0)
         check(currPosition < displayedSize())
 
-        for (treeNode in mTreeNodes!!) {
+        for (treeNode in treeNodes!!) {
             if (currPosition < treeNode.displayedSize())
                 return treeNode.getNode(currPosition)
 
@@ -51,11 +50,11 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
     }
 
     override fun getPosition(treeNode: TreeNode): Int {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
         var offset = 0
-        for (currTreeNode in mTreeNodes!!) {
+        for (currTreeNode in treeNodes!!) {
             val position = currTreeNode.getPosition(treeNode)
             if (position >= 0)
                 return offset + position
@@ -72,43 +71,43 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
     }
 
     override fun displayedSize(): Int {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
         var displayedSize = 0
-        for (treeNode in mTreeNodes!!)
+        for (treeNode in treeNodes!!)
             displayedSize += treeNode.displayedSize()
         return displayedSize
     }
 
     fun onCreateActionMode() {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
-        mTreeNodes!!.forEach(TreeNode::onCreateActionMode)
+        treeNodes!!.forEach(TreeNode::onCreateActionMode)
     }
 
     fun onDestroyActionMode() {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
-        mTreeNodes!!.forEach(TreeNode::onDestroyActionMode)
+        treeNodes!!.forEach(TreeNode::onDestroyActionMode)
     }
 
     fun unselect() {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
-        mTreeNodes!!.forEach(TreeNode::unselect)
+        treeNodes!!.forEach(TreeNode::unselect)
     }
 
     override fun add(treeNode: TreeNode) {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
-        mTreeNodes!!.add(treeNode)
+        treeNodes!!.add(treeNode)
 
-        mTreeNodes!!.sort()
+        treeNodes!!.sort()
 
         val treeViewAdapter = mTreeViewAdapter
 
@@ -122,10 +121,10 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
     }
 
     override fun remove(treeNode: TreeNode) {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
-        check(mTreeNodes!!.contains(treeNode))
+        check(treeNodes!!.contains(treeNode))
 
         val treeViewAdapter = mTreeViewAdapter
 
@@ -134,7 +133,7 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
 
         val displayedSize = treeNode.displayedSize()
 
-        mTreeNodes!!.remove(treeNode)
+        treeNodes!!.remove(treeNode)
 
         treeViewAdapter.notifyItemRangeRemoved(oldPosition, displayedSize)
 
@@ -153,34 +152,44 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
     override fun getTreeNodeCollection() = this
 
     fun selectAll() {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
-        mTreeNodes!!.forEach(TreeNode::selectAll)
+        treeNodes!!.forEach(TreeNode::selectAll)
     }
 
     override fun getIndentation() = 0
 
     fun moveItem(fromPosition: Int, toPosition: Int) {
-        if (mTreeNodes == null)
+        if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition) {
-                Collections.swap(mTreeNodes!!, i, i + 1)
+                Collections.swap(treeNodes!!, i, i + 1)
             }
         } else {
             for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(mTreeNodes!!, i, i - 1)
+                Collections.swap(treeNodes!!, i, i - 1)
             }
         }
         mTreeViewAdapter.notifyItemMoved(fromPosition, toPosition)
     }
 
     fun setNewItemPosition(position: Int) {
-        // todo
+        if (treeNodes == null)
+            throw SetTreeNodesNotCalledException()
 
-        Log.e("asdf", "setNewItemPosition $position")
+        treeNodes!!.let { treeNodes ->
+            val previousNode = position.takeIf { it > 0 }?.let { treeNodes[position - 1] }
+            val node = treeNodes[position]
+            val nextNode = position.takeIf { it < treeNodes.size - 1 }?.let { treeNodes[position + 1] }
+
+            val previousOrdinal = previousNode?.modelNode?.getOrdinal() ?: -Double.MAX_VALUE
+            val nextOrdinal = nextNode?.modelNode?.getOrdinal() ?: Double.MAX_VALUE
+
+            node.modelNode.setOrdinal((previousOrdinal + nextOrdinal) / 2)
+        }
     }
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")

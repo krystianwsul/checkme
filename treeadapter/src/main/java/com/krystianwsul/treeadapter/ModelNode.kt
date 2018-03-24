@@ -17,4 +17,8 @@ interface ModelNode : Comparable<ModelNode> {
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder)
 
     fun onClick()
+
+    fun getOrdinal(): Double = throw UnsupportedOperationException()
+
+    fun setOrdinal(ordinal: Double): Unit = throw UnsupportedOperationException()
 }

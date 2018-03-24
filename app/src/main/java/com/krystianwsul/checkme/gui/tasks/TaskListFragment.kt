@@ -565,7 +565,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                             Color.TRANSPARENT)
 
                         setOnLongClickListener {
-                            if (treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
+                            if (taskListFragment.taskKey != null && treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
                                 taskListFragment.dragHelper.startDrag(viewHolder)
                                 true
                             } else {
@@ -673,6 +673,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 treeNode.remove(childTreeNode)
             }
+
+            override fun getOrdinal() = childTaskData.startExactTimeStamp.long.toDouble() // todo taskHierarchy start timestamp
+
+            override fun setOrdinal(ordinal: Double) {
+                // todo
+            }
         }
 
         private class NoteNode(private val note: String) : ModelNode {
@@ -754,7 +760,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     data class TaskData(val childTaskDatas: List<ChildTaskData>, val note: String?)
 
-    data class ChildTaskData(val name: String, val scheduleText: String?, val children: List<ChildTaskData>, val note: String?, val startExactTimeStamp: ExactTimeStamp, val taskKey: TaskKey)
+    data class ChildTaskData(
+            val name: String,
+            val scheduleText: String?,
+            val children: List<ChildTaskData>,
+            val note: String?,
+            val startExactTimeStamp: ExactTimeStamp,
+            val taskKey: TaskKey)
 
     interface TaskListListener {
 

@@ -452,6 +452,16 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                 return Stream.of(expandedParentKeys);
             }
+
+            @Override
+            public double getOrdinal() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void setOrdinal(double ordinal) {
+                throw new UnsupportedOperationException();
+            }
         }
 
         class TaskHolder extends RecyclerView.ViewHolder {

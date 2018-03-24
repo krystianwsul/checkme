@@ -396,4 +396,9 @@ public class RemoteProject {
 
         mRemoteProjectRecord.setEndTime(now.getLong());
     }
+
+    @NonNull
+    public RemoteTaskHierarchy getTaskHierarchy(@NonNull String id) {
+        return mRemoteTaskHierarchies.getById(id);
+    }
 }

@@ -24,7 +24,7 @@ public class TaskHierarchyContainer<T, U extends TaskHierarchy> {
 
     }
 
-    public void add(T id, @NonNull U taskHierarchy) {
+    public void add(@NonNull T id, @NonNull U taskHierarchy) {
         Assert.assertTrue(!mTaskHierarchiesById.containsKey(id));
 
         mTaskHierarchiesById.put(id, taskHierarchy);
@@ -32,7 +32,7 @@ public class TaskHierarchyContainer<T, U extends TaskHierarchy> {
         Assert.assertTrue(mTaskHierarchiesByParent.put(taskHierarchy.getParentTaskKey(), taskHierarchy));
     }
 
-    public void removeForce(T id) {
+    public void removeForce(@NonNull T id) {
         Assert.assertTrue(mTaskHierarchiesById.containsKey(id));
 
         U taskHierarchy = mTaskHierarchiesById.get(id);
@@ -65,5 +65,12 @@ public class TaskHierarchyContainer<T, U extends TaskHierarchy> {
         Assert.assertTrue(set != null);
 
         return set;
+    }
+
+    @NonNull
+    public U getById(@NonNull T id) {
+        Assert.assertTrue(mTaskHierarchiesById.containsKey(id));
+
+        return mTaskHierarchiesById.get(id);
     }
 }

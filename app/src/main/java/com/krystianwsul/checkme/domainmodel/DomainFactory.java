@@ -20,6 +20,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.krystianwsul.checkme.MyApplication;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
@@ -63,6 +64,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.ScheduleKey;
+import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DateTime;
@@ -995,7 +997,7 @@ public class DomainFactory {
                     return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new TaskListFragment.HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
                 })
                 .collect(Collectors.toList());
-        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> lhs.getStartExactTimeStamp().compareTo(rhs.getStartExactTimeStamp()));
+        Collections.sort(childTaskDatas, TaskListFragment.ChildTaskData::compareTo);
 
         return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()));
     }
@@ -1524,6 +1526,40 @@ public class DomainFactory {
         save(context, dataId, source);
 
         notifyCloud(context, task.getRemoteNullableProject());
+    }
+
+    public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull TaskListFragment.HierarchyData hierarchyData) {
+        MyCrashlytics.log("DomainFactory.setTaskHierarchyOrdinal");
+        Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        RemoteProject remoteProject;
+        TaskHierarchy taskHierarchy;
+        if (hierarchyData.getTaskHierarchyKey() instanceof TaskHierarchyKey.LocalTaskHierarchyKey) {
+            TaskHierarchyKey.LocalTaskHierarchyKey localTaskHierarchyKey = (TaskHierarchyKey.LocalTaskHierarchyKey) hierarchyData.getTaskHierarchyKey();
+
+            remoteProject = null;
+            taskHierarchy = mLocalFactory.getTaskHierarchy(localTaskHierarchyKey);
+        } else {
+            Assert.assertTrue(hierarchyData.getTaskHierarchyKey() instanceof TaskHierarchyKey.RemoteTaskHierarchyKey);
+
+            TaskHierarchyKey.RemoteTaskHierarchyKey remoteTaskHierarchyKey = (TaskHierarchyKey.RemoteTaskHierarchyKey) hierarchyData.getTaskHierarchyKey();
+
+            remoteProject = mRemoteProjectFactory.getRemoteProjectForce(remoteTaskHierarchyKey.getProjectId());
+            taskHierarchy = remoteProject.getTaskHierarchy(remoteTaskHierarchyKey.getTaskHierarchyId());
+        }
+
+        Assert.assertTrue(taskHierarchy.current(now));
+
+        taskHierarchy.setOrdinal(hierarchyData.getOrdinal());
+
+        updateNotifications(MyApplication.instance, now);
+
+        save(MyApplication.instance, dataId, SaveService.Source.GUI);
+
+        if (remoteProject != null)
+            notifyCloud(MyApplication.instance, remoteProject);
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull ArrayList<TaskKey> taskKeys) {
@@ -2368,7 +2404,7 @@ public class DomainFactory {
                 .map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey(), null))
                 .collect(Collectors.toList());
 
-        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> -lhs.getStartExactTimeStamp().compareTo(rhs.getStartExactTimeStamp()));
+        Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> -lhs.compareTo(rhs));
 
         return new TaskListFragment.TaskData(childTaskDatas, null);
     }

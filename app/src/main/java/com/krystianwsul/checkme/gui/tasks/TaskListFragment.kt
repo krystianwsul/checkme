@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -558,6 +559,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
+                Log.e("asf", "getting ordinal: " + childTaskData.hierarchyData?.ordinal + " for " + childTaskData.name)
                 (viewHolder as TaskHolder).run {
                     itemView.run {
                         setBackgroundColor(if (treeNode.isSelected)
@@ -650,7 +652,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun compareTo(other: ModelNode) = if (other is TaskWrapper) {
                 val taskListFragment = taskListFragment
 
-                var comparison = childTaskData.startExactTimeStamp.compareTo(other.childTaskData.startExactTimeStamp)
+                var comparison = childTaskData.compareTo(other.childTaskData)
                 if (taskListFragment.taskKey == null && indentation == 0)
                     comparison = -comparison
 
@@ -678,7 +680,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun getOrdinal() = childTaskData.hierarchyData!!.ordinal
 
             override fun setOrdinal(ordinal: Double) {
-                // todo
+                childTaskData.hierarchyData!!.ordinal = ordinal
+                Log.e("asf", "setting ordinal: " + ordinal + " for " + childTaskData.name)
+
+                DomainFactory.getDomainFactory().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
             }
         }
 
@@ -766,11 +771,22 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val scheduleText: String?,
             val children: List<ChildTaskData>,
             val note: String?,
-            val startExactTimeStamp: ExactTimeStamp,
+            private val startExactTimeStamp: ExactTimeStamp,
             val taskKey: TaskKey,
-            val hierarchyData: HierarchyData?)
+            val hierarchyData: HierarchyData?) : Comparable<ChildTaskData> {
 
-    data class HierarchyData(val taskHierarchyKey: TaskHierarchyKey, val ordinal: Double)
+        override fun compareTo(other: ChildTaskData) = if (hierarchyData != null) {
+            checkNotNull(other.hierarchyData)
+
+            hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
+        } else {
+            check(other.hierarchyData == null)
+
+            startExactTimeStamp.compareTo(other.startExactTimeStamp)
+        }
+    }
+
+    data class HierarchyData(val taskHierarchyKey: TaskHierarchyKey, var ordinal: Double)
 
     interface TaskListListener {
 

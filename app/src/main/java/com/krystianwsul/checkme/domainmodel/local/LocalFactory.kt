@@ -396,8 +396,9 @@ class LocalFactory {
 
     fun getTaskIfPresent(taskId: Int) = localTasks[taskId]
 
+    fun getTaskHierarchy(localTaskHierarchyKey: TaskHierarchyKey.LocalTaskHierarchyKey) = localTaskHierarchies.getById(localTaskHierarchyKey.id)
+
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey) = localTaskHierarchies.getByChildTaskKey(childTaskKey)
 
     fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey) = localTaskHierarchies.getByParentTaskKey(parentTaskKey)
-
 }

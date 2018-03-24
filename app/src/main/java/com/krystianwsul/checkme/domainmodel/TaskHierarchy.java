@@ -27,6 +27,8 @@ public abstract class TaskHierarchy {
     @Nullable
     protected abstract ExactTimeStamp getEndExactTimeStamp();
 
+    public abstract double getOrdinal();
+
     @NonNull
     public abstract TaskKey getParentTaskKey();
 
@@ -46,6 +48,8 @@ public abstract class TaskHierarchy {
     }
 
     public abstract void setEndExactTimeStamp(@NonNull ExactTimeStamp now);
+
+    public abstract void setOrdinal(double ordinal);
 
     public abstract void delete();
 }

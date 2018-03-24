@@ -91,4 +91,14 @@ public class RemoteTaskHierarchy extends TaskHierarchy {
     private String getChildTaskId() {
         return mRemoteTaskHierarchyRecord.getChildTaskId();
     }
+
+    @Override
+    public double getOrdinal() {
+        return (mRemoteTaskHierarchyRecord.getOrdinal() != null) ? mRemoteTaskHierarchyRecord.getOrdinal() : mRemoteTaskHierarchyRecord.getStartTime();
+    }
+
+    @Override
+    public void setOrdinal(double ordinal) {
+        mRemoteTaskHierarchyRecord.setOrdinal(ordinal);
+    }
 }

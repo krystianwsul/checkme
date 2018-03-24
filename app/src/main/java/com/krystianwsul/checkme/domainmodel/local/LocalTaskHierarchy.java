@@ -84,4 +84,14 @@ public class LocalTaskHierarchy extends TaskHierarchy {
     public LocalTask getChildTask() {
         return mDomainFactory.getLocalFactory().getTaskForce(getChildTaskId());
     }
+
+    @Override
+    public double getOrdinal() {
+        return (mTaskHierarchyRecord.getOrdinal() != null) ? mTaskHierarchyRecord.getOrdinal() : mTaskHierarchyRecord.getStartTime();
+    }
+
+    @Override
+    public void setOrdinal(double ordinal) {
+        mTaskHierarchyRecord.setOrdinal(ordinal);
+    }
 }

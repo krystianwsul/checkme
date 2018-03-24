@@ -78,4 +78,14 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
         mTaskHierarchyJson.setEndTime(endTime);
         addValue(getKey() + "/endTime", endTime);
     }
+
+    @Nullable
+    public Double getOrdinal() {
+        return mTaskHierarchyJson.getOrdinal();
+    }
+
+    public void setOrdinal(double ordinal) {
+        mTaskHierarchyJson.setOrdinal(ordinal);
+        addValue(getKey() + "/ordinal", ordinal);
+    }
 }

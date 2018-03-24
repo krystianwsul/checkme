@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -17,6 +16,7 @@ import android.view.ViewGroup
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
+import com.krystianwsul.checkme.gui.DragHelper
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -49,21 +49,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private var treeViewAdapter: TreeViewAdapter? = null
 
-    private val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
-
-        override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-            val from = viewHolder.adapterPosition
-            val to = target.adapterPosition
-
-            treeViewAdapter!!.moveItemTmp(from, to)
-
-            return true
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) = Unit
-
-        override fun isItemViewSwipeEnabled() = false
-    })
+    private val dragHelper by lazy { DragHelper(treeViewAdapter!!) }
 
     private val selectionCallback = object : SelectionCallback() {
 
@@ -133,7 +119,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             (activity as TaskListListener).onCreateTaskActionMode(mActionMode)
 
-            itemTouchHelper.attachToRecyclerView(taskListRecycler)
+            dragHelper.attachToRecyclerView(taskListRecycler)
         }
 
         override fun onSecondAdded() {
@@ -153,7 +139,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 findItem(R.id.action_task_add).isVisible = false
             }
 
-            itemTouchHelper.attachToRecyclerView(null)
+            dragHelper.attachToRecyclerView(null)
         }
 
         override fun onOtherAdded() {
@@ -179,7 +165,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             (activity as TaskListListener).onDestroyTaskActionMode()
 
-            itemTouchHelper.attachToRecyclerView(null)
+            dragHelper.attachToRecyclerView(null)
         }
 
         override fun onSecondToLastRemoved() {
@@ -190,7 +176,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 findItem(R.id.action_task_add).isVisible = true
             }
 
-            itemTouchHelper.attachToRecyclerView(taskListRecycler)
+            dragHelper.attachToRecyclerView(taskListRecycler)
         }
 
         override fun onOtherRemoved() {
@@ -580,7 +566,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                         setOnLongClickListener {
                             if (treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
-                                taskListFragment.itemTouchHelper.startDrag(viewHolder)
+                                taskListFragment.dragHelper.startDrag(viewHolder)
                                 true
                             } else {
                                 treeNode.onLongClickListener.onLongClick(it)

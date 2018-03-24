@@ -152,11 +152,18 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return mTreeNodeCollection.getItemViewType(position);
     }
 
-    public void moveItemTmp(int from, int to) {
+    public void moveItem(int from, int to) {
         if (mTreeNodeCollection == null)
             throw new SetTreeNodeCollectionNotCalledException();
 
         mTreeNodeCollection.moveItem(from, to);
+    }
+
+    public void setNewItemPosition(int position) {
+        if (mTreeNodeCollection == null)
+            throw new SetTreeNodeCollectionNotCalledException();
+
+        mTreeNodeCollection.setNewItemPosition(position);
     }
 
     @SuppressWarnings("WeakerAccess")

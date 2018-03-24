@@ -832,6 +832,10 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         onLongClick();
     }
 
+    public boolean isExpanded() {
+        return mExpanded;
+    }
+
     @SuppressWarnings("WeakerAccess")
     public static class SetChildTreeNodesNotCalledException extends InitializationException {
         private SetChildTreeNodesNotCalledException() {

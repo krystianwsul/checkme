@@ -227,7 +227,8 @@ public class TreeNodeCollection implements NodeContainer {
     }
 
     void moveItem(int fromPosition, int toPosition) {
-        Assert.assertTrue(mTreeNodes != null);
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
 
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
@@ -239,6 +240,14 @@ public class TreeNodeCollection implements NodeContainer {
             }
         }
         mTreeViewAdapter.notifyItemMoved(fromPosition, toPosition);
+    }
+
+    @NonNull
+    public List<TreeNode> getNodes() {
+        if (mTreeNodes == null)
+            throw new SetTreeNodesNotCalledException();
+
+        return mTreeNodes;
     }
 
     @SuppressWarnings("WeakerAccess")

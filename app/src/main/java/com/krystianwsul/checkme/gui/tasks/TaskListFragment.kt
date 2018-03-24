@@ -10,7 +10,6 @@ import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -56,9 +55,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val from = viewHolder.adapterPosition
             val to = target.adapterPosition
 
-            Log.e("asdf", "drag from " + from + " to " + to)
-
-            treeViewAdapter!!.moveItem(from, to)
+            treeViewAdapter!!.moveItemTmp(from, to)
 
             return true
         }
@@ -582,8 +579,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                             Color.TRANSPARENT)
 
                         setOnLongClickListener {
-                            if (taskListFragment.selectionCallback.hasActionMode()) {
-                                Log.e("asdf", "startDrag")
+                            if (treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
                                 taskListFragment.itemTouchHelper.startDrag(viewHolder)
                                 true
                             } else {

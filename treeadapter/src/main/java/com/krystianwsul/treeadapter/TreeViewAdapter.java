@@ -104,8 +104,9 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mTreeNodeCollection.selectAll();
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_PADDING) {
             Assert.assertTrue(mPaddingLayout != null);
 
@@ -119,7 +120,7 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Assert.assertTrue(position >= 0);
 
         int itemCount = getItemCount();
@@ -151,7 +152,10 @@ public class TreeViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return mTreeNodeCollection.getItemViewType(position);
     }
 
-    public void moveItem(int from, int to) {
+    public void moveItemTmp(int from, int to) {
+        if (mTreeNodeCollection == null)
+            throw new SetTreeNodeCollectionNotCalledException();
+
         mTreeNodeCollection.moveItem(from, to);
     }
 

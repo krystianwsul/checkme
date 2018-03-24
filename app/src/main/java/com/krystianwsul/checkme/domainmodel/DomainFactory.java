@@ -173,10 +173,7 @@ public class DomainFactory {
     }
 
     public boolean isHoldingWakeLock() {
-        if (mTickData != null)
-            return mTickData.mWakelock.isHeld();
-        else
-            return false;
+        return mTickData != null && mTickData.mWakelock.isHeld();
     }
 
     public long getReadMillis() {
@@ -991,8 +988,12 @@ public class DomainFactory {
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
 
-        List<TaskListFragment.ChildTaskData> childTaskDatas = Stream.of(task.getChildTasks(now))
-                .map(childTask -> new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
+        List<TaskListFragment.ChildTaskData> childTaskDatas = Stream.of(task.getChildTaskHierarchies(now))
+                .map(taskHierarchy -> {
+                    Task childTask = taskHierarchy.getChildTask();
+
+                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new TaskListFragment.HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+                })
                 .collect(Collectors.toList());
         Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> lhs.getStartExactTimeStamp().compareTo(rhs.getStartExactTimeStamp()));
 
@@ -1060,7 +1061,7 @@ public class DomainFactory {
 
         Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(mRemoteFriendFactory.getFriends())
                 .map(remoteRootUser -> new ShowProjectLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
-                .collect(Collectors.toMap(userData -> userData.getId(), userData -> userData));
+                .collect(Collectors.toMap(ShowProjectLoader.UserListData::getId, userData -> userData));
 
         String name;
         Set<ShowProjectLoader.UserListData> userListDatas;
@@ -2095,9 +2096,13 @@ public class DomainFactory {
 
     @NonNull
     private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull Task parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
-        return Stream.of(parentTask.getChildTasks(now))
-                .filterNot(childTask -> excludedTaskKeys.contains(childTask.getTaskKey()))
-                .collect(Collectors.toMap(childTask -> new CreateTaskLoader.ParentKey.TaskParentKey(childTask.getTaskKey()), childTask -> new CreateTaskLoader.ParentTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(childTask.getTaskKey()), childTask.getScheduleText(context, now), childTask.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(childTask.getStartExactTimeStamp()))));
+        return Stream.of(parentTask.getChildTaskHierarchies(now))
+                .filterNot(taskHierarchy -> excludedTaskKeys.contains(taskHierarchy.getChildTaskKey()))
+                .collect(Collectors.toMap(taskHierarchy -> new CreateTaskLoader.ParentKey.TaskParentKey(taskHierarchy.getChildTaskKey()), taskHierarchy -> {
+                    Task childTask = taskHierarchy.getChildTask();
+
+                    return new CreateTaskLoader.ParentTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(childTask.getTaskKey()), childTask.getScheduleText(context, now), childTask.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(childTask.getStartExactTimeStamp()));
+                }));
     }
 
     @NonNull
@@ -2293,22 +2298,24 @@ public class DomainFactory {
     }
 
     @NonNull
-    List<Task> getChildTasks(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
+    List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(parentTask.current(exactTimeStamp));
 
         return Stream.of(parentTask.getTaskHierarchiesByParentTaskKey(parentTask.getTaskKey()))
-                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                .map(TaskHierarchy::getChildTask)
-                .filter(childTask -> childTask.current(exactTimeStamp))
-                .sortBy(Task::getStartExactTimeStamp)
+                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp) && taskHierarchy.getChildTask().current(exactTimeStamp))
+                .sortBy(TaskHierarchy::getOrdinal)
                 .collect(Collectors.toList());
     }
 
     @NonNull
     private List<TaskListFragment.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
-        return Stream.of(parentTask.getChildTasks(now))
-                .sortBy(Task::getStartExactTimeStamp)
-                .map(childTask -> new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey()))
+        return Stream.of(parentTask.getChildTaskHierarchies(now))
+                .sortBy(TaskHierarchy::getOrdinal)
+                .map(taskHierarchy -> {
+                    Task childTask = taskHierarchy.getChildTask();
+
+                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new TaskListFragment.HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+                })
                 .collect(Collectors.toList());
     }
 
@@ -2341,8 +2348,12 @@ public class DomainFactory {
 
     @NonNull
     private List<GroupListFragment.TaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now) {
-        return Stream.of(parentTask.getChildTasks(now))
-                .map(childTask -> new GroupListFragment.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp(), childTask.getNote()))
+        return Stream.of(parentTask.getChildTaskHierarchies(now))
+                .map(taskHierarchy -> {
+                    Task childTask = taskHierarchy.getChildTask();
+
+                    return new GroupListFragment.TaskData(childTask.getTaskKey(), childTask.getName(), getChildTaskDatas(childTask, now), childTask.getStartExactTimeStamp(), childTask.getNote());
+                })
                 .collect(Collectors.toList());
     }
 
@@ -2354,7 +2365,7 @@ public class DomainFactory {
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
-                .map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey()))
+                .map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey(), null))
                 .collect(Collectors.toList());
 
         Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> -lhs.getStartExactTimeStamp().compareTo(rhs.getStartExactTimeStamp()));

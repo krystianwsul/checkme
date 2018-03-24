@@ -76,10 +76,10 @@ public abstract class Task {
     public abstract TaskKey getTaskKey();
 
     @NonNull
-    List<Task> getChildTasks(@NonNull ExactTimeStamp exactTimeStamp) {
+    List<TaskHierarchy> getChildTaskHierarchies(@NonNull ExactTimeStamp exactTimeStamp) {
         Assert.assertTrue(current(exactTimeStamp));
 
-        return mDomainFactory.getChildTasks(this, exactTimeStamp);
+        return mDomainFactory.getChildTaskHierarchies(this, exactTimeStamp);
     }
 
     boolean notDeleted(@NonNull ExactTimeStamp exactTimeStamp) {
@@ -151,7 +151,7 @@ public abstract class Task {
             Assert.assertTrue(schedules.isEmpty());
         }
 
-        Stream.of(getChildTasks(now))
+        Stream.of(getChildTaskHierarchies(now))
                 .forEach(childTask -> childTask.setEndExactTimeStamp(now));
 
         TaskHierarchy parentTaskHierarchy = mDomainFactory.getParentTaskHierarchy(this, now);

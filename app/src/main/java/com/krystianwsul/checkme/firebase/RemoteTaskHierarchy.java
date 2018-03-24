@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord;
+import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
@@ -100,5 +101,11 @@ public class RemoteTaskHierarchy extends TaskHierarchy {
     @Override
     public void setOrdinal(double ordinal) {
         mRemoteTaskHierarchyRecord.setOrdinal(ordinal);
+    }
+
+    @NonNull
+    @Override
+    public TaskHierarchyKey getTaskHierarchyKey() {
+        return new TaskHierarchyKey.RemoteTaskHierarchyKey(mRemoteProject.getId(), mRemoteTaskHierarchyRecord.getId());
     }
 }

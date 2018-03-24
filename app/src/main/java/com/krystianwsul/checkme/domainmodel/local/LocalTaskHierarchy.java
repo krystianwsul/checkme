@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy;
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord;
+import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
@@ -93,5 +94,11 @@ public class LocalTaskHierarchy extends TaskHierarchy {
     @Override
     public void setOrdinal(double ordinal) {
         mTaskHierarchyRecord.setOrdinal(ordinal);
+    }
+
+    @Override
+    @NonNull
+    public TaskHierarchyKey getTaskHierarchyKey() {
+        return new TaskHierarchyKey.LocalTaskHierarchyKey(mTaskHierarchyRecord.getId());
     }
 }

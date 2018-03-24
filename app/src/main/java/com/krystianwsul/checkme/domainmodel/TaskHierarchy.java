@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
@@ -52,4 +53,7 @@ public abstract class TaskHierarchy {
     public abstract void setOrdinal(double ordinal);
 
     public abstract void delete();
+
+    @NonNull
+    public abstract TaskHierarchyKey getTaskHierarchyKey();
 }

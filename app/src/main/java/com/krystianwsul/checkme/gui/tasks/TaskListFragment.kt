@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.DragHelper
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -674,7 +675,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 treeNode.remove(childTreeNode)
             }
 
-            override fun getOrdinal() = childTaskData.startExactTimeStamp.long.toDouble() // todo taskHierarchy start timestamp
+            override fun getOrdinal() = childTaskData.hierarchyData!!.ordinal
 
             override fun setOrdinal(ordinal: Double) {
                 // todo
@@ -766,7 +767,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val children: List<ChildTaskData>,
             val note: String?,
             val startExactTimeStamp: ExactTimeStamp,
-            val taskKey: TaskKey)
+            val taskKey: TaskKey,
+            val hierarchyData: HierarchyData?)
+
+    data class HierarchyData(val taskHierarchyKey: TaskHierarchyKey, val ordinal: Double)
 
     interface TaskListListener {
 

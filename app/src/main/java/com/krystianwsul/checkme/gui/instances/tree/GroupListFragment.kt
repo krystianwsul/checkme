@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
@@ -44,8 +45,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     companion object {
 
-        private val EXPANSION_STATE_KEY = "expansionState"
-        private val SELECTED_NODES_KEY = "selectedNodes"
+        private const val EXPANSION_STATE_KEY = "expansionState"
+        private const val SELECTED_NODES_KEY = "selectedNodes"
 
         fun newInstance() = GroupListFragment()
 
@@ -419,14 +420,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
             val instanceDatas = ArrayList(mDataWrapper!!.instanceDatas.values)
 
-            Collections.sort(instanceDatas) { lhs, rhs ->
-                val timeStampComparison = lhs.InstanceTimeStamp.compareTo(rhs.InstanceTimeStamp)
-                if (timeStampComparison != 0) {
-                    return@sort timeStampComparison
-                } else {
-                    return@sort lhs.mTaskStartExactTimeStamp.compareTo(rhs.mTaskStartExactTimeStamp)
-                }
-            }
+            instanceDatas.sort()
 
             val lines = mutableListOf<String>()
 
@@ -463,7 +457,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         instanceData.children
                 .values
-                .sortedBy { it.mTaskStartExactTimeStamp }
+                .sorted()
                 .forEach { printTree(lines, indentation + 1, it) }
     }
 
@@ -903,7 +897,12 @@ class GroupListFragment : AbstractFragment(), FabUser {
         fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean)
     }
 
-    data class DataWrapper(val CustomTimeDatas: List<CustomTimeData>, val TaskEditable: Boolean?, val TaskDatas: List<TaskData>?, val mNote: String?, val instanceDatas: HashMap<InstanceKey, InstanceData>) : InstanceDataParent {
+    data class DataWrapper(
+            val CustomTimeDatas: List<CustomTimeData>,
+            val TaskEditable: Boolean?,
+            val TaskDatas: List<TaskData>?,
+            val mNote: String?,
+            val instanceDatas: HashMap<InstanceKey, InstanceData>) : InstanceDataParent {
 
         override fun remove(instanceKey: InstanceKey) {
             Assert.assertTrue(instanceDatas.containsKey(instanceKey))
@@ -912,7 +911,21 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    data class InstanceData(var Done: ExactTimeStamp?, val InstanceKey: InstanceKey, val DisplayText: String?, val Name: String, val InstanceTimeStamp: TimeStamp, var TaskCurrent: Boolean, val IsRootInstance: Boolean, var IsRootTask: Boolean?, var Exists: Boolean, val InstanceTimePair: TimePair, val mNote: String?, val mTaskStartExactTimeStamp: ExactTimeStamp, val children: HashMap<InstanceKey, InstanceData>) : InstanceDataParent {
+    data class InstanceData(
+            var Done: ExactTimeStamp?,
+            val InstanceKey: InstanceKey,
+            val DisplayText: String?,
+            val Name: String,
+            val InstanceTimeStamp: TimeStamp,
+            var TaskCurrent: Boolean,
+            val IsRootInstance: Boolean,
+            var IsRootTask: Boolean?,
+            var Exists: Boolean,
+            val InstanceTimePair: TimePair,
+            val mNote: String?,
+            private val mTaskStartExactTimeStamp: ExactTimeStamp,
+            val children: HashMap<InstanceKey, InstanceData>,
+            val hierarchyData: HierarchyData?) : InstanceDataParent, Comparable<InstanceData> {
 
         lateinit var instanceDataParent: InstanceDataParent
 
@@ -925,7 +938,25 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
             children.remove(instanceKey)
         }
+
+        override fun compareTo(other: InstanceData): Int {
+            val timeStampComparison = InstanceTimeStamp.compareTo(other.InstanceTimeStamp)
+            if (timeStampComparison != 0)
+                return timeStampComparison
+
+            if (hierarchyData != null) {
+                checkNotNull(other.hierarchyData)
+
+                return hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
+            } else {
+                check(other.hierarchyData == null)
+
+                return mTaskStartExactTimeStamp.compareTo(other.mTaskStartExactTimeStamp)
+            }
+        }
     }
+
+    data class HierarchyData(val hierarchyKey: TaskHierarchyKey, val ordinal: Double)
 
     data class CustomTimeData(val Name: String, val HourMinutes: TreeMap<DayOfWeek, HourMinute>) {
 

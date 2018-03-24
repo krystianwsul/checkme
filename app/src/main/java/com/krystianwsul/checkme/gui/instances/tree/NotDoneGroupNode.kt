@@ -117,7 +117,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     } else {
         Assert.assertTrue(!treeNode.expanded())
 
-        instanceDatas.sortedBy { it.mTaskStartExactTimeStamp }.joinToString(", ") { it.Name }
+        instanceDatas.sorted().joinToString(", ") { it.Name }
     }
 
     override fun getGroupAdapter() = nodeCollection.groupAdapter
@@ -337,7 +337,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                 Assert.assertTrue(singleInstance())
                 Assert.assertTrue(other.singleInstance())
 
-                singleInstanceData.mTaskStartExactTimeStamp.compareTo(other.singleInstanceData.mTaskStartExactTimeStamp)
+                singleInstanceData.compareTo(other.singleInstanceData)
             }
         }
         is UnscheduledNode -> -1
@@ -410,7 +410,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                         })
 
                         if (it.isNotEmpty() && !treeNode.expanded()) {
-                            val children = it.sortedBy { it.mTaskStartExactTimeStamp }.joinToString(", ") { it.Name }
+                            val children = it.sorted().joinToString(", ") { it.Name }
 
                             Pair(children, color())
                         } else if (!instanceData.mNote.isNullOrEmpty()) {
@@ -570,7 +570,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             groupListFragment.activity!!.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity!!, instanceData.InstanceKey))
         }
 
-        override fun compareTo(other: ModelNode) = instanceData.mTaskStartExactTimeStamp.compareTo((other as NotDoneInstanceNode).instanceData.mTaskStartExactTimeStamp)
+        override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
         override val isSelectable = selectable
 

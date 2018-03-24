@@ -264,6 +264,7 @@ public abstract class Task {
                 .flatMap(Stream::of)
                 .map(instance -> instance.getChildInstances(now))
                 .flatMap(Stream::of)
+                .map(pair -> pair.first)
                 .filter(instance -> instance.getTaskKey().equals(getTaskKey()))
                 .collect(Collectors.toList()));
 

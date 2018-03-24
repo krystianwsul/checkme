@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
+import kotlin.collections.HashMap
 
 abstract class Instance protected constructor(protected val domainFactory: DomainFactory) {
 
@@ -94,7 +95,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
 
     abstract fun exists(): Boolean
 
-    fun getChildInstances(now: ExactTimeStamp): List<Instance> {
+    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val task = task
@@ -102,7 +103,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
         val scheduleDateTime = scheduleDateTime
 
         val taskHierarchies = task.getTaskHierarchiesByParentTaskKey(task.taskKey)
-        val childInstances = HashSet<Instance>()
+        val childInstances = HashMap<InstanceKey, Pair<Instance, TaskHierarchy>>()
         for (taskHierarchy in taskHierarchies) {
             checkNotNull(taskHierarchy)
 
@@ -113,11 +114,11 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
 
                 val parentInstance = childInstance.getParentInstance(now)
                 if (parentInstance?.instanceKey == instanceKey)
-                    childInstances.add(childInstance)
+                    childInstances[childInstance.instanceKey] = Pair.create(childInstance, taskHierarchy)
             }
         }
 
-        return ArrayList(childInstances)
+        return ArrayList(childInstances.values)
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp): ExactTimeStamp {

@@ -51,7 +51,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
     override fun cancelNotification(id: Int) {
-        MyCrashlytics.log("NotificationManager.cancel " + id)
+        MyCrashlytics.log("NotificationManager.cancel $id")
         notificationManager.cancel(id)
     }
 
@@ -115,9 +115,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private fun getChildNames(instance: Instance, now: ExactTimeStamp): List<String> {
         val childInstances = instance.getChildInstances(now)
 
-        return childInstances.filter { it.done == null }
-                .sortedBy { it.task.startExactTimeStamp }
-                .map { it.name }
+        return childInstances.filter { it.first!!.done == null }
+                .sortedBy { it.second!!.ordinal }
+                .map { it.first!!.name }
     }
 
     protected open fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
@@ -175,7 +175,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (!silent)
             notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
 
-        MyCrashlytics.log("NotificationManager.notify " + notificationId)
+        MyCrashlytics.log("NotificationManager.notify $notificationId")
         notificationManager.notify(notificationId, notification)
     }
 

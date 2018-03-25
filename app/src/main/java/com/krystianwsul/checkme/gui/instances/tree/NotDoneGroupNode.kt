@@ -282,7 +282,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
         return View.OnLongClickListener {
-            if (groupListFragment.mDataWrapper?.TaskEditable == true && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && mIndentation == 0 && treeNodeCollection.nodes.none { it.isExpanded }) {
+            if (groupListFragment.mDataWrapper?.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && mIndentation == 0 && treeNodeCollection.nodes.none { it.isExpanded }) {
                 check(singleInstance())
 
                 groupListFragment.dragHelper.startDrag(viewHolder)
@@ -410,13 +410,19 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         notDoneGroupCollection.remove(this)
     }
 
-    override fun getOrdinal() = singleInstanceData.hierarchyData!!.ordinal
+    override fun getOrdinal() = singleInstanceData.run { hierarchyData?.ordinal ?: ordinal }
 
     override fun setOrdinal(ordinal: Double) {
-        singleInstanceData.hierarchyData!!.let {
-            it.ordinal = ordinal
+        singleInstanceData.let {
+            if (it.hierarchyData != null) {
+                it.hierarchyData.ordinal = ordinal
 
-            DomainFactory.getDomainFactory().setTaskHierarchyOrdinal(groupListFragment.mDataId!!, it)
+                DomainFactory.getDomainFactory().setTaskHierarchyOrdinal(groupListFragment.mDataId!!, it.hierarchyData)
+            } else {
+                it.ordinal = ordinal
+
+                // todo dataase
+            }
         }
     }
 

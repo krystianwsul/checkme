@@ -934,7 +934,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             val mNote: String?,
             val children: HashMap<InstanceKey, InstanceData>,
             val hierarchyData: HierarchyData?,
-            val ordinal: Double) : InstanceDataParent, Comparable<InstanceData> {
+            var ordinal: Double) : InstanceDataParent, Comparable<InstanceData> {
 
         lateinit var instanceDataParent: InstanceDataParent
 

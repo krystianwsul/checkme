@@ -319,4 +319,6 @@ class LocalInstance : Instance {
     }
 
     override fun belongsToRemoteProject() = false
+
+    override fun getNullableOrdinal() = mInstanceRecord?.ordinal
 }

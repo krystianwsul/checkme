@@ -707,7 +707,7 @@ public class DomainFactory {
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
             HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp(), children, null);
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(instanceData.getInstanceKey(), instanceData);
         }
@@ -776,7 +776,7 @@ public class DomainFactory {
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
             HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp(), children, null);
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
@@ -2126,7 +2126,7 @@ public class DomainFactory {
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
             HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(childInstance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()), childInstance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(childInstance.getInstanceKey(), instanceData);
         }
@@ -2949,7 +2949,7 @@ public class DomainFactory {
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
             HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), task.getStartExactTimeStamp(), children, null);
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
@@ -2977,7 +2977,7 @@ public class DomainFactory {
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
             HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(childInstance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()), childInstance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(childInstance.getInstanceKey(), instanceData);
         }

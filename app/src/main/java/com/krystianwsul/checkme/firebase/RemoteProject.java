@@ -204,7 +204,7 @@ public class RemoteProject {
             instanceMinute = null;
         }
 
-        return new InstanceJson(done, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.getHierarchyTime());
+        return new InstanceJson(done, instanceDate.getYear(), instanceDate.getMonth(), instanceDate.getDay(), instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.getHierarchyTime(), localInstance.getOrdinal());
     }
 
     @NonNull

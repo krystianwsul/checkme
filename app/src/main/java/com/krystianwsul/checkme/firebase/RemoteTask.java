@@ -225,7 +225,7 @@ public class RemoteTask extends Task {
 
     @NonNull
     RemoteInstanceRecord createRemoteInstanceRecord(@NonNull RemoteInstance remoteInstance, @NonNull DateTime scheduleDateTime, @NonNull ExactTimeStamp now) {
-        InstanceJson instanceJson = new InstanceJson(null, null, null, null, null, null, null, now.getLong());
+        InstanceJson instanceJson = new InstanceJson(null, null, null, null, null, null, null, now.getLong(), null);
 
         ScheduleKey scheduleKey = new ScheduleKey(scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
 

@@ -24,33 +24,35 @@ class InstanceRecord(
         mInstanceMinute: Int?,
         val hierarchyTime: Long,
         mNotified: Boolean,
-        mNotificationShown: Boolean) : Record(created) {
+        mNotificationShown: Boolean,
+        mOrdinal: Double?) : Record(created) {
 
     companion object {
 
-        val TABLE_INSTANCES = "instances"
+        const val TABLE_INSTANCES = "instances"
 
-        private val COLUMN_ID = "_id"
-        private val COLUMN_TASK_ID = "taskId"
-        private val COLUMN_DONE = "done"
-        private val COLUMN_SCHEDULE_YEAR = "scheduleYear"
-        private val COLUMN_SCHEDULE_MONTH = "scheduleMonth"
-        private val COLUMN_SCHEDULE_DAY = "scheduleDay"
-        private val COLUMN_SCHEDULE_CUSTOM_TIME_ID = "scheduleCustomTimeId"
-        private val COLUMN_SCHEDULE_HOUR = "scheduleHour"
-        private val COLUMN_SCHEDULE_MINUTE = "scheduleMinute"
-        private val COLUMN_INSTANCE_YEAR = "instanceYear"
-        private val COLUMN_INSTANCE_MONTH = "instanceMonth"
-        private val COLUMN_INSTANCE_DAY = "instanceDay"
-        private val COLUMN_INSTANCE_CUSTOM_TIME_ID = "instanceCustomTimeId"
-        private val COLUMN_INSTANCE_HOUR = "instanceHour"
-        private val COLUMN_INSTANCE_MINUTE = "instanceMinute"
-        private val COLUMN_HIERARCHY_TIME = "hierarchyTime"
-        private val COLUMN_NOTIFIED = "notified"
-        private val COLUMN_NOTIFICATION_SHOWN = "notificationShown"
+        private const val COLUMN_ID = "_id"
+        private const val COLUMN_TASK_ID = "taskId"
+        private const val COLUMN_DONE = "done"
+        private const val COLUMN_SCHEDULE_YEAR = "scheduleYear"
+        private const val COLUMN_SCHEDULE_MONTH = "scheduleMonth"
+        private const val COLUMN_SCHEDULE_DAY = "scheduleDay"
+        private const val COLUMN_SCHEDULE_CUSTOM_TIME_ID = "scheduleCustomTimeId"
+        private const val COLUMN_SCHEDULE_HOUR = "scheduleHour"
+        private const val COLUMN_SCHEDULE_MINUTE = "scheduleMinute"
+        private const val COLUMN_INSTANCE_YEAR = "instanceYear"
+        private const val COLUMN_INSTANCE_MONTH = "instanceMonth"
+        private const val COLUMN_INSTANCE_DAY = "instanceDay"
+        private const val COLUMN_INSTANCE_CUSTOM_TIME_ID = "instanceCustomTimeId"
+        private const val COLUMN_INSTANCE_HOUR = "instanceHour"
+        private const val COLUMN_INSTANCE_MINUTE = "instanceMinute"
+        private const val COLUMN_HIERARCHY_TIME = "hierarchyTime"
+        private const val COLUMN_NOTIFIED = "notified"
+        private const val COLUMN_NOTIFICATION_SHOWN = "notificationShown"
+        const val COLUMN_ORDINAL = "ordinal"
 
-        private val INDEX_TASK_SCHEDULE_HOUR_MINUTE = "instanceIndexTaskScheduleHourMinute"
-        private val INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID = "instanceIndexTaskScheduleCustomTimeId"
+        private const val INDEX_TASK_SCHEDULE_HOUR_MINUTE = "instanceIndexTaskScheduleHourMinute"
+        private const val INDEX_TASK_SCHEDULE_CUSTOM_TIME_ID = "instanceIndexTaskScheduleCustomTimeId"
 
         fun onCreate(sqLiteDatabase: SQLiteDatabase) {
             sqLiteDatabase.execSQL("CREATE TABLE $TABLE_INSTANCES " +
@@ -71,7 +73,8 @@ class InstanceRecord(
                     "$COLUMN_INSTANCE_MINUTE INTEGER, " +
                     "$COLUMN_HIERARCHY_TIME INTEGER NOT NULL, " +
                     "$COLUMN_NOTIFIED INTEGER NOT NULL DEFAULT 0, " +
-                    "$COLUMN_NOTIFICATION_SHOWN INTEGER NOT NULL DEFAULT 0);")
+                    "$COLUMN_NOTIFICATION_SHOWN INTEGER NOT NULL DEFAULT 0," +
+                    "$COLUMN_ORDINAL REAL);")
 
             sqLiteDatabase.execSQL("CREATE UNIQUE INDEX $INDEX_TASK_SCHEDULE_HOUR_MINUTE ON $TABLE_INSTANCES " +
                     "(" +
@@ -112,6 +115,7 @@ class InstanceRecord(
             val hierarchyTime = getLong(15)
             val notified = getInt(16) == 1
             val notificationShown = getInt(17) == 1
+            val ordinal = if (isNull(18)) null else getDouble(18)
 
             check(scheduleHour == null == (scheduleMinute == null))
             check(scheduleHour == null != (scheduleCustomTimeId == null))
@@ -126,7 +130,7 @@ class InstanceRecord(
             val hasInstanceTime = instanceHour != null || instanceCustomTimeId != null
             check(hasInstanceDate == hasInstanceTime)
 
-            InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown)
+            InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown, ordinal)
         }
 
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = Record.getMaxId(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID)
@@ -150,6 +154,8 @@ class InstanceRecord(
 
     var notificationShown by observable(mNotificationShown) { _, _, _ -> changed = true }
 
+    val ordinal by observable(mOrdinal) { _, _, _ -> changed = true }
+
     init {
         check(scheduleHour == null == (scheduleMinute == null))
         check(scheduleHour == null != (scheduleCustomTimeId == null))
@@ -166,24 +172,25 @@ class InstanceRecord(
 
     override val contentValues
         get() = ContentValues().apply {
-        put(COLUMN_TASK_ID, taskId)
-        put(COLUMN_DONE, done)
-        put(COLUMN_SCHEDULE_YEAR, scheduleYear)
-        put(COLUMN_SCHEDULE_MONTH, scheduleMonth)
-        put(COLUMN_SCHEDULE_DAY, scheduleDay)
-        put(COLUMN_SCHEDULE_CUSTOM_TIME_ID, scheduleCustomTimeId)
-        put(COLUMN_SCHEDULE_HOUR, scheduleHour)
-        put(COLUMN_SCHEDULE_MINUTE, scheduleMinute)
-        put(COLUMN_INSTANCE_YEAR, instanceYear)
-        put(COLUMN_INSTANCE_MONTH, instanceMonth)
-        put(COLUMN_INSTANCE_DAY, instanceDay)
-        put(COLUMN_INSTANCE_CUSTOM_TIME_ID, instanceCustomTimeId)
-        put(COLUMN_INSTANCE_HOUR, instanceHour)
-        put(COLUMN_INSTANCE_MINUTE, instanceMinute)
-        put(COLUMN_HIERARCHY_TIME, hierarchyTime)
-        put(COLUMN_NOTIFIED, if (notified) 1 else 0)
-        put(COLUMN_NOTIFICATION_SHOWN, if (notificationShown) 1 else 0)
-    }
+            put(COLUMN_TASK_ID, taskId)
+            put(COLUMN_DONE, done)
+            put(COLUMN_SCHEDULE_YEAR, scheduleYear)
+            put(COLUMN_SCHEDULE_MONTH, scheduleMonth)
+            put(COLUMN_SCHEDULE_DAY, scheduleDay)
+            put(COLUMN_SCHEDULE_CUSTOM_TIME_ID, scheduleCustomTimeId)
+            put(COLUMN_SCHEDULE_HOUR, scheduleHour)
+            put(COLUMN_SCHEDULE_MINUTE, scheduleMinute)
+            put(COLUMN_INSTANCE_YEAR, instanceYear)
+            put(COLUMN_INSTANCE_MONTH, instanceMonth)
+            put(COLUMN_INSTANCE_DAY, instanceDay)
+            put(COLUMN_INSTANCE_CUSTOM_TIME_ID, instanceCustomTimeId)
+            put(COLUMN_INSTANCE_HOUR, instanceHour)
+            put(COLUMN_INSTANCE_MINUTE, instanceMinute)
+            put(COLUMN_HIERARCHY_TIME, hierarchyTime)
+            put(COLUMN_NOTIFIED, if (notified) 1 else 0)
+            put(COLUMN_NOTIFICATION_SHOWN, if (notificationShown) 1 else 0)
+            put(COLUMN_ORDINAL, ordinal)
+        }
 
     override val commandTable = TABLE_INSTANCES
     override val commandIdColumn = COLUMN_ID

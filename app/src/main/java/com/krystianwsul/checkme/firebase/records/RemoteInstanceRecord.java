@@ -244,4 +244,17 @@ public class RemoteInstanceRecord extends RemoteRecord {
         mInstanceJson.setDone(done);
         addValue(getKey() + "/done", done);
     }
+
+    @Nullable
+    public Double getOrdinal() {
+        return mInstanceJson.getOrdinal();
+    }
+
+    public void setOrdinal(double ordinal) {
+        if (getOrdinal() != null && getOrdinal().equals(ordinal))
+            return;
+
+        mInstanceJson.setOrdinal(ordinal);
+        addValue(getKey() + "/ordinal", ordinal);
+    }
 }

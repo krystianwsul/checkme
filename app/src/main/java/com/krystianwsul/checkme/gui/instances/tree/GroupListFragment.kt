@@ -932,9 +932,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
             var Exists: Boolean,
             val InstanceTimePair: TimePair,
             val mNote: String?,
-            private val mTaskStartExactTimeStamp: ExactTimeStamp,
             val children: HashMap<InstanceKey, InstanceData>,
-            val hierarchyData: HierarchyData?) : InstanceDataParent, Comparable<InstanceData> {
+            val hierarchyData: HierarchyData?,
+            val ordinal: Double) : InstanceDataParent, Comparable<InstanceData> {
 
         lateinit var instanceDataParent: InstanceDataParent
 
@@ -960,7 +960,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             } else {
                 check(other.hierarchyData == null)
 
-                mTaskStartExactTimeStamp.compareTo(other.mTaskStartExactTimeStamp)
+                ordinal.compareTo(other.ordinal)
             }
         }
     }

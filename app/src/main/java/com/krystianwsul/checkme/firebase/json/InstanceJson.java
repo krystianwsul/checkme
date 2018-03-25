@@ -18,12 +18,15 @@ public class InstanceJson {
 
     private long hierarchyTime;
 
+    @Nullable
+    private Double ordinal;
+
     @SuppressWarnings("unused")
     public InstanceJson() {
 
     }
 
-    public InstanceJson(@Nullable Long done, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable String instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime) {
+    public InstanceJson(@Nullable Long done, @Nullable Integer instanceYear, @Nullable Integer instanceMonth, @Nullable Integer instanceDay, @Nullable String instanceCustomTimeId, @Nullable Integer instanceHour, @Nullable Integer instanceMinute, long hierarchyTime, @Nullable Double ordinal) {
         Assert.assertTrue((instanceYear == null) == (instanceMonth == null));
         Assert.assertTrue((instanceYear == null) == (instanceDay == null));
         boolean hasInstanceDate = (instanceYear != null);
@@ -45,6 +48,8 @@ public class InstanceJson {
         this.instanceMinute = instanceMinute;
 
         this.hierarchyTime = hierarchyTime;
+
+        this.ordinal = ordinal;
     }
 
     public Long getDone() {
@@ -111,5 +116,14 @@ public class InstanceJson {
 
     public void setDone(@Nullable Long done) {
         this.done = done;
+    }
+
+    @Nullable
+    public Double getOrdinal() {
+        return ordinal;
+    }
+
+    public void setOrdinal(double ordinal) {
+        this.ordinal = ordinal;
     }
 }

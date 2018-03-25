@@ -344,7 +344,7 @@ class PersistenceManger(
 
         val id = ++instanceMaxId
 
-        return InstanceRecord(false, id, localTask.id, null, scheduleDate.year, scheduleDate.month, scheduleDate.day, scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.long!!, false, false).also {
+        return InstanceRecord(false, id, localTask.id, null, scheduleDate.year, scheduleDate.month, scheduleDate.day, scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.long!!, false, false, null).also {
             _instanceRecords.add(it)
         }
     }

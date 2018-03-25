@@ -434,4 +434,13 @@ public class RemoteInstance extends Instance {
             return null; // scenario already covered by task/schedule relevance
         }
     }
+
+    @Nullable
+    @Override
+    protected Double getNullableOrdinal() {
+        if (mRemoteInstanceRecord != null)
+            return mRemoteInstanceRecord.getOrdinal();
+        else
+            return null;
+    }
 }

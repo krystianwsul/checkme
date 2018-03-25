@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
@@ -17,17 +18,13 @@ import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.AbstractFragment
-import com.krystianwsul.checkme.gui.FabUser
-import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.EditInstanceActivity
 import com.krystianwsul.checkme.gui.instances.EditInstancesActivity
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
@@ -37,8 +34,7 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import junit.framework.Assert
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
+import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 class GroupListFragment : AbstractFragment(), FabUser {
@@ -112,9 +108,13 @@ class GroupListFragment : AbstractFragment(), FabUser {
     private var mExpansionState: ExpansionState? = null
     private var mSelectedNodes: ArrayList<InstanceKey>? = null
 
-    private var mDataId: Int? = null
+    var mDataId: Int? = null
+        private set
 
-    private var mDataWrapper: DataWrapper? = null
+    var mDataWrapper: DataWrapper? = null
+        private set
+
+    val dragHelper by lazy { DragHelper(mTreeViewAdapter!!) }
 
     val mSelectionCallback: SelectionCallback = object : SelectionCallback() {
 
@@ -314,10 +314,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
             (activity as GroupListListener).onCreateGroupActionMode(mActionMode)
 
             updateMenu()
+
+            dragHelper.attachToRecyclerView(mGroupListRecycler)
         }
 
         override fun onSecondAdded() {
             updateMenu()
+
+            dragHelper.attachToRecyclerView(null)
         }
 
         override fun onOtherAdded() {
@@ -330,10 +334,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
 
             (activity as GroupListListener).onDestroyGroupActionMode()
+
+            dragHelper.attachToRecyclerView(null)
         }
 
         override fun onSecondToLastRemoved() {
             updateMenu()
+
+            dragHelper.attachToRecyclerView(mGroupListRecycler)
         }
 
         override fun onOtherRemoved() {
@@ -793,6 +801,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         private var mTreeViewAdapter: TreeViewAdapter? = null
 
+        lateinit var treeNodeCollection: TreeNodeCollection
+            private set
+
         private var mNodeCollection: NodeCollection? = null
 
         private val mDensity = mGroupListFragment.activity!!.resources.displayMetrics.density
@@ -818,7 +829,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
             mTreeViewAdapter = TreeViewAdapter(this, if (mShowFab) R.layout.row_group_list_fab_padding else null)
 
-            val treeNodeCollection = TreeNodeCollection(mTreeViewAdapter!!)
+            treeNodeCollection = TreeNodeCollection(mTreeViewAdapter!!)
 
             mNodeCollection = NodeCollection(mDensity, 0, this, useGroups, treeNodeCollection, note)
 
@@ -878,15 +889,13 @@ class GroupListFragment : AbstractFragment(), FabUser {
         class GroupHolder(val mGroupRow: LinearLayout, val mGroupRowContainer: LinearLayout, val mGroupRowName: TextView, val mGroupRowDetails: TextView, val mGroupRowChildren: TextView, val mGroupRowExpand: ImageView, val mGroupRowCheckBox: CheckBox, val mGroupRowSeparator: View) : RecyclerView.ViewHolder(mGroupRow)
     }
 
-    @PaperParcel
-    class ExpansionState(val DoneExpanded: Boolean, val ExpandedGroups: List<TimeStamp>, val ExpandedInstances: HashMap<InstanceKey, Boolean>, val UnscheduledExpanded: Boolean, val ExpandedTaskKeys: List<TaskKey>?) : PaperParcelable {
-
-        companion object {
-
-            @JvmField
-            val CREATOR = PaperParcelGroupListFragment_ExpansionState.CREATOR
-        }
-    }
+    @Parcelize
+    class ExpansionState(
+            val DoneExpanded: Boolean,
+            val ExpandedGroups: List<TimeStamp>,
+            val ExpandedInstances: HashMap<InstanceKey, Boolean>,
+            val UnscheduledExpanded: Boolean,
+            val ExpandedTaskKeys: List<TaskKey>?) : Parcelable
 
     interface GroupListListener {
 
@@ -944,19 +953,17 @@ class GroupListFragment : AbstractFragment(), FabUser {
             if (timeStampComparison != 0)
                 return timeStampComparison
 
-            if (hierarchyData != null) {
+            return if (hierarchyData != null) {
                 checkNotNull(other.hierarchyData)
 
-                return hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
+                hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
             } else {
                 check(other.hierarchyData == null)
 
-                return mTaskStartExactTimeStamp.compareTo(other.mTaskStartExactTimeStamp)
+                mTaskStartExactTimeStamp.compareTo(other.mTaskStartExactTimeStamp)
             }
         }
     }
-
-    data class HierarchyData(val hierarchyKey: TaskHierarchyKey, val ordinal: Double)
 
     data class CustomTimeData(val Name: String, val HourMinutes: TreeMap<DayOfWeek, HourMinute>) {
 

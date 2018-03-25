@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
+import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -41,7 +42,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         return treeNode
     }
 
-    private fun expanded() = treeNode.expanded()
+    private fun expanded() = treeNode.isExpanded
 
     fun addExpandedInstances(expandedInstances: Map<InstanceKey, Boolean>) {
         if (!expanded())
@@ -111,7 +112,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         check(!instanceData.children.isEmpty())
         check(this.treeNode.expandVisible)
 
-        return if (this.treeNode.expanded())
+        return if (this.treeNode.isExpanded)
             R.drawable.ic_expand_less_black_36dp
         else
             R.drawable.ic_expand_more_black_36dp
@@ -151,7 +152,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override fun getBackgroundColor() = Color.TRANSPARENT
 
-    override fun getOnLongClickListener() = treeNode.onLongClickListener
+    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
     override fun getOnClickListener() = this.treeNode.onClickListener
 

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
+import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.treeadapter.ModelNode
@@ -57,7 +58,7 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
 
     override fun getBackgroundColor() = Color.TRANSPARENT
 
-    override fun getOnLongClickListener(): View.OnLongClickListener? = null
+    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener? = null
 
     override fun getOnClickListener(): View.OnClickListener? = null
 

@@ -86,7 +86,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     }
 
     @Override
-    public boolean expanded() {
+    public boolean isExpanded() {
         Assert.assertTrue(!mExpanded || visibleSize() > 1);
 
         return mExpanded;
@@ -462,7 +462,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
             Assert.assertTrue(nodeContainer instanceof TreeNode);
             TreeNode parent = (TreeNode) nodeContainer;
 
-            return (parent.visible() && parent.expanded());
+            return (parent.visible() && parent.isExpanded());
         }
     }
 
@@ -482,7 +482,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         int oldChildPosition = treeNodeCollection.getPosition(childTreeNode);
 
-        boolean expanded = expanded();
+        boolean expanded = isExpanded();
         boolean visible = visible();
 
         mChildTreeNodes.remove(childTreeNode);
@@ -674,7 +674,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     public boolean getSeparatorVisibility() {
         NodeContainer parent = getParent();
 
-        if (!parent.expanded())
+        if (!parent.isExpanded())
             throw new InvisibleNodeException();
 
         TreeNodeCollection treeNodeCollection = getTreeNodeCollection();
@@ -690,7 +690,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
 
         TreeNode nextTreeNode = treeNodeCollection.getNode(positionInCollection + 1);
 
-        return (nextTreeNode.expanded() || mModelNode.isSeparatorVisibleWhenNotExpanded());
+        return (nextTreeNode.isExpanded() || mModelNode.isSeparatorVisibleWhenNotExpanded());
     }
 
     @NonNull
@@ -832,10 +832,6 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
         onLongClick();
     }
 
-    public boolean isExpanded() {
-        return mExpanded;
-    }
-
     @SuppressWarnings("WeakerAccess")
     public static class SetChildTreeNodesNotCalledException extends InitializationException {
         private SetChildTreeNodesNotCalledException() {
@@ -881,7 +877,7 @@ public class TreeNode implements Comparable<TreeNode>, NodeContainer {
     @SuppressWarnings("WeakerAccess")
     public static class SelectedChildrenException extends UnsupportedOperationException {
         private SelectedChildrenException() {
-            super("A TreeNode cannot be collaped if it has selected children.");
+            super("A TreeNode cannot be collapsed if it has selected children.");
         }
     }
 

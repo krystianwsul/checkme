@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
+import android.support.v7.widget.RecyclerView
 import android.view.View
 
 import com.krystianwsul.checkme.R
@@ -52,7 +53,7 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
 
     override fun getGroupAdapter() = taskParent.groupAdapter
 
-    private fun expanded() = treeNode.expanded()
+    private fun expanded() = treeNode.isExpanded
 
     override fun compareTo(other: ModelNode) = (other as TaskNode).taskData.mStartExactTimeStamp.let {
         if (mIndentation == 0) {
@@ -109,7 +110,7 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
 
         Assert.assertTrue(!taskData.Children.isEmpty())
 
-        return if (treeNode.expanded())
+        return if (treeNode.isExpanded)
             R.drawable.ic_expand_less_black_36dp
         else
             R.drawable.ic_expand_more_black_36dp
@@ -132,7 +133,7 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
 
     override fun getBackgroundColor() = Color.TRANSPARENT
 
-    override fun getOnLongClickListener() = treeNode.onLongClickListener
+    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
     override fun getOnClickListener() = treeNode.onClickListener
 

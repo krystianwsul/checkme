@@ -56,7 +56,7 @@ public abstract class GroupHolderNode implements ModelNode {
     abstract int getBackgroundColor();
 
     @Nullable
-    abstract View.OnLongClickListener getOnLongClickListener();
+    abstract View.OnLongClickListener getOnLongClickListener(RecyclerView.ViewHolder viewHolder);
 
     @Nullable
     abstract View.OnClickListener getOnClickListener();
@@ -116,7 +116,7 @@ public abstract class GroupHolderNode implements ModelNode {
 
         groupHolder.getMGroupRow().setBackgroundColor(getBackgroundColor());
 
-        groupHolder.getMGroupRow().setOnLongClickListener(getOnLongClickListener());
+        groupHolder.getMGroupRow().setOnLongClickListener(getOnLongClickListener(viewHolder));
 
         groupHolder.getMGroupRow().setOnClickListener(getOnClickListener());
     }

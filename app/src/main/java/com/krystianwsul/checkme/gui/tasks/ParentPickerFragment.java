@@ -350,7 +350,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                     taskHolder.mTaskRowImg.setVisibility(View.VISIBLE);
 
-                    if (treeNode.expanded())
+                    if (treeNode.isExpanded())
                         taskHolder.mTaskRowImg.setImageResource(R.drawable.ic_expand_less_black_36dp);
                     else
                         taskHolder.mTaskRowImg.setImageResource(R.drawable.ic_expand_more_black_36dp);
@@ -367,13 +367,13 @@ public class ParentPickerFragment extends AbstractDialogFragment {
                     taskHolder.mTaskRowDetails.setText(mParentTreeData.getScheduleText());
                 }
 
-                if ((mParentTreeData.getParentTreeDatas().isEmpty() || treeNode.expanded()) && TextUtils.isEmpty(mParentTreeData.getNote())) {
+                if ((mParentTreeData.getParentTreeDatas().isEmpty() || treeNode.isExpanded()) && TextUtils.isEmpty(mParentTreeData.getNote())) {
                     taskHolder.mTaskRowChildren.setVisibility(View.GONE);
                 } else {
                     taskHolder.mTaskRowChildren.setVisibility(View.VISIBLE);
 
                     String text;
-                    if (!mParentTreeData.getParentTreeDatas().isEmpty() && !treeNode.expanded()) {
+                    if (!mParentTreeData.getParentTreeDatas().isEmpty() && !treeNode.isExpanded()) {
                         text = Stream.of(mParentTreeData.getParentTreeDatas().values())
                                 .map(CreateTaskLoader.ParentTreeData::getName)
                                 .collect(Collectors.joining(", "));
@@ -442,7 +442,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
                 TreeNode treeNode = getTreeNode();
 
-                if (treeNode.expanded()) {
+                if (treeNode.isExpanded()) {
                     expandedParentKeys.add(mParentTreeData.getParentKey());
 
                     expandedParentKeys.addAll(Stream.of(mTaskWrappers)

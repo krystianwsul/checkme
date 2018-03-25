@@ -141,7 +141,7 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
             treeViewAdapter.notifyItemChanged(oldPosition - 1)
     }
 
-    override fun expanded() = true
+    override fun isExpanded() = true
 
     override fun update() = Unit
 
@@ -181,9 +181,11 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
             throw SetTreeNodesNotCalledException()
 
         treeNodes!!.let { treeNodes ->
-            val previousNode = position.takeIf { it > 0 }?.let { treeNodes[position - 1] }
-            val node = treeNodes[position]
-            val nextNode = position.takeIf { it < treeNodes.size - 1 }?.let { treeNodes[position + 1] }
+            val visibleNodes = treeNodes.filter { it.canBeShown() }
+
+            val previousNode = position.takeIf { it > 0 }?.let { visibleNodes[position - 1] }
+            val node = visibleNodes[position]
+            val nextNode = position.takeIf { it < visibleNodes.size - 1 }?.let { visibleNodes[position + 1] }
 
             val previousOrdinal = previousNode?.modelNode?.getOrdinal() ?: -Double.MAX_VALUE
             val nextOrdinal = nextNode?.modelNode?.getOrdinal() ?: Double.MAX_VALUE

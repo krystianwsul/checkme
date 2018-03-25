@@ -40,6 +40,7 @@ import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.json.UserWrapper;
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
+import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
@@ -994,7 +995,7 @@ public class DomainFactory {
                 .map(taskHierarchy -> {
                     Task childTask = taskHierarchy.getChildTask();
 
-                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new TaskListFragment.HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
                 })
                 .collect(Collectors.toList());
         Collections.sort(childTaskDatas, TaskListFragment.ChildTaskData::compareTo);
@@ -1528,7 +1529,7 @@ public class DomainFactory {
         notifyCloud(context, task.getRemoteNullableProject());
     }
 
-    public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull TaskListFragment.HierarchyData hierarchyData) {
+    public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull HierarchyData hierarchyData) {
         MyCrashlytics.log("DomainFactory.setTaskHierarchyOrdinal");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -2125,7 +2126,7 @@ public class DomainFactory {
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
             HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(childInstance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp(), children, new GroupListFragment.HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(childInstance.getInstanceKey(), instanceData);
         }
@@ -2353,7 +2354,7 @@ public class DomainFactory {
                 .map(taskHierarchy -> {
                     Task childTask = taskHierarchy.getChildTask();
 
-                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new TaskListFragment.HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
                 })
                 .collect(Collectors.toList());
     }
@@ -2976,7 +2977,7 @@ public class DomainFactory {
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
             HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(childInstance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp(), children, new GroupListFragment.HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), childTask.getStartExactTimeStamp(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(childInstance.getInstanceKey(), instanceData);
         }

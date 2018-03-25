@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Color
 import android.support.v4.content.ContextCompat
+import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.TaskKey
@@ -35,7 +36,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
         it.initialize(treeNode, expandedTaskKeys)
     }
 
-    fun expanded() = treeNode.expanded()
+    fun expanded() = treeNode.isExpanded
 
     override fun getGroupAdapter() = nodeCollection.groupAdapter
 
@@ -72,7 +73,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
     override fun getExpandImageResource(): Int {
         check(treeNode.expandVisible)
 
-        return if (treeNode.expanded())
+        return if (treeNode.isExpanded)
             R.drawable.ic_expand_less_black_36dp
         else
             R.drawable.ic_expand_more_black_36dp
@@ -94,7 +95,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
 
     override fun getBackgroundColor() = Color.TRANSPARENT
 
-    override fun getOnLongClickListener() = treeNode.onLongClickListener
+    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
     override fun getOnClickListener() = treeNode.onClickListener
 

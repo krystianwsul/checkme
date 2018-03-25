@@ -9,19 +9,14 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.AbstractFragment
-import com.krystianwsul.checkme.gui.DragHelper
-import com.krystianwsul.checkme.gui.FabUser
-import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -456,9 +451,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
         private fun initialize(density: Float, taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?): TreeViewAdapter {
             treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
 
-            this.treeNodeCollection = TreeNodeCollection(treeViewAdapter)
+            treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
-            treeViewAdapter.setTreeNodeCollection(this.treeNodeCollection)
+            treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
             val treeNodes = mutableListOf<TreeNode>()
 
@@ -476,7 +471,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 taskWrappers.add(taskWrapper)
             }
 
-            this.treeNodeCollection.nodes = treeNodes
+            treeNodeCollection.nodes = treeNodes
 
             return treeViewAdapter
         }
@@ -519,7 +514,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 get() = mutableListOf<TaskKey>().apply {
                     val treeNode = this@TaskWrapper.treeNode
 
-                    if (treeNode.expanded()) {
+                    if (treeNode.isExpanded) {
                         add(childTaskData.taskKey)
 
                         addAll(taskWrappers.flatMap { it.expandedTaskKeys })
@@ -559,7 +554,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                Log.e("asf", "getting ordinal: " + childTaskData.hierarchyData?.ordinal + " for " + childTaskData.name)
                 (viewHolder as TaskHolder).run {
                     itemView.run {
                         setBackgroundColor(if (treeNode.isSelected)
@@ -588,7 +582,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         } else {
                             check(!childTaskData.children.isEmpty())
 
-                            setImageResource(if (treeNode.expanded())
+                            setImageResource(if (treeNode.isExpanded)
                                 R.drawable.ic_expand_less_black_36dp
                             else
                                 R.drawable.ic_expand_more_black_36dp)
@@ -614,10 +608,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     }
 
                     taskRowChildren.run {
-                        visibility = if ((childTaskData.children.isEmpty() || treeNode.expanded()) && childTaskData.note.isNullOrEmpty()) {
+                        visibility = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
                             View.GONE
                         } else {
-                            text = if (!childTaskData.children.isEmpty() && !treeNode.expanded()) {
+                            text = if (!childTaskData.children.isEmpty() && !treeNode.isExpanded) {
                                 childTaskData.children.joinToString(", ") { it.name }
                             } else {
                                 check(!childTaskData.note.isNullOrEmpty())
@@ -681,7 +675,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override fun setOrdinal(ordinal: Double) {
                 childTaskData.hierarchyData!!.ordinal = ordinal
-                Log.e("asf", "setting ordinal: " + ordinal + " for " + childTaskData.name)
 
                 DomainFactory.getDomainFactory().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
             }
@@ -785,8 +778,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             startExactTimeStamp.compareTo(other.startExactTimeStamp)
         }
     }
-
-    data class HierarchyData(val taskHierarchyKey: TaskHierarchyKey, var ordinal: Double)
 
     interface TaskListListener {
 

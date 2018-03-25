@@ -8,7 +8,8 @@ public interface NodeContainer {
     int displayedSize();
 
     int getPosition(@NonNull TreeNode treeNode);
-    boolean expanded();
+
+    boolean isExpanded();
 
     void update();
 

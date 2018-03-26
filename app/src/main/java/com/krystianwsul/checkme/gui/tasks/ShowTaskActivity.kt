@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
+import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.loaders.ShowTaskLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
@@ -95,6 +96,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
             findItem(R.id.task_menu_share).isVisible = data != null
             findItem(R.id.task_menu_delete).isVisible = data != null
             findItem(R.id.task_menu_select_all).isVisible = selectAllVisible
+            findItem(R.id.task_menu_show_instances).isVisible = data?.hasInstances == true
         }
 
         return true
@@ -119,9 +121,8 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
 
                 finish()
             }
-            R.id.task_menu_select_all -> {
-                taskListFragment.selectAll()
-            }
+            R.id.task_menu_select_all -> taskListFragment.selectAll()
+            R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKey))
             else -> throw UnsupportedOperationException()
         }
         return true

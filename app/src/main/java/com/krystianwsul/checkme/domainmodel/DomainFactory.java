@@ -57,6 +57,7 @@ import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
+import com.krystianwsul.checkme.loaders.ShowTaskInstancesLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.notifications.TickJobIntentService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
@@ -746,6 +747,41 @@ public class DomainFactory {
     }
 
     @NonNull
+    public synchronized ShowTaskInstancesLoader.Data getShowTaskInstancesData(@NonNull TaskKey taskKey) {
+        fakeDelay();
+
+        MyCrashlytics.log("DomainFactory.getShowTaskInstancesData");
+
+        Task task = getTaskForce(taskKey);
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
+                .collect(Collectors.toList());
+
+        Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
+
+        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = Stream.of(task.getExistingInstances().values())
+                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> {
+                    HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
+
+                    HierarchyData hierarchyData;
+                    if (task.isRootTask(now)) {
+                        hierarchyData = null;
+                    } else {
+                        TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
+                        Assert.assertTrue(taskHierarchy != null);
+
+                        hierarchyData = new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal());
+                    }
+
+                    return new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(MyApplication.instance, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, hierarchyData, instance.getOrdinal());
+                }, HashMap::new));
+
+        return new ShowTaskInstancesLoader.Data(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
+    }
+
+
     public synchronized ShowNotificationGroupLoader.Data getShowNotificationGroupData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
         fakeDelay();
 
@@ -1000,7 +1036,7 @@ public class DomainFactory {
                 .collect(Collectors.toList());
         Collections.sort(childTaskDatas, TaskListFragment.ChildTaskData::compareTo);
 
-        return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()));
+        return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()), !task.getExistingInstances().isEmpty());
     }
 
     @NonNull

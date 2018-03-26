@@ -25,7 +25,7 @@ class ShowNotificationGroupLoader(context: Context, private val instanceKeys: Se
         Assert.assertTrue(!instanceKeys.isEmpty())
     }
 
-    override val name = "ShowNotificationGroupLoader, instanceKeys: " + instanceKeys
+    override val name = "ShowNotificationGroupLoader, instanceKeys: $instanceKeys"
 
     override fun loadDomain(domainFactory: DomainFactory): Data {
         Assert.assertTrue(!instanceKeys.isEmpty())

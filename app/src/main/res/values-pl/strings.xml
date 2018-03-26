@@ -66,4 +66,5 @@
     <string name="projects">Projekty</string>
     <string name="projects_empty">Dodaj projekt klikając w plusa na dole.</string>
     <string name="parentProject">Projekt</string>
+    <string name="showInstances">Pokaż przypomnienia</string>
 </resources>

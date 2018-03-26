@@ -104,6 +104,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
     private var mTimeStamp: TimeStamp? = null
     private var mInstanceKey: InstanceKey? = null
 
+    var taskKey: TaskKey? = null
+        private set
+
     var mInstanceKeys: Set<InstanceKey>? = null
         private set
 
@@ -513,6 +516,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         Assert.assertTrue(mTimeStamp == null)
         Assert.assertTrue(mInstanceKey == null)
         Assert.assertTrue(mInstanceKeys == null)
+        check(taskKey == null)
 
         Assert.assertTrue(position >= 0)
 
@@ -528,6 +532,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         Assert.assertTrue(mTimeStamp == null || mTimeStamp == timeStamp)
         Assert.assertTrue(mInstanceKey == null)
         Assert.assertTrue(mInstanceKeys == null)
+        check(taskKey == null)
 
         mTimeStamp = timeStamp
 
@@ -539,6 +544,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         Assert.assertTrue(mTimeRange == null)
         Assert.assertTrue(mTimeStamp == null)
         Assert.assertTrue(mInstanceKeys == null)
+        check(taskKey == null)
 
         mInstanceKey = instanceKey
 
@@ -550,8 +556,21 @@ class GroupListFragment : AbstractFragment(), FabUser {
         Assert.assertTrue(mTimeRange == null)
         Assert.assertTrue(mTimeStamp == null)
         Assert.assertTrue(mInstanceKey == null)
+        check(taskKey == null)
 
         mInstanceKeys = instanceKeys
+
+        initialize(dataId, dataWrapper)
+    }
+
+    fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) {
+        Assert.assertTrue(mPosition == null)
+        Assert.assertTrue(mTimeRange == null)
+        Assert.assertTrue(mTimeStamp == null)
+        Assert.assertTrue(mInstanceKey == null)
+        check(this.taskKey == null)
+
+        this.taskKey = taskKey
 
         initialize(dataId, dataWrapper)
     }
@@ -641,9 +660,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     R.string.empty_disabled
                 }
             }
-            else -> {
+            mInstanceKeys != null -> {
                 Assert.assertTrue(mInstanceKeys!!.isNotEmpty())
                 Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+
+                null
+            }
+            else -> {
+                checkNotNull(taskKey)
 
                 null
             }
@@ -758,9 +782,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                 return mDataWrapper!!.TaskEditable!!
             }
-            else -> {
+            mInstanceKeys != null -> {
                 Assert.assertTrue(mInstanceKeys!!.isNotEmpty())
                 Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+
+                return false
+            }
+            else -> {
+                check(taskKey != null)
 
                 return false
             }

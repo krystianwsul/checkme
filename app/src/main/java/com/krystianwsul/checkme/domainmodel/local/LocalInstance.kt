@@ -321,4 +321,11 @@ class LocalInstance : Instance {
     override fun belongsToRemoteProject() = false
 
     override fun getNullableOrdinal() = mInstanceRecord?.ordinal
+
+    override fun setOrdinal(ordinal: Double, now: ExactTimeStamp) {
+        if (mInstanceRecord == null)
+            createInstanceHierarchy(now)
+
+        mInstanceRecord!!.ordinal = ordinal
+    }
 }

@@ -207,4 +207,6 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
     protected abstract fun getNullableOrdinal(): Double?
 
     val ordinal get() = getNullableOrdinal() ?: task.startExactTimeStamp.long.toDouble()
+
+    abstract fun setOrdinal(ordinal: Double, now: ExactTimeStamp)
 }

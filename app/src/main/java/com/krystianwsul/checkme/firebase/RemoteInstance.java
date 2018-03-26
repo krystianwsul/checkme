@@ -443,4 +443,12 @@ public class RemoteInstance extends Instance {
         else
             return null;
     }
+
+    @Override
+    public void setOrdinal(double ordinal, @NonNull ExactTimeStamp now) {
+        if (mRemoteInstanceRecord == null)
+            createInstanceHierarchy(now);
+
+        mRemoteInstanceRecord.setOrdinal(ordinal);
+    }
 }

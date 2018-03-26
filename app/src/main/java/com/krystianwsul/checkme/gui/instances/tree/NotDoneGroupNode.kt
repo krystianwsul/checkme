@@ -421,7 +421,8 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             } else {
                 it.ordinal = ordinal
 
-                // todo dataase
+
+                DomainFactory.getDomainFactory().setInstanceOrdinal(groupListFragment.mDataId!!, it.InstanceKey, ordinal)
             }
         }
     }

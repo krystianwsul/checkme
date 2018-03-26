@@ -1529,6 +1529,23 @@ public class DomainFactory {
         notifyCloud(context, task.getRemoteNullableProject());
     }
 
+    public synchronized void setInstanceOrdinal(int dataId, @NonNull InstanceKey instanceKey, double ordinal) {
+        MyCrashlytics.log("DomainFactory.setInstanceOrdinal");
+        Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
+
+        ExactTimeStamp now = ExactTimeStamp.getNow();
+
+        Instance instance = getInstance(instanceKey);
+
+        instance.setOrdinal(ordinal, now);
+
+        updateNotifications(MyApplication.instance, now);
+
+        save(MyApplication.instance, dataId, SaveService.Source.GUI);
+
+        notifyCloud(MyApplication.instance, instance.getRemoteNullableProject());
+    }
+
     public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull HierarchyData hierarchyData) {
         MyCrashlytics.log("DomainFactory.setTaskHierarchyOrdinal");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());

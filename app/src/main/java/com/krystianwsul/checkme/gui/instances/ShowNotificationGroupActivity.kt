@@ -21,7 +21,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
 
     companion object {
 
-        private val INSTANCES_KEY = "instanceKeys"
+        private const val INSTANCES_KEY = "instanceKeys"
 
         fun getIntent(context: Context, instanceKeys: ArrayList<InstanceKey>) = Intent(context, ShowNotificationGroupActivity::class.java).apply {
             Assert.assertTrue(!instanceKeys.isEmpty())

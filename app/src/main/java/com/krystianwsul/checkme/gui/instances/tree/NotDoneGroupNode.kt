@@ -282,7 +282,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
         return View.OnLongClickListener {
-            if (groupListFragment.mDataWrapper?.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && mIndentation == 0 && treeNodeCollection.nodes.none { it.isExpanded }) {
+            if (groupListFragment.mDataWrapper?.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && mIndentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && groupListFragment.mInstanceKeys == null) {
                 check(singleInstance())
 
                 groupListFragment.dragHelper.startDrag(viewHolder)

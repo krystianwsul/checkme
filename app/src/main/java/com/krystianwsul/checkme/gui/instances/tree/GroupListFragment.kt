@@ -103,7 +103,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
     private var mTimeRange: MainActivity.TimeRange? = null
     private var mTimeStamp: TimeStamp? = null
     private var mInstanceKey: InstanceKey? = null
-    private var mInstanceKeys: Set<InstanceKey>? = null
+
+    var mInstanceKeys: Set<InstanceKey>? = null
+        private set
 
     private var mExpansionState: ExpansionState? = null
     private var mSelectedNodes: ArrayList<InstanceKey>? = null

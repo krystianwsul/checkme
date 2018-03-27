@@ -56,6 +56,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         private const val IGNORE_FIRST_KEY = "ignoreFirst"
         private const val TIME_RANGE_KEY = "timeRange"
         private const val DEBUG_KEY = "debug"
+        private const val SEARCH_KEY = "search"
 
         private const val RC_SIGN_IN = 1000
 
@@ -115,37 +116,39 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var debug = false
 
-    private lateinit var actionSelectAll: MenuItem
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
-
-        actionSelectAll = menu.findItem(R.id.action_select_all)
-
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) = menu.run {
         when (visibleTab) {
             Tab.INSTANCES -> {
-                findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentItem] ?: false
+                findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
+                findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentItem] ?: false
             }
             Tab.TASKS -> {
-                findItem(R.id.action_select_all).isVisible = taskSelectAllVisible
+                val searching = mainActivitySearch.visibility == View.VISIBLE
+
+                findItem(R.id.action_close).isVisible = searching
                 findItem(R.id.action_search).isVisible = true
+                findItem(R.id.action_select_all).isVisible = taskSelectAllVisible && !searching
             }
             Tab.CUSTOM_TIMES -> {
-                findItem(R.id.action_select_all).isVisible = customTimesSelectAllVisible
+                findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
+                findItem(R.id.action_select_all).isVisible = customTimesSelectAllVisible
             }
             Tab.FRIENDS -> {
-                findItem(R.id.action_select_all).isVisible = userSelectAllVisible
+                findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
+                findItem(R.id.action_select_all).isVisible = userSelectAllVisible
             }
             else -> {
-                findItem(R.id.action_select_all).isVisible = false
+                findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
+                findItem(R.id.action_select_all).isVisible = false
             }
         }
 
@@ -153,8 +156,21 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_select_all) {
-            when (visibleTab) {
+        when (item.itemId) {
+            R.id.action_close -> closeSearch()
+            R.id.action_search -> {
+                check(item.itemId == R.id.action_search)
+
+                if (mainActivitySearch.visibility == View.GONE) {
+                    mainActivitySearch.visibility = View.VISIBLE
+                    mainActivitySearch.requestFocus()
+                } else {
+                    // todo search
+                }
+
+                invalidateOptionsMenu()
+            }
+            R.id.action_select_all -> when (visibleTab) {
                 MainActivity.Tab.INSTANCES -> {
                     val myFragmentStatePagerAdapter = mainDaysPager.adapter as MyFragmentStatePagerAdapter
                     myFragmentStatePagerAdapter.currentItem.selectAll()
@@ -167,16 +183,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 MainActivity.Tab.FRIENDS -> friendListFragment.selectAll()
                 else -> throw UnsupportedOperationException()
             }
-        } else {
-            check(item.itemId == R.id.action_search)
-
-            if (mainActivitySearch.visibility == View.GONE) {
-                mainActivitySearch.visibility = View.VISIBLE
-                actionSelectAll.isVisible = false
-            } else {
-
-                invalidateOptionsMenu()
-            }
+            else -> throw IllegalArgumentException()
         }
 
         return true
@@ -187,6 +194,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             visibility = View.GONE
             text = null
         }
+        invalidateOptionsMenu()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -213,6 +221,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             check(containsKey(DEBUG_KEY))
             debug = getBoolean(DEBUG_KEY)
+
+            if (containsKey(SEARCH_KEY)) {
+                mainActivitySearch.run {
+                    visibility = View.VISIBLE
+                    setText(getString(SEARCH_KEY))
+                }
+            }
         }
 
         mainActivitySpinner.run {
@@ -433,6 +448,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
+
+            mainActivitySearch.run {
+                if (visibility == View.VISIBLE)
+                    putString(SEARCH_KEY, text.toString())
+            }
         }
     }
 
@@ -747,7 +767,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             }
                         }
             } else {
-                val message = "google signin error: " + googleSignInResult
+                val message = "google signin error: $googleSignInResult"
 
                 Log.e("asdf", message)
 

@@ -38,6 +38,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"/>
+
+                <EditText
+                    android:id="@+id/mainActivitySearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:inputType="text"
+                    android:textColor="@color/textPrimaryWhite"
+                    android:hint="@string/search"
+                    android:textColorHint="@color/textDisabledWhite"
+                    android:imeOptions="actionSearch"
+                    android:visibility="gone"/>
                 
             </android.support.v7.widget.Toolbar>
 

@@ -115,41 +115,78 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var debug = false
 
+    private lateinit var actionSelectAll: MenuItem
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
+
+        actionSelectAll = menu.findItem(R.id.action_select_all)
+
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) = menu.run {
         when (visibleTab) {
-            Tab.INSTANCES -> findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentItem] ?: false
-            Tab.TASKS -> findItem(R.id.action_select_all).isVisible = taskSelectAllVisible
-            Tab.CUSTOM_TIMES -> findItem(R.id.action_select_all).isVisible = customTimesSelectAllVisible
-            Tab.FRIENDS -> findItem(R.id.action_select_all).isVisible = userSelectAllVisible
-            else -> findItem(R.id.action_select_all).isVisible = false
+            Tab.INSTANCES -> {
+                findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentItem] ?: false
+                findItem(R.id.action_search).isVisible = false
+            }
+            Tab.TASKS -> {
+                findItem(R.id.action_select_all).isVisible = taskSelectAllVisible
+                findItem(R.id.action_search).isVisible = true
+            }
+            Tab.CUSTOM_TIMES -> {
+                findItem(R.id.action_select_all).isVisible = customTimesSelectAllVisible
+                findItem(R.id.action_search).isVisible = false
+            }
+            Tab.FRIENDS -> {
+                findItem(R.id.action_select_all).isVisible = userSelectAllVisible
+                findItem(R.id.action_search).isVisible = false
+            }
+            else -> {
+                findItem(R.id.action_select_all).isVisible = false
+                findItem(R.id.action_search).isVisible = false
+            }
         }
 
         true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        check(item.itemId == R.id.action_select_all)
+        if (item.itemId == R.id.action_select_all) {
+            when (visibleTab) {
+                MainActivity.Tab.INSTANCES -> {
+                    val myFragmentStatePagerAdapter = mainDaysPager.adapter as MyFragmentStatePagerAdapter
+                    myFragmentStatePagerAdapter.currentItem.selectAll()
+                }
+                MainActivity.Tab.TASKS -> {
+                    val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
+                    taskListFragment.selectAll()
+                }
+                MainActivity.Tab.CUSTOM_TIMES -> showCustomTimesFragment.selectAll()
+                MainActivity.Tab.FRIENDS -> friendListFragment.selectAll()
+                else -> throw UnsupportedOperationException()
+            }
+        } else {
+            check(item.itemId == R.id.action_search)
 
-        when (visibleTab) {
-            MainActivity.Tab.INSTANCES -> {
-                val myFragmentStatePagerAdapter = mainDaysPager.adapter as MyFragmentStatePagerAdapter
-                myFragmentStatePagerAdapter.currentItem.selectAll()
+            if (mainActivitySearch.visibility == View.GONE) {
+                mainActivitySearch.visibility = View.VISIBLE
+                actionSelectAll.isVisible = false
+            } else {
+
+                invalidateOptionsMenu()
             }
-            MainActivity.Tab.TASKS -> {
-                val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
-                taskListFragment.selectAll()
-            }
-            MainActivity.Tab.CUSTOM_TIMES -> showCustomTimesFragment.selectAll()
-            MainActivity.Tab.FRIENDS -> friendListFragment.selectAll()
-            else -> throw UnsupportedOperationException()
         }
 
         return true
+    }
+
+    private fun closeSearch() {
+        mainActivitySearch.apply {
+            visibility = View.GONE
+            text = null
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -420,6 +457,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 friendListFragment.clearFab()
 
                 (mainDaysPager.adapter as MyFragmentStatePagerAdapter).setFab(mainFab)
+
+                closeSearch()
             }
             MainActivity.Tab.TASKS -> {
                 supportActionBar!!.title = getString(R.string.tasks)
@@ -456,6 +495,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 friendListFragment.clearFab()
 
                 projectListFragment.setFab(mainFab)
+
+                closeSearch()
             }
             MainActivity.Tab.CUSTOM_TIMES -> {
                 supportActionBar!!.title = getString(R.string.times)
@@ -474,6 +515,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 friendListFragment.clearFab()
 
                 showCustomTimesFragment.setFab(mainFab)
+
+                closeSearch()
             }
             MainActivity.Tab.FRIENDS -> {
                 checkNotNull(userInfo)
@@ -494,6 +537,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 showCustomTimesFragment.clearFab()
 
                 friendListFragment.setFab(mainFab)
+
+                closeSearch()
             }
             MainActivity.Tab.DEBUG -> {
                 supportActionBar!!.title = "Debug"
@@ -512,6 +557,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
                 mainFab.hide()
+
+                closeSearch()
             }
         }
 

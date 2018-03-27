@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -14,13 +15,14 @@ import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.view.ActionMode
-import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
@@ -161,11 +163,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             R.id.action_search -> {
                 check(item.itemId == R.id.action_search)
 
-                if (mainActivitySearch.visibility == View.GONE) {
-                    mainActivitySearch.visibility = View.VISIBLE
-                    mainActivitySearch.requestFocus()
-                } else {
-                    // todo search
+                mainActivitySearch.apply {
+                    if (visibility == View.GONE) {
+                        visibility = View.VISIBLE // todo replace with actionMode
+                        requestFocus()
+                    } else {
+                        search()
+                        hideKeyboard()
+                    }
                 }
 
                 invalidateOptionsMenu()
@@ -195,15 +200,17 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             text = null
         }
         invalidateOptionsMenu()
+        hideKeyboard()
+    }
+
+    private fun search() {
+        Toast.makeText(this@MainActivity, "searching", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-
-        val mainActivityToolbar = findViewById<Toolbar>(R.id.mainActivityToolbar)
-        checkNotNull(mainActivityToolbar)
 
         setSupportActionBar(mainActivityToolbar)
 
@@ -257,6 +264,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) = Unit
+            }
+        }
+
+        mainActivitySearch.run {
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH)
+                    search()
+                false
             }
         }
 
@@ -802,6 +817,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 findItem(R.id.main_drawer_friends).isEnabled = false
             }
         }
+    }
+
+    private fun hideKeyboard() {
+        currentFocus?.let { (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(it.windowToken, 0) }
     }
 
     private inner class MyFragmentStatePagerAdapter(fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager), FabUser {

@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -55,8 +54,6 @@ class FindFriendActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_find_friend)
 
-        Log.e("asdf", "onCreate " + hashCode())
-
         setSupportActionBar(findFriendToolbar)
 
         findFriendEmail.setOnEditorActionListener { _, actionId, _ ->
@@ -103,12 +100,8 @@ class FindFriendActivity : AppCompatActivity() {
 
         val key = UserData.getKey(findFriendEmail.text.toString())
 
-        Log.e("asdf", "starting")
-
         valueEventListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot?) {
-                Log.e("asdf", "onDataChange " + hashCode())
-
                 checkNotNull(dataSnapshot)
 
                 databaseReference!!.removeEventListener(valueEventListener!!)
@@ -139,21 +132,16 @@ class FindFriendActivity : AppCompatActivity() {
 
                 MyCrashlytics.logException(databaseError!!.toException())
 
-                Log.e("asdf", "onCancelled", databaseError.toException())
-
                 Toast.makeText(this@FindFriendActivity, R.string.connectionError, Toast.LENGTH_SHORT).show()
             }
         }
 
         databaseReference = DatabaseWrapper.getUserDataDatabaseReference(key)
 
-        Log.e("asdf", "addValueEventListener " + valueEventListener!!.hashCode())
         databaseReference!!.addValueEventListener(valueEventListener)
     }
 
     private fun updateLayout() {
-        Log.e("asdf", "updateLayout " + hashCode())
-
         when {
             userData != null -> {
                 check(!loading)
@@ -181,13 +169,9 @@ class FindFriendActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
 
-        Log.e("asdf", "onStop")
-
         if (loading) {
             checkNotNull(databaseReference)
             checkNotNull(valueEventListener)
-
-            Log.e("asdf", "removing listener " + valueEventListener!!.hashCode())
 
             databaseReference!!.removeEventListener(valueEventListener!!)
         } else {

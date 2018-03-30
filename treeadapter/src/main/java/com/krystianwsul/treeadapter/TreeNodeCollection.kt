@@ -1,6 +1,5 @@
 package com.krystianwsul.treeadapter
 
-import com.annimon.stream.Collectors
 import java.util.*
 
 class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer {
@@ -12,7 +11,7 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
             if (treeNodes == null)
                 throw SetTreeNodesNotCalledException()
 
-            return treeNodes!!.flatMap { it.selectedNodes.collect(Collectors.toList()) }
+            return treeNodes!!.flatMap { it.selectedNodes }
         }
 
     var nodes: List<TreeNode>

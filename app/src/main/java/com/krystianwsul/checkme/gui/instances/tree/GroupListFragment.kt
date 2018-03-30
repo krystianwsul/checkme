@@ -605,7 +605,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             Assert.assertTrue(mDataId != null)
 
             DataDiff.diffData(mDataWrapper!!, dataWrapper)
-            Log.e("asdf", "difference w data:\n" + DataDiff.getDiff()!!)
+            Log.e("asdf", "difference w data:\n" + DataDiff.diff)
         } else {
             Assert.assertTrue(mDataId == null)
         }

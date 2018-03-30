@@ -32,6 +32,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         private const val SELECTED_TASK_KEYS_KEY = "selectedTaskKeys"
         private const val EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys"
+        private const val QUERY_KEY = "query"
 
         fun newInstance() = TaskListFragment()
     }
@@ -230,6 +231,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private var selectedTaskKeys: List<TaskKey>? = null
     private var expandedTaskIds: List<TaskKey>? = null
 
+    private var query: String? = null
+
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(!childTaskDatas.isEmpty())
 
@@ -272,6 +275,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 expandedTaskIds = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
                 check(!expandedTaskIds!!.isEmpty())
             }
+
+            query = getString(QUERY_KEY)
         }
     }
 
@@ -387,6 +392,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 if (!expandedTaskKeys.isEmpty())
                     putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedTaskKeys))
             }
+
+            putString(QUERY_KEY, query)
         }
     }
 
@@ -421,6 +428,18 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab?.setOnClickListener(null)
 
         taskListFragmentFab = null
+    }
+
+    fun closeSearch() {
+        query = null
+
+        //todo update list
+    }
+
+    fun search(query: String) {
+        this.query = query
+
+        //todo update list
     }
 
     private class TaskAdapter private constructor(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {

@@ -201,10 +201,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
         invalidateOptionsMenu()
         hideKeyboard()
+
+        taskListFragment.closeSearch()
     }
 
     private fun search() {
-        Toast.makeText(this@MainActivity, "searching", Toast.LENGTH_SHORT).show()
+        taskListFragment.search(mainActivitySearch.text.toString())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -80,6 +80,6 @@ class DebugFragment : AbstractFragment() {
             debugData.text = stringBuilder
         }
 
-        debugDiffButton.setOnClickListener { debugDiffText.text = DataDiff.getDiff() }
+        debugDiffButton.setOnClickListener { debugDiffText.text = DataDiff.diff }
     }
 }

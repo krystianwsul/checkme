@@ -63,13 +63,7 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
         }
     }
 
-    override fun getNameVisibility() = View.VISIBLE
-
-    override fun getName() = taskData.Name
-
-    override fun getNameColor() = ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary)
-
-    override fun getNameSingleLine() = true
+    override fun getName() = Triple(taskData.Name, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
 
     override fun getChildren() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
         null

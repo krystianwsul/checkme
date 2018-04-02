@@ -103,39 +103,19 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun getNameVisibility() = if (singleInstance()) {
-        View.VISIBLE
-    } else {
-        if (treeNode.isExpanded) {
-            View.INVISIBLE
+    override fun getName(): Triple<String, Int, Boolean>? {
+        return if (singleInstance()) {
+            Triple(singleInstanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
         } else {
-            View.VISIBLE
+            if (treeNode.isExpanded) {
+                null
+            } else {
+                Triple(instanceDatas.sorted().joinToString(", ") { it.Name }, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
+            }
         }
-    }
-
-    override fun getName() = if (singleInstance()) {
-        singleInstanceData.Name
-    } else {
-        Assert.assertTrue(!treeNode.isExpanded)
-
-        instanceDatas.sorted().joinToString(", ") { it.Name }
     }
 
     override fun getGroupAdapter() = nodeCollection.groupAdapter
-
-    override fun getNameColor() = ContextCompat.getColor(groupListFragment.activity!!, if (singleInstance()) {
-        if (!singleInstanceData.TaskCurrent) {
-            R.color.textDisabled
-        } else {
-            R.color.textPrimary
-        }
-    } else {
-        Assert.assertTrue(!treeNode.isExpanded)
-
-        R.color.textPrimary
-    })
-
-    override fun getNameSingleLine() = true
 
     override fun getDetails(): Pair<String, Int>? {
         if (singleInstance()) {
@@ -488,17 +468,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override fun getGroupAdapter() = parentNotDoneGroupNode.groupAdapter
 
-        override fun getNameVisibility() = View.VISIBLE
-
-        override fun getName() = instanceData.Name
-
-        override fun getNameColor() = ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) {
-            R.color.textDisabled
-        } else {
-            R.color.textPrimary
-        })
-
-        override fun getNameSingleLine() = true
+        override fun getName() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
 
         override fun getChildren() = Companion.getChildrenNew(treeNode, instanceData, groupListFragment)
 

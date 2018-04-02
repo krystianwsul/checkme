@@ -57,21 +57,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override fun getGroupAdapter() = parentNodeCollection.groupAdapter
 
-    override fun getNameVisibility() = View.VISIBLE
-
-    override fun getName() = instanceData.Name
-
-    override fun getNameColor(): Int {
-        val groupListFragment = groupListFragment
-
-        return ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) {
-            R.color.textDisabled
-        } else {
-            R.color.textPrimary
-        })
-    }
-
-    override fun getNameSingleLine() = true
+    override fun getName() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
 
     override fun getDetails() = instanceData.DisplayText
             .takeUnless { it.isNullOrEmpty() }

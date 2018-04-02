@@ -48,13 +48,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
         1
     }
 
-    override fun getNameVisibility() = View.VISIBLE
-
-    override fun getName() = groupListFragment.getString(R.string.noReminder)
-
-    override fun getNameColor() = ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary)
-
-    override fun getNameSingleLine() = true
+    override fun getName() = Triple(groupListFragment.getString(R.string.noReminder), ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
 
     override fun getExpandVisibility(): Int {
         check(treeNode.expandVisible)

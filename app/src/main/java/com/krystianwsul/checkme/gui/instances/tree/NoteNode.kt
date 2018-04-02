@@ -26,13 +26,7 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
         return treeNode
     }
 
-    override fun getNameVisibility() = View.VISIBLE
-
-    override fun getName() = note
-
-    override fun getNameColor() = ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary)
-
-    override fun getNameSingleLine() = false
+    override fun getName() = Triple(note, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), false)
 
     override fun getExpandVisibility() = View.GONE
 

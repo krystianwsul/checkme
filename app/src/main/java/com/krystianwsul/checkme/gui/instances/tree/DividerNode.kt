@@ -52,17 +52,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
             doneInstanceNode.addExpandedInstances(expandedInstances)
     }
 
-    override fun getNameVisibility() = View.VISIBLE
-
-    override fun getName() = groupListFragment.getString(R.string.done)
-
-    override fun getNameColor() = ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary)
-
-    override fun getNameSingleLine() = true
-
-    override fun getDetails(): Pair<String, Int>? = null
-
-    override fun getChildren(): Nothing? = null
+    override fun getName() = Triple(groupListFragment.getString(R.string.done), ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
 
     override fun getExpandVisibility(): Int {
         check(this.treeNode.expandVisible)

@@ -8,6 +8,7 @@ import android.view.View;
 import com.krystianwsul.treeadapter.ModelNode;
 
 import kotlin.Pair;
+import kotlin.Triple;
 
 public abstract class GroupHolderNode implements ModelNode {
     final float mDensity;
@@ -18,14 +19,10 @@ public abstract class GroupHolderNode implements ModelNode {
         mIndentation = indentation;
     }
 
-    abstract int getNameVisibility();
-
-    @NonNull
-    abstract String getName();
-
-    abstract int getNameColor();
-
-    abstract boolean getNameSingleLine();
+    @Nullable
+    Triple<String, Integer, Boolean> getName() {
+        return null;
+    }
 
     @Nullable
     Pair<String, Integer> getDetails() {
@@ -69,13 +66,14 @@ public abstract class GroupHolderNode implements ModelNode {
 
         groupHolder.getMGroupRowContainer().setPadding((int) (padding * mDensity + 0.5f), 0, 0, 0);
 
-        int nameVisibility = getNameVisibility();
-        //noinspection ResourceType
-        groupHolder.getMGroupRowName().setVisibility(nameVisibility);
-        if (nameVisibility == View.VISIBLE) {
-            groupHolder.getMGroupRowName().setText(getName());
-            groupHolder.getMGroupRowName().setTextColor(getNameColor());
-            groupHolder.getMGroupRowName().setSingleLine(getNameSingleLine());
+        Triple<String, Integer, Boolean> name = getName();
+        if (name != null) {
+            groupHolder.getMGroupRowName().setVisibility(View.VISIBLE);
+            groupHolder.getMGroupRowName().setText(name.getFirst());
+            groupHolder.getMGroupRowName().setTextColor(name.getSecond());
+            groupHolder.getMGroupRowName().setSingleLine(name.getThird());
+        } else {
+            groupHolder.getMGroupRowName().setVisibility(View.INVISIBLE);
         }
 
         Pair<String, Integer> details = getDetails();

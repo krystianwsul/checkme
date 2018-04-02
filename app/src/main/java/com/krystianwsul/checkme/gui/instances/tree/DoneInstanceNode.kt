@@ -73,26 +73,9 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override fun getNameSingleLine() = true
 
-    override fun getDetailsVisibility(): Int {
-        return if (instanceData.DisplayText.isNullOrEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
-    }
-
-    override fun getDetails(): String {
-        check(!instanceData.DisplayText.isNullOrEmpty())
-        return instanceData.DisplayText!!
-    }
-
-    override fun getDetailsColor(): Int {
-        return ContextCompat.getColor(dividerNode.groupAdapter.mGroupListFragment.activity!!, if (!instanceData.TaskCurrent) {
-            R.color.textDisabled
-        } else {
-            R.color.textSecondary
-        })
-    }
+    override fun getDetails() = instanceData.DisplayText
+            .takeUnless { it.isNullOrEmpty() }
+            ?.let { Pair(it, ContextCompat.getColor(dividerNode.groupAdapter.mGroupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary)) }
 
     override fun getChildren() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData, groupListFragment)
 
@@ -148,13 +131,13 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         }
     }
 
-    override fun getSeparatorVisibility() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override fun getSeparatorVisibility() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
     override fun getBackgroundColor() = Color.TRANSPARENT
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-    override fun getOnClickListener() = this.treeNode.onClickListener
+    override fun getOnClickListener() = treeNode.onClickListener
 
     override fun compareTo(other: ModelNode): Int {
         checkNotNull(instanceData.Done)

@@ -56,14 +56,6 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
 
     override fun getNameSingleLine() = true
 
-    override fun getDetailsVisibility() = View.GONE
-
-    override fun getDetails() = throw UnsupportedOperationException()
-
-    override fun getDetailsColor() = throw UnsupportedOperationException()
-
-    override fun getChildren(): Nothing? = null
-
     override fun getExpandVisibility(): Int {
         check(treeNode.expandVisible)
 

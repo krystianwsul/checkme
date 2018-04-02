@@ -137,40 +137,28 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     override fun getNameSingleLine() = true
 
-    override fun getDetailsVisibility() = if (singleInstance()) {
-        if (singleInstanceData.DisplayText.isNullOrEmpty()) {
-            View.GONE
+    override fun getDetails(): Pair<String, Int>? {
+        if (singleInstance()) {
+            return if (singleInstanceData.DisplayText.isNullOrEmpty()) {
+                null
+            } else {
+                Pair(singleInstanceData.DisplayText!!, ContextCompat.getColor(groupListFragment.activity!!, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary))
+            }
         } else {
-            View.VISIBLE
+            val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
+
+            val date = exactTimeStamp.date
+            val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
+
+            val customTimeData = getCustomTimeData(date.dayOfWeek, hourMinute)
+
+            val timeText = customTimeData?.Name ?: hourMinute.toString()
+
+            val text = date.getDisplayText(groupListFragment.activity!!) + ", " + timeText
+
+            return Pair(text, ContextCompat.getColor(groupListFragment.activity!!, R.color.textSecondary))
         }
-    } else {
-        View.VISIBLE
     }
-
-    override fun getDetails() = if (singleInstance()) {
-        singleInstanceData.DisplayText!!
-    } else {
-        val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
-
-        val date = exactTimeStamp.date
-        val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
-
-        val customTimeData = getCustomTimeData(date.dayOfWeek, hourMinute)
-
-        val timeText = customTimeData?.Name ?: hourMinute.toString()
-
-        date.getDisplayText(groupListFragment.activity!!) + ", " + timeText
-    }
-
-    override fun getDetailsColor() = ContextCompat.getColor(groupListFragment.activity!!, if (singleInstance()) {
-        if (!singleInstanceData.TaskCurrent) {
-            R.color.textDisabled
-        } else {
-            R.color.textSecondary
-        }
-    } else {
-        R.color.textSecondary
-    })
 
     override fun getChildren() = if (singleInstance()) {
         NotDoneInstanceNode.getChildrenNew(treeNode, singleInstanceData, groupListFragment)
@@ -511,12 +499,6 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         })
 
         override fun getNameSingleLine() = true
-
-        override fun getDetailsVisibility() = View.GONE
-
-        override fun getDetails() = throw UnsupportedOperationException()
-
-        override fun getDetailsColor() = throw UnsupportedOperationException()
 
         override fun getChildren() = Companion.getChildrenNew(treeNode, instanceData, groupListFragment)
 

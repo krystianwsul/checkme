@@ -71,12 +71,6 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
 
     override fun getNameSingleLine() = true
 
-    override fun getDetailsVisibility() = View.GONE
-
-    override fun getDetails() = throw UnsupportedOperationException()
-
-    override fun getDetailsColor() = throw UnsupportedOperationException()
-
     override fun getChildren() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
         null
     } else {

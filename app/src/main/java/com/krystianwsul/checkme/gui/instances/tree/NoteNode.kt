@@ -34,14 +34,6 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
 
     override fun getNameSingleLine() = false
 
-    override fun getDetailsVisibility() = View.GONE
-
-    override fun getDetails() = throw UnsupportedOperationException()
-
-    override fun getDetailsColor() = throw UnsupportedOperationException()
-
-    override fun getChildren(): Nothing? = null
-
     override fun getExpandVisibility() = View.GONE
 
     override fun getExpandImageResource() = throw UnsupportedOperationException()

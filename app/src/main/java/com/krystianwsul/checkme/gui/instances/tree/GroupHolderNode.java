@@ -27,15 +27,15 @@ public abstract class GroupHolderNode implements ModelNode {
 
     abstract boolean getNameSingleLine();
 
-    abstract int getDetailsVisibility();
-
-    @NonNull
-    abstract String getDetails();
-
-    abstract int getDetailsColor();
+    @Nullable
+    Pair<String, Integer> getDetails() {
+        return null;
+    }
 
     @Nullable
-    abstract Pair<String, Integer> getChildren();
+    Pair<String, Integer> getChildren() {
+        return null;
+    }
 
     abstract int getExpandVisibility();
 
@@ -78,12 +78,13 @@ public abstract class GroupHolderNode implements ModelNode {
             groupHolder.getMGroupRowName().setSingleLine(getNameSingleLine());
         }
 
-        int detailsVisibility = getDetailsVisibility();
-        //noinspection ResourceType
-        groupHolder.getMGroupRowDetails().setVisibility(detailsVisibility);
-        if (detailsVisibility == View.VISIBLE) {
-            groupHolder.getMGroupRowDetails().setText(getDetails());
-            groupHolder.getMGroupRowDetails().setTextColor(getDetailsColor());
+        Pair<String, Integer> details = getDetails();
+        if (details != null) {
+            groupHolder.getMGroupRowDetails().setVisibility(View.VISIBLE);
+            groupHolder.getMGroupRowDetails().setText(details.getFirst());
+            groupHolder.getMGroupRowDetails().setTextColor(details.getSecond());
+        } else {
+            groupHolder.getMGroupRowDetails().setVisibility(View.GONE);
         }
 
         Pair<String, Integer> children = getChildren();

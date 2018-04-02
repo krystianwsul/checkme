@@ -60,11 +60,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     override fun getNameSingleLine() = true
 
-    override fun getDetailsVisibility() = View.GONE
-
-    override fun getDetails() = throw UnsupportedOperationException()
-
-    override fun getDetailsColor() = throw UnsupportedOperationException()
+    override fun getDetails(): Pair<String, Int>? = null
 
     override fun getChildren(): Nothing? = null
 

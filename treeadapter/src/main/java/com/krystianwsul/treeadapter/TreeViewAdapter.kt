@@ -37,7 +37,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        return treeNodeCollection!!.displayedSize() + if (paddingLayout != null) 1 else 0
+        return treeNodeCollection!!.displayedSize + if (paddingLayout != null) 1 else 0
     }
 
     fun hasActionMode() = treeModelAdapter.hasActionMode()
@@ -113,7 +113,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        val displayedSize = treeNodeCollection!!.displayedSize()
+        val displayedSize = treeNodeCollection!!.displayedSize
 
         if (position < displayedSize) {
             val treeNode = treeNodeCollection!!.getNode(position)
@@ -129,7 +129,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        return if (paddingLayout != null && position == treeNodeCollection!!.displayedSize())
+        return if (paddingLayout != null && position == treeNodeCollection!!.displayedSize)
             TYPE_PADDING
         else
             treeNodeCollection!!.getItemViewType(position)

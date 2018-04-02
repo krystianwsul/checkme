@@ -36,13 +36,13 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
 
         var currPosition = position
         check(currPosition >= 0)
-        check(currPosition < displayedSize())
+        check(currPosition < displayedSize)
 
         for (treeNode in treeNodes!!) {
-            if (currPosition < treeNode.displayedSize())
+            if (currPosition < treeNode.displayedSize)
                 return treeNode.getNode(currPosition)
 
-            currPosition -= treeNode.displayedSize()
+            currPosition -= treeNode.displayedSize
         }
 
         throw IndexOutOfBoundsException()
@@ -57,7 +57,7 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
             val position = currTreeNode.getPosition(treeNode)
             if (position >= 0)
                 return offset + position
-            offset += currTreeNode.displayedSize()
+            offset += currTreeNode.displayedSize
         }
 
         return -1
@@ -69,13 +69,14 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
         return treeNode.itemViewType
     }
 
-    override fun displayedSize(): Int {
+    override val displayedSize: Int
+        get() {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
         var displayedSize = 0
         for (treeNode in treeNodes!!)
-            displayedSize += treeNode.displayedSize()
+            displayedSize += treeNode.displayedSize
         return displayedSize
     }
 
@@ -124,7 +125,7 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
         val oldPosition = getPosition(treeNode)
         check(oldPosition >= 0)
 
-        val displayedSize = treeNode.displayedSize()
+        val displayedSize = treeNode.displayedSize
 
         treeNodes!!.remove(treeNode)
 
@@ -134,15 +135,15 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
             treeViewAdapter.notifyItemChanged(oldPosition - 1)
     }
 
-    override fun isExpanded() = true
+    override val isExpanded = true
 
     override fun update() = Unit
 
     override fun updateRecursive() = Unit
 
-    override fun getSelectedChildren() = selectedNodes
+    override val selectedChildren get() = selectedNodes
 
-    override fun getTreeNodeCollection() = this
+    override val treeNodeCollection = this
 
     fun selectAll() {
         if (treeNodes == null)
@@ -151,7 +152,7 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
         treeNodes!!.forEach(TreeNode::selectAll)
     }
 
-    override fun getIndentation() = 0
+    override val indentation = 0
 
     fun moveItem(fromPosition: Int, toPosition: Int) {
         if (treeNodes == null)

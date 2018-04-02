@@ -54,7 +54,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     override fun getName() = Triple(groupListFragment.getString(R.string.done), ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
 
-    override fun getExpand() = Pair(if (this.treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+    override fun getExpand() = Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
 
     override fun getCheckBoxVisibility() = View.INVISIBLE
 

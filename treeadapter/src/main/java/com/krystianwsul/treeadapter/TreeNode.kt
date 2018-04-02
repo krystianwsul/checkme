@@ -99,6 +99,7 @@ class TreeNode(
                     if (hasSelectedDescendants())
                         throw SelectedChildrenException()
 
+                    val displayedSize = displayedSize
                     expanded = false
                     treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1)
                 } else {

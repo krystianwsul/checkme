@@ -21,7 +21,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -33,6 +32,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.jakewharton.rxbinding2.widget.textChanges
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -46,6 +46,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.loaders.MainLoader
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import java.lang.ref.WeakReference
@@ -134,7 +135,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 val searching = mainActivitySearch.visibility == View.VISIBLE
 
                 findItem(R.id.action_close).isVisible = searching
-                findItem(R.id.action_search).isVisible = true
+                findItem(R.id.action_search).isVisible = !searching
                 findItem(R.id.action_select_all).isVisible = taskSelectAllVisible && !searching
             }
             Tab.CUSTOM_TIMES -> {
@@ -164,13 +165,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 check(item.itemId == R.id.action_search)
 
                 mainActivitySearch.apply {
-                    if (visibility == View.GONE) {
-                        visibility = View.VISIBLE // todo replace with actionMode
-                        requestFocus()
-                    } else {
-                        search()
-                        hideKeyboard()
-                    }
+                    check(visibility == View.GONE)
+                    visibility = View.VISIBLE // todo replace with actionMode
+                    requestFocus()
                 }
 
                 invalidateOptionsMenu()
@@ -203,10 +200,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         hideKeyboard()
 
         taskListFragment.closeSearch()
-    }
-
-    private fun search() {
-        taskListFragment.search(mainActivitySearch.text.toString())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -266,14 +259,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) = Unit
-            }
-        }
-
-        mainActivitySearch.run {
-            setOnEditorActionListener { _, actionId, _ ->
-                if (actionId == EditorInfo.IME_ACTION_SEARCH)
-                    search()
-                false
             }
         }
 
@@ -418,6 +403,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 .build()
 
         firebaseAuth = FirebaseAuth.getInstance()
+
+        mainActivitySearch.textChanges()
+                .subscribe { taskListFragment.search(it.toString()) }
+                .addTo(createDisposable)
 
         supportLoaderManager.initLoader(0, null, this)
     }

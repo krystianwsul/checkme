@@ -430,13 +430,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = null
     }
 
-    fun closeSearch() {
-        query = null
-
-        //todo update list
-    }
-
-    fun search(query: String) {
+    fun search(query: String?) {
         this.query = query
 
         //todo update list

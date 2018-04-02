@@ -198,8 +198,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
         invalidateOptionsMenu()
         hideKeyboard()
-
-        taskListFragment.closeSearch()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

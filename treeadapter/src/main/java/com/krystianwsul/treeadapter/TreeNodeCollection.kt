@@ -79,6 +79,14 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
         return displayedSize
     }
 
+    val displayedNodes: List<TreeNode>
+        get() {
+            if (treeNodes == null)
+                throw SetTreeNodesNotCalledException()
+
+            return treeNodes!!.flatMap { it.displayedNodes }
+        }
+
     fun onCreateActionMode() {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()

@@ -64,18 +64,20 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
         override fun onFirstAdded() {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            mActionMode.menuInflater.inflate(R.menu.menu_custom_times, mActionMode.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_custom_times, actionMode!!.menu)
 
             updateFabVisibility()
 
-            (activity as CustomTimesListListener).onCreateCustomTimesActionMode(mActionMode)
+            (activity as CustomTimesListListener).onCreateCustomTimesActionMode(actionMode!!)
         }
 
         override fun onSecondAdded() = Unit
 
         override fun onOtherAdded() = Unit
 
-        override fun onLastRemoved() {
+        override fun onLastRemoved(action: () -> Unit) {
+            action()
+
             updateFabVisibility()
 
             (activity as CustomTimesListListener).onDestroyCustomTimesActionMode()

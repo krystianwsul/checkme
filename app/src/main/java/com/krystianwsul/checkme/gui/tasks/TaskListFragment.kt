@@ -107,15 +107,15 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onFirstAdded() {
-            (activity as AppCompatActivity).startSupportActionMode(this)
+            treeViewAdapter!!.updateDisplayedNodes {
+                (activity as AppCompatActivity).startSupportActionMode(this)
+            }
 
-            treeViewAdapter!!.onCreateActionMode()
-
-            mActionMode.menuInflater.inflate(R.menu.menu_edit_tasks, mActionMode.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_edit_tasks, actionMode!!.menu)
 
             updateFabVisibility()
 
-            (activity as TaskListListener).onCreateTaskActionMode(mActionMode)
+            (activity as TaskListListener).onCreateTaskActionMode(actionMode!!)
 
             dragHelper.attachToRecyclerView(taskListRecycler)
         }
@@ -130,7 +130,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             check(projectIdCount > 0)
 
-            mActionMode.menu.run {
+            actionMode!!.menu.run {
                 findItem(R.id.action_task_join).isVisible = projectIdCount == 1
                 findItem(R.id.action_task_edit).isVisible = false
                 findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
@@ -150,14 +150,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             check(projectIdCount > 0)
 
-            mActionMode.menu.run {
+            actionMode!!.menu.run {
                 findItem(R.id.action_task_join).isVisible = projectIdCount == 1
                 findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
             }
         }
 
-        override fun onLastRemoved() {
-            treeViewAdapter!!.onDestroyActionMode()
+        override fun onLastRemoved(action: () -> Unit) {
+            treeViewAdapter!!.updateDisplayedNodes(action)
 
             updateFabVisibility()
 
@@ -167,7 +167,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onSecondToLastRemoved() {
-            mActionMode.menu.run {
+            actionMode!!.menu.run {
                 findItem(R.id.action_task_join).isVisible = false
                 findItem(R.id.action_task_edit).isVisible = true
                 findItem(R.id.action_task_delete).isVisible = true
@@ -187,7 +187,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             check(projectIdCount > 0)
 
-            mActionMode.menu.run {
+            actionMode!!.menu.run {
                 findItem(R.id.action_task_join).isVisible = projectIdCount == 1
                 findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
             }

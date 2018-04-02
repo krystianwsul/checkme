@@ -68,18 +68,20 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
         override fun onFirstAdded() {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            mActionMode.menuInflater.inflate(R.menu.menu_custom_times, mActionMode.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_custom_times, actionMode!!.menu)
 
             updateFabVisibility()
 
-            (activity as MainActivity).onCreateUserActionMode(mActionMode)
+            (activity as MainActivity).onCreateUserActionMode(actionMode!!)
         }
 
         override fun onSecondAdded() = Unit
 
         override fun onOtherAdded() = Unit
 
-        override fun onLastRemoved() {
+        override fun onLastRemoved(action: () -> Unit) {
+            action()
+
             updateFabVisibility()
 
             (activity as MainActivity).onDestroyUserActionMode()

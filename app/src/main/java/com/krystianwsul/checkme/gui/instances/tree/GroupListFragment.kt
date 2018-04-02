@@ -180,7 +180,6 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     do {
                         val treeNode = selectedTreeNodes[0]
-                        Assert.assertTrue(treeNode != null)
 
                         recursiveDelete(treeNode, true)
 
@@ -308,15 +307,15 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onFirstAdded() {
-            (activity as AppCompatActivity).startSupportActionMode(this)
+            mTreeViewAdapter!!.updateDisplayedNodes {
+                (activity as AppCompatActivity).startSupportActionMode(this)
+            }
 
-            mTreeViewAdapter!!.onCreateActionMode()
-
-            mActionMode.menuInflater.inflate(R.menu.menu_edit_groups, mActionMode.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_edit_groups, actionMode!!.menu)
 
             updateFabVisibility()
 
-            (activity as GroupListListener).onCreateGroupActionMode(mActionMode)
+            (activity as GroupListListener).onCreateGroupActionMode(actionMode!!)
 
             updateMenu()
 
@@ -333,8 +332,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
             updateMenu()
         }
 
-        override fun onLastRemoved() {
-            mTreeViewAdapter!!.onDestroyActionMode()
+        override fun onLastRemoved(action: () -> Unit) {
+            mTreeViewAdapter!!.updateDisplayedNodes(action)
 
             updateFabVisibility()
 
@@ -354,10 +353,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         private fun updateMenu() {
-            Assert.assertTrue(mActionMode != null)
+            Assert.assertTrue(actionMode != null)
 
-            val menu = mActionMode.menu
-            Assert.assertTrue(menu != null)
+            val menu = actionMode!!.menu!!
 
             val instanceDatas = nodesToInstanceDatas(mTreeViewAdapter!!.selectedNodes)
             Assert.assertTrue(instanceDatas.isNotEmpty())
@@ -365,21 +363,25 @@ class GroupListFragment : AbstractFragment(), FabUser {
             Assert.assertTrue(instanceDatas.all { it.Done == null })
 
             if (instanceDatas.size == 1) {
-                val instanceData = instanceDatas[0]
+                val instanceData = instanceDatas.single()
 
-                menu!!.findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance
-                menu.findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
-                menu.findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
-                menu.findItem(R.id.action_group_join).isVisible = false
-                menu.findItem(R.id.action_group_delete_task).isVisible = instanceData.TaskCurrent
-                menu.findItem(R.id.action_group_add_task).isVisible = instanceData.TaskCurrent
+                menu.apply {
+                    findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance
+                    findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
+                    findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
+                    findItem(R.id.action_group_join).isVisible = false
+                    findItem(R.id.action_group_delete_task).isVisible = instanceData.TaskCurrent
+                    findItem(R.id.action_group_add_task).isVisible = instanceData.TaskCurrent
+                }
             } else {
                 Assert.assertTrue(instanceDatas.size > 1)
 
-                menu!!.findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance }
-                menu.findItem(R.id.action_group_show_task).isVisible = false
-                menu.findItem(R.id.action_group_edit_task).isVisible = false
-                menu.findItem(R.id.action_group_add_task).isVisible = false
+                menu.apply {
+                    findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance }
+                    findItem(R.id.action_group_show_task).isVisible = false
+                    findItem(R.id.action_group_edit_task).isVisible = false
+                    findItem(R.id.action_group_add_task).isVisible = false
+                }
 
                 if (instanceDatas.all { it.TaskCurrent }) {
                     val projectIdCount = instanceDatas.map { it.InstanceKey.mTaskKey.mRemoteProjectId }

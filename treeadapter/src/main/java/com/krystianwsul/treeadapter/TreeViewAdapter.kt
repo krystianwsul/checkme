@@ -1,6 +1,7 @@
 package com.krystianwsul.treeadapter
 
 import android.support.annotation.LayoutRes
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -45,18 +46,36 @@ class TreeViewAdapter @JvmOverloads constructor(
 
     fun decrementSelected() = treeModelAdapter.decrementSelected()
 
-    fun onCreateActionMode() {
+    fun updateDisplayedNodes(action: () -> Unit) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        treeNodeCollection!!.onCreateActionMode()
-    }
+        val oldNodes = treeNodeCollection!!.displayedNodes
 
-    fun onDestroyActionMode() {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
+        action()
 
-        treeNodeCollection!!.onDestroyActionMode()
+        val newNodes = treeNodeCollection!!.displayedNodes
+
+        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                if (paddingLayout != null) {
+                    if (oldItemPosition == oldNodes.size && newItemPosition == newNodes.size)
+                        return true
+                    else if (oldItemPosition == oldNodes.size || newItemPosition == newNodes.size)
+                        return false
+                }
+
+                return oldNodes[oldItemPosition] == newNodes[newItemPosition]
+            }
+
+            override fun getOldListSize() = oldNodes.size + (paddingLayout?.let { 1 } ?: 0)
+
+            override fun getNewListSize() = newNodes.size + (paddingLayout?.let { 1 } ?: 0)
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = paddingLayout?.let { oldItemPosition == oldNodes.size }
+                    ?: false // todo this applies only to actionMode
+        }).dispatchUpdatesTo(this)
     }
 
     fun unselect() {
@@ -130,9 +149,9 @@ class TreeViewAdapter @JvmOverloads constructor(
         treeNodeCollection!!.setNewItemPosition(position)
     }
 
-    class SetTreeNodeCollectionNotCalledException() : InitializationException("TreeViewAdapter.setTreeNodeCollection() has not been called.")
+    class SetTreeNodeCollectionNotCalledException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has not been called.")
 
-    class SetTreeNodeCollectionCalledTwiceException() : InitializationException("TreeViewAdapter.setTreeNodeCollection() has already been called.")
+    class SetTreeNodeCollectionCalledTwiceException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has already been called.")
 
     private class PaddingHolder(view: View) : RecyclerView.ViewHolder(view)
 }

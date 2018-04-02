@@ -84,11 +84,11 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         override fun onFirstAdded() {
             Assert.assertTrue(treeViewAdapter != null)
 
-            (activity as AppCompatActivity).startSupportActionMode(this)
+            treeViewAdapter!!.updateDisplayedNodes {
+                (activity as AppCompatActivity).startSupportActionMode(this)
+            }
 
-            treeViewAdapter!!.onCreateActionMode()
-
-            mActionMode.menuInflater.inflate(R.menu.menu_projects, mActionMode.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_projects, actionMode!!.menu)
 
             updateFabVisibility()
         }
@@ -97,10 +97,10 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
 
         override fun onOtherAdded() = Unit
 
-        override fun onLastRemoved() {
+        override fun onLastRemoved(action: () -> Unit) {
             Assert.assertTrue(treeViewAdapter != null)
 
-            treeViewAdapter!!.onDestroyActionMode()
+            treeViewAdapter!!.updateDisplayedNodes(action)
 
             updateFabVisibility()
         }

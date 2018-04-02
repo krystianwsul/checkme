@@ -73,7 +73,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         override fun onFirstAdded() {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            mActionMode.menuInflater.inflate(R.menu.menu_custom_times, mActionMode.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_custom_times, actionMode!!.menu)
 
             updateFabVisibility()
         }
@@ -82,7 +82,9 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override fun onOtherAdded() = Unit
 
-        override fun onLastRemoved() {
+        override fun onLastRemoved(action: () -> Unit) {
+            action()
+
             updateFabVisibility()
         }
 

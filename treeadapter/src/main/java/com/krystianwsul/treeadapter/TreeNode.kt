@@ -220,6 +220,18 @@ class TreeNode(
         }
     }
 
+    val displayedNodes: List<TreeNode>
+        get() {
+            if (childTreeNodes == null)
+                throw SetChildTreeNodesNotCalledException()
+
+            return if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty() || !modelNode.isVisibleDuringActionMode && hasActionMode()) {
+                listOf(this)
+            } else {
+                listOf(this) + childTreeNodes!!.flatMap { it.displayedNodes }
+            }
+        }
+
     private fun visibleSize(): Int {
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()

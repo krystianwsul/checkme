@@ -28,12 +28,6 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
 
     override fun getName() = Triple(note, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), false)
 
-    override fun getExpandVisibility() = View.GONE
-
-    override fun getExpandImageResource() = throw UnsupportedOperationException()
-
-    override fun getExpandOnClickListener() = throw UnsupportedOperationException()
-
     override fun getCheckBoxVisibility() = View.GONE
 
     override fun getCheckBoxChecked() = throw UnsupportedOperationException()

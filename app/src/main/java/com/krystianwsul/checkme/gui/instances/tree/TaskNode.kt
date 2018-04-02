@@ -83,32 +83,12 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
         Pair(text, color)
     }
 
-    override fun getExpandVisibility() = if (taskData.Children.isEmpty()) {
-        Assert.assertTrue(!treeNode.expandVisible)
-
-        View.INVISIBLE
-    } else {
-        Assert.assertTrue(treeNode.expandVisible)
-
-        View.VISIBLE
-    }
-
-    override fun getExpandImageResource(): Int {
-        Assert.assertTrue(treeNode.expandVisible)
-
-        Assert.assertTrue(!taskData.Children.isEmpty())
-
-        return if (treeNode.isExpanded)
-            R.drawable.ic_expand_less_black_36dp
-        else
-            R.drawable.ic_expand_more_black_36dp
-    }
-
-    override fun getExpandOnClickListener(): View.OnClickListener {
-        Assert.assertTrue(!taskData.Children.isEmpty())
-        Assert.assertTrue(treeNode.expandVisible)
-
-        return treeNode.expandListener
+    override fun getExpand(): Pair<Int, View.OnClickListener>? {
+        return if (taskData.Children.isEmpty()) {
+            null
+        } else {
+            Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+        }
     }
 
     override fun getCheckBoxVisibility() = View.INVISIBLE

@@ -50,26 +50,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
 
     override fun getName() = Triple(groupListFragment.getString(R.string.noReminder), ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
 
-    override fun getExpandVisibility(): Int {
-        check(treeNode.expandVisible)
-
-        return View.VISIBLE
-    }
-
-    override fun getExpandImageResource(): Int {
-        check(treeNode.expandVisible)
-
-        return if (treeNode.isExpanded)
-            R.drawable.ic_expand_less_black_36dp
-        else
-            R.drawable.ic_expand_more_black_36dp
-    }
-
-    override fun getExpandOnClickListener(): View.OnClickListener {
-        check(treeNode.expandVisible)
-
-        return treeNode.expandListener
-    }
+    override fun getExpand() = Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
 
     override fun getCheckBoxVisibility() = View.INVISIBLE
 

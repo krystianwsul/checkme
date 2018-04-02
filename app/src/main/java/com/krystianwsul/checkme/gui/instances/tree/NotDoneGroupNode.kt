@@ -146,46 +146,22 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         null
     }
 
-    override fun getExpandVisibility() = if (singleInstance()) {
-        val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
+    override fun getExpand(): Pair<Int, View.OnClickListener>? {
+        return if (singleInstance()) {
+            val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
 
-        if (singleInstanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
-            Assert.assertTrue(!treeNode.expandVisible)
-            View.INVISIBLE
+            if (singleInstanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
+                null
+            } else {
+                Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+            }
         } else {
-            Assert.assertTrue(treeNode.expandVisible)
-            View.VISIBLE
+            if (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants()) {
+                null
+            } else {
+                Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+            }
         }
-    } else {
-        if (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants()) {
-            Assert.assertTrue(!treeNode.expandVisible)
-            View.INVISIBLE
-        } else {
-            Assert.assertTrue(treeNode.expandVisible)
-            View.VISIBLE
-        }
-    }
-
-    override fun getExpandImageResource() = if (singleInstance()) {
-        Assert.assertTrue(!singleInstanceData.children.isEmpty())
-
-        if (treeNode.isExpanded)
-            R.drawable.ic_expand_less_black_36dp
-        else
-            R.drawable.ic_expand_more_black_36dp
-    } else {
-        Assert.assertTrue(!(groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants()))
-
-        if (treeNode.isExpanded)
-            R.drawable.ic_expand_less_black_36dp
-        else
-            R.drawable.ic_expand_more_black_36dp
-    }
-
-    override fun getExpandOnClickListener(): View.OnClickListener {
-        Assert.assertTrue(treeNode.expandVisible)
-
-        return treeNode.expandListener
     }
 
     override fun getCheckBoxVisibility() = if (singleInstance()) {
@@ -472,34 +448,14 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override fun getChildren() = Companion.getChildrenNew(treeNode, instanceData, groupListFragment)
 
-        override fun getExpandVisibility(): Int {
+        override fun getExpand(): Pair<Int, View.OnClickListener>? {
             val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
+
             return if (instanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
-                Assert.assertTrue(!treeNode.expandVisible)
-
-                View.INVISIBLE
+                null
             } else {
-                Assert.assertTrue(treeNode.expandVisible)
-
-                View.VISIBLE
+                Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
             }
-        }
-
-        override fun getExpandImageResource(): Int {
-            Assert.assertTrue(treeNode.expandVisible)
-            Assert.assertTrue(!(instanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants()))
-
-            return if (treeNode.isExpanded)
-                R.drawable.ic_expand_less_black_36dp
-            else
-                R.drawable.ic_expand_more_black_36dp
-        }
-
-        override fun getExpandOnClickListener(): View.OnClickListener {
-            Assert.assertTrue(treeNode.expandVisible)
-            Assert.assertTrue(!(instanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants()))
-
-            return treeNode.expandListener
         }
 
         override fun getCheckBoxVisibility() = if (groupListFragment.mSelectionCallback.hasActionMode()) {

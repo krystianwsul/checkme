@@ -34,12 +34,10 @@ public abstract class GroupHolderNode implements ModelNode {
         return null;
     }
 
-    abstract int getExpandVisibility();
-
-    abstract int getExpandImageResource();
-
-    @NonNull
-    abstract View.OnClickListener getExpandOnClickListener();
+    @Nullable
+    Pair<Integer, View.OnClickListener> getExpand() {
+        return null;
+    }
 
     abstract int getCheckBoxVisibility();
 
@@ -94,12 +92,13 @@ public abstract class GroupHolderNode implements ModelNode {
             groupHolder.getMGroupRowChildren().setVisibility(View.GONE);
         }
 
-        int expandVisibility = getExpandVisibility();
-        //noinspection ResourceType
-        groupHolder.getMGroupRowExpand().setVisibility(expandVisibility);
-        if (expandVisibility == View.VISIBLE) {
-            groupHolder.getMGroupRowExpand().setImageResource(getExpandImageResource());
-            groupHolder.getMGroupRowExpand().setOnClickListener(getExpandOnClickListener());
+        Pair<Integer, View.OnClickListener> expand = getExpand();
+        if (expand != null) {
+            groupHolder.getMGroupRowExpand().setVisibility(View.VISIBLE);
+            groupHolder.getMGroupRowExpand().setImageResource(expand.getFirst());
+            groupHolder.getMGroupRowExpand().setOnClickListener(expand.getSecond());
+        } else {
+            groupHolder.getMGroupRowExpand().setVisibility(View.INVISIBLE);
         }
 
         int checkBoxVisibility = getCheckBoxVisibility();

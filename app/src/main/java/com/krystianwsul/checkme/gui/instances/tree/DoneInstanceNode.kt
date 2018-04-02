@@ -65,33 +65,12 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override fun getChildren() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData, groupListFragment)
 
-    override fun getExpandVisibility(): Int {
+    override fun getExpand(): Pair<Int, View.OnClickListener>? {
         return if (instanceData.children.isEmpty()) {
-            check(!this.treeNode.expandVisible)
-
-            View.INVISIBLE
+            null
         } else {
-            check(this.treeNode.expandVisible)
-
-            View.VISIBLE
+            Pair(if (this.treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
         }
-    }
-
-    override fun getExpandImageResource(): Int {
-        check(!instanceData.children.isEmpty())
-        check(this.treeNode.expandVisible)
-
-        return if (this.treeNode.isExpanded)
-            R.drawable.ic_expand_less_black_36dp
-        else
-            R.drawable.ic_expand_more_black_36dp
-    }
-
-    override fun getExpandOnClickListener(): View.OnClickListener {
-        check(!instanceData.children.isEmpty())
-        check(treeNode.expandVisible)
-
-        return treeNode.expandListener
     }
 
     override fun getCheckBoxVisibility() = View.VISIBLE

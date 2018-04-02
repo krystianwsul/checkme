@@ -222,9 +222,12 @@ class TreeNode(
                 throw SetChildTreeNodesNotCalledException()
 
             return if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty() || !modelNode.isVisibleDuringActionMode && hasActionMode()) {
-                listOf(this)
+                listOf()
             } else {
-                listOf(this) + childTreeNodes!!.flatMap { it.displayedNodes }
+                if (expanded)
+                    listOf(this) + childTreeNodes!!.flatMap { it.displayedNodes }
+                else
+                    listOf(this)
             }
         }
 

@@ -26,7 +26,7 @@ class TreeViewAdapter @JvmOverloads constructor(
             return treeNodeCollection!!.selectedNodes
         }
 
-    var query: String? = null
+    var query: String = ""
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection) {
         if (this.treeNodeCollection != null)

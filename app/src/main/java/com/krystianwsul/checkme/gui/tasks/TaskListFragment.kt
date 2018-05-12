@@ -694,14 +694,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 DomainFactory.getDomainFactory().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
             }
 
-            override fun matchesSearch(query: String?): Boolean {
-                if (query.isNullOrEmpty())
-                    return true
-
-                return childTaskData.name
-                        .toLowerCase()
-                        .contains(query!!) // todo check children
-            }
+            override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)
         }
 
         private class NoteNode(private val note: String) : ModelNode {
@@ -800,6 +793,16 @@ class TaskListFragment : AbstractFragment(), FabUser {
             check(other.hierarchyData == null)
 
             startExactTimeStamp.compareTo(other.startExactTimeStamp)
+        }
+
+        fun matchesSearch(query: String): Boolean {
+            if (query.isEmpty())
+                return true
+
+            if (name.toLowerCase().contains(query))
+                return true
+
+            return children.any { it.matchesSearch(query) }
         }
     }
 

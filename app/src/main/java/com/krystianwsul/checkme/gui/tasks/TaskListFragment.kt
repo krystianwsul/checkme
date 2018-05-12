@@ -700,7 +700,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 return childTaskData.name
                         .toLowerCase()
-                        .contains(query!!)
+                        .contains(query!!) // todo check children
             }
         }
 

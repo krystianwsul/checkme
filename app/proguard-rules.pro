@@ -42,3 +42,6 @@
 -dontwarn com.google.errorprone.annotations.CanIgnoreReturnValue
 -dontwarn com.google.errorprone.annotations.concurrent.LazyInit
 -dontwarn com.google.errorprone.annotations.ForOverride
+
+-keep class com.crashlytics.** { *; }
+-keep class com.google.firebase.** { *; }

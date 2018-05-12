@@ -917,7 +917,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             mGroupListFragment.mSelectionCallback.decrementSelected()
         }
 
-        override fun getGroupAdapter() = this
+        override val groupAdapter = this
 
         class GroupHolder(val mGroupRow: LinearLayout, val mGroupRowContainer: LinearLayout, val mGroupRowName: TextView, val mGroupRowDetails: TextView, val mGroupRowChildren: TextView, val mGroupRowExpand: ImageView, val mGroupRowCheckBox: CheckBox, val mGroupRowSeparator: View) : RecyclerView.ViewHolder(mGroupRow)
     }

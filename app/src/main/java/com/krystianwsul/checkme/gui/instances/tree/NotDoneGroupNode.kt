@@ -115,7 +115,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun getGroupAdapter() = nodeCollection.groupAdapter
+    override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
     override fun getDetails(): Pair<String, Int>? {
         if (singleInstance()) {
@@ -442,11 +442,11 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             })
         }
 
-        override fun getGroupAdapter() = parentNotDoneGroupNode.groupAdapter
+        override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
         override fun getName() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
 
-        override fun getChildren() = Companion.getChildrenNew(treeNode, instanceData, groupListFragment)
+        override fun getChildren() = getChildrenNew(treeNode, instanceData, groupListFragment)
 
         override fun getExpand(): Pair<Int, View.OnClickListener>? {
             val visibleChildren = treeNode.allChildren.any { it.canBeShown() }

@@ -55,7 +55,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         })
     }
 
-    override fun getGroupAdapter() = parentNodeCollection.groupAdapter
+    override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
     override fun getName() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
 

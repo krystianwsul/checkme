@@ -51,9 +51,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private val selectionCallback = object : SelectionCallback() {
 
-        override fun unselect() {
-            treeViewAdapter!!.unselect()
-        }
+        override fun unselect() = treeViewAdapter!!.unselect()
 
         override fun onMenuClick(menuItem: MenuItem) {
             var selected = treeViewAdapter!!.selectedNodes

@@ -45,7 +45,7 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>?) = TaskNode(mDensity, mIndentation + 1, taskData, this).let {
+    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>?) = TaskNode(density, indentation + 1, taskData, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys)
@@ -56,16 +56,17 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
     private fun expanded() = treeNode.isExpanded
 
     override fun compareTo(other: ModelNode) = (other as TaskNode).taskData.mStartExactTimeStamp.let {
-        if (mIndentation == 0) {
+        if (indentation == 0) {
             -taskData.mStartExactTimeStamp.compareTo(it)
         } else {
             taskData.mStartExactTimeStamp.compareTo(it)
         }
     }
 
-    override fun getName() = Triple(taskData.Name, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
+    override val name get() = Triple(taskData.Name, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
 
-    override fun getChildren() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
+    override val children
+        get() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
         null
     } else {
         val text = if (!expanded() && !taskData.Children.isEmpty()) {
@@ -83,7 +84,8 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
         Pair(text, color)
     }
 
-    override fun getExpand(): Pair<Int, View.OnClickListener>? {
+    override val expand
+        get(): Pair<Int, View.OnClickListener>? {
         return if (taskData.Children.isEmpty()) {
             null
         } else {
@@ -91,19 +93,19 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
         }
     }
 
-    override fun getCheckBoxVisibility() = View.INVISIBLE
+    override val checkBoxVisibility = View.INVISIBLE
 
-    override fun getCheckBoxChecked() = throw UnsupportedOperationException()
+    override val checkBoxChecked get() = throw UnsupportedOperationException()
 
-    override fun getCheckBoxOnClickListener() = throw UnsupportedOperationException()
+    override val checkBoxOnClickListener get() = throw UnsupportedOperationException()
 
-    override fun getSeparatorVisibility() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisibility get() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-    override fun getBackgroundColor() = Color.TRANSPARENT
+    override val backgroundColor = Color.TRANSPARENT
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-    override fun getOnClickListener() = treeNode.onClickListener
+    override val onClickListener get() = treeNode.onClickListener
 
     override val isSelectable = false
 

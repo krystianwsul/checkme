@@ -36,7 +36,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
         treeNode = TreeNode(this, dividerTreeNode, expanded, false)
 
-        nodeCollection = NodeCollection(mDensity, mIndentation + 1, groupAdapter, false, this.treeNode, null)
+        nodeCollection = NodeCollection(density, indentation + 1, groupAdapter, false, this.treeNode, null)
         treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, null, false, null, false, null))
 
         return treeNode
@@ -57,15 +57,17 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
-    override fun getName() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
+    override val name get() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
 
-    override fun getDetails() = instanceData.DisplayText
+    override val details
+        get() = instanceData.DisplayText
             .takeUnless { it.isNullOrEmpty() }
             ?.let { Pair(it, ContextCompat.getColor(dividerNode.groupAdapter.mGroupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary)) }
 
-    override fun getChildren() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData, groupListFragment)
+    override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData, groupListFragment)
 
-    override fun getExpand(): Pair<Int, View.OnClickListener>? {
+    override val expand
+        get(): Pair<Int, View.OnClickListener>? {
         return if (instanceData.children.isEmpty()) {
             null
         } else {
@@ -73,11 +75,12 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         }
     }
 
-    override fun getCheckBoxVisibility() = View.VISIBLE
+    override val checkBoxVisibility = View.VISIBLE
 
-    override fun getCheckBoxChecked() = true
+    override val checkBoxChecked = true
 
-    override fun getCheckBoxOnClickListener(): View.OnClickListener {
+    override val checkBoxOnClickListener
+        get(): View.OnClickListener {
         val nodeCollection = dividerNode.nodeCollection
 
         val groupAdapter = nodeCollection.groupAdapter
@@ -96,13 +99,13 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         }
     }
 
-    override fun getSeparatorVisibility() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-    override fun getBackgroundColor() = Color.TRANSPARENT
+    override val backgroundColor = Color.TRANSPARENT
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-    override fun getOnClickListener() = treeNode.onClickListener
+    override val onClickListener get() = treeNode.onClickListener
 
     override fun compareTo(other: ModelNode): Int {
         checkNotNull(instanceData.Done)

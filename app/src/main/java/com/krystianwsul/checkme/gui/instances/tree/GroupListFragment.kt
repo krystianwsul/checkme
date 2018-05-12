@@ -919,7 +919,15 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         override val groupAdapter = this
 
-        class GroupHolder(val mGroupRow: LinearLayout, val mGroupRowContainer: LinearLayout, val mGroupRowName: TextView, val mGroupRowDetails: TextView, val mGroupRowChildren: TextView, val mGroupRowExpand: ImageView, val mGroupRowCheckBox: CheckBox, val mGroupRowSeparator: View) : RecyclerView.ViewHolder(mGroupRow)
+        class GroupHolder(
+                val groupRow: LinearLayout,
+                val groupRowContainer: LinearLayout,
+                val groupRowName: TextView,
+                val groupRowDetails: TextView,
+                val groupRowChildren: TextView,
+                val groupRowExpand: ImageView,
+                val groupRowCheckBox: CheckBox,
+                val groupRowSeparator: View) : RecyclerView.ViewHolder(groupRow)
     }
 
     @Parcelize

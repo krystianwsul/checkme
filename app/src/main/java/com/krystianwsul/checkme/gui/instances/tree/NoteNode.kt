@@ -26,21 +26,21 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
         return treeNode
     }
 
-    override fun getName() = Triple(note, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), false)
+    override val name get() = Triple(note, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), false)
 
-    override fun getCheckBoxVisibility() = View.GONE
+    override val checkBoxVisibility = View.GONE
 
-    override fun getCheckBoxChecked() = throw UnsupportedOperationException()
+    override val checkBoxChecked get() = throw UnsupportedOperationException()
 
-    override fun getCheckBoxOnClickListener() = throw UnsupportedOperationException()
+    override val checkBoxOnClickListener get() = throw UnsupportedOperationException()
 
-    override fun getSeparatorVisibility() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisibility get() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-    override fun getBackgroundColor() = Color.TRANSPARENT
+    override val backgroundColor = Color.TRANSPARENT
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener? = null
 
-    override fun getOnClickListener(): View.OnClickListener? = null
+    override val onClickListener: View.OnClickListener? = null
 
     override val isSelectable = false
 

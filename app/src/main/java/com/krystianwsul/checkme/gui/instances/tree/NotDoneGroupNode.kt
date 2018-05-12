@@ -70,7 +70,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         treeNode = TreeNode(this, nodeContainer, expanded, selected)
 
         if (instanceDatas.size == 1) {
-            singleInstanceNodeCollection = NodeCollection(mDensity, mIndentation + 1, groupAdapter, false, treeNode, null)
+            singleInstanceNodeCollection = NodeCollection(density, indentation + 1, groupAdapter, false, treeNode, null)
 
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedNodes, selectable, null, false, null))
         } else {
@@ -103,7 +103,8 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun getName(): Triple<String, Int, Boolean>? {
+    override val name
+        get(): Triple<String, Int, Boolean>? {
         return if (singleInstance()) {
             Triple(singleInstanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
         } else {
@@ -117,7 +118,8 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
-    override fun getDetails(): Pair<String, Int>? {
+    override val details
+        get(): Pair<String, Int>? {
         if (singleInstance()) {
             return if (singleInstanceData.DisplayText.isNullOrEmpty()) {
                 null
@@ -140,13 +142,15 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun getChildren() = if (singleInstance()) {
+    override val children
+        get() = if (singleInstance()) {
         NotDoneInstanceNode.getChildrenNew(treeNode, singleInstanceData, groupListFragment)
     } else {
         null
     }
 
-    override fun getExpand(): Pair<Int, View.OnClickListener>? {
+    override val expand
+        get(): Pair<Int, View.OnClickListener>? {
         return if (singleInstance()) {
             val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
 
@@ -164,7 +168,8 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun getCheckBoxVisibility() = if (singleInstance()) {
+    override val checkBoxVisibility
+        get() = if (singleInstance()) {
         if (groupListFragment.mSelectionCallback.hasActionMode()) {
             View.INVISIBLE
         } else {
@@ -178,14 +183,10 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun getCheckBoxChecked(): Boolean {
-        Assert.assertTrue(singleInstance())
-        Assert.assertTrue(!groupListFragment.mSelectionCallback.hasActionMode())
+    override val checkBoxChecked = false
 
-        return false
-    }
-
-    override fun getCheckBoxOnClickListener(): View.OnClickListener {
+    override val checkBoxOnClickListener
+        get(): View.OnClickListener {
         val groupAdapter = nodeCollection.groupAdapter
 
         Assert.assertTrue(singleInstance())
@@ -208,9 +209,10 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun getSeparatorVisibility() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisibility get() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-    override fun getBackgroundColor(): Int {
+    override val backgroundColor
+        get(): Int {
         return if (singleInstance()) {
             if (treeNode.isSelected)
                 ContextCompat.getColor(groupListFragment.activity!!, R.color.selected)
@@ -226,7 +228,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
         return View.OnLongClickListener {
-            if (groupListFragment.mDataWrapper?.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && mIndentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && groupListFragment.mInstanceKeys == null && groupListFragment.taskKey == null) {
+            if (groupListFragment.mDataWrapper?.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && groupListFragment.mInstanceKeys == null && groupListFragment.taskKey == null) {
                 check(singleInstance())
 
                 groupListFragment.dragHelper.startDrag(viewHolder)
@@ -237,7 +239,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun getOnClickListener() = treeNode.onClickListener
+    override val onClickListener get() = treeNode.onClickListener
 
     override fun onClick() {
         groupListFragment.activity!!.startActivity(if (singleInstance()) {
@@ -274,7 +276,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
             treeNode.remove(childTreeNode1)
 
-            singleInstanceNodeCollection = NodeCollection(mDensity, mIndentation + 1, groupAdapter, false, treeNode, null)
+            singleInstanceNodeCollection = NodeCollection(density, indentation + 1, groupAdapter, false, treeNode, null)
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, selectable, null, false, null)
 
@@ -319,7 +321,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
             val instanceData1 = instanceDatas.single()
 
-            val notDoneInstanceNode = NotDoneInstanceNode(mDensity, mIndentation, instanceData1, this@NotDoneGroupNode, selectable)
+            val notDoneInstanceNode = NotDoneInstanceNode(density, indentation, instanceData1, this@NotDoneGroupNode, selectable)
             notDoneInstanceNodes.add(notDoneInstanceNode)
 
             treeNode.add(notDoneInstanceNode.initialize(null, null, treeNode))
@@ -331,7 +333,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     }
 
     private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?): TreeNode {
-        val notDoneInstanceNode = NotDoneInstanceNode(mDensity, mIndentation, instanceData, this, selectable)
+        val notDoneInstanceNode = NotDoneInstanceNode(density, indentation, instanceData, this, selectable)
 
         val childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selectedNodes, treeNode)
 
@@ -423,7 +425,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
             treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
 
-            nodeCollection = NodeCollection(mDensity, mIndentation + 1, groupAdapter, false, treeNode, null)
+            nodeCollection = NodeCollection(density, indentation + 1, groupAdapter, false, treeNode, null)
             treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, selectedNodes, selectable, null, false, null))
 
             return this.treeNode
@@ -444,11 +446,12 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override fun getName() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
+        override val name get() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
 
-        override fun getChildren() = getChildrenNew(treeNode, instanceData, groupListFragment)
+        override val children get() = getChildrenNew(treeNode, instanceData, groupListFragment)
 
-        override fun getExpand(): Pair<Int, View.OnClickListener>? {
+        override val expand
+            get(): Pair<Int, View.OnClickListener>? {
             val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
 
             return if (instanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
@@ -458,15 +461,17 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             }
         }
 
-        override fun getCheckBoxVisibility() = if (groupListFragment.mSelectionCallback.hasActionMode()) {
+        override val checkBoxVisibility
+            get() = if (groupListFragment.mSelectionCallback.hasActionMode()) {
             View.INVISIBLE
         } else {
             View.VISIBLE
         }
 
-        override fun getCheckBoxChecked() = false
+        override val checkBoxChecked = false
 
-        override fun getCheckBoxOnClickListener(): View.OnClickListener {
+        override val checkBoxOnClickListener
+            get(): View.OnClickListener {
             val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
             Assert.assertTrue(notDoneGroupTreeNode.isExpanded)
 
@@ -491,9 +496,10 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             }
         }
 
-        override fun getSeparatorVisibility() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+        override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-        override fun getBackgroundColor(): Int {
+        override val backgroundColor
+            get(): Int {
             Assert.assertTrue(parentNotDoneGroupNode.treeNode.isExpanded)
 
             return if (treeNode.isSelected)
@@ -504,7 +510,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-        override fun getOnClickListener() = treeNode.onClickListener
+        override val onClickListener get() = treeNode.onClickListener
 
         override fun onClick() {
             groupListFragment.activity!!.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity!!, instanceData.InstanceKey))

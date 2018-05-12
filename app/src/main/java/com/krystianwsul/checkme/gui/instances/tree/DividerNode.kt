@@ -36,7 +36,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>?): TreeNode {
         checkNotNull(instanceData.Done)
 
-        val doneInstanceNode = DoneInstanceNode(mDensity, mIndentation, instanceData, this)
+        val doneInstanceNode = DoneInstanceNode(density, indentation, instanceData, this)
 
         val childTreeNode = doneInstanceNode.initialize(treeNode, expandedInstances)
 
@@ -52,23 +52,23 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
             doneInstanceNode.addExpandedInstances(expandedInstances)
     }
 
-    override fun getName() = Triple(groupListFragment.getString(R.string.done), ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
+    override val name get() = Triple(groupListFragment.getString(R.string.done), ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
 
-    override fun getExpand() = Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+    override val expand get() = Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
 
-    override fun getCheckBoxVisibility() = View.INVISIBLE
+    override val checkBoxVisibility = View.INVISIBLE
 
-    override fun getCheckBoxChecked() = throw UnsupportedOperationException()
+    override val checkBoxChecked get() = throw UnsupportedOperationException()
 
-    override fun getCheckBoxOnClickListener() = throw UnsupportedOperationException()
+    override val checkBoxOnClickListener get() = throw UnsupportedOperationException()
 
-    override fun getSeparatorVisibility() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-    override fun getBackgroundColor() = Color.TRANSPARENT
+    override val backgroundColor = Color.TRANSPARENT
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-    override fun getOnClickListener() = treeNode.onClickListener
+    override val onClickListener get() = treeNode.onClickListener
 
     fun remove(doneInstanceNode: DoneInstanceNode) {
         check(doneInstanceNodes.contains(doneInstanceNode))

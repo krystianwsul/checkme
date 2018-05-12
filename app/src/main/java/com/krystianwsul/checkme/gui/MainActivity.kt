@@ -403,7 +403,15 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         firebaseAuth = FirebaseAuth.getInstance()
 
         mainActivitySearch.textChanges()
-                .subscribe { taskListFragment.search(it.toString()) }
+                .subscribe {
+                    val query = it.toString().toLowerCase()
+                    taskListFragment.search(query)
+
+                    if (query.isEmpty())
+                        mainFab.show()
+                    else
+                        mainFab.hide()
+                }
                 .addTo(createDisposable)
 
         supportLoaderManager.initLoader(0, null, this)

@@ -209,7 +209,7 @@ class TreeNode(
             if (childTreeNodes == null)
                 throw SetChildTreeNodesNotCalledException()
 
-            return if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty() || !modelNode.isVisibleDuringActionMode && hasActionMode()) {
+            return if ((!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty()) || (!modelNode.isVisibleDuringActionMode && hasActionMode()) || !modelNode.matchesSearch(treeViewAdapter.query)) {
                 0
             } else {
                 1 + if (expanded) childTreeNodes!!.map { it.displayedSize }.sum() else 0
@@ -221,7 +221,7 @@ class TreeNode(
             if (childTreeNodes == null)
                 throw SetChildTreeNodesNotCalledException()
 
-            return if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty() || !modelNode.isVisibleDuringActionMode && hasActionMode()) {
+            return if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty() || !modelNode.isVisibleDuringActionMode && hasActionMode() || !modelNode.matchesSearch(treeViewAdapter.query)) {
                 listOf()
             } else {
                 if (expanded)
@@ -332,6 +332,9 @@ class TreeNode(
             throw SetChildTreeNodesNotCalledException()
 
         if (!modelNode.isVisibleDuringActionMode && hasActionMode())
+            return false
+
+        if (!modelNode.matchesSearch(treeViewAdapter.query))
             return false
 
         return !(!modelNode.isVisibleWhenEmpty && childTreeNodes!!.isEmpty())

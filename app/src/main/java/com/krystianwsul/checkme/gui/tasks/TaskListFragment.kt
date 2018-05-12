@@ -428,10 +428,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = null
     }
 
-    fun search(query: String?) {
+    fun search(query: String) {
         this.query = query
 
-        //todo update list
+        treeViewAdapter?.let {
+            it.updateDisplayedNodes {
+                it.query = query
+            }
+        }
     }
 
     private class TaskAdapter private constructor(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {
@@ -688,6 +692,15 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 childTaskData.hierarchyData!!.ordinal = ordinal
 
                 DomainFactory.getDomainFactory().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
+            }
+
+            override fun matchesSearch(query: String?): Boolean {
+                if (query.isNullOrEmpty())
+                    return true
+
+                return childTaskData.name
+                        .toLowerCase()
+                        .contains(query!!)
             }
         }
 

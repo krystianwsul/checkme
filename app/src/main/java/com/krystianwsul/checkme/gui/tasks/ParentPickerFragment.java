@@ -74,7 +74,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
             }
         }
 
-        MaterialDialog.Builder builder = new MaterialDialog.Builder(getActivity())
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(requireActivity())
                 .title(R.string.parent_dialog_title)
                 .customView(R.layout.fragment_parent_picker, false)
                 .negativeText(android.R.string.cancel);
@@ -331,7 +331,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
                 ParentPickerFragment parentPickerFragment = getParentFragment();
 
                 if (treeNode.isSelected())
-                    taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(parentPickerFragment.getActivity(), R.color.selected));
+                    taskHolder.mShowTaskRow.setBackgroundColor(ContextCompat.getColor(parentPickerFragment.requireActivity(), R.color.selected));
                 else
                     taskHolder.mShowTaskRow.setBackgroundColor(Color.TRANSPARENT);
 
@@ -460,6 +460,11 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
             @Override
             public void setOrdinal(double ordinal) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean matchesSearch(@org.jetbrains.annotations.Nullable String query) {
                 throw new UnsupportedOperationException();
             }
         }

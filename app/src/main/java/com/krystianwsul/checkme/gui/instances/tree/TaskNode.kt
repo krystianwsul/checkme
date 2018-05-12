@@ -13,13 +13,13 @@ import com.krystianwsul.treeadapter.TreeNode
 
 import junit.framework.Assert
 
-internal class TaskNode(density: Float, indentation: Int, private val taskData: GroupListFragment.TaskData, private val taskParent: TaskParent) : GroupHolderNode(density, indentation), ModelNode, TaskParent {
+class TaskNode(density: Float, indentation: Int, private val taskData: GroupListFragment.TaskData, private val taskParent: TaskParent) : GroupHolderNode(density, indentation), ModelNode, TaskParent {
 
     private lateinit var treeNode: TreeNode
 
     private val taskNodes = mutableListOf<TaskNode>()
 
-    private val groupListFragment = groupAdapter.mGroupListFragment
+    private val groupListFragment by lazy { groupAdapter.mGroupListFragment }
 
     val expandedTaskKeys: List<TaskKey>
         get() = if (taskNodes.isEmpty()) {
@@ -51,7 +51,7 @@ internal class TaskNode(density: Float, indentation: Int, private val taskData: 
         it.initialize(treeNode, expandedTaskKeys)
     }
 
-    override fun getGroupAdapter() = taskParent.groupAdapter
+    override val groupAdapter by lazy { taskParent.groupAdapter }
 
     private fun expanded() = treeNode.isExpanded
 

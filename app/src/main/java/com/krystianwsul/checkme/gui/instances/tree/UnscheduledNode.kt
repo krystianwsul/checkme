@@ -18,7 +18,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
 
     val expandedTaskKeys get() = taskNodes.flatMap { it.expandedTaskKeys }
 
-    private val groupListFragment = groupAdapter.mGroupListFragment
+    private val groupListFragment by lazy { groupAdapter.mGroupListFragment }
 
     fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>?): TreeNode {
         check(!expanded || !taskDatas.isEmpty())
@@ -38,7 +38,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
 
     fun expanded() = treeNode.isExpanded
 
-    override fun getGroupAdapter() = nodeCollection.groupAdapter
+    override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
     override fun compareTo(other: ModelNode) = if (other is DividerNode) {
         -1

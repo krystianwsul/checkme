@@ -364,8 +364,8 @@ public class RemoteProject {
         RemoteProjectUser remoteProjectUser = mRemoteUsers.get(key);
         Assert.assertTrue(remoteProjectUser != null);
 
-        remoteProjectUser.setName(userInfo.mName);
-        remoteProjectUser.setToken(userInfo.mToken, uuid);
+        remoteProjectUser.setName(userInfo.getName());
+        remoteProjectUser.setToken(userInfo.getToken(), uuid);
     }
 
     public void setName(@NonNull String name) {

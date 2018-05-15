@@ -41,7 +41,7 @@ object BackendNotifier {
 
         val projectIds = remoteProjects.map(RemoteProject::getId).toSet()
 
-        val url = getUrl(projectIds, production, userKeys, userInfo.mToken)
+        val url = getUrl(projectIds, production, userKeys, userInfo.token)
         check(url.isNotEmpty())
 
         run(context, url)

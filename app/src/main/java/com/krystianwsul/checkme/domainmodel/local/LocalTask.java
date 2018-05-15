@@ -21,8 +21,12 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import junit.framework.Assert;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -109,13 +113,13 @@ public class LocalTask extends Task {
     public void delete() {
         TaskKey taskKey = getTaskKey();
 
-        Stream.of(new ArrayList<>(mDomainFactory.getLocalFactory().getTaskHierarchiesByChildTaskKey(taskKey)))
+        Stream.of(new ArrayList<>(getDomainFactory().getLocalFactory().getTaskHierarchiesByChildTaskKey(taskKey)))
                 .forEach(TaskHierarchy::delete);
 
         Stream.of(new ArrayList<>(getSchedules()))
                 .forEach(Schedule::delete);
 
-        mDomainFactory.getLocalFactory().deleteTask(this);
+        getDomainFactory().getLocalFactory().deleteTask(this);
         mTaskRecord.delete();
     }
 
@@ -134,7 +138,7 @@ public class LocalTask extends Task {
     @NonNull
     @Override
     public Task createChildTask(@NonNull ExactTimeStamp now, @NonNull String name, @Nullable String note) {
-        return mDomainFactory.getLocalFactory().createChildTask(mDomainFactory, now, this, name, note);
+        return getDomainFactory().getLocalFactory().createChildTask(getDomainFactory(), now, this, name, note);
     }
 
     @NonNull
@@ -144,10 +148,10 @@ public class LocalTask extends Task {
     }
 
     @Override
-    protected void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now) {
+    protected void addSchedules(@NotNull List<? extends CreateTaskLoader.ScheduleData> scheduleDatas, @NotNull ExactTimeStamp now) {
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        List<Schedule> schedules = mDomainFactory.getLocalFactory().createSchedules(mDomainFactory, this, scheduleDatas, now);
+        List<Schedule> schedules = getDomainFactory().getLocalFactory().createSchedules(getDomainFactory(), this, scheduleDatas, now);
         Assert.assertTrue(!schedules.isEmpty());
 
         addSchedules(schedules);
@@ -157,32 +161,32 @@ public class LocalTask extends Task {
     public void addChild(@NonNull Task childTask, @NonNull ExactTimeStamp now) {
         Assert.assertTrue(childTask instanceof LocalTask);
 
-        mDomainFactory.getLocalFactory().createTaskHierarchy(mDomainFactory, this, (LocalTask) childTask, now);
+        getDomainFactory().getLocalFactory().createTaskHierarchy(getDomainFactory(), this, (LocalTask) childTask, now);
     }
 
     @Override
-    protected void deleteSchedule(@NonNull Schedule schedule) {
+    public void deleteSchedule(@NonNull Schedule schedule) {
         Assert.assertTrue(mSchedules.contains(schedule));
 
         mSchedules.remove(schedule);
     }
 
-    @NonNull
+    @NotNull
     @Override
-    public Map<ScheduleKey, ? extends Instance> getExistingInstances() {
-        return mDomainFactory.getLocalFactory().getExistingInstances(getTaskKey());
+    public Map<ScheduleKey, Instance> getExistingInstances() {
+        return new HashMap<>(getDomainFactory().getLocalFactory().getExistingInstances(getTaskKey()));
     }
 
     @NonNull
     @Override
-    protected Set<? extends TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
-        return mDomainFactory.getLocalFactory().getTaskHierarchiesByChildTaskKey(childTaskKey);
+    public Set<TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
+        return new HashSet<>(getDomainFactory().getLocalFactory().getTaskHierarchiesByChildTaskKey(childTaskKey));
     }
 
     @NonNull
     @Override
-    protected Set<? extends TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
-        return mDomainFactory.getLocalFactory().getTaskHierarchiesByParentTaskKey(parentTaskKey);
+    public Set<TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
+        return new HashSet<>(getDomainFactory().getLocalFactory().getTaskHierarchiesByParentTaskKey(parentTaskKey));
     }
 
     @Override
@@ -208,7 +212,7 @@ public class LocalTask extends Task {
         if (TextUtils.isEmpty(projectId)) {
             return this;
         } else {
-            return mDomainFactory.convertLocalToRemote(context, now, this, projectId);
+            return getDomainFactory().convertLocalToRemote(context, now, this, projectId);
         }
     }
 }

@@ -172,9 +172,7 @@ public class RemoteProjectFactory {
     @NonNull
     public List<RemoteInstance> getExistingInstances() {
         return Stream.of(mRemoteProjects.values())
-                .map(RemoteProject::getRemoteTasks)
-                .flatMap(Stream::of)
-                .flatMap(remoteTask -> Stream.of(remoteTask.getExistingInstances().values()))
+                .map(RemoteProject::getRemoteTasks).flatMap(Stream::of).flatMap(remoteTask -> Stream.of(remoteTask.getExistingInstances().values())).map(instance -> (RemoteInstance) instance)
                 .collect(Collectors.toList());
     }
 

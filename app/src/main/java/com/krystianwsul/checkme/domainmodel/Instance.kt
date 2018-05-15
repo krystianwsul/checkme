@@ -96,7 +96,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
 
     abstract fun exists(): Boolean
 
-    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
+    fun getChildInstances(now: ExactTimeStamp): List<kotlin.Pair<Instance, TaskHierarchy>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val task = task
@@ -108,7 +108,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
         for (taskHierarchy in taskHierarchies) {
             checkNotNull(taskHierarchy)
 
-            val childTaskKey = taskHierarchy!!.childTaskKey
+            val childTaskKey = taskHierarchy.childTaskKey
 
             if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {
                 val childInstance = domainFactory.getInstance(childTaskKey, scheduleDateTime)
@@ -119,7 +119,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
             }
         }
 
-        return ArrayList(childInstances.values)
+        return ArrayList(childInstances.values.map { kotlin.Pair(it.first!!, it.second!!) })
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp): ExactTimeStamp {
@@ -127,7 +127,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
 
         exactTimeStamps.add(now)
 
-        task.endExactTimeStamp?.let { exactTimeStamps.add(it.minusOne()) }
+        task.getEndExactTimeStamp()?.let { exactTimeStamps.add(it.minusOne()) }
 
         done?.let { exactTimeStamps.add(it.minusOne()) }
 
@@ -150,13 +150,13 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
 
     abstract fun setNotified(now: ExactTimeStamp)
 
-    protected fun isVisible(now: ExactTimeStamp): Boolean {
+    fun isVisible(now: ExactTimeStamp): Boolean {
         val isVisible = isVisibleHelper(now)
 
         if (isVisible) {
             val task = task
 
-            val oldestVisible = task.oldestVisible
+            val oldestVisible = task.getOldestVisible()
             val date = scheduleDate
 
             if (oldestVisible != null && date < oldestVisible) {
@@ -187,7 +187,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp) ?: return null
 
-        fun Task.message() = "name: $name, start: $startExactTimeStamp, end: $endExactTimeStamp"
+        fun Task.message() = "name: $name, start: $startExactTimeStamp, end: " + getEndExactTimeStamp()
 
         if (!parentTask.current(hierarchyExactTimeStamp))
             throw ParentInstanceException("instance: " + toString() + ", task: " + task.message() + ", parentTask: " + parentTask.message() + ", hierarchy: " + hierarchyExactTimeStamp)

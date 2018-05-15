@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
+import com.krystianwsul.checkme.domainmodel.Instance;
 import com.krystianwsul.checkme.domainmodel.MonthlyDaySchedule;
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekSchedule;
 import com.krystianwsul.checkme.domainmodel.Schedule;
@@ -39,9 +40,13 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 
 import junit.framework.Assert;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +103,7 @@ public class RemoteTask extends Task {
 
     @NonNull
     private RemoteProjectFactory getRemoteFactory() {
-        RemoteProjectFactory remoteProjectFactory = mDomainFactory.getRemoteFactory();
+        RemoteProjectFactory remoteProjectFactory = getDomainFactory().getRemoteFactory();
         Assert.assertTrue(remoteProjectFactory != null);
 
         return remoteProjectFactory;
@@ -106,7 +111,7 @@ public class RemoteTask extends Task {
 
     @NonNull
     @Override
-    protected Collection<Schedule> getSchedules() {
+    public Collection<Schedule> getSchedules() {
         return mRemoteSchedules;
     }
 
@@ -205,7 +210,7 @@ public class RemoteTask extends Task {
     }
 
     @Override
-    protected void addSchedules(@NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull ExactTimeStamp now) {
+    protected void addSchedules(@NotNull List<? extends CreateTaskLoader.ScheduleData> scheduleDatas, @NotNull ExactTimeStamp now) {
         createSchedules(now, scheduleDatas);
     }
 
@@ -217,7 +222,7 @@ public class RemoteTask extends Task {
     }
 
     @Override
-    protected void deleteSchedule(@NonNull Schedule schedule) {
+    public void deleteSchedule(@NonNull Schedule schedule) {
         Assert.assertTrue(mRemoteSchedules.contains(schedule));
 
         mRemoteSchedules.remove(schedule);
@@ -229,7 +234,7 @@ public class RemoteTask extends Task {
 
         ScheduleKey scheduleKey = new ScheduleKey(scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
 
-        RemoteInstanceRecord remoteInstanceRecord = mRemoteTaskRecord.newRemoteInstanceRecord(mDomainFactory, instanceJson, scheduleKey);
+        RemoteInstanceRecord remoteInstanceRecord = mRemoteTaskRecord.newRemoteInstanceRecord(getDomainFactory(), instanceJson, scheduleKey);
 
         mExistingRemoteInstances.put(remoteInstance.getScheduleKey(), remoteInstance);
 
@@ -238,8 +243,8 @@ public class RemoteTask extends Task {
 
     @Override
     @NonNull
-    public Map<ScheduleKey, RemoteInstance> getExistingInstances() {
-        return mExistingRemoteInstances;
+    public Map<ScheduleKey, Instance> getExistingInstances() {
+        return new HashMap<>(mExistingRemoteInstances);
     }
 
     void deleteInstance(@NonNull RemoteInstance remoteInstance) {
@@ -256,7 +261,7 @@ public class RemoteTask extends Task {
         return mExistingRemoteInstances.get(scheduleKey);
     }
 
-    void createSchedules(@NonNull ExactTimeStamp now, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas) {
+    void createSchedules(@NonNull ExactTimeStamp now, @NonNull List<? extends CreateTaskLoader.ScheduleData> scheduleDatas) {
         for (CreateTaskLoader.ScheduleData scheduleData : scheduleDatas) {
             Assert.assertTrue(scheduleData != null);
 
@@ -285,7 +290,7 @@ public class RemoteTask extends Task {
 
                     RemoteSingleScheduleRecord remoteSingleScheduleRecord = mRemoteTaskRecord.newRemoteSingleScheduleRecord(new ScheduleWrapper(new SingleScheduleJson(now.getLong(), null, date.getYear(), date.getMonth(), date.getDay(), remoteCustomTimeId, hour, minute)));
 
-                    mRemoteSchedules.add(new SingleSchedule(mDomainFactory, new RemoteSingleScheduleBridge(mDomainFactory, remoteSingleScheduleRecord)));
+                    mRemoteSchedules.add(new SingleSchedule(getDomainFactory(), new RemoteSingleScheduleBridge(getDomainFactory(), remoteSingleScheduleRecord)));
                     break;
                 }
                 case DAILY: {
@@ -314,7 +319,7 @@ public class RemoteTask extends Task {
                     for (DayOfWeek dayOfWeek : weeklyScheduleData.getDaysOfWeek()) {
                         RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteTaskRecord.newRemoteWeeklyScheduleRecord(new ScheduleWrapper(new WeeklyScheduleJson(now.getLong(), null, dayOfWeek.ordinal(), remoteCustomTimeId, hour, minute)));
 
-                        mRemoteSchedules.add(new WeeklySchedule(mDomainFactory, new RemoteWeeklyScheduleBridge(mDomainFactory, remoteWeeklyScheduleRecord)));
+                        mRemoteSchedules.add(new WeeklySchedule(getDomainFactory(), new RemoteWeeklyScheduleBridge(getDomainFactory(), remoteWeeklyScheduleRecord)));
                     }
 
                     break;
@@ -341,7 +346,7 @@ public class RemoteTask extends Task {
 
                     RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord = mRemoteTaskRecord.newRemoteMonthlyDayScheduleRecord(new ScheduleWrapper(new MonthlyDayScheduleJson(now.getLong(), null, monthlyDayScheduleData.getDayOfMonth(), monthlyDayScheduleData.getBeginningOfMonth(), remoteCustomTimeId, hour, minute)));
 
-                    mRemoteSchedules.add(new MonthlyDaySchedule(mDomainFactory, new RemoteMonthlyDayScheduleBridge(mDomainFactory, remoteMonthlyDayScheduleRecord)));
+                    mRemoteSchedules.add(new MonthlyDaySchedule(getDomainFactory(), new RemoteMonthlyDayScheduleBridge(getDomainFactory(), remoteMonthlyDayScheduleRecord)));
                     break;
                 }
                 case MONTHLY_WEEK: {
@@ -366,7 +371,7 @@ public class RemoteTask extends Task {
 
                     RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord = mRemoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(new ScheduleWrapper(new MonthlyWeekScheduleJson(now.getLong(), null, monthlyWeekScheduleData.getDayOfMonth(), monthlyWeekScheduleData.getDayOfWeek().ordinal(), monthlyWeekScheduleData.getBeginningOfMonth(), remoteCustomTimeId, hour, minute)));
 
-                    mRemoteSchedules.add(new MonthlyWeekSchedule(mDomainFactory, new RemoteMonthlyWeekScheduleBridge(mDomainFactory, remoteMonthlyWeekScheduleRecord)));
+                    mRemoteSchedules.add(new MonthlyWeekSchedule(getDomainFactory(), new RemoteMonthlyWeekScheduleBridge(getDomainFactory(), remoteMonthlyWeekScheduleRecord)));
                     break;
                 }
                 default:
@@ -406,7 +411,7 @@ public class RemoteTask extends Task {
 
                     RemoteSingleScheduleRecord remoteSingleScheduleRecord = mRemoteTaskRecord.newRemoteSingleScheduleRecord(new ScheduleWrapper(new SingleScheduleJson(singleSchedule.getStartTime(), singleSchedule.getEndTime(), date.getYear(), date.getMonth(), date.getDay(), remoteCustomTimeId, hour, minute)));
 
-                    mRemoteSchedules.add(new SingleSchedule(mDomainFactory, new RemoteSingleScheduleBridge(mDomainFactory, remoteSingleScheduleRecord)));
+                    mRemoteSchedules.add(new SingleSchedule(getDomainFactory(), new RemoteSingleScheduleBridge(getDomainFactory(), remoteSingleScheduleRecord)));
                     break;
                 }
                 case DAILY: {
@@ -437,7 +442,7 @@ public class RemoteTask extends Task {
                     for (DayOfWeek dayOfWeek : weeklySchedule.getDaysOfWeek()) {
                         RemoteWeeklyScheduleRecord remoteWeeklyScheduleRecord = mRemoteTaskRecord.newRemoteWeeklyScheduleRecord(new ScheduleWrapper(new WeeklyScheduleJson(schedule.getStartTime(), schedule.getEndTime(), dayOfWeek.ordinal(), remoteCustomTimeId, hour, minute)));
 
-                        mRemoteSchedules.add(new WeeklySchedule(mDomainFactory, new RemoteWeeklyScheduleBridge(mDomainFactory, remoteWeeklyScheduleRecord)));
+                        mRemoteSchedules.add(new WeeklySchedule(getDomainFactory(), new RemoteWeeklyScheduleBridge(getDomainFactory(), remoteWeeklyScheduleRecord)));
                     }
 
                     break;
@@ -466,7 +471,7 @@ public class RemoteTask extends Task {
 
                     RemoteMonthlyDayScheduleRecord remoteMonthlyDayScheduleRecord = mRemoteTaskRecord.newRemoteMonthlyDayScheduleRecord(new ScheduleWrapper(new MonthlyDayScheduleJson(schedule.getStartTime(), schedule.getEndTime(), monthlyDaySchedule.getDayOfMonth(), monthlyDaySchedule.getBeginningOfMonth(), remoteCustomTimeId, hour, minute)));
 
-                    mRemoteSchedules.add(new MonthlyDaySchedule(mDomainFactory, new RemoteMonthlyDayScheduleBridge(mDomainFactory, remoteMonthlyDayScheduleRecord)));
+                    mRemoteSchedules.add(new MonthlyDaySchedule(getDomainFactory(), new RemoteMonthlyDayScheduleBridge(getDomainFactory(), remoteMonthlyDayScheduleRecord)));
                     break;
                 }
                 case MONTHLY_WEEK: {
@@ -493,7 +498,7 @@ public class RemoteTask extends Task {
 
                     RemoteMonthlyWeekScheduleRecord remoteMonthlyWeekScheduleRecord = mRemoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(new ScheduleWrapper(new MonthlyWeekScheduleJson(schedule.getStartTime(), schedule.getEndTime(), monthlyWeekScheduleData.getDayOfMonth(), monthlyWeekScheduleData.getDayOfWeek().ordinal(), monthlyWeekScheduleData.getBeginningOfMonth(), remoteCustomTimeId, hour, minute)));
 
-                    mRemoteSchedules.add(new MonthlyWeekSchedule(mDomainFactory, new RemoteMonthlyWeekScheduleBridge(mDomainFactory, remoteMonthlyWeekScheduleRecord)));
+                    mRemoteSchedules.add(new MonthlyWeekSchedule(getDomainFactory(), new RemoteMonthlyWeekScheduleBridge(getDomainFactory(), remoteMonthlyWeekScheduleRecord)));
                     break;
                 }
                 default:
@@ -504,14 +509,14 @@ public class RemoteTask extends Task {
 
     @NonNull
     @Override
-    protected Set<? extends TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
-        return mRemoteProject.getTaskHierarchiesByChildTaskKey(childTaskKey);
+    public Set<TaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
+        return new HashSet<>(mRemoteProject.getTaskHierarchiesByChildTaskKey(childTaskKey));
     }
 
     @NonNull
     @Override
-    protected Set<? extends TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
-        return mRemoteProject.getTaskHierarchiesByParentTaskKey(parentTaskKey);
+    public Set<TaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
+        return new HashSet<>(mRemoteProject.getTaskHierarchiesByParentTaskKey(parentTaskKey));
     }
 
     @NonNull

@@ -2170,9 +2170,9 @@ public class DomainFactory {
     private HashMap<InstanceKey, GroupListFragment.InstanceData> getChildInstanceDatas(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
         HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
 
-        for (Pair<Instance, TaskHierarchy> pair : instance.getChildInstances(now)) {
-            Instance childInstance = pair.first;
-            TaskHierarchy taskHierarchy = pair.second;
+        for (kotlin.Pair<Instance, TaskHierarchy> pair : instance.getChildInstances(now)) {
+            Instance childInstance = pair.getFirst();
+            TaskHierarchy taskHierarchy = pair.getSecond();
 
             Task childTask = childInstance.getTask();
 
@@ -3022,9 +3022,9 @@ public class DomainFactory {
                 .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
-        for (Pair<Instance, TaskHierarchy> pair : instance.getChildInstances(now)) {
-            Instance childInstance = pair.first;
-            TaskHierarchy taskHierarchy = pair.second;
+        for (kotlin.Pair<Instance, TaskHierarchy> pair : instance.getChildInstances(now)) {
+            Instance childInstance = pair.getFirst();
+            TaskHierarchy taskHierarchy = pair.getSecond();
             Task childTask = childInstance.getTask();
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
@@ -3189,7 +3189,7 @@ public class DomainFactory {
             // set child instances relevant
             Stream.of(mInstance.getChildInstances(now))
                     .map(pair -> {
-                        Instance instance = pair.first;
+                        Instance instance = pair.getFirst();
                         InstanceKey instanceKey = instance.getInstanceKey();
 
                         if (!instanceRelevances.containsKey(instanceKey))

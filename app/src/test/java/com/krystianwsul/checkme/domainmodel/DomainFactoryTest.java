@@ -111,7 +111,7 @@ public class DomainFactoryTest {
 
     @SuppressLint("CommitPrefEdits")
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         PowerMockito.mockStatic(TextUtils.class);
         PowerMockito.mockStatic(Log.class);
         PowerMockito.mockStatic(SystemClock.class);
@@ -127,7 +127,7 @@ public class DomainFactoryTest {
             private long mCounter = 0;
 
             @Override
-            public Long answer(InvocationOnMock invocation) throws Throwable {
+            public Long answer(InvocationOnMock invocation) {
                 return mCounter++;
             }
         });
@@ -142,12 +142,12 @@ public class DomainFactoryTest {
 
     @SuppressWarnings("EmptyMethod")
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
     }
 
     @Test
-    public void testRelevantSingleNoChildren() throws Exception {
+    public void testRelevantSingleNoChildren() {
         PersistenceManger persistenceManger = newPersistenceManger();
 
         DomainFactory domainFactory = new DomainFactory(persistenceManger);
@@ -214,7 +214,7 @@ public class DomainFactoryTest {
     }
 
     @Test
-    public void testRelevantSingleWithChildren() throws Exception {
+    public void testRelevantSingleWithChildren() {
         PersistenceManger persistenceManger = newPersistenceManger();
 
         DomainFactory domainFactory = new DomainFactory(persistenceManger);

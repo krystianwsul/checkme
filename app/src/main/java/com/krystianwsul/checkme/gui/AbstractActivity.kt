@@ -8,7 +8,7 @@ import io.reactivex.disposables.CompositeDisposable
 
 abstract class AbstractActivity : AppCompatActivity() {
 
-    protected var createDisposable = CompositeDisposable()
+    protected val createDisposable = CompositeDisposable()
 
     override fun onResume() {
         MyCrashlytics.log(javaClass.simpleName + ".onResume")

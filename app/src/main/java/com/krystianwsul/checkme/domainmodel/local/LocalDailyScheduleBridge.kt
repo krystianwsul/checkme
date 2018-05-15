@@ -15,7 +15,7 @@ internal class LocalDailyScheduleBridge(scheduleRecord: ScheduleRecord, private 
     override val minute get() = mDailyScheduleRecord.minute
 
     override fun delete() {
-        mScheduleRecord.delete()
+        scheduleRecord.delete()
         mDailyScheduleRecord.delete()
     }
 

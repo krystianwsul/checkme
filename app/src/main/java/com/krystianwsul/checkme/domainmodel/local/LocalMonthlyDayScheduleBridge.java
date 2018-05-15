@@ -51,7 +51,7 @@ class LocalMonthlyDayScheduleBridge extends LocalScheduleBridge implements Month
 
     @Override
     public void delete() {
-        mScheduleRecord.delete();
+        getScheduleRecord().delete();
         mMonthlyDayScheduleRecord.delete();
     }
 }

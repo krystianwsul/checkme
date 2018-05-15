@@ -16,7 +16,7 @@ internal class LocalWeeklyScheduleBridge(scheduleRecord: ScheduleRecord, private
     override val minute get() = mWeeklyScheduleRecord.minute
 
     override fun delete() {
-        mScheduleRecord.delete()
+        scheduleRecord.delete()
         mWeeklyScheduleRecord.delete()
     }
 }

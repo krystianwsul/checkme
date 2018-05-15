@@ -256,12 +256,12 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
 
             TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {
-                it.setTimeDialogListener(mTimeDialogListener)
+                it.timeDialogListener = mTimeDialogListener
                 it.show(childFragmentManager, TIME_LIST_FRAGMENT_TAG)
             }
         }
 
-        (childFragmentManager.findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.setTimeDialogListener(mTimeDialogListener)
+        (childFragmentManager.findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.timeDialogListener = mTimeDialogListener
 
         (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.setListener(mTimePickerDialogFragmentListener)
 

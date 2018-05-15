@@ -266,13 +266,13 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
 
             val timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas)
 
-            timeDialogFragment.setTimeDialogListener(mTimeDialogListener)
+            timeDialogFragment.timeDialogListener = mTimeDialogListener
 
             timeDialogFragment.show(supportFragmentManager, TIME_DIALOG_FRAGMENT_TAG)
         }
 
         val timeDialogFragment = supportFragmentManager.findFragmentByTag(TIME_DIALOG_FRAGMENT_TAG) as? TimeDialogFragment
-        timeDialogFragment?.setTimeDialogListener(mTimeDialogListener)
+        timeDialogFragment?.timeDialogListener = mTimeDialogListener
     }
 
     override fun onLoaderReset(loader: Loader<EditInstanceLoader.Data>) {}

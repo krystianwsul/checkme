@@ -28,7 +28,7 @@ public class RemoteTaskHierarchy extends TaskHierarchy {
 
     @NonNull
     @Override
-    protected ExactTimeStamp getStartExactTimeStamp() {
+    public ExactTimeStamp getStartExactTimeStamp() {
         return new ExactTimeStamp(mRemoteTaskHierarchyRecord.getStartTime());
     }
 

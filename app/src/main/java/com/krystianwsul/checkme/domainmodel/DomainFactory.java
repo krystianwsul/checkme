@@ -844,7 +844,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskLoader.ScheduleData, List<Schedule>>> getScheduleDatas(List<Schedule> schedules, ExactTimeStamp now) {
+    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskLoader.ScheduleData, List<Schedule>>> getScheduleDatas(List<Schedule> schedules, ExactTimeStamp now) {
         Map<CustomTimeKey, CustomTime> customTimes = new HashMap<>();
 
         Map<CreateTaskLoader.ScheduleData, List<Schedule>> scheduleDatas = new HashMap<>();
@@ -920,7 +920,7 @@ public class DomainFactory {
             scheduleDatas.put(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(daysOfWeek, entry.getKey()), new ArrayList<>(entry.getValue()));
         }
 
-        return new Pair<>(customTimes, scheduleDatas);
+        return new kotlin.Pair<>(customTimes, scheduleDatas);
     }
 
     @NonNull
@@ -956,9 +956,9 @@ public class DomainFactory {
                 taskParentKey = null;
 
                 if (!schedules.isEmpty()) {
-                    Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskLoader.ScheduleData, List<Schedule>>> pair = getScheduleDatas(schedules, now);
-                    customTimes.putAll(pair.first);
-                    scheduleDatas = new ArrayList<>(pair.second.keySet());
+                    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskLoader.ScheduleData, List<Schedule>>> pair = getScheduleDatas(schedules, now);
+                    customTimes.putAll(pair.getFirst());
+                    scheduleDatas = new ArrayList<>(pair.getSecond().keySet());
                 }
             } else {
                 Task parentTask = task.getParentTask(now);
@@ -2672,7 +2672,7 @@ public class DomainFactory {
                 .map(Instance::getInstanceKey)
                 .collect(Collectors.toSet()));
 
-        Map<InstanceKey, Pair<Integer, InstanceShownRecord>> instanceShownRecordNotificationDatas = new HashMap<>();
+        Map<InstanceKey, kotlin.Pair<Integer, InstanceShownRecord>> instanceShownRecordNotificationDatas = new HashMap<>();
         for (InstanceShownRecord instanceShownRecord : mLocalFactory.getInstanceShownRecords()) {
             if (!instanceShownRecord.getNotificationShown())
                 continue;
@@ -2703,7 +2703,7 @@ public class DomainFactory {
 
             shownInstanceKeys.add(instanceKey);
 
-            instanceShownRecordNotificationDatas.put(instanceKey, new Pair<>(Instance.Companion.getNotificationId(scheduleDate, customTimeKey, hourMinute, taskKey), instanceShownRecord));
+            instanceShownRecordNotificationDatas.put(instanceKey, new kotlin.Pair<>(Instance.Companion.getNotificationId(scheduleDate, customTimeKey, hourMinute, taskKey), instanceShownRecord));
         }
 
         List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
@@ -2734,7 +2734,7 @@ public class DomainFactory {
             } else {
                 Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
-                instanceShownRecordNotificationDatas.get(hideInstanceKey).second.setNotificationShown(false);
+                instanceShownRecordNotificationDatas.get(hideInstanceKey).getSecond().setNotificationShown(false);
             }
         }
 
@@ -2757,7 +2757,7 @@ public class DomainFactory {
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
 
-                            int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).first;
+                            int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).getFirst();
 
                             NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
                         }
@@ -2783,7 +2783,7 @@ public class DomainFactory {
                         } else {
                             Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
-                            int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
+                            int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).getFirst();
 
                             NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
                         }
@@ -2819,7 +2819,7 @@ public class DomainFactory {
                 } else {
                     Assert.assertTrue(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
 
-                    int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).first;
+                    int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).getFirst();
 
                     NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
                 }

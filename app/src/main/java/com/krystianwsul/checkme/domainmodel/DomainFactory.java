@@ -775,7 +775,7 @@ public class DomainFactory {
                         hierarchyData = new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal());
                     }
 
-                    return new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(MyApplication.instance, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, hierarchyData, instance.getOrdinal());
+                    return new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(MyApplication.Companion.getInstance(), now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, hierarchyData, instance.getOrdinal());
                 }, HashMap::new));
 
         return new ShowTaskInstancesLoader.Data(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
@@ -1575,11 +1575,11 @@ public class DomainFactory {
 
         instance.setOrdinal(ordinal, now);
 
-        updateNotifications(MyApplication.instance, now);
+        updateNotifications(MyApplication.Companion.getInstance(), now);
 
-        save(MyApplication.instance, dataId, SaveService.Source.GUI);
+        save(MyApplication.Companion.getInstance(), dataId, SaveService.Source.GUI);
 
-        notifyCloud(MyApplication.instance, instance.getRemoteNullableProject());
+        notifyCloud(MyApplication.Companion.getInstance(), instance.getRemoteNullableProject());
     }
 
     public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull HierarchyData hierarchyData) {
@@ -1608,12 +1608,12 @@ public class DomainFactory {
 
         taskHierarchy.setOrdinal(hierarchyData.getOrdinal());
 
-        updateNotifications(MyApplication.instance, now);
+        updateNotifications(MyApplication.Companion.getInstance(), now);
 
-        save(MyApplication.instance, dataId, SaveService.Source.GUI);
+        save(MyApplication.Companion.getInstance(), dataId, SaveService.Source.GUI);
 
         if (remoteProject != null)
-            notifyCloud(MyApplication.instance, remoteProject);
+            notifyCloud(MyApplication.Companion.getInstance(), remoteProject);
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull ArrayList<TaskKey> taskKeys) {

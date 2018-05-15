@@ -24,7 +24,7 @@ public class Utils {
         intent.putExtra(Intent.EXTRA_TEXT, text);
         intent.setType("text/plain");
 
-        MyApplication.instance.startActivity(Intent.createChooser(intent, MyApplication.instance.getString(R.string.sendTo)));
+        MyApplication.Companion.getInstance().startActivity(Intent.createChooser(intent, MyApplication.Companion.getInstance().getString(R.string.sendTo)));
     }
 
     public static int getDaysInMonth(int year, int month) {

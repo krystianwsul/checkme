@@ -56,7 +56,7 @@ kapt {
 }
 
 ext {
-    supportLibVersion = '27.1.0'
+    supportLibVersion = '27.1.1'
     firebaseVersion = '12.0.0'
     powermockVersion = '1.6.6'
 }

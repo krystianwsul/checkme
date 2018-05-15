@@ -14,7 +14,7 @@ class UserInfo(firebaseUser: FirebaseUser) {
 
     val name = firebaseUser.displayName!!
 
-    val token = MyFirebaseInstanceIdService.getToken()
+    val token = MyFirebaseInstanceIdService.token
 
     val key by lazy { UserData.getKey(email) }
 

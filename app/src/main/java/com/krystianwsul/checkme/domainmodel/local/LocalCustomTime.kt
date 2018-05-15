@@ -22,7 +22,7 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
 
     private val customTimeRecords get() = mutableListOf<CustomTimeRecord>(localCustomTimeRecord).apply { addAll(remoteCustomTimeRecords.values) }
 
-    override fun getName() = localCustomTimeRecord.name
+    override val name get() = localCustomTimeRecord.name
 
     fun setName(name: String) {
         Assert.assertTrue(name.isNotEmpty())
@@ -41,7 +41,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
         DayOfWeek.SATURDAY -> HourMinute(localCustomTimeRecord.saturdayHour, localCustomTimeRecord.saturdayMinute)
     }
 
-    override fun getHourMinutes() = TreeMap<DayOfWeek, HourMinute>().apply {
+    override val hourMinutes
+        get() = TreeMap<DayOfWeek, HourMinute>().apply {
         putAll(DayOfWeek.values().map { Pair(it, getHourMinute(it)) })
     }
 
@@ -106,13 +107,13 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
         localCustomTimeRecord.delete()
     }
 
-    override fun getCustomTimeKey() = CustomTimeKey(id)
+    override val customTimeKey get() = CustomTimeKey(id)
 
     fun addRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord) {
         Assert.assertTrue(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
         Assert.assertTrue(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.projectId))
 
-        remoteCustomTimeRecords.put(remoteCustomTimeRecord.projectId, remoteCustomTimeRecord)
+        remoteCustomTimeRecords[remoteCustomTimeRecord.projectId] = remoteCustomTimeRecord
 
         // bez zapisywania na razie, dopiero przy następnej okazji
         remoteCustomTimeRecord.name = localCustomTimeRecord.name

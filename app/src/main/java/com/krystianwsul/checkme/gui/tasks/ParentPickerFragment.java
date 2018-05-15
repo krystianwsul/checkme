@@ -465,7 +465,7 @@ public class ParentPickerFragment extends AbstractDialogFragment {
 
             @Override
             public boolean matchesSearch(@org.jetbrains.annotations.Nullable String query) {
-                throw new UnsupportedOperationException();
+                return true;
             }
         }
 

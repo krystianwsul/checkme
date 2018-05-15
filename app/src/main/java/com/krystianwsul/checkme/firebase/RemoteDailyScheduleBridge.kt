@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek
 
 internal class RemoteDailyScheduleBridge(private val mDomainFactory: DomainFactory, private val mRemoteDailyScheduleRecord: RemoteDailyScheduleRecord) : WeeklyScheduleBridge {
 
-    override fun getStartTime() = mRemoteDailyScheduleRecord.startTime
+    override val startTime by lazy { mRemoteDailyScheduleRecord.startTime }
 
     override fun getEndTime() = mRemoteDailyScheduleRecord.endTime
 
@@ -17,7 +17,7 @@ internal class RemoteDailyScheduleBridge(private val mDomainFactory: DomainFacto
         mRemoteDailyScheduleRecord.setEndTime(endTime)
     }
 
-    override fun getRootTaskKey() = TaskKey(mRemoteDailyScheduleRecord.projectId, mRemoteDailyScheduleRecord.taskId)
+    override val rootTaskKey get() = TaskKey(mRemoteDailyScheduleRecord.projectId, mRemoteDailyScheduleRecord.taskId)
 
     override val customTimeKey get() = mRemoteDailyScheduleRecord.customTimeId?.let { mDomainFactory.getCustomTimeKey(mRemoteDailyScheduleRecord.projectId, it) }
 
@@ -29,7 +29,7 @@ internal class RemoteDailyScheduleBridge(private val mDomainFactory: DomainFacto
         mRemoteDailyScheduleRecord.delete()
     }
 
-    override fun getRemoteCustomTimeKey() = mRemoteDailyScheduleRecord.customTimeId?.let { Pair.create(mRemoteDailyScheduleRecord.projectId, it) }
+    override val remoteCustomTimeKey get() = mRemoteDailyScheduleRecord.customTimeId?.let { Pair.create(mRemoteDailyScheduleRecord.projectId, it) }
 
     override val daysOfWeek = DayOfWeek.values()
             .map { it.ordinal }

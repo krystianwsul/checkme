@@ -17,9 +17,9 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
 
     val startTime by lazy { scheduleBridge.startTime }
 
-    protected fun getEndExactTimeStamp() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
+    protected fun getEndExactTimeStamp() = scheduleBridge.getEndTime()?.let { ExactTimeStamp(it) }
 
-    val endTime get() = scheduleBridge.endTime
+    val endTime get() = scheduleBridge.getEndTime()
 
     abstract val customTimeKey: CustomTimeKey?
 

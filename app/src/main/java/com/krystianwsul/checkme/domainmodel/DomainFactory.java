@@ -198,9 +198,9 @@ public class DomainFactory {
         if (userInfo != null)
             setUserInfo(context, source, userInfo);
 
-        ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+        ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
 
-        ObserverHolder.getObserverHolder().clear();
+        ObserverHolder.INSTANCE.clear();
     }
 
     public int getTaskCount() {
@@ -236,7 +236,7 @@ public class DomainFactory {
         if (mRemoteProjectFactory != null)
             mRemoteProjectFactory.save();
 
-        ObserverHolder.getObserverHolder().notifyDomainObservers(dataIds);
+        ObserverHolder.INSTANCE.notifyDomainObservers(dataIds);
     }
 
     // firebase
@@ -380,7 +380,7 @@ public class DomainFactory {
 
             updateNotifications(context, now);
 
-            ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+            ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
         }
     }
 
@@ -443,7 +443,7 @@ public class DomainFactory {
     private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
         mRemoteFriendFactory = new RemoteFriendFactory(dataSnapshot.getChildren());
 
-        ObserverHolder.getObserverHolder().notifyDomainObservers(new ArrayList<>());
+        ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
 
         tryNotifyFriendListeners();
     }

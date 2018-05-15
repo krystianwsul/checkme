@@ -57,7 +57,7 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
 
         if (observer == null) {
             observer = Observer()
-            ObserverHolder.getObserverHolder().addDomainObserver(observer!!)
+            ObserverHolder.addDomainObserver(observer!!)
         }
 
         if (takeContentChanged() || data == null) {

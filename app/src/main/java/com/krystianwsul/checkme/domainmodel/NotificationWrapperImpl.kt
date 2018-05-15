@@ -115,9 +115,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private fun getChildNames(instance: Instance, now: ExactTimeStamp): List<String> {
         val childInstances = instance.getChildInstances(now)
 
-        return childInstances.filter { it.first!!.done == null }
-                .sortedBy { it.second!!.ordinal }
-                .map { it.first!!.name }
+        return childInstances.filter { it.first.done == null }
+                .sortedBy { it.second.ordinal }
+                .map { it.first.name }
     }
 
     protected open fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {

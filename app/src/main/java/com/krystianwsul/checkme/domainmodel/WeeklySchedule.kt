@@ -9,7 +9,10 @@ import java.util.*
 
 class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBridge: WeeklyScheduleBridge) : RepeatingSchedule(domainFactory) {
 
-    private val time get() = mWeeklyScheduleBridge.run { customTimeKey?.let { mDomainFactory.getCustomTime(it) } ?: NormalTime(hour!!, minute!!) }
+    private val time
+        get() = mWeeklyScheduleBridge.run {
+            customTimeKey?.let { domainFactory.getCustomTime(it) } ?: NormalTime(hour!!, minute!!)
+        }
 
     val timePair get() = mWeeklyScheduleBridge.run { customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!)) }
 
@@ -18,7 +21,7 @@ class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBr
                 .map { DayOfWeek.values()[it] }
                 .toSet()
 
-    override fun getScheduleBridge() = mWeeklyScheduleBridge
+    override val scheduleBridge get() = mWeeklyScheduleBridge
 
     // todo single tostring
     override fun getScheduleText(context: Context) = daysOfWeek.joinToString(", ") + ": " + time
@@ -40,7 +43,7 @@ class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBr
         val scheduleDateTime = DateTime(date, time)
         Assert.assertTrue(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
-        return mDomainFactory.getInstance(task.taskKey, scheduleDateTime)
+        return domainFactory.getInstance(task.taskKey, scheduleDateTime)
     }
 
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp {
@@ -68,7 +71,7 @@ class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBr
         return DateTime(thisDate, time).timeStamp
     }
 
-    override fun getCustomTimeKey() = mWeeklyScheduleBridge.customTimeKey
+    override val customTimeKey get() = mWeeklyScheduleBridge.customTimeKey
 
-    override fun getScheduleType() = ScheduleType.WEEKLY
+    override val scheduleType = ScheduleType.WEEKLY
 }

@@ -66,7 +66,7 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
         DateTime scheduleDateTime = new DateTime(date, getTime());
         Assert.assertTrue(task.current(scheduleDateTime.getTimeStamp().toExactTimeStamp()));
 
-        return mDomainFactory.getInstance(task.getTaskKey(), scheduleDateTime);
+        return getDomainFactory().getInstance(task.getTaskKey(), scheduleDateTime);
     }
 
     @Nullable
@@ -104,7 +104,7 @@ public class MonthlyWeekSchedule extends RepeatingSchedule {
     private Time getTime() {
         CustomTimeKey customTimeKey = mMonthlyWeekScheduleBridge.getCustomTimeKey();
         if (customTimeKey != null) {
-            return mDomainFactory.getCustomTime(customTimeKey);
+            return getDomainFactory().getCustomTime(customTimeKey);
         } else {
             Integer hour = mMonthlyWeekScheduleBridge.getHour();
             Integer minute = mMonthlyWeekScheduleBridge.getMinute();

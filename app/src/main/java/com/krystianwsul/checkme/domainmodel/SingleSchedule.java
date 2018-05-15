@@ -47,7 +47,7 @@ public class SingleSchedule extends Schedule {
     private Instance getInstance(@NonNull Task task) {
         InstanceKey instanceKey = new InstanceKey(task.getTaskKey(), getDate(), getTimePair());
 
-        return mDomainFactory.getInstance(instanceKey);
+        return getDomainFactory().getInstance(instanceKey);
     }
 
     @Nullable
@@ -86,7 +86,7 @@ public class SingleSchedule extends Schedule {
     private Time getTime() {
         CustomTimeKey customTimeKey = mSingleScheduleBridge.getCustomTimeKey();
         if (customTimeKey != null) {
-            return mDomainFactory.getCustomTime(customTimeKey);
+            return getDomainFactory().getCustomTime(customTimeKey);
         } else {
             Integer hour = mSingleScheduleBridge.getHour();
             Integer minute = mSingleScheduleBridge.getMinute();

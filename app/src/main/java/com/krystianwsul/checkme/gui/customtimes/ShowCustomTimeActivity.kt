@@ -66,7 +66,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
 
     private var savedInstanceState: Bundle? = null
 
-    private val discardDialogListener = DiscardDialogFragment.DiscardDialogListener { this@ShowCustomTimeActivity.finish() }
+    private val discardDialogListener = this@ShowCustomTimeActivity::finish
 
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
         Assert.assertTrue(editedDayOfWeek != null)
@@ -180,7 +180,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
             Assert.assertTrue(intent.hasExtra(NEW_KEY))
         }
 
-        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.setDiscardDialogListener(discardDialogListener)
+        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
     }
 
     private fun extractKey(key: String, dayOfWeek: DayOfWeek) {
@@ -295,9 +295,9 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
     }
 
     private fun tryClose() = if (dataChanged()) {
-        DiscardDialogFragment.newInstance().run {
-            setDiscardDialogListener(discardDialogListener)
-            show(supportFragmentManager, DISCARD_TAG)
+        DiscardDialogFragment.newInstance().also {
+            it.discardDialogListener = discardDialogListener
+            it.show(supportFragmentManager, DISCARD_TAG)
         }
 
         false

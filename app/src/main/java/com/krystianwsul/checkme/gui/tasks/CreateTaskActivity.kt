@@ -90,7 +90,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
     private var mSavedInstanceState: Bundle? = null
 
-    private val mDiscardDialogListener = DiscardDialogFragment.DiscardDialogListener { this@CreateTaskActivity.finish() }
+    private val mDiscardDialogListener = this::finish
 
     private var mTaskKey: TaskKey? = null
     private var mTaskKeys: List<TaskKey>? = null
@@ -375,7 +375,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.setDiscardDialogListener(mDiscardDialogListener)
+        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = mDiscardDialogListener
 
         if (!mNoteHasFocus)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
@@ -548,7 +548,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
         return if (dataChanged()) {
             DiscardDialogFragment.newInstance().let {
-                it.setDiscardDialogListener(mDiscardDialogListener)
+                it.discardDialogListener = mDiscardDialogListener
                 it.show(supportFragmentManager, DISCARD_TAG)
             }
 

@@ -27,6 +27,9 @@ import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 
 import junit.framework.Assert;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+
 public class ShowProjectActivity extends AbstractActivity implements LoaderManager.LoaderCallbacks<ShowProjectLoader.Data> {
     private static final String PROJECT_ID_KEY = "projectId";
 
@@ -45,7 +48,10 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
     @Nullable
     private Bundle mSavedInstanceState;
 
-    private final DiscardDialogFragment.DiscardDialogListener mDiscardDialogListener = this::finish;
+    private final Function0<Unit> mDiscardDialogListener = () -> {
+        finish();
+        return Unit.INSTANCE;
+    };
 
     public static Intent newIntent(@NonNull Context context, @NonNull String projectId) {
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
@@ -107,7 +113,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
         mSavedInstanceState = savedInstanceState;
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         Assert.assertTrue(toolbar != null);
 
         setSupportActionBar(toolbar);
@@ -118,13 +124,13 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_close_white_24dp);
 
-        mToolbarLayout = (TextInputLayout) findViewById(R.id.toolbarLayout);
+        mToolbarLayout = findViewById(R.id.toolbarLayout);
         Assert.assertTrue(mToolbarLayout != null);
 
-        mToolbarEditText = (EditText) findViewById(R.id.toolbarEditText);
+        mToolbarEditText = findViewById(R.id.toolbarEditText);
         Assert.assertTrue(mToolbarEditText != null);
 
-        FloatingActionButton showProjectFab = (FloatingActionButton) findViewById(R.id.show_project_fab);
+        FloatingActionButton showProjectFab = findViewById(R.id.show_project_fab);
         Assert.assertTrue(showProjectFab != null);
 
         mToolbarEditText.addTextChangedListener(new TextWatcher() {
@@ -175,13 +181,14 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
         getSupportLoaderManager().initLoader(0, null, this);
     }
 
+    @NonNull
     @Override
     public Loader<ShowProjectLoader.Data> onCreateLoader(int id, Bundle args) {
         return new ShowProjectLoader(this, mProjectId);
     }
 
     @Override
-    public void onLoadFinished(Loader<ShowProjectLoader.Data> loader, ShowProjectLoader.Data data) {
+    public void onLoadFinished(@NonNull Loader<ShowProjectLoader.Data> loader, ShowProjectLoader.Data data) {
         Assert.assertTrue(data != null);
 
         mData = data;
@@ -201,7 +208,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
     }
 
     @Override
-    public void onLoaderReset(Loader<ShowProjectLoader.Data> loader) {
+    public void onLoaderReset(@NonNull Loader<ShowProjectLoader.Data> loader) {
 
     }
 
@@ -213,7 +220,7 @@ public class ShowProjectActivity extends AbstractActivity implements LoaderManag
 
     private boolean tryClose() {
         if (dataChanged()) {
-            DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.newInstance();
+            DiscardDialogFragment discardDialogFragment = DiscardDialogFragment.Companion.newInstance();
             discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener);
             discardDialogFragment.show(getSupportFragmentManager(), DISCARD_TAG);
 

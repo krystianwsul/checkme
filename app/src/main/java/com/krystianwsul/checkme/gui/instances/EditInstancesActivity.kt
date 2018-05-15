@@ -98,7 +98,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         updateError()
     }
 
-    private val mDiscardDialogListener = DiscardDialogFragment.DiscardDialogListener { this@EditInstancesActivity.finish() }
+    private val mDiscardDialogListener = this@EditInstancesActivity::finish
 
     private val mDatePickerDialogFragmentListener = { date: Date ->
         mDate = date
@@ -200,7 +200,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         }
 
         val discardDialogFragment = supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment
-        discardDialogFragment?.setDiscardDialogListener(mDiscardDialogListener)
+        discardDialogFragment?.discardDialogListener = mDiscardDialogListener
     }
 
     public override fun onResume() {
@@ -374,7 +374,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
     private fun tryClose(): Boolean {
         return if (dataChanged()) {
             val discardDialogFragment = DiscardDialogFragment.newInstance()
-            discardDialogFragment.setDiscardDialogListener(mDiscardDialogListener)
+            discardDialogFragment.discardDialogListener = mDiscardDialogListener
             discardDialogFragment.show(supportFragmentManager, DISCARD_TAG)
 
             false

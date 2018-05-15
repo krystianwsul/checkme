@@ -34,6 +34,23 @@ import java.util.*
 
 class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<EditInstanceLoader.Data> {
 
+    companion object {
+
+        private const val INSTANCE_KEY = "instanceKey"
+
+        private const val DATE_KEY = "date"
+        private const val TIME_PAIR_PERSIST_KEY = "timePairPersist"
+
+        private const val DATE_FRAGMENT_TAG = "dateFragment"
+        private const val TIME_FRAGMENT_TAG = "timeFragment"
+        private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
+        private const val DISCARD_TAG = "discard"
+
+        fun getIntent(instanceKey: InstanceKey) = Intent(MyApplication.instance, EditInstanceActivity::class.java).apply {
+            putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+        }
+    }
+
     private var mDate: Date? = null
     private var mData: EditInstanceLoader.Data? = null
 
@@ -145,11 +162,11 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
 
         editInstanceDate.setOnClickListener {
             val datePickerDialogFragment = DatePickerDialogFragment.newInstance(mDate!!)
-            datePickerDialogFragment.setListener(mDatePickerDialogFragment)
+            datePickerDialogFragment.listener = mDatePickerDialogFragment
             datePickerDialogFragment.show(supportFragmentManager, DATE_FRAGMENT_TAG)
         }
         val datePickerDialogFragment = supportFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment
-        datePickerDialogFragment?.setListener(mDatePickerDialogFragment)
+        datePickerDialogFragment?.listener = mDatePickerDialogFragment
 
         if (mSavedInstanceState != null && mSavedInstanceState!!.containsKey(DATE_KEY)) {
             mDate = mSavedInstanceState!!.getParcelable(DATE_KEY)
@@ -357,23 +374,5 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
 
         if (resultCode > 0)
             mTimePairPersist!!.customTimeKey = CustomTimeKey(resultCode)
-    }
-
-    companion object {
-        private val INSTANCE_KEY = "instanceKey"
-
-        private val DATE_KEY = "date"
-        private val TIME_PAIR_PERSIST_KEY = "timePairPersist"
-
-        private val DATE_FRAGMENT_TAG = "dateFragment"
-        private val TIME_FRAGMENT_TAG = "timeFragment"
-        private val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
-        private val DISCARD_TAG = "discard"
-
-        fun getIntent(instanceKey: InstanceKey): Intent {
-            val intent = Intent(MyApplication.instance, EditInstanceActivity::class.java)
-            intent.putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-            return intent
-        }
     }
 }

@@ -167,11 +167,11 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
 
         editInstanceDate.setOnClickListener {
             val datePickerDialogFragment = DatePickerDialogFragment.newInstance(mDate!!)
-            datePickerDialogFragment.setListener(mDatePickerDialogFragmentListener)
+            datePickerDialogFragment.listener = mDatePickerDialogFragmentListener
             datePickerDialogFragment.show(supportFragmentManager, DATE_FRAGMENT_TAG)
         }
         val datePickerDialogFragment = supportFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment
-        datePickerDialogFragment?.setListener(mDatePickerDialogFragmentListener)
+        datePickerDialogFragment?.listener = mDatePickerDialogFragmentListener
 
         if (mSavedInstanceState != null && mSavedInstanceState!!.containsKey(DATE_KEY)) {
             mDate = mSavedInstanceState!!.getParcelable(DATE_KEY)

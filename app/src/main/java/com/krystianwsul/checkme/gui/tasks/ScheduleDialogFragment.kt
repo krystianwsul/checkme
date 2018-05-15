@@ -269,7 +269,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE)
 
             DatePickerDialogFragment.newInstance(mScheduleDialogData.mDate).let {
-                it.setListener(mDatePickerDialogFragmentListener)
+                it.listener = mDatePickerDialogFragmentListener
                 it.show(childFragmentManager, DATE_FRAGMENT_TAG)
             }
         }
@@ -277,7 +277,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         (childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment)?.run {
             Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE)
 
-            setListener(mDatePickerDialogFragmentListener)
+            listener = mDatePickerDialogFragmentListener
         }
 
         mBroadcastReceiver = object : BroadcastReceiver() {

@@ -75,7 +75,7 @@ class DebugFragment : AbstractFragment() {
             stringBuilder.append(" ms")
 
             stringBuilder.append("\ncrashlytics enabled: ")
-            stringBuilder.append(MyCrashlytics.getEnabled())
+            stringBuilder.append(MyCrashlytics.enabled)
 
             debugData.text = stringBuilder
         }

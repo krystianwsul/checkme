@@ -11,7 +11,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.annimon.stream.Stream;
-import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.DayLoader;
@@ -101,8 +100,6 @@ public class DomainFactoryTest {
 
             }
         });
-
-        MyCrashlytics.initialize();
     }
 
     private PersistenceManger newPersistenceManger() {

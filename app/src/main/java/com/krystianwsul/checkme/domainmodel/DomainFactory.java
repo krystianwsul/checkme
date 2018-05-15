@@ -286,7 +286,7 @@ public class DomainFactory {
                 Assert.assertTrue(databaseError != null);
                 Log.e("asdf", "DomainFactory.mRecordListener.onCancelled", databaseError.toException());
 
-                MyCrashlytics.logException(databaseError.toException());
+                MyCrashlytics.INSTANCE.logException(databaseError.toException());
 
                 if (mTickData != null) {
                     mTickData.release();
@@ -314,7 +314,7 @@ public class DomainFactory {
                 Assert.assertTrue(databaseError != null);
                 Log.e("asdf", "DomainFactory.mFriendListener.onCancelled", databaseError.toException());
 
-                MyCrashlytics.logException(databaseError.toException());
+                MyCrashlytics.INSTANCE.logException(databaseError.toException());
             }
         };
         mFriendQuery.addValueEventListener(mFriendListener);
@@ -334,7 +334,7 @@ public class DomainFactory {
                 Assert.assertTrue(databaseError != null);
                 Log.e("asdf", "DomainFactory.mUserListener.onCancelled", databaseError.toException());
 
-                MyCrashlytics.logException(databaseError.toException());
+                MyCrashlytics.INSTANCE.logException(databaseError.toException());
             }
         };
         mUserQuery.addValueEventListener(mUserListener);
@@ -535,7 +535,7 @@ public class DomainFactory {
     public synchronized EditInstanceLoader.Data getEditInstanceData(@NonNull InstanceKey instanceKey) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getEditInstanceData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstanceData");
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -562,7 +562,7 @@ public class DomainFactory {
     public synchronized EditInstancesLoader.Data getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getEditInstancesData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstancesData");
 
         Assert.assertTrue(instanceKeys.size() > 1);
 
@@ -600,7 +600,7 @@ public class DomainFactory {
     public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int localCustomTimeId) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowCustomTimeData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimeData");
 
         LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(localCustomTimeId);
 
@@ -615,7 +615,7 @@ public class DomainFactory {
     public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowCustomTimesData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimesData");
 
         List<LocalCustomTime> currentCustomTimes = getCurrentCustomTimes();
 
@@ -633,7 +633,7 @@ public class DomainFactory {
     public synchronized DayLoader.Data getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowNotificationGroupData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
 
         Assert.assertTrue(position >= 0);
 
@@ -726,7 +726,7 @@ public class DomainFactory {
     public synchronized ShowGroupLoader.Data getShowGroupData(@NonNull Context context, @NonNull TimeStamp timeStamp) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowGroupData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowGroupData");
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -750,7 +750,7 @@ public class DomainFactory {
     public synchronized ShowTaskInstancesLoader.Data getShowTaskInstancesData(@NonNull TaskKey taskKey) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowTaskInstancesData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskInstancesData");
 
         Task task = getTaskForce(taskKey);
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -785,7 +785,7 @@ public class DomainFactory {
     public synchronized ShowNotificationGroupLoader.Data getShowNotificationGroupData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowNotificationGroupData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
 
         Assert.assertTrue(!instanceKeys.isEmpty());
 
@@ -828,7 +828,7 @@ public class DomainFactory {
     public synchronized ShowInstanceLoader.Data getShowInstanceData(@NonNull Context context, @NonNull InstanceKey instanceKey) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowInstanceData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowInstanceData");
 
         Task task = getTaskIfPresent(instanceKey.mTaskKey);
         if (task == null)
@@ -927,7 +927,7 @@ public class DomainFactory {
     public synchronized CreateTaskLoader.Data getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @Nullable List<TaskKey> joinTaskKeys) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getCreateTaskData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getCreateTaskData");
 
         Assert.assertTrue(taskKey == null || joinTaskKeys == null);
 
@@ -1020,7 +1020,7 @@ public class DomainFactory {
     public synchronized ShowTaskLoader.Data getShowTaskData(@NonNull TaskKey taskKey, @NonNull Context context) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowTaskData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskData");
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1043,7 +1043,7 @@ public class DomainFactory {
     public synchronized MainLoader.Data getMainData(@NonNull Context context) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getMainData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getMainData");
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
@@ -1054,7 +1054,7 @@ public class DomainFactory {
     public synchronized ProjectListLoader.Data getProjectListData() {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getProjectListData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getProjectListData");
 
         Assert.assertTrue(mRemoteProjectFactory != null);
 
@@ -1077,7 +1077,7 @@ public class DomainFactory {
     public synchronized FriendListLoader.Data getFriendListData() {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getFriendListData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getFriendListData");
 
         Assert.assertTrue(mRemoteFriendFactory != null);
 
@@ -1092,7 +1092,7 @@ public class DomainFactory {
     public synchronized ShowProjectLoader.Data getShowProjectData(@Nullable String projectId) {
         fakeDelay();
 
-        MyCrashlytics.log("DomainFactory.getShowProjectData");
+        MyCrashlytics.INSTANCE.log("DomainFactory.getShowProjectData");
 
         Assert.assertTrue(mRemoteProjectFactory != null);
         Assert.assertTrue(mUserInfo != null);
@@ -1124,7 +1124,7 @@ public class DomainFactory {
     // sets
 
     public synchronized void setInstanceDateTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
-        MyCrashlytics.log("DomainFactory.setInstanceDateTime");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceDateTime");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
@@ -1141,7 +1141,7 @@ public class DomainFactory {
     }
 
     public synchronized void setInstancesDateTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
-        MyCrashlytics.log("DomainFactory.setInstancesDateTime");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesDateTime");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(instanceKeys.size() > 1);
@@ -1168,7 +1168,7 @@ public class DomainFactory {
     }
 
     public synchronized void setInstanceAddHourService(@NonNull Context context, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceAddHourService");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourService");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
@@ -1191,7 +1191,7 @@ public class DomainFactory {
     }
 
     public synchronized void setInstanceAddHourActivity(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourActivity");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
@@ -1213,7 +1213,7 @@ public class DomainFactory {
     }
 
     public synchronized void setInstancesAddHourActivity(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Collection<InstanceKey> instanceKeys) {
-        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourActivity");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1241,7 +1241,7 @@ public class DomainFactory {
     }
 
     public synchronized void setInstanceNotificationDone(@NonNull Context context, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceNotificationDone");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotificationDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Instance instance = getInstance(instanceKey);
@@ -1260,7 +1260,7 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ExactTimeStamp setInstancesDone(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
-        MyCrashlytics.log("DomainFactory.setInstancesDone");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1287,7 +1287,7 @@ public class DomainFactory {
     }
 
     public synchronized ExactTimeStamp setInstanceDone(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, boolean done) {
-        MyCrashlytics.log("DomainFactory.setInstanceDone");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1298,7 +1298,7 @@ public class DomainFactory {
     }
 
     public synchronized void setInstancesNotified(@NonNull Context context, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
-        MyCrashlytics.log("DomainFactory.setInstancesNotified");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesNotified");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!instanceKeys.isEmpty());
@@ -1312,7 +1312,7 @@ public class DomainFactory {
     }
 
     public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceNotified");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotified");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         setInstanceNotified(instanceKey, ExactTimeStamp.getNow());
@@ -1344,7 +1344,7 @@ public class DomainFactory {
     }
 
     public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.log("DomainFactory.createScheduleRootTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1384,7 +1384,7 @@ public class DomainFactory {
 
     @NonNull
     public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.log("DomainFactory.updateScheduleTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.updateScheduleTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1396,7 +1396,7 @@ public class DomainFactory {
     }
 
     public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleJoinRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1467,7 +1467,7 @@ public class DomainFactory {
     }
 
     public synchronized void createChildTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
-        MyCrashlytics.log("DomainFactory.createChildTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.createChildTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1476,7 +1476,7 @@ public class DomainFactory {
     }
 
     public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
-        MyCrashlytics.log("DomainFactory.createJoinChildTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.createJoinChildTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1510,7 +1510,7 @@ public class DomainFactory {
 
     @NonNull
     public synchronized TaskKey updateChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
-        MyCrashlytics.log("DomainFactory.updateChildTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.updateChildTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1548,7 +1548,7 @@ public class DomainFactory {
     }
 
     public synchronized void setTaskEndTimeStamp(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey) {
-        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setTaskEndTimeStamp");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1566,7 +1566,7 @@ public class DomainFactory {
     }
 
     public synchronized void setInstanceOrdinal(int dataId, @NonNull InstanceKey instanceKey, double ordinal) {
-        MyCrashlytics.log("DomainFactory.setInstanceOrdinal");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceOrdinal");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1583,7 +1583,7 @@ public class DomainFactory {
     }
 
     public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull HierarchyData hierarchyData) {
-        MyCrashlytics.log("DomainFactory.setTaskHierarchyOrdinal");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setTaskHierarchyOrdinal");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1617,7 +1617,7 @@ public class DomainFactory {
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull ArrayList<TaskKey> taskKeys) {
-        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setTaskEndTimeStamps");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!taskKeys.isEmpty());
@@ -1647,7 +1647,7 @@ public class DomainFactory {
     }
 
     public synchronized int createCustomTime(@NonNull Context context, @NonNull SaveService.Source source, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
-        MyCrashlytics.log("DomainFactory.createCustomTime");
+        MyCrashlytics.INSTANCE.log("DomainFactory.createCustomTime");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1668,7 +1668,7 @@ public class DomainFactory {
     }
 
     public synchronized void updateCustomTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, int localCustomTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
-        MyCrashlytics.log("DomainFactory.updateCustomTime");
+        MyCrashlytics.INSTANCE.log("DomainFactory.updateCustomTime");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1689,7 +1689,7 @@ public class DomainFactory {
     }
 
     public synchronized void setCustomTimeCurrent(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull List<Integer> localCustomTimeIds) {
-        MyCrashlytics.log("DomainFactory.setCustomTimeCurrent");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setCustomTimeCurrent");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!localCustomTimeIds.isEmpty());
@@ -1726,7 +1726,7 @@ public class DomainFactory {
     }
 
     public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.log("DomainFactory.createRootTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.createRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1735,7 +1735,7 @@ public class DomainFactory {
     }
 
     public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.log("DomainFactory.createJoinRootTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.createJoinRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1791,7 +1791,7 @@ public class DomainFactory {
 
     @NonNull
     public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.log("DomainFactory.updateRootTask");
+        MyCrashlytics.INSTANCE.log("DomainFactory.updateRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1836,7 +1836,7 @@ public class DomainFactory {
     }
 
     public synchronized void updateNotificationsTick(@NonNull Context context, @NonNull SaveService.Source source, boolean silent, @NonNull String sourceName) {
-        MyCrashlytics.log("DomainFactory.updateNotificationsTick source: " + sourceName);
+        MyCrashlytics.INSTANCE.log("DomainFactory.updateNotificationsTick source: " + sourceName);
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
@@ -1845,7 +1845,7 @@ public class DomainFactory {
     }
 
     public synchronized void removeFriends(@NonNull Set<String> keys) {
-        MyCrashlytics.log("DomainFactory.removeFriends");
+        MyCrashlytics.INSTANCE.log("DomainFactory.removeFriends");
 
         Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(mRemoteProjectFactory != null);
@@ -1859,7 +1859,7 @@ public class DomainFactory {
     }
 
     public synchronized void updateUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
-        MyCrashlytics.log("DomainFactory.updateUserInfo");
+        MyCrashlytics.INSTANCE.log("DomainFactory.updateUserInfo");
         Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(mRemoteProjectFactory != null);
 
@@ -1875,7 +1875,7 @@ public class DomainFactory {
     }
 
     public synchronized void updateProject(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String projectId, @NonNull String name, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
-        MyCrashlytics.log("DomainFactory.updateProject");
+        MyCrashlytics.INSTANCE.log("DomainFactory.updateProject");
 
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
         Assert.assertTrue(!TextUtils.isEmpty(name));
@@ -1899,7 +1899,7 @@ public class DomainFactory {
     }
 
     public synchronized void createProject(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull Set<String> friends) {
-        MyCrashlytics.log("DomainFactory.createProject");
+        MyCrashlytics.INSTANCE.log("DomainFactory.createProject");
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(mRemoteProjectFactory != null);
@@ -1922,7 +1922,7 @@ public class DomainFactory {
     }
 
     public synchronized void setProjectEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Set<String> projectIds) {
-        MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps");
+        MyCrashlytics.INSTANCE.log("DomainFactory.setProjectEndTimeStamps");
 
         Assert.assertTrue(mRemoteProjectFactory != null);
         Assert.assertTrue(mUserInfo != null);

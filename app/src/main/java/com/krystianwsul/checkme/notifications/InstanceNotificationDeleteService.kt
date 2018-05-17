@@ -16,8 +16,8 @@ class InstanceNotificationDeleteService : IntentService("InstanceNotificationDel
         private const val INSTANCE_KEY = "instanceKey"
 
         fun getIntent(context: Context, instanceKey: InstanceKey) = Intent(context, InstanceNotificationDeleteService::class.java).apply {
-            if (instanceKey.type == TaskKey.Type.REMOTE && instanceKey.mScheduleKey.ScheduleTimePair.customTimeKey != null)
-                check(instanceKey.mScheduleKey.ScheduleTimePair.customTimeKey.type == TaskKey.Type.REMOTE)
+            if (instanceKey.type == TaskKey.Type.REMOTE && instanceKey.scheduleKey.ScheduleTimePair.customTimeKey != null)
+                check(instanceKey.scheduleKey.ScheduleTimePair.customTimeKey.type == TaskKey.Type.REMOTE)
 
             putExtra(INSTANCE_KEY, instanceKey as Parcelable)
         }

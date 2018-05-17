@@ -107,7 +107,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
 
                     supportLoaderManager.destroyLoader(0)
 
-                    startActivityForResult(ShowTaskActivity.newIntent(instanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
+                    startActivityForResult(ShowTaskActivity.newIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
                 R.id.instance_menu_edit_task -> {
                     check(!it.done)
@@ -115,7 +115,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
 
                     supportLoaderManager.destroyLoader(0)
 
-                    startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.mTaskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
+                    startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
                 R.id.instance_menu_delete_task -> {
                     check(!it.done)
@@ -124,7 +124,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                     if (!it.exists)
                         supportLoaderManager.destroyLoader(0)
 
-                    DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.mTaskKey)
+                    DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
                     if (!it.exists)
                         finish()
@@ -224,7 +224,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
 
             val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
 
-            instanceKey = InstanceKey(taskKey, instanceKey.mScheduleKey.ScheduleDate, TimePair(instanceKey.mScheduleKey.ScheduleTimePair.customTimeKey, instanceKey.mScheduleKey.ScheduleTimePair.hourMinute))
+            instanceKey = InstanceKey(taskKey, instanceKey.scheduleKey.ScheduleDate, TimePair(instanceKey.scheduleKey.ScheduleTimePair.customTimeKey, instanceKey.scheduleKey.ScheduleTimePair.hourMinute))
         }
 
         supportLoaderManager.initLoader(0, null, this)

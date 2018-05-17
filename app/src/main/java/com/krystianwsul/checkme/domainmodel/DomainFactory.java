@@ -836,7 +836,7 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowInstanceData");
 
-        Task task = getTaskIfPresent(instanceKey.mTaskKey);
+        Task task = getTaskIfPresent(instanceKey.getTaskKey());
         if (task == null)
             return new ShowInstanceLoader.Data(null);
 
@@ -1964,14 +1964,14 @@ public class DomainFactory {
 
     @Nullable
     private Instance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
-        if (instanceKey.mTaskKey.mLocalTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(instanceKey.mTaskKey.mRemoteProjectId));
-            Assert.assertTrue(TextUtils.isEmpty(instanceKey.mTaskKey.mRemoteTaskId));
+        if (instanceKey.getTaskKey().mLocalTaskId != null) {
+            Assert.assertTrue(TextUtils.isEmpty(instanceKey.getTaskKey().mRemoteProjectId));
+            Assert.assertTrue(TextUtils.isEmpty(instanceKey.getTaskKey().mRemoteTaskId));
 
             return mLocalFactory.getExistingInstanceIfPresent(instanceKey);
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.mTaskKey.mRemoteProjectId));
-            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.mTaskKey.mRemoteTaskId));
+            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.getTaskKey().mRemoteProjectId));
+            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.getTaskKey().mRemoteTaskId));
             Assert.assertTrue(mRemoteProjectFactory != null);
 
             return mRemoteProjectFactory.getExistingInstanceIfPresent(instanceKey);
@@ -2059,9 +2059,9 @@ public class DomainFactory {
         if (instance != null)
             return instance;
 
-        DateTime dateTime = getDateTime(instanceKey.mScheduleKey.ScheduleDate, instanceKey.mScheduleKey.ScheduleTimePair);
+        DateTime dateTime = getDateTime(instanceKey.getScheduleKey().ScheduleDate, instanceKey.getScheduleKey().ScheduleTimePair);
 
-        return generateInstance(instanceKey.mTaskKey, dateTime); // DateTime -> timePair
+        return generateInstance(instanceKey.getTaskKey(), dateTime); // DateTime -> timePair
     }
 
     @NonNull
@@ -2733,7 +2733,7 @@ public class DomainFactory {
         for (InstanceKey hideInstanceKey : hideInstanceKeys) {
             Assert.assertTrue(hideInstanceKey != null);
 
-            if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+            if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
                 Instance hideInstance = getInstance(hideInstanceKey);
 
                 hideInstance.setNotificationShown(false, now);
@@ -2756,7 +2756,7 @@ public class DomainFactory {
                     }
                 } else { // instances shown
                     for (InstanceKey shownInstanceKey : shownInstanceKeys) {
-                        if (allTaskKeys.contains(shownInstanceKey.mTaskKey)) {
+                        if (allTaskKeys.contains(shownInstanceKey.getTaskKey())) {
                             Instance shownInstance = getInstance(shownInstanceKey);
 
                             NotificationWrapper.Companion.getInstance().cancelNotification(shownInstance.getNotificationId());
@@ -2782,7 +2782,7 @@ public class DomainFactory {
                     }
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                        if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                        if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
                             Instance instance = getInstance(hideInstanceKey);
 
                             NotificationWrapper.Companion.getInstance().cancelNotification(instance.getNotificationId());
@@ -2818,7 +2818,7 @@ public class DomainFactory {
 
             message += ", hiding " + hideInstanceKeys.size();
             for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                if (allTaskKeys.contains(hideInstanceKey.mTaskKey)) {
+                if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
                     Instance instance = getInstance(hideInstanceKey);
 
                     NotificationWrapper.Companion.getInstance().cancelNotification(instance.getNotificationId());
@@ -2934,7 +2934,7 @@ public class DomainFactory {
             instance.setNotified(now);
             instance.setNotificationShown(false, now);
         } else {
-            TaskKey taskKey = instanceKey.mTaskKey;
+            TaskKey taskKey = instanceKey.getTaskKey();
 
             String projectId = taskKey.mRemoteProjectId;
             Assert.assertTrue(!TextUtils.isEmpty(projectId));
@@ -2942,7 +2942,7 @@ public class DomainFactory {
             String taskId = taskKey.mRemoteTaskId;
             Assert.assertTrue(!TextUtils.isEmpty(taskId));
 
-            ScheduleKey scheduleKey = instanceKey.mScheduleKey;
+            ScheduleKey scheduleKey = instanceKey.getScheduleKey();
             Date scheduleDate = scheduleKey.ScheduleDate;
 
             Stream<InstanceShownRecord> stream = Stream.of(mLocalFactory.getInstanceShownRecords())

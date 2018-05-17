@@ -126,7 +126,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     }
 
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance? {
-        val taskKey = instanceKey.mTaskKey
+        val taskKey = instanceKey.taskKey
 
         if (TextUtils.isEmpty(taskKey.mRemoteTaskId))
             return null
@@ -134,7 +134,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
         val remoteTask = getRemoteProjectForce(taskKey).getRemoteTaskIfPresent(taskKey.mRemoteTaskId!!)
                 ?: return null
 
-        return remoteTask.getExistingInstanceIfPresent(instanceKey.mScheduleKey)
+        return remoteTask.getExistingInstanceIfPresent(instanceKey.scheduleKey)
     }
 
     private fun getRemoteProjectForce(taskKey: TaskKey) = getRemoteProjectIfPresent(taskKey)!!

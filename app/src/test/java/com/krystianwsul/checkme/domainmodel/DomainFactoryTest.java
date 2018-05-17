@@ -702,12 +702,12 @@ public class DomainFactoryTest {
         Task task = domainFactory.createScheduleRootTask(mContext, new ExactTimeStamp(date, hour1.toHourMilli()), dataId, SaveService.Source.GUI, "task", Collections.singletonList(firstScheduleData), null, null);
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY).getDataWrapper().getInstanceDatas().size() == 1);
-        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY).getDataWrapper().getInstanceDatas().keySet().iterator().next().mScheduleKey.ScheduleTimePair.getHourMinute().equals(hour5));
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY).getDataWrapper().getInstanceDatas().keySet().iterator().next().getScheduleKey().ScheduleTimePair.getHourMinute().equals(hour5));
 
         CreateTaskLoader.ScheduleData.SingleScheduleData secondScheduleData = new CreateTaskLoader.ScheduleData.SingleScheduleData(date, new TimePair(hour6));
         domainFactory.updateScheduleTask(mContext, new ExactTimeStamp(date, hour3.toHourMilli()), dataId, SaveService.Source.GUI, task.getTaskKey(), task.getName(), Collections.singletonList(secondScheduleData), task.getNote(), null);
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).getDataWrapper().getInstanceDatas().size() == 1);
-        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).getDataWrapper().getInstanceDatas().keySet().iterator().next().mScheduleKey.ScheduleTimePair.getHourMinute().equals(hour6));
+        Assert.assertTrue(domainFactory.getGroupListData(mContext, new ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).getDataWrapper().getInstanceDatas().keySet().iterator().next().getScheduleKey().ScheduleTimePair.getHourMinute().equals(hour6));
     }
 }

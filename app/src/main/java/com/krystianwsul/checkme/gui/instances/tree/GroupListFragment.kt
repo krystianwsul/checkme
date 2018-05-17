@@ -160,7 +160,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val instanceData = instanceDatas[0]
                     Assert.assertTrue(instanceData.TaskCurrent)
 
-                    startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.mTaskKey))
+                    startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_edit_task -> {
                     Assert.assertTrue(instanceDatas.size == 1)
@@ -168,10 +168,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val instanceData = instanceDatas[0]
                     Assert.assertTrue(instanceData.TaskCurrent)
 
-                    startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.mTaskKey))
+                    startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_delete_task -> {
-                    val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.mTaskKey })
+                    val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
                     Assert.assertTrue(taskKeys.isNotEmpty())
                     Assert.assertTrue(instanceDatas.all { it.TaskCurrent })
 
@@ -197,10 +197,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val instanceData = instanceDatas[0]
                     Assert.assertTrue(instanceData.TaskCurrent)
 
-                    activity!!.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.mTaskKey))
+                    activity!!.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_join -> {
-                    val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.mTaskKey })
+                    val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
                     Assert.assertTrue(taskKeys.size > 1)
 
                     if (mInstanceKey == null) {
@@ -212,7 +212,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                         startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
                     } else {
-                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, mInstanceKey!!.mTaskKey))
+                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, mInstanceKey!!.taskKey))
                     }
                 }
                 R.id.action_group_mark_done -> {
@@ -384,7 +384,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 }
 
                 if (instanceDatas.all { it.TaskCurrent }) {
-                    val projectIdCount = instanceDatas.map { it.InstanceKey.mTaskKey.mRemoteProjectId }
+                    val projectIdCount = instanceDatas.map { it.InstanceKey.taskKey.mRemoteProjectId }
                             .distinct()
                             .count()
 
@@ -746,7 +746,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     Assert.assertTrue(mDataWrapper!!.TaskEditable!!)
 
-                    startActivity(CreateTaskActivity.getCreateIntent(mInstanceKey!!.mTaskKey))
+                    startActivity(CreateTaskActivity.getCreateIntent(mInstanceKey!!.taskKey))
                 }
             }
         }

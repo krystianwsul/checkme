@@ -30,9 +30,9 @@ public class InstanceMap<T extends Instance> {
 
         InstanceKey instanceKey = instance.getInstanceKey();
 
-        Assert.assertTrue(!innerMap.containsKey(instanceKey.mScheduleKey));
+        Assert.assertTrue(!innerMap.containsKey(instanceKey.getScheduleKey()));
 
-        innerMap.put(instanceKey.mScheduleKey, instance);
+        innerMap.put(instanceKey.getScheduleKey(), instance);
     }
 
     public void removeForce(@NonNull Instance instance) {
@@ -43,10 +43,10 @@ public class InstanceMap<T extends Instance> {
 
         InstanceKey instanceKey = instance.getInstanceKey();
 
-        T innerInstance = innerMap.get(instanceKey.mScheduleKey);
+        T innerInstance = innerMap.get(instanceKey.getScheduleKey());
         Assert.assertTrue(instance.equals(innerInstance));
 
-        innerMap.remove(instanceKey.mScheduleKey);
+        innerMap.remove(instanceKey.getScheduleKey());
     }
 
     @NonNull
@@ -60,11 +60,11 @@ public class InstanceMap<T extends Instance> {
 
     @Nullable
     public T getIfPresent(@NonNull InstanceKey instanceKey) {
-        HashMap<ScheduleKey, T> innerMap = mInstances.get(instanceKey.mTaskKey);
+        HashMap<ScheduleKey, T> innerMap = mInstances.get(instanceKey.getTaskKey());
         if (innerMap == null)
             return null;
 
-        return innerMap.get(instanceKey.mScheduleKey);
+        return innerMap.get(instanceKey.getScheduleKey());
     }
 
     public int size() {

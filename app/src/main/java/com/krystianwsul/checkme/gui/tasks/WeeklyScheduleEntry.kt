@@ -55,14 +55,14 @@ class WeeklyScheduleEntry : ScheduleEntry {
     }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
-        return daysOfWeek.prettyPrint() + if (timePair.mCustomTimeKey != null) {
-            Assert.assertTrue(timePair.mHourMinute == null)
+        return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
+            Assert.assertTrue(timePair.hourMinute == null)
 
-            customTimeDatas[timePair.mCustomTimeKey]!!.name
+            customTimeDatas[timePair.customTimeKey]!!.name
         } else {
-            Assert.assertTrue(timePair.mHourMinute != null)
+            Assert.assertTrue(timePair.hourMinute != null)
 
-            timePair.mHourMinute!!.toString()
+            timePair.hourMinute!!.toString()
         }
     }
 

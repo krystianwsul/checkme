@@ -591,14 +591,14 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
             }
 
             val timePair = singleScheduleEntry.mTimePair
-            val hourMinute = if (timePair.mCustomTimeKey != null) {
-                check(timePair.mHourMinute == null)
+            val hourMinute = if (timePair.customTimeKey != null) {
+                check(timePair.hourMinute == null)
 
-                mData!!.customTimeDatas[timePair.mCustomTimeKey]!!.hourMinutes[singleScheduleEntry.mDate.dayOfWeek]
+                mData!!.customTimeDatas[timePair.customTimeKey]!!.hourMinutes[singleScheduleEntry.mDate.dayOfWeek]
             } else {
-                checkNotNull(timePair.mHourMinute)
+                checkNotNull(timePair.hourMinute)
 
-                timePair.mHourMinute
+                timePair.hourMinute
             }!!
 
             if (hourMinute <= HourMinute.now) {

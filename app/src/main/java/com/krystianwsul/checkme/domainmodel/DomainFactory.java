@@ -545,8 +545,8 @@ public class DomainFactory {
         Instance instance = getInstance(instanceKey);
         Assert.assertTrue(instance.isRootInstance(now));
 
-        if (instance.getInstanceTimePair().mCustomTimeKey != null) {
-            CustomTime customTime = getCustomTime(instance.getInstanceTimePair().mCustomTimeKey);
+        if (instance.getInstanceTimePair().getCustomTimeKey() != null) {
+            CustomTime customTime = getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
 
             currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
         }
@@ -580,8 +580,8 @@ public class DomainFactory {
 
             instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDateTime(), instance.getName()));
 
-            if (instance.getInstanceTimePair().mCustomTimeKey != null) {
-                CustomTime customTime = getCustomTime(instance.getInstanceTimePair().mCustomTimeKey);
+            if (instance.getInstanceTimePair().getCustomTimeKey() != null) {
+                CustomTime customTime = getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
 
                 currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
             }
@@ -2015,8 +2015,8 @@ public class DomainFactory {
             Integer hour;
             Integer minute;
 
-            CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().mCustomTimeKey;
-            HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().mHourMinute;
+            CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().getCustomTimeKey();
+            HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().getHourMinute();
 
             if (customTimeKey != null) {
                 Assert.assertTrue(hourMinute == null);
@@ -2118,14 +2118,14 @@ public class DomainFactory {
 
     @NonNull
     public Time getTime(@NonNull TimePair timePair) {
-        if (timePair.mHourMinute != null) {
-            Assert.assertTrue(timePair.mCustomTimeKey == null);
+        if (timePair.getHourMinute() != null) {
+            Assert.assertTrue(timePair.getCustomTimeKey() == null);
 
-            return new NormalTime(timePair.mHourMinute);
+            return new NormalTime(timePair.getHourMinute());
         } else {
-            Assert.assertTrue(timePair.mCustomTimeKey != null);
+            Assert.assertTrue(timePair.getCustomTimeKey() != null);
 
-            return getCustomTime(timePair.mCustomTimeKey);
+            return getCustomTime(timePair.getCustomTimeKey());
         }
     }
 
@@ -2953,22 +2953,22 @@ public class DomainFactory {
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleDay() == scheduleDate.getDay());
 
             List<InstanceShownRecord> matches;
-            if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null) {
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute == null);
+            if (scheduleKey.ScheduleTimePair.getCustomTimeKey() != null) {
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() == null);
 
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.mCustomTimeKey.getType() == TaskKey.Type.REMOTE); // remote custom time key hack
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.mCustomTimeKey.mLocalCustomTimeId == null);
-                Assert.assertTrue(projectId.equals(scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteProjectId));
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.getCustomTimeKey().getType() == TaskKey.Type.REMOTE); // remote custom time key hack
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.getCustomTimeKey().mLocalCustomTimeId == null);
+                Assert.assertTrue(projectId.equals(scheduleKey.ScheduleTimePair.getCustomTimeKey().mRemoteProjectId));
 
-                String customTimeId = scheduleKey.ScheduleTimePair.mCustomTimeKey.mRemoteCustomTimeId;
+                String customTimeId = scheduleKey.ScheduleTimePair.getCustomTimeKey().mRemoteCustomTimeId;
                 Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
 
                 matches = stream.filter(instanceShownRecord -> customTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
                         .collect(Collectors.toList());
             } else {
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute != null);
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() != null);
 
-                HourMinute hourMinute = scheduleKey.ScheduleTimePair.mHourMinute;
+                HourMinute hourMinute = scheduleKey.ScheduleTimePair.getHourMinute();
 
                 matches = stream.filter(instanceShownRecord -> Integer.valueOf(hourMinute.getHour()).equals(instanceShownRecord.getScheduleHour()))
                         .filter(instanceShownRecord -> Integer.valueOf(hourMinute.getMinute()).equals(instanceShownRecord.getScheduleMinute()))

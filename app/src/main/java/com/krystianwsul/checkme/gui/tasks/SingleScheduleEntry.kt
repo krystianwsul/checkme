@@ -78,17 +78,17 @@ class SingleScheduleEntry : ScheduleEntry {
     }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
-        return mDate.getDisplayText(context) + ", " + if (mTimePair.mCustomTimeKey != null) {
-            Assert.assertTrue(mTimePair.mHourMinute == null)
+        return mDate.getDisplayText(context) + ", " + if (mTimePair.customTimeKey != null) {
+            Assert.assertTrue(mTimePair.hourMinute == null)
 
-            val customTimeData = customTimeDatas[mTimePair.mCustomTimeKey]
+            val customTimeData = customTimeDatas[mTimePair.customTimeKey]
             Assert.assertTrue(customTimeData != null)
 
             customTimeData!!.name + " (" + customTimeData.hourMinutes[mDate.dayOfWeek] + ")"
         } else {
-            Assert.assertTrue(mTimePair.mHourMinute != null)
+            Assert.assertTrue(mTimePair.hourMinute != null)
 
-            mTimePair.mHourMinute!!.toString()
+            mTimePair.hourMinute!!.toString()
         }
     }
 

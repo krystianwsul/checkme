@@ -216,17 +216,17 @@ public class RemoteInstance extends Instance {
         mRemoteInstanceRecord.setInstanceMonth(date.getMonth());
         mRemoteInstanceRecord.setInstanceDay(date.getDay());
 
-        if (timePair.mCustomTimeKey != null) {
-            Assert.assertTrue(timePair.mHourMinute == null);
-            mRemoteInstanceRecord.setInstanceCustomTimeId(getRemoteFactory().getRemoteCustomTimeId(timePair.mCustomTimeKey, mRemoteProject));
+        if (timePair.getCustomTimeKey() != null) {
+            Assert.assertTrue(timePair.getHourMinute() == null);
+            mRemoteInstanceRecord.setInstanceCustomTimeId(getRemoteFactory().getRemoteCustomTimeId(timePair.getCustomTimeKey(), mRemoteProject));
             mRemoteInstanceRecord.setInstanceHour(null);
             mRemoteInstanceRecord.setInstanceMinute(null);
         } else {
-            Assert.assertTrue(timePair.mHourMinute != null);
+            Assert.assertTrue(timePair.getHourMinute() != null);
 
             mRemoteInstanceRecord.setInstanceCustomTimeId(null);
-            mRemoteInstanceRecord.setInstanceHour(timePair.mHourMinute.getHour());
-            mRemoteInstanceRecord.setInstanceMinute(timePair.mHourMinute.getMinute());
+            mRemoteInstanceRecord.setInstanceHour(timePair.getHourMinute().getHour());
+            mRemoteInstanceRecord.setInstanceMinute(timePair.getHourMinute().getMinute());
         }
 
         if (mInstanceShownRecord == null)
@@ -357,7 +357,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue(!TextUtils.isEmpty(mTaskId));
             Assert.assertTrue(mScheduleDateTime != null);
 
-            CustomTimeKey customTimeKey = mScheduleDateTime.getTime().getTimePair().mCustomTimeKey;
+            CustomTimeKey customTimeKey = mScheduleDateTime.getTime().getTimePair().getCustomTimeKey();
 
             if (customTimeKey == null)
                 return null;
@@ -395,7 +395,7 @@ public class RemoteInstance extends Instance {
             Assert.assertTrue(!TextUtils.isEmpty(mTaskId));
             Assert.assertTrue(mScheduleDateTime != null);
 
-            return mScheduleDateTime.getTime().getTimePair().mHourMinute;
+            return mScheduleDateTime.getTime().getTimePair().getHourMinute();
         }
     }
 

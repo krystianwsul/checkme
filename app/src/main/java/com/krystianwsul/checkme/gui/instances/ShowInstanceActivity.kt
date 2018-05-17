@@ -224,7 +224,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
 
             val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
 
-            instanceKey = InstanceKey(taskKey, instanceKey.mScheduleKey.ScheduleDate, TimePair(instanceKey.mScheduleKey.ScheduleTimePair.mCustomTimeKey, instanceKey.mScheduleKey.ScheduleTimePair.mHourMinute))
+            instanceKey = InstanceKey(taskKey, instanceKey.mScheduleKey.ScheduleDate, TimePair(instanceKey.mScheduleKey.ScheduleTimePair.customTimeKey, instanceKey.mScheduleKey.ScheduleTimePair.hourMinute))
         }
 
         supportLoaderManager.initLoader(0, null, this)

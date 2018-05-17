@@ -186,17 +186,17 @@ class LocalFactory {
         val remoteCustomTimeId: String?
         val hour: Int?
         val minute: Int?
-        if (timePair.mHourMinute != null) {
-            check(timePair.mCustomTimeKey == null)
+        if (timePair.hourMinute != null) {
+            check(timePair.customTimeKey == null)
 
             remoteCustomTimeId = null
 
-            hour = timePair.mHourMinute.hour
-            minute = timePair.mHourMinute.minute
+            hour = timePair.hourMinute.hour
+            minute = timePair.hourMinute.minute
         } else {
-            checkNotNull(timePair.mCustomTimeKey)
+            checkNotNull(timePair.customTimeKey)
 
-            remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(projectId, timePair.mCustomTimeKey!!)
+            remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(projectId, timePair.customTimeKey!!)
 
             hour = null
             minute = null

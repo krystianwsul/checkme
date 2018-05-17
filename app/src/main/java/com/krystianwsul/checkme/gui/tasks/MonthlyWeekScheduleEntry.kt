@@ -81,14 +81,14 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
         val day = Utils.ordinal(monthWeekNumber) + " " + monthWeekDay + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
-        return "$day, " + if (timePair.mCustomTimeKey != null) {
-            Assert.assertTrue(timePair.mHourMinute == null)
+        return "$day, " + if (timePair.customTimeKey != null) {
+            Assert.assertTrue(timePair.hourMinute == null)
 
-            val customTimeData = customTimeDatas[timePair.mCustomTimeKey]!!
+            val customTimeData = customTimeDatas[timePair.customTimeKey]!!
 
             customTimeData.name
         } else {
-            timePair.mHourMinute!!.toString()
+            timePair.hourMinute!!.toString()
         }
     }
 

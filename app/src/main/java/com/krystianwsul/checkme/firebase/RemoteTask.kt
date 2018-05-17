@@ -166,18 +166,18 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val remoteCustomTimeId: String?
                     val hour: Int?
                     val minute: Int?
-                    if (timePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(timePair.mHourMinute == null)
+                    if (timePair.customTimeKey != null) {
+                        Assert.assertTrue(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.mHourMinute != null)
+                        Assert.assertTrue(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
-                        hour = timePair.mHourMinute!!.hour
-                        minute = timePair.mHourMinute.minute
+                        hour = timePair.hourMinute!!.hour
+                        minute = timePair.hourMinute.minute
                     }
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, remoteCustomTimeId, hour, minute)))
@@ -191,18 +191,18 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val remoteCustomTimeId: String?
                     val hour: Int?
                     val minute: Int?
-                    if (timePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(timePair.mHourMinute == null)
+                    if (timePair.customTimeKey != null) {
+                        Assert.assertTrue(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.mHourMinute != null)
+                        Assert.assertTrue(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
-                        hour = timePair.mHourMinute!!.hour
-                        minute = timePair.mHourMinute.minute
+                        hour = timePair.hourMinute!!.hour
+                        minute = timePair.hourMinute.minute
                     }
 
                     for (dayOfWeek in daysOfWeek) {
@@ -217,18 +217,18 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val remoteCustomTimeId: String?
                     val hour: Int?
                     val minute: Int?
-                    if (timePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(timePair.mHourMinute == null)
+                    if (timePair.customTimeKey != null) {
+                        Assert.assertTrue(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.mHourMinute != null)
+                        Assert.assertTrue(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
-                        hour = timePair.mHourMinute!!.hour
-                        minute = timePair.mHourMinute.minute
+                        hour = timePair.hourMinute!!.hour
+                        minute = timePair.hourMinute.minute
                     }
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(MonthlyDayScheduleJson(now.long, null, dayOfMonth, beginningOfMonth, remoteCustomTimeId, hour, minute)))
@@ -241,18 +241,18 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val remoteCustomTimeId: String?
                     val hour: Int?
                     val minute: Int?
-                    if (TimePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(TimePair.mHourMinute == null)
+                    if (TimePair.customTimeKey != null) {
+                        Assert.assertTrue(TimePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(TimePair.mCustomTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(TimePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(TimePair.mHourMinute != null)
+                        Assert.assertTrue(TimePair.hourMinute != null)
 
                         remoteCustomTimeId = null
-                        hour = TimePair.mHourMinute!!.hour
-                        minute = TimePair.mHourMinute.minute
+                        hour = TimePair.hourMinute!!.hour
+                        minute = TimePair.hourMinute.minute
                     }
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(MonthlyWeekScheduleJson(now.long, null, dayOfMonth, dayOfWeek.ordinal, beginningOfMonth, remoteCustomTimeId, hour, minute)))
@@ -276,18 +276,18 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val minute: Int?
 
                     val timePair = singleSchedule.timePair
-                    if (timePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(timePair.mHourMinute == null)
+                    if (timePair.customTimeKey != null) {
+                        Assert.assertTrue(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.mHourMinute != null)
+                        Assert.assertTrue(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
-                        hour = timePair.mHourMinute!!.hour
-                        minute = timePair.mHourMinute.minute
+                        hour = timePair.hourMinute!!.hour
+                        minute = timePair.hourMinute.minute
                     }
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(singleSchedule.startTime, singleSchedule.endTime, date.year, date.month, date.day, remoteCustomTimeId, hour, minute)))
@@ -303,18 +303,18 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val minute: Int?
 
                     val timePair = weeklySchedule.timePair
-                    if (timePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(timePair.mHourMinute == null)
+                    if (timePair.customTimeKey != null) {
+                        Assert.assertTrue(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.mHourMinute != null)
+                        Assert.assertTrue(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
-                        hour = timePair.mHourMinute!!.hour
-                        minute = timePair.mHourMinute.minute
+                        hour = timePair.hourMinute!!.hour
+                        minute = timePair.hourMinute.minute
                     }
 
                     for (dayOfWeek in weeklySchedule.daysOfWeek) {
@@ -331,18 +331,18 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val minute: Int?
 
                     val timePair = monthlyDaySchedule.timePair
-                    if (timePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(timePair.mHourMinute == null)
+                    if (timePair.customTimeKey != null) {
+                        Assert.assertTrue(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.mHourMinute != null)
+                        Assert.assertTrue(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
-                        hour = timePair.mHourMinute!!.hour
-                        minute = timePair.mHourMinute.minute
+                        hour = timePair.hourMinute!!.hour
+                        minute = timePair.hourMinute.minute
                     }
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(MonthlyDayScheduleJson(schedule.startTime, schedule.endTime, monthlyDaySchedule.dayOfMonth, monthlyDaySchedule.beginningOfMonth, remoteCustomTimeId, hour, minute)))
@@ -357,18 +357,18 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val minute: Int?
 
                     val timePair = monthlyWeekScheduleData.timePair
-                    if (timePair.mCustomTimeKey != null) {
-                        Assert.assertTrue(timePair.mHourMinute == null)
+                    if (timePair.customTimeKey != null) {
+                        Assert.assertTrue(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.mCustomTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.mHourMinute != null)
+                        Assert.assertTrue(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
-                        hour = timePair.mHourMinute!!.hour
-                        minute = timePair.mHourMinute.minute
+                        hour = timePair.hourMinute!!.hour
+                        minute = timePair.hourMinute.minute
                     }
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(MonthlyWeekScheduleJson(schedule.startTime, schedule.endTime, monthlyWeekScheduleData.dayOfMonth, monthlyWeekScheduleData.dayOfWeek.ordinal, monthlyWeekScheduleData.beginningOfMonth, remoteCustomTimeId, hour, minute)))

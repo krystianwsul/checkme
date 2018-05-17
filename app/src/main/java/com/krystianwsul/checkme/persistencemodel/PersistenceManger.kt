@@ -204,20 +204,20 @@ class PersistenceManger(
         val hour: Int?
         val minute: Int?
 
-        if (time.timePair.mCustomTimeKey != null) {
-            Assert.assertTrue(time.timePair.mHourMinute == null)
+        if (time.timePair.customTimeKey != null) {
+            Assert.assertTrue(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.mCustomTimeKey!!.mLocalCustomTimeId!!
+            customTimeId = time.timePair.customTimeKey!!.mLocalCustomTimeId!!
 
             hour = null
             minute = null
         } else {
-            Assert.assertTrue(time.timePair.mHourMinute != null)
+            Assert.assertTrue(time.timePair.hourMinute != null)
 
             customTimeId = null
 
-            hour = time.timePair.mHourMinute!!.hour
-            minute = time.timePair.mHourMinute!!.minute
+            hour = time.timePair.hourMinute!!.hour
+            minute = time.timePair.hourMinute!!.minute
         }
 
         return SingleScheduleRecord(false, scheduleId, date.year, date.month, date.day, customTimeId, hour, minute).also {
@@ -236,20 +236,20 @@ class PersistenceManger(
         val hour: Int?
         val minute: Int?
 
-        if (time.timePair.mCustomTimeKey != null) {
-            Assert.assertTrue(time.timePair.mHourMinute == null)
+        if (time.timePair.customTimeKey != null) {
+            Assert.assertTrue(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.mCustomTimeKey!!.mLocalCustomTimeId!!
+            customTimeId = time.timePair.customTimeKey!!.mLocalCustomTimeId!!
 
             hour = null
             minute = null
         } else {
-            Assert.assertTrue(time.timePair.mHourMinute != null)
+            Assert.assertTrue(time.timePair.hourMinute != null)
 
             customTimeId = null
 
-            hour = time.timePair.mHourMinute!!.hour
-            minute = time.timePair.mHourMinute!!.minute
+            hour = time.timePair.hourMinute!!.hour
+            minute = time.timePair.hourMinute!!.minute
         }
 
         return WeeklyScheduleRecord(false, scheduleId, dayOfWeek.ordinal, customTimeId, hour, minute).also {
@@ -268,20 +268,20 @@ class PersistenceManger(
         val hour: Int?
         val minute: Int?
 
-        if (time.timePair.mCustomTimeKey != null) {
-            Assert.assertTrue(time.timePair.mHourMinute == null)
+        if (time.timePair.customTimeKey != null) {
+            Assert.assertTrue(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.mCustomTimeKey!!.mLocalCustomTimeId!!
+            customTimeId = time.timePair.customTimeKey!!.mLocalCustomTimeId!!
 
             hour = null
             minute = null
         } else {
-            Assert.assertTrue(time.timePair.mHourMinute != null)
+            Assert.assertTrue(time.timePair.hourMinute != null)
 
             customTimeId = null
 
-            hour = time.timePair.mHourMinute!!.hour
-            minute = time.timePair.mHourMinute!!.minute
+            hour = time.timePair.hourMinute!!.hour
+            minute = time.timePair.hourMinute!!.minute
         }
 
         return MonthlyDayScheduleRecord(false, scheduleId, dayOfMonth, beginningOfMonth, customTimeId, hour, minute).also {
@@ -300,20 +300,20 @@ class PersistenceManger(
         val hour: Int?
         val minute: Int?
 
-        if (time.timePair.mCustomTimeKey != null) {
-            Assert.assertTrue(time.timePair.mHourMinute == null)
+        if (time.timePair.customTimeKey != null) {
+            Assert.assertTrue(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.mCustomTimeKey!!.mLocalCustomTimeId!!
+            customTimeId = time.timePair.customTimeKey!!.mLocalCustomTimeId!!
 
             hour = null
             minute = null
         } else {
-            Assert.assertTrue(time.timePair.mHourMinute != null)
+            Assert.assertTrue(time.timePair.hourMinute != null)
 
             customTimeId = null
 
-            hour = time.timePair.mHourMinute!!.hour
-            minute = time.timePair.mHourMinute!!.minute
+            hour = time.timePair.hourMinute!!.hour
+            minute = time.timePair.hourMinute!!.minute
         }
 
         return MonthlyWeekScheduleRecord(false, scheduleId, dayOfMonth, dayOfWeek.ordinal, beginningOfMonth, customTimeId, hour, minute).also {
@@ -326,20 +326,20 @@ class PersistenceManger(
         val scheduleHour: Int?
         val scheduleMinute: Int?
 
-        if (scheduleTimePair.mCustomTimeKey != null) {
-            Assert.assertTrue(scheduleTimePair.mHourMinute == null)
+        if (scheduleTimePair.customTimeKey != null) {
+            Assert.assertTrue(scheduleTimePair.hourMinute == null)
 
-            scheduleCustomTimeId = scheduleTimePair.mCustomTimeKey.mLocalCustomTimeId!!
+            scheduleCustomTimeId = scheduleTimePair.customTimeKey.mLocalCustomTimeId!!
 
             scheduleHour = null
             scheduleMinute = null
         } else {
-            Assert.assertTrue(scheduleTimePair.mHourMinute != null)
+            Assert.assertTrue(scheduleTimePair.hourMinute != null)
 
             scheduleCustomTimeId = null
 
-            scheduleHour = scheduleTimePair.mHourMinute!!.hour
-            scheduleMinute = scheduleTimePair.mHourMinute.minute
+            scheduleHour = scheduleTimePair.hourMinute!!.hour
+            scheduleMinute = scheduleTimePair.hourMinute.minute
         }
 
         val id = ++instanceMaxId

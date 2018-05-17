@@ -56,14 +56,14 @@ public class RemoteInstanceRecord extends RemoteRecord {
     @NonNull
     public static String scheduleKeyToString(@NonNull DomainFactory domainFactory, @NonNull String projectId, @NonNull ScheduleKey scheduleKey) {
         String key = scheduleKey.ScheduleDate.getYear() + "-" + scheduleKey.ScheduleDate.getMonth() + "-" + scheduleKey.ScheduleDate.getDay();
-        if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null) {
-            Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute == null);
+        if (scheduleKey.ScheduleTimePair.getCustomTimeKey() != null) {
+            Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() == null);
 
-            key += "-" + domainFactory.getRemoteCustomTimeId(projectId, scheduleKey.ScheduleTimePair.mCustomTimeKey);
+            key += "-" + domainFactory.getRemoteCustomTimeId(projectId, scheduleKey.ScheduleTimePair.getCustomTimeKey());
         } else {
-            Assert.assertTrue(scheduleKey.ScheduleTimePair.mHourMinute != null);
+            Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() != null);
 
-            key += "-" + scheduleKey.ScheduleTimePair.mHourMinute.getHour() + "-" + scheduleKey.ScheduleTimePair.mHourMinute.getMinute();
+            key += "-" + scheduleKey.ScheduleTimePair.getHourMinute().getHour() + "-" + scheduleKey.ScheduleTimePair.getHourMinute().getMinute();
         }
 
         return key;
@@ -127,7 +127,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
 
     @Nullable
     public String getScheduleCustomTimeId() {
-        CustomTimeKey customTimeKey = mScheduleKey.ScheduleTimePair.mCustomTimeKey;
+        CustomTimeKey customTimeKey = mScheduleKey.ScheduleTimePair.getCustomTimeKey();
         if (customTimeKey != null) {
             return mDomainFactory.getRemoteCustomTimeId(mRemoteTaskRecord.getProjectId(), customTimeKey);
         } else {
@@ -137,7 +137,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
 
     @Nullable
     public Integer getScheduleHour() {
-        HourMinute hourMinute = mScheduleKey.ScheduleTimePair.mHourMinute;
+        HourMinute hourMinute = mScheduleKey.ScheduleTimePair.getHourMinute();
         if (hourMinute != null) {
             return hourMinute.getHour();
         } else {
@@ -147,7 +147,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
 
     @Nullable
     public Integer getScheduleMinute() {
-        HourMinute hourMinute = mScheduleKey.ScheduleTimePair.mHourMinute;
+        HourMinute hourMinute = mScheduleKey.ScheduleTimePair.getHourMinute();
         if (hourMinute != null) {
             return hourMinute.getMinute();
         } else {

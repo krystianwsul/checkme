@@ -19,7 +19,7 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
             check(!instanceKeys.isEmpty())
 
             check(instanceKeys.filter { it.type == TaskKey.Type.REMOTE }
-                    .mapNotNull { it.mScheduleKey.ScheduleTimePair.mCustomTimeKey }
+                    .mapNotNull { it.mScheduleKey.ScheduleTimePair.customTimeKey }
                     .all { it.type == TaskKey.Type.REMOTE })
 
             putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys)

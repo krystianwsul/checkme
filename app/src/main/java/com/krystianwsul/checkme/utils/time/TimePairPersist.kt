@@ -31,7 +31,7 @@ class TimePairPersist private constructor(var customTimeKey: CustomTimeKey?, _ho
 
     val timePair get() = customTimeKey?.let { TimePair(it) } ?: TimePair(hourMinute)
 
-    constructor(timePair: TimePair) : this(timePair.mCustomTimeKey, timePair.mHourMinute
+    constructor(timePair: TimePair) : this(timePair.customTimeKey, timePair.hourMinute
             ?: HourMinute.nextHour.second)
 
     override fun describeContents() = 0

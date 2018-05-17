@@ -159,8 +159,8 @@ public class RemoteProject {
             InstanceJson instanceJson = getInstanceJson(localInstance);
             ScheduleKey scheduleKey = localInstance.getScheduleKey();
 
-            if (scheduleKey.ScheduleTimePair.mCustomTimeKey != null)
-                getRemoteFactory().getRemoteCustomTimeId(scheduleKey.ScheduleTimePair.mCustomTimeKey, this);
+            if (scheduleKey.ScheduleTimePair.getCustomTimeKey() != null)
+                getRemoteFactory().getRemoteCustomTimeId(scheduleKey.ScheduleTimePair.getCustomTimeKey(), this);
 
             instanceJsons.put(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), scheduleKey), instanceJson);
         }
@@ -188,17 +188,17 @@ public class RemoteProject {
         String instanceRemoteCustomTimeId;
         Integer instanceHour;
         Integer instanceMinute;
-        if (instanceTimePair.mHourMinute != null) {
-            Assert.assertTrue(instanceTimePair.mCustomTimeKey == null);
+        if (instanceTimePair.getHourMinute() != null) {
+            Assert.assertTrue(instanceTimePair.getCustomTimeKey() == null);
 
             instanceRemoteCustomTimeId = null;
 
-            instanceHour = instanceTimePair.mHourMinute.getHour();
-            instanceMinute = instanceTimePair.mHourMinute.getMinute();
+            instanceHour = instanceTimePair.getHourMinute().getHour();
+            instanceMinute = instanceTimePair.getHourMinute().getMinute();
         } else {
-            Assert.assertTrue(instanceTimePair.mCustomTimeKey != null);
+            Assert.assertTrue(instanceTimePair.getCustomTimeKey() != null);
 
-            instanceRemoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(instanceTimePair.mCustomTimeKey, this);
+            instanceRemoteCustomTimeId = getRemoteFactory().getRemoteCustomTimeId(instanceTimePair.getCustomTimeKey(), this);
 
             instanceHour = null;
             instanceMinute = null;

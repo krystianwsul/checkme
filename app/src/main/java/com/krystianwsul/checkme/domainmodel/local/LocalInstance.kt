@@ -164,7 +164,7 @@ class LocalInstance : Instance {
                 Assert.assertTrue(mTaskId != null)
                 Assert.assertTrue(mScheduleDateTime != null)
 
-                return mScheduleDateTime!!.time.timePair.mCustomTimeKey
+                return mScheduleDateTime!!.time.timePair.customTimeKey
             }
         }
 
@@ -190,7 +190,7 @@ class LocalInstance : Instance {
                 Assert.assertTrue(mTaskId != null)
                 Assert.assertTrue(mScheduleDateTime != null)
 
-                return mScheduleDateTime!!.time.timePair.mHourMinute
+                return mScheduleDateTime!!.time.timePair.hourMinute
             }
         }
 
@@ -232,20 +232,20 @@ class LocalInstance : Instance {
         mInstanceRecord!!.instanceMonth = date.month
         mInstanceRecord!!.instanceDay = date.day
 
-        if (timePair.mCustomTimeKey != null) {
-            Assert.assertTrue(timePair.mHourMinute == null)
-            Assert.assertTrue(timePair.mCustomTimeKey.mLocalCustomTimeId != null)
-            Assert.assertTrue(TextUtils.isEmpty(timePair.mCustomTimeKey.mRemoteCustomTimeId))
+        if (timePair.customTimeKey != null) {
+            Assert.assertTrue(timePair.hourMinute == null)
+            Assert.assertTrue(timePair.customTimeKey.mLocalCustomTimeId != null)
+            Assert.assertTrue(TextUtils.isEmpty(timePair.customTimeKey.mRemoteCustomTimeId))
 
-            mInstanceRecord!!.instanceCustomTimeId = timePair.mCustomTimeKey.mLocalCustomTimeId
+            mInstanceRecord!!.instanceCustomTimeId = timePair.customTimeKey.mLocalCustomTimeId
             mInstanceRecord!!.instanceHour = null
             mInstanceRecord!!.instanceMinute = null
         } else {
-            Assert.assertTrue(timePair.mHourMinute != null)
+            Assert.assertTrue(timePair.hourMinute != null)
 
             mInstanceRecord!!.instanceCustomTimeId = null
-            mInstanceRecord!!.instanceHour = timePair.mHourMinute!!.hour
-            mInstanceRecord!!.instanceMinute = timePair.mHourMinute.minute
+            mInstanceRecord!!.instanceHour = timePair.hourMinute!!.hour
+            mInstanceRecord!!.instanceMinute = timePair.hourMinute.minute
         }
 
         mInstanceRecord!!.notified = false

@@ -30,7 +30,7 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         Assert.assertTrue(current(endExactTimeStamp))
 
-        scheduleBridge.setEndTime(endExactTimeStamp.long!!)
+        scheduleBridge.setEndTime(endExactTimeStamp.long)
     }
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {

@@ -167,7 +167,7 @@ class PersistenceManger(
 
         val id = ++taskMaxId
 
-        return TaskRecord(false, id, name, startExactTimeStamp.long!!, null, null, null, null, note).also {
+        return TaskRecord(false, id, name, startExactTimeStamp.long, null, null, null, null, note).also {
             _taskRecords.add(it)
         }
     }
@@ -178,7 +178,7 @@ class PersistenceManger(
 
         val id = ++taskHierarchyMaxId
 
-        return TaskHierarchyRecord(false, id, parentLocalTask.id, childLocalTask.id, startExactTimeStamp.long!!, null, null).also {
+        return TaskHierarchyRecord(false, id, parentLocalTask.id, childLocalTask.id, startExactTimeStamp.long, null, null).also {
             _taskHierarchyRecords.add(it)
         }
     }
@@ -188,7 +188,7 @@ class PersistenceManger(
 
         val id = ++scheduleMaxId
 
-        return ScheduleRecord(false, id, rootLocalTask.id, startExactTimeStamp.long!!, null, scheduleType.ordinal).also {
+        return ScheduleRecord(false, id, rootLocalTask.id, startExactTimeStamp.long, null, scheduleType.ordinal).also {
             _scheduleRecords.add(it)
         }
     }
@@ -344,7 +344,7 @@ class PersistenceManger(
 
         val id = ++instanceMaxId
 
-        return InstanceRecord(false, id, localTask.id, null, scheduleDate.year, scheduleDate.month, scheduleDate.day, scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.long!!, false, false, null).also {
+        return InstanceRecord(false, id, localTask.id, null, scheduleDate.year, scheduleDate.month, scheduleDate.day, scheduleCustomTimeId, scheduleHour, scheduleMinute, null, null, null, null, null, null, now.long, false, false, null).also {
             _instanceRecords.add(it)
         }
     }

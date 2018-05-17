@@ -71,7 +71,7 @@ class DebugFragment : AbstractFragment() {
             val t2 = ExactTimeStamp.getNow()
 
             stringBuilder.append("\ntoday: ")
-            stringBuilder.append(t2.long!! - t1.long!!)
+            stringBuilder.append(t2.long - t1.long)
             stringBuilder.append(" ms")
 
             stringBuilder.append("\ncrashlytics enabled: ")

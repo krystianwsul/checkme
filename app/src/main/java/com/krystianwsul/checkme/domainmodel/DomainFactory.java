@@ -1066,7 +1066,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteProjectFactory.getRemoteProjects())
+        TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteProjectFactory.getRemoteProjects().values())
                 .filter(remoteProject -> remoteProject.current(now))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> {
                     String users = Stream.of(remoteProject.getUsers())
@@ -2216,7 +2216,7 @@ public class DomainFactory {
                 .collect(Collectors.toMap(task -> new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(task.getStartExactTimeStamp())))));
 
         if (mRemoteProjectFactory != null) {
-            parentTreeDatas.putAll(Stream.of(mRemoteProjectFactory.getRemoteProjects())
+            parentTreeDatas.putAll(Stream.of(mRemoteProjectFactory.getRemoteProjects().values())
                     .filter(remoteProject -> remoteProject.current(now))
                     .collect(Collectors.toMap(remoteProject -> new CreateTaskLoader.ParentKey.ProjectParentKey(remoteProject.getId()), remoteProject -> {
                         String users = Stream.of(remoteProject.getUsers())
@@ -2352,7 +2352,7 @@ public class DomainFactory {
     @NonNull
     private Stream<Task> getTasks() {
         if (mRemoteProjectFactory != null) {
-            return Stream.concat(Stream.of(mLocalFactory.getTasks()), mRemoteProjectFactory.getTasks());
+            return Stream.concat(Stream.of(mLocalFactory.getTasks()), Stream.of(mRemoteProjectFactory.getTasks()));
         } else {
             return Stream.of(mLocalFactory.getTasks());
         }
@@ -2580,7 +2580,7 @@ public class DomainFactory {
             List<RemoteCustomTime> remoteCustomTimes = mRemoteProjectFactory.getRemoteCustomTimes();
             Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances = Stream.of(remoteCustomTimes).collect(Collectors.toMap(remoteCustomTime -> Pair.create(remoteCustomTime.getProjectId(), remoteCustomTime.getId()), RemoteCustomTimeRelevance::new));
 
-            Collection<RemoteProject> remoteProjects = mRemoteProjectFactory.getRemoteProjects();
+            Collection<RemoteProject> remoteProjects = mRemoteProjectFactory.getRemoteProjects().values();
             Map<String, RemoteProjectRelevance> remoteProjectRelevances = Stream.of(remoteProjects)
                     .collect(Collectors.toMap(RemoteProject::getId, RemoteProjectRelevance::new));
 

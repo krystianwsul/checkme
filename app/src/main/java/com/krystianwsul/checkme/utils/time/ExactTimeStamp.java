@@ -58,6 +58,7 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
         return mLong.compareTo(exactTimeStamp.getLong());
     }
 
+    @NonNull
     public Long getLong() {
         return mLong;
     }

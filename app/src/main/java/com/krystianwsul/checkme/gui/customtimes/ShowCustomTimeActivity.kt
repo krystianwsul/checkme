@@ -243,12 +243,12 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
                 val currHourMinute = hourMinutes[dayOfWeek]!!
 
                 val timePickerDialogFragment = TimePickerDialogFragment.newInstance(currHourMinute)
-                timePickerDialogFragment.setListener(timePickerDialogFragmentListener)
+                timePickerDialogFragment.listener = timePickerDialogFragmentListener
                 timePickerDialogFragment.show(supportFragmentManager, TIME_PICKER_TAG)
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.setListener(timePickerDialogFragmentListener)
+        (supportFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.listener = timePickerDialogFragmentListener
 
         toolbarEditText.addTextChangedListener(object : TextWatcher {
             private var skip = savedInstanceState != null

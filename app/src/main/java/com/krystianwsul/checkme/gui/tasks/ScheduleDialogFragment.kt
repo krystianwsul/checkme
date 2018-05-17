@@ -100,7 +100,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             Assert.assertTrue(mCustomTimeDatas != null)
 
             TimePickerDialogFragment.newInstance(mScheduleDialogData.mTimePairPersist.hourMinute).let {
-                it.setListener(mTimePickerDialogFragmentListener)
+                it.listener = mTimePickerDialogFragmentListener
                 it.show(childFragmentManager, TIME_PICKER_TAG)
             }
         }
@@ -263,7 +263,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
         (childFragmentManager.findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.timeDialogListener = mTimeDialogListener
 
-        (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.setListener(mTimePickerDialogFragmentListener)
+        (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.listener = mTimePickerDialogFragmentListener
 
         mScheduleDialogDate.setOnClickListener {
             Assert.assertTrue(mScheduleDialogData.mScheduleType == ScheduleType.SINGLE)

@@ -81,7 +81,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
             checkNotNull(mData)
 
             val timePickerDialogFragment = TimePickerDialogFragment.newInstance(mTimePairPersist!!.hourMinute)
-            timePickerDialogFragment.setListener(mTimePickerDialogFragmentListener)
+            timePickerDialogFragment.listener = mTimePickerDialogFragmentListener
             timePickerDialogFragment.show(supportFragmentManager, TIME_FRAGMENT_TAG)
         }
 
@@ -282,7 +282,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         updateDateText()
 
         val timePickerDialogFragment = supportFragmentManager.findFragmentByTag(TIME_FRAGMENT_TAG) as? TimePickerDialogFragment
-        timePickerDialogFragment?.setListener(mTimePickerDialogFragmentListener)
+        timePickerDialogFragment?.listener = mTimePickerDialogFragmentListener
 
         editInstanceTime.setOnClickListener {
             checkNotNull(mData)

@@ -13,14 +13,14 @@ import com.krystianwsul.checkme.firebase.RemoteProject
 
 object BackendNotifier {
 
-    private val PREFIX = "http://check-me-add47.appspot.com/notify?"
+    private const val PREFIX = "http://check-me-add47.appspot.com/notify?"
 
     fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String?): String {
         check(!projects.isEmpty())
 
-        val parameters = projects.map { "projects=" + it }.toMutableSet()
+        val parameters = projects.map { "projects=$it" }.toMutableSet()
 
-        parameters.addAll(userKeys.map { "userKeys=" + it })
+        parameters.addAll(userKeys.map { "userKeys=$it" })
 
         if (production)
             parameters.add("production=1")
@@ -39,7 +39,7 @@ object BackendNotifier {
             else -> throw IllegalArgumentException()
         }
 
-        val projectIds = remoteProjects.map(RemoteProject::getId).toSet()
+        val projectIds = remoteProjects.map { it.id }.toSet()
 
         val url = getUrl(projectIds, production, userKeys, userInfo.token)
         check(url.isNotEmpty())
@@ -54,7 +54,7 @@ object BackendNotifier {
 
         val stringRequest = StringRequest(
                 Request.Method.GET, url,
-                { Log.e("asdf", "BackendNotifier response:" + it) }
+                { Log.e("asdf", "BackendNotifier response:$it") }
                 , {
             if (it is TimeoutError || it is NoConnectionError) {
                 Log.e("asdf", "BackendNotifier error", it)

@@ -2228,7 +2228,7 @@ public class DomainFactory {
 
     @NonNull
     private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getProjectTaskTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull RemoteProject remoteProject, @NonNull List<TaskKey> excludedTaskKeys) {
-        return Stream.of(remoteProject.getRemoteTasks())
+        return Stream.of(remoteProject.getTasks())
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))

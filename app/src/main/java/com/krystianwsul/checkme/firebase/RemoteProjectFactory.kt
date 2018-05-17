@@ -27,19 +27,19 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
 
     val isSaved get() = remoteProjectManager.isSaved
 
-    val tasks get() = remoteProjects.values.flatMap { it.remoteTasks }
+    val tasks get() = remoteProjects.values.flatMap { it.tasks }
 
-    val remoteCustomTimes get() = remoteProjects.values.flatMap { it.remoteCustomTimes }
+    val remoteCustomTimes get() = remoteProjects.values.flatMap { it.customTimes }
 
     val instanceCount
         get() = remoteProjects.values
-                .flatMap { it.remoteTasks }
+                .flatMap { it.tasks }
                 .map { it.existingInstances.size }
                 .sum()
 
     val existingInstances
         get() = remoteProjects.values
-                .flatMap { it.remoteTasks }
+                .flatMap { it.tasks }
                 .flatMap { it.existingInstances.values }
 
     val taskKeys
@@ -53,7 +53,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
 
     val taskCount: Int
         get() = remoteProjects.values
-                .map { it.remoteTasks.size }
+                .map { it.tasks.size }
                 .sum()
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskLoader.ScheduleData>, note: String?, projectId: String) = createRemoteTaskHelper(now, name, note, projectId).apply {

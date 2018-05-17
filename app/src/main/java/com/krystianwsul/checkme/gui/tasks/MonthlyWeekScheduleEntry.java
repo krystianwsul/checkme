@@ -59,7 +59,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
 
     @NonNull
     @Override
-    String getText(@NonNull Map<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
+    public String getText(@NonNull Map<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas, @NonNull Context context) {
         String day = Utils.ordinal(mMonthWeekNumber) + " " + mMonthWeekDay + " " + context.getString(R.string.monthDayStart) + " " + context.getResources().getStringArray(R.array.month)[mBeginningOfMonth ? 0 : 1] + " " + context.getString(R.string.monthDayEnd);
 
         if (mTimePair.mCustomTimeKey != null) {
@@ -78,13 +78,13 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
 
     @NonNull
     @Override
-    CreateTaskLoader.ScheduleData getScheduleData() {
+    public CreateTaskLoader.ScheduleData getScheduleData() {
         return new CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData(mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth, mTimePair);
     }
 
     @NonNull
     @Override
-    ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(@NonNull Date today, @Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
+    public ScheduleDialogFragment.ScheduleDialogData getScheduleDialogData(@NonNull Date today, @Nullable CreateTaskActivity.ScheduleHint scheduleHint) {
         Date date = (scheduleHint != null ? scheduleHint.getMDate() : today);
 
         date = Utils.getDateInMonth(date.getYear(), date.getMonth(), mMonthWeekNumber, mMonthWeekDay, mBeginningOfMonth);
@@ -94,7 +94,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
 
     @NonNull
     @Override
-    ScheduleType getScheduleType() {
+    public ScheduleType getScheduleType() {
         return ScheduleType.MONTHLY_WEEK;
     }
 
@@ -109,7 +109,7 @@ class MonthlyWeekScheduleEntry extends ScheduleEntry {
         parcel.writeSerializable(mMonthWeekDay);
         parcel.writeInt(mBeginningOfMonth ? 1 : 0);
         parcel.writeParcelable(mTimePair, 0);
-        parcel.writeString(mError);
+        parcel.writeString(getError());
     }
 
     @SuppressWarnings("unused")

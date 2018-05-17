@@ -612,14 +612,14 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
     }
 
     private fun setScheduleEntryError(scheduleEntry: ScheduleEntry, stringId: Int) {
-        scheduleEntry.mError = getString(stringId)
-        check(!TextUtils.isEmpty(scheduleEntry.mError))
+        scheduleEntry.error = getString(stringId)
+        check(!TextUtils.isEmpty(scheduleEntry.error))
 
         val index = mScheduleEntries.indexOf(scheduleEntry)
         check(index >= 0)
 
         scheduleRecycler.getChildAt(index + mCreateTaskAdapter.elementsBeforeSchedules())?.let {
-            (scheduleRecycler.getChildViewHolder(it) as CreateTaskAdapter.ScheduleHolder).mScheduleLayout.error = scheduleEntry.mError
+            (scheduleRecycler.getChildViewHolder(it) as CreateTaskAdapter.ScheduleHolder).mScheduleLayout.error = scheduleEntry.error
         }
     }
 
@@ -890,7 +890,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
                     mScheduleLayout.run {
                         hint = null
-                        error = scheduleEntry.mError
+                        error = scheduleEntry.error
                         isHintAnimationEnabled = false
                     }
 

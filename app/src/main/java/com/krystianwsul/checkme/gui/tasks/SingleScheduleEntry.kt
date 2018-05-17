@@ -47,7 +47,7 @@ class SingleScheduleEntry : ScheduleEntry {
     constructor(scheduleHint: CreateTaskActivity.ScheduleHint?) {
         when {
             scheduleHint == null -> { // new for task
-                val pair = HourMinute.getNextHour()
+                val pair = HourMinute.nextHour
 
                 mDate = pair.first
                 mTimePair = TimePair(pair.second)

@@ -601,7 +601,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                 timePair.mHourMinute
             }!!
 
-            if (hourMinute <= HourMinute.getNow()) {
+            if (hourMinute <= HourMinute.now) {
                 setScheduleEntryError(scheduleEntry, R.string.error_time)
 
                 hasError = true

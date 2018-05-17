@@ -1,6 +1,6 @@
-package com.krystianwsul.checkme.utils;
+package com.krystianwsul.checkme.utils
 
-public enum ScheduleType {
+enum class ScheduleType {
     SINGLE,
     DAILY,
     WEEKLY,

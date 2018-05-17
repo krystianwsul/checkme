@@ -5,16 +5,16 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".gui.tasks.FriendPickerFragment">
+    tools:context=".gui.friends.FriendPickerFragment">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/friend_picker_recycler"
+        android:id="@+id/friendPickerRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"/>
 
     <ProgressBar
-        android:id="@+id/friend_picker_progress"
+        android:id="@+id/friendPickerProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 

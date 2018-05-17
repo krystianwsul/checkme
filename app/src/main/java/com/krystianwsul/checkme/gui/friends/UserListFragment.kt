@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
-import com.krystianwsul.checkme.gui.tasks.FriendPickerFragment
 import com.krystianwsul.checkme.loaders.ShowProjectLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import junit.framework.Assert

@@ -99,7 +99,7 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
         localCustomTimeRecord.current = false
     }
 
-    override fun getTimePair() = TimePair(CustomTimeKey(localCustomTimeRecord.id), null)
+    override val timePair by lazy { TimePair(CustomTimeKey(localCustomTimeRecord.id), null) }
 
     fun delete() {
         domainFactory.localFactory.deleteCustomTime(this)

@@ -761,7 +761,13 @@ public class DomainFactory {
 
         Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = Stream.of(task.getExistingInstances().values())
+        Collection<Instance> existingInstances = task.getExistingInstances().values();
+        List<Instance> pastInstances = task.getInstances(null, now, now);
+
+        Set<Instance> allInstances = new HashSet<>(existingInstances);
+        allInstances.addAll(pastInstances);
+
+        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = Stream.of(allInstances)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> {
                     HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
 

@@ -19,6 +19,7 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
 
     companion object {
 
+        @JvmField
         val CREATOR: Parcelable.Creator<MonthlyDayScheduleEntry> = object : Parcelable.Creator<MonthlyDayScheduleEntry> {
 
             override fun createFromParcel(parcel: Parcel): MonthlyDayScheduleEntry {

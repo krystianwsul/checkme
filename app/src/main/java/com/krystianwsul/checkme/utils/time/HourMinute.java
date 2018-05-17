@@ -23,7 +23,7 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializa
 
     @NonNull
     public static Pair<Date, HourMinute> getNextHour() {
-        return getNextHour(Date.today(), ExactTimeStamp.getNow());
+        return getNextHour(Date.Companion.today(), ExactTimeStamp.getNow());
     }
 
     @NonNull
@@ -64,12 +64,12 @@ public class HourMinute implements Comparable<HourMinute>, Parcelable, Serializa
     }
 
     public int compareTo(@NonNull HourMinute hourMinute) {
-        int comparisonHour = Integer.valueOf(mHour).compareTo(hourMinute.getHour());
+        int comparisonHour = Integer.compare(mHour, hourMinute.getHour());
 
         if (comparisonHour != 0)
             return comparisonHour;
 
-        return Integer.valueOf(mMinute).compareTo(hourMinute.getMinute());
+        return Integer.compare(mMinute, hourMinute.getMinute());
     }
 
     @Override

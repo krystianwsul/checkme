@@ -55,15 +55,15 @@ public class RemoteInstanceRecord extends RemoteRecord {
 
     @NonNull
     public static String scheduleKeyToString(@NonNull DomainFactory domainFactory, @NonNull String projectId, @NonNull ScheduleKey scheduleKey) {
-        String key = scheduleKey.ScheduleDate.getYear() + "-" + scheduleKey.ScheduleDate.getMonth() + "-" + scheduleKey.ScheduleDate.getDay();
-        if (scheduleKey.ScheduleTimePair.getCustomTimeKey() != null) {
-            Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() == null);
+        String key = scheduleKey.getScheduleDate().getYear() + "-" + scheduleKey.getScheduleDate().getMonth() + "-" + scheduleKey.getScheduleDate().getDay();
+        if (scheduleKey.getScheduleTimePair().getCustomTimeKey() != null) {
+            Assert.assertTrue(scheduleKey.getScheduleTimePair().getHourMinute() == null);
 
-            key += "-" + domainFactory.getRemoteCustomTimeId(projectId, scheduleKey.ScheduleTimePair.getCustomTimeKey());
+            key += "-" + domainFactory.getRemoteCustomTimeId(projectId, scheduleKey.getScheduleTimePair().getCustomTimeKey());
         } else {
-            Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() != null);
+            Assert.assertTrue(scheduleKey.getScheduleTimePair().getHourMinute() != null);
 
-            key += "-" + scheduleKey.ScheduleTimePair.getHourMinute().getHour() + "-" + scheduleKey.ScheduleTimePair.getHourMinute().getMinute();
+            key += "-" + scheduleKey.getScheduleTimePair().getHourMinute().getHour() + "-" + scheduleKey.getScheduleTimePair().getHourMinute().getMinute();
         }
 
         return key;
@@ -114,20 +114,20 @@ public class RemoteInstanceRecord extends RemoteRecord {
     }
 
     public int getScheduleYear() {
-        return mScheduleKey.ScheduleDate.getYear();
+        return mScheduleKey.getScheduleDate().getYear();
     }
 
     public int getScheduleMonth() {
-        return mScheduleKey.ScheduleDate.getMonth();
+        return mScheduleKey.getScheduleDate().getMonth();
     }
 
     public int getScheduleDay() {
-        return mScheduleKey.ScheduleDate.getDay();
+        return mScheduleKey.getScheduleDate().getDay();
     }
 
     @Nullable
     public String getScheduleCustomTimeId() {
-        CustomTimeKey customTimeKey = mScheduleKey.ScheduleTimePair.getCustomTimeKey();
+        CustomTimeKey customTimeKey = mScheduleKey.getScheduleTimePair().getCustomTimeKey();
         if (customTimeKey != null) {
             return mDomainFactory.getRemoteCustomTimeId(mRemoteTaskRecord.getProjectId(), customTimeKey);
         } else {
@@ -137,7 +137,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
 
     @Nullable
     public Integer getScheduleHour() {
-        HourMinute hourMinute = mScheduleKey.ScheduleTimePair.getHourMinute();
+        HourMinute hourMinute = mScheduleKey.getScheduleTimePair().getHourMinute();
         if (hourMinute != null) {
             return hourMinute.getHour();
         } else {
@@ -147,7 +147,7 @@ public class RemoteInstanceRecord extends RemoteRecord {
 
     @Nullable
     public Integer getScheduleMinute() {
-        HourMinute hourMinute = mScheduleKey.ScheduleTimePair.getHourMinute();
+        HourMinute hourMinute = mScheduleKey.getScheduleTimePair().getHourMinute();
         if (hourMinute != null) {
             return hourMinute.getMinute();
         } else {

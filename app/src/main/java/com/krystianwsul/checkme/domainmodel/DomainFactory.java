@@ -2059,7 +2059,7 @@ public class DomainFactory {
         if (instance != null)
             return instance;
 
-        DateTime dateTime = getDateTime(instanceKey.getScheduleKey().ScheduleDate, instanceKey.getScheduleKey().ScheduleTimePair);
+        DateTime dateTime = getDateTime(instanceKey.getScheduleKey().getScheduleDate(), instanceKey.getScheduleKey().getScheduleTimePair());
 
         return generateInstance(instanceKey.getTaskKey(), dateTime); // DateTime -> timePair
     }
@@ -2943,7 +2943,7 @@ public class DomainFactory {
             Assert.assertTrue(!TextUtils.isEmpty(taskId));
 
             ScheduleKey scheduleKey = instanceKey.getScheduleKey();
-            Date scheduleDate = scheduleKey.ScheduleDate;
+            Date scheduleDate = scheduleKey.getScheduleDate();
 
             Stream<InstanceShownRecord> stream = Stream.of(mLocalFactory.getInstanceShownRecords())
                     .filter(instanceShownRecord -> instanceShownRecord.getProjectId().equals(projectId))
@@ -2953,22 +2953,22 @@ public class DomainFactory {
                     .filter(instanceShownRecord -> instanceShownRecord.getScheduleDay() == scheduleDate.getDay());
 
             List<InstanceShownRecord> matches;
-            if (scheduleKey.ScheduleTimePair.getCustomTimeKey() != null) {
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() == null);
+            if (scheduleKey.getScheduleTimePair().getCustomTimeKey() != null) {
+                Assert.assertTrue(scheduleKey.getScheduleTimePair().getHourMinute() == null);
 
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.getCustomTimeKey().getType() == TaskKey.Type.REMOTE); // remote custom time key hack
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.getCustomTimeKey().getLocalCustomTimeId() == null);
-                Assert.assertTrue(projectId.equals(scheduleKey.ScheduleTimePair.getCustomTimeKey().getRemoteProjectId()));
+                Assert.assertTrue(scheduleKey.getScheduleTimePair().getCustomTimeKey().getType() == TaskKey.Type.REMOTE); // remote custom time key hack
+                Assert.assertTrue(scheduleKey.getScheduleTimePair().getCustomTimeKey().getLocalCustomTimeId() == null);
+                Assert.assertTrue(projectId.equals(scheduleKey.getScheduleTimePair().getCustomTimeKey().getRemoteProjectId()));
 
-                String customTimeId = scheduleKey.ScheduleTimePair.getCustomTimeKey().getRemoteCustomTimeId();
+                String customTimeId = scheduleKey.getScheduleTimePair().getCustomTimeKey().getRemoteCustomTimeId();
                 Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
 
                 matches = stream.filter(instanceShownRecord -> customTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
                         .collect(Collectors.toList());
             } else {
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() != null);
+                Assert.assertTrue(scheduleKey.getScheduleTimePair().getHourMinute() != null);
 
-                HourMinute hourMinute = scheduleKey.ScheduleTimePair.getHourMinute();
+                HourMinute hourMinute = scheduleKey.getScheduleTimePair().getHourMinute();
 
                 matches = stream.filter(instanceShownRecord -> Integer.valueOf(hourMinute.getHour()).equals(instanceShownRecord.getScheduleHour()))
                         .filter(instanceShownRecord -> Integer.valueOf(hourMinute.getMinute()).equals(instanceShownRecord.getScheduleMinute()))

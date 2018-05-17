@@ -994,8 +994,7 @@ public class DomainFactory {
             if (joinTaskKeys != null) {
                 Assert.assertTrue(joinTaskKeys.size() > 1);
 
-                List<String> projectIds = Stream.of(joinTaskKeys)
-                        .map(joinTaskKey -> joinTaskKey.mRemoteProjectId)
+                List<String> projectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
                         .distinct()
                         .collect(Collectors.toList());
 
@@ -1409,8 +1408,7 @@ public class DomainFactory {
         Assert.assertTrue(!scheduleDatas.isEmpty());
         Assert.assertTrue(joinTaskKeys.size() > 1);
 
-        List<String> joinProjectIds = Stream.of(joinTaskKeys)
-                .map(joinTaskKey -> joinTaskKey.mRemoteProjectId)
+        List<String> joinProjectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
                 .distinct()
                 .collect(Collectors.toList());
         Assert.assertTrue(joinProjectIds.size() == 1);
@@ -1493,8 +1491,7 @@ public class DomainFactory {
         Task parentTask = getTaskForce(parentTaskKey);
         Assert.assertTrue(parentTask.current(now));
 
-        List<String> joinProjectIds = Stream.of(joinTaskKeys)
-                .map(joinTaskKey -> joinTaskKey.mRemoteProjectId)
+        List<String> joinProjectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
                 .distinct()
                 .collect(Collectors.toList());
         Assert.assertTrue(joinProjectIds.size() == 1);
@@ -1749,8 +1746,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.getNow();
 
-        List<String> joinProjectIds = Stream.of(joinTaskKeys)
-                .map(joinTaskKey -> joinTaskKey.mRemoteProjectId)
+        List<String> joinProjectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
                 .distinct()
                 .collect(Collectors.toList());
         Assert.assertTrue(joinProjectIds.size() == 1);
@@ -1964,14 +1960,14 @@ public class DomainFactory {
 
     @Nullable
     private Instance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
-        if (instanceKey.getTaskKey().mLocalTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(instanceKey.getTaskKey().mRemoteProjectId));
-            Assert.assertTrue(TextUtils.isEmpty(instanceKey.getTaskKey().mRemoteTaskId));
+        if (instanceKey.getTaskKey().getLocalTaskId() != null) {
+            Assert.assertTrue(TextUtils.isEmpty(instanceKey.getTaskKey().getRemoteProjectId()));
+            Assert.assertTrue(TextUtils.isEmpty(instanceKey.getTaskKey().getRemoteTaskId()));
 
             return mLocalFactory.getExistingInstanceIfPresent(instanceKey);
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.getTaskKey().mRemoteProjectId));
-            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.getTaskKey().mRemoteTaskId));
+            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.getTaskKey().getRemoteProjectId()));
+            Assert.assertTrue(!TextUtils.isEmpty(instanceKey.getTaskKey().getRemoteTaskId()));
             Assert.assertTrue(mRemoteProjectFactory != null);
 
             return mRemoteProjectFactory.getExistingInstanceIfPresent(instanceKey);
@@ -2001,15 +1997,15 @@ public class DomainFactory {
 
     @NonNull
     private Instance generateInstance(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
-        if (taskKey.mLocalTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteProjectId));
-            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
+        if (taskKey.getLocalTaskId() != null) {
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.getRemoteProjectId()));
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.getRemoteTaskId()));
 
-            return new LocalInstance(this, taskKey.mLocalTaskId, scheduleDateTime);
+            return new LocalInstance(this, taskKey.getLocalTaskId(), scheduleDateTime);
         } else {
             Assert.assertTrue(mRemoteProjectFactory != null);
-            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteProjectId));
-            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.getRemoteProjectId()));
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.getRemoteTaskId()));
 
             String remoteCustomTimeId;
             Integer hour;
@@ -2021,7 +2017,7 @@ public class DomainFactory {
             if (customTimeKey != null) {
                 Assert.assertTrue(hourMinute == null);
 
-                remoteCustomTimeId = getRemoteCustomTimeId(taskKey.mRemoteProjectId, customTimeKey);
+                remoteCustomTimeId = getRemoteCustomTimeId(taskKey.getRemoteProjectId(), customTimeKey);
 
                 hour = null;
                 minute = null;
@@ -2034,11 +2030,11 @@ public class DomainFactory {
                 minute = hourMinute.getMinute();
             }
 
-            InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(taskKey.mRemoteProjectId, taskKey.mRemoteTaskId, scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute);
+            InstanceShownRecord instanceShownRecord = mLocalFactory.getInstanceShownRecord(taskKey.getRemoteProjectId(), taskKey.getRemoteTaskId(), scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute);
 
             RemoteProject remoteProject = mRemoteProjectFactory.getTaskForce(taskKey).getRemoteProject();
 
-            return new RemoteInstance(this, remoteProject, taskKey.mRemoteTaskId, scheduleDateTime, instanceShownRecord);
+            return new RemoteInstance(this, remoteProject, taskKey.getRemoteTaskId(), scheduleDateTime, instanceShownRecord);
         }
     }
 
@@ -2370,12 +2366,12 @@ public class DomainFactory {
 
     @NonNull
     Task getTaskForce(@NonNull TaskKey taskKey) {
-        if (taskKey.mLocalTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
+        if (taskKey.getLocalTaskId() != null) {
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.getRemoteTaskId()));
 
-            return mLocalFactory.getTaskForce(taskKey.mLocalTaskId);
+            return mLocalFactory.getTaskForce(taskKey.getLocalTaskId());
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.getRemoteTaskId()));
             Assert.assertTrue(mRemoteProjectFactory != null);
 
             return mRemoteProjectFactory.getTaskForce(taskKey);
@@ -2384,12 +2380,12 @@ public class DomainFactory {
 
     @Nullable
     private Task getTaskIfPresent(@NonNull TaskKey taskKey) {
-        if (taskKey.mLocalTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(taskKey.mRemoteTaskId));
+        if (taskKey.getLocalTaskId() != null) {
+            Assert.assertTrue(TextUtils.isEmpty(taskKey.getRemoteTaskId()));
 
-            return mLocalFactory.getTaskIfPresent(taskKey.mLocalTaskId);
+            return mLocalFactory.getTaskIfPresent(taskKey.getLocalTaskId());
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId));
+            Assert.assertTrue(!TextUtils.isEmpty(taskKey.getRemoteTaskId()));
             Assert.assertTrue(mRemoteProjectFactory != null);
 
             return mRemoteProjectFactory.getTaskIfPresent(taskKey);
@@ -2936,10 +2932,10 @@ public class DomainFactory {
         } else {
             TaskKey taskKey = instanceKey.getTaskKey();
 
-            String projectId = taskKey.mRemoteProjectId;
+            String projectId = taskKey.getRemoteProjectId();
             Assert.assertTrue(!TextUtils.isEmpty(projectId));
 
-            String taskId = taskKey.mRemoteTaskId;
+            String taskId = taskKey.getRemoteTaskId();
             Assert.assertTrue(!TextUtils.isEmpty(taskId));
 
             ScheduleKey scheduleKey = instanceKey.getScheduleKey();

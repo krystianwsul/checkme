@@ -384,7 +384,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 }
 
                 if (instanceDatas.all { it.TaskCurrent }) {
-                    val projectIdCount = instanceDatas.map { it.InstanceKey.taskKey.mRemoteProjectId }
+                    val projectIdCount = instanceDatas.map { it.InstanceKey.taskKey.remoteProjectId }
                             .distinct()
                             .count()
 

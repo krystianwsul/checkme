@@ -299,14 +299,14 @@ public class RemoteProject {
 
     @NonNull
     Set<RemoteTaskHierarchy> getTaskHierarchiesByChildTaskKey(@NonNull TaskKey childTaskKey) {
-        Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.mRemoteTaskId));
+        Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.getRemoteTaskId()));
 
         return mRemoteTaskHierarchies.getByChildTaskKey(childTaskKey);
     }
 
     @NonNull
     Set<RemoteTaskHierarchy> getTaskHierarchiesByParentTaskKey(@NonNull TaskKey parentTaskKey) {
-        Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.mRemoteTaskId));
+        Assert.assertTrue(!TextUtils.isEmpty(parentTaskKey.getRemoteTaskId()));
 
         return mRemoteTaskHierarchies.getByParentTaskKey(parentTaskKey);
     }

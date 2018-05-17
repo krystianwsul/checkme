@@ -122,7 +122,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val selectedNodes = treeViewAdapter!!.selectedNodes
             check(!selectedNodes.isEmpty())
 
-            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.mRemoteProjectId }
+            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
                     .distinct()
                     .count()
 
@@ -142,7 +142,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val selectedNodes = treeViewAdapter!!.selectedNodes
             check(!selectedNodes.isEmpty())
 
-            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.mRemoteProjectId }
+            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
                     .distinct()
                     .count()
 
@@ -179,7 +179,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val selectedNodes = treeViewAdapter!!.selectedNodes
             check(selectedNodes.size > 1)
 
-            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.mRemoteProjectId }
+            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
                     .distinct()
                     .count()
 

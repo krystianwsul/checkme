@@ -128,10 +128,10 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance? {
         val taskKey = instanceKey.taskKey
 
-        if (TextUtils.isEmpty(taskKey.mRemoteTaskId))
+        if (TextUtils.isEmpty(taskKey.remoteTaskId))
             return null
 
-        val remoteTask = getRemoteProjectForce(taskKey).getRemoteTaskIfPresent(taskKey.mRemoteTaskId!!)
+        val remoteTask = getRemoteProjectForce(taskKey).getRemoteTaskIfPresent(taskKey.remoteTaskId!!)
                 ?: return null
 
         return remoteTask.getExistingInstanceIfPresent(instanceKey.scheduleKey)
@@ -140,28 +140,28 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     private fun getRemoteProjectForce(taskKey: TaskKey) = getRemoteProjectIfPresent(taskKey)!!
 
     private fun getRemoteProjectIfPresent(taskKey: TaskKey): RemoteProject? {
-        Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteProjectId))
-        Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId))
+        Assert.assertTrue(!TextUtils.isEmpty(taskKey.remoteProjectId))
+        Assert.assertTrue(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
-        return remoteProjects[taskKey.mRemoteProjectId]
+        return remoteProjects[taskKey.remoteProjectId]
     }
 
     fun getTaskForce(taskKey: TaskKey): RemoteTask {
-        Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId))
+        Assert.assertTrue(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
-        return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.mRemoteTaskId!!)
+        return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId!!)
     }
 
     fun getTaskIfPresent(taskKey: TaskKey): RemoteTask? {
-        Assert.assertTrue(!TextUtils.isEmpty(taskKey.mRemoteTaskId))
+        Assert.assertTrue(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         val remoteProject = getRemoteProjectIfPresent(taskKey) ?: return null
 
-        return remoteProject.getRemoteTaskIfPresent(taskKey.mRemoteTaskId!!)
+        return remoteProject.getRemoteTaskIfPresent(taskKey.remoteTaskId!!)
     }
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<RemoteTaskHierarchy> {
-        Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.mRemoteTaskId))
+        Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.remoteTaskId))
 
         return getRemoteProjectForce(childTaskKey).getTaskHierarchiesByChildTaskKey(childTaskKey)
     }

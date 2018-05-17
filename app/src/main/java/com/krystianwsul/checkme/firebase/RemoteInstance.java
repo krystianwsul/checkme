@@ -362,10 +362,10 @@ public class RemoteInstance extends Instance {
             if (customTimeKey == null)
                 return null;
 
-            if (!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId)) {
-                Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteProjectId));
+            if (!TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId())) {
+                Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.getRemoteProjectId()));
 
-                return getDomainFactory().getCustomTimeKey(customTimeKey.mRemoteProjectId, customTimeKey.mRemoteCustomTimeId);
+                return getDomainFactory().getCustomTimeKey(customTimeKey.getRemoteProjectId(), customTimeKey.getRemoteCustomTimeId());
             } else {
                 return customTimeKey;
             }

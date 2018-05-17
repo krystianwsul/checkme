@@ -234,10 +234,10 @@ class LocalInstance : Instance {
 
         if (timePair.customTimeKey != null) {
             Assert.assertTrue(timePair.hourMinute == null)
-            Assert.assertTrue(timePair.customTimeKey.mLocalCustomTimeId != null)
-            Assert.assertTrue(TextUtils.isEmpty(timePair.customTimeKey.mRemoteCustomTimeId))
+            Assert.assertTrue(timePair.customTimeKey.localCustomTimeId != null)
+            Assert.assertTrue(TextUtils.isEmpty(timePair.customTimeKey.remoteCustomTimeId))
 
-            mInstanceRecord!!.instanceCustomTimeId = timePair.customTimeKey.mLocalCustomTimeId
+            mInstanceRecord!!.instanceCustomTimeId = timePair.customTimeKey.localCustomTimeId
             mInstanceRecord!!.instanceHour = null
             mInstanceRecord!!.instanceMinute = null
         } else {

@@ -95,10 +95,10 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     }
 
     fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey, remoteProject: RemoteProject): String {
-        Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null)
-        Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId))
+        Assert.assertTrue(customTimeKey.localCustomTimeId != null)
+        Assert.assertTrue(TextUtils.isEmpty(customTimeKey.remoteCustomTimeId))
 
-        val localCustomTimeId = customTimeKey.mLocalCustomTimeId!!
+        val localCustomTimeId = customTimeKey.localCustomTimeId!!
 
         val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
 

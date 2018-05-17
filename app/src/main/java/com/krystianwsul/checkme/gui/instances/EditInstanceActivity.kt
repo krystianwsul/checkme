@@ -260,7 +260,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         editInstanceTime.setOnClickListener {
             Assert.assertTrue(mData != null)
             val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(mData!!.customTimeDatas.values
-                    .filter { it.customTimeKey.mLocalCustomTimeId != null }
+                    .filter { it.customTimeKey.localCustomTimeId != null }
                     .sortedBy { it.hourMinutes[mDate!!.dayOfWeek] }
                     .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[mDate!!.dayOfWeek] + ")") })
 

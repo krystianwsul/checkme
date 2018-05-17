@@ -16,7 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -32,39 +31,30 @@ public class RemoteInstanceRecordTest {
     private DomainFactory mDomainFactory;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         PowerMockito.mockStatic(TextUtils.class);
 
-        PowerMockito.when(TextUtils.isEmpty(any(CharSequence.class))).thenAnswer(new Answer<Boolean>() {
-            @Override
-            public Boolean answer(InvocationOnMock invocation) throws Throwable {
-                CharSequence a = (CharSequence) invocation.getArguments()[0];
-                return !(a != null && a.length() > 0);
-            }
+        PowerMockito.when(TextUtils.isEmpty(any(CharSequence.class))).thenAnswer((Answer<Boolean>) invocation -> {
+            CharSequence a = (CharSequence) invocation.getArguments()[0];
+            return !(a != null && a.length() > 0);
         });
 
-        Mockito.when(mDomainFactory.getCustomTimeKey(any(String.class), any(String.class))).thenAnswer(new Answer<CustomTimeKey>() {
-            @Override
-            public CustomTimeKey answer(InvocationOnMock invocation) {
-                String remoteProjectId = (String) invocation.getArguments()[0];
-                String remoteCustomTimeId = (String) invocation.getArguments()[1];
+        Mockito.when(mDomainFactory.getCustomTimeKey(any(String.class), any(String.class))).thenAnswer((Answer<CustomTimeKey>) invocation -> {
+            String remoteProjectId = (String) invocation.getArguments()[0];
+            String remoteCustomTimeId = (String) invocation.getArguments()[1];
 
-                return new CustomTimeKey(remoteProjectId, remoteCustomTimeId);
-            }
+            return new CustomTimeKey(remoteProjectId, remoteCustomTimeId);
         });
 
-        Mockito.when(mDomainFactory.getRemoteCustomTimeId(any(String.class), any(CustomTimeKey.class))).thenAnswer(new Answer<String>() {
-            @Override
-            public String answer(InvocationOnMock invocation) {
-                CustomTimeKey customTimeKey = (CustomTimeKey) invocation.getArguments()[1];
+        Mockito.when(mDomainFactory.getRemoteCustomTimeId(any(String.class), any(CustomTimeKey.class))).thenAnswer((Answer<String>) invocation -> {
+            CustomTimeKey customTimeKey = (CustomTimeKey) invocation.getArguments()[1];
 
-                return customTimeKey.mRemoteCustomTimeId;
-            }
+            return customTimeKey.getRemoteCustomTimeId();
         });
     }
 
     @Test
-    public void testScheduleKeyToStringHourMinute() throws Exception {
+    public void testScheduleKeyToStringHourMinute() {
         ScheduleKey scheduleKey = new ScheduleKey(new Date(2016, 11, 26), new TimePair(new HourMinute(9, 47)));
 
         String key = "2016-11-26-9-47";
@@ -73,7 +63,7 @@ public class RemoteInstanceRecordTest {
     }
 
     @Test
-    public void testScheduleKeyToStringCustomTime() throws Exception {
+    public void testScheduleKeyToStringCustomTime() {
         ScheduleKey scheduleKey = new ScheduleKey(new Date(2016, 11, 27), new TimePair(new CustomTimeKey("asdf", "-KX_IHXkMcoAqwTBfN_k")));
 
         String key = "2016-11-27--KX_IHXkMcoAqwTBfN_k";
@@ -84,7 +74,7 @@ public class RemoteInstanceRecordTest {
     }
 
     @Test
-    public void stringToScheduleKeyHourMinute() throws Exception {
+    public void stringToScheduleKeyHourMinute() {
         ScheduleKey scheduleKey = new ScheduleKey(new Date(2016, 11, 26), new TimePair(new HourMinute(9, 47)));
 
         String key = "2016-11-26-9-47";
@@ -93,7 +83,7 @@ public class RemoteInstanceRecordTest {
     }
 
     @Test
-    public void stringToScheduleKeyCustomTime() throws Exception {
+    public void stringToScheduleKeyCustomTime() {
         ScheduleKey scheduleKey = new ScheduleKey(new Date(2016, 11, 27), new TimePair(new CustomTimeKey("asdf", "-KX_IHXkMcoAqwTBfN_k")));
 
         String key = "2016-11-27--KX_IHXkMcoAqwTBfN_k";

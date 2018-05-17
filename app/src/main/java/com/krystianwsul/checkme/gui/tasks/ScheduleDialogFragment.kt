@@ -246,11 +246,11 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
             val customTimeDatas = when (mScheduleDialogData.mScheduleType) {
                 ScheduleType.SINGLE -> mCustomTimeDatas!!.values
-                        .filter { it.customTimeKey.mLocalCustomTimeId != null }
+                        .filter { it.customTimeKey.localCustomTimeId != null }
                         .sortedBy { it.hourMinutes[mScheduleDialogData.mDate.dayOfWeek] }
                         .map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.customTimeKey, customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.mDate.dayOfWeek] + ")") }
                 ScheduleType.DAILY, ScheduleType.WEEKLY, ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> mCustomTimeDatas!!.values
-                        .filter { it.customTimeKey.mLocalCustomTimeId != null }
+                        .filter { it.customTimeKey.localCustomTimeId != null }
                         .sortedBy { it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum() }
                         .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name) }
             }

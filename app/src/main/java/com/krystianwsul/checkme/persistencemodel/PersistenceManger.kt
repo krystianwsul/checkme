@@ -207,7 +207,7 @@ class PersistenceManger(
         if (time.timePair.customTimeKey != null) {
             Assert.assertTrue(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.customTimeKey!!.mLocalCustomTimeId!!
+            customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
 
             hour = null
             minute = null
@@ -239,7 +239,7 @@ class PersistenceManger(
         if (time.timePair.customTimeKey != null) {
             Assert.assertTrue(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.customTimeKey!!.mLocalCustomTimeId!!
+            customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
 
             hour = null
             minute = null
@@ -271,7 +271,7 @@ class PersistenceManger(
         if (time.timePair.customTimeKey != null) {
             Assert.assertTrue(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.customTimeKey!!.mLocalCustomTimeId!!
+            customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
 
             hour = null
             minute = null
@@ -303,7 +303,7 @@ class PersistenceManger(
         if (time.timePair.customTimeKey != null) {
             Assert.assertTrue(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.customTimeKey!!.mLocalCustomTimeId!!
+            customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
 
             hour = null
             minute = null
@@ -329,7 +329,7 @@ class PersistenceManger(
         if (scheduleTimePair.customTimeKey != null) {
             Assert.assertTrue(scheduleTimePair.hourMinute == null)
 
-            scheduleCustomTimeId = scheduleTimePair.customTimeKey.mLocalCustomTimeId!!
+            scheduleCustomTimeId = scheduleTimePair.customTimeKey.localCustomTimeId!!
 
             scheduleHour = null
             scheduleMinute = null

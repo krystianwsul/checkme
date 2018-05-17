@@ -1980,18 +1980,18 @@ public class DomainFactory {
 
     @NonNull
     public String getRemoteCustomTimeId(@NonNull String projectId, @NonNull CustomTimeKey customTimeKey) {
-        if (!TextUtils.isEmpty(customTimeKey.mRemoteProjectId)) {
-            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
-            Assert.assertTrue(customTimeKey.mLocalCustomTimeId == null);
+        if (!TextUtils.isEmpty(customTimeKey.getRemoteProjectId())) {
+            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId()));
+            Assert.assertTrue(customTimeKey.getLocalCustomTimeId() == null);
 
-            Assert.assertTrue(customTimeKey.mRemoteProjectId.equals(projectId));
+            Assert.assertTrue(customTimeKey.getRemoteProjectId().equals(projectId));
 
-            return customTimeKey.mRemoteCustomTimeId;
+            return customTimeKey.getRemoteCustomTimeId();
         } else {
-            Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
-            Assert.assertTrue(customTimeKey.mLocalCustomTimeId != null);
+            Assert.assertTrue(TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId()));
+            Assert.assertTrue(customTimeKey.getLocalCustomTimeId() != null);
 
-            LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(customTimeKey.mLocalCustomTimeId);
+            LocalCustomTime localCustomTime = mLocalFactory.getLocalCustomTime(customTimeKey.getLocalCustomTimeId());
 
             Assert.assertTrue(localCustomTime.hasRemoteRecord(projectId));
 
@@ -2153,17 +2153,17 @@ public class DomainFactory {
 
     @NonNull
     public CustomTime getCustomTime(@NonNull CustomTimeKey customTimeKey) {
-        if (customTimeKey.mLocalCustomTimeId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteProjectId));
-            Assert.assertTrue(TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
+        if (customTimeKey.getLocalCustomTimeId() != null) {
+            Assert.assertTrue(TextUtils.isEmpty(customTimeKey.getRemoteProjectId()));
+            Assert.assertTrue(TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId()));
 
-            return mLocalFactory.getLocalCustomTime(customTimeKey.mLocalCustomTimeId);
+            return mLocalFactory.getLocalCustomTime(customTimeKey.getLocalCustomTimeId());
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteProjectId));
-            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.mRemoteCustomTimeId));
+            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.getRemoteProjectId()));
+            Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId()));
             Assert.assertTrue(mRemoteProjectFactory != null);
 
-            return mRemoteProjectFactory.getRemoteCustomTime(customTimeKey.mRemoteProjectId, customTimeKey.mRemoteCustomTimeId);
+            return mRemoteProjectFactory.getRemoteCustomTime(customTimeKey.getRemoteProjectId(), customTimeKey.getRemoteCustomTimeId());
         }
     }
 
@@ -2957,10 +2957,10 @@ public class DomainFactory {
                 Assert.assertTrue(scheduleKey.ScheduleTimePair.getHourMinute() == null);
 
                 Assert.assertTrue(scheduleKey.ScheduleTimePair.getCustomTimeKey().getType() == TaskKey.Type.REMOTE); // remote custom time key hack
-                Assert.assertTrue(scheduleKey.ScheduleTimePair.getCustomTimeKey().mLocalCustomTimeId == null);
-                Assert.assertTrue(projectId.equals(scheduleKey.ScheduleTimePair.getCustomTimeKey().mRemoteProjectId));
+                Assert.assertTrue(scheduleKey.ScheduleTimePair.getCustomTimeKey().getLocalCustomTimeId() == null);
+                Assert.assertTrue(projectId.equals(scheduleKey.ScheduleTimePair.getCustomTimeKey().getRemoteProjectId()));
 
-                String customTimeId = scheduleKey.ScheduleTimePair.getCustomTimeKey().mRemoteCustomTimeId;
+                String customTimeId = scheduleKey.ScheduleTimePair.getCustomTimeKey().getRemoteCustomTimeId();
                 Assert.assertTrue(!TextUtils.isEmpty(customTimeId));
 
                 matches = stream.filter(instanceShownRecord -> customTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
@@ -3125,10 +3125,7 @@ public class DomainFactory {
                     .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
 
             // mark custom times relevant
-            Stream.of(mTask.getSchedules())
-                    .map(Schedule::getCustomTimeKey)
-                    .filter(customTimeKey -> customTimeKey != null && customTimeKey.mLocalCustomTimeId != null)
-                    .map(customTimeKey -> customTimeRelevances.get(customTimeKey.mLocalCustomTimeId))
+            Stream.of(mTask.getSchedules()).map(Schedule::getCustomTimeKey).filter(customTimeKey -> customTimeKey != null && customTimeKey.getLocalCustomTimeId() != null).map(customTimeKey -> customTimeRelevances.get(customTimeKey.getLocalCustomTimeId()))
                     .forEach(LocalCustomTimeRelevance::setRelevant);
         }
 
@@ -3207,8 +3204,8 @@ public class DomainFactory {
 
             // set custom time relevant
             CustomTimeKey scheduleCustomTimeKey = mInstance.getScheduleCustomTimeKey();
-            if (scheduleCustomTimeKey != null && scheduleCustomTimeKey.mLocalCustomTimeId != null) {
-                LocalCustomTimeRelevance localCustomTimeRelevance = customTimeRelevances.get(scheduleCustomTimeKey.mLocalCustomTimeId);
+            if (scheduleCustomTimeKey != null && scheduleCustomTimeKey.getLocalCustomTimeId() != null) {
+                LocalCustomTimeRelevance localCustomTimeRelevance = customTimeRelevances.get(scheduleCustomTimeKey.getLocalCustomTimeId());
                 Assert.assertTrue(localCustomTimeRelevance != null);
 
                 localCustomTimeRelevance.setRelevant();
@@ -3216,8 +3213,8 @@ public class DomainFactory {
 
             // set custom time relevant
             CustomTimeKey instanceCustomTimeId = mInstance.getInstanceCustomTimeKey();
-            if (instanceCustomTimeId != null && instanceCustomTimeId.mLocalCustomTimeId != null) {
-                LocalCustomTimeRelevance localCustomTimeRelevance = customTimeRelevances.get(instanceCustomTimeId.mLocalCustomTimeId);
+            if (instanceCustomTimeId != null && instanceCustomTimeId.getLocalCustomTimeId() != null) {
+                LocalCustomTimeRelevance localCustomTimeRelevance = customTimeRelevances.get(instanceCustomTimeId.getLocalCustomTimeId());
                 Assert.assertTrue(localCustomTimeRelevance != null);
 
                 localCustomTimeRelevance.setRelevant();

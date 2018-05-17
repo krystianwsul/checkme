@@ -64,10 +64,10 @@ public class RemoteProject {
 
             RemoteCustomTime remoteCustomTime = new RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord);
 
-            Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
-            Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId));
+            Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.getCustomTimeKey().getRemoteCustomTimeId()));
+            Assert.assertTrue(!mRemoteCustomTimes.containsKey(remoteCustomTime.getCustomTimeKey().getRemoteCustomTimeId()));
 
-            mRemoteCustomTimes.put(remoteCustomTime.getCustomTimeKey().mRemoteCustomTimeId, remoteCustomTime);
+            mRemoteCustomTimes.put(remoteCustomTime.getCustomTimeKey().getRemoteCustomTimeId(), remoteCustomTime);
 
             if (remoteCustomTimeRecord.getOwnerId().equals(domainFactory.getLocalFactory().getUuid()) && domainFactory.getLocalFactory().hasLocalCustomTime(remoteCustomTimeRecord.getLocalId())) {
                 LocalCustomTime localCustomTime = domainFactory.getLocalFactory().getLocalCustomTime(remoteCustomTimeRecord.getLocalId());

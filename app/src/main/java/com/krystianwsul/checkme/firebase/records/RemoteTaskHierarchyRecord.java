@@ -31,7 +31,7 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
     RemoteTaskHierarchyRecord(@NonNull RemoteProjectRecord remoteProjectRecord, @NonNull TaskHierarchyJson taskHierarchyJson) {
         super(true);
 
-        mId = DatabaseWrapper.getTaskHierarchyRecordId(remoteProjectRecord.getId());
+        mId = DatabaseWrapper.INSTANCE.getTaskHierarchyRecordId(remoteProjectRecord.getId());
         mRemoteProjectRecord = remoteProjectRecord;
         mTaskHierarchyJson = taskHierarchyJson;
     }

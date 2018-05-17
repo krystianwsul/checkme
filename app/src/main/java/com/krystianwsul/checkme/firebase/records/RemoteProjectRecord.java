@@ -52,7 +52,7 @@ public class RemoteProjectRecord extends RemoteRecord {
     RemoteProjectRecord(@NonNull DomainFactory domainFactory, @NonNull JsonWrapper jsonWrapper) {
         super(true);
 
-        mId = DatabaseWrapper.getRootRecordId();
+        mId = DatabaseWrapper.INSTANCE.getRootRecordId();
         mJsonWrapper = jsonWrapper;
 
         initialize(domainFactory);

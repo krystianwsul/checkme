@@ -31,7 +31,7 @@ object BackendNotifier {
     }
 
     fun notify(context: Context, remoteProjects: Set<RemoteProject>, userInfo: UserInfo, userKeys: Collection<String>) {
-        val root = DatabaseWrapper.getRoot()
+        val root = DatabaseWrapper.root
 
         val production = when (root) {
             "development" -> false

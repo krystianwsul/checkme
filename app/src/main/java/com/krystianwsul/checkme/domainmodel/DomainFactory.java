@@ -269,9 +269,9 @@ public class DomainFactory {
         Context applicationContext = context.getApplicationContext();
         Assert.assertTrue(applicationContext != null);
 
-        DatabaseWrapper.setUserInfo(userInfo, mLocalFactory.getUuid());
+        DatabaseWrapper.INSTANCE.setUserInfo(userInfo, mLocalFactory.getUuid());
 
-        mRecordQuery = DatabaseWrapper.getTaskRecordsQuery(userInfo);
+        mRecordQuery = DatabaseWrapper.INSTANCE.getTaskRecordsQuery(userInfo);
         mRecordListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -299,7 +299,7 @@ public class DomainFactory {
         };
         mRecordQuery.addValueEventListener(mRecordListener);
 
-        mFriendQuery = DatabaseWrapper.getFriendsQuery(mUserInfo);
+        mFriendQuery = DatabaseWrapper.INSTANCE.getFriendsQuery(mUserInfo);
         mFriendListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -319,7 +319,7 @@ public class DomainFactory {
         };
         mFriendQuery.addValueEventListener(mFriendListener);
 
-        mUserQuery = DatabaseWrapper.getUserQuery(userInfo);
+        mUserQuery = DatabaseWrapper.INSTANCE.getUserQuery(userInfo);
         mUserListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -1869,7 +1869,7 @@ public class DomainFactory {
             return;
 
         mUserInfo = userInfo;
-        DatabaseWrapper.setUserInfo(userInfo, mLocalFactory.getUuid());
+        DatabaseWrapper.INSTANCE.setUserInfo(userInfo, mLocalFactory.getUuid());
 
         mRemoteProjectFactory.updateUserInfo(userInfo);
 

@@ -67,7 +67,7 @@ public class RemoteTaskRecord extends RemoteRecord {
         super(true);
 
         mDomainFactory = domainFactory;
-        mId = DatabaseWrapper.getTaskRecordId(remoteProjectRecord.getId());
+        mId = DatabaseWrapper.INSTANCE.getTaskRecordId(remoteProjectRecord.getId());
         mRemoteProjectRecord = remoteProjectRecord;
         mTaskJson = taskJson;
 

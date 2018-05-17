@@ -29,7 +29,7 @@ public abstract class RemoteScheduleRecord extends RemoteRecord {
     RemoteScheduleRecord(@NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
         super(true);
 
-        mId = DatabaseWrapper.getScheduleRecordId(remoteTaskRecord.getProjectId(), remoteTaskRecord.getId());
+        mId = DatabaseWrapper.INSTANCE.getScheduleRecordId(remoteTaskRecord.getProjectId(), remoteTaskRecord.getId());
         mRemoteTaskRecord = remoteTaskRecord;
         mScheduleWrapper = scheduleWrapper;
     }

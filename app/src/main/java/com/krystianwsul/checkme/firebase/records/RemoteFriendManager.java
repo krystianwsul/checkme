@@ -35,7 +35,7 @@ public class RemoteFriendManager {
 
         if (!values.isEmpty()) {
             mSaved = true;
-            DatabaseWrapper.updateFriends(values);
+            DatabaseWrapper.INSTANCE.updateFriends(values);
         }
     }
 

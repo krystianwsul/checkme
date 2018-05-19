@@ -73,7 +73,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
     override fun setMyEndExactTimeStamp(now: ExactTimeStamp) = remoteTaskRecord.setEndTime(now.long)
 
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?): Task {
-        val taskJson = TaskJson(name, now.long, null, null, null, null, note, emptyMap())
+        val taskJson = TaskJson(name, now.long, null, null, null, null, note)
 
         val childTask = remoteProject.newRemoteTask(taskJson, now)
 

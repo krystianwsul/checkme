@@ -61,7 +61,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     }
 
     fun createRemoteTaskHelper(now: ExactTimeStamp, name: String, note: String?, projectId: String): RemoteTask {
-        val taskJson = TaskJson(name, now.long, null, null, null, null, note, emptyMap<String, InstanceJson>())
+        val taskJson = TaskJson(name, now.long, null, null, null, null, note)
 
         return getRemoteProjectForce(projectId).newRemoteTask(taskJson, now)
     }

@@ -41,7 +41,9 @@ class RemoteTaskRecord : RemoteRecord {
     override val createObject: TaskJson// because of duplicate functionality when converting local task
         get() {
             if (!create)
-                taskJson.instances = _remoteInstanceRecords.entries.associateBy({ RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, it.key) }, { it.value.createObject })
+                taskJson.instances = _remoteInstanceRecords.entries
+                        .associateBy({ RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, it.key) }, { it.value.createObject })
+                        .toMutableMap()
 
             val scheduleWrappers = HashMap<String, ScheduleWrapper>()
 
@@ -127,20 +129,16 @@ class RemoteTaskRecord : RemoteRecord {
 
             val scheduleKey = RemoteInstanceRecord.stringToScheduleKey(domainFactory, remoteProjectRecord.id, key)
 
-            Assert.assertTrue(instanceJson != null)
-
-            val remoteInstanceRecord = RemoteInstanceRecord(false, domainFactory, this, instanceJson!!, scheduleKey)
+            val remoteInstanceRecord = RemoteInstanceRecord(false, domainFactory, this, instanceJson, scheduleKey)
 
             _remoteInstanceRecords[scheduleKey] = remoteInstanceRecord
         }
 
         for ((id, scheduleWrapper) in taskJson.schedules) {
-            Assert.assertTrue(scheduleWrapper != null)
-
             Assert.assertTrue(!TextUtils.isEmpty(id))
 
             when {
-                scheduleWrapper!!.singleScheduleJson != null -> {
+                scheduleWrapper.singleScheduleJson != null -> {
                     Assert.assertTrue(scheduleWrapper.dailyScheduleJson == null)
                     Assert.assertTrue(scheduleWrapper.weeklyScheduleJson == null)
                     Assert.assertTrue(scheduleWrapper.monthlyDayScheduleJson == null)
@@ -178,7 +176,7 @@ class RemoteTaskRecord : RemoteRecord {
     fun setEndTime(endTime: Long) {
         Assert.assertTrue(taskJson.endTime == null)
 
-        taskJson.setEndTime(endTime)
+        taskJson.endTime = endTime
         addValue("$key/endTime", endTime)
     }
 
@@ -186,7 +184,7 @@ class RemoteTaskRecord : RemoteRecord {
         if (oldestVisibleYear == taskJson.oldestVisibleYear)
             return
 
-        taskJson.setOldestVisibleYear(oldestVisibleYear)
+        taskJson.oldestVisibleYear = oldestVisibleYear
         addValue("$key/oldestVisibleYear", oldestVisibleYear)
     }
 
@@ -194,7 +192,7 @@ class RemoteTaskRecord : RemoteRecord {
         if (oldestVisibleMonth == taskJson.oldestVisibleMonth)
             return
 
-        taskJson.setOldestVisibleMonth(oldestVisibleMonth)
+        taskJson.oldestVisibleMonth = oldestVisibleMonth
         addValue("$key/oldestVisibleMonth", oldestVisibleMonth)
     }
 
@@ -202,7 +200,7 @@ class RemoteTaskRecord : RemoteRecord {
         if (oldestVisibleDay == taskJson.oldestVisibleDay)
             return
 
-        taskJson.setOldestVisibleDay(oldestVisibleDay)
+        taskJson.oldestVisibleDay = oldestVisibleDay
         addValue("$key/oldestVisibleDay", oldestVisibleDay)
     }
 
@@ -211,49 +209,53 @@ class RemoteTaskRecord : RemoteRecord {
         Assert.assertTrue(!created)
         Assert.assertTrue(!updated)
 
-        if (delete) {
-            Log.e("asdf", "RemoteTaskRecord.getValues deleting " + this)
+        when {
+            delete -> {
+                Log.e("asdf", "RemoteTaskRecord.getValues deleting " + this)
 
-            Assert.assertTrue(!create)
-            Assert.assertTrue(update != null)
+                Assert.assertTrue(!create)
+                Assert.assertTrue(update != null)
 
-            deleted = true
-            values[key] = null
-        } else if (create) {
-            Log.e("asdf", "RemoteTaskRecord.getValues creating " + this)
-
-            Assert.assertTrue(update == null)
-
-            created = true
-
-            values[key] = createObject
-        } else {
-            Assert.assertTrue(update != null)
-
-            if (!update!!.isEmpty()) {
-                Log.e("asdf", "RemoteTaskRecord.getValues updating " + this)
-
-                updated = true
-                values.putAll(update)
+                deleted = true
+                values[key] = null
             }
+            create -> {
+                Log.e("asdf", "RemoteTaskRecord.getValues creating " + this)
 
-            for (remoteInstanceRecord in _remoteInstanceRecords.values)
-                remoteInstanceRecord.getValues(values)
+                Assert.assertTrue(update == null)
 
-            for (remoteSingleScheduleRecord in remoteSingleScheduleRecords.values)
-                remoteSingleScheduleRecord.getValues(values)
+                created = true
 
-            for (remoteDailyScheduleRecord in remoteDailyScheduleRecords.values)
-                remoteDailyScheduleRecord.getValues(values)
+                values[key] = createObject
+            }
+            else -> {
+                Assert.assertTrue(update != null)
 
-            for (remoteWeeklyScheduleRecord in remoteWeeklyScheduleRecords.values)
-                remoteWeeklyScheduleRecord.getValues(values)
+                if (!update!!.isEmpty()) {
+                    Log.e("asdf", "RemoteTaskRecord.getValues updating " + this)
 
-            for (remoteMonthlyDayScheduleRecord in remoteMonthlyDayScheduleRecords.values)
-                remoteMonthlyDayScheduleRecord.getValues(values)
+                    updated = true
+                    values.putAll(update)
+                }
 
-            for (remoteMonthlyWeekScheduleRecord in remoteMonthlyWeekScheduleRecords.values)
-                remoteMonthlyWeekScheduleRecord.getValues(values)
+                for (remoteInstanceRecord in _remoteInstanceRecords.values)
+                    remoteInstanceRecord.getValues(values)
+
+                for (remoteSingleScheduleRecord in remoteSingleScheduleRecords.values)
+                    remoteSingleScheduleRecord.getValues(values)
+
+                for (remoteDailyScheduleRecord in remoteDailyScheduleRecords.values)
+                    remoteDailyScheduleRecord.getValues(values)
+
+                for (remoteWeeklyScheduleRecord in remoteWeeklyScheduleRecords.values)
+                    remoteWeeklyScheduleRecord.getValues(values)
+
+                for (remoteMonthlyDayScheduleRecord in remoteMonthlyDayScheduleRecords.values)
+                    remoteMonthlyDayScheduleRecord.getValues(values)
+
+                for (remoteMonthlyWeekScheduleRecord in remoteMonthlyWeekScheduleRecords.values)
+                    remoteMonthlyWeekScheduleRecord.getValues(values)
+            }
         }
     }
 

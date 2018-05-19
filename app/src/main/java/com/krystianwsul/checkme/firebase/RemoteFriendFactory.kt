@@ -12,7 +12,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
     private val remoteFriendManager = RemoteFriendManager(children)
 
-    private val _friends = remoteFriendManager.mRemoteRootUserRecords
+    private val _friends = remoteFriendManager.remoteRootUserRecords
             .values
             .map { RemoteRootUser(it) }
             .associateBy { it.id }

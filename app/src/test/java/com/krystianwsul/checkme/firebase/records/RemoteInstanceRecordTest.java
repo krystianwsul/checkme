@@ -59,7 +59,7 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-26-9-47";
 
-        Assert.assertTrue(RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, "asdf", scheduleKey).equals(key));
+        Assert.assertTrue(RemoteInstanceRecord.Companion.scheduleKeyToString(mDomainFactory, "asdf", scheduleKey).equals(key));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-27--KX_IHXkMcoAqwTBfN_k";
 
-        String otherKey = RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, "asdf", scheduleKey);
+        String otherKey = RemoteInstanceRecord.Companion.scheduleKeyToString(mDomainFactory, "asdf", scheduleKey);
 
         Assert.assertTrue(otherKey.equals(key));
     }
@@ -79,7 +79,7 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-26-9-47";
 
-        Assert.assertTrue(RemoteInstanceRecord.stringToScheduleKey(mDomainFactory, "asdf", key).equals(scheduleKey));
+        Assert.assertTrue(RemoteInstanceRecord.Companion.stringToScheduleKey(mDomainFactory, "asdf", key).equals(scheduleKey));
     }
 
     @Test
@@ -88,6 +88,6 @@ public class RemoteInstanceRecordTest {
 
         String key = "2016-11-27--KX_IHXkMcoAqwTBfN_k";
 
-        Assert.assertTrue(RemoteInstanceRecord.stringToScheduleKey(mDomainFactory, "asdf", key).equals(scheduleKey));
+        Assert.assertTrue(RemoteInstanceRecord.Companion.stringToScheduleKey(mDomainFactory, "asdf", key).equals(scheduleKey));
     }
 }

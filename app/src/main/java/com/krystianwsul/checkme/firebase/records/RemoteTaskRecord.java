@@ -79,7 +79,7 @@ public class RemoteTaskRecord extends RemoteRecord {
             String key = entry.getKey();
             Assert.assertTrue(!TextUtils.isEmpty(key));
 
-            ScheduleKey scheduleKey = RemoteInstanceRecord.stringToScheduleKey(mDomainFactory, mRemoteProjectRecord.getId(), key);
+            ScheduleKey scheduleKey = RemoteInstanceRecord.Companion.stringToScheduleKey(mDomainFactory, mRemoteProjectRecord.getId(), key);
 
             InstanceJson instanceJson = entry.getValue();
             Assert.assertTrue(instanceJson != null);
@@ -130,8 +130,7 @@ public class RemoteTaskRecord extends RemoteRecord {
     @Override
     protected TaskJson getCreateObject() {
         if (!getCreate()) { // because of duplicate functionality when converting local task
-            mTaskJson.setInstances(Stream.of(mRemoteInstanceRecords.entrySet())
-                    .collect(Collectors.toMap(entry -> RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), entry.getKey()), entry -> entry.getValue().getCreateObject())));
+            mTaskJson.setInstances(Stream.of(mRemoteInstanceRecords.entrySet()).collect(Collectors.toMap(entry -> RemoteInstanceRecord.Companion.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), entry.getKey()), entry -> entry.getValue().getCreateObject())));
         }
 
         Map<String, ScheduleWrapper> scheduleWrappers = new HashMap<>();

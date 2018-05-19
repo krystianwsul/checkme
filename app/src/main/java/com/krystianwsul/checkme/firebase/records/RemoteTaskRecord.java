@@ -128,7 +128,7 @@ public class RemoteTaskRecord extends RemoteRecord {
 
     @NonNull
     @Override
-    protected TaskJson getCreateObject() {
+    public TaskJson getCreateObject() {
         if (!getCreate()) { // because of duplicate functionality when converting local task
             mTaskJson.setInstances(Stream.of(mRemoteInstanceRecords.entrySet()).collect(Collectors.toMap(entry -> RemoteInstanceRecord.Companion.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), entry.getKey()), entry -> entry.getValue().getCreateObject())));
         }

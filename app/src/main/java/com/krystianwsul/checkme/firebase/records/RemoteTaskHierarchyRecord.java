@@ -38,7 +38,7 @@ public class RemoteTaskHierarchyRecord extends RemoteRecord {
 
     @NonNull
     @Override
-    protected TaskHierarchyJson getCreateObject() {
+    public TaskHierarchyJson getCreateObject() {
         return mTaskHierarchyJson;
     }
 

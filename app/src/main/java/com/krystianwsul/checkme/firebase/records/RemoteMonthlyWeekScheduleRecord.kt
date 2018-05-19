@@ -19,9 +19,9 @@ class RemoteMonthlyWeekScheduleRecord : RemoteScheduleRecord {
 
     val minute by lazy { monthlyWeekScheduleJson.minute }
 
-    constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper) {}
+    constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
 
-    constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper) {}
+    constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
 
     override fun getStartTime() = monthlyWeekScheduleJson.startTime
 

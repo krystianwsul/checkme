@@ -54,9 +54,7 @@ class RemoteProject(private val domainFactory: DomainFactory, private val remote
 
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
-            Assert.assertTrue(remoteCustomTimeRecord != null)
-
-            val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord!!)
+            val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
 
             Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTime.customTimeKey.remoteCustomTimeId))
             Assert.assertTrue(!remoteCustomTimes.containsKey(remoteCustomTime.customTimeKey.remoteCustomTimeId))

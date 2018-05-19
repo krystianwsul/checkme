@@ -30,7 +30,7 @@ public class RemoteProjectUserRecord extends RemoteRecord {
 
     @NonNull
     @Override
-    protected UserJson getCreateObject() {
+    public UserJson getCreateObject() {
         return mUserJson;
     }
 

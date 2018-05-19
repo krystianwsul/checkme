@@ -16,7 +16,7 @@ abstract class RemoteRecord(protected val create: Boolean) {
 
     protected abstract val key: String
 
-    protected abstract val createObject: Any
+    abstract val createObject: Any
 
     open fun getValues(values: MutableMap<String, Any?>) {
         Assert.assertTrue(!deleted)

@@ -36,7 +36,7 @@ public abstract class RemoteScheduleRecord extends RemoteRecord {
 
     @NonNull
     @Override
-    protected ScheduleWrapper getCreateObject() {
+    public ScheduleWrapper getCreateObject() {
         return scheduleWrapper;
     }
 

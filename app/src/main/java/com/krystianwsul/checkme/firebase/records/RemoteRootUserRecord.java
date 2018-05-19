@@ -31,7 +31,7 @@ public class RemoteRootUserRecord extends RemoteRecord {
 
     @NonNull
     @Override
-    protected UserWrapper getCreateObject() {
+    public UserWrapper getCreateObject() {
         return mUserWrapper;
     }
 

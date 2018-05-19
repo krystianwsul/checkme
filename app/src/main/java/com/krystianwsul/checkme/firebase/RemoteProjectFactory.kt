@@ -4,7 +4,10 @@ import android.text.TextUtils
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.firebase.json.*
+import com.krystianwsul.checkme.firebase.json.CustomTimeJson
+import com.krystianwsul.checkme.firebase.json.JsonWrapper
+import com.krystianwsul.checkme.firebase.json.ProjectJson
+import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemoteProjectManager
 import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
@@ -75,7 +78,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
         val userJsons = domainFactory.getUserJsons(friendIds)
         userJsons[userInfo.key] = remoteRootUser.userJson
 
-        val projectJson = ProjectJson(name, now.long, null, HashMap(), HashMap<String, TaskHierarchyJson>(), HashMap(), userJsons)
+        val projectJson = ProjectJson(name, now.long, users = userJsons)
 
         val remoteProjectRecord = remoteProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 

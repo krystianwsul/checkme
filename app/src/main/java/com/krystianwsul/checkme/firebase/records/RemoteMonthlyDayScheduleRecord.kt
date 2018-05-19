@@ -28,7 +28,7 @@ class RemoteMonthlyDayScheduleRecord : RemoteScheduleRecord {
     fun setEndTime(endTime: Long) {
         Assert.assertTrue(monthlyDayScheduleJson.endTime == null)
 
-        monthlyDayScheduleJson.setEndTime(endTime)
+        monthlyDayScheduleJson.endTime = endTime
         addValue("$key/monthlyDayScheduleJson/endTime", endTime)
     }
 }

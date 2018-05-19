@@ -35,7 +35,7 @@ class DatePickerDialogFragment : AbstractDialogFragment() {
         Assert.assertTrue(date != null)
 
         val datePickerDialog = DatePickerDialog(requireActivity(), mOnDateSetListener, date!!.year, date.month - 1, date.day)
-        datePickerDialog.datePicker.minDate = ExactTimeStamp.getNow().long - 1000 // -1000 odejmuje sekundę żeby obejść bug na ver. < 5.0
+        datePickerDialog.datePicker.minDate = ExactTimeStamp.now.long - 1000 // -1000 odejmuje sekundę żeby obejść bug na ver. < 5.0
 
         return datePickerDialog
     }

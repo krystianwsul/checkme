@@ -66,9 +66,9 @@ class DebugFragment : AbstractFragment() {
             stringBuilder.append(", custom times: ")
             stringBuilder.append(domainFactory.customTimeCount)
 
-            val t1 = ExactTimeStamp.getNow()
-            DomainFactory.getDomainFactory().getGroupListData(activity!!, ExactTimeStamp.getNow(), 0, MainActivity.TimeRange.DAY)
-            val t2 = ExactTimeStamp.getNow()
+            val t1 = ExactTimeStamp.now
+            DomainFactory.getDomainFactory().getGroupListData(activity!!, ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
+            val t2 = ExactTimeStamp.now
 
             stringBuilder.append("\ntoday: ")
             stringBuilder.append(t2.long - t1.long)

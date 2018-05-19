@@ -213,7 +213,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val tag = "tickService"
 
         if (nextAlarm != null) {
-            val now = ExactTimeStamp.getNow()
+            val now = ExactTimeStamp.now
 
             val delay = ((nextAlarm.long - now.long) / 1000).toInt()
 

@@ -250,7 +250,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             check(mData!!.taskData == null)
                             check(mTaskKeys!!.size > 1)
 
-                            DomainFactory.getDomainFactory().createScheduleJoinRootTask(this, ExactTimeStamp.getNow(), mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
+                            DomainFactory.getDomainFactory().createScheduleJoinRootTask(this, ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {
@@ -269,7 +269,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             checkNotNull(mData!!.taskData)
                             check(mTaskKeys == null)
 
-                            val taskKey = DomainFactory.getDomainFactory().updateChildTask(this, ExactTimeStamp.getNow(), mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, parentTaskKey, mNote)
+                            val taskKey = DomainFactory.getDomainFactory().updateChildTask(this, ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, parentTaskKey, mNote)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 

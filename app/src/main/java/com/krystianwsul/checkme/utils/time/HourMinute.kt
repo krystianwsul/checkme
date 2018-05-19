@@ -22,9 +22,9 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
 
         val now get() = TimeStamp.now.hourMinute
 
-        val nextHour get() = getNextHour(Date.today(), ExactTimeStamp.getNow())
+        val nextHour get() = getNextHour(Date.today(), ExactTimeStamp.now)
 
-        fun getNextHour(date: Date) = getNextHour(date, ExactTimeStamp.getNow())
+        fun getNextHour(date: Date) = getNextHour(date, ExactTimeStamp.now)
 
         fun getNextHour(date: Date, now: ExactTimeStamp): Pair<Date, HourMinute> {
             val hourMinute = now.toTimeStamp().hourMinute

@@ -150,15 +150,15 @@ public class DomainFactory {
     @NonNull
     public static synchronized DomainFactory getDomainFactory() {
         if (sDomainFactory == null) {
-            sStart = ExactTimeStamp.getNow();
+            sStart = ExactTimeStamp.Companion.getNow();
 
             sDomainFactory = new DomainFactory();
 
-            sRead = ExactTimeStamp.getNow();
+            sRead = ExactTimeStamp.Companion.getNow();
 
             sDomainFactory.initialize();
 
-            sStop = ExactTimeStamp.getNow();
+            sStop = ExactTimeStamp.Companion.getNow();
         }
 
         return sDomainFactory;
@@ -341,7 +341,7 @@ public class DomainFactory {
     }
 
     public synchronized void clearUserInfo(@NonNull Context context) {
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         if (mUserInfo == null) {
             Assert.assertTrue(mRecordQuery == null);
@@ -387,7 +387,7 @@ public class DomainFactory {
     private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot, @NonNull SaveService.Source source) {
         Assert.assertTrue(mUserInfo != null);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         mLocalFactory.clearRemoteCustomTimeRecords();
 
@@ -397,14 +397,14 @@ public class DomainFactory {
         tryNotifyFriendListeners(); // assuming they're all getters
 
         if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
-            updateNotifications(context, firstThereforeSilent, ExactTimeStamp.getNow(), new ArrayList<>());
+            updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
 
             save(context, 0, source);
         } else {
             mSkipSave = true;
 
             if (mTickData == null) {
-                updateNotifications(context, firstThereforeSilent, ExactTimeStamp.getNow(), new ArrayList<>());
+                updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
             } else {
                 updateNotificationsTick(context, source, mTickData.mSilent, mTickData.mSource);
 
@@ -537,7 +537,7 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstanceData");
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
@@ -566,7 +566,7 @@ public class DomainFactory {
 
         Assert.assertTrue(instanceKeys.size() > 1);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
@@ -728,7 +728,7 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowGroupData");
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Date date = timeStamp.getDate();
         DayOfWeek dayOfWeek = date.getDayOfWeek();
@@ -753,7 +753,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskInstancesData");
 
         Task task = getTaskForce(taskKey);
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
@@ -795,7 +795,7 @@ public class DomainFactory {
 
         Assert.assertTrue(!instanceKeys.isEmpty());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (InstanceKey instanceKey : instanceKeys) {
@@ -840,7 +840,7 @@ public class DomainFactory {
         if (task == null)
             return new ShowInstanceLoader.Data(null);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Instance instance = getInstance(instanceKey);
         if (!task.current(now) && !instance.exists())
@@ -937,7 +937,7 @@ public class DomainFactory {
 
         Assert.assertTrue(taskKey == null || joinTaskKeys == null);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Map<CustomTimeKey, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
@@ -1027,7 +1027,7 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskData");
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
@@ -1050,7 +1050,7 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getMainData");
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         return new MainLoader.Data(getMainData(now, context));
     }
@@ -1063,7 +1063,7 @@ public class DomainFactory {
 
         Assert.assertTrue(mRemoteProjectFactory != null);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteProjectFactory.getRemoteProjects().values())
                 .filter(remoteProject -> remoteProject.current(now))
@@ -1134,7 +1134,7 @@ public class DomainFactory {
 
         Instance instance = getInstance(instanceKey);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
 
@@ -1151,7 +1151,7 @@ public class DomainFactory {
 
         Assert.assertTrue(instanceKeys.size() > 1);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         List<Instance> instances = Stream.of(instanceKeys)
                 .map(this::getInstance)
@@ -1178,7 +1178,7 @@ public class DomainFactory {
 
         Instance instance = getInstance(instanceKey);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
         Calendar calendar = now.getCalendar();
         calendar.add(Calendar.HOUR_OF_DAY, 1);
 
@@ -1201,7 +1201,7 @@ public class DomainFactory {
 
         Instance instance = getInstance(instanceKey);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
         Calendar calendar = now.getCalendar();
         calendar.add(Calendar.HOUR_OF_DAY, 1);
 
@@ -1221,7 +1221,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourActivity");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
         Calendar calendar = now.getCalendar();
         calendar.add(Calendar.HOUR_OF_DAY, 1);
 
@@ -1251,7 +1251,7 @@ public class DomainFactory {
 
         Instance instance = getInstance(instanceKey);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         instance.setDone(true, now);
         instance.setNotificationShown(false, now);
@@ -1268,7 +1268,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         List<Instance> instances = Stream.of(instanceKeys)
                 .map(this::getInstance)
@@ -1295,7 +1295,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceDone");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Instance instance = setInstanceDone(context, now, dataId, source, instanceKey, done);
 
@@ -1308,7 +1308,7 @@ public class DomainFactory {
 
         Assert.assertTrue(!instanceKeys.isEmpty());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         for (InstanceKey instanceKey : instanceKeys)
             setInstanceNotified(instanceKey, now);
@@ -1320,7 +1320,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotified");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        setInstanceNotified(instanceKey, ExactTimeStamp.getNow());
+        setInstanceNotified(instanceKey, ExactTimeStamp.Companion.getNow());
 
         save(context, dataId, source);
     }
@@ -1352,7 +1352,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         createScheduleRootTask(context, now, dataId, source, name, scheduleDatas, note, projectId);
     }
@@ -1395,7 +1395,7 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(!scheduleDatas.isEmpty());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         return updateScheduleTask(context, now, dataId, source, taskKey, name, scheduleDatas, note, projectId);
     }
@@ -1474,7 +1474,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.createChildTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         createChildTask(context, now, dataId, source, parentTaskKey, name, note);
     }
@@ -1486,7 +1486,7 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskKeys.size() > 1);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Task parentTask = getTaskForce(parentTaskKey);
         Assert.assertTrue(parentTask.current(now));
@@ -1554,7 +1554,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setTaskEndTimeStamp");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
@@ -1572,7 +1572,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceOrdinal");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Instance instance = getInstance(instanceKey);
 
@@ -1589,7 +1589,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setTaskHierarchyOrdinal");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         RemoteProject remoteProject;
         TaskHierarchy taskHierarchy;
@@ -1625,7 +1625,7 @@ public class DomainFactory {
 
         Assert.assertTrue(!taskKeys.isEmpty());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         List<Task> tasks = Stream.of(taskKeys)
                 .map(this::getTaskForce)
@@ -1732,7 +1732,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.createRootTask");
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         createRootTask(context, now, dataId, source, name, note, projectId);
     }
@@ -1744,7 +1744,7 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(joinTaskKeys.size() > 1);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         List<String> joinProjectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
                 .distinct()
@@ -1798,7 +1798,7 @@ public class DomainFactory {
 
         Assert.assertTrue(!TextUtils.isEmpty(name));
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Task task = getTaskForce(taskKey);
         Assert.assertTrue(task.current(now));
@@ -1841,7 +1841,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateNotificationsTick source: " + sourceName);
         Assert.assertTrue(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         updateNotificationsTick(context, now, source, silent);
     }
@@ -1884,7 +1884,7 @@ public class DomainFactory {
         Assert.assertTrue(mRemoteProjectFactory != null);
         Assert.assertTrue(mRemoteFriendFactory != null);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         RemoteProject remoteProject = mRemoteProjectFactory.getRemoteProjectForce(projectId);
 
@@ -1908,7 +1908,7 @@ public class DomainFactory {
         Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(mRemoteRootUser != null);
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Set<String> recordOf = new HashSet<>(friends);
 
@@ -1930,7 +1930,7 @@ public class DomainFactory {
         Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(!projectIds.isEmpty());
 
-        ExactTimeStamp now = ExactTimeStamp.getNow();
+        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Set<RemoteProject> remoteProjects = Stream.of(projectIds)
                 .map(mRemoteProjectFactory::getRemoteProjectForce)

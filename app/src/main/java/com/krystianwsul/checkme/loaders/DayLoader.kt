@@ -11,7 +11,7 @@ class DayLoader(context: Context, private val position: Int, private val timeRan
 
     override val name = "DayLoader, position: $position, timeRange: $timeRange"
 
-    override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getGroupListData(context, ExactTimeStamp.getNow(), position, timeRange)
+    override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getGroupListData(context, ExactTimeStamp.now, position, timeRange)
 
     data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainLoader.Data()
 }

@@ -68,7 +68,7 @@ public class RemoteProjectUserRecord extends RemoteRecord {
 
         Map<String, String> tokens = mUserJson.getTokens();
 
-        if (Utils.stringEquals(tokens.get(uuid), token))
+        if (Utils.INSTANCE.stringEquals(tokens.get(uuid), token))
             return;
 
         mUserJson.addToken(token, uuid);

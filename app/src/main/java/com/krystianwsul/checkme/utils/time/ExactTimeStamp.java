@@ -97,7 +97,7 @@ public class ExactTimeStamp implements Comparable<ExactTimeStamp> {
     }
 
     public TimeStamp toTimeStamp() {
-        return new TimeStamp(mLong);
+        return TimeStamp.Companion.fromMillis(mLong);
     }
 
     public String toString() {

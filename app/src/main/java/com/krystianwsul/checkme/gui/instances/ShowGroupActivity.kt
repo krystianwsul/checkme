@@ -56,7 +56,7 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
         val time = intent.getLongExtra(TIME_KEY, -1)
         Assert.assertTrue(time != -1L)
 
-        timeStamp = TimeStamp(time)
+        timeStamp = TimeStamp.fromMillis(time)
 
         groupListFragment = (supportFragmentManager.findFragmentById(R.id.show_group_list) as? GroupListFragment) ?: GroupListFragment.newInstance().also {
             supportFragmentManager.beginTransaction()

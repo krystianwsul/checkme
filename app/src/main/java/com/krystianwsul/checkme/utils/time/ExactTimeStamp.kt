@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.utils.time
 
 import java.util.*
 
-class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
+data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
 
     companion object {
 
@@ -32,21 +32,6 @@ class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
     constructor(calendar: Calendar) : this(calendar.timeInMillis)
 
     override fun compareTo(other: ExactTimeStamp) = long.compareTo(other.long)
-
-    override fun hashCode() = long.hashCode()
-
-    override fun equals(other: Any?): Boolean {
-        if (other == null)
-            return false
-
-        if (other !is ExactTimeStamp)
-            return false
-
-        if (other === this)
-            return true
-
-        return long == other.long
-    }
 
     fun plusOne() = ExactTimeStamp(long + 1)
 

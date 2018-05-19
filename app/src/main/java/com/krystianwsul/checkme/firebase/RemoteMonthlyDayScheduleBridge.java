@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 import android.text.TextUtils;
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory;
@@ -83,11 +82,11 @@ class RemoteMonthlyDayScheduleBridge implements MonthlyDayScheduleBridge {
 
     @Nullable
     @Override
-    public Pair<String, String> getRemoteCustomTimeKey() {
+    public kotlin.Pair<String, String> getRemoteCustomTimeKey() {
         if (TextUtils.isEmpty(mRemoteMonthlyDayScheduleRecord.getCustomTimeId())) {
             return null;
         } else {
-            return Pair.create(mRemoteMonthlyDayScheduleRecord.getProjectId(), mRemoteMonthlyDayScheduleRecord.getCustomTimeId());
+            return new kotlin.Pair<>(mRemoteMonthlyDayScheduleRecord.getProjectId(), mRemoteMonthlyDayScheduleRecord.getCustomTimeId());
         }
     }
 }

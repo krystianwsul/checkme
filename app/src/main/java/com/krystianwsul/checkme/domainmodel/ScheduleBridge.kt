@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.support.v4.util.Pair
-
 import com.krystianwsul.checkme.utils.TaskKey
 
 interface ScheduleBridge {

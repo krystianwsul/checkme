@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import android.support.v4.util.Pair
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
@@ -180,7 +179,7 @@ class RemoteInstance : Instance {
     override val remoteNonNullProject get() = task.remoteProject
 
     override val remoteCustomTimeKey // scenario already covered by task/schedule relevance
-        get() = remoteInstanceRecord?.instanceCustomTimeId?.let { Pair.create(remoteProject.id, it) } // todo kotlin pair
+        get() = remoteInstanceRecord?.instanceCustomTimeId?.let { Pair(remoteProject.id, it) }
 
     constructor(domainFactory: DomainFactory, remoteProject: RemoteProject, remoteInstanceRecord: RemoteInstanceRecord, instanceShownRecord: InstanceShownRecord?, now: ExactTimeStamp) : super(domainFactory) {
         this.remoteProject = remoteProject

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.content.Context
-import android.support.v4.util.Pair
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
@@ -13,7 +12,7 @@ import io.reactivex.annotations.Nullable
 import java.util.*
 import kotlin.collections.HashMap
 
-abstract class Instance protected constructor(protected val domainFactory: DomainFactory) {
+abstract class Instance(protected val domainFactory: DomainFactory) {
 
     companion object {
 
@@ -96,7 +95,7 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
 
     abstract fun exists(): Boolean
 
-    fun getChildInstances(now: ExactTimeStamp): List<kotlin.Pair<Instance, TaskHierarchy>> {
+    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val task = task
@@ -115,11 +114,11 @@ abstract class Instance protected constructor(protected val domainFactory: Domai
 
                 val parentInstance = childInstance.getParentInstance(now)
                 if (parentInstance?.instanceKey == instanceKey)
-                    childInstances[childInstance.instanceKey] = Pair.create(childInstance, taskHierarchy)
+                    childInstances[childInstance.instanceKey] = Pair(childInstance, taskHierarchy)
             }
         }
 
-        return ArrayList(childInstances.values.map { kotlin.Pair(it.first!!, it.second!!) })
+        return ArrayList(childInstances.values)
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp): ExactTimeStamp {

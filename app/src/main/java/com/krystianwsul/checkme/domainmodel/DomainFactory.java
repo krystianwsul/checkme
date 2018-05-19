@@ -8,7 +8,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -2574,7 +2573,7 @@ public class DomainFactory {
         List<RemoteProject> irrelevantRemoteProjects;
         if (mRemoteProjectFactory != null) {
             List<RemoteCustomTime> remoteCustomTimes = mRemoteProjectFactory.getRemoteCustomTimes();
-            Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances = Stream.of(remoteCustomTimes).collect(Collectors.toMap(remoteCustomTime -> Pair.create(remoteCustomTime.getProjectId(), remoteCustomTime.getId()), RemoteCustomTimeRelevance::new));
+            Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances = Stream.of(remoteCustomTimes).collect(Collectors.toMap(remoteCustomTime -> new kotlin.Pair<>(remoteCustomTime.getProjectId(), remoteCustomTime.getId()), RemoteCustomTimeRelevance::new));
 
             Collection<RemoteProject> remoteProjects = mRemoteProjectFactory.getRemoteProjects().values();
             Map<String, RemoteProjectRelevance> remoteProjectRelevances = Stream.of(remoteProjects)
@@ -3133,7 +3132,7 @@ public class DomainFactory {
             return mTask;
         }
 
-        void setRemoteRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull Map<String, RemoteProjectRelevance> remoteProjectRelevances) {
+        void setRemoteRelevant(@NonNull Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull Map<String, RemoteProjectRelevance> remoteProjectRelevances) {
             Assert.assertTrue(mRelevant);
 
             //noinspection Convert2MethodRef
@@ -3217,10 +3216,10 @@ public class DomainFactory {
             }
         }
 
-        void setRemoteRelevant(@NonNull Map<Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull Map<String, RemoteProjectRelevance> remoteProjectRelevances) {
+        void setRemoteRelevant(@NonNull Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull Map<String, RemoteProjectRelevance> remoteProjectRelevances) {
             Assert.assertTrue(mRelevant);
 
-            Pair<String, String> pair = mInstance.getRemoteCustomTimeKey();
+            kotlin.Pair<String, String> pair = mInstance.getRemoteCustomTimeKey();
             RemoteProject remoteProject = mInstance.getRemoteNullableProject();
             if (pair != null) {
                 Assert.assertTrue(remoteProject != null);

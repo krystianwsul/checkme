@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.local
 
-import android.support.v4.util.Pair
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance

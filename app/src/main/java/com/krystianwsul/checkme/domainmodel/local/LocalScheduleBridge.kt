@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.local
 
-import android.support.v4.util.Pair
-
 import com.krystianwsul.checkme.domainmodel.ScheduleBridge
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord
 import com.krystianwsul.checkme.utils.TaskKey

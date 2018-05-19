@@ -1,12 +1,11 @@
 package com.krystianwsul.checkme.firebase
 
-import android.support.v4.util.Pair
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.WeeklyScheduleBridge
 import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord
 import com.krystianwsul.checkme.utils.TaskKey
 
-internal class RemoteWeeklyScheduleBridge(private val mDomainFactory: DomainFactory, private val mRemoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord) : WeeklyScheduleBridge {
+class RemoteWeeklyScheduleBridge(private val mDomainFactory: DomainFactory, private val mRemoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord) : WeeklyScheduleBridge {
 
     override val daysOfWeek get() = setOf(mRemoteWeeklyScheduleRecord.dayOfWeek)
 
@@ -30,5 +29,5 @@ internal class RemoteWeeklyScheduleBridge(private val mDomainFactory: DomainFact
         mRemoteWeeklyScheduleRecord.delete()
     }
 
-    override val remoteCustomTimeKey get() = mRemoteWeeklyScheduleRecord.run { customTimeId?.let { Pair.create(projectId, it) } }
+    override val remoteCustomTimeKey get() = mRemoteWeeklyScheduleRecord.run { customTimeId?.let { Pair(projectId, it) } }
 }

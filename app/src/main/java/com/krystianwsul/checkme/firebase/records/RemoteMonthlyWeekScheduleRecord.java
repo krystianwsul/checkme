@@ -19,7 +19,7 @@ public class RemoteMonthlyWeekScheduleRecord extends RemoteScheduleRecord {
 
     @NonNull
     private MonthlyWeekScheduleJson getMonthlyWeekScheduleJson() {
-        MonthlyWeekScheduleJson monthlyWeekScheduleJson = mScheduleWrapper.monthlyWeekScheduleJson;
+        MonthlyWeekScheduleJson monthlyWeekScheduleJson = scheduleWrapper.monthlyWeekScheduleJson;
         Assert.assertTrue(monthlyWeekScheduleJson != null);
 
         return monthlyWeekScheduleJson;

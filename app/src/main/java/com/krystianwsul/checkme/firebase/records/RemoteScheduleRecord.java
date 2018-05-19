@@ -16,14 +16,14 @@ public abstract class RemoteScheduleRecord extends RemoteRecord {
     private final RemoteTaskRecord mRemoteTaskRecord;
 
     @NonNull
-    final ScheduleWrapper mScheduleWrapper;
+    final ScheduleWrapper scheduleWrapper;
 
     RemoteScheduleRecord(@NonNull String id, @NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
         super(false);
 
         mId = id;
         mRemoteTaskRecord = remoteTaskRecord;
-        mScheduleWrapper = scheduleWrapper;
+        this.scheduleWrapper = scheduleWrapper;
     }
 
     RemoteScheduleRecord(@NonNull RemoteTaskRecord remoteTaskRecord, @NonNull ScheduleWrapper scheduleWrapper) {
@@ -31,13 +31,13 @@ public abstract class RemoteScheduleRecord extends RemoteRecord {
 
         mId = DatabaseWrapper.INSTANCE.getScheduleRecordId(remoteTaskRecord.getProjectId(), remoteTaskRecord.getId());
         mRemoteTaskRecord = remoteTaskRecord;
-        mScheduleWrapper = scheduleWrapper;
+        this.scheduleWrapper = scheduleWrapper;
     }
 
     @NonNull
     @Override
     protected ScheduleWrapper getCreateObject() {
-        return mScheduleWrapper;
+        return scheduleWrapper;
     }
 
     @NonNull

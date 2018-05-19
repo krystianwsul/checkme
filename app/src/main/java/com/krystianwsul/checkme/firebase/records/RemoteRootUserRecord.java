@@ -37,7 +37,7 @@ public class RemoteRootUserRecord extends RemoteRecord {
 
     @NonNull
     public String getId() {
-        return UserData.getKey(getUserJson().getEmail());
+        return UserData.Companion.getKey(getUserJson().getEmail());
     }
 
     @NonNull

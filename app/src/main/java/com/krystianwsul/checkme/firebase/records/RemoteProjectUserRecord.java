@@ -36,7 +36,7 @@ public class RemoteProjectUserRecord extends RemoteRecord {
 
     @NonNull
     public String getId() {
-        return UserData.getKey(mUserJson.getEmail());
+        return UserData.Companion.getKey(mUserJson.getEmail());
     }
 
     @NonNull

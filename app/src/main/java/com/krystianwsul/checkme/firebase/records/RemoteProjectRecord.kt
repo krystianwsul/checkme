@@ -33,13 +33,21 @@ class RemoteProjectRecord : RemoteRecord {
         get() {
             val projectJson = jsonWrapper.projectJson
 
-            projectJson.tasks = remoteTaskRecords.values.associateBy({ it.id }, { it.createObject })
+            projectJson.tasks = remoteTaskRecords.values
+                    .associateBy({ it.id }, { it.createObject })
+                    .toMutableMap()
 
-            projectJson.taskHierarchies = remoteTaskHierarchyRecords.values.associateBy({ it.id }, { it.createObject })
+            projectJson.taskHierarchies = remoteTaskHierarchyRecords.values
+                    .associateBy({ it.id }, { it.createObject })
+                    .toMutableMap()
 
-            projectJson.customTimes = remoteCustomTimeRecords.values.associateBy({ it.id }, { it.createObject })
+            projectJson.customTimes = remoteCustomTimeRecords.values
+                    .associateBy({ it.id }, { it.createObject })
+                    .toMutableMap()
 
-            projectJson.users = remoteUserRecords.values.associateBy({ it.id }, { it.createObject })
+            projectJson.users = remoteUserRecords.values
+                    .associateBy({ it.id }, { it.createObject })
+                    .toMutableMap()
 
             return jsonWrapper
         }
@@ -80,33 +88,25 @@ class RemoteProjectRecord : RemoteRecord {
         for ((id, taskJson) in projectJson.tasks) {
             Assert.assertTrue(!TextUtils.isEmpty(id))
 
-            Assert.assertTrue(taskJson != null)
-
-            remoteTaskRecords[id] = RemoteTaskRecord(domainFactory, id, this, taskJson!!)
+            remoteTaskRecords[id] = RemoteTaskRecord(domainFactory, id, this, taskJson)
         }
 
         for ((id, taskHierarchyJson) in projectJson.taskHierarchies) {
-            Assert.assertTrue(taskHierarchyJson != null)
-
             Assert.assertTrue(!TextUtils.isEmpty(id))
 
-            remoteTaskHierarchyRecords[id] = RemoteTaskHierarchyRecord(id, this, taskHierarchyJson!!)
+            remoteTaskHierarchyRecords[id] = RemoteTaskHierarchyRecord(id, this, taskHierarchyJson)
         }
 
         for ((id, customTimeJson) in projectJson.customTimes) {
             Assert.assertTrue(!TextUtils.isEmpty(id))
 
-            Assert.assertTrue(customTimeJson != null)
-
-            remoteCustomTimeRecords[id] = RemoteCustomTimeRecord(id, this, customTimeJson!!)
+            remoteCustomTimeRecords[id] = RemoteCustomTimeRecord(id, this, customTimeJson)
         }
 
         for ((id, userJson) in projectJson.users) {
             Assert.assertTrue(!TextUtils.isEmpty(id))
 
-            Assert.assertTrue(userJson != null)
-
-            remoteUserRecords[id] = RemoteProjectUserRecord(false, this, userJson!!)
+            remoteUserRecords[id] = RemoteProjectUserRecord(false, this, userJson)
         }
     }
 
@@ -125,7 +125,9 @@ class RemoteProjectRecord : RemoteRecord {
     }
 
     fun setEndTime(endTime: Long) {
-        projectJson.setEndTime(endTime)
+        check(projectJson.endTime == null)
+
+        projectJson.endTime = endTime
         addValue("$id/$PROJECT_JSON/endTime", endTime)
     }
 

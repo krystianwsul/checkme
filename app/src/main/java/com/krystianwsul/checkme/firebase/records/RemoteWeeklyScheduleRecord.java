@@ -19,7 +19,7 @@ public class RemoteWeeklyScheduleRecord extends RemoteScheduleRecord {
 
     @NonNull
     private WeeklyScheduleJson getWeeklyScheduleJson() {
-        WeeklyScheduleJson weeklyScheduleJson = scheduleWrapper.weeklyScheduleJson;
+        WeeklyScheduleJson weeklyScheduleJson = getCreateObject().weeklyScheduleJson;
         Assert.assertTrue(weeklyScheduleJson != null);
 
         return weeklyScheduleJson;

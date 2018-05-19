@@ -5,7 +5,7 @@ import junit.framework.Assert
 
 class RemoteMonthlyDayScheduleRecord : RemoteScheduleRecord {
 
-    private val monthlyDayScheduleJson by lazy { scheduleWrapper.monthlyDayScheduleJson!! }
+    private val monthlyDayScheduleJson by lazy { createObject.monthlyDayScheduleJson!! }
 
     val dayOfMonth by lazy { monthlyDayScheduleJson.dayOfMonth }
 
@@ -21,12 +21,12 @@ class RemoteMonthlyDayScheduleRecord : RemoteScheduleRecord {
 
     constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper) {}
 
-    override fun getStartTime() = monthlyDayScheduleJson.startTime
+    override val startTime by lazy { monthlyDayScheduleJson.startTime }
 
-    override fun getEndTime() = monthlyDayScheduleJson.endTime
+    override val endTime get() = monthlyDayScheduleJson.endTime
 
     fun setEndTime(endTime: Long) {
-        Assert.assertTrue(getEndTime() == null)
+        Assert.assertTrue(monthlyDayScheduleJson.endTime == null)
 
         monthlyDayScheduleJson.setEndTime(endTime)
         addValue("$key/monthlyDayScheduleJson/endTime", endTime)

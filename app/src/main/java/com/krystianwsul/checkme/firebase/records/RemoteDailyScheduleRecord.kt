@@ -14,12 +14,12 @@ class RemoteDailyScheduleRecord(id: String, remoteTaskRecord: RemoteTaskRecord, 
 
     val minute by lazy { dailyScheduleJson.minute }
 
-    override fun getStartTime() = dailyScheduleJson.startTime
+    override val startTime by lazy { dailyScheduleJson.startTime }
 
-    override fun getEndTime() = dailyScheduleJson.endTime
+    override val endTime get() = dailyScheduleJson.endTime
 
     fun setEndTime(endTime: Long) {
-        Assert.assertTrue(getEndTime() == null)
+        Assert.assertTrue(dailyScheduleJson.endTime == null)
 
         dailyScheduleJson.setEndTime(endTime)
         addValue("$key/dailyScheduleJson/endTime", endTime)

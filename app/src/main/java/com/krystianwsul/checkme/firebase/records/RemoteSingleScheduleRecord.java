@@ -19,7 +19,7 @@ public class RemoteSingleScheduleRecord extends RemoteScheduleRecord {
 
     @NonNull
     private SingleScheduleJson getSingleScheduleJson() {
-        SingleScheduleJson singleScheduleJson = scheduleWrapper.singleScheduleJson;
+        SingleScheduleJson singleScheduleJson = getCreateObject().singleScheduleJson;
         Assert.assertTrue(singleScheduleJson != null);
 
         return singleScheduleJson;

@@ -323,7 +323,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
                     mTimePairPersist!!.hourMinute
                 }
 
-                return TimeStamp(mDate, hourMinute) > TimeStamp.getNow()
+                return TimeStamp(mDate!!, hourMinute) > TimeStamp.now
             } else {
                 return false
             }

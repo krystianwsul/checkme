@@ -735,7 +735,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
 
-                    Assert.assertTrue(mTimeStamp!! > TimeStamp.getNow())
+                    Assert.assertTrue(mTimeStamp!! > TimeStamp.now)
 
                     startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(mTimeStamp!!.date, mTimeStamp!!.hourMinute)))
                 }
@@ -775,7 +775,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                 Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
 
-                return (mTimeStamp!! > TimeStamp.getNow())
+                return (mTimeStamp!! > TimeStamp.now)
             }
             mInstanceKey != null -> {
                 Assert.assertTrue(mInstanceKeys == null)

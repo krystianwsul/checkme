@@ -150,7 +150,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogData.mTimePairPersist.hourMinute
             }
 
-            return TimeStamp(mScheduleDialogData.mDate, hourMinute) > TimeStamp.getNow()
+            return TimeStamp(mScheduleDialogData.mDate, hourMinute) > TimeStamp.now
         }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

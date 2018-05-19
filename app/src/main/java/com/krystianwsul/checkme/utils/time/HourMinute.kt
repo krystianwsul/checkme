@@ -20,7 +20,7 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
 
     companion object {
 
-        val now get() = TimeStamp.getNow().hourMinute
+        val now get() = TimeStamp.now.hourMinute
 
         val nextHour get() = getNextHour(Date.today(), ExactTimeStamp.getNow())
 

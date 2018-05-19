@@ -97,7 +97,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             style = null
         }
 
-        notify(instance.name, text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.instanceDateTime.timeStamp.long, style, true, false, instance.instanceDateTime.timeStamp.long!!.toString() + instance.task.startExactTimeStamp.toString())
+        notify(instance.name, text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.instanceDateTime.timeStamp.long, style, true, false, instance.instanceDateTime.timeStamp.long.toString() + instance.task.startExactTimeStamp.toString())
     }
 
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {

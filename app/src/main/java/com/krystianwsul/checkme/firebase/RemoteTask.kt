@@ -134,8 +134,8 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
         remoteSchedules.remove(schedule)
     }
 
-    fun createRemoteInstanceRecord(remoteInstance: RemoteInstance, scheduleDateTime: DateTime, now: ExactTimeStamp): RemoteInstanceRecord {
-        val instanceJson = InstanceJson(null, null, null, null, null, null, null, now.long, null)
+    fun createRemoteInstanceRecord(remoteInstance: RemoteInstance, scheduleDateTime: DateTime): RemoteInstanceRecord {
+        val instanceJson = InstanceJson(null, null, null, null, null, null, null, null)
 
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 

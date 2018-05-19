@@ -175,7 +175,7 @@ class RemoteProject(private val domainFactory: DomainFactory, private val remote
             instanceMinute = null
         }
 
-        return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.hierarchyTime, localInstance.ordinal)
+        return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.ordinal)
     }
 
     fun copyLocalTaskHierarchy(localTaskHierarchy: LocalTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy {

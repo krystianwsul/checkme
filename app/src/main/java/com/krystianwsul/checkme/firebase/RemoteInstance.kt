@@ -252,22 +252,18 @@ class RemoteInstance : Instance {
         Assert.assertTrue(remoteInstanceRecord == null != (_scheduleDateTime == null))
         Assert.assertTrue(_taskId == null == (_scheduleDateTime == null))
 
-        val parentInstance = getParentInstance(now)
-        parentInstance?.createInstanceHierarchy(now)
+        getParentInstance(now)?.createInstanceHierarchy(now)
 
         if (remoteInstanceRecord == null)
-            createInstanceRecord(now)
+            createInstanceRecord()
     }
 
-    private fun createInstanceRecord(now: ExactTimeStamp) {
+    private fun createInstanceRecord() {
         val task = task
 
         val scheduleDateTime = scheduleDateTime
 
-        val remoteProjectFactory = domainFactory.remoteFactory
-        Assert.assertTrue(remoteProjectFactory != null)
-
-        remoteInstanceRecord = task.createRemoteInstanceRecord(this, scheduleDateTime, now)
+        remoteInstanceRecord = task.createRemoteInstanceRecord(this, scheduleDateTime)
 
         _taskId = null
         _scheduleDateTime = null

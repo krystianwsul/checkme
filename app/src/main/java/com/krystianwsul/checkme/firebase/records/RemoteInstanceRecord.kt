@@ -13,7 +13,7 @@ import junit.framework.Assert
 
 import java.util.regex.Pattern
 
-class RemoteInstanceRecord(create: Boolean, private val domainFactory: DomainFactory, private val remoteTaskRecord: RemoteTaskRecord, public override val createObject: InstanceJson, val scheduleKey: ScheduleKey) : RemoteRecord(create) {
+class RemoteInstanceRecord(create: Boolean, private val domainFactory: DomainFactory, private val remoteTaskRecord: RemoteTaskRecord, override val createObject: InstanceJson, val scheduleKey: ScheduleKey) : RemoteRecord(create) {
 
     companion object {
 
@@ -146,7 +146,7 @@ class RemoteInstanceRecord(create: Boolean, private val domainFactory: DomainFac
         if (instanceYear == createObject.instanceYear)
             return
 
-        createObject.setInstanceYear(instanceYear)
+        createObject.instanceYear = instanceYear
         addValue("$key/instanceYear", instanceYear)
     }
 
@@ -154,7 +154,7 @@ class RemoteInstanceRecord(create: Boolean, private val domainFactory: DomainFac
         if (instanceMonth == createObject.instanceMonth)
             return
 
-        createObject.setInstanceMonth(instanceMonth)
+        createObject.instanceMonth = instanceMonth
         addValue("$key/instanceMonth", instanceMonth)
     }
 
@@ -162,7 +162,7 @@ class RemoteInstanceRecord(create: Boolean, private val domainFactory: DomainFac
         if (instanceDay == createObject.instanceDay)
             return
 
-        createObject.setInstanceDay(instanceDay)
+        createObject.instanceDay = instanceDay
         addValue("$key/instanceDay", instanceDay)
     }
 
@@ -170,7 +170,7 @@ class RemoteInstanceRecord(create: Boolean, private val domainFactory: DomainFac
         if (ordinal == createObject.ordinal)
             return
 
-        createObject.setOrdinal(ordinal)
+        createObject.ordinal = ordinal
         addValue("$key/ordinal", ordinal)
     }
 }

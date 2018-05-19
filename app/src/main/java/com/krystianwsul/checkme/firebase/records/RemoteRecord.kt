@@ -14,7 +14,7 @@ abstract class RemoteRecord(protected val create: Boolean) {
     protected val update = if (create) null else mutableMapOf<String, Any?>()
     protected var updated = false
 
-    protected abstract val key: String
+    abstract val key: String
 
     abstract val createObject: Any
 

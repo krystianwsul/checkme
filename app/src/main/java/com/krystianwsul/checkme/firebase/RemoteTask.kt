@@ -47,23 +47,23 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
     override val remoteNonNullProject get() = remoteProject
 
     init {
-        remoteSchedules.addAll(remoteTaskRecord.mRemoteSingleScheduleRecords
+        remoteSchedules.addAll(remoteTaskRecord.remoteSingleScheduleRecords
                 .values
                 .map { SingleSchedule(domainFactory, RemoteSingleScheduleBridge(domainFactory, it)) })
 
-        remoteSchedules.addAll(remoteTaskRecord.mRemoteDailyScheduleRecords
+        remoteSchedules.addAll(remoteTaskRecord.remoteDailyScheduleRecords
                 .values
                 .map { WeeklySchedule(domainFactory, RemoteDailyScheduleBridge(domainFactory, it)) })
 
-        remoteSchedules.addAll(remoteTaskRecord.mRemoteWeeklyScheduleRecords
+        remoteSchedules.addAll(remoteTaskRecord.remoteWeeklyScheduleRecords
                 .values
                 .map { WeeklySchedule(domainFactory, RemoteWeeklyScheduleBridge(domainFactory, it)) })
 
-        remoteSchedules.addAll(remoteTaskRecord.mRemoteMonthlyDayScheduleRecords
+        remoteSchedules.addAll(remoteTaskRecord.remoteMonthlyDayScheduleRecords
                 .values
                 .map { MonthlyDaySchedule(domainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, it)) })
 
-        remoteSchedules.addAll(remoteTaskRecord.mRemoteMonthlyWeekScheduleRecords
+        remoteSchedules.addAll(remoteTaskRecord.remoteMonthlyWeekScheduleRecords
                 .values
                 .map { MonthlyWeekSchedule(domainFactory, RemoteMonthlyWeekScheduleBridge(domainFactory, it)) })
     }

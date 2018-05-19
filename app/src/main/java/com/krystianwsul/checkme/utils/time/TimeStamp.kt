@@ -1,25 +1,15 @@
 package com.krystianwsul.checkme.utils.time
 
-import android.os.Parcel
 import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import java.util.*
 
+@Parcelize
 class TimeStamp private constructor(val long: Long) : Comparable<TimeStamp>, Parcelable {
 
     companion object {
 
         val now get() = TimeStamp(Calendar.getInstance())
-
-        @JvmField
-        val CREATOR: Parcelable.Creator<TimeStamp> = object : Parcelable.Creator<TimeStamp> {
-
-            override fun createFromParcel(source: Parcel): TimeStamp {
-                val time = source.readLong()
-                return TimeStamp(time)
-            }
-
-            override fun newArray(size: Int): Array<TimeStamp?> = arrayOfNulls(size)
-        }
 
         fun fromMillis(millis: Long): TimeStamp {
             val calendar = Calendar.getInstance()
@@ -69,8 +59,4 @@ class TimeStamp private constructor(val long: Long) : Comparable<TimeStamp>, Par
     }
 
     fun toExactTimeStamp() = ExactTimeStamp(long)
-
-    override fun describeContents() = 0
-
-    override fun writeToParcel(dest: Parcel, flags: Int) = dest.writeLong(long)
 }

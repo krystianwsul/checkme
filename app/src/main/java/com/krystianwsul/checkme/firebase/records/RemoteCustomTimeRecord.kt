@@ -31,7 +31,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.name = value
-            addValue(key + "/name", value)
+            addValue("$key/name", value)
         }
 
     override var sundayHour: Int
@@ -41,7 +41,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.sundayHour = value
-            addValue(key + "/sundayHour", value)
+            addValue("$key/sundayHour", value)
         }
 
     override var sundayMinute: Int
@@ -51,7 +51,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.sundayMinute = value
-            addValue(key + "/sundayMinute", value)
+            addValue("$key/sundayMinute", value)
         }
 
     override var mondayHour: Int
@@ -61,7 +61,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.mondayHour = value
-            addValue(key + "/mondayHour", value)
+            addValue("$key/mondayHour", value)
         }
 
     override var mondayMinute: Int
@@ -71,7 +71,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.mondayMinute = minute
-            addValue(key + "/mondayMinute", minute)
+            addValue("$key/mondayMinute", minute)
         }
 
     override var tuesdayHour: Int
@@ -81,7 +81,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.tuesdayHour = hour
-            addValue(key + "/tuesdayHour", hour)
+            addValue("$key/tuesdayHour", hour)
         }
 
     override var tuesdayMinute: Int
@@ -91,7 +91,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.tuesdayMinute = minute
-            addValue(key + "/tuesdayMinute", minute)
+            addValue("$key/tuesdayMinute", minute)
         }
 
     override var wednesdayHour: Int
@@ -101,7 +101,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.wednesdayHour = hour
-            addValue(key + "/wednesdayHour", hour)
+            addValue("$key/wednesdayHour", hour)
         }
 
     override var wednesdayMinute: Int
@@ -111,7 +111,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.wednesdayMinute = minute
-            addValue(key + "/wednesdayMinute", minute)
+            addValue("$key/wednesdayMinute", minute)
         }
 
     override var thursdayHour: Int
@@ -121,7 +121,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.thursdayHour = hour
-            addValue(key + "/thursdayHour", hour)
+            addValue("$key/thursdayHour", hour)
         }
 
     override var thursdayMinute: Int
@@ -131,7 +131,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.thursdayMinute = minute
-            addValue(key + "/thursdayMinute", minute)
+            addValue("$key/thursdayMinute", minute)
         }
 
     override var fridayHour: Int
@@ -141,7 +141,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.fridayHour = hour
-            addValue(key + "/fridayHour", hour)
+            addValue("$key/fridayHour", hour)
         }
 
     override var fridayMinute: Int
@@ -151,7 +151,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.fridayMinute = minute
-            addValue(key + "/fridayMinute", minute)
+            addValue("$key/fridayMinute", minute)
         }
 
     override var saturdayHour: Int
@@ -161,7 +161,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.saturdayHour = hour
-            addValue(key + "/saturdayHour", hour)
+            addValue("$key/saturdayHour", hour)
         }
 
     override var saturdayMinute: Int
@@ -171,7 +171,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
                 return
 
             customTimeJson.saturdayMinute = minute
-            addValue(key + "/saturdayMinute", minute)
+            addValue("$key/saturdayMinute", minute)
         }
 
     val projectId get() = remoteProjectRecord.id
@@ -188,7 +188,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
         this.customTimeJson = customTimeJson
     }
 
-    public override fun getCreateObject() = customTimeJson
+    override val createObject get() = customTimeJson
 
-    override fun getKey() = remoteProjectRecord.key + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + CUSTOM_TIMES + "/" + id
+    override val key get() = remoteProjectRecord.key + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + CUSTOM_TIMES + "/" + id
 }

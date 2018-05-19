@@ -207,35 +207,35 @@ public class RemoteProjectRecord extends RemoteRecord {
     }
 
     @Override
-    void getValues(@NonNull Map<String, Object> values) {
-        Assert.assertTrue(!mDeleted);
-        Assert.assertTrue(!mCreated);
-        Assert.assertTrue(!mUpdated);
+    public void getValues(@NonNull Map<String, Object> values) {
+        Assert.assertTrue(!getDeleted());
+        Assert.assertTrue(!getCreated());
+        Assert.assertTrue(!getUpdated());
 
-        if (mDelete) {
+        if (getDelete()) {
             Log.e("asdf", "RemoteProjectRecord.getValues deleting " + this);
 
-            Assert.assertTrue(!mCreate);
-            Assert.assertTrue(mUpdate != null);
+            Assert.assertTrue(!getCreate());
+            Assert.assertTrue(getUpdate() != null);
 
-            mDeleted = true;
+            setDeleted(true);
             values.put(getKey(), null);
-        } else if (mCreate) {
+        } else if (getCreate()) {
             Log.e("asdf", "RemoteProjectRecord.getValues creating " + this);
 
-            Assert.assertTrue(mUpdate == null);
+            Assert.assertTrue(getUpdate() == null);
 
-            mCreated = true;
+            setCreated(true);
 
             values.put(getKey(), getCreateObject());
         } else {
-            Assert.assertTrue(mUpdate != null);
+            Assert.assertTrue(getUpdate() != null);
 
-            if (!mUpdate.isEmpty()) {
+            if (!getUpdate().isEmpty()) {
                 Log.e("asdf", "RemoteProjectRecord.getValues updating " + this);
 
-                mUpdated = true;
-                values.putAll(mUpdate);
+                setUpdated(true);
+                values.putAll(getUpdate());
             }
 
             for (RemoteTaskRecord remoteTaskRecord : mRemoteTaskRecords.values())

@@ -129,7 +129,7 @@ public class RemoteTaskRecord extends RemoteRecord {
     @NonNull
     @Override
     protected TaskJson getCreateObject() {
-        if (!mCreate) { // because of duplicate functionality when converting local task
+        if (!getCreate()) { // because of duplicate functionality when converting local task
             mTaskJson.setInstances(Stream.of(mRemoteInstanceRecords.entrySet())
                     .collect(Collectors.toMap(entry -> RemoteInstanceRecord.scheduleKeyToString(mDomainFactory, mRemoteProjectRecord.getId(), entry.getKey()), entry -> entry.getValue().getCreateObject())));
         }
@@ -266,35 +266,35 @@ public class RemoteTaskRecord extends RemoteRecord {
     }
 
     @Override
-    void getValues(@NonNull Map<String, Object> values) {
-        Assert.assertTrue(!mDeleted);
-        Assert.assertTrue(!mCreated);
-        Assert.assertTrue(!mUpdated);
+    public void getValues(@NonNull Map<String, Object> values) {
+        Assert.assertTrue(!getDeleted());
+        Assert.assertTrue(!getCreated());
+        Assert.assertTrue(!getUpdated());
 
-        if (mDelete) {
+        if (getDelete()) {
             Log.e("asdf", "RemoteTaskRecord.getValues deleting " + this);
 
-            Assert.assertTrue(!mCreate);
-            Assert.assertTrue(mUpdate != null);
+            Assert.assertTrue(!getCreate());
+            Assert.assertTrue(getUpdate() != null);
 
-            mDeleted = true;
+            setDeleted(true);
             values.put(getKey(), null);
-        } else if (mCreate) {
+        } else if (getCreate()) {
             Log.e("asdf", "RemoteTaskRecord.getValues creating " + this);
 
-            Assert.assertTrue(mUpdate == null);
+            Assert.assertTrue(getUpdate() == null);
 
-            mCreated = true;
+            setCreated(true);
 
             values.put(getKey(), getCreateObject());
         } else {
-            Assert.assertTrue(mUpdate != null);
+            Assert.assertTrue(getUpdate() != null);
 
-            if (!mUpdate.isEmpty()) {
+            if (!getUpdate().isEmpty()) {
                 Log.e("asdf", "RemoteTaskRecord.getValues updating " + this);
 
-                mUpdated = true;
-                values.putAll(mUpdate);
+                setUpdated(true);
+                values.putAll(getUpdate());
             }
 
             for (RemoteInstanceRecord remoteInstanceRecord : mRemoteInstanceRecords.values())
@@ -333,15 +333,6 @@ public class RemoteTaskRecord extends RemoteRecord {
 
         mRemoteSingleScheduleRecords.put(remoteSingleScheduleRecord.getId(), remoteSingleScheduleRecord);
         return remoteSingleScheduleRecord;
-    }
-
-    @NonNull
-    public RemoteDailyScheduleRecord newRemoteDailyScheduleRecord(@NonNull ScheduleWrapper scheduleWrapper) {
-        RemoteDailyScheduleRecord remoteDailyScheduleRecord = new RemoteDailyScheduleRecord(this, scheduleWrapper);
-        Assert.assertTrue(!mRemoteDailyScheduleRecords.containsKey(remoteDailyScheduleRecord.getId()));
-
-        mRemoteDailyScheduleRecords.put(remoteDailyScheduleRecord.getId(), remoteDailyScheduleRecord);
-        return remoteDailyScheduleRecord;
     }
 
     @NonNull

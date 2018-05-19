@@ -26,7 +26,7 @@ class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<Data
     }
 
     fun save() {
-        val values = HashMap<String, Any>()
+        val values = HashMap<String, Any?>()
 
         remoteProjectRecords.values.forEach { it.getValues(values) }
 

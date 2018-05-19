@@ -94,9 +94,9 @@ object DatabaseWrapper {
                 .equalTo(true)!!
     }
 
-    fun updateRecords(values: Map<String, Any>) = rootReference.child(RECORDS_KEY).updateChildren(values)!!
+    fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)!!
 
-    fun updateFriends(values: Map<String, Any>) = rootReference.child(USERS_KEY).updateChildren(values)!!
+    fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)!!
 
     fun getUserQuery(userInfo: UserInfo): Query {
         val key = userInfo.key

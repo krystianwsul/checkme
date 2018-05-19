@@ -14,7 +14,7 @@ class RemoteFriendManager(children: Iterable<DataSnapshot>) {
     val remoteRootUserRecords = children.map { RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!) }.associateBy { it.id }
 
     fun save() {
-        val values = HashMap<String, Any>()
+        val values = HashMap<String, Any?>()
 
         remoteRootUserRecords.values.forEach { it.getValues(values) }
 

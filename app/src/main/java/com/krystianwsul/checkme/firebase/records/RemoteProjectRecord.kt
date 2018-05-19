@@ -27,11 +27,11 @@ class RemoteProjectRecord : RemoteRecord {
 
     val remoteUserRecords = HashMap<String, RemoteProjectUserRecord>()
 
-    public override val key get() = id
+    override val key get() = id
 
     override val createObject: JsonWrapper
         get() {
-            val projectJson = jsonWrapper.projectJson!!
+            val projectJson = jsonWrapper.projectJson
 
             projectJson.tasks = remoteTaskRecords.values.associateBy({ it.id }, { it.createObject })
 
@@ -44,7 +44,7 @@ class RemoteProjectRecord : RemoteRecord {
             return jsonWrapper
         }
 
-    private val projectJson get() = jsonWrapper.projectJson!!
+    private val projectJson get() = jsonWrapper.projectJson
 
     var name: String
         get() = projectJson.name

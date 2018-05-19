@@ -34,7 +34,7 @@ class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapp
     fun removeFriendOf(friendId: String) {
         Assert.assertTrue(!TextUtils.isEmpty(friendId))
 
-        val friendOf = createObject.friendOf!!
+        val friendOf = createObject.friendOf
         Assert.assertTrue(friendOf.containsKey(friendId))
 
         friendOf.remove(friendId)

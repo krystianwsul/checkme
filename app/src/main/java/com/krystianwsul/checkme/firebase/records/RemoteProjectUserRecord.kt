@@ -1,11 +1,8 @@
 package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
-
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.firebase.json.UserJson
-import com.krystianwsul.checkme.utils.Utils
-
 import junit.framework.Assert
 
 class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: RemoteProjectRecord, override val createObject: UserJson) : RemoteRecord(create) {
@@ -22,9 +19,6 @@ class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: 
     var name: String
         get() = createObject.name
         set(name) {
-            if (name == createObject.name)
-                return
-
             createObject.name = name
             addValue("$key/name", name)
         }
@@ -34,12 +28,7 @@ class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: 
     fun setToken(token: String?, uuid: String) {
         Assert.assertTrue(!TextUtils.isEmpty(uuid))
 
-        val tokens = createObject.tokens
-
-        if (Utils.stringEquals(tokens[uuid], token))
-            return
-
-        createObject.addToken(token, uuid)
+        createObject.tokens[uuid] = token
         addValue("$key/tokens/$uuid", token)
     }
 }

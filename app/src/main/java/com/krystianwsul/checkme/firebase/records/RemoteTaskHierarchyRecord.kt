@@ -45,12 +45,12 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
     fun setEndTime(endTime: Long) {
         Assert.assertTrue(createObject.endTime == null)
 
-        createObject.setEndTime(endTime)
+        createObject.endTime = endTime
         addValue("$key/endTime", endTime)
     }
 
     fun setOrdinal(ordinal: Double) {
-        createObject.setOrdinal(ordinal)
+        createObject.ordinal = ordinal
         addValue("$key/ordinal", ordinal)
     }
 }

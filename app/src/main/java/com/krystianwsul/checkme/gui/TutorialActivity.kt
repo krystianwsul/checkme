@@ -1,13 +1,20 @@
 package com.krystianwsul.checkme.gui
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentStatePagerAdapter
 import com.jakewharton.rxbinding2.view.clicks
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_tutorial.*
 
 class TutorialActivity : AbstractActivity() {
+
+    companion object {
+
+        fun newIntent() = Intent(MyApplication.instance, TutorialActivity::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,7 +22,7 @@ class TutorialActivity : AbstractActivity() {
 
         tutorialPager.adapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
 
-            override fun getCount() = 3
+            override fun getCount() = 4
 
             override fun getItem(position: Int) = TutorialFragment.newInstance(position)
         }

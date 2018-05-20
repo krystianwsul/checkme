@@ -34,6 +34,12 @@ class TutorialFragment : AbstractFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tutorialText.text = "position $position"
+        tutorialText.setText(when (position) {
+            0 -> R.string.tutorial1
+            1 -> R.string.tutorial2
+            2 -> R.string.tutorial3
+            3 -> R.string.tutorial4
+            else -> throw IllegalArgumentException()
+        })
     }
 }

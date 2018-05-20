@@ -33,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.jakewharton.rxbinding2.widget.textChanges
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -68,6 +69,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         var userInfo: UserInfo? = null
             private set
+
+        fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
     }
 
     private lateinit var taskListFragment: TaskListFragment

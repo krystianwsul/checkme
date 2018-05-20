@@ -67,4 +67,9 @@
     <string name="projects_empty">Dodaj projekt klikając w plusa na dole.</string>
     <string name="parentProject">Projekt</string>
     <string name="showInstances">Pokaż przypomnienia</string>
+    <string name="tutorial1">Zacznij od utworzenia zadania.  Zadanie może mieć nazwę, notatki, i podzadania.</string>
+    <string name="tutorial2">Możesz również dodać przypomnienia do zadania, żeby otrzymać powiadomienie o nim o danej porze.  Możesz otrzymać powiadomienie raz, w pewne dni tygodnia, lub w pewien dzień każdego miesiąca.</string>
+    <string name="tutorial3">Możesz ustawić powadomienie na konkretną godzinę.  Możesz również utworzyć porę dnia jako skrót, jeśli często masz coś do zrobienia o pewnej porze dnia.</string>
+    <string name="tutorial4">Zaloguj się do konta Google żeby dzielić się zadaniami z innymi użytkownikami.  Zacznij od wyszukania użytkowników po adresie e-mailowym, żeby dodać ich jako znajomych.  Następnie, utwórz projekt, i dodaj do niegogo znajomych.  Potem, przy tworzeniu zadania, ustaw że to zadanie należy do danego projektu.</string>
+    <string name="tutorial">Przewodnik</string>
 </resources>

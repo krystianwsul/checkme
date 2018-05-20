@@ -14,23 +14,27 @@ class TutorialActivity : AbstractActivity() {
 
     companion object {
 
+        private const val FORCE_KEY = "force"
+
         private const val TUTORIAL_SHOWN_KEY = "tutorialShown"
 
-        fun newIntent() = Intent(MyApplication.instance, TutorialActivity::class.java)
+        fun newIntent() = Intent(MyApplication.instance, TutorialActivity::class.java).apply { putExtra(FORCE_KEY, true) }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        if (!intent.hasExtra(FORCE_KEY)) {
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-        if (sharedPreferences.getBoolean(TUTORIAL_SHOWN_KEY, false)) {
-            startMain()
-            return
-        } else {
-            sharedPreferences.edit()
-                    .putBoolean(TUTORIAL_SHOWN_KEY, true)
-                    .apply()
+            if (sharedPreferences.getBoolean(TUTORIAL_SHOWN_KEY, false)) {
+                startMain()
+                return
+            } else {
+                sharedPreferences.edit()
+                        .putBoolean(TUTORIAL_SHOWN_KEY, true)
+                        .apply()
+            }
         }
 
         setContentView(R.layout.activity_tutorial)

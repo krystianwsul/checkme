@@ -22,7 +22,8 @@
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
             android:name=".gui.MainActivity"
-            android:theme="@style/AppTheme.NavDrawer"/>
+            android:theme="@style/AppTheme.NavDrawer"
+            android:launchMode="singleTask"/>
         <activity android:name=".gui.tasks.ShowTaskActivity"/>
         <activity android:name=".gui.instances.ShowGroupActivity"/>
         <activity
@@ -116,13 +117,10 @@
         </service>
 
         <activity android:name=".gui.TutorialActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-
         </activity>
 
     </application>

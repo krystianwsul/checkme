@@ -176,6 +176,9 @@ class RemoteTaskRecord : RemoteRecord {
     fun setEndTime(endTime: Long) {
         Assert.assertTrue(taskJson.endTime == null)
 
+        if (endTime == taskJson.endTime)
+            return
+
         taskJson.endTime = endTime
         addValue("$key/endTime", endTime)
     }

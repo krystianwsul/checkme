@@ -19,6 +19,9 @@ class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: 
     var name: String
         get() = createObject.name
         set(name) {
+            if (name == createObject.name)
+                return
+
             createObject.name = name
             addValue("$key/name", name)
         }
@@ -27,6 +30,9 @@ class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: 
 
     fun setToken(token: String?, uuid: String) {
         Assert.assertTrue(!TextUtils.isEmpty(uuid))
+
+        if (token == createObject.tokens[uuid])
+            return
 
         createObject.tokens[uuid] = token
         addValue("$key/tokens/$uuid", token)

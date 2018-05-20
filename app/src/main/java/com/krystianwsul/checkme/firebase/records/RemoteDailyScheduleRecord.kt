@@ -21,6 +21,9 @@ class RemoteDailyScheduleRecord(id: String, remoteTaskRecord: RemoteTaskRecord, 
     fun setEndTime(endTime: Long) {
         Assert.assertTrue(dailyScheduleJson.endTime == null)
 
+        if (endTime == dailyScheduleJson.endTime)
+            return
+
         dailyScheduleJson.endTime = endTime
         addValue("$key/dailyScheduleJson/endTime", endTime)
     }

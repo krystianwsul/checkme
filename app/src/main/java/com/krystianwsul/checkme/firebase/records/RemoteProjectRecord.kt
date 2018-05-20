@@ -127,6 +127,9 @@ class RemoteProjectRecord : RemoteRecord {
     fun setEndTime(endTime: Long) {
         check(projectJson.endTime == null)
 
+        if (endTime == projectJson.endTime)
+            return
+
         projectJson.endTime = endTime
         addValue("$id/$PROJECT_JSON/endTime", endTime)
     }

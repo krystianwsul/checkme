@@ -30,6 +30,9 @@ class RemoteSingleScheduleRecord : RemoteScheduleRecord {
     fun setEndTime(endTime: Long) {
         Assert.assertTrue(singleScheduleJson.endTime == null)
 
+        if (endTime == singleScheduleJson.endTime)
+            return
+
         singleScheduleJson.endTime = endTime
         addValue("$key/singleScheduleJson/endTime", endTime)
     }

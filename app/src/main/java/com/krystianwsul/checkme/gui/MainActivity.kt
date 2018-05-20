@@ -354,6 +354,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             // todo add spinner to grouplistfragment padding
                             startActivityForResult(Auth.GoogleSignInApi.getSignInIntent(googleApiClient), RC_SIGN_IN)
                         }
+                        R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newIntent())
                         R.id.main_drawer_debug -> {
                             drawerTaskListener?.let { removeDrawerListener(it) }
                             drawerTaskListener = null

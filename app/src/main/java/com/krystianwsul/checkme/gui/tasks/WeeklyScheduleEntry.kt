@@ -48,10 +48,10 @@ class WeeklyScheduleEntry : ScheduleEntry {
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.WEEKLY)
+        Assert.assertTrue(scheduleDialogData.scheduleType == ScheduleType.WEEKLY)
 
-        daysOfWeek = scheduleDialogData.mDaysOfWeek
-        timePair = scheduleDialogData.mTimePairPersist.timePair
+        daysOfWeek = scheduleDialogData.daysOfWeek
+        timePair = scheduleDialogData.timePairPersist.timePair
     }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {

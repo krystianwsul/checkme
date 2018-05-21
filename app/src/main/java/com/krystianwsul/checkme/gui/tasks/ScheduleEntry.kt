@@ -12,7 +12,7 @@ abstract class ScheduleEntry(var error: String?) : Parcelable {
     companion object {
 
         fun fromScheduleDialogData(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData): ScheduleEntry {
-            return when (scheduleDialogData.mScheduleType) {
+            return when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> SingleScheduleEntry(scheduleDialogData)
                 ScheduleType.WEEKLY -> WeeklyScheduleEntry(scheduleDialogData)
                 ScheduleType.MONTHLY_DAY -> MonthlyDayScheduleEntry(scheduleDialogData)

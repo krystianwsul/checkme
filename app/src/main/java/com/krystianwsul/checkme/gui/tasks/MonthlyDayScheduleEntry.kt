@@ -62,12 +62,12 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_DAY)
-        Assert.assertTrue(scheduleDialogData.mMonthlyDay)
+        Assert.assertTrue(scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY)
+        Assert.assertTrue(scheduleDialogData.monthlyDay)
 
-        monthDayNumber = scheduleDialogData.mMonthDayNumber
-        beginningOfMonth = scheduleDialogData.mBeginningOfMonth
-        timePair = scheduleDialogData.mTimePairPersist.timePair
+        monthDayNumber = scheduleDialogData.monthDayNumber
+        beginningOfMonth = scheduleDialogData.beginningOfMonth
+        timePair = scheduleDialogData.timePairPersist.timePair
     }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {

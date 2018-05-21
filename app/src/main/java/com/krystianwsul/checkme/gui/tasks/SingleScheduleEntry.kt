@@ -71,10 +71,10 @@ class SingleScheduleEntry : ScheduleEntry {
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.mScheduleType == ScheduleType.SINGLE)
+        Assert.assertTrue(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
-        mDate = scheduleDialogData.mDate
-        mTimePair = scheduleDialogData.mTimePairPersist.timePair
+        mDate = scheduleDialogData.date
+        mTimePair = scheduleDialogData.timePairPersist.timePair
     }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {

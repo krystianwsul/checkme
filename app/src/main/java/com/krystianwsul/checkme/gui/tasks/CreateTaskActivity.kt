@@ -138,10 +138,10 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         override fun onScheduleDialogResult(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
             checkNotNull(mData)
 
-            if (scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_DAY) {
-                check(scheduleDialogData.mMonthlyDay)
-            } else if (scheduleDialogData.mScheduleType == ScheduleType.MONTHLY_WEEK) {
-                check(!scheduleDialogData.mMonthlyDay)
+            if (scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
+                check(scheduleDialogData.monthlyDay)
+            } else if (scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
+                check(!scheduleDialogData.monthlyDay)
             }
 
             if (mHourMinutePickerPosition == null) {

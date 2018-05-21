@@ -147,9 +147,9 @@ class DomainFactoryTest {
         val nextDayBeforeExactTimeStamp = ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMilli)
 
         val irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp)
-        Assert.assertTrue(irrelevantBefore.mLocalCustomTimes.isEmpty())
-        Assert.assertTrue(irrelevantBefore.mTasks.isEmpty())
-        Assert.assertTrue(irrelevantBefore.mInstances.isEmpty())
+        Assert.assertTrue(irrelevantBefore.localCustomTimes.isEmpty())
+        Assert.assertTrue(irrelevantBefore.tasks.isEmpty())
+        Assert.assertTrue(irrelevantBefore.instances.isEmpty())
 
         Assert.assertTrue(rootTask.getOldestVisible() == startDate)
 
@@ -161,9 +161,9 @@ class DomainFactoryTest {
         val nextDayAfterExactTimeStamp = ExactTimeStamp(nextDayBeforeDate, nextDayAfterHourMilli)
 
         val irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp)
-        Assert.assertTrue(irrelevantAfter.mLocalCustomTimes.isEmpty())
-        Assert.assertTrue(irrelevantAfter.mTasks.size == 1)
-        Assert.assertTrue(irrelevantAfter.mInstances.size == 1)
+        Assert.assertTrue(irrelevantAfter.localCustomTimes.isEmpty())
+        Assert.assertTrue(irrelevantAfter.tasks.size == 1)
+        Assert.assertTrue(irrelevantAfter.instances.size == 1)
 
         Assert.assertTrue(domainFactory.getMainData(nextDayAfterExactTimeStamp, mContext).childTaskDatas.isEmpty())
     }
@@ -251,9 +251,9 @@ class DomainFactoryTest {
         val nextDayBeforeExactTimeStamp = ExactTimeStamp(nextDayBeforeDate, nextDayBeforeHourMilli)
 
         val irrelevantBefore = domainFactory.setIrrelevant(nextDayBeforeExactTimeStamp)
-        Assert.assertTrue(irrelevantBefore.mLocalCustomTimes.isEmpty())
-        Assert.assertTrue(irrelevantBefore.mTasks.isEmpty())
-        Assert.assertTrue(irrelevantBefore.mInstances.isEmpty())
+        Assert.assertTrue(irrelevantBefore.localCustomTimes.isEmpty())
+        Assert.assertTrue(irrelevantBefore.tasks.isEmpty())
+        Assert.assertTrue(irrelevantBefore.instances.isEmpty())
 
         Assert.assertTrue(childTaskDone.getOldestVisible() == startDate)
         Assert.assertTrue(rootTask.getOldestVisible() == startDate)
@@ -266,9 +266,9 @@ class DomainFactoryTest {
         val nextDayAfterExactTimeStamp = ExactTimeStamp(nextDayBeforeDate, nextDayAfterHourMilli)
 
         val irrelevantAfter = domainFactory.setIrrelevant(nextDayAfterExactTimeStamp)
-        Assert.assertTrue(irrelevantAfter.mLocalCustomTimes.isEmpty())
-        Assert.assertTrue(irrelevantAfter.mTasks.size == 4)
-        Assert.assertTrue(irrelevantAfter.mInstances.size == 3)
+        Assert.assertTrue(irrelevantAfter.localCustomTimes.isEmpty())
+        Assert.assertTrue(irrelevantAfter.tasks.size == 4)
+        Assert.assertTrue(irrelevantAfter.instances.size == 3)
 
         Assert.assertTrue(domainFactory.getMainData(nextDayAfterExactTimeStamp, mContext).childTaskDatas.isEmpty())
     }
@@ -293,8 +293,8 @@ class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getMainData(startExactTimeStamp, mContext).childTaskDatas.size == 2)
 
         val irrelevantFirstDay = domainFactory.setIrrelevant(ExactTimeStamp(startDate, HourMilli(3, 0, 0, 0)))
-        Assert.assertTrue(irrelevantFirstDay.mTasks.isEmpty())
-        Assert.assertTrue(irrelevantFirstDay.mInstances.isEmpty())
+        Assert.assertTrue(irrelevantFirstDay.tasks.isEmpty())
+        Assert.assertTrue(irrelevantFirstDay.instances.isEmpty())
 
         Assert.assertTrue(singleTask.getOldestVisible() == startDate)
         Assert.assertTrue(noReminderTask.getOldestVisible() == startDate)
@@ -302,15 +302,15 @@ class DomainFactoryTest {
         val nextDay = Date(2016, 1, 2)
 
         val irrelevantNextDayBefore = domainFactory.setIrrelevant(ExactTimeStamp(nextDay, HourMilli(3, 0, 0, 0)))
-        Assert.assertTrue(irrelevantNextDayBefore.mTasks.isEmpty())
-        Assert.assertTrue(irrelevantNextDayBefore.mInstances.isEmpty())
+        Assert.assertTrue(irrelevantNextDayBefore.tasks.isEmpty())
+        Assert.assertTrue(irrelevantNextDayBefore.instances.isEmpty())
 
         Assert.assertTrue(singleTask.getOldestVisible() == startDate)
         Assert.assertTrue(noReminderTask.getOldestVisible() == nextDay)
 
         domainFactory.updateChildTask(mContext, ExactTimeStamp(nextDay, HourMilli(4, 0, 0, 0)), 0, SaveService.Source.GUI, noReminderTask.taskKey, noReminderTask.name, singleTask.taskKey, noReminderTask.note)
-        Assert.assertTrue(irrelevantNextDayBefore.mTasks.isEmpty())
-        Assert.assertTrue(irrelevantNextDayBefore.mInstances.isEmpty())
+        Assert.assertTrue(irrelevantNextDayBefore.tasks.isEmpty())
+        Assert.assertTrue(irrelevantNextDayBefore.instances.isEmpty())
 
         Assert.assertTrue(singleTask.getOldestVisible() == startDate)
         Assert.assertTrue(noReminderTask.getOldestVisible() == nextDay)
@@ -451,8 +451,8 @@ class DomainFactoryTest {
 
         run {
             val irrelevant = domainFactory.updateNotificationsTick(mContext!!, ExactTimeStamp(day1, hour12.toHourMilli()), SaveService.Source.GUI, false)
-            Assert.assertTrue(irrelevant.mTasks.isEmpty())
-            Assert.assertTrue(irrelevant.mInstances.isEmpty())
+            Assert.assertTrue(irrelevant.tasks.isEmpty())
+            Assert.assertTrue(irrelevant.instances.isEmpty())
         }
 
         domainFactory.updateChildTask(mContext, ExactTimeStamp(day1, hour13.toHourMilli()), dataId, SaveService.Source.GUI, childTask.taskKey, childTask.name, secondTask.taskKey, childTask.note)
@@ -500,8 +500,8 @@ class DomainFactoryTest {
 
         run {
             val irrelevant = domainFactory.updateNotificationsTick(mContext!!, ExactTimeStamp(day2, hour16.toHourMilli()), SaveService.Source.GUI, false)
-            Assert.assertTrue(irrelevant.mTasks.isEmpty())
-            Assert.assertTrue(irrelevant.mInstances.size == 2)
+            Assert.assertTrue(irrelevant.tasks.isEmpty())
+            Assert.assertTrue(irrelevant.instances.size == 2)
         }
 
         Assert.assertTrue(domainFactory.getMainData(ExactTimeStamp(day2, hour17.toHourMilli()), mContext).childTaskDatas.size == 1)

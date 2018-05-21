@@ -3043,31 +3043,6 @@ public class DomainFactory {
         return dataWrapper;
     }
 
-    static class Irrelevant {
-        @NonNull
-        final List<LocalCustomTime> mLocalCustomTimes;
-
-        @NonNull
-        final List<Task> mTasks;
-
-        @NonNull
-        final List<Instance> mInstances;
-
-        @Nullable
-        final List<RemoteCustomTime> mRemoteCustomTimes;
-
-        @Nullable
-        final List<RemoteProject> mRemoteProjects;
-
-        Irrelevant(@NonNull List<LocalCustomTime> customTimes, @NonNull List<Task> tasks, @NonNull List<Instance> instances, @Nullable List<RemoteCustomTime> remoteCustomTimes, @Nullable List<RemoteProject> remoteProjects) {
-            mLocalCustomTimes = customTimes;
-            mTasks = tasks;
-            mInstances = instances;
-            mRemoteCustomTimes = remoteCustomTimes;
-            mRemoteProjects = remoteProjects;
-        }
-    }
-
     private class TaskRelevance {
         @NonNull
         private final Task mTask;

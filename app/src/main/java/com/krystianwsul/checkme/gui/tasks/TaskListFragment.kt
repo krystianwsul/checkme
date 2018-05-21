@@ -323,10 +323,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val selected = treeViewAdapter!!.selectedNodes
 
             selectedTaskKeys = if (selected.isEmpty()) {
-                check(!selectionCallback.hasActionMode())
+                check(!selectionCallback.hasActionMode)
                 null
             } else {
-                check(selectionCallback.hasActionMode())
+                check(selectionCallback.hasActionMode)
                 selected.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey }
             }
 
@@ -377,7 +377,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 val selected = treeViewAdapter!!.selectedNodes
 
                 if (!selected.isEmpty()) {
-                    check(selectionCallback.hasActionMode())
+                    check(selectionCallback.hasActionMode)
 
                     val taskKeys = ArrayList(selected.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey })
                     check(!taskKeys.isEmpty())
@@ -395,9 +395,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    fun selectAll() {
-        treeViewAdapter!!.selectAll()
-    }
+    fun selectAll() = treeViewAdapter!!.selectAll()
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         taskListFragmentFab = floatingActionButton
@@ -414,7 +412,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private fun updateFabVisibility() {
         taskListFragmentFab?.run {
-            if (dataId != null && !selectionCallback.hasActionMode()) {
+            if (dataId != null && !selectionCallback.hasActionMode) {
                 show()
             } else {
                 hide()
@@ -505,7 +503,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             treeNodeCollection.remove(treeNode)
         }
 
-        override fun hasActionMode() = taskListFragment.selectionCallback.hasActionMode()
+        override val hasActionMode get() = taskListFragment.selectionCallback.hasActionMode
 
         override fun incrementSelected() {
             taskListFragment.selectionCallback.incrementSelected()

@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.friends
 
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Parcel
 import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.content.ContextCompat
@@ -25,6 +24,7 @@ import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.loaders.ShowProjectLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import junit.framework.Assert
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
 
@@ -238,7 +238,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         if (friendListFab == null)
             return
 
-        if (data != null && !selectionCallback.hasActionMode()) {
+        if (data != null && !selectionCallback.hasActionMode) {
             friendListFab!!.show()
         } else {
             friendListFab!!.hide()
@@ -327,7 +327,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             }
 
             friendHolder.itemView.setOnClickListener {
-                if (selectionCallback.hasActionMode())
+                if (selectionCallback.hasActionMode)
                     friendHolder.onLongClick()
             }
         }
@@ -377,33 +377,6 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    class SaveState(val addedIds: Set<String>, val removedIds: Set<String>, val selectedIds: Set<String>) : Parcelable {
-
-        companion object {
-
-            val CREATOR: Parcelable.Creator<SaveState> = object : Parcelable.Creator<SaveState> {
-                override fun createFromParcel(parcel: Parcel): SaveState {
-                    val addedIds = parcel.createStringArrayList()!!
-
-                    val removedIds = parcel.createStringArrayList()!!
-
-                    val selectedIds = parcel.createStringArrayList()!!
-
-                    return SaveState(HashSet(addedIds), HashSet(removedIds), HashSet(selectedIds))
-                }
-
-                override fun newArray(size: Int): Array<SaveState?> = arrayOfNulls(size)
-            }
-        }
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {
-            dest.run {
-                writeStringList(ArrayList(addedIds))
-                writeStringList(ArrayList(removedIds))
-                writeStringList(ArrayList(selectedIds))
-            }
-        }
-
-        override fun describeContents() = 0
-    }
+    @Parcelize
+    class SaveState(val addedIds: Set<String>, val removedIds: Set<String>, val selectedIds: Set<String>) : Parcelable
 }

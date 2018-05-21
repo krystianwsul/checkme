@@ -169,7 +169,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
 
     private fun updateFabVisibility() {
         friendListFab?.run {
-            if (data != null && !selectionCallback.hasActionMode()) {
+            if (data != null && !selectionCallback.hasActionMode) {
                 show()
             } else {
                 hide()
@@ -221,7 +221,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
                     }
 
                     setOnClickListener {
-                        if (selectionCallback.hasActionMode())
+                        if (selectionCallback.hasActionMode)
                             onLongClick()
                     }
                 }
@@ -239,7 +239,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
         }
 
         fun selectAll() {
-            check(!selectionCallback.hasActionMode())
+            check(!selectionCallback.hasActionMode)
 
             userDataWrappers.filterNot { it.selected }.forEach { it.toggleSelect() }
         }

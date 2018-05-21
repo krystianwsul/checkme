@@ -588,7 +588,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         if (mTreeViewAdapter != null) {
             outState.putParcelable(EXPANSION_STATE_KEY, (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState)
 
-            if (mSelectionCallback.hasActionMode()) {
+            if (mSelectionCallback.hasActionMode) {
                 val instanceDatas = nodesToInstanceDatas(mTreeViewAdapter!!.selectedNodes)
                 Assert.assertTrue(instanceDatas.isNotEmpty())
 
@@ -623,10 +623,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
             val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
 
             mSelectedNodes = if (instanceKeys.isEmpty()) {
-                Assert.assertTrue(!mSelectionCallback.hasActionMode())
+                Assert.assertTrue(!mSelectionCallback.hasActionMode)
                 null
             } else {
-                Assert.assertTrue(mSelectionCallback.hasActionMode())
+                Assert.assertTrue(mSelectionCallback.hasActionMode)
                 instanceKeys
             }
         }
@@ -802,7 +802,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         if (mFloatingActionButton == null)
             return
 
-        if (mDataWrapper != null && !mSelectionCallback.hasActionMode() && showPadding()) {
+        if (mDataWrapper != null && !mSelectionCallback.hasActionMode && showPadding()) {
             mFloatingActionButton!!.show()
         } else {
             mFloatingActionButton!!.hide()
@@ -823,7 +823,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         companion object {
 
-            val TYPE_GROUP = 0
+            const val TYPE_GROUP = 0
 
             fun getAdapter(groupListFragment: GroupListFragment, dataId: Int, customTimeDatas: List<CustomTimeData>, useGroups: Boolean, showFab: Boolean, instanceDatas: Collection<InstanceData>, expansionState: GroupListFragment.ExpansionState?, selectedNodes: ArrayList<InstanceKey>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
                 val groupAdapter = GroupAdapter(groupListFragment, dataId, customTimeDatas, showFab)
@@ -907,7 +907,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             return GroupHolder(groupRow, groupRowContainer, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator)
         }
 
-        override fun hasActionMode() = mGroupListFragment.mSelectionCallback.hasActionMode()
+        override val hasActionMode get() = mGroupListFragment.mSelectionCallback.hasActionMode
 
         override fun incrementSelected() {
             mGroupListFragment.mSelectionCallback.incrementSelected()

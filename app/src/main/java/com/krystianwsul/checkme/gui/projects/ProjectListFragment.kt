@@ -195,7 +195,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         if (projectListFab == null)
             return
 
-        if (dataId != null && !selectionCallback.hasActionMode()) {
+        if (dataId != null && !selectionCallback.hasActionMode) {
             projectListFab!!.show()
         } else {
             projectListFab!!.hide()
@@ -233,7 +233,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = Holder(activity!!.layoutInflater.inflate(R.layout.row_project, parent, false)!!)
 
-        override fun hasActionMode() = selectionCallback.hasActionMode()
+        override val hasActionMode get() = selectionCallback.hasActionMode
 
         override fun incrementSelected() {
             selectionCallback.incrementSelected()

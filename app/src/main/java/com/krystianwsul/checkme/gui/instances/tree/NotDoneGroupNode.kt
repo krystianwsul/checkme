@@ -154,13 +154,13 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         return if (singleInstance()) {
             val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
 
-            if (singleInstanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
+            if (singleInstanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
                 null
             } else {
                 Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
             }
         } else {
-            if (groupListFragment.mSelectionCallback.hasActionMode() && treeNode.hasSelectedDescendants()) {
+            if (groupListFragment.mSelectionCallback.hasActionMode && treeNode.hasSelectedDescendants()) {
                 null
             } else {
                 Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
@@ -170,7 +170,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     override val checkBoxVisibility
         get() = if (singleInstance()) {
-        if (groupListFragment.mSelectionCallback.hasActionMode()) {
+            if (groupListFragment.mSelectionCallback.hasActionMode) {
             View.INVISIBLE
         } else {
             View.VISIBLE
@@ -191,7 +191,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         Assert.assertTrue(singleInstance())
 
-        Assert.assertTrue(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode())
+            Assert.assertTrue(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode)
 
         return View.OnClickListener {
             it.setOnClickListener(null)
@@ -454,7 +454,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             get(): Pair<Int, View.OnClickListener>? {
             val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
 
-            return if (instanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode() && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
+                return if (instanceData.children.isEmpty() || groupListFragment.mSelectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
                 null
             } else {
                 Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
@@ -462,7 +462,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
 
         override val checkBoxVisibility
-            get() = if (groupListFragment.mSelectionCallback.hasActionMode()) {
+            get() = if (groupListFragment.mSelectionCallback.hasActionMode) {
             View.INVISIBLE
         } else {
             View.VISIBLE
@@ -476,7 +476,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             Assert.assertTrue(notDoneGroupTreeNode.isExpanded)
 
             val groupAdapter = parentNodeCollection.groupAdapter
-            Assert.assertTrue(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode())
+                Assert.assertTrue(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode)
 
             return View.OnClickListener {
                 it.setOnClickListener(null)

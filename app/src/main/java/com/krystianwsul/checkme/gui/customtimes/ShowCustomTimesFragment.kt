@@ -177,7 +177,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
 
     private fun updateFabVisibility() {
         showTimesFab?.let {
-            if (data != null && !selectionCallback.hasActionMode()) {
+            if (data != null && !selectionCallback.hasActionMode) {
                 it.show()
             } else {
                 it.hide()
@@ -210,7 +210,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
         }
 
         fun selectAll() {
-            Assert.assertTrue(!selectionCallback.hasActionMode())
+            Assert.assertTrue(!selectionCallback.hasActionMode)
 
             customTimeWrappers.filterNot { it.selected }.forEach { it.toggleSelect() }
         }
@@ -242,7 +242,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
                     }
 
                     setOnClickListener {
-                        if (showCustomTimesFragment.selectionCallback.hasActionMode())
+                        if (showCustomTimesFragment.selectionCallback.hasActionMode)
                             onLongClick()
                         else
                             onRowClick()

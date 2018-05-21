@@ -174,7 +174,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             return TaskHolder(showTaskRow, taskRowContainer!!, taskRowName!!, taskRowDetails!!, taskRowChildren!!, taskRowImage!!, taskRowSeparator!!)
         }
 
-        override fun hasActionMode() = false
+        override val hasActionMode = false
 
         override fun incrementSelected() = throw UnsupportedOperationException()
 

@@ -103,7 +103,7 @@ abstract class SelectionCallback : ActionMode.Callback {
         }
     }
 
-    fun hasActionMode() = actionMode != null
+    val hasActionMode get() = actionMode != null
 
     protected abstract fun unselect()
 

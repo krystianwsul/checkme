@@ -42,7 +42,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         return treeNodeCollection!!.displayedSize + if (paddingLayout != null) 1 else 0
     }
 
-    fun hasActionMode() = treeModelAdapter.hasActionMode()
+    fun hasActionMode() = treeModelAdapter.hasActionMode
 
     fun incrementSelected() = treeModelAdapter.incrementSelected()
 
@@ -91,7 +91,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        check(!treeModelAdapter.hasActionMode())
+        check(!treeModelAdapter.hasActionMode)
 
         treeNodeCollection!!.selectAll()
     }

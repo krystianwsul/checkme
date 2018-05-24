@@ -66,7 +66,7 @@ class TickJobIntentService : JobIntentService() {
             val listeners = listOfNotNull(listener)
 
             if (domainFactory.isConnected) {
-                return if (domainFactory.isSaved) {
+                return if (domainFactory.isConnectedAndSaved) {
                     domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, TickData(silent, sourceName, MyApplication.instance, listeners))
                     true
                 } else {

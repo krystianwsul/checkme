@@ -28,7 +28,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
             val domainFactory = DomainFactory.getDomainFactory()
 
             if (domainFactory.isConnected) {
-                if (domainFactory.isSaved) {
+                if (domainFactory.isConnectedAndSaved) {
                     queueFirebase(domainFactory, context, firebaseListener)
                 } else {
                     firebaseListener(domainFactory)
@@ -43,7 +43,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         }
 
         private fun queueFirebase(domainFactory: DomainFactory, context: Context, firebaseListener: (DomainFactory) -> Unit) {
-            check(!domainFactory.isConnected || domainFactory.isSaved)
+            check(!domainFactory.isConnected || domainFactory.isConnectedAndSaved)
 
             if (!domainFactory.isConnected) {
                 val firebaseUser = FirebaseAuth.getInstance().currentUser

@@ -513,7 +513,7 @@ public class DomainFactory {
         return (mRemoteProjectFactory != null);
     }
 
-    public synchronized boolean isSaved() {
+    public synchronized boolean isConnectedAndSaved() {
         Assert.assertTrue(mRemoteProjectFactory != null);
 
         return mRemoteProjectFactory.isSaved();

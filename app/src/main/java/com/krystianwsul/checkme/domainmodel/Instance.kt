@@ -65,7 +65,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
 
-    protected val instanceCustomTimeKey get() = (instanceTime as? CustomTime)?.customTimeKey
+    val instanceCustomTimeKey get() = (instanceTime as? CustomTime)?.customTimeKey
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
 

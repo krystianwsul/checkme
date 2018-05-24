@@ -3054,30 +3054,6 @@ public class DomainFactory {
         }
     }
 
-    public static class LocalCustomTimeRelevance {
-        @NonNull
-        private final LocalCustomTime mLocalCustomTime;
-
-        private boolean mRelevant = false;
-
-        LocalCustomTimeRelevance(@NonNull LocalCustomTime localCustomTime) {
-            mLocalCustomTime = localCustomTime;
-        }
-
-        void setRelevant() {
-            mRelevant = true;
-        }
-
-        boolean getRelevant() {
-            return mRelevant;
-        }
-
-        @NonNull
-        LocalCustomTime getLocalCustomTime() {
-            return mLocalCustomTime;
-        }
-    }
-
     public static class RemoteCustomTimeRelevance {
         @NonNull
         private final RemoteCustomTime mRemoteCustomTime;

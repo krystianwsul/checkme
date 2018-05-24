@@ -96,6 +96,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import kotlin.jvm.functions.Function0;
+
 @SuppressLint("UseSparseArrays")
 public class DomainFactory {
     private static DomainFactory sDomainFactory;
@@ -180,7 +182,7 @@ public class DomainFactory {
     }
 
     public boolean isHoldingWakeLock() {
-        return mTickData != null && mTickData.mWakelock.isHeld();
+        return mTickData != null && mTickData.getWakelock().isHeld();
     }
 
     public long getReadMillis() {
@@ -409,7 +411,7 @@ public class DomainFactory {
             if (mTickData == null) {
                 updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
             } else {
-                updateNotificationsTick(context, source, mTickData.mSilent, mTickData.mSource);
+                updateNotificationsTick(context, source, mTickData.getSilent(), mTickData.getSource());
 
                 if (!firstThereforeSilent) {
                     Log.e("asdf", "not first, clearing mTickData");
@@ -480,7 +482,7 @@ public class DomainFactory {
         Assert.assertTrue(FirebaseAuth.getInstance().getCurrentUser() != null);
 
         if ((mRemoteProjectFactory != null) && !mRemoteProjectFactory.isSaved() && (mTickData == null)) {
-            updateNotificationsTick(context, source, tickData.mSilent, tickData.mSource);
+            updateNotificationsTick(context, source, tickData.getSilent(), tickData.getSource());
 
             tickData.release();
         } else {
@@ -494,15 +496,15 @@ public class DomainFactory {
 
     @NonNull
     private static TickData mergeTickDatas(@NonNull Context context, @NonNull TickData oldTickData, @NonNull TickData newTickData) {
-        boolean silent = (oldTickData.mSilent && newTickData.mSilent);
+        boolean silent = (oldTickData.getSilent() && newTickData.getSilent());
 
         String source = "merged (" + oldTickData + ", " + newTickData + ")";
 
         oldTickData.releaseWakelock();
         newTickData.releaseWakelock();
 
-        List<TickData.Listener> listeners = new ArrayList<>(oldTickData.listeners);
-        listeners.addAll(newTickData.listeners);
+        List<Function0<kotlin.Unit>> listeners = new ArrayList<>(oldTickData.getListeners());
+        listeners.addAll(newTickData.getListeners());
 
         return new TickData(silent, source, context, listeners);
     }

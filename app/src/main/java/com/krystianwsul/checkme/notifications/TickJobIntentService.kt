@@ -16,9 +16,7 @@ class TickJobIntentService : JobIntentService() {
 
     companion object {
 
-        fun start(intent: Intent) {
-            JobIntentService.enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
-        }
+        fun start(intent: Intent) = JobIntentService.enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
 
         val MAX_NOTIFICATIONS = 3
         val GROUP_KEY = "group"
@@ -62,7 +60,7 @@ class TickJobIntentService : JobIntentService() {
         }
 
         // still running?
-        fun tick(silent: Boolean, sourceName: String, listener: TickData.Listener? = null): Boolean {
+        fun tick(silent: Boolean, sourceName: String, listener: (() -> Unit)? = null): Boolean {
             val domainFactory = DomainFactory.getDomainFactory()
 
             val listeners = listOfNotNull(listener)

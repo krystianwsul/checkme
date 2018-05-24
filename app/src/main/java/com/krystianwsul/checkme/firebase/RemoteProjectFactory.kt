@@ -75,7 +75,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
         val friendIds = HashSet(recordOf)
         friendIds.remove(userInfo.key)
 
-        val userJsons = domainFactory.getUserJsons(friendIds)
+        val userJsons = RemoteFriendFactory.getUserJsons(friendIds)
         userJsons[userInfo.key] = remoteRootUser.userJson
 
         val projectJson = ProjectJson(name, now.long, users = userJsons)

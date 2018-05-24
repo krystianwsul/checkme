@@ -40,7 +40,6 @@ import com.krystianwsul.checkme.firebase.RemoteProjectUser;
 import com.krystianwsul.checkme.firebase.RemoteRootUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
-import com.krystianwsul.checkme.firebase.json.UserJson;
 import com.krystianwsul.checkme.firebase.json.UserWrapper;
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
 import com.krystianwsul.checkme.gui.HierarchyData;
@@ -110,9 +109,6 @@ public class DomainFactory {
 
     @Nullable
     private UserInfo mUserInfo;
-
-    @Nullable
-    private RemoteFriendFactory mRemoteFriendFactory;
 
     @Nullable
     private Query mRecordQuery;
@@ -369,7 +365,7 @@ public class DomainFactory {
             Log.e("asdf", "clearing mRemoteProjectFactory", new Exception());
 
             mRemoteProjectFactory = null;
-            mRemoteFriendFactory = null;
+            RemoteFriendFactory.Companion.setInstance(null);
 
             mUserInfo = null;
 
@@ -438,7 +434,7 @@ public class DomainFactory {
         if (mRemoteProjectFactory == null)
             return;
 
-        if (mRemoteFriendFactory == null)
+        if (!RemoteFriendFactory.Companion.hasFriends())
             return;
 
         Stream.of(mFriendFirebaseListeners).forEach(firebaseListener -> firebaseListener.invoke(this));
@@ -446,7 +442,7 @@ public class DomainFactory {
     }
 
     private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
-        mRemoteFriendFactory = new RemoteFriendFactory(dataSnapshot.getChildren());
+        RemoteFriendFactory.Companion.setInstance(new RemoteFriendFactory(dataSnapshot.getChildren()));
 
         ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
 
@@ -469,7 +465,7 @@ public class DomainFactory {
 
     public synchronized void addFriendFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
         Assert.assertTrue(mRemoteProjectFactory == null);
-        Assert.assertTrue(mRemoteFriendFactory == null);
+        Assert.assertTrue(!RemoteFriendFactory.Companion.hasFriends());
 
         mFriendFirebaseListeners.add(firebaseListener);
     }
@@ -517,10 +513,6 @@ public class DomainFactory {
         Assert.assertTrue(mRemoteProjectFactory != null);
 
         return mRemoteProjectFactory.isSaved();
-    }
-
-    public synchronized boolean hasFriends() {
-        return (mRemoteFriendFactory != null);
     }
 
     // gets
@@ -1089,9 +1081,9 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getFriendListData");
 
-        Assert.assertTrue(mRemoteFriendFactory != null);
+        Assert.assertTrue(RemoteFriendFactory.Companion.hasFriends());
 
-        Set<FriendListLoader.UserListData> userListDatas = Stream.of(mRemoteFriendFactory.getFriends())
+        Set<FriendListLoader.UserListData> userListDatas = Stream.of(RemoteFriendFactory.Companion.getFriends())
                 .map(remoteRootUser -> new FriendListLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
                 .collect(Collectors.toSet());
 
@@ -1106,9 +1098,9 @@ public class DomainFactory {
 
         Assert.assertTrue(mRemoteProjectFactory != null);
         Assert.assertTrue(mUserInfo != null);
-        Assert.assertTrue(mRemoteFriendFactory != null);
+        Assert.assertTrue(RemoteFriendFactory.Companion.hasFriends());
 
-        Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(mRemoteFriendFactory.getFriends())
+        Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(RemoteFriendFactory.Companion.getFriends())
                 .map(remoteRootUser -> new ShowProjectLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
                 .collect(Collectors.toMap(ShowProjectLoader.UserListData::getId, userData -> userData));
 
@@ -1856,13 +1848,12 @@ public class DomainFactory {
 
         Assert.assertTrue(mUserInfo != null);
         Assert.assertTrue(mRemoteProjectFactory != null);
-        Assert.assertTrue(mRemoteFriendFactory != null);
-        Assert.assertTrue(!mRemoteFriendFactory.isSaved());
+        Assert.assertTrue(RemoteFriendFactory.Companion.hasFriends());
+        Assert.assertTrue(!RemoteFriendFactory.Companion.isSaved());
 
-        Stream.of(keys)
-                .forEach(friendId -> mRemoteFriendFactory.removeFriend(mUserInfo.getKey(), friendId));
+        Stream.of(keys).forEach(friendId -> RemoteFriendFactory.Companion.removeFriend(mUserInfo.getKey(), friendId));
 
-        mRemoteFriendFactory.save();
+        RemoteFriendFactory.Companion.save();
     }
 
     public synchronized void updateUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
@@ -1887,15 +1878,14 @@ public class DomainFactory {
         Assert.assertTrue(!TextUtils.isEmpty(projectId));
         Assert.assertTrue(!TextUtils.isEmpty(name));
         Assert.assertTrue(mRemoteProjectFactory != null);
-        Assert.assertTrue(mRemoteFriendFactory != null);
+        Assert.assertTrue(RemoteFriendFactory.Companion.hasFriends());
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         RemoteProject remoteProject = mRemoteProjectFactory.getRemoteProjectForce(projectId);
 
         remoteProject.setName(name);
-        remoteProject.updateRecordOf(Stream.of(addedFriends)
-                .map(mRemoteFriendFactory::getFriend)
+        remoteProject.updateRecordOf(Stream.of(addedFriends).map(RemoteFriendFactory.Companion::getFriend)
                 .collect(Collectors.toSet()), removedFriends);
 
         updateNotifications(context, now);
@@ -2437,13 +2427,6 @@ public class DomainFactory {
             instances.addAll(mRemoteProjectFactory.getExistingInstances());
 
         return instances;
-    }
-
-    @NonNull
-    public Map<String, UserJson> getUserJsons(@NonNull Set<String> friendIds) {
-        Assert.assertTrue(mRemoteFriendFactory != null);
-
-        return mRemoteFriendFactory.getUserJsons(friendIds);
     }
 
     @NonNull

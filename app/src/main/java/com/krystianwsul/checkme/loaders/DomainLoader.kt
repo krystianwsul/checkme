@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 
 abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val firebaseLevel: FirebaseLevel) : AsyncTaskLoader<D>(context) {
@@ -29,7 +30,7 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
         if (firebaseLevel == FirebaseLevel.NEED && !domainFactory.isConnected)
             return null
 
-        return if (firebaseLevel == FirebaseLevel.FRIEND && !(domainFactory.isConnected && domainFactory.hasFriends())) null else loadDomain(domainFactory)
+        return if (firebaseLevel == FirebaseLevel.FRIEND && !(domainFactory.isConnected && RemoteFriendFactory.hasFriends())) null else loadDomain(domainFactory)
     }
 
     protected abstract fun loadDomain(domainFactory: DomainFactory): D
@@ -86,7 +87,7 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
                     }
                 }
                 DomainLoader.FirebaseLevel.FRIEND -> {
-                    if (domainFactory.isConnected && domainFactory.hasFriends()) {
+                    if (domainFactory.isConnected && RemoteFriendFactory.hasFriends()) {
                         forceLoad()
                     } else {
                         FirebaseAuth.getInstance().currentUser?.let {

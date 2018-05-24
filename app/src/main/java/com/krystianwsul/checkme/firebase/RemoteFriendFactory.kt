@@ -10,6 +10,37 @@ import junit.framework.Assert
 
 class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
+    companion object {
+
+        private var instance: RemoteFriendFactory? = null
+
+        @Synchronized
+        fun setInstance(remoteFriendFactory: RemoteFriendFactory?) {
+            instance = remoteFriendFactory
+        }
+
+        @Synchronized
+        fun hasFriends() = instance != null
+
+        @Synchronized
+        fun getFriends() = instance!!.friends
+
+        @Synchronized
+        fun save() = instance!!.save()
+
+        @Synchronized
+        fun isSaved() = instance!!.isSaved
+
+        @Synchronized
+        fun removeFriend(userKey: String, friendId: String) = instance!!.removeFriend(userKey, friendId)
+
+        @Synchronized
+        fun getFriend(friendId: String) = instance!!.getFriend(friendId)
+
+        @Synchronized
+        fun getUserJsons(friendIds: Set<String>) = instance!!.getUserJsons(friendIds)
+    }
+
     private val remoteFriendManager = RemoteFriendManager(children)
 
     private val _friends = remoteFriendManager.remoteRootUserRecords
@@ -28,12 +59,13 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
         remoteFriendManager.save()
     }
 
-    fun getUserJsons(friendIds: Set<String>): Map<String, UserJson> {
+    fun getUserJsons(friendIds: Set<String>): MutableMap<String, UserJson> {
         Assert.assertTrue(friendIds.all { _friends.containsKey(it) })
 
         return _friends.entries
                 .filter { friendIds.contains(it.key) }
                 .associateBy({ it.key }, { it.value.userJson })
+                .toMutableMap()
     }
 
     fun getFriend(friendId: String): RemoteRootUser {

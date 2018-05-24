@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import junit.framework.Assert
@@ -33,7 +34,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 DomainFactory.getDomainFactory().let {
                     it.setUserInfo(this, SaveService.Source.SERVICE, userInfo)
 
-                    it.setFirebaseTickListener(this, SaveService.Source.SERVICE, DomainFactory.TickData(false, "MyFirebaseMessagingService", this, listOf()))
+                    it.setFirebaseTickListener(this, SaveService.Source.SERVICE, TickData(false, "MyFirebaseMessagingService", this, listOf()))
                 }
             }
         } else {

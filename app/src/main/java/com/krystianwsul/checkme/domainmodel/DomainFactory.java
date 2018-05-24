@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -3069,50 +3068,5 @@ public class DomainFactory {
 
     public interface FirebaseListener {
         void onFirebaseResult(@NonNull DomainFactory domainFactory);
-    }
-
-    public static class TickData {
-        private static final String WAKELOCK_TAG = "myWakelockTag";
-        final boolean mSilent;
-
-        @NonNull
-        private final String mSource;
-
-        @NonNull
-        private final PowerManager.WakeLock mWakelock;
-
-        @NonNull
-        private final List<Listener> listeners;
-
-        public TickData(boolean silent, @NonNull String source, @NonNull Context context, @NonNull List<Listener> listeners) {
-            Assert.assertTrue(!TextUtils.isEmpty(source));
-
-            mSilent = silent;
-            mSource = source;
-            this.listeners = listeners;
-
-            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            Assert.assertTrue(powerManager != null);
-
-            mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
-            mWakelock.acquire(30 * 1000);
-        }
-
-        void releaseWakelock() {
-            if (mWakelock.isHeld())
-                mWakelock.release();
-        }
-
-        void release() {
-            for (Listener listener : listeners)
-                listener.onTick();
-
-            releaseWakelock();
-        }
-
-        public interface Listener {
-
-            void onTick();
-        }
     }
 }

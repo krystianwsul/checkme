@@ -7,6 +7,7 @@ import android.text.TextUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import junit.framework.Assert
@@ -61,14 +62,14 @@ class TickJobIntentService : JobIntentService() {
         }
 
         // still running?
-        fun tick(silent: Boolean, sourceName: String, listener: DomainFactory.TickData.Listener? = null): Boolean {
+        fun tick(silent: Boolean, sourceName: String, listener: TickData.Listener? = null): Boolean {
             val domainFactory = DomainFactory.getDomainFactory()
 
             val listeners = listOfNotNull(listener)
 
             if (domainFactory.isConnected) {
                 return if (domainFactory.isSaved) {
-                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, DomainFactory.TickData(silent, sourceName, MyApplication.instance, listeners))
+                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, TickData(silent, sourceName, MyApplication.instance, listeners))
                     true
                 } else {
                     domainFactory.updateNotificationsTick(MyApplication.instance, SaveService.Source.SERVICE, silent, sourceName)
@@ -81,7 +82,7 @@ class TickJobIntentService : JobIntentService() {
                 return if (firebaseUser != null) {
                     domainFactory.setUserInfo(MyApplication.instance, SaveService.Source.SERVICE, UserInfo(firebaseUser))
 
-                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, DomainFactory.TickData(silent, sourceName, MyApplication.instance, listeners))
+                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, TickData(silent, sourceName, MyApplication.instance, listeners))
 
                     true
                 } else {

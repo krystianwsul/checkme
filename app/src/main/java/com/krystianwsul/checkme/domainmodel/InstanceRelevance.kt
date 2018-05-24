@@ -60,7 +60,7 @@ class InstanceRelevance(val instance: Instance) {
             customTimeRelevances[instanceCustomTimeId.localCustomTimeId]!!.setRelevant()
     }
 
-    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, DomainFactory.RemoteProjectRelevance>) {
+    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
         Assert.assertTrue(relevant)
 
         val pair = instance.remoteCustomTimeKey

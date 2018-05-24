@@ -55,7 +55,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
                 .forEach { it.setRelevant() }
     }
 
-    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, DomainFactory.RemoteProjectRelevance>) {
+    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
         Assert.assertTrue(relevant)
 
         task.schedules

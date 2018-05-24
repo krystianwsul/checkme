@@ -3054,30 +3054,6 @@ public class DomainFactory {
         }
     }
 
-    public static class RemoteProjectRelevance {
-        @NonNull
-        private final RemoteProject mRemoteProject;
-
-        private boolean mRelevant = false;
-
-        RemoteProjectRelevance(@NonNull RemoteProject remoteProject) {
-            mRemoteProject = remoteProject;
-        }
-
-        public void setRelevant() {
-            mRelevant = true;
-        }
-
-        boolean getRelevant() {
-            return mRelevant;
-        }
-
-        @NonNull
-        RemoteProject getRemoteProject() {
-            return mRemoteProject;
-        }
-    }
-
     public static class LocalToRemoteConversion {
         public final Map<Integer, kotlin.Pair<LocalTask, List<LocalInstance>>> mLocalTasks = new HashMap<>();
         public final List<LocalTaskHierarchy> mLocalTaskHierarchies = new ArrayList<>();

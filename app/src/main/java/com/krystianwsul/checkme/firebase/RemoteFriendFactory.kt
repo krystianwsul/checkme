@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
 import android.util.Log
-import com.annimon.stream.Stream
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.Query
@@ -22,11 +21,9 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
         private var instance: RemoteFriendFactory? = null
 
-        private var mFriendQuery: Query? = null
+        private var database: Pair<Query, ValueEventListener>? = null
 
-        private var mFriendListener: ValueEventListener? = null
-
-        private val mFriendFirebaseListeners = ArrayList<Function1<DomainFactory, Unit>>()
+        private val friendListeners = mutableListOf<(DomainFactory) -> Unit>()
 
         @Synchronized
         fun setInstance(remoteFriendFactory: RemoteFriendFactory?) {
@@ -56,29 +53,26 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
         @Synchronized
         fun clearListener() {
-            mFriendQuery!!.removeEventListener(mFriendListener!!)
-            mFriendQuery = null
-            mFriendListener = null
+            database!!.apply { first.removeEventListener(second) }
+            database = null
         }
 
         @Synchronized
         fun setListener(mUserInfo: UserInfo) {
-            mFriendQuery = DatabaseWrapper.getFriendsQuery(mUserInfo)
-            mFriendListener = object : ValueEventListener {
+            database = Pair(DatabaseWrapper.getFriendsQuery(mUserInfo), object : ValueEventListener {
 
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    Log.e("asdf", "DomainFactory.mFriendListener.onDataChange, dataSnapshot: " + dataSnapshot)
+                    Log.e("asdf", "RemoteFriendFactory.onDataChange, dataSnapshot: $dataSnapshot")
 
                     setFriendRecords(dataSnapshot)
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
-                    Log.e("asdf", "DomainFactory.mFriendListener.onCancelled", databaseError.toException())
+                    Log.e("asdf", "RemoteFriendFactory.onCancelled", databaseError.toException())
 
                     MyCrashlytics.logException(databaseError.toException())
                 }
-            }
-            mFriendQuery!!.addValueEventListener(mFriendListener)
+            }).apply { first.addValueEventListener(second) }
         }
 
         @Synchronized
@@ -95,18 +89,18 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
             if (!DomainFactory.getDomainFactory().isConnected)
                 return
 
-            if (!RemoteFriendFactory.hasFriends())
+            if (!hasFriends())
                 return
 
-            Stream.of<Function1<DomainFactory, Unit>>(mFriendFirebaseListeners).forEach { firebaseListener -> firebaseListener.invoke(DomainFactory.getDomainFactory()) } // todo remove param
-            mFriendFirebaseListeners.clear()
+            friendListeners.forEach { it(DomainFactory.getDomainFactory()) } // todo remove param
+            friendListeners.clear()
         }
 
         @Synchronized
-        fun clearFriendListeners() = mFriendFirebaseListeners.clear()
+        fun clearFriendListeners() = friendListeners.clear()
 
         @Synchronized
-        fun addFriendListener(friendListener: Function1<DomainFactory, Unit>) = mFriendFirebaseListeners.add(friendListener)
+        fun addFriendListener(friendListener: Function1<DomainFactory, Unit>) = friendListeners.add(friendListener)
     }
 
     private val remoteFriendManager = RemoteFriendManager(children)

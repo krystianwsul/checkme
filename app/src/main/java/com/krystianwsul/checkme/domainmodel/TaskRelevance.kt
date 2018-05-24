@@ -10,7 +10,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
     var relevant = false
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, DomainFactory.InstanceRelevance>, customTimeRelevances: Map<Int, DomainFactory.LocalCustomTimeRelevance>, now: ExactTimeStamp) {
+    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, DomainFactory.LocalCustomTimeRelevance>, now: ExactTimeStamp) {
         if (relevant) return
 
         relevant = true
@@ -36,7 +36,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
                     val instanceKey = instance.instanceKey
 
                     if (!instanceRelevances.containsKey(instanceKey))
-                        instanceRelevances[instanceKey] = DomainFactory.InstanceRelevance(instance)
+                        instanceRelevances[instanceKey] = InstanceRelevance(instance)
 
                     instanceRelevances[instanceKey]!!
                 }

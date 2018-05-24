@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.iid.FirebaseInstanceIdService
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.notifications.InstanceDoneService
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -23,6 +22,6 @@ class MyFirebaseInstanceIdService : FirebaseInstanceIdService() {
 
         val userInfo = UserInfo(firebaseUser)
 
-        InstanceDoneService.throttleFirebase(this, true, DomainFactory.FirebaseListener { domainFactory -> domainFactory.updateUserInfo(this, SaveService.Source.SERVICE, userInfo) })
+        InstanceDoneService.throttleFirebase(this, true, { it.updateUserInfo(this, SaveService.Source.SERVICE, userInfo) })
     }
 }

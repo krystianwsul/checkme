@@ -96,7 +96,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
 
 @SuppressLint("UseSparseArrays")
 public class DomainFactory {
@@ -140,10 +142,10 @@ public class DomainFactory {
     private RemoteRootUser mRemoteRootUser;
 
     @NonNull
-    private final List<FirebaseListener> mNotTickFirebaseListeners = new ArrayList<>();
+    private final List<Function1<DomainFactory, Unit>> mNotTickFirebaseListeners = new ArrayList<>();
 
     @NonNull
-    private final List<FirebaseListener> mFriendFirebaseListeners = new ArrayList<>();
+    private final List<Function1<DomainFactory, Unit>> mFriendFirebaseListeners = new ArrayList<>();
 
     @Nullable
     private TickData mTickData = null;
@@ -423,8 +425,7 @@ public class DomainFactory {
                 }
             }
 
-            Stream.of(mNotTickFirebaseListeners)
-                    .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+            Stream.of(mNotTickFirebaseListeners).forEach(firebaseListener -> firebaseListener.invoke(this));
             mNotTickFirebaseListeners.clear();
 
             mSkipSave = false;
@@ -440,8 +441,7 @@ public class DomainFactory {
         if (mRemoteFriendFactory == null)
             return;
 
-        Stream.of(mFriendFirebaseListeners)
-                .forEach(firebaseListener -> firebaseListener.onFirebaseResult(this));
+        Stream.of(mFriendFirebaseListeners).forEach(firebaseListener -> firebaseListener.invoke(this));
         mFriendFirebaseListeners.clear();
     }
 
@@ -461,20 +461,20 @@ public class DomainFactory {
         mRemoteRootUser = new RemoteRootUser(remoteRootUserRecord);
     }
 
-    public synchronized void addFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+    public synchronized void addFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
         Assert.assertTrue(mRemoteProjectFactory == null || mRemoteProjectFactory.isSaved());
 
         mNotTickFirebaseListeners.add(firebaseListener);
     }
 
-    public synchronized void addFriendFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+    public synchronized void addFriendFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
         Assert.assertTrue(mRemoteProjectFactory == null);
         Assert.assertTrue(mRemoteFriendFactory == null);
 
         mFriendFirebaseListeners.add(firebaseListener);
     }
 
-    public synchronized void removeFirebaseListener(@NonNull FirebaseListener firebaseListener) {
+    public synchronized void removeFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
         mNotTickFirebaseListeners.remove(firebaseListener);
     }
 
@@ -3066,9 +3066,5 @@ public class DomainFactory {
 
         final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();
         final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();
-    }
-
-    public interface FirebaseListener {
-        void onFirebaseResult(@NonNull DomainFactory domainFactory);
     }
 }

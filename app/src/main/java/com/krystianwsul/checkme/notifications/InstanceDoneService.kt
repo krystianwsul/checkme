@@ -24,25 +24,25 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
             putExtra(NOTIFICATION_ID_KEY, notificationId)
         }
 
-        fun throttleFirebase(context: Context, needsFirebase: Boolean, firebaseListener: DomainFactory.FirebaseListener) {
+        fun throttleFirebase(context: Context, needsFirebase: Boolean, firebaseListener: (DomainFactory) -> Unit) {
             val domainFactory = DomainFactory.getDomainFactory()
 
             if (domainFactory.isConnected) {
                 if (domainFactory.isSaved) {
                     queueFirebase(domainFactory, context, firebaseListener)
                 } else {
-                    firebaseListener.onFirebaseResult(domainFactory)
+                    firebaseListener(domainFactory)
                 }
             } else {
                 if (needsFirebase) {
                     queueFirebase(domainFactory, context, firebaseListener)
                 } else {
-                    firebaseListener.onFirebaseResult(domainFactory)
+                    firebaseListener(domainFactory)
                 }
             }
         }
 
-        private fun queueFirebase(domainFactory: DomainFactory, context: Context, firebaseListener: DomainFactory.FirebaseListener) {
+        private fun queueFirebase(domainFactory: DomainFactory, context: Context, firebaseListener: (DomainFactory) -> Unit) {
             check(!domainFactory.isConnected || domainFactory.isSaved)
 
             if (!domainFactory.isConnected) {
@@ -68,12 +68,10 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId) // todo uodpornić na podwójne kliknięcie
 
-        throttleFirebase(this, instanceKey.type == TaskKey.Type.REMOTE, DomainFactory.FirebaseListener { setInstanceNotificationDone(it, instanceKey) })
+        throttleFirebase(this, instanceKey.type == TaskKey.Type.REMOTE, { setInstanceNotificationDone(it, instanceKey) })
     }
 
-    private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) {
-        domainFactory.setInstanceNotificationDone(this, SaveService.Source.SERVICE, instanceKey)
-    }
+    private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceNotificationDone(this, SaveService.Source.SERVICE, instanceKey)
 
-    private class NeedsFirebaseException() : RuntimeException()
+    private class NeedsFirebaseException : RuntimeException()
 }

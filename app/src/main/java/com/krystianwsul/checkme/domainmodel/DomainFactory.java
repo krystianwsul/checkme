@@ -26,6 +26,11 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
+import com.krystianwsul.checkme.domainmodel.relevance.InstanceRelevance;
+import com.krystianwsul.checkme.domainmodel.relevance.LocalCustomTimeRelevance;
+import com.krystianwsul.checkme.domainmodel.relevance.RemoteCustomTimeRelevance;
+import com.krystianwsul.checkme.domainmodel.relevance.RemoteProjectRelevance;
+import com.krystianwsul.checkme.domainmodel.relevance.TaskRelevance;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteCustomTime;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
@@ -2060,7 +2065,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
+    public List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
         Map<InstanceKey, Instance> allInstances = new HashMap<>();
 
         allInstances.putAll(Stream.of(task.getExistingInstances().values())

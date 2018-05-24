@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domainmodel.relevance
 
 import com.krystianwsul.checkme.firebase.RemoteCustomTime
 

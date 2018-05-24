@@ -23,7 +23,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
         private var database: Pair<Query, ValueEventListener>? = null
 
-        private val friendListeners = mutableListOf<(DomainFactory) -> Unit>()
+        private val friendListeners = mutableListOf<() -> Unit>()
 
         @Synchronized
         fun setInstance(remoteFriendFactory: RemoteFriendFactory?) {
@@ -92,7 +92,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
             if (!hasFriends())
                 return
 
-            friendListeners.forEach { it(DomainFactory.getDomainFactory()) } // todo remove param
+            friendListeners.forEach { it() }
             friendListeners.clear()
         }
 
@@ -100,7 +100,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
         fun clearFriendListeners() = friendListeners.clear()
 
         @Synchronized
-        fun addFriendListener(friendListener: Function1<DomainFactory, Unit>) = friendListeners.add(friendListener)
+        fun addFriendListener(friendListener: () -> Unit) = friendListeners.add(friendListener)
     }
 
     private val remoteFriendManager = RemoteFriendManager(children)

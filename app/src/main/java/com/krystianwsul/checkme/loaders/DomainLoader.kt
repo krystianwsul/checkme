@@ -94,8 +94,7 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
                             val userInfo = UserInfo(it)
 
                             domainFactory.setUserInfo(context.applicationContext, SaveService.Source.GUI, userInfo)
-                            domainFactory.addFriendFirebaseListener(firebaseListener)
-
+                            RemoteFriendFactory.addFriendListener(firebaseListener)
                         }
                     }
                 }

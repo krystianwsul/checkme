@@ -117,12 +117,6 @@ public class DomainFactory {
     private ValueEventListener mRecordListener;
 
     @Nullable
-    private Query mFriendQuery;
-
-    @Nullable
-    private ValueEventListener mFriendListener;
-
-    @Nullable
     private Query mUserQuery;
 
     @Nullable
@@ -139,9 +133,6 @@ public class DomainFactory {
 
     @NonNull
     private final List<Function1<DomainFactory, Unit>> mNotTickFirebaseListeners = new ArrayList<>();
-
-    @NonNull
-    private final List<Function1<DomainFactory, Unit>> mFriendFirebaseListeners = new ArrayList<>();
 
     @Nullable
     private TickData mTickData = null;
@@ -247,7 +238,6 @@ public class DomainFactory {
     public synchronized void setUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
         if (mUserInfo != null) {
             Assert.assertTrue(mRecordQuery != null);
-            Assert.assertTrue(mFriendQuery != null);
             Assert.assertTrue(mUserQuery != null);
 
             if (mUserInfo.equals(userInfo))
@@ -260,9 +250,6 @@ public class DomainFactory {
 
         Assert.assertTrue(mRecordQuery == null);
         Assert.assertTrue(mRecordListener == null);
-
-        Assert.assertTrue(mFriendQuery == null);
-        Assert.assertTrue(mFriendListener == null);
 
         Assert.assertTrue(mUserQuery == null);
         Assert.assertTrue(mUserListener == null);
@@ -297,30 +284,12 @@ public class DomainFactory {
                 }
 
                 mNotTickFirebaseListeners.clear();
-                mFriendFirebaseListeners.clear();
+                RemoteFriendFactory.Companion.clearFriendListeners();
             }
         };
         mRecordQuery.addValueEventListener(mRecordListener);
 
-        mFriendQuery = DatabaseWrapper.INSTANCE.getFriendsQuery(mUserInfo);
-        mFriendListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.e("asdf", "DomainFactory.mFriendListener.onDataChange, dataSnapshot: " + dataSnapshot);
-                Assert.assertTrue(dataSnapshot != null);
-
-                setFriendRecords(dataSnapshot);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Assert.assertTrue(databaseError != null);
-                Log.e("asdf", "DomainFactory.mFriendListener.onCancelled", databaseError.toException());
-
-                MyCrashlytics.INSTANCE.logException(databaseError.toException());
-            }
-        };
-        mFriendQuery.addValueEventListener(mFriendListener);
+        RemoteFriendFactory.Companion.setListener(mUserInfo);
 
         mUserQuery = DatabaseWrapper.INSTANCE.getUserQuery(userInfo);
         mUserListener = new ValueEventListener() {
@@ -349,15 +318,11 @@ public class DomainFactory {
         if (mUserInfo == null) {
             Assert.assertTrue(mRecordQuery == null);
             Assert.assertTrue(mRecordListener == null);
-            Assert.assertTrue(mFriendQuery == null);
-            Assert.assertTrue(mFriendListener == null);
             Assert.assertTrue(mUserQuery == null);
             Assert.assertTrue(mUserListener == null);
         } else {
             Assert.assertTrue(mRecordQuery != null);
             Assert.assertTrue(mRecordListener != null);
-            Assert.assertTrue(mFriendQuery != null);
-            Assert.assertTrue(mFriendListener != null);
             Assert.assertTrue(mUserQuery != null);
             Assert.assertTrue(mUserListener != null);
 
@@ -373,9 +338,7 @@ public class DomainFactory {
             mRecordQuery = null;
             mRecordListener = null;
 
-            mFriendQuery.removeEventListener(mFriendListener);
-            mFriendQuery = null;
-            mFriendListener = null;
+            RemoteFriendFactory.Companion.clearListener();
 
             mUserQuery.removeEventListener(mUserListener);
             mUserQuery = null;
@@ -397,7 +360,7 @@ public class DomainFactory {
         boolean firstThereforeSilent = (mRemoteProjectFactory == null);
         mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserInfo, mLocalFactory.getUuid(), now);
 
-        tryNotifyFriendListeners(); // assuming they're all getters
+        RemoteFriendFactory.Companion.tryNotifyFriendListeners(); // assuming they're all getters
 
         if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
             updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
@@ -430,25 +393,6 @@ public class DomainFactory {
         }
     }
 
-    private void tryNotifyFriendListeners() {
-        if (mRemoteProjectFactory == null)
-            return;
-
-        if (!RemoteFriendFactory.Companion.hasFriends())
-            return;
-
-        Stream.of(mFriendFirebaseListeners).forEach(firebaseListener -> firebaseListener.invoke(this));
-        mFriendFirebaseListeners.clear();
-    }
-
-    private synchronized void setFriendRecords(@NonNull DataSnapshot dataSnapshot) {
-        RemoteFriendFactory.Companion.setInstance(new RemoteFriendFactory(dataSnapshot.getChildren()));
-
-        ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
-
-        tryNotifyFriendListeners();
-    }
-
     private synchronized void setUserRecord(@NonNull DataSnapshot dataSnapshot) {
         UserWrapper userWrapper = dataSnapshot.getValue(UserWrapper.class);
         Assert.assertTrue(userWrapper != null);
@@ -461,13 +405,6 @@ public class DomainFactory {
         Assert.assertTrue(mRemoteProjectFactory == null || mRemoteProjectFactory.isSaved());
 
         mNotTickFirebaseListeners.add(firebaseListener);
-    }
-
-    public synchronized void addFriendFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
-        Assert.assertTrue(mRemoteProjectFactory == null);
-        Assert.assertTrue(!RemoteFriendFactory.Companion.hasFriends());
-
-        mFriendFirebaseListeners.add(firebaseListener);
     }
 
     public synchronized void removeFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {

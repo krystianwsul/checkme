@@ -2490,7 +2490,7 @@ public class DomainFactory {
             task.updateOldestVisible(now);
 
         // relevant hack
-        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(tasks).collect(Collectors.toMap(Task::getTaskKey, TaskRelevance::new));
+        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(tasks).collect(Collectors.toMap(Task::getTaskKey, task -> new TaskRelevance(this, task)));
 
         List<Instance> existingInstances = getExistingInstances();
         List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now);
@@ -3043,87 +3043,7 @@ public class DomainFactory {
         return dataWrapper;
     }
 
-    private class TaskRelevance {
-        @NonNull
-        private final Task mTask;
-        private boolean mRelevant = false;
-
-        TaskRelevance(@NonNull Task task) {
-            mTask = task;
-        }
-
-        void setRelevant(@NonNull Map<TaskKey, TaskRelevance> taskRelevances, @NonNull Map<InstanceKey, InstanceRelevance> instanceRelevances, @NonNull Map<Integer, LocalCustomTimeRelevance> customTimeRelevances, @NonNull ExactTimeStamp now) {
-            if (mRelevant)
-                return;
-
-            mRelevant = true;
-
-            TaskKey taskKey = mTask.getTaskKey();
-
-            // mark parents relevant
-            Stream.of(mTask.getTaskHierarchiesByChildTaskKey(taskKey))
-                    .map(TaskHierarchy::getParentTaskKey)
-                    .map(taskRelevances::get)
-                    .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
-
-            // mark children relevant
-            Stream.of(mTask.getTaskHierarchiesByParentTaskKey(taskKey))
-                    .map(TaskHierarchy::getChildTaskKey)
-                    .map(taskRelevances::get)
-                    .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
-
-            Date oldestVisible = mTask.getOldestVisible();
-            Assert.assertTrue(oldestVisible != null);
-
-            // mark instances relevant
-            Stream.of(getPastInstances(mTask, now))
-                    .filter(instance -> instance.getScheduleDate().compareTo(oldestVisible) >= 0)
-                    .map(instance -> {
-                        InstanceKey instanceKey = instance.getInstanceKey();
-
-                        if (!instanceRelevances.containsKey(instanceKey))
-                            instanceRelevances.put(instanceKey, new InstanceRelevance(instance));
-
-                        return instanceRelevances.get(instanceKey);
-                    })
-                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
-
-            Stream.of(mTask.getExistingInstances().values())
-                    .filter(instance -> instance.getScheduleDate().compareTo(oldestVisible) >= 0)
-                    .map(Instance::getInstanceKey)
-                    .map(instanceRelevances::get)
-                    .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now));
-
-            // mark custom times relevant
-            Stream.of(mTask.getSchedules()).map(Schedule::getCustomTimeKey).filter(customTimeKey -> customTimeKey != null && customTimeKey.getLocalCustomTimeId() != null).map(customTimeKey -> customTimeRelevances.get(customTimeKey.getLocalCustomTimeId()))
-                    .forEach(LocalCustomTimeRelevance::setRelevant);
-        }
-
-        boolean getRelevant() {
-            return mRelevant;
-        }
-
-        public Task getTask() {
-            return mTask;
-        }
-
-        void setRemoteRelevant(@NonNull Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances, @NonNull Map<String, RemoteProjectRelevance> remoteProjectRelevances) {
-            Assert.assertTrue(mRelevant);
-
-            //noinspection Convert2MethodRef
-            Stream.of(mTask.getSchedules())
-                    .map(Schedule::getRemoteCustomTimeKey)
-                    .filter(pair -> pair != null)
-                    .map(remoteCustomTimeRelevances::get)
-                    .forEach(RemoteCustomTimeRelevance::setRelevant);
-
-            RemoteProject remoteProject = mTask.getRemoteNullableProject();
-            if (remoteProject != null)
-                remoteProjectRelevances.get(remoteProject.getId()).setRelevant();
-        }
-    }
-
-    private static class InstanceRelevance {
+    static class InstanceRelevance {
         private final Instance mInstance;
         private boolean mRelevant = false;
 
@@ -3226,7 +3146,7 @@ public class DomainFactory {
         }
     }
 
-    private static class LocalCustomTimeRelevance {
+    static class LocalCustomTimeRelevance {
         @NonNull
         private final LocalCustomTime mLocalCustomTime;
 
@@ -3250,7 +3170,7 @@ public class DomainFactory {
         }
     }
 
-    private static class RemoteCustomTimeRelevance {
+    static class RemoteCustomTimeRelevance {
         @NonNull
         private final RemoteCustomTime mRemoteCustomTime;
 
@@ -3274,7 +3194,7 @@ public class DomainFactory {
         }
     }
 
-    private static class RemoteProjectRelevance {
+    static class RemoteProjectRelevance {
         @NonNull
         private final RemoteProject mRemoteProject;
 
@@ -3284,7 +3204,7 @@ public class DomainFactory {
             mRemoteProject = remoteProject;
         }
 
-        void setRelevant() {
+        public void setRelevant() {
             mRelevant = true;
         }
 

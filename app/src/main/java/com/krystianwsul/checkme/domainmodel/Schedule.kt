@@ -23,7 +23,7 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
 
     abstract val customTimeKey: CustomTimeKey?
 
-    protected val remoteCustomTimeKey get() = scheduleBridge.remoteCustomTimeKey
+    val remoteCustomTimeKey get() = scheduleBridge.remoteCustomTimeKey
 
     abstract val scheduleType: ScheduleType
 

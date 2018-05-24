@@ -3043,7 +3043,7 @@ public class DomainFactory {
         return dataWrapper;
     }
 
-    static class InstanceRelevance {
+    public static class InstanceRelevance {
         private final Instance mInstance;
         private boolean mRelevant = false;
 
@@ -3146,7 +3146,7 @@ public class DomainFactory {
         }
     }
 
-    static class LocalCustomTimeRelevance {
+    public static class LocalCustomTimeRelevance {
         @NonNull
         private final LocalCustomTime mLocalCustomTime;
 
@@ -3170,7 +3170,7 @@ public class DomainFactory {
         }
     }
 
-    static class RemoteCustomTimeRelevance {
+    public static class RemoteCustomTimeRelevance {
         @NonNull
         private final RemoteCustomTime mRemoteCustomTime;
 
@@ -3194,7 +3194,7 @@ public class DomainFactory {
         }
     }
 
-    static class RemoteProjectRelevance {
+    public static class RemoteProjectRelevance {
         @NonNull
         private final RemoteProject mRemoteProject;
 

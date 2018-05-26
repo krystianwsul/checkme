@@ -5,7 +5,7 @@ import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 @Parcelize
-class TimeStamp private constructor(val long: Long) : Comparable<TimeStamp>, Parcelable {
+class TimeStamp internal constructor(val long: Long) : Comparable<TimeStamp>, Parcelable {
 
     companion object {
 

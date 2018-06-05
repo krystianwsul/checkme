@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.loaders
 
 import android.content.Context
-import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -10,6 +9,7 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
+import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private val joinTaskKeys: List<TaskKey>?) : DomainLoader<CreateTaskLoader.Data>(context, needsFirebase(taskKey)) {
@@ -64,57 +64,16 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
 
         abstract val type: ParentType
 
+        @Parcelize
         data class ProjectParentKey(val projectId: String) : ParentKey() {
 
-            companion object {
-
-                @JvmField
-                val CREATOR: Parcelable.Creator<ProjectParentKey> = object : Parcelable.Creator<ProjectParentKey> {
-
-                    override fun createFromParcel(parcel: Parcel): ProjectParentKey {
-                        val projectId = parcel.readString()!!
-                        check(!TextUtils.isEmpty(projectId))
-
-                        return ProjectParentKey(projectId)
-                    }
-
-                    override fun newArray(size: Int) = arrayOfNulls<ProjectParentKey>(size)
-                }
-            }
-
-            override val type = ParentType.PROJECT
-
-            override fun describeContents() = 0
-
-            override fun writeToParcel(dest: Parcel, flags: Int) {
-                dest.writeString(projectId)
-            }
+            override val type get() = ParentType.PROJECT
         }
 
+        @Parcelize
         data class TaskParentKey(val taskKey: TaskKey) : ParentKey() {
 
-            companion object {
-
-                @JvmField
-                val CREATOR: Parcelable.Creator<TaskParentKey> = object : Parcelable.Creator<TaskParentKey> {
-
-                    override fun createFromParcel(parcel: Parcel): TaskParentKey {
-                        val taskKey = parcel.readParcelable<TaskKey>(TaskKey::class.java.classLoader)!!
-
-                        return TaskParentKey(taskKey)
-                    }
-
-                    override fun newArray(size: Int) = arrayOfNulls<TaskParentKey>(size)
-                }
-            }
-
-            override val type = ParentType.TASK
-
-            override fun describeContents() = 0
-
-            override fun writeToParcel(dest: Parcel, flags: Int) {
-                dest.writeParcelable(taskKey, 0)
-            }
+            override val type get() = ParentType.TASK
         }
     }
 

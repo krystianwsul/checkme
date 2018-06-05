@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcel
 import android.os.Parcelable
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
@@ -30,6 +29,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_create_task.*
 import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
@@ -745,59 +745,11 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         scheduleRecycler.removeOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener)
     }
 
-    class ScheduleHint : Parcelable {
+    @Parcelize
+    class ScheduleHint(val date: Date, val timePair: TimePair? = null) : Parcelable {
 
-        companion object {
+        constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
 
-            @JvmField
-            val CREATOR: Parcelable.Creator<ScheduleHint> = object : Parcelable.Creator<ScheduleHint> {
-
-                override fun createFromParcel(source: Parcel) = source.run {
-                    val date = readParcelable<Date>(Date::class.java.classLoader)!!
-
-                    val hasTimePair = readInt() == 1
-                    val timePair = if (hasTimePair) readParcelable<TimePair>(HourMinute::class.java.classLoader)!! else null
-
-                    ScheduleHint(date, timePair)
-                }
-
-                override fun newArray(size: Int) = arrayOfNulls<ScheduleHint>(size)
-            }
-        }
-
-        val mDate: Date
-
-        val mTimePair: TimePair?
-
-        constructor(date: Date) { // root group list
-            mDate = date
-            mTimePair = null
-        }
-
-        constructor(date: Date, hourMinute: HourMinute) { // group list for group
-            mDate = date
-            mTimePair = TimePair(hourMinute)
-        }
-
-        constructor(date: Date, timePair: TimePair?) { // join instances, parcelable
-            mDate = date
-            mTimePair = timePair
-        }
-
-        override fun describeContents() = 0
-
-        override fun writeToParcel(dest: Parcel, flags: Int) {
-            dest.run {
-                writeParcelable(mDate, 0)
-
-                if (mTimePair == null) {
-                    writeInt(0)
-                } else {
-                    writeInt(1)
-                    writeParcelable(mTimePair, 0)
-                }
-            }
-        }
     }
 
     @Suppress("PrivatePropertyName")

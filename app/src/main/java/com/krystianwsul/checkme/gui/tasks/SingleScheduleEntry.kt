@@ -52,12 +52,12 @@ class SingleScheduleEntry : ScheduleEntry {
                 mDate = pair.first
                 mTimePair = TimePair(pair.second)
             }
-            scheduleHint.mTimePair != null -> { // for instance group or instance join
-                mDate = scheduleHint.mDate
-                mTimePair = scheduleHint.mTimePair.copy()
+            scheduleHint.timePair != null -> { // for instance group or instance join
+                mDate = scheduleHint.date
+                mTimePair = scheduleHint.timePair.copy()
             }
             else -> { // for group root
-                val pair = HourMinute.getNextHour(scheduleHint.mDate)
+                val pair = HourMinute.getNextHour(scheduleHint.date)
 
                 mDate = pair.first
                 mTimePair = TimePair(pair.second)

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -165,12 +166,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         when (item.itemId) {
             R.id.action_close -> closeSearch()
             R.id.action_search -> {
-                check(item.itemId == R.id.action_search)
-
                 mainActivitySearch.apply {
                     check(visibility == View.GONE)
                     visibility = View.VISIBLE // todo replace with actionMode
                     requestFocus()
+
+                    (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
                 }
 
                 invalidateOptionsMenu()

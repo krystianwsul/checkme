@@ -131,7 +131,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun onPrepareOptionsMenu(menu: Menu) = menu.run {
         when (visibleTab) {
             Tab.INSTANCES -> {
-                findItem(R.id.action_calendar).isVisible = true
+                findItem(R.id.action_calendar).isVisible = (timeRange == TimeRange.DAY)
                 findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentItem] ?: false

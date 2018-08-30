@@ -127,7 +127,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var debug = false
 
-    private var calendarShown = false
+    private var calendarDate: LocalDate? = null
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
@@ -177,7 +177,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_calendar -> {
-                calendarShown = !calendarShown
+                if (calendarDate == null) {
+                    calendarDate = LocalDate.now()
+                } else {
+                    calendarDate = null
+                }
+
                 updateCalendar()
             }
             R.id.action_close -> closeSearch()
@@ -249,7 +254,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 }
             }
 
-            calendarShown = getBoolean(CALENDAR_KEY)
+            calendarDate = getSerializable(CALENDAR_KEY) as? LocalDate
+            calendarDate?.let { mainCalendar.date = it.toDateTimeAtStartOfDay().millis }
 
             updateCalendar()
         }
@@ -279,7 +285,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         invalidateOptionsMenu()
 
                         if (timeRange != TimeRange.DAY)
-                            calendarShown = false
+                            calendarDate = null
 
                         updateCalendar()
                     }
@@ -446,9 +452,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         mainCalendar.minDate = DateTime.now().millis
         mainCalendar.setOnDateChangeListener { view, year, month, dayOfMonth ->
-            Log.e("asdf", "days: " + Days.daysBetween(LocalDate(year, month + 1, dayOfMonth), LocalDate.now()).days)
+            calendarDate = LocalDate(year, month + 1, dayOfMonth)
 
-            mainDaysPager.currentItem = Days.daysBetween(LocalDate.now(), LocalDate(year, month + 1, dayOfMonth)).days
+            Log.e("asdf", "days: " + Days.daysBetween(calendarDate, LocalDate.now()).days)
+
+            mainDaysPager.currentItem = Days.daysBetween(LocalDate.now(), calendarDate).days
         }
 
         supportLoaderManager.initLoader(0, null, this)
@@ -503,7 +511,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     putString(SEARCH_KEY, text.toString())
             }
 
-            putBoolean(CALENDAR_KEY, calendarShown)
+            putSerializable(CALENDAR_KEY, calendarDate)
         }
     }
 
@@ -549,7 +557,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 taskListFragment.setFab(mainFab)
 
-                calendarShown = false
+                calendarDate = null
             }
             MainActivity.Tab.PROJECTS -> {
                 supportActionBar!!.title = getString(R.string.projects)
@@ -571,7 +579,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 closeSearch()
 
-                calendarShown = false
+                calendarDate = null
             }
             MainActivity.Tab.CUSTOM_TIMES -> {
                 supportActionBar!!.title = getString(R.string.times)
@@ -593,7 +601,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 closeSearch()
 
-                calendarShown = false
+                calendarDate = null
             }
             MainActivity.Tab.FRIENDS -> {
                 checkNotNull(userInfo)
@@ -617,7 +625,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 closeSearch()
 
-                calendarShown = false
+                calendarDate = null
             }
             MainActivity.Tab.DEBUG -> {
                 supportActionBar!!.title = "Debug"
@@ -639,7 +647,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 closeSearch()
 
-                calendarShown = false
+                calendarDate = null
             }
         }
 
@@ -872,7 +880,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     private fun updateCalendar() {
-        mainCalendar.visibility = if (calendarShown) View.VISIBLE else View.GONE
+        mainCalendar.visibility = if (calendarDate != null) View.VISIBLE else View.GONE
 
         // todo animation
     }

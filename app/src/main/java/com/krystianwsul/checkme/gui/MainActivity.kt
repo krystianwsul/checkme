@@ -62,6 +62,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         private const val TIME_RANGE_KEY = "timeRange"
         private const val DEBUG_KEY = "debug"
         private const val SEARCH_KEY = "search"
+        private const val CALENDAR_KEY = "calendar"
 
         private const val RC_SIGN_IN = 1000
 
@@ -123,6 +124,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var debug = false
 
+    private var calendarShown = false
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
         return true
@@ -170,6 +173,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_calendar -> {
+                calendarShown = !calendarShown
+                updateCalendar()
+            }
             R.id.action_close -> closeSearch()
             R.id.action_search -> {
                 mainActivitySearch.apply {
@@ -238,6 +245,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     setText(getString(SEARCH_KEY))
                 }
             }
+
+            calendarShown = getBoolean(CALENDAR_KEY)
+
+            updateCalendar()
         }
 
         mainActivitySpinner.run {
@@ -263,6 +274,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                         groupSelectAllVisible.clear()
                         invalidateOptionsMenu()
+
+                        if (timeRange != TimeRange.DAY)
+                            calendarShown = false
+
+                        updateCalendar()
                     }
                 }
 
@@ -476,6 +492,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 if (visibility == View.VISIBLE)
                     putString(SEARCH_KEY, text.toString())
             }
+
+            putBoolean(CALENDAR_KEY, calendarShown)
         }
     }
 
@@ -520,6 +538,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 friendListFragment.clearFab()
 
                 taskListFragment.setFab(mainFab)
+
+                calendarShown = false
             }
             MainActivity.Tab.PROJECTS -> {
                 supportActionBar!!.title = getString(R.string.projects)
@@ -540,6 +560,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 projectListFragment.setFab(mainFab)
 
                 closeSearch()
+
+                calendarShown = false
             }
             MainActivity.Tab.CUSTOM_TIMES -> {
                 supportActionBar!!.title = getString(R.string.times)
@@ -560,6 +582,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 showCustomTimesFragment.setFab(mainFab)
 
                 closeSearch()
+
+                calendarShown = false
             }
             MainActivity.Tab.FRIENDS -> {
                 checkNotNull(userInfo)
@@ -582,6 +606,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 friendListFragment.setFab(mainFab)
 
                 closeSearch()
+
+                calendarShown = false
             }
             MainActivity.Tab.DEBUG -> {
                 supportActionBar!!.title = "Debug"
@@ -602,10 +628,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 mainFab.hide()
 
                 closeSearch()
+
+                calendarShown = false
             }
         }
 
         visibleTab = tab
+
+        updateCalendar()
     }
 
     override fun onCreateTaskActionMode(actionMode: ActionMode) {
@@ -829,6 +859,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private fun hideKeyboard() {
         currentFocus?.let { (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(it.windowToken, 0) }
+    }
+
+    private fun updateCalendar() {
+        mainCalendar.visibility = if (calendarShown) View.VISIBLE else View.GONE
     }
 
     private inner class MyFragmentStatePagerAdapter(fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager), FabUser {

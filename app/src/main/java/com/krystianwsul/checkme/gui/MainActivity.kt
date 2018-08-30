@@ -51,6 +51,9 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
+import org.joda.time.DateTime
+import org.joda.time.Days
+import org.joda.time.LocalDate
 import java.lang.ref.WeakReference
 
 class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.Data>, TaskListFragment.TaskListListener {
@@ -440,6 +443,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         mainFab.hide()
                 }
                 .addTo(createDisposable)
+
+        mainCalendar.minDate = DateTime.now().millis
+        mainCalendar.setOnDateChangeListener { view, year, month, dayOfMonth ->
+            Log.e("asdf", "days: " + Days.daysBetween(LocalDate(year, month + 1, dayOfMonth), LocalDate.now()).days)
+
+            mainDaysPager.currentItem = Days.daysBetween(LocalDate.now(), LocalDate(year, month + 1, dayOfMonth)).days
+        }
 
         supportLoaderManager.initLoader(0, null, this)
     }
@@ -863,6 +873,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private fun updateCalendar() {
         mainCalendar.visibility = if (calendarShown) View.VISIBLE else View.GONE
+
+        // todo animation
     }
 
     private inner class MyFragmentStatePagerAdapter(fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager), FabUser {

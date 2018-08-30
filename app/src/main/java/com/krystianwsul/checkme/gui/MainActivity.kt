@@ -131,11 +131,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun onPrepareOptionsMenu(menu: Menu) = menu.run {
         when (visibleTab) {
             Tab.INSTANCES -> {
+                findItem(R.id.action_calendar).isVisible = true
                 findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentItem] ?: false
             }
             Tab.TASKS -> {
+                findItem(R.id.action_calendar).isVisible = false
+
                 val searching = mainActivitySearch.visibility == View.VISIBLE
 
                 findItem(R.id.action_close).isVisible = searching
@@ -143,16 +146,19 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 findItem(R.id.action_select_all).isVisible = taskSelectAllVisible && !searching
             }
             Tab.CUSTOM_TIMES -> {
+                findItem(R.id.action_calendar).isVisible = false
                 findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = customTimesSelectAllVisible
             }
             Tab.FRIENDS -> {
+                findItem(R.id.action_calendar).isVisible = false
                 findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = userSelectAllVisible
             }
             else -> {
+                findItem(R.id.action_calendar).isVisible = false
                 findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = false

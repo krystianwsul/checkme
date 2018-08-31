@@ -42,15 +42,13 @@ fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.a
 
 object KotlinUtils {
 
-    fun getRanges(list: List<DayOfWeek>): List<List<DayOfWeek>> {
-        return getRanges(list.sorted(), { x, y ->
-            check(x.ordinal < y.ordinal)
+    fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
+        check(x.ordinal < y.ordinal)
 
-            x.ordinal + 1 < y.ordinal
-        })
+        x.ordinal + 1 < y.ordinal
     }
 
-    fun <T> getRanges(list: List<T>, shouldSplit: (T, T) -> Boolean): List<List<T>> {
+    private fun <T> getRanges(list: List<T>, shouldSplit: (T, T) -> Boolean): List<List<T>> {
         val copy = ArrayList(list)
 
         val ranges = mutableListOf<List<T>>()

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -48,6 +49,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.loaders.MainLoader
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
@@ -128,6 +130,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private var debug = false
 
     private var calendarDate: LocalDate? = null
+    private var calendarHeight: Int? = null
+    private var calendarInitial: Boolean = true
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
@@ -177,10 +181,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_calendar -> {
-                if (calendarDate == null) {
-                    calendarDate = LocalDate.now()
+                calendarDate = if (calendarDate == null) {
+                    LocalDate.now()
                 } else {
-                    calendarDate = null
+                    null
                 }
 
                 updateCalendar()
@@ -256,8 +260,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             calendarDate = getSerializable(CALENDAR_KEY) as? LocalDate
             calendarDate?.let { mainCalendar.date = it.toDateTimeAtStartOfDay().millis }
-
-            updateCalendar()
         }
 
         mainActivitySpinner.run {
@@ -422,6 +424,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             }
         }
 
+        mainCalendar.addOneShotGlobalLayoutListener {
+            Log.e("asdf", "height: " + mainCalendar.height)
+
+            calendarHeight = mainCalendar.height
+
+            updateCalendar()
+        }
+
         showTab(visibleTab)
 
         TickJobIntentService.startServiceRegister(this, "MainActivity: TickJobIntentService.startServiceRegister")
@@ -451,7 +461,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 .addTo(createDisposable)
 
         mainCalendar.minDate = DateTime.now().millis
-        mainCalendar.setOnDateChangeListener { view, year, month, dayOfMonth ->
+        mainCalendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
             calendarDate = LocalDate(year, month + 1, dayOfMonth)
 
             Log.e("asdf", "days: " + Days.daysBetween(calendarDate, LocalDate.now()).days)
@@ -880,9 +890,30 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     private fun updateCalendar() {
-        mainCalendar.visibility = if (calendarDate != null) View.VISIBLE else View.GONE
+        if (calendarHeight == null)
+            return
 
-        // todo animation
+        val targetHeight = if (calendarDate != null) calendarHeight!! else 0
+
+        fun setHeight(height: Int) {
+            val layoutParams = mainCalendar.layoutParams
+            layoutParams.height = height
+            mainCalendar.layoutParams = layoutParams
+        }
+
+        if (calendarInitial) {
+            setHeight(targetHeight)
+
+            calendarInitial = false
+        } else {
+            val animation = ValueAnimator.ofInt(mainCalendar.height, targetHeight)
+            animation.addUpdateListener {
+                val height = it.animatedValue as Int
+                setHeight(height)
+            }
+            animation.duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
+            animation.start()
+        }
     }
 
     private inner class MyFragmentStatePagerAdapter(fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager), FabUser {

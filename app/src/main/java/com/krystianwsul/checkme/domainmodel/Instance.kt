@@ -96,7 +96,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     abstract fun exists(): Boolean
 
     fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
+        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
         val task = task
 
@@ -121,18 +121,16 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         return ArrayList(childInstances.values)
     }
 
-    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp): ExactTimeStamp {
-        val exactTimeStamps = ArrayList<ExactTimeStamp>()
+    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp): Pair<ExactTimeStamp, String> {
+        val exactTimeStamps = mutableListOf(Pair(now, "now"))
 
-        exactTimeStamps.add(now)
+        task.getEndExactTimeStamp()?.let { exactTimeStamps.add(Pair(it.minusOne(), "task end")) }
 
-        task.getEndExactTimeStamp()?.let { exactTimeStamps.add(it.minusOne()) }
+        done?.let { exactTimeStamps.add(Pair(it.minusOne(), "done")) }
 
-        done?.let { exactTimeStamps.add(it.minusOne()) }
+        exactTimeStamps.add(Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"))
 
-        exactTimeStamps.add(scheduleDateTime.timeStamp.toExactTimeStamp())
-
-        return Collections.min(exactTimeStamps)
+        return exactTimeStamps.minBy { it.first }!!
     }
 
     fun isRootInstance(now: ExactTimeStamp) = getParentInstance(now) == null
@@ -184,11 +182,11 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
         val task = task
 
-        val parentTask = task.getParentTask(hierarchyExactTimeStamp) ?: return null
+        val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
 
         fun Task.message() = "name: $name, start: $startExactTimeStamp, end: " + getEndExactTimeStamp()
 
-        if (!parentTask.current(hierarchyExactTimeStamp))
+        if (!parentTask.current(hierarchyExactTimeStamp.first))
             throw ParentInstanceException("instance: " + toString() + ", task: " + task.message() + ", parentTask: " + parentTask.message() + ", hierarchy: " + hierarchyExactTimeStamp)
 
         return domainFactory.getInstance(parentTask.taskKey, scheduleDateTime)

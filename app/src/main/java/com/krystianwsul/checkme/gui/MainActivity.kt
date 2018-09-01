@@ -187,7 +187,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     null
                 }
 
-                updateCalendar()
+                updateCalendarHeight()
             }
             R.id.action_close -> closeSearch()
             R.id.action_search -> {
@@ -259,7 +259,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             }
 
             calendarDate = getSerializable(CALENDAR_KEY) as? LocalDate
-            calendarDate?.let { mainCalendar.date = it.toDateTimeAtStartOfDay().millis }
+
+            updateCalendarHeight()
+            updateCalendarDate()
         }
 
         mainActivitySpinner.run {
@@ -289,7 +291,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         if (timeRange != TimeRange.DAY)
                             calendarDate = null
 
-                        updateCalendar()
+                        updateCalendarHeight()
                     }
                 }
 
@@ -330,6 +332,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 override fun onPageSelected(position: Int) {
                     invalidateOptionsMenu()
+
+                    calendarDate = LocalDate.now().plusDays(mainDaysPager.currentItem)
+
+                    updateCalendarDate()
                 }
 
                 override fun onPageScrollStateChanged(state: Int) = Unit
@@ -429,7 +435,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             calendarHeight = mainCalendar.height
 
-            updateCalendar()
+            updateCalendarHeight()
         }
 
         showTab(visibleTab)
@@ -663,7 +669,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         visibleTab = tab
 
-        updateCalendar()
+        updateCalendarHeight()
     }
 
     override fun onCreateTaskActionMode(actionMode: ActionMode) {
@@ -889,7 +895,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         currentFocus?.let { (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(it.windowToken, 0) }
     }
 
-    private fun updateCalendar() {
+    private fun updateCalendarHeight() {
         if (calendarHeight == null)
             return
 
@@ -915,6 +921,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             animation.start()
         }
     }
+
+    private fun updateCalendarDate() = calendarDate?.let { mainCalendar.date = it.toDateTimeAtStartOfDay().millis }
 
     private inner class MyFragmentStatePagerAdapter(fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager), FabUser {
 

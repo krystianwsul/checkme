@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.content.Context
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
@@ -186,8 +187,10 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
         fun Task.message() = "name: $name, start: $startExactTimeStamp, end: " + getEndExactTimeStamp()
 
-        if (!parentTask.current(hierarchyExactTimeStamp.first))
-            throw ParentInstanceException("instance: " + toString() + ", task: " + task.message() + ", parentTask: " + parentTask.message() + ", hierarchy: " + hierarchyExactTimeStamp)
+        if (!parentTask.current(hierarchyExactTimeStamp.first)) {
+            MyCrashlytics.logException(ParentInstanceException("instance: " + toString() + ", task: " + task.message() + ", parentTask: " + parentTask.message() + ", hierarchy: " + hierarchyExactTimeStamp))
+            return null
+        }
 
         return domainFactory.getInstance(parentTask.taskKey, scheduleDateTime)
     }

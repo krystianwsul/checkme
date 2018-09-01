@@ -360,6 +360,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
 
         updateSelectAll()
+
+        query?.let { search(it) }
     }
 
     private fun updateSelectAll() {

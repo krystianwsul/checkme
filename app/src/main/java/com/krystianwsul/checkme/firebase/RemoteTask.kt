@@ -84,13 +84,16 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
     override fun getOldestVisible(): Date? {
         return if (remoteTaskRecord.oldestVisibleYear != null) {
-            Assert.assertTrue(remoteTaskRecord.oldestVisibleMonth != null)
-            Assert.assertTrue(remoteTaskRecord.oldestVisibleDay != null)
+            checkNotNull(remoteTaskRecord.oldestVisibleMonth != null)
+            checkNotNull(remoteTaskRecord.oldestVisibleDay != null)
 
             Date(remoteTaskRecord.oldestVisibleYear!!, remoteTaskRecord.oldestVisibleMonth!!, remoteTaskRecord.oldestVisibleDay!!)
         } else {
-            Assert.assertTrue(remoteTaskRecord.oldestVisibleMonth == null)
-            Assert.assertTrue(remoteTaskRecord.oldestVisibleDay == null)
+            if (remoteTaskRecord.oldestVisibleMonth != null || remoteTaskRecord.oldestVisibleDay != null)
+                throw MissingDayException("projectId: ${remoteProject.id}, taskId: $id, oldestVisibleYear: ${remoteTaskRecord.oldestVisibleYear}, oldestVisibleMonth: ${remoteTaskRecord.oldestVisibleMonth}, oldestVisibleDay: ${remoteTaskRecord.oldestVisibleDay}")
+
+            check(remoteTaskRecord.oldestVisibleMonth == null)
+            check(remoteTaskRecord.oldestVisibleDay == null)
 
             null
         }
@@ -390,4 +393,6 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
         return this
     }
+
+    private class MissingDayException(message: String) : Exception(message)
 }

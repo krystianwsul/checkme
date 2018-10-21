@@ -286,6 +286,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         groupSelectAllVisible.clear()
                         invalidateOptionsMenu()
 
+                        if (timeRange != TimeRange.DAY)
+                            calendarOpen = false
+
+                        updateCalendarDate()
                         updateCalendarHeight()
                     }
                 }
@@ -920,6 +924,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     private fun updateCalendarDate() {
+        if (timeRange != TimeRange.DAY)
+            return
+
         mainCalendar.date = LocalDate.now()
                 .plusDays(mainDaysPager.currentItem)
                 .toDateTimeAtStartOfDay()

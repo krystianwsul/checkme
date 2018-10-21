@@ -8,8 +8,6 @@ import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v4.util.ArrayMap
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewCompat
@@ -46,11 +44,13 @@ import com.krystianwsul.checkme.gui.instances.DayFragment
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.loaders.MainLoader
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.viewmodels.MainViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.joda.time.DateTime
@@ -58,7 +58,7 @@ import org.joda.time.Days
 import org.joda.time.LocalDate
 import java.lang.ref.WeakReference
 
-class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.DomainData>, TaskListFragment.TaskListListener {
+class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, TaskListFragment.TaskListListener {
 
     companion object {
 
@@ -132,6 +132,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private var calendarOpen = false
     private var calendarHeight: Int? = null
     private var calendarInitial: Boolean = true
+
+    private lateinit var mainViewModel: MainViewModel
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
@@ -475,8 +477,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             updateCalendarHeight()
         }
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this)
+        mainViewModel = getViewModel<MainViewModel>().apply {
+            start()
+
+            createDisposable += data.subscribe {
+                it.value!!.let { taskListFragment.setAllTasks(it.dataId, it.taskData) }
+            }
+        }
     }
 
     override fun onStart() {
@@ -484,14 +491,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         firebaseAuth.addAuthStateListener(mAuthStateListener)
     }
-
-    override fun onCreateLoader(id: Int, args: Bundle?) = MainLoader(this)
-
-    override fun onLoadFinished(loader: Loader<MainLoader.DomainData>, data: MainLoader.DomainData) {
-        taskListFragment.setAllTasks(data.dataId, data.taskData)
-    }
-
-    override fun onLoaderReset(loader: Loader<MainLoader.DomainData>) = Unit
 
     override fun onStop() {
         super.onStop()

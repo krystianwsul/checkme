@@ -48,7 +48,6 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.FriendListLoader;
-import com.krystianwsul.checkme.loaders.MainLoader;
 import com.krystianwsul.checkme.loaders.ProjectListLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import com.krystianwsul.checkme.viewmodels.DayViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel;
+import com.krystianwsul.checkme.viewmodels.MainViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -980,14 +980,14 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized MainLoader.DomainData getMainData(@NonNull Context context) {
+    public synchronized MainViewModel.Data getMainData(@NonNull Context context) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getMainData");
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        return new MainLoader.DomainData(getMainData(now, context));
+        return new MainViewModel.Data(getMainData(now, context));
     }
 
     @NonNull

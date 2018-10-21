@@ -6,32 +6,41 @@ import com.krystianwsul.checkme.loaders.FirebaseLevel
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
-import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.*
 
-class EditInstanceViewModel : DomainViewModel<EditInstanceViewModel.Data>() {
+class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
 
-    private lateinit var instanceKey: InstanceKey
+    private lateinit var instanceKeys: List<InstanceKey>
 
-    fun start(instanceKey: InstanceKey) {
-        this.instanceKey = instanceKey
+    fun start(instanceKeys: List<InstanceKey>) {
+        check(instanceKeys.size > 1)
 
-        internalStart(if (instanceKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING)
+        this.instanceKeys = instanceKeys
+
+        val firebaseLevel = if (instanceKeys.any { it.type == TaskKey.Type.REMOTE })
+            FirebaseLevel.NEED
+        else
+            FirebaseLevel.NOTHING
+
+        internalStart(firebaseLevel)
     }
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getEditInstanceData(instanceKey)
+    override fun getData(domainFactory: DomainFactory) = domainFactory.getEditInstancesData(instanceKeys)
 
     data class Data(
-            val instanceKey: InstanceKey,
-            val instanceDate: Date,
-            val instanceTimePair: TimePair,
-            val name: String,
+            val instanceDatas: Map<InstanceKey, InstanceData>,
             val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
-            val done: Boolean,
             val showHour: Boolean) : DomainData() {
+
+        init {
+            check(instanceDatas.size > 1)
+        }
+    }
+
+    data class InstanceData(val instanceDateTime: DateTime, val name: String) {
 
         init {
             check(name.isNotEmpty())

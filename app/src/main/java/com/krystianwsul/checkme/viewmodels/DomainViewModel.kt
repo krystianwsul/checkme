@@ -35,7 +35,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private lateinit var firebaseLevel: FirebaseLevel
 
-    protected fun start(firebaseLevel: FirebaseLevel) {
+    protected fun internalStart(firebaseLevel: FirebaseLevel) {
         this.firebaseLevel = firebaseLevel
 
         if (observer == null) {

@@ -17,7 +17,7 @@ class DayViewModel : DomainViewModel<DayViewModel.DayData>() {
         this.position = position
         this.timeRange = timeRange
 
-        start(FirebaseLevel.WANT)
+        internalStart(FirebaseLevel.WANT)
     }
 
     override fun getData(domainFactory: DomainFactory) = domainFactory.getGroupListData(MyApplication.instance, ExactTimeStamp.now, position, timeRange)

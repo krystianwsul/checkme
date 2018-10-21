@@ -47,7 +47,6 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.FriendListLoader;
 import com.krystianwsul.checkme.loaders.MainLoader;
 import com.krystianwsul.checkme.loaders.ProjectListLoader;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 import com.krystianwsul.checkme.viewmodels.DayViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel;
+import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -495,7 +495,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized EditInstancesLoader.DomainData getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {
+    public synchronized EditInstancesViewModel.Data getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstancesData");
@@ -507,14 +507,14 @@ public class DomainFactory {
         Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
-        HashMap<InstanceKey, EditInstancesLoader.InstanceDomainData> instanceDatas = new HashMap<>();
+        HashMap<InstanceKey, EditInstancesViewModel.InstanceData> instanceDatas = new HashMap<>();
 
         for (InstanceKey instanceKey : instanceKeys) {
             Instance instance = getInstance(instanceKey);
             check(instance.isRootInstance(now));
             check(instance.getDone() == null);
 
-            instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceDomainData(instance.getInstanceDateTime(), instance.getName()));
+            instanceDatas.put(instanceKey, new EditInstancesViewModel.InstanceData(instance.getInstanceDateTime(), instance.getName()));
 
             if (instance.getInstanceTimePair().getCustomTimeKey() != null) {
                 CustomTime customTime = getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
@@ -523,13 +523,13 @@ public class DomainFactory {
             }
         }
 
-        Map<CustomTimeKey, EditInstancesLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        Map<CustomTimeKey, EditInstancesViewModel.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : currentCustomTimes.values())
-            customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstancesLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstancesViewModel.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
         Boolean showHour = Stream.of(instanceDatas.values()).allMatch(instanceData -> instanceData.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) < 0);
 
-        return new EditInstancesLoader.DomainData(instanceDatas, customTimeDatas, showHour);
+        return new EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour);
     }
 
     @NonNull

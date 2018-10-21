@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v7.app.ActionBar
 import android.support.v7.widget.Toolbar
 import android.view.Menu
@@ -18,16 +16,18 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.loaders.EditInstancesLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_edit_instance.*
 import java.util.*
 
-class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<EditInstancesLoader.DomainData> {
+class EditInstancesActivity : AbstractActivity() {
 
     companion object {
 
@@ -54,7 +54,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
     }
 
     private var mDate: Date? = null
-    private var mData: EditInstancesLoader.DomainData? = null
+    private var mData: EditInstancesViewModel.Data? = null
 
     private lateinit var actionBar: ActionBar
 
@@ -108,6 +108,8 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
     private var mInitialTimePair: TimePair? = null
     private var mInitialDate: Date? = null
 
+    private lateinit var editInstancesViewModel: EditInstancesViewModel
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_edit_instance, menu)
         return true
@@ -125,8 +127,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
                 checkNotNull(mData)
                 check(mData!!.showHour)
 
-                @Suppress("DEPRECATION")
-                supportLoaderManager.destroyLoader(0)
+                editInstancesViewModel.stop()
 
                 DomainFactory.getDomainFactory().setInstancesAddHourActivity(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
 
@@ -191,8 +192,14 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
             checkNotNull(mInitialDate)
         }
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader<EditInstancesLoader.DomainData>(0, null, this)
+        val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCE_KEYS)!!
+        check(instanceKeys.size > 1)
+
+        editInstancesViewModel = getViewModel<EditInstancesViewModel>().apply {
+            start(instanceKeys)
+
+            createDisposable += data.subscribe { onLoadFinished(it.value!!) }
+        }
 
         mBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -238,18 +245,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<EditInstancesLoader.DomainData> {
-        val intent = intent
-        check(intent.hasExtra(INSTANCE_KEYS))
-        val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCE_KEYS)
-
-        checkNotNull(instanceKeys)
-        check(instanceKeys!!.size > 1)
-
-        return EditInstancesLoader(this, instanceKeys)
-    }
-
-    override fun onLoadFinished(loader: Loader<EditInstancesLoader.DomainData>, data: EditInstancesLoader.DomainData) {
+    private fun onLoadFinished(data: EditInstancesViewModel.Data) {
         mData = data
 
         editInstanceLayout.visibility = View.VISIBLE
@@ -303,8 +299,6 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         val timeDialogFragment = supportFragmentManager.findFragmentByTag(TIME_DIALOG_FRAGMENT_TAG) as? TimeDialogFragment
         timeDialogFragment?.timeDialogListener = mTimeDialogListener
     }
-
-    override fun onLoaderReset(loader: Loader<EditInstancesLoader.DomainData>) {}
 
     private fun updateDateText() {
         checkNotNull(mDate)

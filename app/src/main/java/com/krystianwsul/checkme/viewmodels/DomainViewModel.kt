@@ -17,7 +17,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 
-abstract class DomainViewModel<D : DomainData>() : ViewModel() {
+abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 

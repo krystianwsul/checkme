@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances
 
 
-import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.view.LayoutInflater
@@ -13,6 +12,7 @@ import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.DayViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_day.*
 import java.text.DateFormatSymbols
@@ -107,7 +107,7 @@ class DayFragment : AbstractFragment(), FabUser {
 
         floatingActionButton?.let { groupListFragment!!.setFab(it) }
 
-        dayViewModel = ViewModelProviders.of(this).get(DayViewModel::class.java).apply {
+        dayViewModel = getViewModel<DayViewModel>().apply {
             start(position, timeRange)
 
             createDisposable += data.subscribe {

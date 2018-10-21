@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances
 
 import android.annotation.SuppressLint
-import android.arch.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -27,8 +26,8 @@ import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
-
 import kotlinx.android.synthetic.main.activity_edit_instance.*
 import java.util.*
 
@@ -182,7 +181,7 @@ class EditInstanceActivity : AbstractActivity() {
 
         val instanceKey = intent.getParcelableExtra<InstanceKey>(INSTANCE_KEY)!!
 
-        editInstanceViewModel = ViewModelProviders.of(this)[EditInstanceViewModel::class.java].apply {
+        editInstanceViewModel = getViewModel<EditInstanceViewModel>().apply {
             start(instanceKey)
 
             createDisposable += data.subscribe { onLoadFinished(it.value!!) }

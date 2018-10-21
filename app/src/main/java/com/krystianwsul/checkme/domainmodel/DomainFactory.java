@@ -47,8 +47,6 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.DayData;
-import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.FriendListLoader;
 import com.krystianwsul.checkme.loaders.MainLoader;
@@ -80,6 +78,8 @@ import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
+import com.krystianwsul.checkme.viewmodels.DayViewModel;
+import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -468,7 +468,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized EditInstanceLoader.DomainData getEditInstanceData(@NonNull InstanceKey instanceKey) {
+    public synchronized EditInstanceViewModel.Data getEditInstanceData(@NonNull InstanceKey instanceKey) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstanceData");
@@ -487,11 +487,11 @@ public class DomainFactory {
             currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
         }
 
-        Map<CustomTimeKey, EditInstanceLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        Map<CustomTimeKey, EditInstanceViewModel.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : currentCustomTimes.values())
-            customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstanceLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstanceViewModel.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new EditInstanceLoader.DomainData(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas, (instance.getDone() != null), instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0);
+        return new EditInstanceViewModel.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas, (instance.getDone() != null), instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0);
     }
 
     @NonNull
@@ -566,7 +566,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized DayData getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
+    public synchronized DayViewModel.DayData getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
@@ -650,7 +650,7 @@ public class DomainFactory {
         }
 
         GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas);
-        DayData data = new DayData(dataWrapper);
+        DayViewModel.DayData data = new DayViewModel.DayData(dataWrapper);
 
         Stream.of(instanceDatas.values()).forEach(instanceData -> instanceData.setInstanceDataParent(dataWrapper));
 

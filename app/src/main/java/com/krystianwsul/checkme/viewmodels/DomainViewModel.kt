@@ -17,7 +17,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 
-abstract class DomainViewModel<D : DomainData>(private val firebaseLevel: FirebaseLevel) : ViewModel() {
+abstract class DomainViewModel<D : DomainData>() : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -33,7 +33,11 @@ abstract class DomainViewModel<D : DomainData>(private val firebaseLevel: Fireba
         load()
     }
 
-    fun start() {
+    private lateinit var firebaseLevel: FirebaseLevel
+
+    protected fun start(firebaseLevel: FirebaseLevel) {
+        this.firebaseLevel = firebaseLevel
+
         if (observer == null) {
             observer = Observer()
             ObserverHolder.addDomainObserver(observer!!)
@@ -104,11 +108,7 @@ abstract class DomainViewModel<D : DomainData>(private val firebaseLevel: Fireba
 
     protected abstract fun getData(domainFactory: DomainFactory): D?
 
-    override fun onCleared() {
-        compositeDisposable.dispose()
-
-        super.onCleared()
-    }
+    override fun onCleared() = stop()
 
     inner class Observer : DomainObserver {
 

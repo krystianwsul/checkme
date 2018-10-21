@@ -7,14 +7,13 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.time.TimeStamp
 
 
-
-class ShowGroupLoader(context: Context, private val timeStamp: TimeStamp) : DomainLoader<ShowGroupLoader.Data>(context, DomainLoader.FirebaseLevel.WANT) {
+class ShowGroupLoader(context: Context, private val timeStamp: TimeStamp) : DomainLoader<ShowGroupLoader.DomainData>(context, FirebaseLevel.WANT) {
 
     override val name = "ShowGroupLoader, timeStamp: " + timeStamp
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowGroupData(context, timeStamp)
 
-    data class Data(val displayText: String, val dataWrapper: GroupListFragment.DataWrapper?) : DomainLoader.Data() {
+    data class DomainData(val displayText: String, val dataWrapper: GroupListFragment.DataWrapper?) : com.krystianwsul.checkme.loaders.DomainData() {
 
         init {
             check(displayText.isNotEmpty())

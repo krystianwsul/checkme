@@ -5,11 +5,11 @@ import android.content.Context
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 
-class MainLoader(context: Context) : DomainLoader<MainLoader.Data>(context, DomainLoader.FirebaseLevel.WANT) {
+class MainLoader(context: Context) : DomainLoader<MainLoader.DomainData>(context, FirebaseLevel.WANT) {
 
     override val name = "MainLoader"
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getMainData(context)
 
-    data class Data(val taskData: TaskListFragment.TaskData) : DomainLoader.Data()
+    data class DomainData(val taskData: TaskListFragment.TaskData) : com.krystianwsul.checkme.loaders.DomainData()
 }

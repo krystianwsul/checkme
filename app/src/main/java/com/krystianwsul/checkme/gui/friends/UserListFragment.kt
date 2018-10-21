@@ -49,7 +49,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var friendListAdapter: FriendListAdapter? = null
 
-    private var data: ShowProjectLoader.Data? = null
+    private var data: ShowProjectLoader.DomainData? = null
 
     private var saveState: SaveState? = null
 
@@ -155,7 +155,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    fun initialize(projectId: String?, data: ShowProjectLoader.Data) {
+    fun initialize(projectId: String?, data: ShowProjectLoader.DomainData) {
         this.projectId = projectId
         this.data = data
 

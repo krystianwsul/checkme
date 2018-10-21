@@ -11,13 +11,13 @@ import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.*
 
-class EditInstanceLoader(context: Context, private val instanceKey: InstanceKey) : DomainLoader<EditInstanceLoader.Data>(context, if (instanceKey.type == TaskKey.Type.REMOTE) DomainLoader.FirebaseLevel.NEED else DomainLoader.FirebaseLevel.NOTHING) {
+class EditInstanceLoader(context: Context, private val instanceKey: InstanceKey) : DomainLoader<EditInstanceLoader.DomainData>(context, if (instanceKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING) {
 
     override val name = "EditInstanceLoader, instanceKey: " + instanceKey
 
     public override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getEditInstanceData(instanceKey)
 
-    data class Data(val instanceKey: InstanceKey, val instanceDate: Date, val instanceTimePair: TimePair, val name: String, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>, val done: Boolean, val showHour: Boolean) : DomainLoader.Data() {
+    data class DomainData(val instanceKey: InstanceKey, val instanceDate: Date, val instanceTimePair: TimePair, val name: String, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>, val done: Boolean, val showHour: Boolean) : com.krystianwsul.checkme.loaders.DomainData() {
 
         init {
             check(name.isNotEmpty())

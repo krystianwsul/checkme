@@ -1,15 +1,15 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.loaders.DomainLoader
+import com.krystianwsul.checkme.viewmodels.DomainObserver
 import java.lang.ref.WeakReference
 import java.util.*
 
 object ObserverHolder {
 
-    private val observers = ArrayList<WeakReference<DomainLoader<*>.Observer>>()
+    private val observers = ArrayList<WeakReference<DomainObserver>>()
 
     @Synchronized
-    fun addDomainObserver(observer: DomainLoader<*>.Observer) = observers.add(WeakReference(observer))
+    fun addDomainObserver(observer: DomainObserver) = observers.add(WeakReference(observer))
 
     @Synchronized
     fun clear() {
@@ -18,7 +18,7 @@ object ObserverHolder {
 
     @Synchronized
     fun notifyDomainObservers(dataIds: List<Int>) {
-        val remove = ArrayList<WeakReference<DomainLoader<*>.Observer>>()
+        val remove = ArrayList<WeakReference<DomainObserver>>()
 
         for (reference in observers) {
             val observer = reference.get()

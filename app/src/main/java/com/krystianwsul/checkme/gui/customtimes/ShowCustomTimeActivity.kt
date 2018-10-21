@@ -26,7 +26,7 @@ import kotlinx.android.synthetic.main.activity_show_custom_time.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
 
-class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowCustomTimeLoader.Data> {
+class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowCustomTimeLoader.DomainData> {
 
     companion object {
 
@@ -57,7 +57,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
 
     private var customTimeId: Int? = null
 
-    private var data: ShowCustomTimeLoader.Data? = null
+    private var data: ShowCustomTimeLoader.DomainData? = null
 
     private val timeViews = HashMap<DayOfWeek, TextView>()
     private val hourMinutes = HashMap<DayOfWeek, HourMinute>()
@@ -270,7 +270,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
         })
     }
 
-    override fun onLoadFinished(loader: Loader<ShowCustomTimeLoader.Data>, data: ShowCustomTimeLoader.Data) {
+    override fun onLoadFinished(loader: Loader<ShowCustomTimeLoader.DomainData>, data: ShowCustomTimeLoader.DomainData) {
         Log.e("asdf", "onLoadFinished")
 
         this.data = data
@@ -289,7 +289,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
         invalidateOptionsMenu()
     }
 
-    override fun onLoaderReset(data: Loader<ShowCustomTimeLoader.Data>) {}
+    override fun onLoaderReset(data: Loader<ShowCustomTimeLoader.DomainData>) {}
 
     override fun onBackPressed() {
         if (tryClose())

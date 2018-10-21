@@ -17,7 +17,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 
-class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener, LoaderManager.LoaderCallbacks<ShowNotificationGroupLoader.Data> {
+class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener, LoaderManager.LoaderCallbacks<ShowNotificationGroupLoader.DomainData> {
 
     companion object {
 
@@ -63,11 +63,11 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
 
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowNotificationGroupLoader(this, instanceKeys)
 
-    override fun onLoadFinished(loader: Loader<ShowNotificationGroupLoader.Data>, data: ShowNotificationGroupLoader.Data) {
+    override fun onLoadFinished(loader: Loader<ShowNotificationGroupLoader.DomainData>, data: ShowNotificationGroupLoader.DomainData) {
         groupListFragment.setInstanceKeys(instanceKeys, data.dataId, data.dataWrapper)
     }
 
-    override fun onLoaderReset(loader: Loader<ShowNotificationGroupLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<ShowNotificationGroupLoader.DomainData>) = Unit
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
 

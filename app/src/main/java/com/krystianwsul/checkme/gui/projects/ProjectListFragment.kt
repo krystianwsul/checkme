@@ -28,7 +28,7 @@ import com.krystianwsul.treeadapter.*
 import kotlinx.android.synthetic.main.row_project.view.*
 import java.util.*
 
-class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<ProjectListLoader.Data>, FabUser {
+class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<ProjectListLoader.DomainData>, FabUser {
 
     companion object {
 
@@ -145,7 +145,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
 
     override fun onCreateLoader(id: Int, args: Bundle?) = ProjectListLoader(activity!!)
 
-    override fun onLoadFinished(loader: Loader<ProjectListLoader.Data>, data: ProjectListLoader.Data) {
+    override fun onLoadFinished(loader: Loader<ProjectListLoader.DomainData>, data: ProjectListLoader.DomainData) {
         dataId = data.dataId
 
         projectListProgress.visibility = View.GONE
@@ -171,7 +171,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         updateFabVisibility()
     }
 
-    override fun onLoaderReset(loader: Loader<ProjectListLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<ProjectListLoader.DomainData>) = Unit
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

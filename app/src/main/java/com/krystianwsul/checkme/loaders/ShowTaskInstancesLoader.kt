@@ -5,15 +5,15 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.TaskKey
 
-class ShowTaskInstancesLoader(context: Context, private val taskKey: TaskKey) : DomainLoader<ShowTaskInstancesLoader.Data>(context, needsFirebase(taskKey)) {
+class ShowTaskInstancesLoader(context: Context, private val taskKey: TaskKey) : DomainLoader<ShowTaskInstancesLoader.DomainData>(context, needsFirebase(taskKey)) {
 
     companion object {
 
-        private fun needsFirebase(taskKey: TaskKey): DomainLoader.FirebaseLevel {
+        private fun needsFirebase(taskKey: TaskKey): FirebaseLevel {
             return if (taskKey.type == TaskKey.Type.REMOTE)
-                DomainLoader.FirebaseLevel.NEED
+                FirebaseLevel.NEED
             else
-                DomainLoader.FirebaseLevel.NOTHING
+                FirebaseLevel.NOTHING
         }
     }
 
@@ -21,5 +21,5 @@ class ShowTaskInstancesLoader(context: Context, private val taskKey: TaskKey) : 
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(taskKey)
 
-    data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainLoader.Data()
+    data class DomainData(val dataWrapper: GroupListFragment.DataWrapper) : com.krystianwsul.checkme.loaders.DomainData()
 }

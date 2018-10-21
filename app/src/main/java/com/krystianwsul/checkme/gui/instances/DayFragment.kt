@@ -1,10 +1,9 @@
 package com.krystianwsul.checkme.gui.instances
 
 
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.krystianwsul.checkme.R
@@ -12,18 +11,19 @@ import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.loaders.DayLoader
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.viewmodels.DayViewModel
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_day.*
 import java.text.DateFormatSymbols
 import java.util.*
 
-class DayFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<DayLoader.Data>, FabUser {
+class DayFragment : AbstractFragment(), FabUser {
 
     companion object {
 
-        private val POSITION_KEY = "position"
-        private val TIME_RANGE_KEY = "timeRange"
+        private const val POSITION_KEY = "position"
+        private const val TIME_RANGE_KEY = "timeRange"
 
         fun newInstance(timeRange: MainActivity.TimeRange, day: Int) = DayFragment().apply {
             check(day >= 0)
@@ -40,6 +40,8 @@ class DayFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<DayLoader.
 
     private var groupListFragment: GroupListFragment? = null
     private var floatingActionButton: FloatingActionButton? = null
+
+    private lateinit var dayViewModel: DayViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,16 +107,14 @@ class DayFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<DayLoader.
 
         floatingActionButton?.let { groupListFragment!!.setFab(it) }
 
-        loaderManager.initLoader(0, null, this)
+        dayViewModel = ViewModelProviders.of(this).get(DayViewModel::class.java).apply {
+            start(position, timeRange)
+
+            createDisposable += data.subscribe {
+                it.value!!.let { groupListFragment!!.setAll(timeRange, position, it.dataId, it.dataWrapper) }
+            }
+        }
     }
-
-    override fun onCreateLoader(id: Int, args: Bundle?) = DayLoader(activity!!, position, timeRange)
-
-    override fun onLoadFinished(loader: Loader<DayLoader.Data>, data: DayLoader.Data) {
-        groupListFragment!!.setAll(timeRange, position, data.dataId, data.dataWrapper)
-    }
-
-    override fun onLoaderReset(loader: Loader<DayLoader.Data>) = Unit
 
     fun selectAll() {
         groupListFragment!!.selectAll()

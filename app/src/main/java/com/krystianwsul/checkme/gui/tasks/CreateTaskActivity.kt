@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
 
 @Suppress("CascadeIf")
-class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<CreateTaskLoader.Data> {
+class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<CreateTaskLoader.DomainData> {
 
     companion object {
 
@@ -99,7 +99,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
     private var mParentTaskKeyHint: TaskKey? = null
     private var mNameHint: String? = null
 
-    private var mData: CreateTaskLoader.Data? = null
+    private var mData: CreateTaskLoader.DomainData? = null
 
     private var mParent: CreateTaskLoader.ParentTreeData? = null
 
@@ -382,7 +382,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader<CreateTaskLoader.Data>(0, null, this)
+        supportLoaderManager.initLoader<CreateTaskLoader.DomainData>(0, null, this)
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
@@ -412,7 +412,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
     override fun onCreateLoader(id: Int, args: Bundle?) = CreateTaskLoader(this, mTaskKey, mTaskKeys)
 
-    override fun onLoadFinished(loader: Loader<CreateTaskLoader.Data>, data: CreateTaskLoader.Data) {
+    override fun onLoadFinished(loader: Loader<CreateTaskLoader.DomainData>, data: CreateTaskLoader.DomainData) {
         mData = data
 
         toolbarLayout.run {
@@ -538,7 +538,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         check(!hasValueParentTask() || !hasValueSchedule())
     }
 
-    override fun onLoaderReset(loader: Loader<CreateTaskLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<CreateTaskLoader.DomainData>) = Unit
 
     override fun onBackPressed() {
         if (tryClose())

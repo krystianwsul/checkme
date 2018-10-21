@@ -32,7 +32,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 import kotlinx.android.synthetic.main.activity_edit_instance.*
 import java.util.*
 
-class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<EditInstanceLoader.Data> {
+class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<EditInstanceLoader.DomainData> {
 
     companion object {
 
@@ -52,7 +52,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
     }
 
     private var mDate: Date? = null
-    private var mData: EditInstanceLoader.Data? = null
+    private var mData: EditInstanceLoader.DomainData? = null
 
     private lateinit var actionBar: ActionBar
 
@@ -180,7 +180,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         }
 
         @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader<EditInstanceLoader.Data>(0, null, this)
+        supportLoaderManager.initLoader<EditInstanceLoader.DomainData>(0, null, this)
 
         mBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -220,7 +220,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<EditInstanceLoader.Data> {
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<EditInstanceLoader.DomainData> {
         val intent = intent
         check(intent.hasExtra(INSTANCE_KEY))
 
@@ -230,7 +230,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         return EditInstanceLoader(this, instanceKey!!)
     }
 
-    override fun onLoadFinished(loader: Loader<EditInstanceLoader.Data>, data: EditInstanceLoader.Data) {
+    override fun onLoadFinished(loader: Loader<EditInstanceLoader.DomainData>, data: EditInstanceLoader.DomainData) {
         mData = data
 
         if (data.done) {
@@ -278,7 +278,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         timeDialogFragment?.timeDialogListener = mTimeDialogListener
     }
 
-    override fun onLoaderReset(loader: Loader<EditInstanceLoader.Data>) {}
+    override fun onLoaderReset(loader: Loader<EditInstanceLoader.DomainData>) {}
 
     private fun updateDateText() {
         check(mDate != null)

@@ -8,8 +8,9 @@ import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.viewmodels.DomainObserver
 
-abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val firebaseLevel: FirebaseLevel) : AsyncTaskLoader<D>(context) {
+abstract class DomainLoader<D : DomainData>(context: Context, private val firebaseLevel: FirebaseLevel) : AsyncTaskLoader<D>(context) {
 
     private var data: D? = null
 
@@ -63,8 +64,8 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
 
         if (takeContentChanged() || data == null) {
             when (firebaseLevel) {
-                DomainLoader.FirebaseLevel.NOTHING -> forceLoad()
-                DomainLoader.FirebaseLevel.WANT -> {
+                FirebaseLevel.NOTHING -> forceLoad()
+                FirebaseLevel.WANT -> {
                     forceLoad()
 
                     val firebaseUser = FirebaseAuth.getInstance().currentUser
@@ -74,7 +75,7 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
                         domainFactory.setUserInfo(context.applicationContext, SaveService.Source.GUI, userInfo)
                     }
                 }
-                DomainLoader.FirebaseLevel.NEED -> {
+                FirebaseLevel.NEED -> {
                     if (domainFactory.isConnected) {
                         forceLoad()
                     } else {
@@ -86,7 +87,7 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
                         domainFactory.addFirebaseListener(firebaseListener)
                     }
                 }
-                DomainLoader.FirebaseLevel.FRIEND -> {
+                FirebaseLevel.FRIEND -> {
                     if (domainFactory.isConnected && RemoteFriendFactory.hasFriends()) {
                         forceLoad()
                     } else {
@@ -115,35 +116,13 @@ abstract class DomainLoader<D : DomainLoader.Data>(context: Context, private val
         observer = null
     }
 
-    inner class Observer {
-        fun onDomainChanged(dataIds: List<Int>) {
+    inner class Observer : DomainObserver {
+
+        override fun onDomainChanged(dataIds: List<Int>) {
             if (data?.let { dataIds.contains(it.dataId) } == true)
                 return
 
             onContentChanged()
         }
-    }
-
-    abstract class Data {
-
-        companion object {
-
-            private var sDataId = 1
-
-            private val nextId get() = sDataId++
-        }
-
-        val dataId: Int
-
-        init {
-            dataId = nextId
-        }
-    }
-
-    enum class FirebaseLevel {
-        NOTHING,
-        WANT,
-        NEED,
-        FRIEND
     }
 }

@@ -17,7 +17,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupListListener, LoaderManager.LoaderCallbacks<ShowTaskInstancesLoader.Data> {
+class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupListListener, LoaderManager.LoaderCallbacks<ShowTaskInstancesLoader.DomainData> {
 
     companion object {
 
@@ -58,11 +58,11 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
 
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowTaskInstancesLoader(this, taskKey)
 
-    override fun onLoadFinished(loader: Loader<ShowTaskInstancesLoader.Data>, data: ShowTaskInstancesLoader.Data) {
+    override fun onLoadFinished(loader: Loader<ShowTaskInstancesLoader.DomainData>, data: ShowTaskInstancesLoader.DomainData) {
         groupListFragment.setTaskKey(taskKey, data.dataId, data.dataWrapper)
     }
 
-    override fun onLoaderReset(loader: Loader<ShowTaskInstancesLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<ShowTaskInstancesLoader.DomainData>) = Unit
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
 

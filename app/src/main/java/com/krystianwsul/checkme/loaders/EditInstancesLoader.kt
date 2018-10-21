@@ -10,15 +10,15 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import java.util.*
 
-class EditInstancesLoader(context: Context, private val instanceKeys: List<InstanceKey>) : DomainLoader<EditInstancesLoader.Data>(context, needsFirebase(instanceKeys)) {
+class EditInstancesLoader(context: Context, private val instanceKeys: List<InstanceKey>) : DomainLoader<EditInstancesLoader.DomainData>(context, needsFirebase(instanceKeys)) {
 
     companion object {
 
-        private fun needsFirebase(instanceKeys: List<InstanceKey>): DomainLoader.FirebaseLevel {
+        private fun needsFirebase(instanceKeys: List<InstanceKey>): FirebaseLevel {
             return if (instanceKeys.any { it.type == TaskKey.Type.REMOTE })
-                DomainLoader.FirebaseLevel.NEED
+                FirebaseLevel.NEED
             else
-                DomainLoader.FirebaseLevel.NOTHING
+                FirebaseLevel.NOTHING
         }
     }
 
@@ -30,14 +30,14 @@ class EditInstancesLoader(context: Context, private val instanceKeys: List<Insta
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getEditInstancesData(instanceKeys)
 
-    data class Data(val instanceDatas: HashMap<InstanceKey, InstanceData>, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>, val showHour: Boolean) : DomainLoader.Data() {
+    data class DomainData(val instanceDatas: HashMap<InstanceKey, InstanceDomainData>, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>, val showHour: Boolean) : com.krystianwsul.checkme.loaders.DomainData() {
 
         init {
             check(instanceDatas.size > 1)
         }
     }
 
-    data class InstanceData(val instanceDateTime: DateTime, val name: String) : DomainLoader.Data() {
+    data class InstanceDomainData(val instanceDateTime: DateTime, val name: String) : com.krystianwsul.checkme.loaders.DomainData() {
 
         init {
             check(name.isNotEmpty())

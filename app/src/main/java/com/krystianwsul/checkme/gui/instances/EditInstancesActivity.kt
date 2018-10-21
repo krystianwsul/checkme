@@ -27,7 +27,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import kotlinx.android.synthetic.main.activity_edit_instance.*
 import java.util.*
 
-class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<EditInstancesLoader.Data> {
+class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<EditInstancesLoader.DomainData> {
 
     companion object {
 
@@ -54,7 +54,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
     }
 
     private var mDate: Date? = null
-    private var mData: EditInstancesLoader.Data? = null
+    private var mData: EditInstancesLoader.DomainData? = null
 
     private lateinit var actionBar: ActionBar
 
@@ -192,7 +192,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         }
 
         @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader<EditInstancesLoader.Data>(0, null, this)
+        supportLoaderManager.initLoader<EditInstancesLoader.DomainData>(0, null, this)
 
         mBroadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -238,7 +238,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<EditInstancesLoader.Data> {
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<EditInstancesLoader.DomainData> {
         val intent = intent
         check(intent.hasExtra(INSTANCE_KEYS))
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCE_KEYS)
@@ -249,7 +249,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         return EditInstancesLoader(this, instanceKeys)
     }
 
-    override fun onLoadFinished(loader: Loader<EditInstancesLoader.Data>, data: EditInstancesLoader.Data) {
+    override fun onLoadFinished(loader: Loader<EditInstancesLoader.DomainData>, data: EditInstancesLoader.DomainData) {
         mData = data
 
         editInstanceLayout.visibility = View.VISIBLE
@@ -304,7 +304,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
         timeDialogFragment?.timeDialogListener = mTimeDialogListener
     }
 
-    override fun onLoaderReset(loader: Loader<EditInstancesLoader.Data>) {}
+    override fun onLoaderReset(loader: Loader<EditInstancesLoader.DomainData>) {}
 
     private fun updateDateText() {
         checkNotNull(mDate)

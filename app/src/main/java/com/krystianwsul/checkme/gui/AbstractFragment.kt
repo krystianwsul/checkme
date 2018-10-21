@@ -4,8 +4,11 @@ import android.content.Context
 import android.support.v4.app.Fragment
 
 import com.krystianwsul.checkme.MyCrashlytics
+import io.reactivex.disposables.CompositeDisposable
 
 abstract class AbstractFragment : Fragment() {
+
+    protected val createDisposable = CompositeDisposable()
 
     override fun onAttach(context: Context) {
         MyCrashlytics.log(javaClass.simpleName + ".onAttach " + hashCode())
@@ -20,6 +23,14 @@ abstract class AbstractFragment : Fragment() {
     override fun onPause() {
         MyCrashlytics.log(javaClass.simpleName + ".onPause " + hashCode())
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        MyCrashlytics.log(javaClass.simpleName + ".onDetach " + hashCode())
+
+        createDisposable.dispose()
+
+        super.onDestroy()
     }
 
     override fun onDetach() {

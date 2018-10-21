@@ -8,16 +8,15 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 
 
-
-class ShowNotificationGroupLoader(context: Context, private val instanceKeys: Set<InstanceKey>) : DomainLoader<ShowNotificationGroupLoader.Data>(context, needsFirebase(instanceKeys)) {
+class ShowNotificationGroupLoader(context: Context, private val instanceKeys: Set<InstanceKey>) : DomainLoader<ShowNotificationGroupLoader.DomainData>(context, needsFirebase(instanceKeys)) {
 
     companion object {
 
-        private fun needsFirebase(instanceKeys: Set<InstanceKey>): DomainLoader.FirebaseLevel {
+        private fun needsFirebase(instanceKeys: Set<InstanceKey>): FirebaseLevel {
             return if (instanceKeys.any { it.type == TaskKey.Type.REMOTE })
-                DomainLoader.FirebaseLevel.NEED
+                FirebaseLevel.NEED
             else
-                DomainLoader.FirebaseLevel.NOTHING
+                FirebaseLevel.NOTHING
         }
     }
 
@@ -27,11 +26,11 @@ class ShowNotificationGroupLoader(context: Context, private val instanceKeys: Se
 
     override val name = "ShowNotificationGroupLoader, instanceKeys: $instanceKeys"
 
-    override fun loadDomain(domainFactory: DomainFactory): Data {
+    override fun loadDomain(domainFactory: DomainFactory): DomainData {
         check(!instanceKeys.isEmpty())
 
         return domainFactory.getShowNotificationGroupData(context, instanceKeys)
     }
 
-    data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainLoader.Data()
+    data class DomainData(val dataWrapper: GroupListFragment.DataWrapper) : com.krystianwsul.checkme.loaders.DomainData()
 }

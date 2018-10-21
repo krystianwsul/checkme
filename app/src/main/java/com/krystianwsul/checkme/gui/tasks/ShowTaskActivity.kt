@@ -22,7 +22,7 @@ import com.krystianwsul.checkme.utils.Utils
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowTaskLoader.Data>, TaskListFragment.TaskListListener {
+class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowTaskLoader.DomainData>, TaskListFragment.TaskListListener {
 
     companion object {
 
@@ -35,7 +35,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
 
     private lateinit var taskKey: TaskKey
 
-    private var data: ShowTaskLoader.Data? = null
+    private var data: ShowTaskLoader.DomainData? = null
 
     private var selectAllVisible = false
 
@@ -134,7 +134,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
 
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowTaskLoader(this, taskKey)
 
-    override fun onLoadFinished(loader: Loader<ShowTaskLoader.Data>, data: ShowTaskLoader.Data) {
+    override fun onLoadFinished(loader: Loader<ShowTaskLoader.DomainData>, data: ShowTaskLoader.DomainData) {
         this.data = data
 
         supportActionBar!!.run {
@@ -147,7 +147,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
         taskListFragment.setTaskKey(taskKey, data.dataId, data.taskData)
     }
 
-    override fun onLoaderReset(loader: Loader<ShowTaskLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<ShowTaskLoader.DomainData>) = Unit
 
     override fun onCreateTaskActionMode(actionMode: ActionMode) = Unit
 

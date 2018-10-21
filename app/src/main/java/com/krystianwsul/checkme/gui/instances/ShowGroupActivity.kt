@@ -19,7 +19,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowGroupLoader.Data>, GroupListFragment.GroupListListener {
+class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowGroupLoader.DomainData>, GroupListFragment.GroupListListener {
 
     companion object {
 
@@ -72,7 +72,7 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
 
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowGroupLoader(this, timeStamp)
 
-    override fun onLoadFinished(loader: Loader<ShowGroupLoader.Data>, data: ShowGroupLoader.Data) {
+    override fun onLoadFinished(loader: Loader<ShowGroupLoader.DomainData>, data: ShowGroupLoader.DomainData) {
         actionBar.title = data.displayText
 
         if (data.dataWrapper == null) {
@@ -84,7 +84,7 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
         groupListFragment.setTimeStamp(timeStamp, data.dataId, data.dataWrapper)
     }
 
-    override fun onLoaderReset(loader: Loader<ShowGroupLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<ShowGroupLoader.DomainData>) = Unit
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
 

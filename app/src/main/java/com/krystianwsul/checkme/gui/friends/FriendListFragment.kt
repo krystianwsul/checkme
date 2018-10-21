@@ -26,7 +26,7 @@ import com.krystianwsul.checkme.loaders.FriendListLoader
 import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
 
-class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<FriendListLoader.Data>, FabUser {
+class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<FriendListLoader.DomainData>, FabUser {
 
     companion object {
 
@@ -41,7 +41,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
 
     private var friendListAdapter: FriendListAdapter? = null
 
-    private var data: FriendListLoader.Data? = null
+    private var data: FriendListLoader.DomainData? = null
 
     private var selectedIds: List<String>? = null
 
@@ -116,7 +116,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
 
     override fun onCreateLoader(id: Int, args: Bundle?) = FriendListLoader(activity!!)
 
-    override fun onLoadFinished(loader: Loader<FriendListLoader.Data>, data: FriendListLoader.Data) {
+    override fun onLoadFinished(loader: Loader<FriendListLoader.DomainData>, data: FriendListLoader.DomainData) {
         this.data = data
 
         selectedIds = friendListAdapter?.selected ?: selectedIds ?: ArrayList()
@@ -142,7 +142,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
         updateSelectAll()
     }
 
-    override fun onLoaderReset(loader: Loader<FriendListLoader.Data>) {}
+    override fun onLoaderReset(loader: Loader<FriendListLoader.DomainData>) {}
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

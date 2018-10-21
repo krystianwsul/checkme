@@ -12,14 +12,14 @@ import com.krystianwsul.checkme.utils.time.Date
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
-class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private val joinTaskKeys: List<TaskKey>?) : DomainLoader<CreateTaskLoader.Data>(context, needsFirebase(taskKey)) {
+class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private val joinTaskKeys: List<TaskKey>?) : DomainLoader<CreateTaskLoader.DomainData>(context, needsFirebase(taskKey)) {
 
     companion object {
 
         private fun needsFirebase(taskKey: TaskKey?) = if (taskKey?.type == TaskKey.Type.REMOTE) {
-            DomainLoader.FirebaseLevel.NEED
+            FirebaseLevel.NEED
         } else {
-            DomainLoader.FirebaseLevel.WANT
+            FirebaseLevel.WANT
         }
     }
 
@@ -52,7 +52,7 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
         }
     }
 
-    data class Data(val taskData: TaskData?, val parentTreeDatas: Map<ParentKey, ParentTreeData>, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>) : DomainLoader.Data()
+    data class DomainData(val taskData: TaskData?, val parentTreeDatas: Map<ParentKey, ParentTreeData>, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>) : com.krystianwsul.checkme.loaders.DomainData()
 
     data class CustomTimeData(val customTimeKey: CustomTimeKey, val name: String, val hourMinutes: TreeMap<DayOfWeek, HourMinute>)
 

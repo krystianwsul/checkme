@@ -7,13 +7,13 @@ import com.krystianwsul.checkme.utils.time.HourMinute
 
 import java.util.*
 
-class ShowCustomTimeLoader(context: Context, private val customTimeId: Int) : DomainLoader<ShowCustomTimeLoader.Data>(context, DomainLoader.FirebaseLevel.NOTHING) {
+class ShowCustomTimeLoader(context: Context, private val customTimeId: Int) : DomainLoader<ShowCustomTimeLoader.DomainData>(context, FirebaseLevel.NOTHING) {
 
     override val name = "ShowCustomTimeLoader, customTimeId: " + customTimeId
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowCustomTimeData(customTimeId)
 
-    data class Data(val id: Int, val name: String, val hourMinutes: HashMap<DayOfWeek, HourMinute>) : DomainLoader.Data() {
+    data class DomainData(val id: Int, val name: String, val hourMinutes: HashMap<DayOfWeek, HourMinute>) : com.krystianwsul.checkme.loaders.DomainData() {
 
         init {
             check(name.isNotEmpty())

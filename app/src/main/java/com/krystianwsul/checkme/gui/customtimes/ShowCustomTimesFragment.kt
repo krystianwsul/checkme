@@ -27,7 +27,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 
 import java.util.*
 
-class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data>, FabUser {
+class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.DomainData>, FabUser {
 
     companion object {
 
@@ -90,7 +90,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
 
     private var showTimesFab: FloatingActionButton? = null
 
-    private var data: ShowCustomTimesLoader.Data? = null
+    private var data: ShowCustomTimesLoader.DomainData? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -119,7 +119,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
 
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowCustomTimesLoader(activity!!)
 
-    override fun onLoadFinished(loader: Loader<ShowCustomTimesLoader.Data>, data: ShowCustomTimesLoader.Data) {
+    override fun onLoadFinished(loader: Loader<ShowCustomTimesLoader.DomainData>, data: ShowCustomTimesLoader.DomainData) {
         this.data = data
 
         customTimesAdapter?.let {
@@ -146,7 +146,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
         updateFabVisibility()
     }
 
-    override fun onLoaderReset(loader: Loader<ShowCustomTimesLoader.Data>) {}
+    override fun onLoaderReset(loader: Loader<ShowCustomTimesLoader.DomainData>) {}
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -191,7 +191,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
         showTimesFab = null
     }
 
-    private inner class CustomTimesAdapter(data: ShowCustomTimesLoader.Data, private val showCustomTimesFragment: ShowCustomTimesFragment, selectedCustomTimeIds: List<Int>?) : RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder>() {
+    private inner class CustomTimesAdapter(data: ShowCustomTimesLoader.DomainData, private val showCustomTimesFragment: ShowCustomTimesFragment, selectedCustomTimeIds: List<Int>?) : RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder>() {
 
         private val dataId = data.dataId
 

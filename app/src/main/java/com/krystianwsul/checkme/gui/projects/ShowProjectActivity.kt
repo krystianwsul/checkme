@@ -20,7 +20,7 @@ import com.krystianwsul.checkme.loaders.ShowProjectLoader
 import kotlinx.android.synthetic.main.activity_show_project.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 
-class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowProjectLoader.Data> {
+class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowProjectLoader.DomainData> {
 
     companion object {
 
@@ -39,7 +39,7 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
 
     private lateinit var projectId: String
 
-    private var data: ShowProjectLoader.Data? = null
+    private var data: ShowProjectLoader.DomainData? = null
 
     private lateinit var userListFragment: UserListFragment
 
@@ -134,7 +134,7 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
 
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowProjectLoader(this, projectId)
 
-    override fun onLoadFinished(loader: Loader<ShowProjectLoader.Data>, data: ShowProjectLoader.Data?) {
+    override fun onLoadFinished(loader: Loader<ShowProjectLoader.DomainData>, data: ShowProjectLoader.DomainData?) {
         this.data = data
 
         if (savedInstanceState == null) {
@@ -151,7 +151,7 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
         userListFragment.initialize(projectId, data!!)
     }
 
-    override fun onLoaderReset(loader: Loader<ShowProjectLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<ShowProjectLoader.DomainData>) = Unit
 
     override fun onBackPressed() {
         if (tryClose())

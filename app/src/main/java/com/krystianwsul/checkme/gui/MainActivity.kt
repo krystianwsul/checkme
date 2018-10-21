@@ -58,7 +58,7 @@ import org.joda.time.Days
 import org.joda.time.LocalDate
 import java.lang.ref.WeakReference
 
-class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.Data>, TaskListFragment.TaskListListener {
+class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, LoaderManager.LoaderCallbacks<MainLoader.DomainData>, TaskListFragment.TaskListListener {
 
     companion object {
 
@@ -487,11 +487,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     override fun onCreateLoader(id: Int, args: Bundle?) = MainLoader(this)
 
-    override fun onLoadFinished(loader: Loader<MainLoader.Data>, data: MainLoader.Data) {
+    override fun onLoadFinished(loader: Loader<MainLoader.DomainData>, data: MainLoader.DomainData) {
         taskListFragment.setAllTasks(data.dataId, data.taskData)
     }
 
-    override fun onLoaderReset(loader: Loader<MainLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<MainLoader.DomainData>) = Unit
 
     override fun onStop() {
         super.onStop()

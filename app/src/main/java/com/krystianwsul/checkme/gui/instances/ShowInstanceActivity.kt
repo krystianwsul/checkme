@@ -29,7 +29,7 @@ import com.krystianwsul.checkme.utils.time.TimePair
 import kotlinx.android.synthetic.main.activity_show_instance.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowInstanceLoader.Data>, GroupListFragment.GroupListListener {
+class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowInstanceLoader.DomainData>, GroupListFragment.GroupListListener {
 
     companion object {
 
@@ -172,7 +172,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
 
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowInstanceLoader(this, instanceKey)
 
-    override fun onLoadFinished(loader: Loader<ShowInstanceLoader.Data>, data: ShowInstanceLoader.Data) {
+    override fun onLoadFinished(loader: Loader<ShowInstanceLoader.DomainData>, data: ShowInstanceLoader.DomainData) {
         if (data.instanceData == null) {
             finish()
             return
@@ -208,7 +208,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
         invalidateOptionsMenu()
     }
 
-    override fun onLoaderReset(loader: Loader<ShowInstanceLoader.Data>) = Unit
+    override fun onLoaderReset(loader: Loader<ShowInstanceLoader.DomainData>) = Unit
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
 

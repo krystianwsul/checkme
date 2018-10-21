@@ -47,7 +47,7 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.DayLoader;
+import com.krystianwsul.checkme.loaders.DayData;
 import com.krystianwsul.checkme.loaders.EditInstanceLoader;
 import com.krystianwsul.checkme.loaders.EditInstancesLoader;
 import com.krystianwsul.checkme.loaders.FriendListLoader;
@@ -468,7 +468,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized EditInstanceLoader.Data getEditInstanceData(@NonNull InstanceKey instanceKey) {
+    public synchronized EditInstanceLoader.DomainData getEditInstanceData(@NonNull InstanceKey instanceKey) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstanceData");
@@ -491,11 +491,11 @@ public class DomainFactory {
         for (CustomTime customTime : currentCustomTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstanceLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new EditInstanceLoader.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas, (instance.getDone() != null), instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0);
+        return new EditInstanceLoader.DomainData(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas, (instance.getDone() != null), instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0);
     }
 
     @NonNull
-    public synchronized EditInstancesLoader.Data getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {
+    public synchronized EditInstancesLoader.DomainData getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstancesData");
@@ -507,14 +507,14 @@ public class DomainFactory {
         Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
-        HashMap<InstanceKey, EditInstancesLoader.InstanceData> instanceDatas = new HashMap<>();
+        HashMap<InstanceKey, EditInstancesLoader.InstanceDomainData> instanceDatas = new HashMap<>();
 
         for (InstanceKey instanceKey : instanceKeys) {
             Instance instance = getInstance(instanceKey);
             check(instance.isRootInstance(now));
             check(instance.getDone() == null);
 
-            instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceData(instance.getInstanceDateTime(), instance.getName()));
+            instanceDatas.put(instanceKey, new EditInstancesLoader.InstanceDomainData(instance.getInstanceDateTime(), instance.getName()));
 
             if (instance.getInstanceTimePair().getCustomTimeKey() != null) {
                 CustomTime customTime = getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
@@ -529,11 +529,11 @@ public class DomainFactory {
 
         Boolean showHour = Stream.of(instanceDatas.values()).allMatch(instanceData -> instanceData.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) < 0);
 
-        return new EditInstancesLoader.Data(instanceDatas, customTimeDatas, showHour);
+        return new EditInstancesLoader.DomainData(instanceDatas, customTimeDatas, showHour);
     }
 
     @NonNull
-    public synchronized ShowCustomTimeLoader.Data getShowCustomTimeData(int localCustomTimeId) {
+    public synchronized ShowCustomTimeLoader.DomainData getShowCustomTimeData(int localCustomTimeId) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimeData");
@@ -544,11 +544,11 @@ public class DomainFactory {
         for (DayOfWeek dayOfWeek : DayOfWeek.values())
             hourMinutes.put(dayOfWeek, localCustomTime.getHourMinute(dayOfWeek));
 
-        return new ShowCustomTimeLoader.Data(localCustomTime.getId(), localCustomTime.getName(), hourMinutes);
+        return new ShowCustomTimeLoader.DomainData(localCustomTime.getId(), localCustomTime.getName(), hourMinutes);
     }
 
     @NonNull
-    public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
+    public synchronized ShowCustomTimesLoader.DomainData getShowCustomTimesData() {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimesData");
@@ -562,11 +562,11 @@ public class DomainFactory {
             entries.add(new ShowCustomTimesLoader.CustomTimeData(localCustomTime.getId(), localCustomTime.getName()));
         }
 
-        return new ShowCustomTimesLoader.Data(entries);
+        return new ShowCustomTimesLoader.DomainData(entries);
     }
 
     @NonNull
-    public synchronized DayLoader.Data getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
+    public synchronized DayData getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
@@ -650,7 +650,7 @@ public class DomainFactory {
         }
 
         GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas);
-        DayLoader.Data data = new DayLoader.Data(dataWrapper);
+        DayData data = new DayData(dataWrapper);
 
         Stream.of(instanceDatas.values()).forEach(instanceData -> instanceData.setInstanceDataParent(dataWrapper));
 
@@ -659,7 +659,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowGroupLoader.Data getShowGroupData(@NonNull Context context, @NonNull TimeStamp timeStamp) {
+    public synchronized ShowGroupLoader.DomainData getShowGroupData(@NonNull Context context, @NonNull TimeStamp timeStamp) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowGroupData");
@@ -679,11 +679,11 @@ public class DomainFactory {
 
         String displayText = new DateTime(date, time).getDisplayText(context);
 
-        return new ShowGroupLoader.Data(displayText, getGroupListData(timeStamp, now));
+        return new ShowGroupLoader.DomainData(displayText, getGroupListData(timeStamp, now));
     }
 
     @NonNull
-    public synchronized ShowTaskInstancesLoader.Data getShowTaskInstancesData(@NonNull TaskKey taskKey) {
+    public synchronized ShowTaskInstancesLoader.DomainData getShowTaskInstancesData(@NonNull TaskKey taskKey) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskInstancesData");
@@ -720,11 +720,11 @@ public class DomainFactory {
                     return new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(MyApplication.Companion.getInstance(), now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, hierarchyData, instance.getOrdinal());
                 }, HashMap::new));
 
-        return new ShowTaskInstancesLoader.Data(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
+        return new ShowTaskInstancesLoader.DomainData(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
     }
 
 
-    public synchronized ShowNotificationGroupLoader.Data getShowNotificationGroupData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
+    public synchronized ShowNotificationGroupLoader.DomainData getShowNotificationGroupData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
@@ -763,26 +763,25 @@ public class DomainFactory {
 
         Stream.of(instanceDatas.values()).forEach(instanceData -> instanceData.setInstanceDataParent(dataWrapper));
 
-        return new ShowNotificationGroupLoader.Data(dataWrapper);
+        return new ShowNotificationGroupLoader.DomainData(dataWrapper);
     }
 
     @NonNull
-    public synchronized ShowInstanceLoader.Data getShowInstanceData(@NonNull Context context, @NonNull InstanceKey instanceKey) {
+    public synchronized ShowInstanceLoader.DomainData getShowInstanceData(@NonNull Context context, @NonNull InstanceKey instanceKey) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowInstanceData");
 
         Task task = getTaskIfPresent(instanceKey.getTaskKey());
-        if (task == null)
-            return new ShowInstanceLoader.Data(null);
+        if (task == null) return new ShowInstanceLoader.DomainData(null);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Instance instance = getInstance(instanceKey);
         if (!task.current(now) && !instance.exists())
-            return new ShowInstanceLoader.Data(null);
+            return new ShowInstanceLoader.DomainData(null);
 
-        return new ShowInstanceLoader.Data(new ShowInstanceLoader.InstanceData(instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)));
+        return new ShowInstanceLoader.DomainData(new ShowInstanceLoader.InstanceData(instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)));
     }
 
     @NonNull
@@ -866,7 +865,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized CreateTaskLoader.Data getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @Nullable List<TaskKey> joinTaskKeys) {
+    public synchronized CreateTaskLoader.DomainData getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @Nullable List<TaskKey> joinTaskKeys) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getCreateTaskData");
@@ -954,11 +953,11 @@ public class DomainFactory {
         for (CustomTime customTime : customTimes.values())
             customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new CreateTaskLoader.Data(taskData, parentTreeDatas, customTimeDatas);
+        return new CreateTaskLoader.DomainData(taskData, parentTreeDatas, customTimeDatas);
     }
 
     @NonNull
-    public synchronized ShowTaskLoader.Data getShowTaskData(@NonNull TaskKey taskKey, @NonNull Context context) {
+    public synchronized ShowTaskLoader.DomainData getShowTaskData(@NonNull TaskKey taskKey, @NonNull Context context) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskData");
@@ -977,22 +976,22 @@ public class DomainFactory {
                 .collect(Collectors.toList());
         Collections.sort(childTaskDatas, TaskListFragment.ChildTaskData::compareTo);
 
-        return new ShowTaskLoader.Data(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()), !task.getExistingInstances().isEmpty());
+        return new ShowTaskLoader.DomainData(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()), !task.getExistingInstances().isEmpty());
     }
 
     @NonNull
-    public synchronized MainLoader.Data getMainData(@NonNull Context context) {
+    public synchronized MainLoader.DomainData getMainData(@NonNull Context context) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getMainData");
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        return new MainLoader.Data(getMainData(now, context));
+        return new MainLoader.DomainData(getMainData(now, context));
     }
 
     @NonNull
-    public synchronized ProjectListLoader.Data getProjectListData() {
+    public synchronized ProjectListLoader.DomainData getProjectListData() {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getProjectListData");
@@ -1011,11 +1010,11 @@ public class DomainFactory {
                     return new ProjectListLoader.ProjectData(remoteProject.getId(), remoteProject.getName(), users);
                 }, TreeMap::new));
 
-        return new ProjectListLoader.Data(projectDatas);
+        return new ProjectListLoader.DomainData(projectDatas);
     }
 
     @NonNull
-    public synchronized FriendListLoader.Data getFriendListData() {
+    public synchronized FriendListLoader.DomainData getFriendListData() {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getFriendListData");
@@ -1026,11 +1025,11 @@ public class DomainFactory {
                 .map(remoteRootUser -> new FriendListLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
                 .collect(Collectors.toSet());
 
-        return new FriendListLoader.Data(userListDatas);
+        return new FriendListLoader.DomainData(userListDatas);
     }
 
     @NonNull
-    public synchronized ShowProjectLoader.Data getShowProjectData(@Nullable String projectId) {
+    public synchronized ShowProjectLoader.DomainData getShowProjectData(@Nullable String projectId) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowProjectData");
@@ -1059,7 +1058,7 @@ public class DomainFactory {
             userListDatas = new HashSet<>();
         }
 
-        return new ShowProjectLoader.Data(name, userListDatas, friendDatas);
+        return new ShowProjectLoader.DomainData(name, userListDatas, friendDatas);
     }
 
     // sets

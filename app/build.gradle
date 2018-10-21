@@ -19,11 +19,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
-        minSdkVersion 21
-        targetSdkVersion 27
+        minSdkVersion 22
+        targetSdkVersion 28
         versionCode 86
         versionName "0.6.3"
     }
@@ -56,7 +56,7 @@ kapt {
 }
 
 ext {
-    supportLibVersion = '27.1.1'
+    supportLibVersion = '28.0.0'
     firebaseVersion = '12.0.0'
     powermockVersion = '1.6.6'
 }
@@ -72,36 +72,45 @@ dependencies {
     testImplementation "org.powermock:powermock-module-junit4-rule:$powermockVersion"
     testImplementation "org.powermock:powermock-api-mockito:$powermockVersion"
     testImplementation "org.powermock:powermock-classloading-xstream:$powermockVersion"
-    implementation('com.github.afollestad.material-dialogs:core:0.8.5.8@aar') {
-        transitive = true
-    }
-    implementation('com.crashlytics.sdk.android:crashlytics:2.9.5@aar') {
-        transitive = true
-    }
-    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
-    implementation "com.android.support:design:${supportLibVersion}"
-    implementation 'com.code-troopers.betterpickers:library:3.1.0'
-    implementation 'com.annimon:stream:1.1.9'
-    //noinspection GradleDependency
-    implementation 'com.google.guava:guava:20.0'
+
+    implementation "com.android.support:appcompat-v7:$supportLibVersion"
+    implementation "com.android.support:design:$supportLibVersion"
+    implementation "com.android.support:support-media-compat:$supportLibVersion"
+    implementation "com.android.support:support-v4:$supportLibVersion"
+
     implementation "com.google.android.gms:play-services-auth:$firebaseVersion"
     implementation "com.google.firebase:firebase-core:$firebaseVersion"
     implementation "com.google.firebase:firebase-auth:$firebaseVersion"
     implementation "com.google.firebase:firebase-database:$firebaseVersion"
     implementation "com.google.firebase:firebase-messaging:$firebaseVersion"
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
+
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.2'
+    implementation 'io.reactivex.rxjava2:rxkotlin:2.1.0'
+    implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.1.1'
+
+    implementation 'nz.bradcampbell:paperparcel:2.0.1'
+    implementation 'nz.bradcampbell:paperparcel-kotlin:2.0.1'
+    kapt 'nz.bradcampbell:paperparcel-compiler:2.0.1'
+
     implementation 'com.android.volley:volley:1.1.0'
     implementation 'net.danlew:android.joda:2.9.9'
     testImplementation 'joda-time:joda-time:2.9.9'
     implementation project(path: ':treeadapter')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.2'
-    implementation 'io.reactivex.rxjava2:rxkotlin:2.1.0'
-    implementation 'nz.bradcampbell:paperparcel:2.0.1'
-    implementation 'nz.bradcampbell:paperparcel-kotlin:2.0.1'
-    kapt 'nz.bradcampbell:paperparcel-compiler:2.0.1'
-    implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.1.1'
+
+    implementation 'com.code-troopers.betterpickers:library:3.1.0'
+    implementation 'com.annimon:stream:1.1.9'
+    //noinspection GradleDependency
+    implementation 'com.google.guava:guava:20.0'
+
+    implementation('com.github.afollestad.material-dialogs:core:0.8.5.8@aar') {
+        transitive = true
+    }
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.5@aar') {
+        transitive = true
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'

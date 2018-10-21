@@ -4,7 +4,7 @@ import android.app.TimePickerDialog
 import android.os.Bundle
 import android.text.format.DateFormat
 import com.krystianwsul.checkme.utils.time.HourMinute
-import junit.framework.Assert
+
 
 class TimePickerDialogFragment : AbstractDialogFragment() {
 
@@ -22,7 +22,7 @@ class TimePickerDialogFragment : AbstractDialogFragment() {
     lateinit var listener: (HourMinute) -> Unit
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = arguments!!.run {
-        Assert.assertTrue(containsKey(HOUR_MINUTE_KEY))
+        check(containsKey(HOUR_MINUTE_KEY))
 
         val hourMinute = getParcelable<HourMinute>(HOUR_MINUTE_KEY)!!
 

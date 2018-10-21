@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 
-import junit.framework.Assert
+
 
 class TaskNode(density: Float, indentation: Int, private val taskData: GroupListFragment.TaskData, private val taskParent: TaskParent) : GroupHolderNode(density, indentation), ModelNode, TaskParent {
 
@@ -23,7 +23,7 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
 
     val expandedTaskKeys: List<TaskKey>
         get() = if (taskNodes.isEmpty()) {
-            Assert.assertTrue(!expanded())
+            check(!expanded())
 
             listOf()
         } else {
@@ -74,7 +74,7 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
                     .sortedBy { it.mStartExactTimeStamp }
                     .joinToString(", ") { it.Name }
         } else {
-            Assert.assertTrue(!taskData.mNote.isNullOrEmpty())
+            check(!taskData.mNote.isNullOrEmpty())
 
             taskData.mNote!!
         }

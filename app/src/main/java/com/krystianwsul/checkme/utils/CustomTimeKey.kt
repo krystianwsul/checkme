@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.utils
 
 import android.os.Parcelable
 import android.text.TextUtils
-import junit.framework.Assert
+
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 
@@ -12,13 +12,13 @@ data class CustomTimeKey(val localCustomTimeId: Int?, val remoteProjectId: Strin
     val type: TaskKey.Type
         get() {
             return if (localCustomTimeId != null) {
-                Assert.assertTrue(TextUtils.isEmpty(remoteProjectId))
-                Assert.assertTrue(TextUtils.isEmpty(remoteCustomTimeId))
+                check(TextUtils.isEmpty(remoteProjectId))
+                check(TextUtils.isEmpty(remoteCustomTimeId))
 
                 TaskKey.Type.LOCAL
             } else {
-                Assert.assertTrue(!TextUtils.isEmpty(remoteProjectId))
-                Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTimeId))
+                check(!TextUtils.isEmpty(remoteProjectId))
+                check(!TextUtils.isEmpty(remoteCustomTimeId))
 
                 TaskKey.Type.REMOTE
             }

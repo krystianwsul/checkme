@@ -5,7 +5,7 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
-import junit.framework.Assert
+
 import java.util.*
 
 class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
@@ -18,7 +18,7 @@ class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<Data
     init {
         for (child in children) {
             child.key.let {
-                Assert.assertTrue(it.isNotEmpty())
+                check(it.isNotEmpty())
 
                 remoteProjectRecords[it] = RemoteProjectRecord(domainFactory, it, child.getValue(JsonWrapper::class.java)!!)
             }
@@ -39,7 +39,7 @@ class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<Data
     }
 
     fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteProjectRecord(domainFactory, jsonWrapper).also {
-        Assert.assertTrue(!remoteProjectRecords.containsKey(it.id))
+        check(!remoteProjectRecords.containsKey(it.id))
 
         remoteProjectRecords[it.id] = it
     }

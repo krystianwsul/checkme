@@ -4,7 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 
-import junit.framework.Assert
+
 
 import kotlin.properties.Delegates.observable
 
@@ -48,8 +48,8 @@ class TaskHierarchyRecord(
             val endTime = if (isNull(4)) null else getLong(4)
             val ordinal = if (isNull(5)) null else getDouble(5)
 
-            Assert.assertTrue(parentTaskId != childTaskId)
-            Assert.assertTrue(endTime == null || startTime <= endTime)
+            check(parentTaskId != childTaskId)
+            check(endTime == null || startTime <= endTime)
 
             TaskHierarchyRecord(true, id, parentTaskId, childTaskId, startTime, endTime, ordinal)
         }
@@ -61,8 +61,8 @@ class TaskHierarchyRecord(
     var ordinal by observable(mOrdinal) { _, _, _ -> changed = true }
 
     init {
-        Assert.assertTrue(parentTaskId != childTaskId)
-        Assert.assertTrue(mEndTime == null || startTime <= mEndTime)
+        check(parentTaskId != childTaskId)
+        check(mEndTime == null || startTime <= mEndTime)
     }
 
     override val contentValues

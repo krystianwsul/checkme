@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 
-import junit.framework.Assert
+
 
 import java.util.regex.Pattern
 
@@ -24,11 +24,11 @@ class RemoteInstanceRecord(create: Boolean, private val domainFactory: DomainFac
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day
             key += scheduleKey.scheduleTimePair.let {
                 if (it.customTimeKey != null) {
-                    Assert.assertTrue(it.hourMinute == null)
+                    check(it.hourMinute == null)
 
                     "-" + domainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
                 } else {
-                    Assert.assertTrue(it.hourMinute != null)
+                    check(it.hourMinute != null)
 
                     "-" + it.hourMinute!!.hour + "-" + it.hourMinute.minute
                 }
@@ -50,14 +50,14 @@ class RemoteInstanceRecord(create: Boolean, private val domainFactory: DomainFac
                 return ScheduleKey(Date(year, month, day), TimePair(HourMinute(hour, minute)))
             } else {
                 val customTimeMatcher = customTimePattern.matcher(key)
-                Assert.assertTrue(customTimeMatcher.matches())
+                check(customTimeMatcher.matches())
 
                 val year = Integer.valueOf(customTimeMatcher.group(1))
                 val month = Integer.valueOf(customTimeMatcher.group(2))
                 val day = Integer.valueOf(customTimeMatcher.group(3))
 
                 val customTimeId = customTimeMatcher.group(4)
-                Assert.assertTrue(!TextUtils.isEmpty(customTimeId))
+                check(!TextUtils.isEmpty(customTimeId))
 
                 val customTimeKey = domainFactory.getCustomTimeKey(projectId, customTimeId)
 

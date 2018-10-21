@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
-import junit.framework.Assert
+
 
 class RemoteWeeklyScheduleRecord : RemoteScheduleRecord {
 
@@ -24,7 +24,7 @@ class RemoteWeeklyScheduleRecord : RemoteScheduleRecord {
     constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper) {}
 
     fun setEndTime(endTime: Long) {
-        Assert.assertTrue(weeklyScheduleJson.endTime == null)
+        check(weeklyScheduleJson.endTime == null)
 
         if (endTime == weeklyScheduleJson.endTime)
             return

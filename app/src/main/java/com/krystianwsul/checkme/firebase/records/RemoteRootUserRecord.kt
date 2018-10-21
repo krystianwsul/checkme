@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.records
 import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.firebase.json.UserWrapper
-import junit.framework.Assert
+
 
 class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create) {
 
@@ -32,10 +32,10 @@ class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapp
     val email by lazy { userJson.email }
 
     fun removeFriendOf(friendId: String) {
-        Assert.assertTrue(!TextUtils.isEmpty(friendId))
+        check(!TextUtils.isEmpty(friendId))
 
         val friendOf = createObject.friendOf
-        Assert.assertTrue(friendOf.containsKey(friendId))
+        check(friendOf.containsKey(friendId))
         checkNotNull(friendOf[friendId])
 
         friendOf.remove(friendId)

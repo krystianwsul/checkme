@@ -12,13 +12,13 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.notifications.TickJobIntentService
-import junit.framework.Assert
+
 
 @SuppressLint("NewApi")
 open class NotificationWrapperImplN : NotificationWrapperImpl() {
 
     override fun cleanGroup(lastNotificationId: Int?) {
-        Assert.assertTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
 
         val statusBarNotifications = notificationManager.activeNotifications!!
 
@@ -29,7 +29,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
                 if (statusBarNotifications.isNotEmpty())
                     NotificationException.throwException(lastNotificationId, statusBarNotifications)
             } else {
-                Assert.assertTrue(statusBarNotifications.size == 2)
+                check(statusBarNotifications.size == 2)
 
                 if (statusBarNotifications.none { it.id == 0 })
                     NotificationException.throwException(lastNotificationId, statusBarNotifications)
@@ -45,14 +45,14 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
 
             Log.e("asdf", "cleaning group")
 
-            Assert.assertTrue(statusBarNotifications.single().id == 0)
+            check(statusBarNotifications.single().id == 0)
 
             cancelNotification(0)
         }
     }
 
     override fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
-        Assert.assertTrue(!lines.isEmpty())
+        check(!lines.isEmpty())
 
         val max = 5
 
@@ -69,7 +69,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
     }
 
     override fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
-        Assert.assertTrue(title.isNotEmpty())
+        check(title.isNotEmpty())
 
         @Suppress("Deprecation")
         val builder = NotificationCompat.Builder(MyApplication.instance)
@@ -87,7 +87,7 @@ open class NotificationWrapperImplN : NotificationWrapperImpl() {
         if (!silent)
             builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
 
-        Assert.assertTrue(actions.size <= 3)
+        check(actions.size <= 3)
 
         actions.forEach { builder.addAction(it) }
 

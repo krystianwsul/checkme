@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.utils.ScheduleKey
-import junit.framework.Assert
+
 import java.util.*
 
 class RemoteTaskRecord : RemoteRecord {
@@ -74,7 +74,7 @@ class RemoteTaskRecord : RemoteRecord {
     var name
         get() = taskJson.name
         set(name) {
-            Assert.assertTrue(!TextUtils.isEmpty(name))
+            check(!TextUtils.isEmpty(name))
 
             if (name == taskJson.name)
                 return
@@ -125,7 +125,7 @@ class RemoteTaskRecord : RemoteRecord {
 
     private fun initialize() {
         for ((key, instanceJson) in taskJson.instances) {
-            Assert.assertTrue(!TextUtils.isEmpty(key))
+            check(!TextUtils.isEmpty(key))
 
             val scheduleKey = RemoteInstanceRecord.stringToScheduleKey(domainFactory, remoteProjectRecord.id, key)
 
@@ -135,37 +135,37 @@ class RemoteTaskRecord : RemoteRecord {
         }
 
         for ((id, scheduleWrapper) in taskJson.schedules) {
-            Assert.assertTrue(!TextUtils.isEmpty(id))
+            check(!TextUtils.isEmpty(id))
 
             when {
                 scheduleWrapper.singleScheduleJson != null -> {
-                    Assert.assertTrue(scheduleWrapper.dailyScheduleJson == null)
-                    Assert.assertTrue(scheduleWrapper.weeklyScheduleJson == null)
-                    Assert.assertTrue(scheduleWrapper.monthlyDayScheduleJson == null)
-                    Assert.assertTrue(scheduleWrapper.monthlyWeekScheduleJson == null)
+                    check(scheduleWrapper.dailyScheduleJson == null)
+                    check(scheduleWrapper.weeklyScheduleJson == null)
+                    check(scheduleWrapper.monthlyDayScheduleJson == null)
+                    check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
                     remoteSingleScheduleRecords[id] = RemoteSingleScheduleRecord(id, this, scheduleWrapper)
                 }
                 scheduleWrapper.dailyScheduleJson != null -> {
-                    Assert.assertTrue(scheduleWrapper.weeklyScheduleJson == null)
-                    Assert.assertTrue(scheduleWrapper.monthlyDayScheduleJson == null)
-                    Assert.assertTrue(scheduleWrapper.monthlyWeekScheduleJson == null)
+                    check(scheduleWrapper.weeklyScheduleJson == null)
+                    check(scheduleWrapper.monthlyDayScheduleJson == null)
+                    check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
                     remoteDailyScheduleRecords[id] = RemoteDailyScheduleRecord(id, this, scheduleWrapper)
                 }
                 scheduleWrapper.weeklyScheduleJson != null -> {
-                    Assert.assertTrue(scheduleWrapper.monthlyDayScheduleJson == null)
-                    Assert.assertTrue(scheduleWrapper.monthlyWeekScheduleJson == null)
+                    check(scheduleWrapper.monthlyDayScheduleJson == null)
+                    check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
                     remoteWeeklyScheduleRecords[id] = RemoteWeeklyScheduleRecord(id, this, scheduleWrapper)
                 }
                 scheduleWrapper.monthlyDayScheduleJson != null -> {
-                    Assert.assertTrue(scheduleWrapper.monthlyWeekScheduleJson == null)
+                    check(scheduleWrapper.monthlyWeekScheduleJson == null)
 
                     remoteMonthlyDayScheduleRecords[id] = RemoteMonthlyDayScheduleRecord(id, this, scheduleWrapper)
                 }
                 else -> {
-                    Assert.assertTrue(scheduleWrapper.monthlyWeekScheduleJson != null)
+                    check(scheduleWrapper.monthlyWeekScheduleJson != null)
 
                     remoteMonthlyWeekScheduleRecords[id] = RemoteMonthlyWeekScheduleRecord(id, this, scheduleWrapper)
                 }
@@ -174,7 +174,7 @@ class RemoteTaskRecord : RemoteRecord {
     }
 
     fun setEndTime(endTime: Long) {
-        Assert.assertTrue(taskJson.endTime == null)
+        check(taskJson.endTime == null)
 
         if (endTime == taskJson.endTime)
             return
@@ -208,16 +208,16 @@ class RemoteTaskRecord : RemoteRecord {
     }
 
     override fun getValues(values: MutableMap<String, Any?>) {
-        Assert.assertTrue(!deleted)
-        Assert.assertTrue(!created)
-        Assert.assertTrue(!updated)
+        check(!deleted)
+        check(!created)
+        check(!updated)
 
         when {
             delete -> {
                 Log.e("asdf", "RemoteTaskRecord.getValues deleting " + this)
 
-                Assert.assertTrue(!create)
-                Assert.assertTrue(update != null)
+                check(!create)
+                check(update != null)
 
                 deleted = true
                 values[key] = null
@@ -225,14 +225,14 @@ class RemoteTaskRecord : RemoteRecord {
             create -> {
                 Log.e("asdf", "RemoteTaskRecord.getValues creating " + this)
 
-                Assert.assertTrue(update == null)
+                check(update == null)
 
                 created = true
 
                 values[key] = createObject
             }
             else -> {
-                Assert.assertTrue(update != null)
+                check(update != null)
 
                 if (!update!!.isEmpty()) {
                     Log.e("asdf", "RemoteTaskRecord.getValues updating " + this)
@@ -264,7 +264,7 @@ class RemoteTaskRecord : RemoteRecord {
 
     fun newRemoteInstanceRecord(domainFactory: DomainFactory, instanceJson: InstanceJson, scheduleKey: ScheduleKey): RemoteInstanceRecord {
         val remoteInstanceRecord = RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey)
-        Assert.assertTrue(!_remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
+        check(!_remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 
         _remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord
         return remoteInstanceRecord
@@ -272,7 +272,7 @@ class RemoteTaskRecord : RemoteRecord {
 
     fun newRemoteSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteSingleScheduleRecord {
         val remoteSingleScheduleRecord = RemoteSingleScheduleRecord(this, scheduleWrapper)
-        Assert.assertTrue(!remoteSingleScheduleRecords.containsKey(remoteSingleScheduleRecord.id))
+        check(!remoteSingleScheduleRecords.containsKey(remoteSingleScheduleRecord.id))
 
         remoteSingleScheduleRecords[remoteSingleScheduleRecord.id] = remoteSingleScheduleRecord
         return remoteSingleScheduleRecord
@@ -280,7 +280,7 @@ class RemoteTaskRecord : RemoteRecord {
 
     fun newRemoteWeeklyScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteWeeklyScheduleRecord {
         val remoteWeeklyScheduleRecord = RemoteWeeklyScheduleRecord(this, scheduleWrapper)
-        Assert.assertTrue(!remoteWeeklyScheduleRecords.containsKey(remoteWeeklyScheduleRecord.id))
+        check(!remoteWeeklyScheduleRecords.containsKey(remoteWeeklyScheduleRecord.id))
 
         remoteWeeklyScheduleRecords[remoteWeeklyScheduleRecord.id] = remoteWeeklyScheduleRecord
         return remoteWeeklyScheduleRecord
@@ -288,7 +288,7 @@ class RemoteTaskRecord : RemoteRecord {
 
     fun newRemoteMonthlyDayScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyDayScheduleRecord {
         val remoteMonthlyDayScheduleRecord = RemoteMonthlyDayScheduleRecord(this, scheduleWrapper)
-        Assert.assertTrue(!remoteMonthlyDayScheduleRecords.containsKey(remoteMonthlyDayScheduleRecord.id))
+        check(!remoteMonthlyDayScheduleRecords.containsKey(remoteMonthlyDayScheduleRecord.id))
 
         remoteMonthlyDayScheduleRecords[remoteMonthlyDayScheduleRecord.id] = remoteMonthlyDayScheduleRecord
         return remoteMonthlyDayScheduleRecord
@@ -296,7 +296,7 @@ class RemoteTaskRecord : RemoteRecord {
 
     fun newRemoteMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyWeekScheduleRecord {
         val remoteMonthlyWeekScheduleRecord = RemoteMonthlyWeekScheduleRecord(this, scheduleWrapper)
-        Assert.assertTrue(!remoteMonthlyWeekScheduleRecords.containsKey(remoteMonthlyWeekScheduleRecord.id))
+        check(!remoteMonthlyWeekScheduleRecords.containsKey(remoteMonthlyWeekScheduleRecord.id))
 
         remoteMonthlyWeekScheduleRecords[remoteMonthlyWeekScheduleRecord.id] = remoteMonthlyWeekScheduleRecord
         return remoteMonthlyWeekScheduleRecord

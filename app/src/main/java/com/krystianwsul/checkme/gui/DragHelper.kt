@@ -35,7 +35,7 @@ class DragHelper(private val treeViewAdapter: TreeViewAdapter, private val callb
 
         lateinit var listener: (Int) -> Unit
 
-        override fun onMove(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+        override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
             val from = viewHolder.adapterPosition
             endPosition = target.adapterPosition
 
@@ -44,11 +44,11 @@ class DragHelper(private val treeViewAdapter: TreeViewAdapter, private val callb
             return true
         }
 
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int) = Unit
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
 
         override fun isItemViewSwipeEnabled() = false
 
-        override fun clearView(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?) {
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
             endPosition?.let { listener(it) }
             endPosition = null
 

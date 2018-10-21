@@ -33,7 +33,7 @@ import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import junit.framework.Assert
+
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
@@ -47,7 +47,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         fun newInstance() = GroupListFragment()
 
         private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
-            Assert.assertTrue(position >= 0)
+            check(position >= 0)
 
             val calendar = Calendar.getInstance()
 
@@ -89,7 +89,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             if (instanceData.instanceDataParent is InstanceData) {
                 recursiveExists(instanceData.instanceDataParent as InstanceData)
             } else {
-                Assert.assertTrue(instanceData.instanceDataParent is DataWrapper)
+                check(instanceData.instanceDataParent is DataWrapper)
             }
         }
     }
@@ -128,25 +128,25 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onMenuClick(menuItem: MenuItem) {
-            Assert.assertTrue(mTreeViewAdapter != null)
+            check(mTreeViewAdapter != null)
 
             val treeNodes = mTreeViewAdapter!!.selectedNodes
 
             val instanceDatas = nodesToInstanceDatas(treeNodes)
-            Assert.assertTrue(instanceDatas.isNotEmpty())
+            check(instanceDatas.isNotEmpty())
 
             when (menuItem.itemId) {
                 R.id.action_group_edit_instance -> {
-                    Assert.assertTrue(instanceDatas.isNotEmpty())
+                    check(instanceDatas.isNotEmpty())
 
                     if (instanceDatas.size == 1) {
                         val instanceData = instanceDatas[0]
-                        Assert.assertTrue(instanceData.IsRootInstance)
+                        check(instanceData.IsRootInstance)
 
                         startActivity(EditInstanceActivity.getIntent(instanceData.InstanceKey))
                     } else {
-                        Assert.assertTrue(instanceDatas.size > 1)
-                        Assert.assertTrue(instanceDatas.all { it.IsRootInstance })
+                        check(instanceDatas.size > 1)
+                        check(instanceDatas.all { it.IsRootInstance })
 
                         val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
 
@@ -155,28 +155,28 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 }
                 R.id.action_group_share -> Utils.share(getShareData(instanceDatas))
                 R.id.action_group_show_task -> {
-                    Assert.assertTrue(instanceDatas.size == 1)
+                    check(instanceDatas.size == 1)
 
                     val instanceData = instanceDatas[0]
-                    Assert.assertTrue(instanceData.TaskCurrent)
+                    check(instanceData.TaskCurrent)
 
                     startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_edit_task -> {
-                    Assert.assertTrue(instanceDatas.size == 1)
+                    check(instanceDatas.size == 1)
 
                     val instanceData = instanceDatas[0]
-                    Assert.assertTrue(instanceData.TaskCurrent)
+                    check(instanceData.TaskCurrent)
 
                     startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_delete_task -> {
                     val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
-                    Assert.assertTrue(taskKeys.isNotEmpty())
-                    Assert.assertTrue(instanceDatas.all { it.TaskCurrent })
+                    check(taskKeys.isNotEmpty())
+                    check(instanceDatas.all { it.TaskCurrent })
 
                     var selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
-                    Assert.assertTrue(selectedTreeNodes.isNotEmpty())
+                    check(selectedTreeNodes.isNotEmpty())
 
                     do {
                         val treeNode = selectedTreeNodes[0]
@@ -192,16 +192,16 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     updateSelectAll()
                 }
                 R.id.action_group_add_task -> {
-                    Assert.assertTrue(instanceDatas.size == 1)
+                    check(instanceDatas.size == 1)
 
                     val instanceData = instanceDatas[0]
-                    Assert.assertTrue(instanceData.TaskCurrent)
+                    check(instanceData.TaskCurrent)
 
                     activity!!.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_join -> {
                     val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
-                    Assert.assertTrue(taskKeys.size > 1)
+                    check(taskKeys.size > 1)
 
                     if (mInstanceKey == null) {
                         val firstInstanceData = instanceDatas.minBy { it.InstanceTimeStamp }!!
@@ -216,24 +216,24 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     }
                 }
                 R.id.action_group_mark_done -> {
-                    Assert.assertTrue(mDataId != null)
-                    Assert.assertTrue(mDataWrapper != null)
+                    check(mDataId != null)
+                    check(mDataWrapper != null)
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
                     val done = DomainFactory.getDomainFactory().setInstancesDone(activity!!, mDataId!!, SaveService.Source.GUI, instanceKeys)
 
                     var selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
-                    Assert.assertTrue(selectedTreeNodes.isNotEmpty())
+                    check(selectedTreeNodes.isNotEmpty())
 
                     do {
-                        Assert.assertTrue(selectedTreeNodes.isNotEmpty())
+                        check(selectedTreeNodes.isNotEmpty())
 
                         val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
 
                         treeNode.modelNode.let {
                             if (it is NotDoneGroupNode) {
-                                Assert.assertTrue(it.singleInstance())
+                                check(it.singleInstance())
 
                                 val instanceData = it.singleInstanceData
                                 instanceData.Done = done
@@ -275,7 +275,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     is NotDoneGroupNode.NotDoneInstanceNode -> it.instanceData
                     is DoneInstanceNode -> it.instanceData
                     else -> {
-                        Assert.assertTrue(it is DividerNode)
+                        check(it is DividerNode)
 
                         treeNode.allChildren.forEach { recursiveDelete(it, false) }
 
@@ -353,14 +353,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         private fun updateMenu() {
-            Assert.assertTrue(actionMode != null)
+            check(actionMode != null)
 
             val menu = actionMode!!.menu!!
 
             val instanceDatas = nodesToInstanceDatas(mTreeViewAdapter!!.selectedNodes)
-            Assert.assertTrue(instanceDatas.isNotEmpty())
+            check(instanceDatas.isNotEmpty())
 
-            Assert.assertTrue(instanceDatas.all { it.Done == null })
+            check(instanceDatas.all { it.Done == null })
 
             if (instanceDatas.size == 1) {
                 val instanceData = instanceDatas.single()
@@ -374,7 +374,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     findItem(R.id.action_group_add_task).isVisible = instanceData.TaskCurrent
                 }
             } else {
-                Assert.assertTrue(instanceDatas.size > 1)
+                check(instanceDatas.size > 1)
 
                 menu.apply {
                     findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance }
@@ -384,11 +384,12 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 }
 
                 if (instanceDatas.all { it.TaskCurrent }) {
-                    val projectIdCount = instanceDatas.map { it.InstanceKey.taskKey.remoteProjectId }
+                    val projectIdCount = instanceDatas.asSequence()
+                            .map { it.InstanceKey.taskKey.remoteProjectId }
                             .distinct()
                             .count()
 
-                    Assert.assertTrue(projectIdCount > 0)
+                    check(projectIdCount > 0)
 
                     menu.findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
                     menu.findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
@@ -400,7 +401,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         private fun containsLoop(instanceDatas: List<InstanceData>): Boolean {
-            Assert.assertTrue(instanceDatas.size > 1)
+            check(instanceDatas.size > 1)
 
             for (instanceData in instanceDatas) {
                 val parents = ArrayList<InstanceData>()
@@ -430,8 +431,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     val shareData: String?
         get() {
-            Assert.assertTrue(mDataWrapper != null)
-            Assert.assertTrue(mDataId != null)
+            check(mDataWrapper != null)
+            check(mDataId != null)
 
             val instanceDatas = ArrayList(mDataWrapper!!.instanceDatas.values)
 
@@ -446,7 +447,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
     private fun getShareData(instanceDatas: List<InstanceData>): String {
-        Assert.assertTrue(instanceDatas.isNotEmpty())
+        check(instanceDatas.isNotEmpty())
 
         val tree = LinkedHashMap<InstanceKey, InstanceData>()
 
@@ -479,7 +480,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        Assert.assertTrue(context is GroupListListener)
+        check(context is GroupListListener)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -490,7 +491,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
             if (savedInstanceState.containsKey(SELECTED_NODES_KEY)) {
                 mSelectedNodes = savedInstanceState.getParcelableArrayList(SELECTED_NODES_KEY)
-                Assert.assertTrue(mSelectedNodes!!.isNotEmpty())
+                check(mSelectedNodes!!.isNotEmpty())
             }
         }
     }
@@ -499,28 +500,28 @@ class GroupListFragment : AbstractFragment(), FabUser {
         val view = inflater.inflate(R.layout.fragment_group_list, container, false)!!
 
         mGroupListProgress = view.findViewById(R.id.group_list_progress)
-        Assert.assertTrue(mGroupListProgress != null)
+        check(mGroupListProgress != null)
 
         mGroupListRecycler = view.findViewById(R.id.group_list_recycler)
-        Assert.assertTrue(mGroupListRecycler != null)
+        check(mGroupListRecycler != null)
 
         mGroupListRecycler!!.layoutManager = LinearLayoutManager(context)
 
         mEmptyText = view.findViewById(R.id.emptyText)
-        Assert.assertTrue(mEmptyText != null)
+        check(mEmptyText != null)
 
         return view
     }
 
     fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
-        Assert.assertTrue(mPosition == null || mPosition == position)
-        Assert.assertTrue(mTimeRange == null || mTimeRange == timeRange)
-        Assert.assertTrue(mTimeStamp == null)
-        Assert.assertTrue(mInstanceKey == null)
-        Assert.assertTrue(mInstanceKeys == null)
+        check(mPosition == null || mPosition == position)
+        check(mTimeRange == null || mTimeRange == timeRange)
+        check(mTimeStamp == null)
+        check(mInstanceKey == null)
+        check(mInstanceKeys == null)
         check(taskKey == null)
 
-        Assert.assertTrue(position >= 0)
+        check(position >= 0)
 
         mPosition = position
         mTimeRange = timeRange
@@ -529,11 +530,11 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) {
-        Assert.assertTrue(mPosition == null)
-        Assert.assertTrue(mTimeRange == null)
-        Assert.assertTrue(mTimeStamp == null || mTimeStamp == timeStamp)
-        Assert.assertTrue(mInstanceKey == null)
-        Assert.assertTrue(mInstanceKeys == null)
+        check(mPosition == null)
+        check(mTimeRange == null)
+        check(mTimeStamp == null || mTimeStamp == timeStamp)
+        check(mInstanceKey == null)
+        check(mInstanceKeys == null)
         check(taskKey == null)
 
         mTimeStamp = timeStamp
@@ -542,10 +543,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) {
-        Assert.assertTrue(mPosition == null)
-        Assert.assertTrue(mTimeRange == null)
-        Assert.assertTrue(mTimeStamp == null)
-        Assert.assertTrue(mInstanceKeys == null)
+        check(mPosition == null)
+        check(mTimeRange == null)
+        check(mTimeStamp == null)
+        check(mInstanceKeys == null)
         check(taskKey == null)
 
         mInstanceKey = instanceKey
@@ -554,10 +555,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun setInstanceKeys(instanceKeys: Set<InstanceKey>, dataId: Int, dataWrapper: DataWrapper) {
-        Assert.assertTrue(mPosition == null)
-        Assert.assertTrue(mTimeRange == null)
-        Assert.assertTrue(mTimeStamp == null)
-        Assert.assertTrue(mInstanceKey == null)
+        check(mPosition == null)
+        check(mTimeRange == null)
+        check(mTimeStamp == null)
+        check(mInstanceKey == null)
         check(taskKey == null)
 
         mInstanceKeys = instanceKeys
@@ -566,10 +567,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) {
-        Assert.assertTrue(mPosition == null)
-        Assert.assertTrue(mTimeRange == null)
-        Assert.assertTrue(mTimeStamp == null)
-        Assert.assertTrue(mInstanceKey == null)
+        check(mPosition == null)
+        check(mTimeRange == null)
+        check(mTimeStamp == null)
+        check(mInstanceKey == null)
         check(this.taskKey == null)
 
         this.taskKey = taskKey
@@ -578,7 +579,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun useGroups(): Boolean {
-        Assert.assertTrue(mPosition == null == (mTimeRange == null))
+        check(mPosition == null == (mTimeRange == null))
         return mPosition != null
     }
 
@@ -590,10 +591,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
             if (mSelectionCallback.hasActionMode) {
                 val instanceDatas = nodesToInstanceDatas(mTreeViewAdapter!!.selectedNodes)
-                Assert.assertTrue(instanceDatas.isNotEmpty())
+                check(instanceDatas.isNotEmpty())
 
                 val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
-                Assert.assertTrue(instanceKeys.isNotEmpty())
+                check(instanceKeys.isNotEmpty())
 
                 outState.putParcelableArrayList(SELECTED_NODES_KEY, instanceKeys)
             }
@@ -604,12 +605,12 @@ class GroupListFragment : AbstractFragment(), FabUser {
         mGroupListProgress!!.visibility = View.GONE
 
         if (mDataWrapper != null) {
-            Assert.assertTrue(mDataId != null)
+            check(mDataId != null)
 
             DataDiff.diffData(mDataWrapper!!, dataWrapper)
             Log.e("asdf", "difference w data:\n" + DataDiff.diff)
         } else {
-            Assert.assertTrue(mDataId == null)
+            check(mDataId == null)
         }
 
         mDataWrapper = dataWrapper
@@ -623,38 +624,38 @@ class GroupListFragment : AbstractFragment(), FabUser {
             val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
 
             mSelectedNodes = if (instanceKeys.isEmpty()) {
-                Assert.assertTrue(!mSelectionCallback.hasActionMode)
+                check(!mSelectionCallback.hasActionMode)
                 null
             } else {
-                Assert.assertTrue(mSelectionCallback.hasActionMode)
+                check(mSelectionCallback.hasActionMode)
                 instanceKeys
             }
         }
 
         val emptyTextId = when {
             mPosition != null -> {
-                Assert.assertTrue(mTimeRange != null)
+                check(mTimeRange != null)
 
-                Assert.assertTrue(mTimeStamp == null)
-                Assert.assertTrue(mInstanceKey == null)
-                Assert.assertTrue(mInstanceKeys == null)
+                check(mTimeStamp == null)
+                check(mInstanceKey == null)
+                check(mInstanceKeys == null)
 
-                Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+                check(mDataWrapper!!.TaskEditable == null)
 
                 R.string.instances_empty_root
             }
             mTimeStamp != null -> {
-                Assert.assertTrue(mInstanceKey == null)
-                Assert.assertTrue(mInstanceKeys == null)
+                check(mInstanceKey == null)
+                check(mInstanceKeys == null)
 
-                Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+                check(mDataWrapper!!.TaskEditable == null)
 
                 null
             }
             mInstanceKey != null -> {
-                Assert.assertTrue(mInstanceKeys == null)
+                check(mInstanceKeys == null)
 
-                Assert.assertTrue(mDataWrapper!!.TaskEditable != null)
+                check(mDataWrapper!!.TaskEditable != null)
 
                 if (mDataWrapper!!.TaskEditable!!) {
                     R.string.empty_child
@@ -663,8 +664,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 }
             }
             mInstanceKeys != null -> {
-                Assert.assertTrue(mInstanceKeys!!.isNotEmpty())
-                Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+                check(mInstanceKeys!!.isNotEmpty())
+                check(mDataWrapper!!.TaskEditable == null)
 
                 null
             }
@@ -699,8 +700,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun updateSelectAll() {
-        Assert.assertTrue(mDataWrapper != null)
-        Assert.assertTrue(mDataId != null)
+        check(mDataWrapper != null)
+        check(mDataId != null)
 
         (activity as GroupListListener).setGroupSelectAllVisibility(mPosition, mDataWrapper!!.instanceDatas.values.any { it.Done == null })
     }
@@ -714,37 +715,37 @@ class GroupListFragment : AbstractFragment(), FabUser {
         mFloatingActionButton = floatingActionButton
 
         mFloatingActionButton!!.setOnClickListener {
-            Assert.assertTrue(mDataWrapper != null)
-            Assert.assertTrue(mInstanceKeys == null)
+            check(mDataWrapper != null)
+            check(mInstanceKeys == null)
 
-            Assert.assertTrue(activity != null) // todo how the fuck is this null?
+            check(activity != null) // todo how the fuck is this null?
 
             when {
                 mPosition != null -> {
-                    Assert.assertTrue(mTimeRange != null)
+                    check(mTimeRange != null)
 
-                    Assert.assertTrue(mTimeStamp == null)
-                    Assert.assertTrue(mInstanceKey == null)
+                    check(mTimeStamp == null)
+                    check(mInstanceKey == null)
 
-                    Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+                    check(mDataWrapper!!.TaskEditable == null)
 
                     startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange!!, mPosition!!))))
                 }
                 mTimeStamp != null -> {
-                    Assert.assertTrue(mInstanceKey == null)
+                    check(mInstanceKey == null)
 
-                    Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+                    check(mDataWrapper!!.TaskEditable == null)
 
-                    Assert.assertTrue(mTimeStamp!! > TimeStamp.now)
+                    check(mTimeStamp!! > TimeStamp.now)
 
                     startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(mTimeStamp!!.date, mTimeStamp!!.hourMinute)))
                 }
                 else -> {
-                    Assert.assertTrue(mInstanceKey != null)
+                    check(mInstanceKey != null)
 
-                    Assert.assertTrue(mDataWrapper!!.TaskEditable != null)
+                    check(mDataWrapper!!.TaskEditable != null)
 
-                    Assert.assertTrue(mDataWrapper!!.TaskEditable!!)
+                    check(mDataWrapper!!.TaskEditable!!)
 
                     startActivity(CreateTaskActivity.getCreateIntent(mInstanceKey!!.taskKey))
                 }
@@ -755,38 +756,38 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun showPadding(): Boolean {
-        Assert.assertTrue(mDataWrapper != null)
+        check(mDataWrapper != null)
 
         when {
             mPosition != null -> {
-                Assert.assertTrue(mTimeRange != null)
+                check(mTimeRange != null)
 
-                Assert.assertTrue(mTimeStamp == null)
-                Assert.assertTrue(mInstanceKey == null)
-                Assert.assertTrue(mInstanceKeys == null)
+                check(mTimeStamp == null)
+                check(mInstanceKey == null)
+                check(mInstanceKeys == null)
 
-                Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+                check(mDataWrapper!!.TaskEditable == null)
 
                 return true
             }
             mTimeStamp != null -> {
-                Assert.assertTrue(mInstanceKey == null)
-                Assert.assertTrue(mInstanceKeys == null)
+                check(mInstanceKey == null)
+                check(mInstanceKeys == null)
 
-                Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+                check(mDataWrapper!!.TaskEditable == null)
 
                 return (mTimeStamp!! > TimeStamp.now)
             }
             mInstanceKey != null -> {
-                Assert.assertTrue(mInstanceKeys == null)
+                check(mInstanceKeys == null)
 
-                Assert.assertTrue(mDataWrapper!!.TaskEditable != null)
+                check(mDataWrapper!!.TaskEditable != null)
 
                 return mDataWrapper!!.TaskEditable!!
             }
             mInstanceKeys != null -> {
-                Assert.assertTrue(mInstanceKeys!!.isNotEmpty())
-                Assert.assertTrue(mDataWrapper!!.TaskEditable == null)
+                check(mInstanceKeys!!.isNotEmpty())
+                check(mDataWrapper!!.TaskEditable == null)
 
                 return false
             }
@@ -858,7 +859,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             }
 
         private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>?, expansionState: GroupListFragment.ExpansionState?, selectedNodes: ArrayList<InstanceKey>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
-            Assert.assertTrue(instanceDatas != null)
+            check(instanceDatas != null)
 
             mTreeViewAdapter = TreeViewAdapter(this, if (mShowFab) R.layout.row_group_list_fab_padding else null)
 
@@ -955,7 +956,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             val instanceDatas: HashMap<InstanceKey, InstanceData>) : InstanceDataParent {
 
         override fun remove(instanceKey: InstanceKey) {
-            Assert.assertTrue(instanceDatas.containsKey(instanceKey))
+            check(instanceDatas.containsKey(instanceKey))
 
             instanceDatas.remove(instanceKey)
         }
@@ -980,11 +981,11 @@ class GroupListFragment : AbstractFragment(), FabUser {
         lateinit var instanceDataParent: InstanceDataParent
 
         init {
-            Assert.assertTrue(Name.isNotEmpty())
+            check(Name.isNotEmpty())
         }
 
         override fun remove(instanceKey: InstanceKey) {
-            Assert.assertTrue(children.containsKey(instanceKey))
+            check(children.containsKey(instanceKey))
 
             children.remove(instanceKey)
         }
@@ -1009,8 +1010,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
     data class CustomTimeData(val Name: String, val HourMinutes: TreeMap<DayOfWeek, HourMinute>) {
 
         init {
-            Assert.assertTrue(Name.isNotEmpty())
-            Assert.assertTrue(HourMinutes.size == 7)
+            check(Name.isNotEmpty())
+            check(HourMinutes.size == 7)
         }
 
     }
@@ -1023,7 +1024,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     data class TaskData(val mTaskKey: TaskKey, val Name: String, val Children: List<TaskData>, val mStartExactTimeStamp: ExactTimeStamp, val mNote: String?) {
 
         init {
-            Assert.assertTrue(Name.isNotEmpty())
+            check(Name.isNotEmpty())
         }
     }
 }

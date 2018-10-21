@@ -5,7 +5,7 @@ import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.*
-import junit.framework.Assert
+
 import java.util.*
 
 class RemoteProjectRecord : RemoteRecord {
@@ -57,7 +57,7 @@ class RemoteProjectRecord : RemoteRecord {
     var name: String
         get() = projectJson.name
         set(name) {
-            Assert.assertTrue(!TextUtils.isEmpty(name))
+            check(!TextUtils.isEmpty(name))
 
             if (name == projectJson.name)
                 return
@@ -86,32 +86,32 @@ class RemoteProjectRecord : RemoteRecord {
 
     private fun initialize(domainFactory: DomainFactory) {
         for ((id, taskJson) in projectJson.tasks) {
-            Assert.assertTrue(!TextUtils.isEmpty(id))
+            check(!TextUtils.isEmpty(id))
 
             remoteTaskRecords[id] = RemoteTaskRecord(domainFactory, id, this, taskJson)
         }
 
         for ((id, taskHierarchyJson) in projectJson.taskHierarchies) {
-            Assert.assertTrue(!TextUtils.isEmpty(id))
+            check(!TextUtils.isEmpty(id))
 
             remoteTaskHierarchyRecords[id] = RemoteTaskHierarchyRecord(id, this, taskHierarchyJson)
         }
 
         for ((id, customTimeJson) in projectJson.customTimes) {
-            Assert.assertTrue(!TextUtils.isEmpty(id))
+            check(!TextUtils.isEmpty(id))
 
             remoteCustomTimeRecords[id] = RemoteCustomTimeRecord(id, this, customTimeJson)
         }
 
         for ((id, userJson) in projectJson.users) {
-            Assert.assertTrue(!TextUtils.isEmpty(id))
+            check(!TextUtils.isEmpty(id))
 
             remoteUserRecords[id] = RemoteProjectUserRecord(false, this, userJson)
         }
     }
 
     fun updateRecordOf(addedFriends: Set<String>, removedFriends: Set<String>) {
-        Assert.assertTrue(addedFriends.none { removedFriends.contains(it) })
+        check(addedFriends.none { removedFriends.contains(it) })
 
         jsonWrapper.updateRecordOf(addedFriends, removedFriends)
 
@@ -135,16 +135,16 @@ class RemoteProjectRecord : RemoteRecord {
     }
 
     override fun getValues(values: MutableMap<String, Any?>) {
-        Assert.assertTrue(!deleted)
-        Assert.assertTrue(!created)
-        Assert.assertTrue(!updated)
+        check(!deleted)
+        check(!created)
+        check(!updated)
 
         when {
             delete -> {
                 Log.e("asdf", "RemoteProjectRecord.getValues deleting " + this)
 
-                Assert.assertTrue(!create)
-                Assert.assertTrue(update != null)
+                check(!create)
+                check(update != null)
 
                 deleted = true
                 values[key] = null
@@ -152,14 +152,14 @@ class RemoteProjectRecord : RemoteRecord {
             create -> {
                 Log.e("asdf", "RemoteProjectRecord.getValues creating " + this)
 
-                Assert.assertTrue(update == null)
+                check(update == null)
 
                 created = true
 
                 values[key] = createObject
             }
             else -> {
-                Assert.assertTrue(update != null)
+                check(update != null)
 
                 if (!update!!.isEmpty()) {
                     Log.e("asdf", "RemoteProjectRecord.getValues updating " + this)
@@ -185,7 +185,7 @@ class RemoteProjectRecord : RemoteRecord {
 
     fun newRemoteTaskRecord(domainFactory: DomainFactory, taskJson: TaskJson): RemoteTaskRecord {
         val remoteTaskRecord = RemoteTaskRecord(domainFactory, this, taskJson)
-        Assert.assertTrue(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
+        check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
         remoteTaskRecords[remoteTaskRecord.id] = remoteTaskRecord
         return remoteTaskRecord
@@ -193,7 +193,7 @@ class RemoteProjectRecord : RemoteRecord {
 
     fun newRemoteTaskHierarchyRecord(taskHierarchyJson: TaskHierarchyJson): RemoteTaskHierarchyRecord {
         val remoteTaskHierarchyRecord = RemoteTaskHierarchyRecord(this, taskHierarchyJson)
-        Assert.assertTrue(!remoteTaskHierarchyRecords.containsKey(remoteTaskHierarchyRecord.id))
+        check(!remoteTaskHierarchyRecords.containsKey(remoteTaskHierarchyRecord.id))
 
         remoteTaskHierarchyRecords[remoteTaskHierarchyRecord.id] = remoteTaskHierarchyRecord
         return remoteTaskHierarchyRecord
@@ -201,7 +201,7 @@ class RemoteProjectRecord : RemoteRecord {
 
     fun newRemoteCustomTimeRecord(customTimeJson: CustomTimeJson): RemoteCustomTimeRecord {
         val remoteCustomTimeRecord = RemoteCustomTimeRecord(this, customTimeJson)
-        Assert.assertTrue(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.id))
+        check(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.id))
 
         remoteCustomTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
         return remoteCustomTimeRecord
@@ -209,7 +209,7 @@ class RemoteProjectRecord : RemoteRecord {
 
     fun newRemoteUserRecord(userJson: UserJson): RemoteProjectUserRecord {
         val remoteProjectUserRecord = RemoteProjectUserRecord(true, this, userJson)
-        Assert.assertTrue(!remoteCustomTimeRecords.containsKey(remoteProjectUserRecord.id))
+        check(!remoteCustomTimeRecords.containsKey(remoteProjectUserRecord.id))
 
         remoteUserRecords[remoteProjectUserRecord.id] = remoteProjectUserRecord
         return remoteProjectUserRecord

@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
-import junit.framework.Assert
+
 
 class LocalTaskHierarchy(domainFactory: DomainFactory, private val taskHierarchyRecord: TaskHierarchyRecord) : TaskHierarchy(domainFactory) {
 
@@ -38,7 +38,7 @@ class LocalTaskHierarchy(domainFactory: DomainFactory, private val taskHierarchy
     public override fun getEndExactTimeStamp() = taskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
 
     override fun setEndExactTimeStamp(now: ExactTimeStamp) {
-        Assert.assertTrue(current(now))
+        check(current(now))
 
         taskHierarchyRecord.endTime = now.long
     }

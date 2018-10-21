@@ -5,7 +5,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.krystianwsul.checkme.MyFirebaseInstanceIdService
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.utils.Utils
-import junit.framework.Assert
+
 import java.util.*
 
 class UserInfo(firebaseUser: FirebaseUser) {
@@ -19,8 +19,8 @@ class UserInfo(firebaseUser: FirebaseUser) {
     val key by lazy { UserData.getKey(email) }
 
     init {
-        Assert.assertTrue(!TextUtils.isEmpty(email))
-        Assert.assertTrue(!TextUtils.isEmpty(name))
+        check(!TextUtils.isEmpty(email))
+        check(!TextUtils.isEmpty(name))
     }
 
     fun getValues(uuid: String): Map<String, Any?> {

@@ -28,7 +28,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.utils.time.TimeStamp
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.activity_edit_instance.*
 import java.util.*
 
@@ -66,7 +66,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
 
     private val mTimeDialogListener = object : TimeDialogFragment.TimeDialogListener {
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
-            Assert.assertTrue(mData != null)
+            check(mData != null)
 
             mTimePairPersist!!.customTimeKey = customTimeKey
 
@@ -76,7 +76,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         }
 
         override fun onOtherSelected() {
-            Assert.assertTrue(mData != null)
+            check(mData != null)
 
             val timePickerDialogFragment = TimePickerDialogFragment.newInstance(mTimePairPersist!!.hourMinute)
             timePickerDialogFragment.listener = mTimePickerDialogFragmentListener
@@ -89,7 +89,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
     }
 
     private val mTimePickerDialogFragmentListener = { hourMinute: HourMinute ->
-        Assert.assertTrue(mData != null)
+        check(mData != null)
 
         mTimePairPersist!!.hourMinute = hourMinute
         updateTimeText()
@@ -117,9 +117,10 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_edit_instance_hour -> {
-                Assert.assertTrue(mData != null)
-                Assert.assertTrue(mData!!.showHour)
+                check(mData != null)
+                check(mData!!.showHour)
 
+                @Suppress("DEPRECATION")
                 supportLoaderManager.destroyLoader(0)
 
                 DomainFactory.getDomainFactory().setInstanceAddHourActivity(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceKey)
@@ -127,10 +128,11 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
                 finish()
             }
             R.id.action_edit_instance_save -> {
-                Assert.assertTrue(mDate != null)
-                Assert.assertTrue(mData != null)
+                check(mDate != null)
+                check(mData != null)
 
                 if (isValidDateTime) {
+                    @Suppress("DEPRECATION")
                     supportLoaderManager.destroyLoader(0)
                     DomainFactory.getDomainFactory().setInstanceDateTime(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceKey, mDate!!, mTimePairPersist!!.timePair)
                     finish()
@@ -148,7 +150,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         setContentView(R.layout.activity_edit_instance)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        Assert.assertTrue(toolbar != null)
+        check(toolbar != null)
 
         setSupportActionBar(toolbar)
 
@@ -170,13 +172,14 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
 
         if (mSavedInstanceState != null && mSavedInstanceState!!.containsKey(DATE_KEY)) {
             mDate = mSavedInstanceState!!.getParcelable(DATE_KEY)
-            Assert.assertTrue(mDate != null)
+            check(mDate != null)
 
-            Assert.assertTrue(mSavedInstanceState!!.containsKey(TIME_PAIR_PERSIST_KEY))
+            check(mSavedInstanceState!!.containsKey(TIME_PAIR_PERSIST_KEY))
             mTimePairPersist = mSavedInstanceState!!.getParcelable(TIME_PAIR_PERSIST_KEY)
-            Assert.assertTrue(mTimePairPersist != null)
+            check(mTimePairPersist != null)
         }
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader<EditInstanceLoader.Data>(0, null, this)
 
         mBroadcastReceiver = object : BroadcastReceiver() {
@@ -209,20 +212,20 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         super.onSaveInstanceState(outState)
 
         if (mData != null) {
-            Assert.assertTrue(mDate != null)
+            check(mDate != null)
             outState.putParcelable(DATE_KEY, mDate)
 
-            Assert.assertTrue(mTimePairPersist != null)
+            check(mTimePairPersist != null)
             outState.putParcelable(TIME_PAIR_PERSIST_KEY, mTimePairPersist)
         }
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<EditInstanceLoader.Data> {
         val intent = intent
-        Assert.assertTrue(intent.hasExtra(INSTANCE_KEY))
+        check(intent.hasExtra(INSTANCE_KEY))
 
         val instanceKey = intent.getParcelableExtra<InstanceKey>(INSTANCE_KEY)
-        Assert.assertTrue(instanceKey != null)
+        check(instanceKey != null)
 
         return EditInstanceLoader(this, instanceKey!!)
     }
@@ -239,8 +242,8 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         editInstanceLayout.visibility = View.VISIBLE
 
         if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState!!.containsKey(DATE_KEY))) {
-            Assert.assertTrue(mDate == null)
-            Assert.assertTrue(mTimePairPersist == null)
+            check(mDate == null)
+            check(mTimePairPersist == null)
 
             mFirst = false
 
@@ -258,7 +261,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
         timePickerDialogFragment?.listener = mTimePickerDialogFragmentListener
 
         editInstanceTime.setOnClickListener {
-            Assert.assertTrue(mData != null)
+            check(mData != null)
             val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(mData!!.customTimeDatas.values
                     .filter { it.customTimeKey.localCustomTimeId != null }
                     .sortedBy { it.hourMinutes[mDate!!.dayOfWeek] }
@@ -278,7 +281,7 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
     override fun onLoaderReset(loader: Loader<EditInstanceLoader.Data>) {}
 
     private fun updateDateText() {
-        Assert.assertTrue(mDate != null)
+        check(mDate != null)
 
         editInstanceDate.setText(mDate!!.getDisplayText(this))
 
@@ -289,13 +292,13 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
 
     @SuppressLint("SetTextI18n")
     private fun updateTimeText() {
-        Assert.assertTrue(mTimePairPersist != null)
-        Assert.assertTrue(mData != null)
-        Assert.assertTrue(mDate != null)
+        check(mTimePairPersist != null)
+        check(mData != null)
+        check(mDate != null)
 
         if (mTimePairPersist!!.customTimeKey != null) {
             val customTimeData = mData!!.customTimeDatas[mTimePairPersist!!.customTimeKey]
-            Assert.assertTrue(customTimeData != null)
+            check(customTimeData != null)
 
             editInstanceTime.setText(customTimeData!!.name + " (" + customTimeData.hourMinutes[mDate!!.dayOfWeek] + ")")
         } else {
@@ -367,10 +370,10 @@ class EditInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<E
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Assert.assertTrue(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
-        Assert.assertTrue(resultCode >= 0)
-        Assert.assertTrue(data == null)
-        Assert.assertTrue(mTimePairPersist != null)
+        check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
+        check(resultCode >= 0)
+        check(data == null)
+        check(mTimePairPersist != null)
 
         if (resultCode > 0)
             mTimePairPersist!!.customTimeKey = CustomTimeKey(resultCode)

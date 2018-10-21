@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.utils
 
 import android.os.Parcelable
 import android.text.TextUtils
-import junit.framework.Assert
+
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 
@@ -11,13 +11,13 @@ data class TaskKey(val localTaskId: Int?, val remoteProjectId: String?, val remo
 
     val type
         get() = if (localTaskId != null) {
-            Assert.assertTrue(TextUtils.isEmpty(remoteProjectId))
-            Assert.assertTrue(TextUtils.isEmpty(remoteTaskId))
+            check(TextUtils.isEmpty(remoteProjectId))
+            check(TextUtils.isEmpty(remoteTaskId))
 
             Type.LOCAL
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(remoteProjectId))
-            Assert.assertTrue(!TextUtils.isEmpty(remoteTaskId))
+            check(!TextUtils.isEmpty(remoteProjectId))
+            check(!TextUtils.isEmpty(remoteTaskId))
 
             Type.REMOTE
         }

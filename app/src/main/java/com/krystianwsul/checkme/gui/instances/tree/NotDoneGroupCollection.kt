@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import junit.framework.Assert
+
 
 class NotDoneGroupCollection(private val density: Float, private val indentation: Int, val nodeCollection: NodeCollection, private val nodeContainer: NodeContainer, private val selectable: Boolean) {
 
@@ -21,7 +21,7 @@ class NotDoneGroupCollection(private val density: Float, private val indentation
     }
 
     fun remove(notDoneGroupNode: NotDoneGroupNode) {
-        Assert.assertTrue(notDoneGroupNodes.contains(notDoneGroupNode))
+        check(notDoneGroupNodes.contains(notDoneGroupNode))
 
         notDoneGroupNodes.remove(notDoneGroupNode)
         nodeContainer.remove(notDoneGroupNode.treeNode)
@@ -40,7 +40,7 @@ class NotDoneGroupCollection(private val density: Float, private val indentation
     }
 
     private fun newNotDoneGroupNode(notDoneGroupCollection: NotDoneGroupCollection, instanceDatas: MutableList<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>?, expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?): TreeNode {
-        Assert.assertTrue(!instanceDatas.isEmpty())
+        check(!instanceDatas.isEmpty())
 
         val notDoneGroupNode = NotDoneGroupNode(density, indentation, notDoneGroupCollection, instanceDatas, selectable)
 

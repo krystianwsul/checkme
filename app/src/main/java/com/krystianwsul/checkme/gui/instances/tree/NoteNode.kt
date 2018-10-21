@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import junit.framework.Assert
+
 import java.util.*
 
 class NoteNode(density: Float, private val note: String, private val groupListFragment: GroupListFragment) : GroupHolderNode(density, 0), ModelNode {
@@ -16,7 +16,7 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
     private lateinit var treeNode: TreeNode
 
     init {
-        Assert.assertTrue(note.isNotEmpty())
+        check(note.isNotEmpty())
     }
 
     fun initialize(nodeContainer: NodeContainer): TreeNode {
@@ -53,7 +53,7 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
     override val isSeparatorVisibleWhenNotExpanded = true
 
     override fun compareTo(other: ModelNode): Int {
-        Assert.assertTrue(other is NotDoneGroupNode || other is UnscheduledNode || other is DividerNode)
+        check(other is NotDoneGroupNode || other is UnscheduledNode || other is DividerNode)
 
         return -1
     }

@@ -110,6 +110,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
         if (savedInstanceState?.containsKey(SELECTED_IDS_KEY) == true)
             selectedIds = savedInstanceState.getStringArrayList(SELECTED_IDS_KEY)!!
 
+        @Suppress("DEPRECATION")
         loaderManager.initLoader(0, null, this)
     }
 

@@ -475,6 +475,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             mainDaysPager.currentItem = Days.daysBetween(LocalDate.now(), calendarDate).days
         }
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this)
     }
 

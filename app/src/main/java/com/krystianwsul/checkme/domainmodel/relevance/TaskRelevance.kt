@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import junit.framework.Assert
+
 
 class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
 
@@ -58,7 +58,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
     }
 
     fun setRemoteRelevant(remoteCustomTimeRelevances: Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
-        Assert.assertTrue(relevant)
+        check(relevant)
 
         task.schedules
                 .mapNotNull { it.remoteCustomTimeKey }

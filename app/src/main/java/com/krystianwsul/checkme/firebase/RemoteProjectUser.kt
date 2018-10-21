@@ -4,7 +4,7 @@ import android.text.TextUtils
 
 import com.krystianwsul.checkme.firebase.records.RemoteProjectUserRecord
 
-import junit.framework.Assert
+
 
 class RemoteProjectUser(private val remoteProject: RemoteProject, private val remoteProjectUserRecord: RemoteProjectUserRecord) {
 
@@ -13,7 +13,7 @@ class RemoteProjectUser(private val remoteProject: RemoteProject, private val re
     var name
         get() = remoteProjectUserRecord.name
         set(name) {
-            Assert.assertTrue(!TextUtils.isEmpty(name))
+            check(!TextUtils.isEmpty(name))
 
             remoteProjectUserRecord.name = name
         }

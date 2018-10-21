@@ -23,7 +23,7 @@ import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.loaders.ShowProjectLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import junit.framework.Assert
+
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
@@ -98,10 +98,10 @@ class UserListFragment : AbstractFragment(), FabUser {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
-            Assert.assertTrue(it.containsKey(PROJECT_ID_KEY))
+            check(it.containsKey(PROJECT_ID_KEY))
 
             projectId = it.getString(PROJECT_ID_KEY)!!
-            Assert.assertTrue(projectId.isNullOrEmpty())
+            check(projectId.isNullOrEmpty())
         }
     }
 
@@ -126,7 +126,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private fun initializeFriendPickerFragment(friendPickerFragment: FriendPickerFragment) {
-        Assert.assertTrue(data != null)
+        check(data != null)
 
         val userIds = friendListAdapter!!.userDataWrappers
                 .map { it.userListData.id }
@@ -138,8 +138,8 @@ class UserListFragment : AbstractFragment(), FabUser {
                 .map { FriendPickerFragment.FriendData(it.id, it.name, it.email) }
 
         friendPickerFragment.initialize(friendDatas) { friendId ->
-            Assert.assertTrue(data!!.friendDatas.containsKey(friendId))
-            Assert.assertTrue(friendListAdapter!!.userDataWrappers.none { it.userListData.id == friendId })
+            check(data!!.friendDatas.containsKey(friendId))
+            check(friendListAdapter!!.userDataWrappers.none { it.userListData.id == friendId })
 
             val friendData = data!!.friendDatas[friendId]!!
 
@@ -204,14 +204,14 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     fun save(name: String) {
-        Assert.assertTrue(name.isNotEmpty())
-        Assert.assertTrue(data != null)
-        Assert.assertTrue(friendListAdapter != null)
+        check(name.isNotEmpty())
+        check(data != null)
+        check(friendListAdapter != null)
 
         val saveState = friendListAdapter!!.saveState
 
         if (projectId.isNullOrEmpty()) {
-            Assert.assertTrue(saveState.removedIds.isEmpty())
+            check(saveState.removedIds.isEmpty())
 
             DomainFactory.getDomainFactory().createProject(activity!!, data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
         } else {
@@ -220,7 +220,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
-        Assert.assertTrue(friendListFab == null)
+        check(friendListFab == null)
 
         friendListFab = floatingActionButton
 
@@ -246,7 +246,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     override fun clearFab() {
-        Assert.assertTrue(friendListFab != null)
+        check(friendListFab != null)
 
         friendListFab!!.setOnClickListener(null)
 
@@ -261,7 +261,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         val saveState: SaveState
             get() {
-                Assert.assertTrue(data != null)
+                check(data != null)
 
                 val oldUserIds = data!!.userListDatas
                         .map { it.id }
@@ -281,7 +281,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             }
 
         init {
-            Assert.assertTrue(data != null)
+            check(data != null)
 
             val userListMap = userListDatas.associateBy { it.id }.toMutableMap()
 
@@ -371,7 +371,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             }
 
             val position = friendListAdapter!!.userDataWrappers.indexOf(this)
-            Assert.assertTrue(position >= 0)
+            check(position >= 0)
 
             friendListAdapter!!.notifyItemChanged(position)
         }

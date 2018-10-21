@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
-import junit.framework.Assert
+
 
 class WeeklyScheduleEntry : ScheduleEntry {
 
@@ -48,7 +48,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.scheduleType == ScheduleType.WEEKLY)
+        check(scheduleDialogData.scheduleType == ScheduleType.WEEKLY)
 
         daysOfWeek = scheduleDialogData.daysOfWeek
         timePair = scheduleDialogData.timePairPersist.timePair
@@ -56,11 +56,11 @@ class WeeklyScheduleEntry : ScheduleEntry {
 
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
         return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
-            Assert.assertTrue(timePair.hourMinute == null)
+            check(timePair.hourMinute == null)
 
             customTimeDatas[timePair.customTimeKey]!!.name
         } else {
-            Assert.assertTrue(timePair.hourMinute != null)
+            check(timePair.hourMinute != null)
 
             timePair.hourMinute!!.toString()
         }

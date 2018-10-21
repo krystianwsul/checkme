@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.UserJson
 import com.krystianwsul.checkme.firebase.records.RemoteFriendManager
-import junit.framework.Assert
+
 import java.util.*
 
 class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
@@ -116,13 +116,13 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
     val friends: Collection<RemoteRootUser> get() = _friends.values
 
     fun save() {
-        Assert.assertTrue(!remoteFriendManager.isSaved)
+        check(!remoteFriendManager.isSaved)
 
         remoteFriendManager.save()
     }
 
     fun getUserJsons(friendIds: Set<String>): MutableMap<String, UserJson> {
-        Assert.assertTrue(friendIds.all { _friends.containsKey(it) })
+        check(friendIds.all { _friends.containsKey(it) })
 
         return _friends.entries
                 .filter { friendIds.contains(it.key) }
@@ -131,15 +131,15 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
     }
 
     fun getFriend(friendId: String): RemoteRootUser {
-        Assert.assertTrue(_friends.containsKey(friendId))
+        check(_friends.containsKey(friendId))
 
         return _friends[friendId]!!
     }
 
     fun removeFriend(userKey: String, friendId: String) {
-        Assert.assertTrue(!TextUtils.isEmpty(userKey))
-        Assert.assertTrue(!TextUtils.isEmpty(friendId))
-        Assert.assertTrue(_friends.containsKey(friendId))
+        check(!TextUtils.isEmpty(userKey))
+        check(!TextUtils.isEmpty(friendId))
+        check(_friends.containsKey(friendId))
 
         _friends[friendId]!!.removeFriend(userKey)
 

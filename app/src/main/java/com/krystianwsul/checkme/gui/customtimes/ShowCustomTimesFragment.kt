@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import junit.framework.Assert
+
 import java.util.*
 
 class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data>, FabUser {
@@ -49,7 +49,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
 
         override fun onMenuClick(menuItem: MenuItem) {
             val customTimeIds = customTimesAdapter!!.selected
-            Assert.assertTrue(!customTimeIds.isEmpty())
+            check(!customTimeIds.isEmpty())
 
             when (menuItem.itemId) {
                 R.id.action_custom_times_delete -> {
@@ -95,7 +95,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        Assert.assertTrue(context is CustomTimesListListener)
+        check(context is CustomTimesListListener)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_show_custom_times, container, false)!!
@@ -110,9 +110,10 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
 
         if (savedInstanceState?.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY) == true) {
             selectedCustomTimeIds = savedInstanceState.getIntegerArrayList(SELECTED_CUSTOM_TIME_IDS_KEY)!!
-            Assert.assertTrue(!selectedCustomTimeIds!!.isEmpty())
+            check(!selectedCustomTimeIds!!.isEmpty())
         }
 
+        @Suppress("DEPRECATION")
         loaderManager.initLoader(0, null, this)
     }
 
@@ -158,7 +159,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
     }
 
     private fun updateSelectAll() {
-        Assert.assertTrue(customTimesAdapter != null)
+        check(customTimesAdapter != null)
 
         (activity as CustomTimesListListener).setCustomTimesSelectAllVisibility(customTimesAdapter!!.itemCount != 0)
     }
@@ -210,7 +211,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
         }
 
         fun selectAll() {
-            Assert.assertTrue(!selectionCallback.hasActionMode)
+            check(!selectionCallback.hasActionMode)
 
             customTimeWrappers.filterNot { it.selected }.forEach { it.toggleSelect() }
         }
@@ -286,7 +287,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
 
         init {
             if (selectedCustomTimeIds != null) {
-                Assert.assertTrue(!selectedCustomTimeIds.isEmpty())
+                check(!selectedCustomTimeIds.isEmpty())
 
                 selected = selectedCustomTimeIds.contains(customTimeData.id)
             }
@@ -302,7 +303,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
             }
 
             val position = customTimesAdapter!!.customTimeWrappers.indexOf(this)
-            Assert.assertTrue(position >= 0)
+            check(position >= 0)
 
             customTimesAdapter!!.notifyItemChanged(position)
         }

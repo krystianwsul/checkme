@@ -5,7 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import junit.framework.Assert
+
 
 class DatePickerDialogFragment : AbstractDialogFragment() {
 
@@ -28,11 +28,11 @@ class DatePickerDialogFragment : AbstractDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val args = arguments
-        Assert.assertTrue(args != null)
-        Assert.assertTrue(args!!.containsKey(DATE_KEY))
+        check(args != null)
+        check(args!!.containsKey(DATE_KEY))
 
         val date = args.getParcelable<Date>(DATE_KEY)
-        Assert.assertTrue(date != null)
+        check(date != null)
 
         val datePickerDialog = DatePickerDialog(requireActivity(), mOnDateSetListener, date!!.year, date.month - 1, date.day)
         datePickerDialog.datePicker.minDate = ExactTimeStamp.now.long - 1000 // -1000 odejmuje sekundę żeby obejść bug na ver. < 5.0

@@ -4,7 +4,7 @@ import android.content.Context
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 
-import junit.framework.Assert
+
 
 class ShowProjectLoader(context: Context, private val projectId: String?) : DomainLoader<ShowProjectLoader.Data>(context, DomainLoader.FirebaseLevel.FRIEND) {
 
@@ -17,9 +17,9 @@ class ShowProjectLoader(context: Context, private val projectId: String?) : Doma
     data class UserListData(val name: String, val email: String, val id: String) {
 
         init {
-            Assert.assertTrue(name.isNotEmpty())
-            Assert.assertTrue(email.isNotEmpty())
-            Assert.assertTrue(id.isNotEmpty())
+            check(name.isNotEmpty())
+            check(email.isNotEmpty())
+            check(id.isNotEmpty())
         }
     }
 }

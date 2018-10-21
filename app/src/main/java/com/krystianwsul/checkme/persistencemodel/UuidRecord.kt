@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import junit.framework.Assert
+
 import java.util.*
 
 class UuidRecord(created: Boolean, val uuid: String) : Record(created) {
@@ -27,14 +27,14 @@ class UuidRecord(created: Boolean, val uuid: String) : Record(created) {
 
         private fun cursorToCustomTimeRecord(cursor: Cursor): UuidRecord {
             val uuid = cursor.getString(0)
-            Assert.assertTrue(uuid.isNotEmpty())
+            check(uuid.isNotEmpty())
 
             return UuidRecord(true, uuid)
         }
     }
 
     init {
-        Assert.assertTrue(uuid.isNotEmpty())
+        check(uuid.isNotEmpty())
     }
 
     override val contentValues

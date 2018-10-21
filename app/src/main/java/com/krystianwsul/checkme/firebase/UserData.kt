@@ -5,7 +5,7 @@ import android.text.TextUtils
 import android.util.Base64
 import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
-import junit.framework.Assert
+
 import kotlinx.android.parcel.Parcelize
 
 @IgnoreExtraProperties
@@ -19,7 +19,7 @@ data class UserData(val email: String = "", val name: String = "") : Parcelable 
     companion object {
 
         fun getKey(email: String): String {
-            Assert.assertTrue(!TextUtils.isEmpty(email))
+            check(!TextUtils.isEmpty(email))
 
             val encoded = email.trim { it <= ' ' }
                     .toLowerCase()

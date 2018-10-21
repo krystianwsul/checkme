@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import junit.framework.Assert
+
 import java.util.*
 
 class MonthlyWeekSchedule(domainFactory: DomainFactory, private val monthlyWeekScheduleBridge: MonthlyWeekScheduleBridge) : RepeatingSchedule(domainFactory) {
@@ -32,8 +32,8 @@ class MonthlyWeekSchedule(domainFactory: DomainFactory, private val monthlyWeekS
             val minute = monthlyWeekScheduleBridge.minute
 
             return if (customTimeKey != null) {
-                Assert.assertTrue(hour == null)
-                Assert.assertTrue(minute == null)
+                check(hour == null)
+                check(minute == null)
 
                 TimePair(customTimeKey)
             } else {
@@ -72,7 +72,7 @@ class MonthlyWeekSchedule(domainFactory: DomainFactory, private val monthlyWeekS
             return null
 
         val scheduleDateTime = DateTime(date, time)
-        Assert.assertTrue(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
+        check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
         return domainFactory.getInstance(task.taskKey, scheduleDateTime)
     }

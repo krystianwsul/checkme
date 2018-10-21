@@ -6,13 +6,13 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
-import junit.framework.Assert
+
 import java.util.*
 
 object Utils {
 
     fun share(text: String) {
-        Assert.assertTrue(!TextUtils.isEmpty(text))
+        check(!TextUtils.isEmpty(text))
 
         val intent = Intent(Intent.ACTION_SEND).apply {
             putExtra(Intent.EXTRA_TEXT, text)

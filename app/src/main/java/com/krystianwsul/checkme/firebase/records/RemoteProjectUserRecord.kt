@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.records
 import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.firebase.json.UserJson
-import junit.framework.Assert
+
 
 class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: RemoteProjectRecord, override val createObject: UserJson) : RemoteRecord(create) {
 
@@ -29,7 +29,7 @@ class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: 
     val email by lazy { createObject.email }
 
     fun setToken(token: String?, uuid: String) {
-        Assert.assertTrue(!TextUtils.isEmpty(uuid))
+        check(!TextUtils.isEmpty(uuid))
 
         if (token == createObject.tokens[uuid])
             return

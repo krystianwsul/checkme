@@ -18,7 +18,7 @@ import com.krystianwsul.checkme.loaders.ShowTaskLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -50,11 +50,11 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
         supportActionBar!!.title = null
 
         taskKey = if (savedInstanceState != null) {
-            Assert.assertTrue(savedInstanceState.containsKey(TASK_KEY_KEY))
+            check(savedInstanceState.containsKey(TASK_KEY_KEY))
 
             savedInstanceState.getParcelable(TASK_KEY_KEY)!!
         } else {
-            Assert.assertTrue(intent.hasExtra(TASK_KEY_KEY))
+            check(intent.hasExtra(TASK_KEY_KEY))
 
             intent.getParcelableExtra(TASK_KEY_KEY)!!
         }
@@ -66,14 +66,15 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
                     .commit()
         }.also { it.setFab(showTaskFab) }
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Assert.assertTrue(requestCode == REQUEST_EDIT_TASK)
+        check(requestCode == REQUEST_EDIT_TASK)
 
         if (resultCode == Activity.RESULT_OK) {
-            Assert.assertTrue(data!!.hasExtra(TASK_KEY_KEY))
+            check(data!!.hasExtra(TASK_KEY_KEY))
 
             taskKey = data.getParcelableExtra(TASK_KEY_KEY)!!
 
@@ -82,6 +83,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
             })
         }
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this) // does this work?
     }
 
@@ -105,16 +107,18 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.task_menu_edit -> {
+                @Suppress("DEPRECATION")
                 supportLoaderManager.destroyLoader(0)
 
                 startActivityForResult(CreateTaskActivity.getEditIntent(taskKey), REQUEST_EDIT_TASK)
             }
             R.id.task_menu_share -> {
-                Assert.assertTrue(data != null)
+                check(data != null)
 
                 Utils.share(data!!.name + taskListFragment.shareData.let { "\n" + it })
             }
             R.id.task_menu_delete -> {
+                @Suppress("DEPRECATION")
                 supportLoaderManager.destroyLoader(0)
 
                 DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, data!!.dataId, SaveService.Source.GUI, taskKey)

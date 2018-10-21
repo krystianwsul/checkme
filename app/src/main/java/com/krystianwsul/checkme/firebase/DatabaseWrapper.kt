@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.records.*
-import junit.framework.Assert
+
 
 object DatabaseWrapper {
 
@@ -24,7 +24,7 @@ object DatabaseWrapper {
 
     fun initialize(myApplication: MyApplication) {
         root = myApplication.resources.getString(R.string.firebase_root)
-        Assert.assertTrue(!TextUtils.isEmpty(root))
+        check(!TextUtils.isEmpty(root))
 
         rootReference = FirebaseDatabase.getInstance().reference.child(root)!!
     }
@@ -54,7 +54,7 @@ object DatabaseWrapper {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
                 .push()
                 .key!!
-        Assert.assertTrue(!TextUtils.isEmpty(id))
+        check(!TextUtils.isEmpty(id))
 
         return id
     }
@@ -63,7 +63,7 @@ object DatabaseWrapper {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
                 .push()
                 .key!!
-        Assert.assertTrue(!TextUtils.isEmpty(id))
+        check(!TextUtils.isEmpty(id))
 
         return id
     }
@@ -72,7 +72,7 @@ object DatabaseWrapper {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
                 .push()
                 .key!!
-        Assert.assertTrue(!TextUtils.isEmpty(id))
+        check(!TextUtils.isEmpty(id))
 
         return id
     }
@@ -81,7 +81,7 @@ object DatabaseWrapper {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
                 .push()
                 .key!!
-        Assert.assertTrue(!TextUtils.isEmpty(id))
+        check(!TextUtils.isEmpty(id))
 
         return id
     }
@@ -100,7 +100,7 @@ object DatabaseWrapper {
 
     fun getUserQuery(userInfo: UserInfo): Query {
         val key = userInfo.key
-        Assert.assertTrue(!TextUtils.isEmpty(key))
+        check(!TextUtils.isEmpty(key))
 
         return rootReference.child("$USERS_KEY/$key")!!
     }

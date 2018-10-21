@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.loaders.ShowProjectLoader
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.activity_show_project.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 
@@ -29,7 +29,7 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
         private const val DISCARD_TAG = "discard"
 
         fun newIntent(context: Context, projectId: String) = Intent(context, ShowProjectActivity::class.java).apply {
-            Assert.assertTrue(!TextUtils.isEmpty(projectId))
+            check(!TextUtils.isEmpty(projectId))
 
             putExtra(PROJECT_ID_KEY, projectId)
         }
@@ -60,11 +60,12 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_save -> {
-                Assert.assertTrue(data != null)
+                check(data != null)
 
                 if (updateError())
                     return true
 
+                @Suppress("DEPRECATION")
                 supportLoaderManager.destroyLoader(0)
 
                 userListFragment.save(toolbarEditText.text.toString())
@@ -113,7 +114,7 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
 
         if (intent.hasExtra(PROJECT_ID_KEY)) {
             projectId = intent.getStringExtra(PROJECT_ID_KEY)
-            Assert.assertTrue(!TextUtils.isEmpty(projectId))
+            check(!TextUtils.isEmpty(projectId))
         }
 
         userListFragment = supportFragmentManager.findFragmentById(R.id.show_project_frame) as? UserListFragment ?: UserListFragment.newInstance().also {
@@ -127,6 +128,7 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this)
     }
 
@@ -179,7 +181,7 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
     }
 
     private fun updateError(): Boolean {
-        Assert.assertTrue(data != null)
+        check(data != null)
 
         return if (TextUtils.isEmpty(toolbarEditText.text)) {
             toolbarLayout.error = getString(R.string.nameError)

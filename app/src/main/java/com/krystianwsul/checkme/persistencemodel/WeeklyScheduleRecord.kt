@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import junit.framework.Assert
+
 
 class WeeklyScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfWeek: Int, val customTimeId: Int?, val hour: Int?, val minute: Int?) : Record(created) {
 
@@ -35,18 +35,18 @@ class WeeklyScheduleRecord(created: Boolean, val scheduleId: Int, val dayOfWeek:
             val hour = if (isNull(3)) null else getInt(3)
             val minute = if (isNull(4)) null else getInt(4)
 
-            Assert.assertTrue(hour == null == (minute == null))
-            Assert.assertTrue(hour == null || customTimeId == null)
-            Assert.assertTrue(hour != null || customTimeId != null)
+            check(hour == null == (minute == null))
+            check(hour == null || customTimeId == null)
+            check(hour != null || customTimeId != null)
 
             WeeklyScheduleRecord(true, scheduleId, dayOfWeek, customTimeId, hour, minute)
         }
     }
 
     init {
-        Assert.assertTrue(hour == null == (minute == null))
-        Assert.assertTrue(hour == null || customTimeId == null)
-        Assert.assertTrue(hour != null || customTimeId != null)
+        check(hour == null == (minute == null))
+        check(hour == null || customTimeId == null)
+        check(hour != null || customTimeId != null)
     }
 
     override val contentValues

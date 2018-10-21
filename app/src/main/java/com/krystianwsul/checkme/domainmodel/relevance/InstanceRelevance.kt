@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import junit.framework.Assert
+
 
 class InstanceRelevance(val instance: Instance) {
 
@@ -18,14 +18,14 @@ class InstanceRelevance(val instance: Instance) {
 
         // set task relevant
         val taskRelevance = taskRelevances[instance.taskKey]
-        Assert.assertTrue(taskRelevance != null)
+        check(taskRelevance != null)
 
         taskRelevance!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
 
         // set parent instance relevant
         if (!instance.isRootInstance(now)) {
             val parentInstance = instance.getParentInstance(now)
-            Assert.assertTrue(parentInstance != null)
+            check(parentInstance != null)
 
             val parentInstanceKey = parentInstance!!.instanceKey
 
@@ -33,7 +33,7 @@ class InstanceRelevance(val instance: Instance) {
                 instanceRelevances[parentInstanceKey] = InstanceRelevance(parentInstance)
 
             val parentInstanceRelevance = instanceRelevances[parentInstanceKey]
-            Assert.assertTrue(parentInstanceRelevance != null)
+            check(parentInstanceRelevance != null)
 
             parentInstanceRelevance!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
         }
@@ -62,12 +62,12 @@ class InstanceRelevance(val instance: Instance) {
     }
 
     fun setRemoteRelevant(remoteCustomTimeRelevances: Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
-        Assert.assertTrue(relevant)
+        check(relevant)
 
         val pair = instance.remoteCustomTimeKey
         val remoteProject = instance.remoteNullableProject
         if (pair != null) {
-            Assert.assertTrue(remoteProject != null)
+            check(remoteProject != null)
 
             remoteCustomTimeRelevances[pair]!!.setRelevant()
         }

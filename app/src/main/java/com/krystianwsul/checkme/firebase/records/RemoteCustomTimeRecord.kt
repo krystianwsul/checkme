@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.records
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
-import junit.framework.Assert
+
 
 class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
 
@@ -25,7 +25,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
     var name: String
         get() = customTimeJson.name
         set(value) {
-            Assert.assertTrue(value.isNotEmpty())
+            check(value.isNotEmpty())
 
             if (customTimeJson.name == value)
                 return

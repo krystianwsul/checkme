@@ -16,7 +16,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.loaders.ShowGroupLoader
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowGroupLoader.Data>, GroupListFragment.GroupListListener {
@@ -49,12 +49,12 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
         actionBar.title = null
 
         val showGroupFab = findViewById<FloatingActionButton>(R.id.show_group_fab)
-        Assert.assertTrue(showGroupFab != null)
+        check(showGroupFab != null)
 
-        Assert.assertTrue(intent.hasExtra(TIME_KEY))
+        check(intent.hasExtra(TIME_KEY))
 
         val time = intent.getLongExtra(TIME_KEY, -1)
-        Assert.assertTrue(time != -1L)
+        check(time != -1L)
 
         timeStamp = TimeStamp.fromMillis(time)
 
@@ -66,6 +66,7 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
 
         groupListFragment.setFab(showGroupFab!!)
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this)
     }
 
@@ -106,7 +107,7 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Assert.assertTrue(item.itemId == R.id.action_select_all)
+        check(item.itemId == R.id.action_select_all)
 
         groupListFragment.selectAll()
 

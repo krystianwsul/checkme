@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import junit.framework.Assert
+
 import java.util.*
 
 class SingleSchedule(domainFactory: DomainFactory, private val singleScheduleBridge: SingleScheduleBridge) : Schedule(domainFactory) {
@@ -31,8 +31,8 @@ class SingleSchedule(domainFactory: DomainFactory, private val singleScheduleBri
             val minute = singleScheduleBridge.minute
 
             return if (customTimeKey != null) {
-                Assert.assertTrue(hour == null)
-                Assert.assertTrue(minute == null)
+                check(hour == null)
+                check(minute == null)
 
                 TimePair(customTimeKey)
             } else {
@@ -86,7 +86,7 @@ class SingleSchedule(domainFactory: DomainFactory, private val singleScheduleBri
     }
 
     override fun isVisible(task: Task, now: ExactTimeStamp): Boolean {
-        Assert.assertTrue(current(now))
+        check(current(now))
 
         return getInstance(task).isVisible(now)
     }

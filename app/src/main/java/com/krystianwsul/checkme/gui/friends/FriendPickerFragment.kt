@@ -16,7 +16,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 
-import junit.framework.Assert
+
 
 class FriendPickerFragment : AbstractDialogFragment() {
 
@@ -70,8 +70,8 @@ class FriendPickerFragment : AbstractDialogFragment() {
     }
 
     private fun initialize() {
-        Assert.assertTrue(activity != null)
-        Assert.assertTrue(friendDatas != null)
+        check(activity != null)
+        check(friendDatas != null)
 
         friendPickerRecycler.adapter = FriendListAdapter()
     }
@@ -114,9 +114,9 @@ class FriendPickerFragment : AbstractDialogFragment() {
     class FriendData(val id: String, val name: String, val email: String) {
 
         init {
-            Assert.assertTrue(!TextUtils.isEmpty(id))
-            Assert.assertTrue(!TextUtils.isEmpty(name))
-            Assert.assertTrue(!TextUtils.isEmpty(email))
+            check(!TextUtils.isEmpty(id))
+            check(!TextUtils.isEmpty(name))
+            check(!TextUtils.isEmpty(email))
         }
     }
 }

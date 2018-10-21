@@ -17,7 +17,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import junit.framework.Assert
+
 import java.util.*
 
 class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, private val instanceDatas: MutableList<GroupListFragment.InstanceData>, private val selectable: Boolean) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
@@ -38,13 +38,13 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     private val groupListFragment get() = groupAdapter.mGroupListFragment
 
     init {
-        Assert.assertTrue(!instanceDatas.isEmpty())
+        check(!instanceDatas.isEmpty())
 
         exactTimeStamp = instanceDatas.first()
                 .InstanceTimeStamp
                 .toExactTimeStamp()
 
-        Assert.assertTrue(instanceDatas.all { it.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp })
+        check(instanceDatas.all { it.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp })
     }
 
     fun initialize(expandedGroups: List<TimeStamp>?, expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?, nodeContainer: NodeContainer): TreeNode {
@@ -83,7 +83,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     }
 
     fun singleInstance(): Boolean {
-        Assert.assertTrue(!instanceDatas.isEmpty())
+        check(!instanceDatas.isEmpty())
 
         return instanceDatas.size == 1
     }
@@ -93,7 +93,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             return
 
         if (singleInstance()) {
-            Assert.assertTrue(!expandedInstances.containsKey(singleInstanceData.InstanceKey))
+            check(!expandedInstances.containsKey(singleInstanceData.InstanceKey))
 
             singleInstanceNodeCollection!!.addExpandedInstances(expandedInstances.toMutableMap().also {
                 it[singleInstanceData.InstanceKey] = singleInstanceNodeCollection!!.doneExpanded
@@ -189,15 +189,15 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         get(): View.OnClickListener {
         val groupAdapter = nodeCollection.groupAdapter
 
-        Assert.assertTrue(singleInstance())
+            check(singleInstance())
 
-            Assert.assertTrue(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode)
+            check(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode)
 
         return View.OnClickListener {
             it.setOnClickListener(null)
 
             singleInstanceData.Done = DomainFactory.getDomainFactory().setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)
-            Assert.assertTrue(singleInstanceData.Done != null)
+            check(singleInstanceData.Done != null)
 
             GroupListFragment.recursiveExists(singleInstanceData)
 
@@ -252,10 +252,10 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.mCustomTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
 
     private fun remove(notDoneInstanceNode: NotDoneInstanceNode) {
-        Assert.assertTrue(instanceDatas.contains(notDoneInstanceNode.instanceData))
+        check(instanceDatas.contains(notDoneInstanceNode.instanceData))
         instanceDatas.remove(notDoneInstanceNode.instanceData)
 
-        Assert.assertTrue(notDoneInstanceNodes.contains(notDoneInstanceNode))
+        check(notDoneInstanceNodes.contains(notDoneInstanceNode))
         notDoneInstanceNodes.remove(notDoneInstanceNode)
 
         val childTreeNode = notDoneInstanceNode.treeNode
@@ -266,7 +266,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         treeNode.remove(childTreeNode)
 
-        Assert.assertTrue(!instanceDatas.isEmpty())
+        check(!instanceDatas.isEmpty())
         if (instanceDatas.size == 1) {
             val notDoneInstanceNode1 = notDoneInstanceNodes.single()
 
@@ -295,26 +295,26 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             if (timeStampComparison != 0) {
                 timeStampComparison
             } else {
-                Assert.assertTrue(singleInstance())
-                Assert.assertTrue(other.singleInstance())
+                check(singleInstance())
+                check(other.singleInstance())
 
                 singleInstanceData.compareTo(other.singleInstanceData)
             }
         }
         is UnscheduledNode -> -1
         else -> {
-            Assert.assertTrue(other is DividerNode)
+            check(other is DividerNode)
 
             -1
         }
     }
 
     fun addInstanceData(instanceData: GroupListFragment.InstanceData) {
-        Assert.assertTrue(instanceData.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
+        check(instanceData.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
 
-        Assert.assertTrue(!instanceDatas.isEmpty())
+        check(!instanceDatas.isEmpty())
         if (instanceDatas.size == 1) {
-            Assert.assertTrue(notDoneInstanceNodes.isEmpty())
+            check(notDoneInstanceNodes.isEmpty())
 
             treeNode.removeAll()
             singleInstanceNodeCollection = null
@@ -437,7 +437,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             if (!expanded())
                 return
 
-            Assert.assertTrue(!expandedInstances.containsKey(instanceData.InstanceKey))
+            check(!expandedInstances.containsKey(instanceData.InstanceKey))
 
             nodeCollection.addExpandedInstances(expandedInstances.toMutableMap().also {
                 it[instanceData.InstanceKey] = nodeCollection.doneExpanded
@@ -473,18 +473,18 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         override val checkBoxOnClickListener
             get(): View.OnClickListener {
             val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
-            Assert.assertTrue(notDoneGroupTreeNode.isExpanded)
+                check(notDoneGroupTreeNode.isExpanded)
 
             val groupAdapter = parentNodeCollection.groupAdapter
-                Assert.assertTrue(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode)
+                check(!groupAdapter.mGroupListFragment.mSelectionCallback.hasActionMode)
 
             return View.OnClickListener {
                 it.setOnClickListener(null)
 
-                Assert.assertTrue(notDoneGroupTreeNode.isExpanded)
+                check(notDoneGroupTreeNode.isExpanded)
 
                 instanceData.Done = DomainFactory.getDomainFactory().setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)
-                Assert.assertTrue(instanceData.Done != null)
+                check(instanceData.Done != null)
 
                 GroupListFragment.recursiveExists(instanceData)
 
@@ -500,7 +500,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override val backgroundColor
             get(): Int {
-            Assert.assertTrue(parentNotDoneGroupNode.treeNode.isExpanded)
+                check(parentNotDoneGroupNode.treeNode.isExpanded)
 
             return if (treeNode.isSelected)
                 ContextCompat.getColor(groupListFragment.activity!!, R.color.selected)

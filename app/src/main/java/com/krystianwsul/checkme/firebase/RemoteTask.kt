@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import junit.framework.Assert
+
 import java.util.*
 
 class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject, private val remoteTaskRecord: RemoteTaskRecord, now: ExactTimeStamp) : Task(domainFactory) {
@@ -117,7 +117,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
     }
 
     override fun setName(name: String, note: String?) {
-        Assert.assertTrue(!TextUtils.isEmpty(name))
+        check(!TextUtils.isEmpty(name))
 
         remoteTaskRecord.name = name
         remoteTaskRecord.note = note
@@ -126,13 +126,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
     override fun addSchedules(scheduleDatas: List<CreateTaskLoader.ScheduleData>, now: ExactTimeStamp) = createSchedules(now, scheduleDatas)
 
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
-        Assert.assertTrue(childTask is RemoteTask)
+        check(childTask is RemoteTask)
 
         remoteProject.createTaskHierarchy(this, childTask as RemoteTask, now)
     }
 
     override fun deleteSchedule(schedule: Schedule) {
-        Assert.assertTrue(remoteSchedules.contains(schedule))
+        check(remoteSchedules.contains(schedule))
 
         remoteSchedules.remove(schedule)
     }
@@ -152,8 +152,8 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
     fun deleteInstance(remoteInstance: RemoteInstance) {
         val scheduleKey = remoteInstance.scheduleKey
 
-        Assert.assertTrue(existingRemoteInstances.containsKey(scheduleKey))
-        Assert.assertTrue(remoteInstance == existingRemoteInstances[scheduleKey])
+        check(existingRemoteInstances.containsKey(scheduleKey))
+        check(remoteInstance == existingRemoteInstances[scheduleKey])
 
         existingRemoteInstances.remove(scheduleKey)
     }
@@ -170,13 +170,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val hour: Int?
                     val minute: Int?
                     if (timePair.customTimeKey != null) {
-                        Assert.assertTrue(timePair.hourMinute == null)
+                        check(timePair.hourMinute == null)
 
                         remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.hourMinute != null)
+                        check(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
@@ -195,13 +195,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val hour: Int?
                     val minute: Int?
                     if (timePair.customTimeKey != null) {
-                        Assert.assertTrue(timePair.hourMinute == null)
+                        check(timePair.hourMinute == null)
 
                         remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.hourMinute != null)
+                        check(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
@@ -221,13 +221,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val hour: Int?
                     val minute: Int?
                     if (timePair.customTimeKey != null) {
-                        Assert.assertTrue(timePair.hourMinute == null)
+                        check(timePair.hourMinute == null)
 
                         remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.hourMinute != null)
+                        check(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
@@ -245,13 +245,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     val hour: Int?
                     val minute: Int?
                     if (TimePair.customTimeKey != null) {
-                        Assert.assertTrue(TimePair.hourMinute == null)
+                        check(TimePair.hourMinute == null)
 
                         remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(TimePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(TimePair.hourMinute != null)
+                        check(TimePair.hourMinute != null)
 
                         remoteCustomTimeId = null
                         hour = TimePair.hourMinute!!.hour
@@ -280,13 +280,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val timePair = singleSchedule.timePair
                     if (timePair.customTimeKey != null) {
-                        Assert.assertTrue(timePair.hourMinute == null)
+                        check(timePair.hourMinute == null)
 
                         remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.hourMinute != null)
+                        check(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
@@ -307,13 +307,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val timePair = weeklySchedule.timePair
                     if (timePair.customTimeKey != null) {
-                        Assert.assertTrue(timePair.hourMinute == null)
+                        check(timePair.hourMinute == null)
 
                         remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.hourMinute != null)
+                        check(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
@@ -335,13 +335,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val timePair = monthlyDaySchedule.timePair
                     if (timePair.customTimeKey != null) {
-                        Assert.assertTrue(timePair.hourMinute == null)
+                        check(timePair.hourMinute == null)
 
                         remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.hourMinute != null)
+                        check(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
@@ -361,13 +361,13 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val timePair = monthlyWeekScheduleData.timePair
                     if (timePair.customTimeKey != null) {
-                        Assert.assertTrue(timePair.hourMinute == null)
+                        check(timePair.hourMinute == null)
 
                         remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
-                        Assert.assertTrue(timePair.hourMinute != null)
+                        check(timePair.hourMinute != null)
 
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
@@ -389,7 +389,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
     override fun belongsToRemoteProject() = true
 
     override fun updateProject(context: Context, now: ExactTimeStamp, projectId: String?): RemoteTask {
-        Assert.assertTrue(TextUtils.isEmpty(projectId))
+        check(TextUtils.isEmpty(projectId))
 
         return this
     }

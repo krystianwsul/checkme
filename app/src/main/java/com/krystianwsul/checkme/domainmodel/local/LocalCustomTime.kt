@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
-import junit.framework.Assert
+
 import java.util.*
 
 class LocalCustomTime(private val domainFactory: DomainFactory, private val localCustomTimeRecord: LocalCustomTimeRecord) : CustomTime {
@@ -25,7 +25,7 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
     override val name get() = localCustomTimeRecord.name
 
     fun setName(name: String) {
-        Assert.assertTrue(name.isNotEmpty())
+        check(name.isNotEmpty())
         localCustomTimeRecord.name = name
 
         remoteCustomTimeRecords.values.forEach { it.name = name }
@@ -110,8 +110,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
     override val customTimeKey get() = CustomTimeKey(id)
 
     fun addRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord) {
-        Assert.assertTrue(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
-        Assert.assertTrue(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.projectId))
+        check(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
+        check(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.projectId))
 
         remoteCustomTimeRecords[remoteCustomTimeRecord.projectId] = remoteCustomTimeRecord
 
@@ -141,7 +141,7 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
     }
 
     fun hasRemoteRecord(projectId: String): Boolean {
-        Assert.assertTrue(projectId.isNotEmpty())
+        check(projectId.isNotEmpty())
 
         return remoteCustomTimeRecords.containsKey(projectId)
     }
@@ -151,8 +151,8 @@ class LocalCustomTime(private val domainFactory: DomainFactory, private val loca
     }
 
     fun getRemoteId(projectId: String): String {
-        Assert.assertTrue(projectId.isNotEmpty())
-        Assert.assertTrue(remoteCustomTimeRecords.containsKey(projectId))
+        check(projectId.isNotEmpty())
+        check(remoteCustomTimeRecords.containsKey(projectId))
 
         return remoteCustomTimeRecords[projectId]!!.id
     }

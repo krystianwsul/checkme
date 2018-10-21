@@ -14,7 +14,7 @@ import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.loaders.ShowTaskInstancesLoader
 import com.krystianwsul.checkme.utils.TaskKey
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupListListener, LoaderManager.LoaderCallbacks<ShowTaskInstancesLoader.Data> {
@@ -48,10 +48,11 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
                     .commit()
         }
 
-        Assert.assertTrue(intent.hasExtra(TASK_KEY))
+        check(intent.hasExtra(TASK_KEY))
 
         taskKey = intent.getParcelableExtra<TaskKey>(TASK_KEY)!!
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this)
     }
 
@@ -84,7 +85,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Assert.assertTrue(item.itemId == R.id.action_select_all)
+        check(item.itemId == R.id.action_select_all)
 
         groupListFragment.selectAll()
 

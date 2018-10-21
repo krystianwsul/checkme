@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import junit.framework.Assert
+
 
 class NodeCollection(private val density: Float, private val indentation: Int, val groupAdapter: GroupListFragment.GroupAdapter, val useGroups: Boolean, val nodeContainer: NodeContainer, private val note: String?) {
 
@@ -31,7 +31,7 @@ class NodeCollection(private val density: Float, private val indentation: Int, v
 
         return mutableListOf<TreeNode>().apply {
             if (!note.isNullOrEmpty()) {
-                Assert.assertTrue(indentation == 0)
+                check(indentation == 0)
 
                 add(NoteNode(density, note!!, groupAdapter.mGroupListFragment).initialize(nodeContainer))
             }
@@ -40,7 +40,7 @@ class NodeCollection(private val density: Float, private val indentation: Int, v
 
             addAll(notDoneGroupCollection.initialize(notDoneInstanceDatas, expandedGroups, expandedInstances, selectedNodes))
 
-            Assert.assertTrue(indentation == 0 || taskDatas == null)
+            check(indentation == 0 || taskDatas == null)
             if (taskDatas?.isEmpty() == false) {
                 unscheduledNode = UnscheduledNode(density, this@NodeCollection)
 

@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.records
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
 
-import junit.framework.Assert
+
 
 class RemoteTaskHierarchyRecord : RemoteRecord {
 
@@ -43,7 +43,7 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
     }
 
     fun setEndTime(endTime: Long) {
-        Assert.assertTrue(createObject.endTime == null)
+        check(createObject.endTime == null)
 
         if (endTime == createObject.endTime)
             return

@@ -26,7 +26,7 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import junit.framework.Assert
+
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.math.BigDecimal
@@ -89,7 +89,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
     private val mTimeDialogListener = object : TimeDialogFragment.TimeDialogListener {
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
-            Assert.assertTrue(mCustomTimeDatas != null)
+            check(mCustomTimeDatas != null)
 
             mScheduleDialogData.timePairPersist.customTimeKey = customTimeKey
 
@@ -97,7 +97,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         override fun onOtherSelected() {
-            Assert.assertTrue(mCustomTimeDatas != null)
+            check(mCustomTimeDatas != null)
 
             TimePickerDialogFragment.newInstance(mScheduleDialogData.timePairPersist.hourMinute).let {
                 it.listener = mTimePickerDialogFragmentListener
@@ -111,7 +111,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     }
 
     private val mTimePickerDialogFragmentListener = { hourMinute: HourMinute ->
-        Assert.assertTrue(mCustomTimeDatas != null)
+        check(mCustomTimeDatas != null)
 
         mScheduleDialogData.timePairPersist.hourMinute = hourMinute
         updateFields()
@@ -119,14 +119,14 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
     private val mDayNumberPickerDialogHandlerV2 = NumberPickerDialogFragment.NumberPickerDialogHandlerV2 { _, _, _, _, fullNumber ->
         mScheduleDialogData.monthDayNumber = fullNumber.toInt()
-        Assert.assertTrue(mScheduleDialogData.monthDayNumber > 0)
-        Assert.assertTrue(mScheduleDialogData.monthDayNumber < 29)
+        check(mScheduleDialogData.monthDayNumber > 0)
+        check(mScheduleDialogData.monthDayNumber < 29)
 
         updateFields()
     }
 
     private val mDatePickerDialogFragmentListener = { date: Date ->
-        Assert.assertTrue(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
+        check(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
         mScheduleDialogData.date = date
         updateFields()
@@ -154,7 +154,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        Assert.assertTrue(arguments!!.containsKey(SHOW_DELETE_KEY))
+        check(arguments!!.containsKey(SHOW_DELETE_KEY))
 
         val showDelete = arguments!!.getBoolean(SHOW_DELETE_KEY)
 
@@ -164,9 +164,9 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 .positiveText(android.R.string.ok)
                 .onNegative { dialog, _ -> dialog.cancel() }
                 .onPositive { _, _ ->
-                    Assert.assertTrue(mCustomTimeDatas != null)
-                    Assert.assertTrue(mScheduleDialogListener != null)
-                    Assert.assertTrue(isValid)
+                    check(mCustomTimeDatas != null)
+                    check(mScheduleDialogListener != null)
+                    check(isValid)
 
                     mScheduleDialogListener!!.onScheduleDialogResult(mScheduleDialogData)
                 }
@@ -215,7 +215,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         mScheduleDialogData = (savedInstanceState ?: arguments!!).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
 
         mScheduleType.run {
-            adapter = ArrayAdapter.createFromResource(activity, R.array.schedule_types, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            adapter = ArrayAdapter.createFromResource(requireContext(), R.array.schedule_types, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
             setSelection(when (mScheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> 0
@@ -242,7 +242,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         mScheduleDialogTime.setOnClickListener {
-            Assert.assertTrue(mCustomTimeDatas != null)
+            check(mCustomTimeDatas != null)
 
             val customTimeDatas = when (mScheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> mCustomTimeDatas!!.values
@@ -266,7 +266,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.listener = mTimePickerDialogFragmentListener
 
         mScheduleDialogDate.setOnClickListener {
-            Assert.assertTrue(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
+            check(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
             DatePickerDialogFragment.newInstance(mScheduleDialogData.date).let {
                 it.listener = mDatePickerDialogFragmentListener
@@ -275,7 +275,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         (childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment)?.run {
-            Assert.assertTrue(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
+            check(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
             listener = mDatePickerDialogFragmentListener
         }
@@ -356,12 +356,12 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         mScheduleDialogMonthWeekNumber.run {
-            adapter = ArrayAdapter(activity, R.layout.spinner_no_padding, listOf(1, 2, 3, 4).map { Utils.ordinal(it) }).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            adapter = ArrayAdapter(requireContext(), R.layout.spinner_no_padding, listOf(1, 2, 3, 4).map { Utils.ordinal(it) }).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
             setSelection(mScheduleDialogData.monthWeekNumber - 1)
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    Assert.assertTrue(position >= 0)
-                    Assert.assertTrue(position <= 3)
+                    check(position >= 0)
+                    check(position <= 3)
 
                     mScheduleDialogData.monthWeekNumber = position + 1
                 }
@@ -376,8 +376,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             setSelection(monthWeekDayAdapter.getPosition(mScheduleDialogData.monthWeekDay))
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    val dayOfWeek = monthWeekDayAdapter.getItem(position)
-                    Assert.assertTrue(dayOfWeek != null)
+                    val dayOfWeek = monthWeekDayAdapter.getItem(position)!!
 
                     mScheduleDialogData.monthWeekDay = dayOfWeek
 
@@ -389,13 +388,13 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         mScheduleDialogMonthEnd.run {
-            adapter = ArrayAdapter.createFromResource(activity, R.array.month, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            adapter = ArrayAdapter.createFromResource(requireContext(), R.array.month, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
             setSelection(if (mScheduleDialogData.beginningOfMonth) 0 else 1)
 
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    Assert.assertTrue(position == 0 || position == 1)
+                    check(position == 0 || position == 1)
 
                     mScheduleDialogData.beginningOfMonth = position == 0
                 }
@@ -426,9 +425,9 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     }
 
     private fun initialize() {
-        Assert.assertTrue(mCustomTimeDatas != null)
-        Assert.assertTrue(mScheduleDialogListener != null)
-        Assert.assertTrue(activity != null)
+        check(mCustomTimeDatas != null)
+        check(mScheduleDialogListener != null)
+        check(activity != null)
 
         when (mScheduleDialogData.scheduleType) {
             ScheduleType.SINGLE -> {
@@ -481,9 +480,9 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Assert.assertTrue(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
-        Assert.assertTrue(resultCode >= 0)
-        Assert.assertTrue(data == null)
+        check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
+        check(resultCode >= 0)
+        check(data == null)
 
         if (resultCode > 0) {
             mCustomTimeDatas = null
@@ -493,7 +492,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
     @SuppressLint("SetTextI18n")
     private fun updateFields() {
-        Assert.assertTrue(mCustomTimeDatas != null)
+        check(mCustomTimeDatas != null)
 
         when (mScheduleDialogData.scheduleType) {
             ScheduleType.SINGLE -> {
@@ -536,7 +535,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             mScheduleDialogDateLayout.error = null
             mScheduleDialogTimeLayout.error = null
         } else {
-            Assert.assertTrue(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
+            check(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
             mButton.isEnabled = false
 
             if (mScheduleDialogData.date >= Date.today()) {
@@ -552,7 +551,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onCancel(dialog: DialogInterface?) {
         super.onCancel(dialog)
 
-        Assert.assertTrue(mScheduleDialogListener != null)
+        check(mScheduleDialogListener != null)
 
         mScheduleDialogListener!!.onScheduleDialogCancel()
     }
@@ -570,10 +569,10 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             var scheduleType: ScheduleType) : Parcelable {
 
         init {
-            Assert.assertTrue(monthDayNumber > 0)
-            Assert.assertTrue(monthDayNumber < 29)
-            Assert.assertTrue(monthWeekNumber > 0)
-            Assert.assertTrue(monthWeekNumber < 5)
+            check(monthDayNumber > 0)
+            check(monthDayNumber < 29)
+            check(monthWeekNumber > 0)
+            check(monthWeekNumber < 5)
         }
     }
 

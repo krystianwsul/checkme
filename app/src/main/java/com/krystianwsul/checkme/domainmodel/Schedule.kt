@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
 
-import junit.framework.Assert
+
 
 abstract class Schedule(protected val domainFactory: DomainFactory) {
 
@@ -28,7 +28,7 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
     abstract val scheduleType: ScheduleType
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
-        Assert.assertTrue(current(endExactTimeStamp))
+        check(current(endExactTimeStamp))
 
         scheduleBridge.setEndTime(endExactTimeStamp.long)
     }

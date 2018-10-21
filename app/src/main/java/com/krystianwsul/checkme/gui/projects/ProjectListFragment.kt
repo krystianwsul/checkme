@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.loaders.ProjectListLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.treeadapter.*
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.row_project.view.*
 import java.util.*
 
@@ -54,10 +54,10 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         }
 
         override fun onMenuClick(menuItem: MenuItem) {
-            Assert.assertTrue(treeViewAdapter != null)
+            check(treeViewAdapter != null)
 
             val selected = treeViewAdapter!!.selectedNodes
-            Assert.assertTrue(!selected.isEmpty())
+            check(!selected.isEmpty())
 
             val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
 
@@ -65,7 +65,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
 
             when (menuItem.itemId) {
                 R.id.action_project_delete -> {
-                    Assert.assertTrue(dataId != null)
+                    check(dataId != null)
 
                     for (treeNode in selected) {
                         val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
@@ -82,7 +82,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         }
 
         override fun onFirstAdded() {
-            Assert.assertTrue(treeViewAdapter != null)
+            check(treeViewAdapter != null)
 
             treeViewAdapter!!.updateDisplayedNodes {
                 (activity as AppCompatActivity).startSupportActionMode(this)
@@ -98,7 +98,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         override fun onOtherAdded() = Unit
 
         override fun onLastRemoved(action: () -> Unit) {
-            Assert.assertTrue(treeViewAdapter != null)
+            check(treeViewAdapter != null)
 
             treeViewAdapter!!.updateDisplayedNodes(action)
 
@@ -139,6 +139,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
 
         projectListRecycler.layoutManager = LinearLayoutManager(activity)
 
+        @Suppress("DEPRECATION")
         loaderManager.initLoader(0, null, this)
     }
 
@@ -244,7 +245,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         }
 
         private fun remove(projectNode: ProjectNode) {
-            Assert.assertTrue(projectNodes.contains(projectNode))
+            check(projectNodes.contains(projectNode))
 
             projectNodes.remove(projectNode)
 
@@ -294,7 +295,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
             override val isSeparatorVisibleWhenNotExpanded = false
 
             override fun compareTo(other: ModelNode): Int {
-                Assert.assertTrue(other is ProjectNode)
+                check(other is ProjectNode)
 
                 val projectNode = other as ProjectNode
 

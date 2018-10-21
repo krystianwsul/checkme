@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import junit.framework.Assert
+
 
 class TickJobIntentService : JobIntentService() {
 
@@ -39,7 +39,7 @@ class TickJobIntentService : JobIntentService() {
         }
 
         fun getIntent(context: Context, silent: Boolean, source: String): Intent {
-            Assert.assertTrue(!TextUtils.isEmpty(source))
+            check(!TextUtils.isEmpty(source))
 
             val intent = Intent(context, TickJobIntentService::class.java)
             intent.putExtra(SILENT_KEY, silent)
@@ -48,13 +48,13 @@ class TickJobIntentService : JobIntentService() {
         }
 
         fun tick(intent: Intent) {
-            Assert.assertTrue(intent.hasExtra(SILENT_KEY))
-            Assert.assertTrue(intent.hasExtra(SOURCE_KEY))
+            check(intent.hasExtra(SILENT_KEY))
+            check(intent.hasExtra(SOURCE_KEY))
 
             val silent = intent.getBooleanExtra(SILENT_KEY, false)
 
             val sourceName = intent.getStringExtra(SOURCE_KEY)
-            Assert.assertTrue(!TextUtils.isEmpty(sourceName))
+            check(!TextUtils.isEmpty(sourceName))
 
             tick(silent, sourceName)
         }

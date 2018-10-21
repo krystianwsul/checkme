@@ -4,7 +4,7 @@ import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 
-import junit.framework.Assert
+
 
 abstract class SelectionCallback : ActionMode.Callback {
 
@@ -24,7 +24,7 @@ abstract class SelectionCallback : ActionMode.Callback {
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         onMenuClick(item)
 
-        Assert.assertTrue(!mFinishing)
+        check(!mFinishing)
 
         actionMode?.finish()
 
@@ -32,10 +32,10 @@ abstract class SelectionCallback : ActionMode.Callback {
     }
 
     override fun onDestroyActionMode(mode: ActionMode) {
-        Assert.assertTrue(actionMode != null)
+        check(actionMode != null)
 
         if (!mFinishing) {
-            Assert.assertTrue(mSelected > 0)
+            check(mSelected > 0)
 
             for (i in mSelected downTo 1) {
                 mSelected--
@@ -68,30 +68,30 @@ abstract class SelectionCallback : ActionMode.Callback {
 
         when (mSelected) {
             1 -> {
-                Assert.assertTrue(actionMode == null)
+                check(actionMode == null)
                 onFirstAdded()
             }
             2 -> {
-                Assert.assertTrue(actionMode != null)
+                check(actionMode != null)
                 onSecondAdded()
             }
             else -> {
-                Assert.assertTrue(actionMode != null)
+                check(actionMode != null)
                 onOtherAdded()
             }
         }
     }
 
     fun decrementSelected() {
-        Assert.assertTrue(mSelected > 0)
-        Assert.assertTrue(actionMode != null)
+        check(mSelected > 0)
+        check(actionMode != null)
 
         mSelected--
 
         when (mSelected) {
             1 -> onSecondToLastRemoved()
             0 -> {
-                Assert.assertTrue(!mFinishing)
+                check(!mFinishing)
 
                 onLastRemoved {
                     mFinishing = true

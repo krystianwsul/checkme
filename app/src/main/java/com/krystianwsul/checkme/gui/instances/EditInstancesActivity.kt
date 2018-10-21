@@ -125,6 +125,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
                 checkNotNull(mData)
                 check(mData!!.showHour)
 
+                @Suppress("DEPRECATION")
                 supportLoaderManager.destroyLoader(0)
 
                 DomainFactory.getDomainFactory().setInstancesAddHourActivity(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
@@ -190,6 +191,7 @@ class EditInstancesActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<
             checkNotNull(mInitialDate)
         }
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader<EditInstancesLoader.Data>(0, null, this)
 
         mBroadcastReceiver = object : BroadcastReceiver() {

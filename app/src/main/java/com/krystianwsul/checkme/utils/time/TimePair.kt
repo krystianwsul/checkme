@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.utils.time
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import junit.framework.Assert
+
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 
@@ -19,7 +19,7 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
 
     override fun toString(): String {
         return if (customTimeKey != null) {
-            Assert.assertTrue(hourMinute == null)
+            check(hourMinute == null)
 
             super.toString() + ": " + customTimeKey
         } else {

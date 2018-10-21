@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import junit.framework.Assert
+
 import java.util.*
 
 class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord) : Task(domainFactory) {
@@ -38,7 +38,7 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
     fun addSchedules(schedules: List<Schedule>) = mSchedules.addAll(schedules)
 
     override fun setName(name: String, note: String?) {
-        Assert.assertTrue(!TextUtils.isEmpty(name))
+        check(!TextUtils.isEmpty(name))
 
         taskRecord.name = name
         taskRecord.note = note
@@ -52,13 +52,13 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
 
     override fun getOldestVisible(): Date? {
         return if (taskRecord.oldestVisibleYear != null) {
-            Assert.assertTrue(taskRecord.oldestVisibleMonth != null)
-            Assert.assertTrue(taskRecord.oldestVisibleDay != null)
+            check(taskRecord.oldestVisibleMonth != null)
+            check(taskRecord.oldestVisibleDay != null)
 
             Date(taskRecord.oldestVisibleYear!!, taskRecord.oldestVisibleMonth!!, taskRecord.oldestVisibleDay!!)
         } else {
-            Assert.assertTrue(taskRecord.oldestVisibleMonth == null)
-            Assert.assertTrue(taskRecord.oldestVisibleDay == null)
+            check(taskRecord.oldestVisibleMonth == null)
+            check(taskRecord.oldestVisibleDay == null)
 
             null
         }
@@ -84,22 +84,22 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?) = domainFactory.localFactory.createChildTask(domainFactory, now, this, name, note)
 
     override fun addSchedules(scheduleDatas: List<CreateTaskLoader.ScheduleData>, now: ExactTimeStamp) {
-        Assert.assertTrue(!scheduleDatas.isEmpty())
+        check(!scheduleDatas.isEmpty())
 
         val schedules = domainFactory.localFactory.createSchedules(domainFactory, this, scheduleDatas, now)
-        Assert.assertTrue(!schedules.isEmpty())
+        check(!schedules.isEmpty())
 
         addSchedules(schedules)
     }
 
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
-        Assert.assertTrue(childTask is LocalTask)
+        check(childTask is LocalTask)
 
         domainFactory.localFactory.createTaskHierarchy(domainFactory, this, childTask as LocalTask, now)
     }
 
     override fun deleteSchedule(schedule: Schedule) {
-        Assert.assertTrue(mSchedules.contains(schedule))
+        check(mSchedules.contains(schedule))
 
         mSchedules.remove(schedule)
     }

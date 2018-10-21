@@ -4,7 +4,7 @@ import android.content.Context
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import junit.framework.Assert
+
 import java.util.*
 
 class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBridge: WeeklyScheduleBridge) : RepeatingSchedule(domainFactory) {
@@ -41,7 +41,7 @@ class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBr
             return null
 
         val scheduleDateTime = DateTime(date, time)
-        Assert.assertTrue(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
+        check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
         return domainFactory.getInstance(task.taskKey, scheduleDateTime)
     }

@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import junit.framework.Assert
+
 import kotlin.properties.Delegates
 
 class ScheduleRecord(created: Boolean, val id: Int, val rootTaskId: Int, val startTime: Long, _endTime: Long?, val type: Int) : Record(created) {
@@ -36,7 +36,7 @@ class ScheduleRecord(created: Boolean, val id: Int, val rootTaskId: Int, val sta
             val endTime = if (isNull(3)) null else getLong(3)
             val type = getInt(4)
 
-            Assert.assertTrue(endTime == null || startTime <= endTime)
+            check(endTime == null || startTime <= endTime)
 
             ScheduleRecord(true, id, taskId, startTime, endTime, type)
         }
@@ -45,14 +45,14 @@ class ScheduleRecord(created: Boolean, val id: Int, val rootTaskId: Int, val sta
     }
 
     var endTime by Delegates.observable(_endTime) { _, oldValue, newValue ->
-        Assert.assertTrue(oldValue == null)
-        Assert.assertTrue(startTime <= newValue!!)
+        check(oldValue == null)
+        check(startTime <= newValue!!)
 
         changed = true
     }
 
     init {
-        Assert.assertTrue(_endTime == null || startTime <= _endTime)
+        check(_endTime == null || startTime <= _endTime)
     }
 
     override val contentValues

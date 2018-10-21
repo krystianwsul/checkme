@@ -4,7 +4,6 @@ import android.text.TextUtils
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
-import junit.framework.Assert
 
 object MyCrashlytics {
 
@@ -19,7 +18,7 @@ object MyCrashlytics {
     }
 
     fun log(message: String) {
-        Assert.assertTrue(!TextUtils.isEmpty(message))
+        check(!TextUtils.isEmpty(message))
 
         Log.e("asdf", "MyCrashLytics.log: $message")
         if (enabled)

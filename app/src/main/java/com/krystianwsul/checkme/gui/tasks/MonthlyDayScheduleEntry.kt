@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
 
-import junit.framework.Assert
+
 
 class MonthlyDayScheduleEntry : ScheduleEntry {
 
@@ -28,7 +28,7 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
                 val beginningOfMonth = parcel.readInt() == 1
 
                 val timePair = parcel.readParcelable<TimePair>(TimePair::class.java.classLoader)
-                Assert.assertTrue(timePair != null)
+                check(timePair != null)
 
                 val error = parcel.readString()
 
@@ -62,8 +62,8 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY)
-        Assert.assertTrue(scheduleDialogData.monthlyDay)
+        check(scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY)
+        check(scheduleDialogData.monthlyDay)
 
         monthDayNumber = scheduleDialogData.monthDayNumber
         beginningOfMonth = scheduleDialogData.beginningOfMonth
@@ -74,7 +74,7 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
         val day = Utils.ordinal(monthDayNumber) + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day, " + if (timePair.customTimeKey != null) {
-            Assert.assertTrue(timePair.hourMinute == null)
+            check(timePair.hourMinute == null)
 
             val customTimeData = customTimeDatas[timePair.customTimeKey]!!
 

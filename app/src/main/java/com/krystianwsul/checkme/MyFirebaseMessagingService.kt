@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import junit.framework.Assert
+
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -24,8 +24,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         if (data.containsKey(REFRESH_KEY)) {
             val refresh = data[REFRESH_KEY]!!
-            Assert.assertTrue(refresh.isNotEmpty())
-            Assert.assertTrue(data[REFRESH_KEY] == "true")
+            check(refresh.isNotEmpty())
+            check(data[REFRESH_KEY] == "true")
 
             val firebaseUser = FirebaseAuth.getInstance().currentUser
             if (firebaseUser != null) {

@@ -21,7 +21,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimeStamp
-import junit.framework.Assert
+
 import java.util.*
 
 open class NotificationWrapperImpl : NotificationWrapper() {
@@ -121,7 +121,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     protected open fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
-        Assert.assertTrue(!lines.isEmpty())
+        check(!lines.isEmpty())
 
         val max = 5
 
@@ -138,7 +138,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     protected open fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
-        Assert.assertTrue(title.isNotEmpty())
+        check(title.isNotEmpty())
 
         @Suppress("DEPRECATION")
         val builder = NotificationCompat.Builder(MyApplication.instance)
@@ -156,7 +156,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (!silent)
             builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
 
-        Assert.assertTrue(actions.size <= 3)
+        check(actions.size <= 3)
 
         actions.forEach { builder.addAction(it) }
 
@@ -203,7 +203,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {
-        Assert.assertTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+        check(Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
 
         if (lastNotificationId != null)
             cancelNotification(lastNotificationId)

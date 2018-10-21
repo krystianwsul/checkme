@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 
-import junit.framework.Assert
+
 
 class RemoteDailyScheduleRecord(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : RemoteScheduleRecord(id, remoteTaskRecord, scheduleWrapper) {
 
@@ -19,7 +19,7 @@ class RemoteDailyScheduleRecord(id: String, remoteTaskRecord: RemoteTaskRecord, 
     override val endTime get() = dailyScheduleJson.endTime
 
     fun setEndTime(endTime: Long) {
-        Assert.assertTrue(dailyScheduleJson.endTime == null)
+        check(dailyScheduleJson.endTime == null)
 
         if (endTime == dailyScheduleJson.endTime)
             return

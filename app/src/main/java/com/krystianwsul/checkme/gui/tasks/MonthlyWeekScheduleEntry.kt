@@ -14,7 +14,7 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
 
-import junit.framework.Assert
+
 
 class MonthlyWeekScheduleEntry : ScheduleEntry {
 
@@ -69,8 +69,8 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK)
-        Assert.assertTrue(!scheduleDialogData.monthlyDay)
+        check(scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK)
+        check(!scheduleDialogData.monthlyDay)
 
         monthWeekNumber = scheduleDialogData.monthWeekNumber
         monthWeekDay = scheduleDialogData.monthWeekDay
@@ -82,7 +82,7 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
         val day = Utils.ordinal(monthWeekNumber) + " " + monthWeekDay + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day, " + if (timePair.customTimeKey != null) {
-            Assert.assertTrue(timePair.hourMinute == null)
+            check(timePair.hourMinute == null)
 
             val customTimeData = customTimeDatas[timePair.customTimeKey]!!
 

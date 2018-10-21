@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import junit.framework.Assert
+
 import kotlin.properties.Delegates.observable
 
 class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Long, _endTime: Long?, _oldestVisibleYear: Int?, _oldestVisibleMonth: Int?, _oldestVisibleDay: Int?, _note: String?) : Record(created) {
@@ -45,10 +45,10 @@ class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Lo
             val oldestVisibleDay = if (isNull(6)) null else getInt(6)
             val note = getString(7)
 
-            Assert.assertTrue(name.isNotEmpty())
-            Assert.assertTrue(endTime == null || startTime <= endTime)
-            Assert.assertTrue(oldestVisibleYear == null == (oldestVisibleMonth == null))
-            Assert.assertTrue(oldestVisibleYear == null == (oldestVisibleDay == null))
+            check(name.isNotEmpty())
+            check(endTime == null || startTime <= endTime)
+            check(oldestVisibleYear == null == (oldestVisibleMonth == null))
+            check(oldestVisibleYear == null == (oldestVisibleDay == null))
 
             TaskRecord(true, id, name, startTime, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, note)
         }
@@ -57,14 +57,14 @@ class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Lo
     }
 
     var name by observable(_name) { _, _, newValue ->
-        Assert.assertTrue(newValue.isNotEmpty())
+        check(newValue.isNotEmpty())
 
         changed = true
     }
 
     var endTime by observable(_endTime) { _, oldValue, newValue ->
-        Assert.assertTrue(oldValue == null)
-        Assert.assertTrue(startTime <= newValue!!)
+        check(oldValue == null)
+        check(startTime <= newValue!!)
 
         changed = true
     }
@@ -78,10 +78,10 @@ class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Lo
     var note by observable(_note) { _, _, _ -> changed = true }
 
     init {
-        Assert.assertTrue(_name.isNotEmpty())
-        Assert.assertTrue(_endTime == null || startTime <= _endTime)
-        Assert.assertTrue(_oldestVisibleYear == null == (_oldestVisibleMonth == null))
-        Assert.assertTrue(_oldestVisibleYear == null == (_oldestVisibleDay == null))
+        check(_name.isNotEmpty())
+        check(_endTime == null || startTime <= _endTime)
+        check(_oldestVisibleYear == null == (_oldestVisibleMonth == null))
+        check(_oldestVisibleYear == null == (_oldestVisibleDay == null))
     }
 
     override val contentValues

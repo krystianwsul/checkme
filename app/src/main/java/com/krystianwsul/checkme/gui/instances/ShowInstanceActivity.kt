@@ -105,6 +105,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                     check(!it.done)
                     check(it.taskCurrent)
 
+                    @Suppress("DEPRECATION")
                     supportLoaderManager.destroyLoader(0)
 
                     startActivityForResult(ShowTaskActivity.newIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
@@ -113,6 +114,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                     check(!it.done)
                     check(it.taskCurrent)
 
+                    @Suppress("DEPRECATION")
                     supportLoaderManager.destroyLoader(0)
 
                     startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
@@ -121,6 +123,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                     check(!it.done)
                     check(it.taskCurrent)
 
+                    @Suppress("DEPRECATION")
                     if (!it.exists)
                         supportLoaderManager.destroyLoader(0)
 
@@ -161,6 +164,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
 
         groupListFragment.setFab(showInstanceFab)
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this)
 
         NotificationWrapper.instance.cleanGroup(null)
@@ -227,6 +231,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
             instanceKey = InstanceKey(taskKey, instanceKey.scheduleKey.scheduleDate, TimePair(instanceKey.scheduleKey.scheduleTimePair.customTimeKey, instanceKey.scheduleKey.scheduleTimePair.hourMinute))
         }
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this)
     }
 }

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
-import junit.framework.Assert
+
 
 class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {
 
@@ -15,7 +15,7 @@ class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {
     val userJson get() = remoteRootUserRecord.userJson
 
     fun removeFriend(friendId: String) {
-        Assert.assertTrue(!TextUtils.isEmpty(friendId))
+        check(!TextUtils.isEmpty(friendId))
 
         remoteRootUserRecord.removeFriendOf(friendId)
     }

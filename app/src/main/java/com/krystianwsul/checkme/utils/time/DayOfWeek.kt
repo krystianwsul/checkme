@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.utils.time
 
 import android.text.TextUtils
-import junit.framework.Assert
+
 import java.text.DateFormatSymbols
 import java.util.*
 
@@ -25,7 +25,7 @@ enum class DayOfWeek {
 
     override fun toString(): String {
         val weekDay = DateFormatSymbols.getInstance().weekdays[this.ordinal + 1]
-        Assert.assertTrue(!TextUtils.isEmpty(weekDay))
+        check(!TextUtils.isEmpty(weekDay))
 
         return weekDay
     }

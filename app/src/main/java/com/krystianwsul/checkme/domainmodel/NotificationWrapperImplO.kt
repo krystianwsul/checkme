@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.notifications.TickJobIntentService
-import junit.framework.Assert
+
 
 @SuppressLint("NewApi")
 class NotificationWrapperImplO : NotificationWrapperImplN() {
@@ -29,7 +29,7 @@ class NotificationWrapperImplO : NotificationWrapperImplN() {
     }
 
     override fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
-        Assert.assertTrue(title.isNotEmpty())
+        check(title.isNotEmpty())
 
         val builder = NotificationCompat.Builder(MyApplication.instance, if (silent) SILENT_CHANNEL_ID else CHANNEL_ID)
                 .setContentTitle(title)
@@ -46,7 +46,7 @@ class NotificationWrapperImplO : NotificationWrapperImplN() {
         if (!silent)
             builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
 
-        Assert.assertTrue(actions.size <= 3)
+        check(actions.size <= 3)
 
         actions.forEach { builder.addAction(it) }
 

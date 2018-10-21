@@ -15,7 +15,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import junit.framework.Assert
+
 import java.util.*
 
 class RemoteProjectFactory(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>, private val userInfo: UserInfo, private val uuid: String, now: ExactTimeStamp) {
@@ -70,7 +70,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     }
 
     fun createRemoteProject(name: String, now: ExactTimeStamp, recordOf: Set<String>, remoteRootUser: RemoteRootUser): RemoteProject {
-        Assert.assertTrue(!TextUtils.isEmpty(name))
+        check(!TextUtils.isEmpty(name))
 
         val friendIds = HashSet(recordOf)
         friendIds.remove(userInfo.key)
@@ -84,7 +84,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
 
         val remoteProject = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
 
-        Assert.assertTrue(!this.remoteProjects.containsKey(remoteProject.id))
+        check(!this.remoteProjects.containsKey(remoteProject.id))
 
         this.remoteProjects[remoteProject.id] = remoteProject
 
@@ -92,14 +92,14 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     }
 
     fun save() {
-        Assert.assertTrue(!remoteProjectManager.isSaved)
+        check(!remoteProjectManager.isSaved)
 
         remoteProjectManager.save()
     }
 
     fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey, remoteProject: RemoteProject): String {
-        Assert.assertTrue(customTimeKey.localCustomTimeId != null)
-        Assert.assertTrue(TextUtils.isEmpty(customTimeKey.remoteCustomTimeId))
+        check(customTimeKey.localCustomTimeId != null)
+        check(TextUtils.isEmpty(customTimeKey.remoteCustomTimeId))
 
         val localCustomTimeId = customTimeKey.localCustomTimeId!!
 
@@ -117,13 +117,13 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     }
 
     fun getRemoteCustomTime(remoteProjectId: String, remoteCustomTimeId: String): RemoteCustomTime {
-        Assert.assertTrue(!TextUtils.isEmpty(remoteProjectId))
-        Assert.assertTrue(!TextUtils.isEmpty(remoteCustomTimeId))
+        check(!TextUtils.isEmpty(remoteProjectId))
+        check(!TextUtils.isEmpty(remoteCustomTimeId))
 
-        Assert.assertTrue(this.remoteProjects.containsKey(remoteProjectId))
+        check(this.remoteProjects.containsKey(remoteProjectId))
 
         val remoteProject = this.remoteProjects[remoteProjectId]
-        Assert.assertTrue(remoteProject != null)
+        check(remoteProject != null)
 
         return remoteProject!!.getRemoteCustomTime(remoteCustomTimeId)
     }
@@ -143,20 +143,20 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     private fun getRemoteProjectForce(taskKey: TaskKey) = getRemoteProjectIfPresent(taskKey)!!
 
     private fun getRemoteProjectIfPresent(taskKey: TaskKey): RemoteProject? {
-        Assert.assertTrue(!TextUtils.isEmpty(taskKey.remoteProjectId))
-        Assert.assertTrue(!TextUtils.isEmpty(taskKey.remoteTaskId))
+        check(!TextUtils.isEmpty(taskKey.remoteProjectId))
+        check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return remoteProjects[taskKey.remoteProjectId]
     }
 
     fun getTaskForce(taskKey: TaskKey): RemoteTask {
-        Assert.assertTrue(!TextUtils.isEmpty(taskKey.remoteTaskId))
+        check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId!!)
     }
 
     fun getTaskIfPresent(taskKey: TaskKey): RemoteTask? {
-        Assert.assertTrue(!TextUtils.isEmpty(taskKey.remoteTaskId))
+        check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         val remoteProject = getRemoteProjectIfPresent(taskKey) ?: return null
 
@@ -164,7 +164,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     }
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<RemoteTaskHierarchy> {
-        Assert.assertTrue(!TextUtils.isEmpty(childTaskKey.remoteTaskId))
+        check(!TextUtils.isEmpty(childTaskKey.remoteTaskId))
 
         return getRemoteProjectForce(childTaskKey).getTaskHierarchiesByChildTaskKey(childTaskKey)
     }
@@ -172,8 +172,8 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     fun updateUserInfo(userInfo: UserInfo) = remoteProjects.values.forEach { it.updateUserInfo(userInfo, uuid) }
 
     fun getRemoteProjectForce(projectId: String): RemoteProject {
-        Assert.assertTrue(!TextUtils.isEmpty(projectId))
-        Assert.assertTrue(remoteProjects.containsKey(projectId))
+        check(!TextUtils.isEmpty(projectId))
+        check(remoteProjects.containsKey(projectId))
 
         return remoteProjects[projectId]!!
     }
@@ -181,7 +181,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     fun deleteProject(remoteProject: RemoteProject) {
         val projectId = remoteProject.id
 
-        Assert.assertTrue(remoteProjects.containsKey(projectId))
+        check(remoteProjects.containsKey(projectId))
         remoteProjects.remove(projectId)
     }
 }

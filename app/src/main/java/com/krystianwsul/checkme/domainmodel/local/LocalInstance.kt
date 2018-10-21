@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.persistencemodel.InstanceRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
-import junit.framework.Assert
+
 
 class LocalInstance : Instance {
     private var mInstanceRecord: InstanceRecord? = null
@@ -20,13 +20,13 @@ class LocalInstance : Instance {
     val taskId: Int
         get() {
             return if (mInstanceRecord != null) {
-                Assert.assertTrue(mTaskId == null)
-                Assert.assertTrue(mScheduleDateTime == null)
+                check(mTaskId == null)
+                check(mScheduleDateTime == null)
 
                 mInstanceRecord!!.taskId
             } else {
-                Assert.assertTrue(mTaskId != null)
-                Assert.assertTrue(mScheduleDateTime != null)
+                check(mTaskId != null)
+                check(mScheduleDateTime != null)
 
                 mTaskId!!
             }
@@ -41,13 +41,13 @@ class LocalInstance : Instance {
     override val scheduleDate: Date
         get() {
             return if (mInstanceRecord != null) {
-                Assert.assertTrue(mTaskId == null)
-                Assert.assertTrue(mScheduleDateTime == null)
+                check(mTaskId == null)
+                check(mScheduleDateTime == null)
 
                 Date(mInstanceRecord!!.scheduleYear, mInstanceRecord!!.scheduleMonth, mInstanceRecord!!.scheduleDay)
             } else {
-                Assert.assertTrue(mTaskId != null)
-                Assert.assertTrue(mScheduleDateTime != null)
+                check(mTaskId != null)
+                check(mScheduleDateTime != null)
 
                 mScheduleDateTime!!.date
             }
@@ -56,15 +56,15 @@ class LocalInstance : Instance {
     override val scheduleTime: Time
         get() {
             if (mInstanceRecord != null) {
-                Assert.assertTrue(mTaskId == null)
-                Assert.assertTrue(mScheduleDateTime == null)
+                check(mTaskId == null)
+                check(mScheduleDateTime == null)
 
                 val customTimeId = mInstanceRecord!!.scheduleCustomTimeId
                 val hour = mInstanceRecord!!.scheduleHour
                 val minute = mInstanceRecord!!.scheduleMinute
 
-                Assert.assertTrue(hour == null == (minute == null))
-                Assert.assertTrue(customTimeId == null != (hour == null))
+                check(hour == null == (minute == null))
+                check(customTimeId == null != (hour == null))
 
                 return if (customTimeId != null) {
                     domainFactory.getCustomTime(CustomTimeKey(customTimeId))
@@ -72,8 +72,8 @@ class LocalInstance : Instance {
                     NormalTime(hour!!, minute!!)
                 }
             } else {
-                Assert.assertTrue(mTaskId != null)
-                Assert.assertTrue(mScheduleDateTime != null)
+                check(mTaskId != null)
+                check(mScheduleDateTime != null)
 
                 return mScheduleDateTime!!.time
             }
@@ -82,18 +82,18 @@ class LocalInstance : Instance {
     override val instanceDate: Date
         get() {
             if (mInstanceRecord != null) {
-                Assert.assertTrue(mTaskId == null)
-                Assert.assertTrue(mScheduleDateTime == null)
+                check(mTaskId == null)
+                check(mScheduleDateTime == null)
 
-                Assert.assertTrue(mInstanceRecord!!.instanceYear == null == (mInstanceRecord!!.instanceMonth == null))
-                Assert.assertTrue(mInstanceRecord!!.instanceYear == null == (mInstanceRecord!!.instanceDay == null))
+                check(mInstanceRecord!!.instanceYear == null == (mInstanceRecord!!.instanceMonth == null))
+                check(mInstanceRecord!!.instanceYear == null == (mInstanceRecord!!.instanceDay == null))
                 return if (mInstanceRecord!!.instanceYear != null)
                     Date(mInstanceRecord!!.instanceYear!!, mInstanceRecord!!.instanceMonth!!, mInstanceRecord!!.instanceDay!!)
                 else
                     scheduleDate
             } else {
-                Assert.assertTrue(mTaskId != null)
-                Assert.assertTrue(mScheduleDateTime != null)
+                check(mTaskId != null)
+                check(mScheduleDateTime != null)
 
                 return mScheduleDateTime!!.date
             }
@@ -102,11 +102,11 @@ class LocalInstance : Instance {
     override val instanceTime: Time
         get() {
             if (mInstanceRecord != null) {
-                Assert.assertTrue(mTaskId == null)
-                Assert.assertTrue(mScheduleDateTime == null)
+                check(mTaskId == null)
+                check(mScheduleDateTime == null)
 
-                Assert.assertTrue(mInstanceRecord!!.instanceHour == null == (mInstanceRecord!!.instanceMinute == null))
-                Assert.assertTrue(mInstanceRecord!!.instanceHour == null || mInstanceRecord!!.instanceCustomTimeId == null)
+                check(mInstanceRecord!!.instanceHour == null == (mInstanceRecord!!.instanceMinute == null))
+                check(mInstanceRecord!!.instanceHour == null || mInstanceRecord!!.instanceCustomTimeId == null)
 
                 return when {
                     mInstanceRecord!!.instanceCustomTimeId != null -> domainFactory.getCustomTime(CustomTimeKey(mInstanceRecord!!.instanceCustomTimeId!!))
@@ -114,8 +114,8 @@ class LocalInstance : Instance {
                     else -> scheduleTime
                 }
             } else {
-                Assert.assertTrue(mTaskId != null)
-                Assert.assertTrue(mScheduleDateTime != null)
+                check(mTaskId != null)
+                check(mScheduleDateTime != null)
 
                 return mScheduleDateTime!!.time
             }
@@ -135,7 +135,7 @@ class LocalInstance : Instance {
 
     val hierarchyTime: Long
         get() {
-            Assert.assertTrue(mInstanceRecord != null)
+            check(mInstanceRecord != null)
 
             return mInstanceRecord!!.hierarchyTime
         }
@@ -149,8 +149,8 @@ class LocalInstance : Instance {
     override val scheduleCustomTimeKey: CustomTimeKey?
         get() {
             if (mInstanceRecord != null) {
-                Assert.assertTrue(mTaskId == null)
-                Assert.assertTrue(mScheduleDateTime == null)
+                check(mTaskId == null)
+                check(mScheduleDateTime == null)
 
                 val customTimeId = mInstanceRecord!!.scheduleCustomTimeId
 
@@ -160,8 +160,8 @@ class LocalInstance : Instance {
                     null
                 }
             } else {
-                Assert.assertTrue(mTaskId != null)
-                Assert.assertTrue(mScheduleDateTime != null)
+                check(mTaskId != null)
+                check(mScheduleDateTime != null)
 
                 return mScheduleDateTime!!.time.timePair.customTimeKey
             }
@@ -170,24 +170,24 @@ class LocalInstance : Instance {
     override val scheduleHourMinute: HourMinute?
         get() {
             if (mInstanceRecord != null) {
-                Assert.assertTrue(mTaskId == null)
-                Assert.assertTrue(mScheduleDateTime == null)
+                check(mTaskId == null)
+                check(mScheduleDateTime == null)
 
                 val hour = mInstanceRecord!!.scheduleHour
                 val minute = mInstanceRecord!!.scheduleMinute
 
                 return if (hour == null) {
-                    Assert.assertTrue(minute == null)
+                    check(minute == null)
 
                     null
                 } else {
-                    Assert.assertTrue(minute != null)
+                    check(minute != null)
 
                     HourMinute(hour, minute!!)
                 }
             } else {
-                Assert.assertTrue(mTaskId != null)
-                Assert.assertTrue(mScheduleDateTime != null)
+                check(mTaskId != null)
+                check(mScheduleDateTime != null)
 
                 return mScheduleDateTime!!.time.timePair.hourMinute
             }
@@ -222,7 +222,7 @@ class LocalInstance : Instance {
     }
 
     override fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp) {
-        Assert.assertTrue(isRootInstance(now))
+        check(isRootInstance(now))
 
         if (mInstanceRecord == null)
             createInstanceHierarchy(now)
@@ -232,15 +232,15 @@ class LocalInstance : Instance {
         mInstanceRecord!!.instanceDay = date.day
 
         if (timePair.customTimeKey != null) {
-            Assert.assertTrue(timePair.hourMinute == null)
-            Assert.assertTrue(timePair.customTimeKey.localCustomTimeId != null)
-            Assert.assertTrue(TextUtils.isEmpty(timePair.customTimeKey.remoteCustomTimeId))
+            check(timePair.hourMinute == null)
+            check(timePair.customTimeKey.localCustomTimeId != null)
+            check(TextUtils.isEmpty(timePair.customTimeKey.remoteCustomTimeId))
 
             mInstanceRecord!!.instanceCustomTimeId = timePair.customTimeKey.localCustomTimeId
             mInstanceRecord!!.instanceHour = null
             mInstanceRecord!!.instanceMinute = null
         } else {
-            Assert.assertTrue(timePair.hourMinute != null)
+            check(timePair.hourMinute != null)
 
             mInstanceRecord!!.instanceCustomTimeId = null
             mInstanceRecord!!.instanceHour = timePair.hourMinute!!.hour
@@ -255,19 +255,19 @@ class LocalInstance : Instance {
             if (mInstanceRecord == null)
                 createInstanceHierarchy(now)
 
-            Assert.assertTrue(mInstanceRecord != null)
+            check(mInstanceRecord != null)
 
             mInstanceRecord!!.done = now.long
             mInstanceRecord!!.notified = false
         } else {
-            Assert.assertTrue(mInstanceRecord != null)
+            check(mInstanceRecord != null)
             mInstanceRecord!!.done = null
         }
     }
 
     override fun createInstanceHierarchy(now: ExactTimeStamp) {
-        Assert.assertTrue(mInstanceRecord == null != (mScheduleDateTime == null))
-        Assert.assertTrue(mTaskId == null == (mScheduleDateTime == null))
+        check(mInstanceRecord == null != (mScheduleDateTime == null))
+        check(mTaskId == null == (mScheduleDateTime == null))
 
         val parentInstance = getParentInstance(now)
         parentInstance?.createInstanceHierarchy(now)
@@ -289,7 +289,7 @@ class LocalInstance : Instance {
         if (mInstanceRecord == null)
             createInstanceHierarchy(now)
 
-        Assert.assertTrue(mInstanceRecord != null)
+        check(mInstanceRecord != null)
         mInstanceRecord!!.notified = true
     }
 
@@ -297,20 +297,20 @@ class LocalInstance : Instance {
         if (mInstanceRecord == null)
             createInstanceHierarchy(now)
 
-        Assert.assertTrue(mInstanceRecord != null)
+        check(mInstanceRecord != null)
 
         mInstanceRecord!!.notificationShown = notificationShown
     }
 
     override fun exists(): Boolean {
-        Assert.assertTrue(mInstanceRecord == null != (mScheduleDateTime == null))
-        Assert.assertTrue(mTaskId == null == (mScheduleDateTime == null))
+        check(mInstanceRecord == null != (mScheduleDateTime == null))
+        check(mTaskId == null == (mScheduleDateTime == null))
 
         return mInstanceRecord != null
     }
 
     override fun delete() {
-        Assert.assertTrue(mInstanceRecord != null)
+        check(mInstanceRecord != null)
 
         domainFactory.localFactory.deleteInstance(this)
 

@@ -7,7 +7,7 @@ import android.text.TextUtils
 import com.afollestad.materialdialogs.MaterialDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import junit.framework.Assert
+
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
@@ -27,7 +27,7 @@ class TimeDialogFragment : AbstractDialogFragment() {
     lateinit var timeDialogListener: TimeDialogListener
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        Assert.assertTrue(arguments!!.containsKey(CUSTOM_TIMES_KEY))
+        check(arguments!!.containsKey(CUSTOM_TIMES_KEY))
 
         val customTimeDatas = arguments!!.getParcelableArrayList<CustomTimeData>(CUSTOM_TIMES_KEY)!!
 
@@ -39,8 +39,8 @@ class TimeDialogFragment : AbstractDialogFragment() {
                 .title(R.string.time_dialog_title)
                 .items(names)
                 .itemsCallback { _, _, which, _ ->
-                    Assert.assertTrue(which < names.size)
-                    Assert.assertTrue(which < customTimeDatas.size + 2)
+                    check(which < names.size)
+                    check(which < customTimeDatas.size + 2)
 
                     when {
                         which < customTimeDatas.size -> {
@@ -49,7 +49,7 @@ class TimeDialogFragment : AbstractDialogFragment() {
                         }
                         which == customTimeDatas.size -> timeDialogListener.onOtherSelected()
                         else -> {
-                            Assert.assertTrue(which == customTimeDatas.size + 1)
+                            check(which == customTimeDatas.size + 1)
                             timeDialogListener.onAddSelected()
                         }
                     }
@@ -70,7 +70,7 @@ class TimeDialogFragment : AbstractDialogFragment() {
     class CustomTimeData(val customTimeKey: CustomTimeKey, val name: String) : Parcelable {
 
         init {
-            Assert.assertTrue(!TextUtils.isEmpty(name))
+            check(!TextUtils.isEmpty(name))
         }
     }
 }

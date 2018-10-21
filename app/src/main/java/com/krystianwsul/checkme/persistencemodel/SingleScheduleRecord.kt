@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import junit.framework.Assert
+
 
 class SingleScheduleRecord(created: Boolean, val scheduleId: Int, val year: Int, val month: Int, val day: Int, val customTimeId: Int?, val hour: Int?, val minute: Int?) : Record(created) {
 
@@ -41,18 +41,18 @@ class SingleScheduleRecord(created: Boolean, val scheduleId: Int, val year: Int,
             val hour = if (isNull(5)) null else getInt(5)
             val minute = if (isNull(6)) null else getInt(6)
 
-            Assert.assertTrue(hour == null == (minute == null))
-            Assert.assertTrue(hour == null || customTimeId == null)
-            Assert.assertTrue(hour != null || customTimeId != null)
+            check(hour == null == (minute == null))
+            check(hour == null || customTimeId == null)
+            check(hour != null || customTimeId != null)
 
             SingleScheduleRecord(true, scheduleId, year, month, day, customTimeId, hour, minute)
         }
     }
 
     init {
-        Assert.assertTrue(hour == null == (minute == null))
-        Assert.assertTrue(hour == null || customTimeId == null)
-        Assert.assertTrue(hour != null || customTimeId != null)
+        check(hour == null == (minute == null))
+        check(hour == null || customTimeId == null)
+        check(hour != null || customTimeId != null)
     }
 
     override val contentValues

@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader
 import com.krystianwsul.checkme.utils.InstanceKey
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 
@@ -24,7 +24,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
         private const val INSTANCES_KEY = "instanceKeys"
 
         fun getIntent(context: Context, instanceKeys: ArrayList<InstanceKey>) = Intent(context, ShowNotificationGroupActivity::class.java).apply {
-            Assert.assertTrue(!instanceKeys.isEmpty())
+            check(!instanceKeys.isEmpty())
 
             putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys)
         }
@@ -50,13 +50,14 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
                     .commit()
         }
 
-        Assert.assertTrue(intent.hasExtra(INSTANCES_KEY))
+        check(intent.hasExtra(INSTANCES_KEY))
 
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!
-        Assert.assertTrue(!instanceKeys.isEmpty())
+        check(!instanceKeys.isEmpty())
 
         this.instanceKeys = HashSet(instanceKeys)
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader(0, null, this)
     }
 
@@ -89,7 +90,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        Assert.assertTrue(item.itemId == R.id.action_select_all)
+        check(item.itemId == R.id.action_select_all)
 
         groupListFragment.selectAll()
 

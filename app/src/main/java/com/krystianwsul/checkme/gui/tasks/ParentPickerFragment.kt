@@ -18,7 +18,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.treeadapter.*
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.row_task_list.view.*
 import java.util.*
 
@@ -49,7 +49,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey(EXPANDED_TASK_KEYS_KEY)) {
                 expandedParentKeys = savedInstanceState.getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
-                Assert.assertTrue(!expandedParentKeys!!.isEmpty())
+                check(!expandedParentKeys!!.isEmpty())
             }
         }
 
@@ -58,7 +58,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 .customView(R.layout.fragment_parent_picker, false)
                 .negativeText(android.R.string.cancel)
 
-        Assert.assertTrue(arguments!!.containsKey(SHOW_DELETE_KEY))
+        check(arguments!!.containsKey(SHOW_DELETE_KEY))
 
         val showDelete = arguments!!.getBoolean(SHOW_DELETE_KEY)
 
@@ -87,8 +87,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     private fun initialize() {
-        Assert.assertTrue(taskDatas != null)
-        Assert.assertTrue(activity != null)
+        check(taskDatas != null)
+        check(activity != null)
 
         recyclerView.layoutManager = LinearLayoutManager(activity)
 
@@ -219,7 +219,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             fun initialize(nodeContainer: NodeContainer, expandedParentKeys: List<CreateTaskLoader.ParentKey>?): TreeNode {
                 var expanded = false
                 if (expandedParentKeys != null) {
-                    Assert.assertTrue(!expandedParentKeys.isEmpty())
+                    check(!expandedParentKeys.isEmpty())
                     expanded = expandedParentKeys.contains(parentTreeData.parentKey)
                 }
 
@@ -261,11 +261,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 taskHolder.taskRowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
 
                 if (parentTreeData.parentTreeDatas.isEmpty()) {
-                    Assert.assertTrue(!treeNode.expandVisible)
+                    check(!treeNode.expandVisible)
 
                     taskHolder.mTaskRowImg.visibility = View.INVISIBLE
                 } else {
-                    Assert.assertTrue(treeNode.expandVisible)
+                    check(treeNode.expandVisible)
 
                     taskHolder.mTaskRowImg.visibility = View.VISIBLE
 
@@ -296,12 +296,12 @@ class ParentPickerFragment : AbstractDialogFragment() {
                                 .values
                                 .joinToString(", ") { it.name }
                     } else {
-                        Assert.assertTrue(!TextUtils.isEmpty(parentTreeData.note))
+                        check(!TextUtils.isEmpty(parentTreeData.note))
 
                         parentTreeData.note
                     }
 
-                    Assert.assertTrue(!TextUtils.isEmpty(text))
+                    check(!TextUtils.isEmpty(text))
 
                     taskHolder.mTaskRowChildren.text = text
                 }

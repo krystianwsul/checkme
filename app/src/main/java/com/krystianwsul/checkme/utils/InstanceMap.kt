@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.utils
 
 import com.krystianwsul.checkme.domainmodel.Instance
-import junit.framework.Assert
+
 import java.util.*
 
 class InstanceMap<T : Instance> {
@@ -19,7 +19,7 @@ class InstanceMap<T : Instance> {
 
         val instanceKey = instance.instanceKey
 
-        Assert.assertTrue(!innerMap.containsKey(instanceKey.scheduleKey))
+        check(!innerMap.containsKey(instanceKey.scheduleKey))
 
         innerMap[instanceKey.scheduleKey] = instance
     }
@@ -32,7 +32,7 @@ class InstanceMap<T : Instance> {
         val instanceKey = instance.instanceKey
 
         val innerInstance = innerMap[instanceKey.scheduleKey]
-        Assert.assertTrue(instance == innerInstance)
+        check(instance == innerInstance)
 
         innerMap.remove(instanceKey.scheduleKey)
     }

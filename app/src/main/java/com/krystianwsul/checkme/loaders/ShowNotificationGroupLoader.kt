@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 
-import junit.framework.Assert
+
 
 class ShowNotificationGroupLoader(context: Context, private val instanceKeys: Set<InstanceKey>) : DomainLoader<ShowNotificationGroupLoader.Data>(context, needsFirebase(instanceKeys)) {
 
@@ -22,13 +22,13 @@ class ShowNotificationGroupLoader(context: Context, private val instanceKeys: Se
     }
 
     init {
-        Assert.assertTrue(!instanceKeys.isEmpty())
+        check(!instanceKeys.isEmpty())
     }
 
     override val name = "ShowNotificationGroupLoader, instanceKeys: $instanceKeys"
 
     override fun loadDomain(domainFactory: DomainFactory): Data {
-        Assert.assertTrue(!instanceKeys.isEmpty())
+        check(!instanceKeys.isEmpty())
 
         return domainFactory.getShowNotificationGroupData(context, instanceKeys)
     }

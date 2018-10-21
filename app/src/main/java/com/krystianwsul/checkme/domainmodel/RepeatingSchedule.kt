@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMilli
-import junit.framework.Assert
+
 import java.util.*
 
 abstract class RepeatingSchedule(domainFactory: DomainFactory) : Schedule(domainFactory) {
@@ -27,7 +27,7 @@ abstract class RepeatingSchedule(domainFactory: DomainFactory) : Schedule(domain
         if (startExactTimeStamp >= endExactTimeStamp)
             return instances.filterNotNull()
 
-        Assert.assertTrue(startExactTimeStamp < endExactTimeStamp)
+        check(startExactTimeStamp < endExactTimeStamp)
 
         if (startExactTimeStamp.date == endExactTimeStamp.date) {
             instances.add(getInstanceInDate(task, startExactTimeStamp.date, startExactTimeStamp.hourMilli, endExactTimeStamp.hourMilli))
@@ -52,7 +52,7 @@ abstract class RepeatingSchedule(domainFactory: DomainFactory) : Schedule(domain
     protected abstract fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance?
 
     override fun isVisible(task: Task, now: ExactTimeStamp): Boolean {
-        Assert.assertTrue(current(now))
+        check(current(now))
 
         return true
     }

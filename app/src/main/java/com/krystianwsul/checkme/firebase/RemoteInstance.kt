@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.time.*
-import junit.framework.Assert
+
 
 class RemoteInstance : Instance {
 
@@ -22,47 +22,47 @@ class RemoteInstance : Instance {
 
     private val taskId
         get() = if (remoteInstanceRecord != null) {
-            Assert.assertTrue(TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime == null)
+            check(TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime == null)
 
             remoteInstanceRecord!!.taskId
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime != null)
+            check(!TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime != null)
 
             _taskId!!
         }
 
     override val scheduleDate
         get() = if (remoteInstanceRecord != null) {
-            Assert.assertTrue(TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime == null)
+            check(TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime == null)
 
             Date(remoteInstanceRecord!!.scheduleYear, remoteInstanceRecord!!.scheduleMonth, remoteInstanceRecord!!.scheduleDay)
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime != null)
+            check(!TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime != null)
 
             _scheduleDateTime!!.date
         }
 
     override val scheduleTime: Time
         get() = if (remoteInstanceRecord != null) {
-            Assert.assertTrue(TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime == null)
+            check(TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime == null)
 
             val customTimeId = remoteInstanceRecord!!.scheduleCustomTimeId
             val hour = remoteInstanceRecord!!.scheduleHour
             val minute = remoteInstanceRecord!!.scheduleMinute
 
-            Assert.assertTrue(hour == null == (minute == null))
-            Assert.assertTrue(customTimeId == null != (hour == null))
+            check(hour == null == (minute == null))
+            check(customTimeId == null != (hour == null))
 
             customTimeId?.let { remoteProject.getRemoteCustomTime(it) }
                     ?: NormalTime(hour!!, minute!!)
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime != null)
+            check(!TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime != null)
 
             _scheduleDateTime!!.time
         }
@@ -73,34 +73,34 @@ class RemoteInstance : Instance {
 
     override val instanceDate
         get() = if (remoteInstanceRecord != null) {
-            Assert.assertTrue(_taskId == null)
-            Assert.assertTrue(_scheduleDateTime == null)
+            check(_taskId == null)
+            check(_scheduleDateTime == null)
 
             if (remoteInstanceRecord!!.instanceYear != null) {
-                Assert.assertTrue(remoteInstanceRecord!!.instanceMonth != null)
-                Assert.assertTrue(remoteInstanceRecord!!.instanceDay != null)
+                check(remoteInstanceRecord!!.instanceMonth != null)
+                check(remoteInstanceRecord!!.instanceDay != null)
 
                 Date(remoteInstanceRecord!!.instanceYear!!, remoteInstanceRecord!!.instanceMonth!!, remoteInstanceRecord!!.instanceDay!!)
             } else {
-                Assert.assertTrue(remoteInstanceRecord!!.instanceMonth == null)
-                Assert.assertTrue(remoteInstanceRecord!!.instanceDay == null)
+                check(remoteInstanceRecord!!.instanceMonth == null)
+                check(remoteInstanceRecord!!.instanceDay == null)
 
                 scheduleDate
             }
         } else {
-            Assert.assertTrue(_taskId != null)
-            Assert.assertTrue(_scheduleDateTime != null)
+            check(_taskId != null)
+            check(_scheduleDateTime != null)
 
             _scheduleDateTime!!.date
         }
 
     override val instanceTime
         get() = if (remoteInstanceRecord != null) {
-            Assert.assertTrue(_taskId == null)
-            Assert.assertTrue(_scheduleDateTime == null)
+            check(_taskId == null)
+            check(_scheduleDateTime == null)
 
-            Assert.assertTrue(remoteInstanceRecord!!.instanceHour == null == (remoteInstanceRecord!!.instanceMinute == null))
-            Assert.assertTrue(remoteInstanceRecord!!.instanceHour == null || remoteInstanceRecord!!.instanceCustomTimeId == null)
+            check(remoteInstanceRecord!!.instanceHour == null == (remoteInstanceRecord!!.instanceMinute == null))
+            check(remoteInstanceRecord!!.instanceHour == null || remoteInstanceRecord!!.instanceCustomTimeId == null)
 
             when {
                 remoteInstanceRecord!!.instanceCustomTimeId != null -> remoteProject.getRemoteCustomTime(remoteInstanceRecord!!.instanceCustomTimeId!!)
@@ -108,8 +108,8 @@ class RemoteInstance : Instance {
                 else -> scheduleTime
             }
         } else {
-            Assert.assertTrue(_taskId != null)
-            Assert.assertTrue(_scheduleDateTime != null)
+            check(_taskId != null)
+            check(_scheduleDateTime != null)
 
             _scheduleDateTime!!.time
         }
@@ -124,22 +124,22 @@ class RemoteInstance : Instance {
 
     override val scheduleCustomTimeKey
         get() = if (remoteInstanceRecord != null) {
-            Assert.assertTrue(TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime == null)
+            check(TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime == null)
 
             val customTimeId = remoteInstanceRecord!!.scheduleCustomTimeId
 
             customTimeId?.let { domainFactory.getCustomTimeKey(remoteProject.id, it) }
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime != null)
+            check(!TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime != null)
 
             val customTimeKey = _scheduleDateTime!!.time.timePair.customTimeKey
             if (customTimeKey == null) {
                 null
             } else {
                 if (!TextUtils.isEmpty(customTimeKey.remoteCustomTimeId)) {
-                    Assert.assertTrue(!TextUtils.isEmpty(customTimeKey.remoteProjectId))
+                    check(!TextUtils.isEmpty(customTimeKey.remoteProjectId))
 
                     domainFactory.getCustomTimeKey(customTimeKey.remoteProjectId!!, customTimeKey.remoteCustomTimeId!!)
                 } else {
@@ -150,24 +150,24 @@ class RemoteInstance : Instance {
 
     override val scheduleHourMinute
         get() = if (remoteInstanceRecord != null) {
-            Assert.assertTrue(TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime == null)
+            check(TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime == null)
 
             val hour = remoteInstanceRecord!!.scheduleHour
             val minute = remoteInstanceRecord!!.scheduleMinute
 
             if (hour == null) {
-                Assert.assertTrue(minute == null)
+                check(minute == null)
 
                 null
             } else {
-                Assert.assertTrue(minute != null)
+                check(minute != null)
 
                 HourMinute(hour, minute!!)
             }
         } else {
-            Assert.assertTrue(!TextUtils.isEmpty(_taskId))
-            Assert.assertTrue(_scheduleDateTime != null)
+            check(!TextUtils.isEmpty(_taskId))
+            check(_scheduleDateTime != null)
 
             _scheduleDateTime!!.time.timePair.hourMinute
         }
@@ -195,7 +195,7 @@ class RemoteInstance : Instance {
     }
 
     constructor(domainFactory: DomainFactory, remoteProject: RemoteProject, taskId: String, scheduleDateTime: DateTime, instanceShownRecord: InstanceShownRecord?) : super(domainFactory) {
-        Assert.assertTrue(!TextUtils.isEmpty(taskId))
+        check(!TextUtils.isEmpty(taskId))
 
         this.remoteProject = remoteProject
         remoteInstanceRecord = null
@@ -205,14 +205,14 @@ class RemoteInstance : Instance {
     }
 
     override fun exists(): Boolean {
-        Assert.assertTrue(remoteInstanceRecord == null != (_scheduleDateTime == null))
-        Assert.assertTrue(_taskId == null == (_scheduleDateTime == null))
+        check(remoteInstanceRecord == null != (_scheduleDateTime == null))
+        check(_taskId == null == (_scheduleDateTime == null))
 
         return remoteInstanceRecord != null
     }
 
     override fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp) {
-        Assert.assertTrue(isRootInstance(now))
+        check(isRootInstance(now))
 
         if (remoteInstanceRecord == null)
             createInstanceHierarchy(now)
@@ -222,12 +222,12 @@ class RemoteInstance : Instance {
         remoteInstanceRecord!!.setInstanceDay(date.day)
 
         if (timePair.customTimeKey != null) {
-            Assert.assertTrue(timePair.hourMinute == null)
+            check(timePair.hourMinute == null)
             remoteInstanceRecord!!.instanceCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
             remoteInstanceRecord!!.instanceHour = null
             remoteInstanceRecord!!.instanceMinute = null
         } else {
-            Assert.assertTrue(timePair.hourMinute != null)
+            check(timePair.hourMinute != null)
 
             remoteInstanceRecord!!.instanceCustomTimeId = null
             remoteInstanceRecord!!.instanceHour = timePair.hourMinute!!.hour
@@ -237,20 +237,20 @@ class RemoteInstance : Instance {
         if (instanceShownRecord == null)
             createInstanceShownRecord()
 
-        Assert.assertTrue(instanceShownRecord != null)
+        check(instanceShownRecord != null)
 
         instanceShownRecord!!.notified = false
     }
 
     private fun createInstanceShownRecord() {
-        Assert.assertTrue(instanceShownRecord == null)
+        check(instanceShownRecord == null)
 
         instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(domainFactory, taskId, scheduleDateTime, task.remoteProject.id)
     }
 
     override fun createInstanceHierarchy(now: ExactTimeStamp) {
-        Assert.assertTrue(remoteInstanceRecord == null != (_scheduleDateTime == null))
-        Assert.assertTrue(_taskId == null == (_scheduleDateTime == null))
+        check(remoteInstanceRecord == null != (_scheduleDateTime == null))
+        check(_taskId == null == (_scheduleDateTime == null))
 
         getParentInstance(now)?.createInstanceHierarchy(now)
 
@@ -273,7 +273,7 @@ class RemoteInstance : Instance {
         if (instanceShownRecord == null)
             createInstanceShownRecord()
 
-        Assert.assertTrue(instanceShownRecord != null)
+        check(instanceShownRecord != null)
 
         instanceShownRecord!!.notificationShown = notificationShown
     }
@@ -283,14 +283,14 @@ class RemoteInstance : Instance {
             if (remoteInstanceRecord == null)
                 createInstanceHierarchy(now)
 
-            Assert.assertTrue(remoteInstanceRecord != null)
+            check(remoteInstanceRecord != null)
 
             remoteInstanceRecord!!.done = now.long
 
             if (instanceShownRecord != null)
                 instanceShownRecord!!.notified = false
         } else {
-            Assert.assertTrue(remoteInstanceRecord != null)
+            check(remoteInstanceRecord != null)
 
             remoteInstanceRecord!!.done = null
         }
@@ -300,16 +300,16 @@ class RemoteInstance : Instance {
         if (instanceShownRecord == null)
             createInstanceShownRecord()
 
-        Assert.assertTrue(instanceShownRecord != null)
+        check(instanceShownRecord != null)
 
         instanceShownRecord!!.notified = true
     }
 
     override fun delete() {
-        Assert.assertTrue(remoteInstanceRecord != null)
+        check(remoteInstanceRecord != null)
 
         val remoteProjectFactory = domainFactory.remoteFactory
-        Assert.assertTrue(remoteProjectFactory != null)
+        check(remoteProjectFactory != null)
 
         task.deleteInstance(this)
 

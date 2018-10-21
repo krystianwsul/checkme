@@ -230,6 +230,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                     val name = toolbarEditText.text.toString().trim { it <= ' ' }
                     check(!TextUtils.isEmpty(name))
 
+                    @Suppress("DEPRECATION")
                     supportLoaderManager.destroyLoader(0)
 
                     if (hasValueSchedule()) {
@@ -380,6 +381,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         if (!mNoteHasFocus)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
+        @Suppress("DEPRECATION")
         supportLoaderManager.initLoader<CreateTaskLoader.Data>(0, null, this)
     }
 

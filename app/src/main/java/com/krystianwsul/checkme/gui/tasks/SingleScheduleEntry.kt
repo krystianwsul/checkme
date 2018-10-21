@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
-import junit.framework.Assert
+
 
 class SingleScheduleEntry : ScheduleEntry {
 
@@ -22,10 +22,10 @@ class SingleScheduleEntry : ScheduleEntry {
 
             override fun createFromParcel(parcel: Parcel) = parcel.run {
                 val date = readParcelable<Date>(Date::class.java.classLoader)
-                Assert.assertTrue(date != null)
+                check(date != null)
 
                 val timePair = readParcelable<TimePair>(TimePair::class.java.classLoader)
-                Assert.assertTrue(timePair != null)
+                check(timePair != null)
 
                 val error = readString()
 
@@ -71,7 +71,7 @@ class SingleScheduleEntry : ScheduleEntry {
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        Assert.assertTrue(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
+        check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
         mDate = scheduleDialogData.date
         mTimePair = scheduleDialogData.timePairPersist.timePair
@@ -79,14 +79,14 @@ class SingleScheduleEntry : ScheduleEntry {
 
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
         return mDate.getDisplayText(context) + ", " + if (mTimePair.customTimeKey != null) {
-            Assert.assertTrue(mTimePair.hourMinute == null)
+            check(mTimePair.hourMinute == null)
 
             val customTimeData = customTimeDatas[mTimePair.customTimeKey]
-            Assert.assertTrue(customTimeData != null)
+            check(customTimeData != null)
 
             customTimeData!!.name + " (" + customTimeData.hourMinutes[mDate.dayOfWeek] + ")"
         } else {
-            Assert.assertTrue(mTimePair.hourMinute != null)
+            check(mTimePair.hourMinute != null)
 
             mTimePair.hourMinute!!.toString()
         }

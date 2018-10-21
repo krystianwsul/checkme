@@ -4,15 +4,15 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import junit.framework.Assert
+
 
 abstract class Record(private var created: Boolean) {
 
     companion object {
 
         fun getMaxId(sqLiteDatabase: SQLiteDatabase, tableName: String, idColumn: String): Int {
-            Assert.assertTrue(tableName.isNotEmpty())
-            Assert.assertTrue(idColumn.isNotEmpty())
+            check(tableName.isNotEmpty())
+            check(idColumn.isNotEmpty())
 
             return sqLiteDatabase.rawQuery("SELECT seq FROM SQLITE_SEQUENCE WHERE name='$tableName'", null).use {
                 it.moveToFirst()
@@ -44,11 +44,11 @@ abstract class Record(private var created: Boolean) {
 
     val insertCommand: InsertCommand
         get() {
-            Assert.assertTrue(commandTable.isNotEmpty())
+            check(commandTable.isNotEmpty())
 
             Log.e("asdf", toString() + " created? " + created)
 
-            Assert.assertTrue(!created)
+            check(!created)
 
             created = true
             changed = false
@@ -58,10 +58,10 @@ abstract class Record(private var created: Boolean) {
 
     val updateCommand: UpdateCommand
         get() {
-            Assert.assertTrue(commandTable.isNotEmpty())
-            Assert.assertTrue(commandIdColumn.isNotEmpty())
+            check(commandTable.isNotEmpty())
+            check(commandIdColumn.isNotEmpty())
 
-            Assert.assertTrue(changed)
+            check(changed)
 
             changed = false
 
@@ -70,10 +70,10 @@ abstract class Record(private var created: Boolean) {
 
     val deleteCommand: DeleteCommand
         get() {
-            Assert.assertTrue(commandTable.isNotEmpty())
-            Assert.assertTrue(commandIdColumn.isNotEmpty())
+            check(commandTable.isNotEmpty())
+            check(commandIdColumn.isNotEmpty())
 
-            Assert.assertTrue(deleted)
+            check(deleted)
 
             deleted = false
 
@@ -83,13 +83,13 @@ abstract class Record(private var created: Boolean) {
     fun needsInsert() = !created
 
     fun needsUpdate(): Boolean {
-        Assert.assertTrue(created)
+        check(created)
 
         return changed && !deleted
     }
 
     fun needsDelete(): Boolean {
-        Assert.assertTrue(created)
+        check(created)
 
         return deleted
     }

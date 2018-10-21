@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
-import junit.framework.Assert
+
 
 class PersistenceManger(
         private val _customTimeRecords: MutableList<LocalCustomTimeRecord>,
@@ -145,7 +145,7 @@ class PersistenceManger(
     fun getMonthlyWeekScheduleRecord(scheduleId: Int) = _monthlyWeekScheduleRecords[scheduleId]!!
 
     fun createCustomTimeRecord(name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTimeRecord {
-        Assert.assertTrue(name.isNotEmpty())
+        check(name.isNotEmpty())
 
         val sunday = hourMinutes[DayOfWeek.SUNDAY]!!
         val monday = hourMinutes[DayOfWeek.MONDAY]!!
@@ -163,7 +163,7 @@ class PersistenceManger(
     }
 
     fun createTaskRecord(name: String, startExactTimeStamp: ExactTimeStamp, note: String?): TaskRecord {
-        Assert.assertTrue(name.isNotEmpty())
+        check(name.isNotEmpty())
 
         val id = ++taskMaxId
 
@@ -173,8 +173,8 @@ class PersistenceManger(
     }
 
     fun createTaskHierarchyRecord(parentLocalTask: LocalTask, childLocalTask: LocalTask, startExactTimeStamp: ExactTimeStamp): TaskHierarchyRecord {
-        Assert.assertTrue(parentLocalTask.current(startExactTimeStamp))
-        Assert.assertTrue(childLocalTask.current(startExactTimeStamp))
+        check(parentLocalTask.current(startExactTimeStamp))
+        check(childLocalTask.current(startExactTimeStamp))
 
         val id = ++taskHierarchyMaxId
 
@@ -184,7 +184,7 @@ class PersistenceManger(
     }
 
     fun createScheduleRecord(rootLocalTask: LocalTask, scheduleType: ScheduleType, startExactTimeStamp: ExactTimeStamp): ScheduleRecord {
-        Assert.assertTrue(rootLocalTask.current(startExactTimeStamp))
+        check(rootLocalTask.current(startExactTimeStamp))
 
         val id = ++scheduleMaxId
 
@@ -194,25 +194,25 @@ class PersistenceManger(
     }
 
     fun createSingleScheduleRecord(scheduleId: Int, date: Date, time: Time): SingleScheduleRecord {
-        Assert.assertTrue(!_singleScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_dailyScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_weeklyScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_monthlyDayScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
+        check(!_singleScheduleRecords.containsKey(scheduleId))
+        check(!_dailyScheduleRecords.containsKey(scheduleId))
+        check(!_weeklyScheduleRecords.containsKey(scheduleId))
+        check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
+        check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
         val customTimeId: Int?
         val hour: Int?
         val minute: Int?
 
         if (time.timePair.customTimeKey != null) {
-            Assert.assertTrue(time.timePair.hourMinute == null)
+            check(time.timePair.hourMinute == null)
 
             customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
 
             hour = null
             minute = null
         } else {
-            Assert.assertTrue(time.timePair.hourMinute != null)
+            check(time.timePair.hourMinute != null)
 
             customTimeId = null
 
@@ -226,25 +226,25 @@ class PersistenceManger(
     }
 
     fun createWeeklyScheduleRecord(scheduleId: Int, dayOfWeek: DayOfWeek, time: Time): WeeklyScheduleRecord {
-        Assert.assertTrue(!_singleScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_dailyScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_weeklyScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_monthlyDayScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
+        check(!_singleScheduleRecords.containsKey(scheduleId))
+        check(!_dailyScheduleRecords.containsKey(scheduleId))
+        check(!_weeklyScheduleRecords.containsKey(scheduleId))
+        check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
+        check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
         val customTimeId: Int?
         val hour: Int?
         val minute: Int?
 
         if (time.timePair.customTimeKey != null) {
-            Assert.assertTrue(time.timePair.hourMinute == null)
+            check(time.timePair.hourMinute == null)
 
             customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
 
             hour = null
             minute = null
         } else {
-            Assert.assertTrue(time.timePair.hourMinute != null)
+            check(time.timePair.hourMinute != null)
 
             customTimeId = null
 
@@ -258,25 +258,25 @@ class PersistenceManger(
     }
 
     fun createMonthlyDayScheduleRecord(scheduleId: Int, dayOfMonth: Int, beginningOfMonth: Boolean, time: Time): MonthlyDayScheduleRecord {
-        Assert.assertTrue(!_singleScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_dailyScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_weeklyScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_monthlyDayScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
+        check(!_singleScheduleRecords.containsKey(scheduleId))
+        check(!_dailyScheduleRecords.containsKey(scheduleId))
+        check(!_weeklyScheduleRecords.containsKey(scheduleId))
+        check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
+        check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
         val customTimeId: Int?
         val hour: Int?
         val minute: Int?
 
         if (time.timePair.customTimeKey != null) {
-            Assert.assertTrue(time.timePair.hourMinute == null)
+            check(time.timePair.hourMinute == null)
 
             customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
 
             hour = null
             minute = null
         } else {
-            Assert.assertTrue(time.timePair.hourMinute != null)
+            check(time.timePair.hourMinute != null)
 
             customTimeId = null
 
@@ -290,25 +290,25 @@ class PersistenceManger(
     }
 
     fun createMonthlyWeekScheduleRecord(scheduleId: Int, dayOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean, time: Time): MonthlyWeekScheduleRecord {
-        Assert.assertTrue(!_singleScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_dailyScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_weeklyScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_monthlyDayScheduleRecords.containsKey(scheduleId))
-        Assert.assertTrue(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
+        check(!_singleScheduleRecords.containsKey(scheduleId))
+        check(!_dailyScheduleRecords.containsKey(scheduleId))
+        check(!_weeklyScheduleRecords.containsKey(scheduleId))
+        check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
+        check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
         val customTimeId: Int?
         val hour: Int?
         val minute: Int?
 
         if (time.timePair.customTimeKey != null) {
-            Assert.assertTrue(time.timePair.hourMinute == null)
+            check(time.timePair.hourMinute == null)
 
             customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
 
             hour = null
             minute = null
         } else {
-            Assert.assertTrue(time.timePair.hourMinute != null)
+            check(time.timePair.hourMinute != null)
 
             customTimeId = null
 
@@ -327,14 +327,14 @@ class PersistenceManger(
         val scheduleMinute: Int?
 
         if (scheduleTimePair.customTimeKey != null) {
-            Assert.assertTrue(scheduleTimePair.hourMinute == null)
+            check(scheduleTimePair.hourMinute == null)
 
             scheduleCustomTimeId = scheduleTimePair.customTimeKey.localCustomTimeId!!
 
             scheduleHour = null
             scheduleMinute = null
         } else {
-            Assert.assertTrue(scheduleTimePair.hourMinute != null)
+            check(scheduleTimePair.hourMinute != null)
 
             scheduleCustomTimeId = null
 
@@ -354,8 +354,8 @@ class PersistenceManger(
     }
 
     fun createInstanceShownRecord(remoteTaskId: String, scheduleDate: Date, remoteCustomTimeId: String?, hour: Int?, minute: Int?, projectId: String): InstanceShownRecord {
-        Assert.assertTrue(remoteTaskId.isNotEmpty())
-        Assert.assertTrue(projectId.isNotEmpty())
+        check(remoteTaskId.isNotEmpty())
+        check(projectId.isNotEmpty())
 
         val id = ++instanceShownMaxId
 

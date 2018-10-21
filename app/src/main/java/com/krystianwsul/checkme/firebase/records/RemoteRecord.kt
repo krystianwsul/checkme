@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.util.Log
 
-import junit.framework.Assert
+
 
 abstract class RemoteRecord(protected val create: Boolean) {
 
@@ -19,27 +19,27 @@ abstract class RemoteRecord(protected val create: Boolean) {
     abstract val createObject: Any
 
     open fun getValues(values: MutableMap<String, Any?>) {
-        Assert.assertTrue(!deleted)
-        Assert.assertTrue(!created)
-        Assert.assertTrue(!updated)
+        check(!deleted)
+        check(!created)
+        check(!updated)
 
         if (delete) {
             Log.e("asdf", "RemoteRecord.getValues deleting " + this)
 
-            Assert.assertTrue(!create)
-            Assert.assertTrue(update != null)
+            check(!create)
+            check(update != null)
 
             deleted = true
             values[key] = null
         } else if (create) {
             Log.e("asdf", "RemoteRecord.getValues creating " + this)
 
-            Assert.assertTrue(update == null)
+            check(update == null)
 
             created = true
             values[key] = createObject
         } else {
-            Assert.assertTrue(update != null)
+            check(update != null)
 
             if (!update!!.isEmpty()) {
                 Log.e("asdf", "RemoteRecord.getValues updating " + this)
@@ -51,27 +51,27 @@ abstract class RemoteRecord(protected val create: Boolean) {
     }
 
     protected fun addValue(key: String, obj: Any?) {
-        Assert.assertTrue(!delete)
-        Assert.assertTrue(!deleted)
-        Assert.assertTrue(!created)
-        Assert.assertTrue(!updated)
+        check(!delete)
+        check(!deleted)
+        check(!created)
+        check(!updated)
 
         if (create) {
-            Assert.assertTrue(update == null)
+            check(update == null)
         } else {
-            Assert.assertTrue(update != null)
+            check(update != null)
 
             update!![key] = obj
         }
     }
 
     fun delete() {
-        Assert.assertTrue(!deleted)
-        Assert.assertTrue(!updated)
-        Assert.assertTrue(!created)
-        Assert.assertTrue(!delete)
-        Assert.assertTrue(!create)
-        Assert.assertTrue(update != null)
+        check(!deleted)
+        check(!updated)
+        check(!created)
+        check(!delete)
+        check(!create)
+        check(update != null)
 
         delete = true
     }

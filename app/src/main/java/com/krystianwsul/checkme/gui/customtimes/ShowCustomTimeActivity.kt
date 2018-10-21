@@ -21,7 +21,7 @@ import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
-import junit.framework.Assert
+
 import kotlinx.android.synthetic.main.activity_show_custom_time.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
@@ -69,9 +69,9 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
     private val discardDialogListener = this@ShowCustomTimeActivity::finish
 
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
-        Assert.assertTrue(editedDayOfWeek != null)
-        Assert.assertTrue(timeViews.containsKey(editedDayOfWeek))
-        Assert.assertTrue(hourMinutes.containsKey(editedDayOfWeek))
+        check(editedDayOfWeek != null)
+        check(timeViews.containsKey(editedDayOfWeek))
+        check(hourMinutes.containsKey(editedDayOfWeek))
 
         hourMinutes[editedDayOfWeek!!] = hourMinute
         timeViews[editedDayOfWeek!!]!!.text = hourMinute.toString()
@@ -93,19 +93,20 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_save -> {
-                Assert.assertTrue(!hourMinutes.isEmpty())
+                check(!hourMinutes.isEmpty())
 
                 updateError()
 
                 val name = toolbarEditText.text.toString().trim { it <= ' ' }
                 if (name.isNotEmpty()) {
+                    @Suppress("DEPRECATION")
                     supportLoaderManager.destroyLoader(0)
 
                     if (data != null) {
                         DomainFactory.getDomainFactory().updateCustomTime(this@ShowCustomTimeActivity, data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
                     } else {
                         val customTimeId = DomainFactory.getDomainFactory().createCustomTime(this@ShowCustomTimeActivity, SaveService.Source.GUI, name, hourMinutes)
-                        Assert.assertTrue(customTimeId > 0)
+                        check(customTimeId > 0)
 
                         setResult(customTimeId)
                     }
@@ -141,8 +142,8 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
         initializeDay(DayOfWeek.SATURDAY, R.id.time_saturday_name, R.id.time_saturday_time)
 
         if (savedInstanceState?.containsKey(HOUR_MINUTE_SUNDAY_KEY) == true) {
-            Assert.assertTrue(savedInstanceState.containsKey(EDITED_DAY_OF_WEEK_KEY))
-            Assert.assertTrue(hourMinutes.isEmpty())
+            check(savedInstanceState.containsKey(EDITED_DAY_OF_WEEK_KEY))
+            check(hourMinutes.isEmpty())
 
             extractKey(HOUR_MINUTE_SUNDAY_KEY, DayOfWeek.SUNDAY)
             extractKey(HOUR_MINUTE_MONDAY_KEY, DayOfWeek.MONDAY)
@@ -157,10 +158,10 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
             updateGui()
         } else {
             if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
-                Assert.assertTrue(!intent.hasExtra(NEW_KEY))
+                check(!intent.hasExtra(NEW_KEY))
             } else {
-                Assert.assertTrue(intent.hasExtra(NEW_KEY))
-                Assert.assertTrue(hourMinutes.isEmpty())
+                check(intent.hasExtra(NEW_KEY))
+                check(hourMinutes.isEmpty())
 
                 for (dayOfWeek in DayOfWeek.values())
                     hourMinutes[dayOfWeek] = sDefaultHourMinute
@@ -170,24 +171,25 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
         }
 
         if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
-            Assert.assertTrue(!intent.hasExtra(NEW_KEY))
+            check(!intent.hasExtra(NEW_KEY))
 
             customTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1)
-            Assert.assertTrue(customTimeId != -1)
+            check(customTimeId != -1)
 
+            @Suppress("DEPRECATION")
             supportLoaderManager.initLoader(0, null, this)
         } else {
-            Assert.assertTrue(intent.hasExtra(NEW_KEY))
+            check(intent.hasExtra(NEW_KEY))
         }
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
     }
 
     private fun extractKey(key: String, dayOfWeek: DayOfWeek) {
-        Assert.assertTrue(savedInstanceState != null)
-        Assert.assertTrue(key.isNotEmpty())
+        check(savedInstanceState != null)
+        check(key.isNotEmpty())
 
-        Assert.assertTrue(savedInstanceState!!.containsKey(key))
+        check(savedInstanceState!!.containsKey(key))
 
         val hourMinute = savedInstanceState!!.getParcelable<HourMinute>(key)!!
 
@@ -225,7 +227,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
     override fun onCreateLoader(id: Int, args: Bundle?) = ShowCustomTimeLoader(this, customTimeId!!)
 
     private fun updateGui() {
-        Assert.assertTrue(!hourMinutes.isEmpty())
+        check(!hourMinutes.isEmpty())
 
         toolbarLayout.visibility = View.VISIBLE
         showCustomTimeContainer.visibility = View.VISIBLE
@@ -274,7 +276,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
         this.data = data
 
         if (savedInstanceState?.containsKey(HOUR_MINUTE_SUNDAY_KEY) != true) {
-            Assert.assertTrue(hourMinutes.isEmpty())
+            check(hourMinutes.isEmpty())
 
             toolbarEditText.setText(data.name)
 
@@ -307,7 +309,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
 
     private fun dataChanged(): Boolean {
         if (customTimeId == null) {
-            Assert.assertTrue(data == null)
+            check(data == null)
 
             if (toolbarEditText.text.isNotEmpty())
                 return true

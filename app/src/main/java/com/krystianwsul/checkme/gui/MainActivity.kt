@@ -129,7 +129,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var debug = false
 
-    private var calendarDate: LocalDate? = null
+    private var calendarOpen = false
     private var calendarHeight: Int? = null
     private var calendarInitial: Boolean = true
 
@@ -181,11 +181,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_calendar -> {
-                calendarDate = if (calendarDate == null) {
-                    LocalDate.now()
-                } else {
-                    null
-                }
+                Log.e("asdf", "calendarOpen: $calendarOpen")
+
+                calendarOpen = !calendarOpen
 
                 updateCalendarHeight()
             }
@@ -258,7 +256,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 }
             }
 
-            calendarDate = getSerializable(CALENDAR_KEY) as? LocalDate
+            calendarOpen = getBoolean(CALENDAR_KEY)
 
             updateCalendarHeight()
             updateCalendarDate()
@@ -287,9 +285,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                         groupSelectAllVisible.clear()
                         invalidateOptionsMenu()
-
-                        if (timeRange != TimeRange.DAY)
-                            calendarDate = null
 
                         updateCalendarHeight()
                     }
@@ -332,8 +327,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 override fun onPageSelected(position: Int) {
                     invalidateOptionsMenu()
-
-                    calendarDate = LocalDate.now().plusDays(mainDaysPager.currentItem)
 
                     updateCalendarDate()
                 }
@@ -468,11 +461,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         mainCalendar.minDate = DateTime.now().millis
         mainCalendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            calendarDate = LocalDate(year, month + 1, dayOfMonth)
+            val date = LocalDate(year, month + 1, dayOfMonth)
 
-            Log.e("asdf", "days: " + Days.daysBetween(calendarDate, LocalDate.now()).days)
+            Log.e("asdf", "days: " + Days.daysBetween(date, LocalDate.now()).days)
 
-            mainDaysPager.currentItem = Days.daysBetween(LocalDate.now(), calendarDate).days
+            mainDaysPager.currentItem = Days.daysBetween(LocalDate.now(), date).days
+
+            calendarOpen = false
+            updateCalendarHeight()
         }
 
         @Suppress("DEPRECATION")
@@ -528,7 +524,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     putString(SEARCH_KEY, text.toString())
             }
 
-            putSerializable(CALENDAR_KEY, calendarDate)
+            putBoolean(CALENDAR_KEY, calendarOpen)
         }
     }
 
@@ -574,7 +570,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 taskListFragment.setFab(mainFab)
 
-                calendarDate = null
+                calendarOpen = false
             }
             MainActivity.Tab.PROJECTS -> {
                 supportActionBar!!.title = getString(R.string.projects)
@@ -596,7 +592,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 closeSearch()
 
-                calendarDate = null
+                calendarOpen = false
             }
             MainActivity.Tab.CUSTOM_TIMES -> {
                 supportActionBar!!.title = getString(R.string.times)
@@ -618,7 +614,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 closeSearch()
 
-                calendarDate = null
+                calendarOpen = false
             }
             MainActivity.Tab.FRIENDS -> {
                 checkNotNull(userInfo)
@@ -642,7 +638,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 closeSearch()
 
-                calendarDate = null
+                calendarOpen = false
             }
             MainActivity.Tab.DEBUG -> {
                 supportActionBar!!.title = "Debug"
@@ -664,7 +660,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 closeSearch()
 
-                calendarDate = null
+                calendarOpen = false
             }
         }
 
@@ -900,7 +896,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         if (calendarHeight == null)
             return
 
-        val targetHeight = if (calendarDate != null) calendarHeight!! else 0
+        val targetHeight = if (calendarOpen) calendarHeight!! else 0
 
         fun setHeight(height: Int) {
             val layoutParams = mainCalendar.layoutParams
@@ -923,7 +919,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
     }
 
-    private fun updateCalendarDate() = calendarDate?.let { mainCalendar.date = it.toDateTimeAtStartOfDay().millis }
+    private fun updateCalendarDate() {
+        mainCalendar.date = LocalDate.now()
+                .plusDays(mainDaysPager.currentItem)
+                .toDateTimeAtStartOfDay()
+                .millis
+    }
 
     private inner class MyFragmentStatePagerAdapter(fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager), FabUser {
 

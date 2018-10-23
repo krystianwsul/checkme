@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.viewmodels.FirebaseLevel
 
 
 class ShowNotificationGroupLoader(context: Context, private val instanceKeys: Set<InstanceKey>) : DomainLoader<ShowNotificationGroupLoader.DomainData>(context, needsFirebase(instanceKeys)) {

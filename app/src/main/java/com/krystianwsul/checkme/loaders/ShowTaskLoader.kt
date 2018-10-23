@@ -4,6 +4,7 @@ import android.content.Context
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.viewmodels.FirebaseLevel
 
 
 class ShowTaskLoader(context: Context, private val taskKey: TaskKey) : DomainLoader<ShowTaskLoader.DomainData>(context, if (taskKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING) {

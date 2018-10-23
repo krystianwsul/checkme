@@ -4,6 +4,7 @@ import android.content.Context
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.viewmodels.FirebaseLevel
 
 class ShowTaskInstancesLoader(context: Context, private val taskKey: TaskKey) : DomainLoader<ShowTaskInstancesLoader.DomainData>(context, needsFirebase(taskKey)) {
 

@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.DomainData
 import com.krystianwsul.checkme.viewmodels.DomainObserver
+import com.krystianwsul.checkme.viewmodels.FirebaseLevel
 
 abstract class DomainLoader<D : DomainData>(context: Context, private val firebaseLevel: FirebaseLevel) : AsyncTaskLoader<D>(context) {
 

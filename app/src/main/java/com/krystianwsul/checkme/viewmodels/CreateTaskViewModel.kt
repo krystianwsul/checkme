@@ -4,7 +4,6 @@ import android.os.Parcelable
 import android.text.TextUtils
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.loaders.FirebaseLevel
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey

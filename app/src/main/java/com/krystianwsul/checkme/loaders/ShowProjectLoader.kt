@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.loaders
 import android.content.Context
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.viewmodels.FirebaseLevel
 
 
 class ShowProjectLoader(context: Context, private val projectId: String?) : DomainLoader<ShowProjectLoader.DomainData>(context, FirebaseLevel.FRIEND) {

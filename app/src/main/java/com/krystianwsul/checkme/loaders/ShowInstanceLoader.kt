@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.viewmodels.FirebaseLevel
 
 
 class ShowInstanceLoader(context: Context, private val instanceKey: InstanceKey) : DomainLoader<ShowInstanceLoader.DomainData>(context, if (instanceKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING) {

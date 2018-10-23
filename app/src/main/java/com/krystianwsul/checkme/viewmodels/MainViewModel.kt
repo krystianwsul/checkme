@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.viewmodels
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.loaders.FirebaseLevel
 
 class MainViewModel : DomainViewModel<MainViewModel.Data>() {
 

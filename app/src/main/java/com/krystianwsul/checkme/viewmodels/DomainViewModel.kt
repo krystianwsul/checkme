@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
-import com.krystianwsul.checkme.loaders.FirebaseLevel
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers

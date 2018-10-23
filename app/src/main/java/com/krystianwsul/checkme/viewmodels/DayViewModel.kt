@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.loaders.FirebaseLevel
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 class DayViewModel : DomainViewModel<DayViewModel.DayData>() {

@@ -64,7 +64,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val taskKeys = ArrayList(childTaskDatas.map { it.taskKey })
 
             when (menuItem.itemId) {
-                R.id.action_task_share -> Utils.share(getShareData(childTaskDatas))
+                R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
                 R.id.action_task_edit -> {
                     check(selected.size == 1)
 

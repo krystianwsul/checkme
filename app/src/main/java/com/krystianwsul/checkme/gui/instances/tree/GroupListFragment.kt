@@ -153,7 +153,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         startActivity(EditInstancesActivity.getIntent(instanceKeys))
                     }
                 }
-                R.id.action_group_share -> Utils.share(getShareData(instanceDatas))
+                R.id.action_group_share -> Utils.share(requireActivity(), getShareData(instanceDatas))
                 R.id.action_group_show_task -> {
                     check(instanceDatas.size == 1)
 

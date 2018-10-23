@@ -1,17 +1,16 @@
 package com.krystianwsul.checkme.utils
 
+import android.app.Activity
 import android.content.Intent
 import android.text.TextUtils
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
-
 import java.util.*
 
 object Utils {
 
-    fun share(text: String) {
+    fun share(activity: Activity, text: String) {
         check(!TextUtils.isEmpty(text))
 
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -19,7 +18,7 @@ object Utils {
             type = "text/plain"
         }
 
-        MyApplication.instance.startActivity(Intent.createChooser(intent, MyApplication.instance.getString(R.string.sendTo)))
+        activity.startActivity(Intent.createChooser(intent, activity.getString(R.string.sendTo)))
     }
 
     fun getDaysInMonth(year: Int, month: Int) = GregorianCalendar(year, month - 1, 1).getActualMaximum(Calendar.DAY_OF_MONTH)

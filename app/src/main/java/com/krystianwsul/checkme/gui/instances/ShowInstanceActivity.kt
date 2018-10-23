@@ -97,9 +97,9 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                 R.id.instance_menu_share -> {
                     val shareData = groupListFragment.shareData
                     if (TextUtils.isEmpty(shareData))
-                        Utils.share(it.name)
+                        Utils.share(this, it.name)
                     else
-                        Utils.share(it.name + "\n" + shareData)
+                        Utils.share(this, it.name + "\n" + shareData)
                 }
                 R.id.instance_menu_show_task -> {
                     check(!it.done)

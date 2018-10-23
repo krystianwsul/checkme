@@ -13,7 +13,7 @@ class ShowInstanceLoader(context: Context, private val instanceKey: InstanceKey)
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowInstanceData(context, instanceKey)
 
-    data class DomainData(val instanceData: InstanceData?) : com.krystianwsul.checkme.loaders.DomainData()
+    data class DomainData(val instanceData: InstanceData?) : com.krystianwsul.checkme.viewmodels.DomainData()
 
     data class InstanceData(val name: String, val displayText: String?, var done: Boolean, val taskCurrent: Boolean, val isRootInstance: Boolean, val exists: Boolean, val dataWrapper: GroupListFragment.DataWrapper) {
 

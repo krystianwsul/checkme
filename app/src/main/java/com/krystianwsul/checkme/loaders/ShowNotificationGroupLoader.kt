@@ -32,5 +32,5 @@ class ShowNotificationGroupLoader(context: Context, private val instanceKeys: Se
         return domainFactory.getShowNotificationGroupData(context, instanceKeys)
     }
 
-    data class DomainData(val dataWrapper: GroupListFragment.DataWrapper) : com.krystianwsul.checkme.loaders.DomainData()
+    data class DomainData(val dataWrapper: GroupListFragment.DataWrapper) : com.krystianwsul.checkme.viewmodels.DomainData()
 }

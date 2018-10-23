@@ -10,5 +10,5 @@ class MainViewModel : DomainViewModel<MainViewModel.Data>() {
     fun start() = internalStart(FirebaseLevel.WANT)
 
     override fun getData(domainFactory: DomainFactory) = domainFactory.getMainData(MyApplication.instance)
-    data class Data(val taskData: TaskListFragment.TaskData) : com.krystianwsul.checkme.loaders.DomainData()
+    data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
 }

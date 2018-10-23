@@ -12,7 +12,7 @@ class ShowTaskLoader(context: Context, private val taskKey: TaskKey) : DomainLoa
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowTaskData(taskKey, context)
 
-    data class DomainData(val name: String, val scheduleText: String?, val taskData: TaskListFragment.TaskData, val hasInstances: Boolean) : com.krystianwsul.checkme.loaders.DomainData() {
+    data class DomainData(val name: String, val scheduleText: String?, val taskData: TaskListFragment.TaskData, val hasInstances: Boolean) : com.krystianwsul.checkme.viewmodels.DomainData() {
 
         init {
             check(name.isNotEmpty())

@@ -52,7 +52,7 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
         }
     }
 
-    data class DomainData(val taskData: TaskData?, val parentTreeDatas: Map<ParentKey, ParentTreeData>, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>) : com.krystianwsul.checkme.loaders.DomainData()
+    data class DomainData(val taskData: TaskData?, val parentTreeDatas: Map<ParentKey, ParentTreeData>, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>) : com.krystianwsul.checkme.viewmodels.DomainData()
 
     data class CustomTimeData(val customTimeKey: CustomTimeKey, val name: String, val hourMinutes: TreeMap<DayOfWeek, HourMinute>)
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.loaders.DomainData
 import com.krystianwsul.checkme.loaders.FirebaseLevel
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey

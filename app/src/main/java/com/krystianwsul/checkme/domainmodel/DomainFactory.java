@@ -548,7 +548,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowCustomTimesLoader.DomainData getShowCustomTimesData() {
+    public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimesData");
@@ -562,7 +562,7 @@ public class DomainFactory {
             entries.add(new ShowCustomTimesLoader.CustomTimeData(localCustomTime.getId(), localCustomTime.getName()));
         }
 
-        return new ShowCustomTimesLoader.DomainData(entries);
+        return new ShowCustomTimesLoader.Data(entries);
     }
 
     @NonNull

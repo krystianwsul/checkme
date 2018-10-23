@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.loaders
+package com.krystianwsul.checkme.viewmodels
 
 abstract class DomainData {
 

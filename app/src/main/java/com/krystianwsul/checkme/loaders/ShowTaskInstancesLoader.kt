@@ -21,5 +21,5 @@ class ShowTaskInstancesLoader(context: Context, private val taskKey: TaskKey) : 
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(taskKey)
 
-    data class DomainData(val dataWrapper: GroupListFragment.DataWrapper) : com.krystianwsul.checkme.loaders.DomainData()
+    data class DomainData(val dataWrapper: GroupListFragment.DataWrapper) : com.krystianwsul.checkme.viewmodels.DomainData()
 }

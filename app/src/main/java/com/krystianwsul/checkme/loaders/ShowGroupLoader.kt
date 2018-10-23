@@ -13,7 +13,7 @@ class ShowGroupLoader(context: Context, private val timeStamp: TimeStamp) : Doma
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowGroupData(context, timeStamp)
 
-    data class DomainData(val displayText: String, val dataWrapper: GroupListFragment.DataWrapper?) : com.krystianwsul.checkme.loaders.DomainData() {
+    data class DomainData(val displayText: String, val dataWrapper: GroupListFragment.DataWrapper?) : com.krystianwsul.checkme.viewmodels.DomainData() {
 
         init {
             check(displayText.isNotEmpty())

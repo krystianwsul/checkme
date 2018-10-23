@@ -11,7 +11,7 @@ class ShowProjectLoader(context: Context, private val projectId: String?) : Doma
 
     override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getShowProjectData(projectId)
 
-    data class DomainData(val name: String?, val userListDatas: Set<UserListData>, val friendDatas: Map<String, UserListData>) : com.krystianwsul.checkme.loaders.DomainData()
+    data class DomainData(val name: String?, val userListDatas: Set<UserListData>, val friendDatas: Map<String, UserListData>) : com.krystianwsul.checkme.viewmodels.DomainData()
 
     data class UserListData(val name: String, val email: String, val id: String) {
 

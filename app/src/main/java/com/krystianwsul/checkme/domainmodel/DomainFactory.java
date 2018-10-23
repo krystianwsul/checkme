@@ -46,7 +46,6 @@ import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.loaders.CreateTaskLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
@@ -71,6 +70,7 @@ import com.krystianwsul.checkme.utils.time.NormalTime;
 import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
 import com.krystianwsul.checkme.viewmodels.DayViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel;
@@ -785,10 +785,10 @@ public class DomainFactory {
     }
 
     @NonNull
-    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskLoader.ScheduleData, List<Schedule>>> getScheduleDatas(List<Schedule> schedules, ExactTimeStamp now) {
+    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> getScheduleDatas(List<Schedule> schedules, ExactTimeStamp now) {
         Map<CustomTimeKey, CustomTime> customTimes = new HashMap<>();
 
-        Map<CreateTaskLoader.ScheduleData, List<Schedule>> scheduleDatas = new HashMap<>();
+        Map<CreateTaskViewModel.ScheduleData, List<Schedule>> scheduleDatas = new HashMap<>();
 
         Map<TimePair, List<WeeklySchedule>> weeklySchedules = new HashMap<>();
 
@@ -800,7 +800,7 @@ public class DomainFactory {
                 case SINGLE: {
                     SingleSchedule singleSchedule = (SingleSchedule) schedule;
 
-                    scheduleDatas.put(new CreateTaskLoader.ScheduleData.SingleScheduleData(singleSchedule.getDate(), singleSchedule.getTimePair()), Collections.singletonList(schedule));
+                    scheduleDatas.put(new CreateTaskViewModel.ScheduleData.SingleScheduleData(singleSchedule.getDate(), singleSchedule.getTimePair()), Collections.singletonList(schedule));
 
                     CustomTimeKey customTimeKey = singleSchedule.getCustomTimeKey();
                     if (customTimeKey != null)
@@ -828,7 +828,7 @@ public class DomainFactory {
                 case MONTHLY_DAY: {
                     MonthlyDaySchedule monthlyDaySchedule = (MonthlyDaySchedule) schedule;
 
-                    scheduleDatas.put(new CreateTaskLoader.ScheduleData.MonthlyDayScheduleData(monthlyDaySchedule.getDayOfMonth(), monthlyDaySchedule.getBeginningOfMonth(), monthlyDaySchedule.getTimePair()), Collections.singletonList(schedule));
+                    scheduleDatas.put(new CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData(monthlyDaySchedule.getDayOfMonth(), monthlyDaySchedule.getBeginningOfMonth(), monthlyDaySchedule.getTimePair()), Collections.singletonList(schedule));
 
                     CustomTimeKey customTimeKey = monthlyDaySchedule.getCustomTimeKey();
                     if (customTimeKey != null)
@@ -839,7 +839,7 @@ public class DomainFactory {
                 case MONTHLY_WEEK: {
                     MonthlyWeekSchedule monthlyWeekSchedule = (MonthlyWeekSchedule) schedule;
 
-                    scheduleDatas.put(new CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData(monthlyWeekSchedule.getDayOfMonth(), monthlyWeekSchedule.getDayOfWeek(), monthlyWeekSchedule.getBeginningOfMonth(), monthlyWeekSchedule.getTimePair()), Collections.singletonList(schedule));
+                    scheduleDatas.put(new CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData(monthlyWeekSchedule.getDayOfMonth(), monthlyWeekSchedule.getDayOfWeek(), monthlyWeekSchedule.getBeginningOfMonth(), monthlyWeekSchedule.getTimePair()), Collections.singletonList(schedule));
 
                     CustomTimeKey customTimeKey = monthlyWeekSchedule.getCustomTimeKey();
                     if (customTimeKey != null)
@@ -858,14 +858,14 @@ public class DomainFactory {
                     .map(WeeklySchedule::getDaysOfWeek)
                     .flatMap(Stream::of)
                     .collect(Collectors.toSet());
-            scheduleDatas.put(new CreateTaskLoader.ScheduleData.WeeklyScheduleData(daysOfWeek, entry.getKey()), new ArrayList<>(entry.getValue()));
+            scheduleDatas.put(new CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, entry.getKey()), new ArrayList<>(entry.getValue()));
         }
 
         return new kotlin.Pair<>(customTimes, scheduleDatas);
     }
 
     @NonNull
-    public synchronized CreateTaskLoader.DomainData getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @Nullable List<TaskKey> joinTaskKeys) {
+    public synchronized CreateTaskViewModel.Data getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @Nullable List<TaskKey> joinTaskKeys) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getCreateTaskData");
@@ -883,13 +883,13 @@ public class DomainFactory {
         else if (joinTaskKeys != null)
             excludedTaskKeys.addAll(joinTaskKeys);
 
-        CreateTaskLoader.TaskData taskData = null;
-        Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> parentTreeDatas;
+        CreateTaskViewModel.TaskData taskData = null;
+        Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> parentTreeDatas;
         if (taskKey != null) {
             Task task = getTaskForce(taskKey);
 
-            CreateTaskLoader.ParentKey.TaskParentKey taskParentKey;
-            List<CreateTaskLoader.ScheduleData> scheduleDatas = null;
+            CreateTaskViewModel.ParentKey.TaskParentKey taskParentKey;
+            List<CreateTaskViewModel.ScheduleData> scheduleDatas = null;
 
             if (task.isRootTask(now)) {
                 List<Schedule> schedules = task.getCurrentSchedules(now);
@@ -897,7 +897,7 @@ public class DomainFactory {
                 taskParentKey = null;
 
                 if (!schedules.isEmpty()) {
-                    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskLoader.ScheduleData, List<Schedule>>> pair = getScheduleDatas(schedules, now);
+                    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> pair = getScheduleDatas(schedules, now);
                     customTimes.putAll(pair.getFirst());
                     scheduleDatas = new ArrayList<>(pair.getSecond().keySet());
                 }
@@ -905,7 +905,7 @@ public class DomainFactory {
                 Task parentTask = task.getParentTask(now);
                 check(parentTask != null);
 
-                taskParentKey = new CreateTaskLoader.ParentKey.TaskParentKey(parentTask.getTaskKey());
+                taskParentKey = new CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.getTaskKey());
             }
 
             RemoteProject remoteProject = task.getRemoteNullableProject();
@@ -913,7 +913,7 @@ public class DomainFactory {
             if (remoteProject != null)
                 projectName = remoteProject.getName();
 
-            taskData = new CreateTaskLoader.TaskData(task.getName(), taskParentKey, scheduleDatas, task.getNote(), projectName);
+            taskData = new CreateTaskViewModel.TaskData(task.getName(), taskParentKey, scheduleDatas, task.getNote(), projectName);
 
             if (task instanceof RemoteTask) {
                 RemoteTask remoteTask = (RemoteTask) task;
@@ -949,11 +949,11 @@ public class DomainFactory {
             }
         }
 
-        @SuppressLint("UseSparseArrays") HashMap<CustomTimeKey, CreateTaskLoader.CustomTimeData> customTimeDatas = new HashMap<>();
+        @SuppressLint("UseSparseArrays") HashMap<CustomTimeKey, CreateTaskViewModel.CustomTimeData> customTimeDatas = new HashMap<>();
         for (CustomTime customTime : customTimes.values())
-            customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskLoader.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
+            customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskViewModel.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
 
-        return new CreateTaskLoader.DomainData(taskData, parentTreeDatas, customTimeDatas);
+        return new CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas);
     }
 
     @NonNull
@@ -1260,7 +1260,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         check(!TextUtils.isEmpty(name));
         check(!scheduleDatas.isEmpty());
 
@@ -1282,7 +1282,7 @@ public class DomainFactory {
         return task;
     }
 
-    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleRootTask");
         check(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1292,7 +1292,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         check(!TextUtils.isEmpty(name));
         check(!scheduleDatas.isEmpty());
 
@@ -1322,7 +1322,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateScheduleTask");
         check(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -1334,7 +1334,7 @@ public class DomainFactory {
         return updateScheduleTask(context, now, dataId, source, taskKey, name, scheduleDatas, note, projectId);
     }
 
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskLoader.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleJoinRootTask");
         check(mRemoteProjectFactory == null || !mRemoteProjectFactory.isSaved());
 
@@ -2122,36 +2122,30 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull Task parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
-        return Stream.of(parentTask.getChildTaskHierarchies(now))
-                .filterNot(taskHierarchy -> excludedTaskKeys.contains(taskHierarchy.getChildTaskKey()))
-                .collect(Collectors.toMap(taskHierarchy -> new CreateTaskLoader.ParentKey.TaskParentKey(taskHierarchy.getChildTaskKey()), taskHierarchy -> {
+    private Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull Task parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
+        return Stream.of(parentTask.getChildTaskHierarchies(now)).filterNot(taskHierarchy -> excludedTaskKeys.contains(taskHierarchy.getChildTaskKey())).collect(Collectors.toMap(taskHierarchy -> new CreateTaskViewModel.ParentKey.TaskParentKey(taskHierarchy.getChildTaskKey()), taskHierarchy -> {
                     Task childTask = taskHierarchy.getChildTask();
 
-                    return new CreateTaskLoader.ParentTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(childTask.getTaskKey()), childTask.getScheduleText(context, now), childTask.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(childTask.getStartExactTimeStamp()));
+            return new CreateTaskViewModel.ParentTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(childTask.getTaskKey()), childTask.getScheduleText(context, now), childTask.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(childTask.getStartExactTimeStamp()));
                 }));
     }
 
     @NonNull
-    private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getParentTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
-        Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> parentTreeDatas = new HashMap<>();
+    private Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> getParentTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
+        Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> parentTreeDatas = new HashMap<>();
 
         parentTreeDatas.putAll(Stream.of(mLocalFactory.getTasks())
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .filter(task -> task.current(now))
-                .filter(task -> task.isVisible(now))
-                .filter(task -> task.isRootTask(now))
-                .collect(Collectors.toMap(task -> new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(task.getStartExactTimeStamp())))));
+                .filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).collect(Collectors.toMap(task -> new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskViewModel.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(task.getStartExactTimeStamp())))));
 
         if (mRemoteProjectFactory != null) {
-            parentTreeDatas.putAll(Stream.of(mRemoteProjectFactory.getRemoteProjects().values())
-                    .filter(remoteProject -> remoteProject.current(now))
-                    .collect(Collectors.toMap(remoteProject -> new CreateTaskLoader.ParentKey.ProjectParentKey(remoteProject.getId()), remoteProject -> {
+            parentTreeDatas.putAll(Stream.of(mRemoteProjectFactory.getRemoteProjects().values()).filter(remoteProject -> remoteProject.current(now)).collect(Collectors.toMap(remoteProject -> new CreateTaskViewModel.ParentKey.ProjectParentKey(remoteProject.getId()), remoteProject -> {
                         String users = Stream.of(remoteProject.getUsers())
                                 .map(RemoteProjectUser::getName)
                                 .collect(Collectors.joining(", "));
 
-                        return new CreateTaskLoader.ParentTreeData(remoteProject.getName(), getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys), new CreateTaskLoader.ParentKey.ProjectParentKey(remoteProject.getId()), users, null, new CreateTaskLoader.SortKey.ProjectSortKey(remoteProject.getId()));
+                return new CreateTaskViewModel.ParentTreeData(remoteProject.getName(), getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys), new CreateTaskViewModel.ParentKey.ProjectParentKey(remoteProject.getId()), users, null, new CreateTaskViewModel.SortKey.ProjectSortKey(remoteProject.getId()));
                     })));
         }
 
@@ -2159,13 +2153,11 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData> getProjectTaskTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull RemoteProject remoteProject, @NonNull List<TaskKey> excludedTaskKeys) {
+    private Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> getProjectTaskTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull RemoteProject remoteProject, @NonNull List<TaskKey> excludedTaskKeys) {
         return Stream.of(remoteProject.getTasks())
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
                 .filter(task -> task.current(now))
-                .filter(task -> task.isVisible(now))
-                .filter(task -> task.isRootTask(now))
-                .collect(Collectors.toMap(task -> new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskLoader.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskLoader.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskLoader.SortKey.TaskSortKey(task.getStartExactTimeStamp()))));
+                .filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).collect(Collectors.toMap(task -> new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskViewModel.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(task.getStartExactTimeStamp()))));
     }
 
     @NonNull

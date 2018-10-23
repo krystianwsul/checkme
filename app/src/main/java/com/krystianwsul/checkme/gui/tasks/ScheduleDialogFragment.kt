@@ -20,12 +20,12 @@ import com.krystianwsul.checkme.gui.DatePickerDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
@@ -80,7 +80,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
     private lateinit var mButton: MDButton
 
-    private var mCustomTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>? = null
+    private var mCustomTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>? = null
     private var mScheduleDialogListener: ScheduleDialogListener? = null
 
     private lateinit var mScheduleDialogData: ScheduleDialogData
@@ -416,7 +416,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             updateFields()
     }
 
-    fun initialize(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, scheduleDialogListener: ScheduleDialogListener) {
+    fun initialize(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, scheduleDialogListener: ScheduleDialogListener) {
         mCustomTimeDatas = customTimeDatas
         mScheduleDialogListener = scheduleDialogListener
 

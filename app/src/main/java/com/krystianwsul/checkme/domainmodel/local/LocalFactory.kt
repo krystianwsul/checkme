@@ -3,11 +3,11 @@ package com.krystianwsul.checkme.domainmodel.local
 import android.annotation.SuppressLint
 import android.content.Context
 import com.krystianwsul.checkme.domainmodel.*
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.persistencemodel.*
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
 @SuppressLint("UseSparseArrays")
@@ -229,7 +229,7 @@ class LocalFactory {
         persistenceManager.deleteInstanceShownRecords(taskKeys)
     }
 
-    fun createScheduleRootTask(domainFactory: DomainFactory, now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskLoader.ScheduleData>, note: String?): LocalTask {
+    fun createScheduleRootTask(domainFactory: DomainFactory, now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?): LocalTask {
         check(name.isNotEmpty())
         check(!scheduleDatas.isEmpty())
 
@@ -256,14 +256,14 @@ class LocalFactory {
         return rootLocalTask
     }
 
-    fun createSchedules(domainFactory: DomainFactory, rootLocalTask: LocalTask, scheduleDatas: List<CreateTaskLoader.ScheduleData>, startExactTimeStamp: ExactTimeStamp): List<Schedule> {
+    fun createSchedules(domainFactory: DomainFactory, rootLocalTask: LocalTask, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, startExactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(!scheduleDatas.isEmpty())
         check(rootLocalTask.current(startExactTimeStamp))
 
         return scheduleDatas.map { scheduleData ->
             when (scheduleData.scheduleType) {
                 ScheduleType.SINGLE -> {
-                    val (date, timePair) = scheduleData as CreateTaskLoader.ScheduleData.SingleScheduleData
+                    val (date, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.SingleScheduleData
 
                     val time = domainFactory.getTime(timePair)
 
@@ -275,7 +275,7 @@ class LocalFactory {
                 }
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> {
-                    val (daysOfWeek, timePair) = scheduleData as CreateTaskLoader.ScheduleData.WeeklyScheduleData
+                    val (daysOfWeek, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.WeeklyScheduleData
 
                     val time = domainFactory.getTime(timePair)
 
@@ -288,7 +288,7 @@ class LocalFactory {
                     }
                 }
                 ScheduleType.MONTHLY_DAY -> {
-                    val (dayOfMonth, beginningOfMonth, timePair) = scheduleData as CreateTaskLoader.ScheduleData.MonthlyDayScheduleData
+                    val (dayOfMonth, beginningOfMonth, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData
 
                     val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp)
 
@@ -297,7 +297,7 @@ class LocalFactory {
                     listOf(MonthlyDaySchedule(domainFactory, LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)))
                 }
                 ScheduleType.MONTHLY_WEEK -> {
-                    val (dayOfMonth, dayOfWeek, beginningOfMonth, TimePair) = scheduleData as CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData
+                    val (dayOfMonth, dayOfWeek, beginningOfMonth, TimePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData
 
                     val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp)
 

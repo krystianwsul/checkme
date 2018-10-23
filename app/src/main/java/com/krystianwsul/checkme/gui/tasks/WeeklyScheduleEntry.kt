@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.tasks
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
@@ -12,6 +11,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
 class WeeklyScheduleEntry : ScheduleEntry {
@@ -37,7 +37,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
     private val daysOfWeek: Set<DayOfWeek>
     private val timePair: TimePair
 
-    constructor(weeklyScheduleData: CreateTaskLoader.ScheduleData.WeeklyScheduleData) {
+    constructor(weeklyScheduleData: CreateTaskViewModel.ScheduleData.WeeklyScheduleData) {
         daysOfWeek = weeklyScheduleData.daysOfWeek
         timePair = weeklyScheduleData.timePair.copy()
     }
@@ -54,7 +54,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
         timePair = scheduleDialogData.timePairPersist.timePair
     }
 
-    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
+    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
             check(timePair.hourMinute == null)
 
@@ -66,7 +66,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
         }
     }
 
-    override val scheduleData get() = CreateTaskLoader.ScheduleData.WeeklyScheduleData(daysOfWeek, timePair)
+    override val scheduleData get() = CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, timePair)
 
     override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.ScheduleHint?): ScheduleDialogFragment.ScheduleDialogData {
         val date = scheduleHint?.date ?: today

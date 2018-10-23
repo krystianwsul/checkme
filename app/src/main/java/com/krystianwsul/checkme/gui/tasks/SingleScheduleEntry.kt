@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.tasks
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
@@ -11,6 +10,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
 class SingleScheduleEntry : ScheduleEntry {
@@ -39,7 +39,7 @@ class SingleScheduleEntry : ScheduleEntry {
     val mDate: Date
     val mTimePair: TimePair
 
-    constructor(singleScheduleData: CreateTaskLoader.ScheduleData.SingleScheduleData) {
+    constructor(singleScheduleData: CreateTaskViewModel.ScheduleData.SingleScheduleData) {
         mDate = singleScheduleData.date
         mTimePair = singleScheduleData.timePair.copy()
     }
@@ -77,7 +77,7 @@ class SingleScheduleEntry : ScheduleEntry {
         mTimePair = scheduleDialogData.timePairPersist.timePair
     }
 
-    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
+    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return mDate.getDisplayText(context) + ", " + if (mTimePair.customTimeKey != null) {
             check(mTimePair.hourMinute == null)
 
@@ -92,7 +92,7 @@ class SingleScheduleEntry : ScheduleEntry {
         }
     }
 
-    override val scheduleData get() = CreateTaskLoader.ScheduleData.SingleScheduleData(mDate, mTimePair)
+    override val scheduleData get() = CreateTaskViewModel.ScheduleData.SingleScheduleData(mDate, mTimePair)
 
     override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.ScheduleHint?): ScheduleDialogFragment.ScheduleDialogData {
         var monthDayNumber = mDate.day

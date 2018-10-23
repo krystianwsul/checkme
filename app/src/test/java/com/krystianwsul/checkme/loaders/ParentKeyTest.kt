@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.loaders
 
 import android.text.TextUtils
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
@@ -29,8 +30,8 @@ class ParentKeyTest {
     fun testEquals() {
         val projectId = "asdf"
 
-        val parentKey1 = CreateTaskLoader.ParentKey.ProjectParentKey(projectId)
-        val parentKey2 = CreateTaskLoader.ParentKey.ProjectParentKey(projectId)
+        val parentKey1 = CreateTaskViewModel.ParentKey.ProjectParentKey(projectId)
+        val parentKey2 = CreateTaskViewModel.ParentKey.ProjectParentKey(projectId)
 
         Assert.assertTrue(parentKey1 == parentKey2)
     }

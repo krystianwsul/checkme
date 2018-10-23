@@ -9,12 +9,12 @@ import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import com.krystianwsul.checkme.firebase.json.ProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemoteProjectManager
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 import java.util.*
 
@@ -59,7 +59,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
                 .map { it.tasks.size }
                 .sum()
 
-    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskLoader.ScheduleData>, note: String?, projectId: String) = createRemoteTaskHelper(now, name, note, projectId).apply {
+    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String) = createRemoteTaskHelper(now, name, note, projectId).apply {
         createSchedules(now, scheduleDatas)
     }
 

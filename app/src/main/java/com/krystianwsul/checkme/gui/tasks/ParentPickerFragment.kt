@@ -16,7 +16,7 @@ import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.treeadapter.*
 
 import kotlinx.android.synthetic.main.row_task_list.view.*
@@ -39,11 +39,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private lateinit var recyclerView: RecyclerView
 
-    private var taskDatas: Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData>? = null
+    private var taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>? = null
     lateinit var listener: Listener
 
     private var treeViewAdapter: TreeViewAdapter? = null
-    private var expandedParentKeys: List<CreateTaskLoader.ParentKey>? = null
+    private var expandedParentKeys: List<CreateTaskViewModel.ParentKey>? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         if (savedInstanceState != null) {
@@ -72,7 +72,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         return materialDialog
     }
 
-    fun initialize(taskDatas: Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData>, listener: Listener) {
+    fun initialize(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, listener: Listener) {
         this.taskDatas = taskDatas
         this.listener = listener
         if (activity != null)
@@ -118,7 +118,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         companion object {
 
-            fun getAdapter(parentPickerFragment: ParentPickerFragment, taskDatas: Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData>, expandedParentKeys: List<CreateTaskLoader.ParentKey>?): TreeViewAdapter {
+            fun getAdapter(parentPickerFragment: ParentPickerFragment, taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, expandedParentKeys: List<CreateTaskViewModel.ParentKey>?): TreeViewAdapter {
                 val taskAdapter = TaskAdapter(parentPickerFragment)
 
                 val density = parentPickerFragment.resources.displayMetrics.density
@@ -135,7 +135,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         val expandedParentKeys get() = taskWrappers.flatMap { it.expandedParentKeys }
 
-        private fun initialize(density: Float, taskDatas: Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData>, expandedParentKeys: List<CreateTaskLoader.ParentKey>?): TreeViewAdapter {
+        private fun initialize(density: Float, taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, expandedParentKeys: List<CreateTaskViewModel.ParentKey>?): TreeViewAdapter {
             treeViewAdapter = TreeViewAdapter(this)
 
             val treeNodeCollection = TreeNodeCollection(treeViewAdapter)
@@ -180,7 +180,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override fun decrementSelected() = throw UnsupportedOperationException()
 
-        private class TaskWrapper(private val density: Float, private val indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskLoader.ParentTreeData) : ModelNode, TaskParent {
+        private class TaskWrapper(private val density: Float, private val indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : ModelNode, TaskParent {
 
             lateinit var treeNode: TreeNode
                 private set
@@ -201,9 +201,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val isSeparatorVisibleWhenNotExpanded = false
 
-            val expandedParentKeys: List<CreateTaskLoader.ParentKey>
+            val expandedParentKeys: List<CreateTaskViewModel.ParentKey>
                 get() {
-                    val expandedParentKeys = ArrayList<CreateTaskLoader.ParentKey>()
+                    val expandedParentKeys = ArrayList<CreateTaskViewModel.ParentKey>()
 
                     val treeNode = this.treeNode
 
@@ -216,7 +216,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     return expandedParentKeys
                 }
 
-            fun initialize(nodeContainer: NodeContainer, expandedParentKeys: List<CreateTaskLoader.ParentKey>?): TreeNode {
+            fun initialize(nodeContainer: NodeContainer, expandedParentKeys: List<CreateTaskViewModel.ParentKey>?): TreeNode {
                 var expanded = false
                 if (expandedParentKeys != null) {
                     check(!expandedParentKeys.isEmpty())
@@ -336,7 +336,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     interface Listener {
-        fun onTaskSelected(parentTreeData: CreateTaskLoader.ParentTreeData)
+        fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData)
 
         fun onTaskDeleted()
     }

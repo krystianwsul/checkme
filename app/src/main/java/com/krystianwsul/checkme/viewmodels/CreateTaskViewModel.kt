@@ -1,9 +1,10 @@
-package com.krystianwsul.checkme.loaders
+package com.krystianwsul.checkme.viewmodels
 
-import android.content.Context
 import android.os.Parcelable
 import android.text.TextUtils
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.loaders.FirebaseLevel
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
@@ -12,20 +13,25 @@ import com.krystianwsul.checkme.utils.time.Date
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
-class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private val joinTaskKeys: List<TaskKey>?) : DomainLoader<CreateTaskLoader.DomainData>(context, needsFirebase(taskKey)) {
+class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
-    companion object {
+    private var taskKey: TaskKey? = null
+    private var joinTaskKeys: List<TaskKey>? = null
 
-        private fun needsFirebase(taskKey: TaskKey?) = if (taskKey?.type == TaskKey.Type.REMOTE) {
+    fun start(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?) {
+        this.taskKey = taskKey
+        this.joinTaskKeys = joinTaskKeys
+
+        val firebaseLevel = if (taskKey?.type == TaskKey.Type.REMOTE) {
             FirebaseLevel.NEED
         } else {
             FirebaseLevel.WANT
         }
+
+        internalStart(firebaseLevel)
     }
 
-    override val name = "CreateTaskLoader, taskKey: $taskKey, excludedTaskKeys: $joinTaskKeys"
-
-    public override fun loadDomain(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(taskKey, context, joinTaskKeys)
+    override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(taskKey, MyApplication.instance, joinTaskKeys)
 
     sealed class ScheduleData {
 
@@ -41,24 +47,48 @@ class CreateTaskLoader(context: Context, private val taskKey: TaskKey?, private 
             override val scheduleType = ScheduleType.WEEKLY
         }
 
-        data class MonthlyDayScheduleData(val dayOfMonth: Int, val beginningOfMonth: Boolean, val timePair: TimePair) : ScheduleData() {
+        data class MonthlyDayScheduleData(
+                val dayOfMonth: Int,
+                val beginningOfMonth: Boolean,
+                val timePair: TimePair) : ScheduleData() {
 
             override val scheduleType = ScheduleType.MONTHLY_DAY
         }
 
-        data class MonthlyWeekScheduleData(val dayOfMonth: Int, val dayOfWeek: DayOfWeek, val beginningOfMonth: Boolean, val TimePair: TimePair) : ScheduleData() {
+        data class MonthlyWeekScheduleData(
+                val dayOfMonth: Int,
+                val dayOfWeek: DayOfWeek,
+                val beginningOfMonth: Boolean,
+                val TimePair: TimePair) : ScheduleData() {
 
             override val scheduleType = ScheduleType.MONTHLY_WEEK
         }
     }
 
-    data class DomainData(val taskData: TaskData?, val parentTreeDatas: Map<ParentKey, ParentTreeData>, val customTimeDatas: Map<CustomTimeKey, CustomTimeData>) : com.krystianwsul.checkme.viewmodels.DomainData()
+    data class Data(
+            val taskData: TaskData?,
+            val parentTreeDatas: Map<ParentKey, ParentTreeData>,
+            val customTimeDatas: Map<CustomTimeKey, CustomTimeData>) : DomainData()
 
-    data class CustomTimeData(val customTimeKey: CustomTimeKey, val name: String, val hourMinutes: TreeMap<DayOfWeek, HourMinute>)
+    data class CustomTimeData(
+            val customTimeKey: CustomTimeKey,
+            val name: String,
+            val hourMinutes: TreeMap<DayOfWeek, HourMinute>)
 
-    data class TaskData(val name: String, val taskParentKey: ParentKey.TaskParentKey?, val scheduleDatas: List<ScheduleData>?, val note: String?, val projectName: String?)
+    data class TaskData(
+            val name: String,
+            val taskParentKey: ParentKey.TaskParentKey?,
+            val scheduleDatas: List<ScheduleData>?,
+            val note: String?,
+            val projectName: String?)
 
-    data class ParentTreeData(val name: String, val parentTreeDatas: Map<ParentKey, ParentTreeData>, val parentKey: ParentKey, val scheduleText: String?, val note: String?, val sortKey: SortKey)
+    data class ParentTreeData(
+            val name: String,
+            val parentTreeDatas: Map<ParentKey, ParentTreeData>,
+            val parentKey: ParentKey,
+            val scheduleText: String?,
+            val note: String?,
+            val sortKey: SortKey)
 
     sealed class ParentKey : Parcelable {
 

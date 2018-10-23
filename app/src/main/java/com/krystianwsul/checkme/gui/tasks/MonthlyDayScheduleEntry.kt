@@ -5,14 +5,13 @@ import android.os.Parcel
 import android.os.Parcelable
 
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
-
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
 class MonthlyDayScheduleEntry : ScheduleEntry {
@@ -44,12 +43,12 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
 
     private val timePair: TimePair
 
-    override val scheduleData: CreateTaskLoader.ScheduleData
-        get() = CreateTaskLoader.ScheduleData.MonthlyDayScheduleData(monthDayNumber, beginningOfMonth, timePair)
+    override val scheduleData: CreateTaskViewModel.ScheduleData
+        get() = CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData(monthDayNumber, beginningOfMonth, timePair)
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
-    constructor(monthlyDayScheduleData: CreateTaskLoader.ScheduleData.MonthlyDayScheduleData) {
+    constructor(monthlyDayScheduleData: CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData) {
         monthDayNumber = monthlyDayScheduleData.dayOfMonth
         beginningOfMonth = monthlyDayScheduleData.beginningOfMonth
         timePair = monthlyDayScheduleData.timePair.copy()
@@ -70,7 +69,7 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
         timePair = scheduleDialogData.timePairPersist.timePair
     }
 
-    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
+    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         val day = Utils.ordinal(monthDayNumber) + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day, " + if (timePair.customTimeKey != null) {

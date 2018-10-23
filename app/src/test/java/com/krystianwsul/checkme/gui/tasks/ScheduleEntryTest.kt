@@ -3,12 +3,12 @@ package com.krystianwsul.checkme.gui.tasks
 import android.content.Context
 import android.text.TextUtils
 import android.util.Log
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import junit.framework.Assert
 import org.junit.Before
 import org.junit.Test
@@ -167,7 +167,7 @@ class ScheduleEntryTest {
     fun testSingle_record_2016_9_30_noon() {
         val scheduleDate = Date(2016, 9, 30) // last friday of the month
         val hourMinute = HourMinute(12, 0)
-        val scheduleEntry = SingleScheduleEntry(CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
+        val scheduleEntry = SingleScheduleEntry(CreateTaskViewModel.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null)
 
@@ -187,7 +187,7 @@ class ScheduleEntryTest {
     fun testSingle_record_2016_9_1_noon() {
         val scheduleDate = Date(2016, 9, 1) // first thursday of the month
         val hourMinute = HourMinute(12, 0)
-        val scheduleEntry = SingleScheduleEntry(CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
+        val scheduleEntry = SingleScheduleEntry(CreateTaskViewModel.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null)
 
@@ -207,7 +207,7 @@ class ScheduleEntryTest {
     fun testSingle_record_2016_9_7_noon() {
         val scheduleDate = Date(2016, 9, 7) // first wednesday of the month
         val hourMinute = HourMinute(12, 0)
-        val scheduleEntry = SingleScheduleEntry(CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
+        val scheduleEntry = SingleScheduleEntry(CreateTaskViewModel.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null)
 
@@ -227,7 +227,7 @@ class ScheduleEntryTest {
     fun testSingle_record_2016_9_8_noon() {
         val scheduleDate = Date(2016, 9, 8) // second thursday of the month
         val hourMinute = HourMinute(12, 0)
-        val scheduleEntry = SingleScheduleEntry(CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
+        val scheduleEntry = SingleScheduleEntry(CreateTaskViewModel.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null)
 
@@ -247,7 +247,7 @@ class ScheduleEntryTest {
     fun testSingle_record_2016_9_28_noon() {
         val scheduleDate = Date(2016, 9, 28) // fourth wednesday of the month
         val hourMinute = HourMinute(12, 0)
-        val scheduleEntry = SingleScheduleEntry(CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
+        val scheduleEntry = SingleScheduleEntry(CreateTaskViewModel.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null)
 
@@ -267,7 +267,7 @@ class ScheduleEntryTest {
     fun testSingle_record_2016_9_29_noon() {
         val scheduleDate = Date(2016, 9, 29) // last thursday of the month
         val hourMinute = HourMinute(12, 0)
-        val scheduleEntry = SingleScheduleEntry(CreateTaskLoader.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
+        val scheduleEntry = SingleScheduleEntry(CreateTaskViewModel.ScheduleData.SingleScheduleData(scheduleDate, TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(Date.today(), null)
 
@@ -290,7 +290,7 @@ class ScheduleEntryTest {
         val today = Date(2016, 9, 30) // last friday of the month
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -311,7 +311,7 @@ class ScheduleEntryTest {
         val today = Date(2016, 9, 1) // first thursday of the month
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -332,7 +332,7 @@ class ScheduleEntryTest {
         val today = Date(2016, 9, 7) // first wednesday of the month
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -353,7 +353,7 @@ class ScheduleEntryTest {
         val today = Date(2016, 9, 8) // second thursday of the month
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -374,7 +374,7 @@ class ScheduleEntryTest {
         val today = Date(2016, 9, 28) // fourth wednesday of the month
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -395,7 +395,7 @@ class ScheduleEntryTest {
         val today = Date(2016, 9, 29) // last thursday of the month
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(HashSet(Arrays.asList(*DayOfWeek.values())), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -419,7 +419,7 @@ class ScheduleEntryTest {
         val dayOfWeek = DayOfWeek.FRIDAY
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -441,7 +441,7 @@ class ScheduleEntryTest {
         val dayOfWeek = DayOfWeek.FRIDAY
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -463,7 +463,7 @@ class ScheduleEntryTest {
         val dayOfWeek = DayOfWeek.THURSDAY
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -485,7 +485,7 @@ class ScheduleEntryTest {
         val dayOfWeek = DayOfWeek.SATURDAY
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -507,7 +507,7 @@ class ScheduleEntryTest {
         val dayOfWeek = DayOfWeek.SUNDAY
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 
@@ -529,7 +529,7 @@ class ScheduleEntryTest {
         val dayOfWeek = DayOfWeek.MONDAY
         val hourMinute = HourMinute(12, 0)
         val scheduleHint = CreateTaskActivity.ScheduleHint(today)
-        val scheduleEntry = WeeklyScheduleEntry(CreateTaskLoader.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
+        val scheduleEntry = WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.WeeklyScheduleData(setOf(dayOfWeek), TimePair(hourMinute)))
 
         val scheduleDialogData = scheduleEntry.getScheduleDialogData(today, scheduleHint)
 

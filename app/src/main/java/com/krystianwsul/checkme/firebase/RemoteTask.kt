@@ -6,13 +6,13 @@ import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 import java.util.*
 
@@ -123,7 +123,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
         remoteTaskRecord.note = note
     }
 
-    override fun addSchedules(scheduleDatas: List<CreateTaskLoader.ScheduleData>, now: ExactTimeStamp) = createSchedules(now, scheduleDatas)
+    override fun addSchedules(scheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) = createSchedules(now, scheduleDatas)
 
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is RemoteTask)
@@ -160,11 +160,11 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
     fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = existingRemoteInstances[scheduleKey]
 
-    fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<CreateTaskLoader.ScheduleData>) {
+    fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<CreateTaskViewModel.ScheduleData>) {
         for (scheduleData in scheduleDatas) {
             when (scheduleData.scheduleType) {
                 ScheduleType.SINGLE -> {
-                    val (date, timePair) = scheduleData as CreateTaskLoader.ScheduleData.SingleScheduleData
+                    val (date, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.SingleScheduleData
 
                     val remoteCustomTimeId: String?
                     val hour: Int?
@@ -189,7 +189,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                 }
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> {
-                    val (daysOfWeek, timePair) = scheduleData as CreateTaskLoader.ScheduleData.WeeklyScheduleData
+                    val (daysOfWeek, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.WeeklyScheduleData
 
                     val remoteCustomTimeId: String?
                     val hour: Int?
@@ -215,7 +215,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     }
                 }
                 ScheduleType.MONTHLY_DAY -> {
-                    val (dayOfMonth, beginningOfMonth, timePair) = scheduleData as CreateTaskLoader.ScheduleData.MonthlyDayScheduleData
+                    val (dayOfMonth, beginningOfMonth, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData
 
                     val remoteCustomTimeId: String?
                     val hour: Int?
@@ -239,7 +239,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     remoteSchedules.add(MonthlyDaySchedule(domainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)))
                 }
                 ScheduleType.MONTHLY_WEEK -> {
-                    val (dayOfMonth, dayOfWeek, beginningOfMonth, TimePair) = scheduleData as CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData
+                    val (dayOfMonth, dayOfWeek, beginningOfMonth, TimePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData
 
                     val remoteCustomTimeId: String?
                     val hour: Int?

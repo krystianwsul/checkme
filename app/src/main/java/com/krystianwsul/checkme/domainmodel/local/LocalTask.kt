@@ -4,12 +4,12 @@ import android.content.Context
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.persistencemodel.TaskRecord
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 import java.util.*
 
@@ -83,7 +83,7 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
 
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?) = domainFactory.localFactory.createChildTask(domainFactory, now, this, name, note)
 
-    override fun addSchedules(scheduleDatas: List<CreateTaskLoader.ScheduleData>, now: ExactTimeStamp) {
+    override fun addSchedules(scheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) {
         check(!scheduleDatas.isEmpty())
 
         val schedules = domainFactory.localFactory.createSchedules(domainFactory, this, scheduleDatas, now)

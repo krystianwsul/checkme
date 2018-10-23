@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.Editable
@@ -19,7 +17,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
@@ -29,6 +26,9 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_create_task.*
 import kotlinx.android.synthetic.main.row_note.view.*
@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
 
 @Suppress("CascadeIf")
-class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<CreateTaskLoader.DomainData> {
+class CreateTaskActivity : AbstractActivity() {
 
     companion object {
 
@@ -99,9 +99,9 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
     private var mParentTaskKeyHint: TaskKey? = null
     private var mNameHint: String? = null
 
-    private var mData: CreateTaskLoader.DomainData? = null
+    private var mData: CreateTaskViewModel.Data? = null
 
-    private var mParent: CreateTaskLoader.ParentTreeData? = null
+    private var mParent: CreateTaskViewModel.ParentTreeData? = null
 
     private lateinit var mCreateTaskAdapter: CreateTaskAdapter
 
@@ -112,8 +112,8 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
     private var mFirst = true
 
     private val mParentFragmentListener = object : ParentPickerFragment.Listener {
-        override fun onTaskSelected(parentTreeData: CreateTaskLoader.ParentTreeData) {
-            if (parentTreeData.parentKey.type == CreateTaskLoader.ParentType.TASK)
+        override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
+            if (parentTreeData.parentKey.type == CreateTaskViewModel.ParentType.TASK)
                 clearSchedules()
 
             mParent = parentTreeData
@@ -206,6 +206,8 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
     private val scheduleDatas get() = mScheduleEntries.map { it.scheduleData }.apply { check(!isEmpty()) }
 
+    private lateinit var createTaskViewModel: CreateTaskViewModel
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true
@@ -230,13 +232,12 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                     val name = toolbarEditText.text.toString().trim { it <= ' ' }
                     check(!TextUtils.isEmpty(name))
 
-                    @Suppress("DEPRECATION")
-                    supportLoaderManager.destroyLoader(0)
+                    createTaskViewModel.stop()
 
                     if (hasValueSchedule()) {
                         check(!hasValueParentTask())
 
-                        val projectId = if (hasValueParentInGeneral()) (mParent!!.parentKey as CreateTaskLoader.ParentKey.ProjectParentKey).projectId else null
+                        val projectId = if (hasValueParentInGeneral()) (mParent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
 
                         if (mTaskKey != null) {
                             checkNotNull(mData!!.taskData)
@@ -264,7 +265,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                     } else if (hasValueParentTask()) {
                         checkNotNull(mParent)
 
-                        val parentTaskKey = (mParent!!.parentKey as CreateTaskLoader.ParentKey.TaskParentKey).taskKey
+                        val parentTaskKey = (mParent!!.parentKey as CreateTaskViewModel.ParentKey.TaskParentKey).taskKey
 
                         if (mTaskKey != null) {
                             checkNotNull(mData!!.taskData)
@@ -290,7 +291,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                             finish()
                         }
                     } else {  // no reminder
-                        val projectId = if (hasValueParentInGeneral()) (mParent!!.parentKey as CreateTaskLoader.ParentKey.ProjectParentKey).projectId else null
+                        val projectId = if (hasValueParentInGeneral()) (mParent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
 
                         if (mTaskKey != null) {
                             checkNotNull(mData!!.taskData)
@@ -381,8 +382,11 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         if (!mNoteHasFocus)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader<CreateTaskLoader.DomainData>(0, null, this)
+        createTaskViewModel = getViewModel<CreateTaskViewModel>().apply {
+            start(mTaskKey, mTaskKeys)
+
+            createDisposable += data.subscribe { onLoadFinished(it.value!!) }
+        }
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
@@ -410,9 +414,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = CreateTaskLoader(this, mTaskKey, mTaskKeys)
-
-    override fun onLoadFinished(loader: Loader<CreateTaskLoader.DomainData>, data: CreateTaskLoader.DomainData) {
+    private fun onLoadFinished(data: CreateTaskViewModel.Data) {
         mData = data
 
         toolbarLayout.run {
@@ -458,7 +460,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         if (mSavedInstanceState?.containsKey(SCHEDULE_ENTRIES_KEY) == true) {
             mSavedInstanceState!!.run {
                 if (containsKey(PARENT_KEY_KEY)) {
-                    val parentKey = getParcelable<CreateTaskLoader.ParentKey>(PARENT_KEY_KEY)!!
+                    val parentKey = getParcelable<CreateTaskViewModel.ParentKey>(PARENT_KEY_KEY)!!
 
                     mParent = findTaskData(parentKey)
                 }
@@ -483,7 +485,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                 } else if (mParentTaskKeyHint != null) {
                     check(mTaskKey == null)
 
-                    mParent = findTaskData(CreateTaskLoader.ParentKey.TaskParentKey(mParentTaskKeyHint!!))
+                    mParent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(mParentTaskKeyHint!!))
                 }
 
                 taskData?.let { mNote = it.note }
@@ -505,12 +507,13 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                         check(!taskData.scheduleDatas.isEmpty())
 
                         mScheduleEntries = taskData.scheduleDatas
+                                .asSequence()
                                 .map { scheduleData ->
                                     when (scheduleData) {
-                                        is CreateTaskLoader.ScheduleData.SingleScheduleData -> SingleScheduleEntry(scheduleData)
-                                        is CreateTaskLoader.ScheduleData.WeeklyScheduleData -> WeeklyScheduleEntry(scheduleData)
-                                        is CreateTaskLoader.ScheduleData.MonthlyDayScheduleData -> MonthlyDayScheduleEntry(scheduleData)
-                                        is CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData -> MonthlyWeekScheduleEntry(scheduleData)
+                                        is CreateTaskViewModel.ScheduleData.SingleScheduleData -> SingleScheduleEntry(scheduleData)
+                                        is CreateTaskViewModel.ScheduleData.WeeklyScheduleData -> WeeklyScheduleEntry(scheduleData)
+                                        is CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData -> MonthlyDayScheduleEntry(scheduleData)
+                                        is CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData -> MonthlyWeekScheduleEntry(scheduleData)
                                     }
                                 }
                                 .toMutableList()
@@ -537,8 +540,6 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
         check(!hasValueParentTask() || !hasValueSchedule())
     }
-
-    override fun onLoaderReset(loader: Loader<CreateTaskLoader.DomainData>) = Unit
 
     override fun onBackPressed() {
         if (tryClose())
@@ -669,7 +670,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
                 if (!hasValueParentTask())
                     return true
 
-                return mParent == null || mParent!!.parentKey != CreateTaskLoader.ParentKey.TaskParentKey(mParentTaskKeyHint!!)
+                return mParent == null || mParent!!.parentKey != CreateTaskViewModel.ParentKey.TaskParentKey(mParentTaskKeyHint!!)
             } else {
                 if (!hasValueSchedule())
                     return true
@@ -679,13 +680,13 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         }
     }
 
-    private fun findTaskData(parentKey: CreateTaskLoader.ParentKey): CreateTaskLoader.ParentTreeData {
+    private fun findTaskData(parentKey: CreateTaskViewModel.ParentKey): CreateTaskViewModel.ParentTreeData {
         checkNotNull(mData)
 
         return findTaskDataHelper(mData!!.parentTreeDatas, parentKey).single()
     }
 
-    private fun findTaskDataHelper(taskDatas: Map<CreateTaskLoader.ParentKey, CreateTaskLoader.ParentTreeData>, parentKey: CreateTaskLoader.ParentKey): Iterable<CreateTaskLoader.ParentTreeData> {
+    private fun findTaskDataHelper(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, parentKey: CreateTaskViewModel.ParentKey): Iterable<CreateTaskViewModel.ParentTreeData> {
         if (taskDatas.containsKey(parentKey))
             return listOf(taskDatas[parentKey]!!)
 
@@ -695,7 +696,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
     }
 
     private fun clearParent() {
-        if (mParent == null || mParent!!.parentKey.type == CreateTaskLoader.ParentType.PROJECT)
+        if (mParent == null || mParent!!.parentKey.type == CreateTaskViewModel.ParentType.PROJECT)
             return
 
         mParent = null
@@ -713,7 +714,7 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
 
     private fun hasValueParentInGeneral() = mParent != null
 
-    private fun hasValueParentTask() = mParent?.parentKey?.type == CreateTaskLoader.ParentType.TASK
+    private fun hasValueParentTask() = mParent?.parentKey?.type == CreateTaskViewModel.ParentType.TASK
 
     private fun hasValueSchedule() = !mScheduleEntries.isEmpty()
 
@@ -723,13 +724,13 @@ class CreateTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Cre
         if (mData == null)
             return false
 
-        val oldScheduleDatas = HashMultiset.create<CreateTaskLoader.ScheduleData>(if (mData!!.taskData != null) {
+        val oldScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(if (mData!!.taskData != null) {
             mData!!.taskData!!.scheduleDatas ?: listOf()
         } else {
             listOf(firstScheduleEntry().scheduleData)
         })
 
-        val newScheduleDatas = HashMultiset.create<CreateTaskLoader.ScheduleData>(mScheduleEntries.map { it.scheduleData })
+        val newScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(mScheduleEntries.map { it.scheduleData })
 
         return oldScheduleDatas != newScheduleDatas
     }

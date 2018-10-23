@@ -4,12 +4,12 @@ import android.content.Context
 import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMilli
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
 abstract class Task(protected val domainFactory: DomainFactory) {
@@ -230,7 +230,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     abstract fun setName(name: String, note: String?)
 
-    protected fun updateSchedules(newScheduleDatas: List<CreateTaskLoader.ScheduleData>, now: ExactTimeStamp) {
+    protected fun updateSchedules(newScheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) {
         val removeSchedules = ArrayList<Schedule>()
         val addScheduleDatas = ArrayList(newScheduleDatas)
 
@@ -250,7 +250,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
             addSchedules(addScheduleDatas, now)
     }
 
-    protected abstract fun addSchedules(scheduleDatas: List<CreateTaskLoader.ScheduleData>, now: ExactTimeStamp)
+    protected abstract fun addSchedules(scheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp)
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp)
 

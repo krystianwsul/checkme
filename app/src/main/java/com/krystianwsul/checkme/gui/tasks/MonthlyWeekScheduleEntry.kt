@@ -5,7 +5,6 @@ import android.os.Parcel
 import android.os.Parcelable
 
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
@@ -13,7 +12,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
-
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
 class MonthlyWeekScheduleEntry : ScheduleEntry {
@@ -49,12 +48,12 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
 
     private val timePair: TimePair
 
-    override val scheduleData: CreateTaskLoader.ScheduleData
-        get() = CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData(monthWeekNumber, monthWeekDay, beginningOfMonth, timePair)
+    override val scheduleData: CreateTaskViewModel.ScheduleData
+        get() = CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData(monthWeekNumber, monthWeekDay, beginningOfMonth, timePair)
 
     override val scheduleType = ScheduleType.MONTHLY_WEEK
 
-    constructor(monthlyWeekScheduleData: CreateTaskLoader.ScheduleData.MonthlyWeekScheduleData) {
+    constructor(monthlyWeekScheduleData: CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData) {
         monthWeekNumber = monthlyWeekScheduleData.dayOfMonth
         monthWeekDay = monthlyWeekScheduleData.dayOfWeek
         beginningOfMonth = monthlyWeekScheduleData.beginningOfMonth
@@ -78,7 +77,7 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
         timePair = scheduleDialogData.timePairPersist.timePair
     }
 
-    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskLoader.CustomTimeData>, context: Context): String {
+    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         val day = Utils.ordinal(monthWeekNumber) + " " + monthWeekDay + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day, " + if (timePair.customTimeKey != null) {

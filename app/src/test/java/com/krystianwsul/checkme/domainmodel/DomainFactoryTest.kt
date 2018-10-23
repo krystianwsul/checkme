@@ -8,11 +8,11 @@ import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Log
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.loaders.CreateTaskLoader
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
@@ -119,7 +119,7 @@ class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getMainData(startExactTimeStamp, mContext!!).childTaskDatas.isEmpty())
 
-        val rootTask = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, SaveService.Source.GUI, "root task", listOf(CreateTaskLoader.ScheduleData.SingleScheduleData(startDate, TimePair(scheduleHourMinute))), null, null)
+        val rootTask = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, SaveService.Source.GUI, "root task", listOf(CreateTaskViewModel.ScheduleData.SingleScheduleData(startDate, TimePair(scheduleHourMinute))), null, null)
 
         Assert.assertTrue(rootTask.isVisible(startExactTimeStamp))
 
@@ -183,7 +183,7 @@ class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getMainData(startExactTimeStamp, mContext!!).childTaskDatas.isEmpty())
 
-        val rootTask = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, SaveService.Source.GUI, "root task", listOf(CreateTaskLoader.ScheduleData.SingleScheduleData(startDate, TimePair(scheduleHourMinute))), null, null)
+        val rootTask = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, SaveService.Source.GUI, "root task", listOf(CreateTaskViewModel.ScheduleData.SingleScheduleData(startDate, TimePair(scheduleHourMinute))), null, null)
 
         Assert.assertTrue(rootTask.isVisible(startExactTimeStamp))
 
@@ -284,7 +284,7 @@ class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getMainData(startExactTimeStamp, mContext!!).childTaskDatas.isEmpty())
 
-        val singleTask = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, SaveService.Source.GUI, "single", listOf(CreateTaskLoader.ScheduleData.SingleScheduleData(Date(2016, 1, 1), TimePair(HourMinute(2, 0)))), null, null)
+        val singleTask = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, SaveService.Source.GUI, "single", listOf(CreateTaskViewModel.ScheduleData.SingleScheduleData(Date(2016, 1, 1), TimePair(HourMinute(2, 0)))), null, null)
 
         Assert.assertTrue(domainFactory.getMainData(startExactTimeStamp, mContext).childTaskDatas.size == 1)
 
@@ -333,7 +333,7 @@ class DomainFactoryTest {
 
         val singleTimePair = TimePair(HourMinute(2, 0))
 
-        val singleData = CreateTaskLoader.ScheduleData.SingleScheduleData(startDate, singleTimePair)
+        val singleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(startDate, singleTimePair)
 
         val singleTask1 = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, SaveService.Source.GUI, "singleTask1", listOf(singleData), null, null)
         val singleTask2 = domainFactory.createScheduleRootTask(mContext, startExactTimeStamp, 0, SaveService.Source.GUI, "singleTask2", listOf(singleData), null, null)
@@ -348,7 +348,7 @@ class DomainFactoryTest {
 
         val joinExactTimeStamp = ExactTimeStamp(startDate, HourMilli(4, 0, 0, 0))
 
-        val joinData = CreateTaskLoader.ScheduleData.SingleScheduleData(startDate, TimePair(HourMinute(5, 0)))
+        val joinData = CreateTaskViewModel.ScheduleData.SingleScheduleData(startDate, TimePair(HourMinute(5, 0)))
 
         val joinTaskKeys = Arrays.asList(singleTask1.taskKey, singleTask2.taskKey)
 
@@ -417,7 +417,7 @@ class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext!!, ExactTimeStamp(day1, hour0.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.isEmpty())
 
-        val firstScheduleData = CreateTaskLoader.ScheduleData.SingleScheduleData(day1, TimePair(hour12))
+        val firstScheduleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(day1, TimePair(hour12))
         val firstTask = domainFactory.createScheduleRootTask(mContext, ExactTimeStamp(day1, hour1.toHourMilli()), dataId, SaveService.Source.GUI, "firstTask", listOf(firstScheduleData), null, null)
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, ExactTimeStamp(day1, hour2.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
@@ -428,7 +428,7 @@ class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getGroupListData(mContext, ExactTimeStamp(day1, hour4.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(mContext, ExactTimeStamp(day1, hour4.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.size == 1)
 
-        val secondScheduleData = CreateTaskLoader.ScheduleData.SingleScheduleData(day2, TimePair(hour12))
+        val secondScheduleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(day2, TimePair(hour12))
         val secondTask = domainFactory.createScheduleRootTask(mContext, ExactTimeStamp(day1, hour5.toHourMilli()), dataId, SaveService.Source.GUI, "secondTask", listOf(secondScheduleData), null, null)
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
@@ -536,7 +536,7 @@ class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext!!, ExactTimeStamp(date, hour0.toHourMilli()), range, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.isEmpty())
 
-        val scheduleData = CreateTaskLoader.ScheduleData.SingleScheduleData(date, TimePair(hour3))
+        val scheduleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(date, TimePair(hour3))
         val parentTask = domainFactory.createScheduleRootTask(mContext, ExactTimeStamp(date, hour1.toHourMilli()), dataId, SaveService.Source.GUI, "parent", listOf(scheduleData), null, null)
 
         val (dataWrapper) = domainFactory.getGroupListData(mContext, ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY)
@@ -585,7 +585,7 @@ class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext!!, ExactTimeStamp(date, hour0.toHourMilli()), range, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.isEmpty())
 
-        val splitScheduleData = CreateTaskLoader.ScheduleData.SingleScheduleData(date, TimePair(hour2))
+        val splitScheduleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(date, TimePair(hour2))
         val splitTask = domainFactory.createScheduleRootTask(mContext, ExactTimeStamp(date, hour1.toHourMilli()), dataId, SaveService.Source.GUI, "split", listOf(splitScheduleData), null, null)
 
         domainFactory.updateNotificationsTick(mContext, ExactTimeStamp(date, hour2.toHourMilli()), SaveService.Source.GUI, false)
@@ -596,7 +596,7 @@ class DomainFactoryTest {
         val splitInstanceKey = dataWrapper1.instanceDatas.keys.iterator().next()
         Assert.assertTrue(dataWrapper1.instanceDatas[splitInstanceKey]!!.children.isEmpty())
 
-        val parentScheduleData = CreateTaskLoader.ScheduleData.SingleScheduleData(date, TimePair(hour7))
+        val parentScheduleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(date, TimePair(hour7))
         val parentTask = domainFactory.createScheduleRootTask(mContext, ExactTimeStamp(date, hour3.toHourMilli()), dataId, SaveService.Source.GUI, "parent", listOf(parentScheduleData), null, null)
 
         val (dataWrapper2) = domainFactory.getGroupListData(mContext, ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY)
@@ -642,13 +642,13 @@ class DomainFactoryTest {
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext!!, ExactTimeStamp(date, hour0.toHourMilli()), range, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.isEmpty())
 
-        val firstScheduleData = CreateTaskLoader.ScheduleData.SingleScheduleData(date, TimePair(hour5))
+        val firstScheduleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(date, TimePair(hour5))
         val task = domainFactory.createScheduleRootTask(mContext, ExactTimeStamp(date, hour1.toHourMilli()), dataId, SaveService.Source.GUI, "task", listOf(firstScheduleData), null, null)
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(mContext, ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.keys.iterator().next().scheduleKey.scheduleTimePair.hourMinute == hour5)
 
-        val secondScheduleData = CreateTaskLoader.ScheduleData.SingleScheduleData(date, TimePair(hour6))
+        val secondScheduleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(date, TimePair(hour6))
         domainFactory.updateScheduleTask(mContext, ExactTimeStamp(date, hour3.toHourMilli()), dataId, SaveService.Source.GUI, task.taskKey, task.name, listOf(secondScheduleData), task.note, null)
 
         Assert.assertTrue(domainFactory.getGroupListData(mContext, ExactTimeStamp(date, hour4.toHourMilli()), range, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)

@@ -4,9 +4,7 @@ package com.krystianwsul.checkme.gui.projects
 import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.LoaderManager
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.Loader
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -21,14 +19,16 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
-import com.krystianwsul.checkme.loaders.ProjectListLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
+import io.reactivex.rxkotlin.plusAssign
 
 import kotlinx.android.synthetic.main.row_project.view.*
 import java.util.*
 
-class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<ProjectListLoader.DomainData>, FabUser {
+class ProjectListFragment : AbstractFragment(), FabUser {
 
     companion object {
 
@@ -61,7 +61,9 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
 
             val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
 
-            val projectIds = projectNodes.map { it.projectData.id }.toSet()
+            val projectIds = projectNodes.asSequence()
+                    .map { it.projectData.id }
+                    .toSet()
 
             when (menuItem.itemId) {
                 R.id.action_project_delete -> {
@@ -112,6 +114,8 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
 
     private var selectedProjectIds: Set<String> = setOf()
 
+    private lateinit var projectListViewModel: ProjectListViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -134,18 +138,19 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         return view
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         projectListRecycler.layoutManager = LinearLayoutManager(activity)
 
-        @Suppress("DEPRECATION")
-        loaderManager.initLoader(0, null, this)
+        projectListViewModel = getViewModel<ProjectListViewModel>().apply {
+            start()
+
+            viewCreatedDisposable += data.subscribe { onLoadFinished(it.value!!) }
+        }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = ProjectListLoader(activity!!)
-
-    override fun onLoadFinished(loader: Loader<ProjectListLoader.DomainData>, data: ProjectListLoader.DomainData) {
+    private fun onLoadFinished(data: ProjectListViewModel.Data) {
         dataId = data.dataId
 
         projectListProgress.visibility = View.GONE
@@ -171,13 +176,12 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         updateFabVisibility()
     }
 
-    override fun onLoaderReset(loader: Loader<ProjectListLoader.DomainData>) = Unit
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
         if (treeViewAdapter != null)
             selectedProjectIds = treeViewAdapter!!.selectedNodes
+                    .asSequence()
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toSet()
 
@@ -218,7 +222,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
         private lateinit var treeViewAdapter: TreeViewAdapter
         private lateinit var treeNodeCollection: TreeNodeCollection
 
-        fun initialize(projectDatas: TreeMap<String, ProjectListLoader.ProjectData>): TreeViewAdapter {
+        fun initialize(projectDatas: TreeMap<String, ProjectListViewModel.ProjectData>): TreeViewAdapter {
             projectNodes = projectDatas.values
                     .map { ProjectNode(this, it) }
                     .toMutableList()
@@ -252,7 +256,7 @@ class ProjectListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Pr
             treeNodeCollection.remove(projectNode.treeNode)
         }
 
-        inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListLoader.ProjectData) : ModelNode {
+        inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListViewModel.ProjectData) : ModelNode {
 
             lateinit var treeNode: TreeNode
                 private set

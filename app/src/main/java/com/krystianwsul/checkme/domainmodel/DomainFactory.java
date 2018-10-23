@@ -47,7 +47,6 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.ProjectListLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel;
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
+import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -991,7 +991,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ProjectListLoader.DomainData getProjectListData() {
+    public synchronized ProjectListViewModel.Data getProjectListData() {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getProjectListData");
@@ -1000,17 +1000,17 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        TreeMap<String, ProjectListLoader.ProjectData> projectDatas = Stream.of(mRemoteProjectFactory.getRemoteProjects().values())
+        TreeMap<String, ProjectListViewModel.ProjectData> projectDatas = Stream.of(mRemoteProjectFactory.getRemoteProjects().values())
                 .filter(remoteProject -> remoteProject.current(now))
                 .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> {
                     String users = Stream.of(remoteProject.getUsers())
                             .map(RemoteProjectUser::getName)
                             .collect(Collectors.joining(", "));
 
-                    return new ProjectListLoader.ProjectData(remoteProject.getId(), remoteProject.getName(), users);
+                    return new ProjectListViewModel.ProjectData(remoteProject.getId(), remoteProject.getName(), users);
                 }, TreeMap::new));
 
-        return new ProjectListLoader.DomainData(projectDatas);
+        return new ProjectListViewModel.Data(projectDatas);
     }
 
     @NonNull

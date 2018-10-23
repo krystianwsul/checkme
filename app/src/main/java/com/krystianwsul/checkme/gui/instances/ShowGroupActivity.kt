@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v7.app.ActionBar
 import android.support.v7.view.ActionMode
 import android.view.Menu
@@ -13,17 +11,19 @@ import android.view.MenuItem
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.loaders.ShowGroupLoader
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
+import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowGroupLoader.DomainData>, GroupListFragment.GroupListListener {
+class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener {
 
     companion object {
 
-        private val TIME_KEY = "time"
+        private const val TIME_KEY = "time"
 
         fun getIntent(exactTimeStamp: ExactTimeStamp, context: Context) = Intent(context, ShowGroupActivity::class.java).apply {
             putExtra(TIME_KEY, exactTimeStamp.long)
@@ -37,6 +37,8 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
     private lateinit var groupListFragment: GroupListFragment
 
     private var selectAllVisible = false
+
+    private lateinit var showGroupViewModel: ShowGroupViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,13 +68,14 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
 
         groupListFragment.setFab(showGroupFab!!)
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this)
+        showGroupViewModel = getViewModel<ShowGroupViewModel>().apply {
+            start(timeStamp)
+
+            createDisposable += data.subscribe { onLoadFinished(it.value!!) }
+        }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = ShowGroupLoader(this, timeStamp)
-
-    override fun onLoadFinished(loader: Loader<ShowGroupLoader.DomainData>, data: ShowGroupLoader.DomainData) {
+    private fun onLoadFinished(data: ShowGroupViewModel.Data) {
         actionBar.title = data.displayText
 
         if (data.dataWrapper == null) {
@@ -83,8 +86,6 @@ class ShowGroupActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Show
 
         groupListFragment.setTimeStamp(timeStamp, data.dataId, data.dataWrapper)
     }
-
-    override fun onLoaderReset(loader: Loader<ShowGroupLoader.DomainData>) = Unit
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
 

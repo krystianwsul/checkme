@@ -47,7 +47,6 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel;
+import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -659,7 +659,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowGroupLoader.DomainData getShowGroupData(@NonNull Context context, @NonNull TimeStamp timeStamp) {
+    public synchronized ShowGroupViewModel.Data getShowGroupData(@NonNull Context context, @NonNull TimeStamp timeStamp) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowGroupData");
@@ -679,7 +679,7 @@ public class DomainFactory {
 
         String displayText = new DateTime(date, time).getDisplayText(context);
 
-        return new ShowGroupLoader.DomainData(displayText, getGroupListData(timeStamp, now));
+        return new ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now));
     }
 
     @NonNull

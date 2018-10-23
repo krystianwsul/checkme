@@ -47,7 +47,6 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel;
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
+import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -533,7 +533,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowCustomTimeLoader.DomainData getShowCustomTimeData(int localCustomTimeId) {
+    public synchronized ShowCustomTimeViewModel.Data getShowCustomTimeData(int localCustomTimeId) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimeData");
@@ -544,7 +544,7 @@ public class DomainFactory {
         for (DayOfWeek dayOfWeek : DayOfWeek.values())
             hourMinutes.put(dayOfWeek, localCustomTime.getHourMinute(dayOfWeek));
 
-        return new ShowCustomTimeLoader.DomainData(localCustomTime.getId(), localCustomTime.getName(), hourMinutes);
+        return new ShowCustomTimeViewModel.Data(localCustomTime.getId(), localCustomTime.getName(), hourMinutes);
     }
 
     @NonNull

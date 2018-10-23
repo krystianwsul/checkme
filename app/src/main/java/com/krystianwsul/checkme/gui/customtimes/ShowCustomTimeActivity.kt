@@ -3,11 +3,8 @@ package com.krystianwsul.checkme.gui.customtimes
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -17,16 +14,18 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
-import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
+import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 
 import kotlinx.android.synthetic.main.activity_show_custom_time.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
 
-class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowCustomTimeLoader.DomainData> {
+class ShowCustomTimeActivity : AbstractActivity() {
 
     companion object {
 
@@ -57,7 +56,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
 
     private var customTimeId: Int? = null
 
-    private var data: ShowCustomTimeLoader.DomainData? = null
+    private var data: ShowCustomTimeViewModel.Data? = null
 
     private val timeViews = HashMap<DayOfWeek, TextView>()
     private val hourMinutes = HashMap<DayOfWeek, HourMinute>()
@@ -79,6 +78,8 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
         editedDayOfWeek = null
     }
 
+    private var showCustomTimeViewModel: ShowCustomTimeViewModel? = null
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true
@@ -99,8 +100,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
 
                 val name = toolbarEditText.text.toString().trim { it <= ' ' }
                 if (name.isNotEmpty()) {
-                    @Suppress("DEPRECATION")
-                    supportLoaderManager.destroyLoader(0)
+                    showCustomTimeViewModel?.stop()
 
                     if (data != null) {
                         DomainFactory.getDomainFactory().updateCustomTime(this@ShowCustomTimeActivity, data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
@@ -176,8 +176,11 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
             customTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1)
             check(customTimeId != -1)
 
-            @Suppress("DEPRECATION")
-            supportLoaderManager.initLoader(0, null, this)
+            showCustomTimeViewModel = getViewModel<ShowCustomTimeViewModel>().apply {
+                start(customTimeId!!)
+
+                createDisposable += data.subscribe { onLoadFinished(it.value!!) }
+            }
         } else {
             check(intent.hasExtra(NEW_KEY))
         }
@@ -224,8 +227,6 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
         }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = ShowCustomTimeLoader(this, customTimeId!!)
-
     private fun updateGui() {
         check(!hourMinutes.isEmpty())
 
@@ -270,9 +271,7 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
         })
     }
 
-    override fun onLoadFinished(loader: Loader<ShowCustomTimeLoader.DomainData>, data: ShowCustomTimeLoader.DomainData) {
-        Log.e("asdf", "onLoadFinished")
-
+    private fun onLoadFinished(data: ShowCustomTimeViewModel.Data) {
         this.data = data
 
         if (savedInstanceState?.containsKey(HOUR_MINUTE_SUNDAY_KEY) != true) {
@@ -288,8 +287,6 @@ class ShowCustomTimeActivity : AbstractActivity(), LoaderManager.LoaderCallbacks
 
         invalidateOptionsMenu()
     }
-
-    override fun onLoaderReset(data: Loader<ShowCustomTimeLoader.DomainData>) {}
 
     override fun onBackPressed() {
         if (tryClose())

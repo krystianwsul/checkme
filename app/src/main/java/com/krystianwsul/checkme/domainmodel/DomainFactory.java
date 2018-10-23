@@ -46,7 +46,6 @@ import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.notifications.TickJobIntentService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel;
+import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -956,7 +956,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowTaskLoader.DomainData getShowTaskData(@NonNull TaskKey taskKey, @NonNull Context context) {
+    public synchronized ShowTaskViewModel.Data getShowTaskData(@NonNull TaskKey taskKey, @NonNull Context context) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskData");
@@ -975,7 +975,7 @@ public class DomainFactory {
                 .collect(Collectors.toList());
         Collections.sort(childTaskDatas, TaskListFragment.ChildTaskData::compareTo);
 
-        return new ShowTaskLoader.DomainData(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()), !task.getExistingInstances().isEmpty());
+        return new ShowTaskViewModel.Data(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()), !task.getExistingInstances().isEmpty());
     }
 
     @NonNull

@@ -4,8 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
@@ -14,15 +12,17 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
-import com.krystianwsul.checkme.loaders.ShowTaskLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowTaskLoader.DomainData>, TaskListFragment.TaskListListener {
+class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
     companion object {
 
@@ -35,11 +35,13 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
 
     private lateinit var taskKey: TaskKey
 
-    private var data: ShowTaskLoader.DomainData? = null
+    private var data: ShowTaskViewModel.Data? = null
 
     private var selectAllVisible = false
 
     private lateinit var taskListFragment: TaskListFragment
+
+    private lateinit var showTaskViewModel: ShowTaskViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,8 +68,11 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
                     .commit()
         }.also { it.setFab(showTaskFab) }
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this)
+        showTaskViewModel = getViewModel<ShowTaskViewModel>().apply {
+            start(taskKey)
+
+            createDisposable += data.subscribe { onLoadFinished(it) }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -83,8 +88,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
             })
         }
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this) // does this work?
+        showTaskViewModel.start(taskKey)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -107,8 +111,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.task_menu_edit -> {
-                @Suppress("DEPRECATION")
-                supportLoaderManager.destroyLoader(0)
+                showTaskViewModel.stop()
 
                 startActivityForResult(CreateTaskActivity.getEditIntent(taskKey), REQUEST_EDIT_TASK)
             }
@@ -118,8 +121,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
                 Utils.share(this, data!!.name + taskListFragment.shareData.let { "\n" + it })
             }
             R.id.task_menu_delete -> {
-                @Suppress("DEPRECATION")
-                supportLoaderManager.destroyLoader(0)
+                showTaskViewModel.stop()
 
                 DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, data!!.dataId, SaveService.Source.GUI, taskKey)
 
@@ -132,9 +134,7 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
         return true
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = ShowTaskLoader(this, taskKey)
-
-    override fun onLoadFinished(loader: Loader<ShowTaskLoader.DomainData>, data: ShowTaskLoader.DomainData) {
+    private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
         supportActionBar!!.run {
@@ -146,8 +146,6 @@ class ShowTaskActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowT
 
         taskListFragment.setTaskKey(taskKey, data.dataId, data.taskData)
     }
-
-    override fun onLoaderReset(loader: Loader<ShowTaskLoader.DomainData>) = Unit
 
     override fun onCreateTaskActionMode(actionMode: ActionMode) = Unit
 

@@ -110,9 +110,7 @@ class DayFragment : AbstractFragment(), FabUser {
         dayViewModel = getViewModel<DayViewModel>().apply {
             start(position, timeRange)
 
-            createDisposable += data.subscribe {
-                it.value!!.let { groupListFragment!!.setAll(timeRange, position, it.dataId, it.dataWrapper) }
-            }
+            createDisposable += data.subscribe { groupListFragment!!.setAll(timeRange, position, it.dataId, it.dataWrapper) }
         }
     }
 

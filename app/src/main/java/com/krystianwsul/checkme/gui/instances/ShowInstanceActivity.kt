@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v7.app.ActionBar
 import android.support.v7.view.ActionMode
 import android.text.TextUtils
@@ -20,16 +18,18 @@ import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
-import com.krystianwsul.checkme.loaders.ShowInstanceLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_instance.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowInstanceLoader.DomainData>, GroupListFragment.GroupListListener {
+class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListListener {
 
     companion object {
 
@@ -49,13 +49,15 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
     private lateinit var instanceKey: InstanceKey
 
     private var dataId = -1
-    private var instanceData: ShowInstanceLoader.InstanceData? = null
+    private var instanceData: ShowInstanceViewModel.InstanceData? = null
 
     private var first = false
 
     private lateinit var groupListFragment: GroupListFragment
 
     private var selectAllVisible = false
+
+    private lateinit var showInstanceViewModel: ShowInstanceViewModel
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.show_instance_menu, menu)
@@ -105,8 +107,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                     check(!it.done)
                     check(it.taskCurrent)
 
-                    @Suppress("DEPRECATION")
-                    supportLoaderManager.destroyLoader(0)
+                    showInstanceViewModel.stop()
 
                     startActivityForResult(ShowTaskActivity.newIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
@@ -114,8 +115,7 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                     check(!it.done)
                     check(it.taskCurrent)
 
-                    @Suppress("DEPRECATION")
-                    supportLoaderManager.destroyLoader(0)
+                    showInstanceViewModel.stop()
 
                     startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
@@ -123,9 +123,8 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
                     check(!it.done)
                     check(it.taskCurrent)
 
-                    @Suppress("DEPRECATION")
                     if (!it.exists)
-                        supportLoaderManager.destroyLoader(0)
+                        showInstanceViewModel.stop()
 
                     DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
@@ -164,15 +163,16 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
 
         groupListFragment.setFab(showInstanceFab)
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this)
+        showInstanceViewModel = getViewModel<ShowInstanceViewModel>().apply {
+            start(instanceKey)
+
+            createDisposable += data.subscribe { onLoadFinished(it) }
+        }
 
         NotificationWrapper.instance.cleanGroup(null)
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = ShowInstanceLoader(this, instanceKey)
-
-    override fun onLoadFinished(loader: Loader<ShowInstanceLoader.DomainData>, data: ShowInstanceLoader.DomainData) {
+    private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         if (data.instanceData == null) {
             finish()
             return
@@ -208,8 +208,6 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
         invalidateOptionsMenu()
     }
 
-    override fun onLoaderReset(loader: Loader<ShowInstanceLoader.DomainData>) = Unit
-
     override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
@@ -231,7 +229,6 @@ class ShowInstanceActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<S
             instanceKey = InstanceKey(taskKey, instanceKey.scheduleKey.scheduleDate, TimePair(instanceKey.scheduleKey.scheduleTimePair.customTimeKey, instanceKey.scheduleKey.scheduleTimePair.hourMinute))
         }
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this)
+        showInstanceViewModel.start(instanceKey)
     }
 }

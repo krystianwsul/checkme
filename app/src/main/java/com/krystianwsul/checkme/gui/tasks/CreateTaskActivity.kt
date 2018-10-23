@@ -385,7 +385,7 @@ class CreateTaskActivity : AbstractActivity() {
         createTaskViewModel = getViewModel<CreateTaskViewModel>().apply {
             start(mTaskKey, mTaskKeys)
 
-            createDisposable += data.subscribe { onLoadFinished(it.value!!) }
+            createDisposable += data.subscribe { onLoadFinished(it) }
         }
     }
 

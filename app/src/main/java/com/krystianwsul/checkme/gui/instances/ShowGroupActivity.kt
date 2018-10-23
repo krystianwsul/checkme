@@ -71,7 +71,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
         showGroupViewModel = getViewModel<ShowGroupViewModel>().apply {
             start(timeStamp)
 
-            createDisposable += data.subscribe { onLoadFinished(it.value!!) }
+            createDisposable += data.subscribe { onLoadFinished(it) }
         }
     }
 

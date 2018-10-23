@@ -118,7 +118,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         showCustomTimesViewModel = getViewModel<ShowCustomTimesViewModel>().apply {
             start()
 
-            viewCreatedDisposable += data.subscribe { onLoadFinished(it.value!!) }
+            viewCreatedDisposable += data.subscribe { onLoadFinished(it) }
         }
     }
 

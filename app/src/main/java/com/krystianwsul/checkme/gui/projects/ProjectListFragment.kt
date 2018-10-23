@@ -146,7 +146,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         projectListViewModel = getViewModel<ProjectListViewModel>().apply {
             start()
 
-            viewCreatedDisposable += data.subscribe { onLoadFinished(it.value!!) }
+            viewCreatedDisposable += data.subscribe { onLoadFinished(it) }
         }
     }
 

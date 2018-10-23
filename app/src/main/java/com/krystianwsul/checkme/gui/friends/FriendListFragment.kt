@@ -115,7 +115,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         friendListViewModel = getViewModel<FriendListViewModel>().apply {
             start()
 
-            viewCreatedDisposable += data.subscribe { onLoadFinished(it.value!!) }
+            viewCreatedDisposable += data.subscribe { onLoadFinished(it) }
         }
     }
 

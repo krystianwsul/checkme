@@ -46,7 +46,6 @@ import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskInstancesLoader;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel;
+import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -767,21 +767,20 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowInstanceLoader.DomainData getShowInstanceData(@NonNull Context context, @NonNull InstanceKey instanceKey) {
+    public synchronized ShowInstanceViewModel.Data getShowInstanceData(@NonNull Context context, @NonNull InstanceKey instanceKey) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowInstanceData");
 
         Task task = getTaskIfPresent(instanceKey.getTaskKey());
-        if (task == null) return new ShowInstanceLoader.DomainData(null);
+        if (task == null) return new ShowInstanceViewModel.Data(null);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Instance instance = getInstance(instanceKey);
-        if (!task.current(now) && !instance.exists())
-            return new ShowInstanceLoader.DomainData(null);
+        if (!task.current(now) && !instance.exists()) return new ShowInstanceViewModel.Data(null);
 
-        return new ShowInstanceLoader.DomainData(new ShowInstanceLoader.InstanceData(instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)));
+        return new ShowInstanceViewModel.Data(new ShowInstanceViewModel.InstanceData(instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)));
     }
 
     @NonNull

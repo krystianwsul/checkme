@@ -179,7 +179,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
             showCustomTimeViewModel = getViewModel<ShowCustomTimeViewModel>().apply {
                 start(customTimeId!!)
 
-                createDisposable += data.subscribe { onLoadFinished(it.value!!) }
+                createDisposable += data.subscribe { onLoadFinished(it) }
             }
         } else {
             check(intent.hasExtra(NEW_KEY))

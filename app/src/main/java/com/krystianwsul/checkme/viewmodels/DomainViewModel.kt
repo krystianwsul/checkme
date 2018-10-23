@@ -19,7 +19,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 
-    val data = BehaviorRelay.create<NullableWrapper<D>>()!!
+    val data = BehaviorRelay.create<D>()!!
 
     private var observer: Observer? = null
 
@@ -94,7 +94,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
         if (firebaseLevel == FirebaseLevel.FRIEND && !(domainFactory.isConnected && RemoteFriendFactory.hasFriends()))
             return
 
-        Single.fromCallable { NullableWrapper(getData(domainFactory)) }
+        Single.fromCallable { getData(domainFactory) }
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { loaded ->
@@ -104,14 +104,14 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                 .addTo(compositeDisposable)
     }
 
-    protected abstract fun getData(domainFactory: DomainFactory): D?
+    protected abstract fun getData(domainFactory: DomainFactory): D
 
     override fun onCleared() = stop()
 
     inner class Observer : DomainObserver {
 
         override fun onDomainChanged(dataIds: List<Int>) {
-            if (data.value?.value?.let { dataIds.contains(it.dataId) } == true)
+            if (data.value?.let { dataIds.contains(it.dataId) } == true)
                 return
 
             load()

@@ -198,7 +198,7 @@ class EditInstancesActivity : AbstractActivity() {
         editInstancesViewModel = getViewModel<EditInstancesViewModel>().apply {
             start(instanceKeys)
 
-            createDisposable += data.subscribe { onLoadFinished(it.value!!) }
+            createDisposable += data.subscribe { onLoadFinished(it) }
         }
 
         mBroadcastReceiver = object : BroadcastReceiver() {

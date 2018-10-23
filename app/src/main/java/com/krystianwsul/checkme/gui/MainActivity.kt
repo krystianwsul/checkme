@@ -480,9 +480,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         mainViewModel = getViewModel<MainViewModel>().apply {
             start()
 
-            createDisposable += data.subscribe {
-                it.value!!.let { taskListFragment.setAllTasks(it.dataId, it.taskData) }
-            }
+            createDisposable += data.subscribe { taskListFragment.setAllTasks(it.dataId, it.taskData) }
         }
     }
 

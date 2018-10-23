@@ -46,7 +46,6 @@ import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskInstancesLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.notifications.TickJobIntentService;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel;
+import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1027,7 +1027,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowProjectLoader.DomainData getShowProjectData(@Nullable String projectId) {
+    public synchronized ShowProjectViewModel.Data getShowProjectData(@Nullable String projectId) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowProjectData");
@@ -1036,27 +1036,24 @@ public class DomainFactory {
         check(mUserInfo != null);
         check(RemoteFriendFactory.Companion.hasFriends());
 
-        Map<String, ShowProjectLoader.UserListData> friendDatas = Stream.of(RemoteFriendFactory.Companion.getFriends())
-                .map(remoteRootUser -> new ShowProjectLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
-                .collect(Collectors.toMap(ShowProjectLoader.UserListData::getId, userData -> userData));
+        Map<String, ShowProjectViewModel.UserListData> friendDatas = Stream.of(RemoteFriendFactory.Companion.getFriends()).map(remoteRootUser -> new ShowProjectViewModel.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId())).collect(Collectors.toMap(ShowProjectViewModel.UserListData::getId, userData -> userData));
 
         String name;
-        Set<ShowProjectLoader.UserListData> userListDatas;
+        Set<ShowProjectViewModel.UserListData> userListDatas;
         if (!TextUtils.isEmpty(projectId)) {
             RemoteProject remoteProject = mRemoteProjectFactory.getRemoteProjectForce(projectId);
 
             name = remoteProject.getName();
 
             userListDatas = Stream.of(remoteProject.getUsers())
-                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserInfo.getKey()))
-                    .map(remoteUser -> new ShowProjectLoader.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
+                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserInfo.getKey())).map(remoteUser -> new ShowProjectViewModel.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
                     .collect(Collectors.toSet());
         } else {
             name = null;
             userListDatas = new HashSet<>();
         }
 
-        return new ShowProjectLoader.DomainData(name, userListDatas, friendDatas);
+        return new ShowProjectViewModel.Data(name, userListDatas, friendDatas);
     }
 
     // sets

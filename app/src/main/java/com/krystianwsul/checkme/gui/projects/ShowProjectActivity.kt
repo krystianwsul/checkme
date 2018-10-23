@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.projects
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -15,12 +13,14 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.friends.UserListFragment
-import com.krystianwsul.checkme.loaders.ShowProjectLoader
+import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 
 import kotlinx.android.synthetic.main.activity_show_project.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 
-class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<ShowProjectLoader.DomainData> {
+class ShowProjectActivity : AbstractActivity() {
 
     companion object {
 
@@ -37,15 +37,17 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
         fun newIntent(context: Context) = Intent(context, ShowProjectActivity::class.java)
     }
 
-    private lateinit var projectId: String
+    private var projectId: String? = null
 
-    private var data: ShowProjectLoader.DomainData? = null
+    private var data: ShowProjectViewModel.Data? = null
 
     private lateinit var userListFragment: UserListFragment
 
     private var savedInstanceState: Bundle? = null
 
     private val discardDialogListener = this::finish
+
+    private lateinit var showProjectViewModel: ShowProjectViewModel
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -65,8 +67,7 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
                 if (updateError())
                     return true
 
-                @Suppress("DEPRECATION")
-                supportLoaderManager.destroyLoader(0)
+                showProjectViewModel.stop()
 
                 userListFragment.save(toolbarEditText.text.toString())
 
@@ -128,13 +129,14 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this)
+        showProjectViewModel = getViewModel<ShowProjectViewModel>().apply {
+            start(projectId)
+
+            createDisposable += data.subscribe { onLoadFinished(it) }
+        }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = ShowProjectLoader(this, projectId)
-
-    override fun onLoadFinished(loader: Loader<ShowProjectLoader.DomainData>, data: ShowProjectLoader.DomainData?) {
+    private fun onLoadFinished(data: ShowProjectViewModel.Data?) {
         this.data = data
 
         if (savedInstanceState == null) {
@@ -150,8 +152,6 @@ class ShowProjectActivity : AbstractActivity(), LoaderManager.LoaderCallbacks<Sh
 
         userListFragment.initialize(projectId, data!!)
     }
-
-    override fun onLoaderReset(loader: Loader<ShowProjectLoader.DomainData>) = Unit
 
     override fun onBackPressed() {
         if (tryClose())

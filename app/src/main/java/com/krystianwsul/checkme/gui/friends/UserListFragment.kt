@@ -21,8 +21,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
-import com.krystianwsul.checkme.loaders.ShowProjectLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.row_friend.view.*
@@ -49,7 +49,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var friendListAdapter: FriendListAdapter? = null
 
-    private var data: ShowProjectLoader.DomainData? = null
+    private var data: ShowProjectViewModel.Data? = null
 
     private var saveState: SaveState? = null
 
@@ -155,7 +155,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    fun initialize(projectId: String?, data: ShowProjectLoader.DomainData) {
+    fun initialize(projectId: String?, data: ShowProjectViewModel.Data) {
         this.projectId = projectId
         this.data = data
 
@@ -253,7 +253,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         friendListFab = null
     }
 
-    inner class FriendListAdapter(userListDatas: Collection<ShowProjectLoader.UserListData>, saveState: SaveState) : RecyclerView.Adapter<FriendListAdapter.FriendHolder>() {
+    inner class FriendListAdapter(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) : RecyclerView.Adapter<FriendListAdapter.FriendHolder>() {
 
         val userDataWrappers: MutableList<UserDataWrapper>
 
@@ -353,7 +353,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    inner class UserDataWrapper(val userListData: ShowProjectLoader.UserListData, selectedIds: Set<String>) {
+    inner class UserDataWrapper(val userListData: ShowProjectViewModel.UserListData, selectedIds: Set<String>) {
 
         var selected = false
 

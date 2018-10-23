@@ -5,9 +5,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.LoaderManager
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.Loader
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
@@ -22,12 +20,14 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
-import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 
 import java.util.*
 
-class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<ShowCustomTimesLoader.Data>, FabUser {
+class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     companion object {
 
@@ -90,7 +90,9 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
 
     private var showTimesFab: FloatingActionButton? = null
 
-    private var data: ShowCustomTimesLoader.Data? = null
+    private var data: ShowCustomTimesViewModel.Data? = null
+
+    private lateinit var showCustomTimesViewModel: ShowCustomTimesViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -113,13 +115,14 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
             check(!selectedCustomTimeIds!!.isEmpty())
         }
 
-        @Suppress("DEPRECATION")
-        loaderManager.initLoader(0, null, this)
+        showCustomTimesViewModel = getViewModel<ShowCustomTimesViewModel>().apply {
+            start()
+
+            viewCreatedDisposable += data.subscribe { onLoadFinished(it.value!!) }
+        }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = ShowCustomTimesLoader(activity!!)
-
-    override fun onLoadFinished(loader: Loader<ShowCustomTimesLoader.Data>, data: ShowCustomTimesLoader.Data) {
+    private fun onLoadFinished(data: ShowCustomTimesViewModel.Data) {
         this.data = data
 
         customTimesAdapter?.let {
@@ -145,8 +148,6 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
 
         updateFabVisibility()
     }
-
-    override fun onLoaderReset(loader: Loader<ShowCustomTimesLoader.Data>) {}
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -191,15 +192,20 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
         showTimesFab = null
     }
 
-    private inner class CustomTimesAdapter(data: ShowCustomTimesLoader.Data, private val showCustomTimesFragment: ShowCustomTimesFragment, selectedCustomTimeIds: List<Int>?) : RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder>() {
+    private inner class CustomTimesAdapter(data: ShowCustomTimesViewModel.Data, private val showCustomTimesFragment: ShowCustomTimesFragment, selectedCustomTimeIds: List<Int>?) : RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder>() {
 
         private val dataId = data.dataId
 
         val customTimeWrappers = data.entries
+                .asSequence()
                 .map { CustomTimeWrapper(it, selectedCustomTimeIds) }
                 .toMutableList()
 
-        val selected get() = customTimeWrappers.filter { it.selected }.map { it.customTimeData.id }
+        val selected
+            get() = customTimeWrappers.asSequence()
+                    .filter { it.selected }
+                    .map { it.customTimeData.id }
+                    .toList()
 
         override fun getItemCount() = customTimeWrappers.size
 
@@ -282,7 +288,7 @@ class ShowCustomTimesFragment : AbstractFragment(), LoaderManager.LoaderCallback
         }
     }
 
-    private inner class CustomTimeWrapper(val customTimeData: ShowCustomTimesLoader.CustomTimeData, selectedCustomTimeIds: List<Int>?) {
+    private inner class CustomTimeWrapper(val customTimeData: ShowCustomTimesViewModel.CustomTimeData, selectedCustomTimeIds: List<Int>?) {
         var selected = false
 
         init {

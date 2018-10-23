@@ -47,7 +47,6 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
 import com.krystianwsul.checkme.loaders.ShowGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowInstanceLoader;
 import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel;
+import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -548,21 +548,21 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowCustomTimesLoader.Data getShowCustomTimesData() {
+    public synchronized ShowCustomTimesViewModel.Data getShowCustomTimesData() {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimesData");
 
         List<LocalCustomTime> currentCustomTimes = getCurrentCustomTimes();
 
-        ArrayList<ShowCustomTimesLoader.CustomTimeData> entries = new ArrayList<>();
+        ArrayList<ShowCustomTimesViewModel.CustomTimeData> entries = new ArrayList<>();
         for (LocalCustomTime localCustomTime : currentCustomTimes) {
             check(localCustomTime != null);
 
-            entries.add(new ShowCustomTimesLoader.CustomTimeData(localCustomTime.getId(), localCustomTime.getName()));
+            entries.add(new ShowCustomTimesViewModel.CustomTimeData(localCustomTime.getId(), localCustomTime.getName()));
         }
 
-        return new ShowCustomTimesLoader.Data(entries);
+        return new ShowCustomTimesViewModel.Data(entries);
     }
 
     @NonNull

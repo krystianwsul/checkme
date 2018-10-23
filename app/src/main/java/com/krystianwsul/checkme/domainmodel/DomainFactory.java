@@ -46,7 +46,6 @@ import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader;
 import com.krystianwsul.checkme.loaders.ShowProjectLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskInstancesLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
+import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -723,8 +723,8 @@ public class DomainFactory {
         return new ShowTaskInstancesLoader.DomainData(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
     }
 
-
-    public synchronized ShowNotificationGroupLoader.DomainData getShowNotificationGroupData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
+    @NonNull
+    public synchronized ShowNotificationGroupViewModel.Data getShowNotificationGroupData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
@@ -763,7 +763,7 @@ public class DomainFactory {
 
         Stream.of(instanceDatas.values()).forEach(instanceData -> instanceData.setInstanceDataParent(dataWrapper));
 
-        return new ShowNotificationGroupLoader.DomainData(dataWrapper);
+        return new ShowNotificationGroupViewModel.Data(dataWrapper);
     }
 
     @NonNull

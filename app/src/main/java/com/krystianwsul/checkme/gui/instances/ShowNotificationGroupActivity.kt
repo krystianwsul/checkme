@@ -3,21 +3,21 @@ package com.krystianwsul.checkme.gui.instances
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.loaders.ShowNotificationGroupLoader
 import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 
 import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 
-class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener, LoaderManager.LoaderCallbacks<ShowNotificationGroupLoader.DomainData> {
+class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener {
 
     companion object {
 
@@ -35,6 +35,8 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
     private lateinit var groupListFragment: GroupListFragment
 
     private var selectAllVisible = false
+
+    private lateinit var showNotificationGroupViewModel: ShowNotificationGroupViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,17 +59,12 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
 
         this.instanceKeys = HashSet(instanceKeys)
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this)
+        showNotificationGroupViewModel = getViewModel<ShowNotificationGroupViewModel>().apply {
+            start(this@ShowNotificationGroupActivity.instanceKeys)
+
+            createDisposable += data.subscribe { groupListFragment.setInstanceKeys(this@ShowNotificationGroupActivity.instanceKeys, it.dataId, it.dataWrapper) }
+        }
     }
-
-    override fun onCreateLoader(id: Int, args: Bundle?) = ShowNotificationGroupLoader(this, instanceKeys)
-
-    override fun onLoadFinished(loader: Loader<ShowNotificationGroupLoader.DomainData>, data: ShowNotificationGroupLoader.DomainData) {
-        groupListFragment.setInstanceKeys(instanceKeys, data.dataId, data.dataWrapper)
-    }
-
-    override fun onLoaderReset(loader: Loader<ShowNotificationGroupLoader.DomainData>) = Unit
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
 

@@ -46,7 +46,6 @@ import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.loaders.ShowTaskInstancesLoader;
 import com.krystianwsul.checkme.loaders.ShowTaskLoader;
 import com.krystianwsul.checkme.notifications.TickJobIntentService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
@@ -80,6 +79,7 @@ import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
+import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -683,7 +683,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowTaskInstancesLoader.DomainData getShowTaskInstancesData(@NonNull TaskKey taskKey) {
+    public synchronized ShowTaskInstancesViewModel.Data getShowTaskInstancesData(@NonNull TaskKey taskKey) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskInstancesData");
@@ -720,7 +720,7 @@ public class DomainFactory {
                     return new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(MyApplication.Companion.getInstance(), now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, hierarchyData, instance.getOrdinal());
                 }, HashMap::new));
 
-        return new ShowTaskInstancesLoader.DomainData(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
+        return new ShowTaskInstancesViewModel.Data(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
     }
 
     @NonNull

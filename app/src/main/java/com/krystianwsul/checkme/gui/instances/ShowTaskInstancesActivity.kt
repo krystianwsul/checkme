@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.instances
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
@@ -12,12 +10,14 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.loaders.ShowTaskInstancesLoader
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupListListener, LoaderManager.LoaderCallbacks<ShowTaskInstancesLoader.DomainData> {
+class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupListListener {
 
     companion object {
 
@@ -33,6 +33,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
     private lateinit var groupListFragment: GroupListFragment
 
     private var selectAllVisible = false
+
+    private lateinit var showTaskInstancesViewModel: ShowTaskInstancesViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,19 +52,14 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
 
         check(intent.hasExtra(TASK_KEY))
 
-        taskKey = intent.getParcelableExtra<TaskKey>(TASK_KEY)!!
+        taskKey = intent.getParcelableExtra(TASK_KEY)!!
 
-        @Suppress("DEPRECATION")
-        supportLoaderManager.initLoader(0, null, this)
+        showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
+            start(taskKey)
+
+            createDisposable += data.subscribe { groupListFragment.setTaskKey(taskKey, it.dataId, it.dataWrapper) }
+        }
     }
-
-    override fun onCreateLoader(id: Int, args: Bundle?) = ShowTaskInstancesLoader(this, taskKey)
-
-    override fun onLoadFinished(loader: Loader<ShowTaskInstancesLoader.DomainData>, data: ShowTaskInstancesLoader.DomainData) {
-        groupListFragment.setTaskKey(taskKey, data.dataId, data.dataWrapper)
-    }
-
-    override fun onLoaderReset(loader: Loader<ShowTaskInstancesLoader.DomainData>) = Unit
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
 

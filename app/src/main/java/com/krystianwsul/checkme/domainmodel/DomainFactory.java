@@ -47,7 +47,6 @@ import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.loaders.CreateTaskLoader;
-import com.krystianwsul.checkme.loaders.FriendListLoader;
 import com.krystianwsul.checkme.loaders.ProjectListLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimeLoader;
 import com.krystianwsul.checkme.loaders.ShowCustomTimesLoader;
@@ -79,6 +78,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp;
 import com.krystianwsul.checkme.viewmodels.DayViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel;
+import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 
 import java.util.ArrayList;
@@ -1014,18 +1014,17 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized FriendListLoader.DomainData getFriendListData() {
+    public synchronized FriendListViewModel.Data getFriendListData() {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getFriendListData");
 
         check(RemoteFriendFactory.Companion.hasFriends());
 
-        Set<FriendListLoader.UserListData> userListDatas = Stream.of(RemoteFriendFactory.Companion.getFriends())
-                .map(remoteRootUser -> new FriendListLoader.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
+        Set<FriendListViewModel.UserListData> userListDatas = Stream.of(RemoteFriendFactory.Companion.getFriends()).map(remoteRootUser -> new FriendListViewModel.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
                 .collect(Collectors.toSet());
 
-        return new FriendListLoader.DomainData(userListDatas);
+        return new FriendListViewModel.Data(userListDatas);
     }
 
     @NonNull
@@ -2615,6 +2614,7 @@ public class DomainFactory {
                 check(instanceShownRecord.getScheduleHour() == null);
                 check(instanceShownRecord.getScheduleMinute() == null);
 
+                //noinspection ConstantConditions
                 customTimeKey = getCustomTimeKey(instanceShownRecord.getProjectId(), remoteCustomTimeId);
                 hourMinute = null;
             } else {
@@ -2625,7 +2625,7 @@ public class DomainFactory {
                 hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
             }
 
-            TaskKey taskKey = new TaskKey(instanceShownRecord.getProjectId(), instanceShownRecord.getTaskId());
+            @SuppressWarnings("ConstantConditions") TaskKey taskKey = new TaskKey(instanceShownRecord.getProjectId(), instanceShownRecord.getTaskId());
 
             InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, new TimePair(customTimeKey, hourMinute));
 
@@ -2867,12 +2867,7 @@ public class DomainFactory {
             ScheduleKey scheduleKey = instanceKey.getScheduleKey();
             Date scheduleDate = scheduleKey.getScheduleDate();
 
-            Stream<InstanceShownRecord> stream = Stream.of(mLocalFactory.getInstanceShownRecords())
-                    .filter(instanceShownRecord -> instanceShownRecord.getProjectId().equals(projectId))
-                    .filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId))
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleDate.getYear())
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleDate.getMonth())
-                    .filter(instanceShownRecord -> instanceShownRecord.getScheduleDay() == scheduleDate.getDay());
+            @SuppressWarnings("ConstantConditions") Stream<InstanceShownRecord> stream = Stream.of(mLocalFactory.getInstanceShownRecords()).filter(instanceShownRecord -> instanceShownRecord.getProjectId().equals(projectId)).filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId)).filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleDate.getYear()).filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleDate.getMonth()).filter(instanceShownRecord -> instanceShownRecord.getScheduleDay() == scheduleDate.getDay());
 
             List<InstanceShownRecord> matches;
             if (scheduleKey.getScheduleTimePair().getCustomTimeKey() != null) {

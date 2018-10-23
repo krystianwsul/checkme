@@ -4,9 +4,7 @@ package com.krystianwsul.checkme.gui.friends
 import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.LoaderManager
 import android.support.v4.content.ContextCompat
-import android.support.v4.content.Loader
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -22,11 +20,13 @@ import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SelectionCallback
-import com.krystianwsul.checkme.loaders.FriendListLoader
+import com.krystianwsul.checkme.viewmodels.FriendListViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
 
-class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<FriendListLoader.DomainData>, FabUser {
+class FriendListFragment : AbstractFragment(), FabUser {
 
     companion object {
 
@@ -41,7 +41,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
 
     private var friendListAdapter: FriendListAdapter? = null
 
-    private var data: FriendListLoader.DomainData? = null
+    private var data: FriendListViewModel.Data? = null
 
     private var selectedIds: List<String>? = null
 
@@ -94,29 +94,32 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
 
     private var friendListFab: FloatingActionButton? = null
 
+    private lateinit var friendListViewModel: FriendListViewModel
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        friendListProgress = view!!.findViewById<View>(R.id.friendListProgress) as ProgressBar
+        friendListProgress = view.findViewById<View>(R.id.friendListProgress) as ProgressBar
 
-        friendListRecycler = view!!.findViewById<View>(R.id.friendListRecycler) as RecyclerView
+        friendListRecycler = view.findViewById<View>(R.id.friendListRecycler) as RecyclerView
 
         friendListRecycler.layoutManager = LinearLayoutManager(activity)
 
-        emptyText = view!!.findViewById<View>(R.id.emptyText) as TextView
+        emptyText = view.findViewById<View>(R.id.emptyText) as TextView
 
         if (savedInstanceState?.containsKey(SELECTED_IDS_KEY) == true)
             selectedIds = savedInstanceState.getStringArrayList(SELECTED_IDS_KEY)!!
 
-        @Suppress("DEPRECATION")
-        loaderManager.initLoader(0, null, this)
+        friendListViewModel = getViewModel<FriendListViewModel>().apply {
+            start()
+
+            viewCreatedDisposable += data.subscribe { onLoadFinished(it.value!!) }
+        }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?) = FriendListLoader(activity!!)
-
-    override fun onLoadFinished(loader: Loader<FriendListLoader.DomainData>, data: FriendListLoader.DomainData) {
+    private fun onLoadFinished(data: FriendListViewModel.Data) {
         this.data = data
 
         selectedIds = friendListAdapter?.selected ?: selectedIds ?: ArrayList()
@@ -141,8 +144,6 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
 
         updateSelectAll()
     }
-
-    override fun onLoaderReset(loader: Loader<FriendListLoader.DomainData>) {}
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -184,13 +185,17 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
         friendListFab = null
     }
 
-    private inner class FriendListAdapter(userListDatas: Collection<FriendListLoader.UserListData>, selectedIds: List<String>) : RecyclerView.Adapter<FriendListAdapter.FriendHolder>() {
+    private inner class FriendListAdapter(userListDatas: Collection<FriendListViewModel.UserListData>, selectedIds: List<String>) : RecyclerView.Adapter<FriendListAdapter.FriendHolder>() {
 
         val userDataWrappers = userListDatas.sortedBy { it.id }
                 .map { userListData -> UserDataWrapper(userListData, selectedIds) }
                 .toMutableList()
 
-        val selected get() = userDataWrappers.filter { it.selected }.map { it.userListData.id }
+        val selected
+            get() = userDataWrappers.asSequence()
+                    .filter { it.selected }
+                    .map { it.userListData.id }
+                    .toList()
 
         override fun getItemCount() = userDataWrappers.size
 
@@ -236,7 +241,9 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
                 notifyItemRemoved(it)
             }
 
-            DomainFactory.getDomainFactory().removeFriends(selectedUserDataWrappers.map { it.userListData.id }.toSet())
+            DomainFactory.getDomainFactory().removeFriends(selectedUserDataWrappers.asSequence()
+                    .map { it.userListData.id }
+                    .toSet())
         }
 
         fun selectAll() {
@@ -256,7 +263,7 @@ class FriendListFragment : AbstractFragment(), LoaderManager.LoaderCallbacks<Fri
         }
     }
 
-    private inner class UserDataWrapper(val userListData: FriendListLoader.UserListData, selectedIds: List<String>) {
+    private inner class UserDataWrapper(val userListData: FriendListViewModel.UserListData, selectedIds: List<String>) {
 
         var selected = selectedIds.contains(userListData.id)
 

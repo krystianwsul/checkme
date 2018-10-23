@@ -9,6 +9,7 @@ import io.reactivex.disposables.CompositeDisposable
 abstract class AbstractFragment : Fragment() {
 
     protected val createDisposable = CompositeDisposable()
+    protected val viewCreatedDisposable = CompositeDisposable()
 
     override fun onAttach(context: Context) {
         MyCrashlytics.log(javaClass.simpleName + ".onAttach " + hashCode())
@@ -25,8 +26,16 @@ abstract class AbstractFragment : Fragment() {
         super.onPause()
     }
 
+    override fun onDestroyView() {
+        MyCrashlytics.log(javaClass.simpleName + ".onDestroyView " + hashCode())
+
+        viewCreatedDisposable.clear()
+
+        super.onDestroyView()
+    }
+
     override fun onDestroy() {
-        MyCrashlytics.log(javaClass.simpleName + ".onDetach " + hashCode())
+        MyCrashlytics.log(javaClass.simpleName + ".onDestroy " + hashCode())
 
         createDisposable.dispose()
 

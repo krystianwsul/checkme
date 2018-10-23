@@ -108,9 +108,9 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     override fun onCleared() = stop()
 
-    inner class Observer : DomainObserver {
+    inner class Observer {
 
-        override fun onDomainChanged(dataIds: List<Int>) {
+        fun onDomainChanged(dataIds: List<Int>) {
             if (data.value?.let { dataIds.contains(it.dataId) } == true)
                 return
 

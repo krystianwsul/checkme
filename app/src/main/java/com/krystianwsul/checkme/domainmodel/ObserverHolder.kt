@@ -1,24 +1,21 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.viewmodels.DomainObserver
+import com.krystianwsul.checkme.viewmodels.DomainViewModel
 import java.lang.ref.WeakReference
-import java.util.*
 
 object ObserverHolder {
 
-    private val observers = ArrayList<WeakReference<DomainObserver>>()
+    private val observers = mutableListOf<WeakReference<DomainViewModel<*>.Observer>>()
 
     @Synchronized
-    fun addDomainObserver(observer: DomainObserver) = observers.add(WeakReference(observer))
+    fun addDomainObserver(observer: DomainViewModel<*>.Observer) = observers.add(WeakReference(observer))
 
     @Synchronized
-    fun clear() {
-        observers.clear()
-    }
+    fun clear() = observers.clear()
 
     @Synchronized
     fun notifyDomainObservers(dataIds: List<Int>) {
-        val remove = ArrayList<WeakReference<DomainObserver>>()
+        val remove = mutableListOf<WeakReference<DomainViewModel<*>.Observer>>()
 
         for (reference in observers) {
             val observer = reference.get()

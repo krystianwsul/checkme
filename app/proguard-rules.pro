@@ -45,3 +45,5 @@
 
 -keep class com.crashlytics.** { *; }
 -keep class com.google.firebase.** { *; }
+
+-keep class android.arch.lifecycle.** {*;}

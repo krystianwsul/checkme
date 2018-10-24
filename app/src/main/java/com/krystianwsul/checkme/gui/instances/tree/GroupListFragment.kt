@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -33,7 +34,8 @@ import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
-
+import io.reactivex.rxkotlin.Observables
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
@@ -446,6 +448,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
             return lines.joinToString("\n")
         }
 
+    private val dataRelay = PublishRelay.create<Pair<Int, DataWrapper>>()!!
+    private val viewCreatedRelay = PublishRelay.create<Unit>()!!
+
     private fun getShareData(instanceDatas: List<InstanceData>): String {
         check(instanceDatas.isNotEmpty())
 
@@ -494,6 +499,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 check(mSelectedNodes!!.isNotEmpty())
             }
         }
+
+        Observables.combineLatest(dataRelay, viewCreatedRelay) { pair, _ -> pair }
+                .subscribe { initialize(it.first, it.second) }
+                .addTo(createDisposable)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -513,6 +522,12 @@ class GroupListFragment : AbstractFragment(), FabUser {
         return view
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewCreatedRelay.accept(Unit)
+    }
+
     fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
         check(mPosition == null || mPosition == position)
         check(mTimeRange == null || mTimeRange == timeRange)
@@ -526,7 +541,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         mPosition = position
         mTimeRange = timeRange
 
-        initialize(dataId, dataWrapper)
+        dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) {
@@ -539,7 +554,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         mTimeStamp = timeStamp
 
-        initialize(dataId, dataWrapper)
+        dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) {
@@ -551,7 +566,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         mInstanceKey = instanceKey
 
-        initialize(dataId, dataWrapper)
+        dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setInstanceKeys(instanceKeys: Set<InstanceKey>, dataId: Int, dataWrapper: DataWrapper) {
@@ -563,7 +578,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         mInstanceKeys = instanceKeys
 
-        initialize(dataId, dataWrapper)
+        dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) {
@@ -575,7 +590,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         this.taskKey = taskKey
 
-        initialize(dataId, dataWrapper)
+        dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     private fun useGroups(): Boolean {

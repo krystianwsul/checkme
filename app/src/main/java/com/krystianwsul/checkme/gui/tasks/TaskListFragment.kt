@@ -280,8 +280,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_task_list, container, false)!!
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         taskListRecycler.layoutManager = LinearLayoutManager(context)
 
@@ -311,7 +311,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     private fun initialize() {
-        if (activity == null)
+        if (view == null)
             return
 
         if (taskData == null)

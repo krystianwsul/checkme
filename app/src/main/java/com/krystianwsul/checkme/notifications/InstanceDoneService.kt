@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Parcelable
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -25,7 +26,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         }
 
         fun throttleFirebase(context: Context, needsFirebase: Boolean, firebaseListener: (DomainFactory) -> Unit) {
-            val domainFactory = DomainFactory.getDomainFactory()
+            val domainFactory = KotlinDomainFactory.getKotlinDomainFactory().domainFactory
 
             if (domainFactory.isConnected) {
                 if (domainFactory.isConnectedAndSaved) {
@@ -68,7 +69,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId) // todo uodpornić na podwójne kliknięcie
 
-        throttleFirebase(this, instanceKey.type == TaskKey.Type.REMOTE, { setInstanceNotificationDone(it, instanceKey) })
+        throttleFirebase(this, instanceKey.type == TaskKey.Type.REMOTE) { setInstanceNotificationDone(it, instanceKey) }
     }
 
     private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceNotificationDone(this, SaveService.Source.SERVICE, instanceKey)

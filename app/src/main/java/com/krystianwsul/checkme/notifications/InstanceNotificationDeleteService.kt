@@ -4,7 +4,7 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
@@ -26,6 +26,6 @@ class InstanceNotificationDeleteService : IntentService("InstanceNotificationDel
     override fun onHandleIntent(intent: Intent?) {
         val instanceKey = intent!!.getParcelableExtra<InstanceKey>(INSTANCE_KEY)!!
 
-        DomainFactory.getDomainFactory().setInstanceNotified(this, 0, SaveService.Source.SERVICE, instanceKey)
+        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceNotified(this, 0, SaveService.Source.SERVICE, instanceKey)
     }
 }

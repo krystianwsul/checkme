@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.notifications
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
@@ -18,7 +18,8 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
         fun getIntent(context: Context, instanceKeys: ArrayList<InstanceKey>) = Intent(context, GroupNotificationDeleteService::class.java).apply {
             check(!instanceKeys.isEmpty())
 
-            check(instanceKeys.filter { it.type == TaskKey.Type.REMOTE }
+            check(instanceKeys.asSequence()
+                    .filter { it.type == TaskKey.Type.REMOTE }
                     .mapNotNull { it.scheduleKey.scheduleTimePair.customTimeKey }
                     .all { it.type == TaskKey.Type.REMOTE })
 
@@ -30,6 +31,6 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!
         check(!instanceKeys.isEmpty())
 
-        DomainFactory.getDomainFactory().setInstancesNotified(this, SaveService.Source.SERVICE, instanceKeys)
+        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesNotified(this, SaveService.Source.SERVICE, instanceKeys)
     }
 }

@@ -99,11 +99,6 @@ import kotlin.jvm.functions.Function1;
 
 @SuppressLint("UseSparseArrays")
 public class DomainFactory {
-    private static DomainFactory sDomainFactory;
-
-    private static ExactTimeStamp sStart;
-    private static ExactTimeStamp sRead;
-    private static ExactTimeStamp sStop;
 
     @Nullable
     private UserInfo mUserInfo;
@@ -143,24 +138,7 @@ public class DomainFactory {
         if (!value) throw new IllegalStateException();
     }
 
-    @NonNull
-    public static synchronized DomainFactory getDomainFactory() {
-        if (sDomainFactory == null) {
-            sStart = ExactTimeStamp.Companion.getNow();
-
-            sDomainFactory = new DomainFactory();
-
-            sRead = ExactTimeStamp.Companion.getNow();
-
-            sDomainFactory.initialize();
-
-            sStop = ExactTimeStamp.Companion.getNow();
-        }
-
-        return sDomainFactory;
-    }
-
-    private DomainFactory() {
+    DomainFactory() {
         mLocalFactory = LocalFactory.Companion.getInstance();
     }
 
@@ -168,7 +146,7 @@ public class DomainFactory {
         mLocalFactory = new LocalFactory(persistenceManger);
     }
 
-    private void initialize() {
+    void initialize() {
         mLocalFactory.initialize(this);
     }
 
@@ -176,19 +154,11 @@ public class DomainFactory {
         return mTickData != null && mTickData.getWakelock().isHeld();
     }
 
-    public long getReadMillis() {
-        return (sRead.getLong() - sStart.getLong());
-    }
-
-    public long getInstantiateMillis() {
-        return (sStop.getLong() - sRead.getLong());
-    }
-
     public synchronized void reset(@NonNull Context context, @NonNull SaveService.Source source) {
         UserInfo userInfo = mUserInfo;
         clearUserInfo(context);
 
-        sDomainFactory = null;
+        KotlinDomainFactory.Companion.set_kotlinDomainFactory(null);
         mLocalFactory.reset();
 
         if (userInfo != null)
@@ -2657,8 +2627,8 @@ public class DomainFactory {
         String message = "";
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (notificationInstances.size() > TickJobIntentService.Companion.getMAX_NOTIFICATIONS()) { // show group
-                if (shownInstanceKeys.size() > TickJobIntentService.Companion.getMAX_NOTIFICATIONS()) { // group shown
+            if (notificationInstances.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // show group
+                if (shownInstanceKeys.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
                         NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
                     } else {
@@ -2682,7 +2652,7 @@ public class DomainFactory {
                     NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
                 }
             } else { // show instances
-                if (shownInstanceKeys.size() > TickJobIntentService.Companion.getMAX_NOTIFICATIONS()) { // group shown
+                if (shownInstanceKeys.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
                     NotificationWrapper.Companion.getInstance().cancelNotification(0);
 
                     for (Instance instance : notificationInstances.values()) {

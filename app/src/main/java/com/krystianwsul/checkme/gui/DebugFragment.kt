@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import kotlinx.android.synthetic.main.fragment_debug.*
@@ -49,14 +49,15 @@ class DebugFragment : AbstractFragment() {
             stringBuilder.append("\ntick log:\n")
             stringBuilder.append(tickLog)
 
-            val domainFactory = DomainFactory.getDomainFactory()
+            val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+            val domainFactory = kotlinDomainFactory.domainFactory
 
             stringBuilder.append("\ndata load time: ")
-            stringBuilder.append(domainFactory.readMillis + domainFactory.instantiateMillis)
+            stringBuilder.append(kotlinDomainFactory.readMillis + kotlinDomainFactory.instantiateMillis)
             stringBuilder.append("ms (")
-            stringBuilder.append(domainFactory.readMillis)
+            stringBuilder.append(kotlinDomainFactory.readMillis)
             stringBuilder.append(" + ")
-            stringBuilder.append(domainFactory.instantiateMillis)
+            stringBuilder.append(kotlinDomainFactory.instantiateMillis)
             stringBuilder.append(")")
 
             stringBuilder.append("\ntasks: ")
@@ -67,7 +68,7 @@ class DebugFragment : AbstractFragment() {
             stringBuilder.append(domainFactory.customTimeCount)
 
             val t1 = ExactTimeStamp.now
-            DomainFactory.getDomainFactory().getGroupListData(activity!!, ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.getGroupListData(activity!!, ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
             val t2 = ExactTimeStamp.now
 
             stringBuilder.append("\ntoday: ")

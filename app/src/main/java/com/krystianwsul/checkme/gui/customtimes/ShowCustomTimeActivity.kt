@@ -10,7 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
-
 import kotlinx.android.synthetic.main.activity_show_custom_time.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
@@ -103,9 +102,9 @@ class ShowCustomTimeActivity : AbstractActivity() {
                     showCustomTimeViewModel?.stop()
 
                     if (data != null) {
-                        DomainFactory.getDomainFactory().updateCustomTime(this@ShowCustomTimeActivity, data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
+                        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.updateCustomTime(this@ShowCustomTimeActivity, data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
                     } else {
-                        val customTimeId = DomainFactory.getDomainFactory().createCustomTime(this@ShowCustomTimeActivity, SaveService.Source.GUI, name, hourMinutes)
+                        val customTimeId = KotlinDomainFactory.getKotlinDomainFactory().domainFactory.createCustomTime(this@ShowCustomTimeActivity, SaveService.Source.GUI, name, hourMinutes)
                         check(customTimeId > 0)
 
                         setResult(customTimeId)

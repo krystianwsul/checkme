@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.persistencemodel
 
 import android.content.Context
 import android.util.Log
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
@@ -31,7 +31,7 @@ object SaveService {
                 sqLiteDatabase.endTransaction()
             }
         } catch (e: Exception) {
-            DomainFactory.getDomainFactory().reset(context, source)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.reset(context, source)
             throw e
         }
     }
@@ -62,14 +62,18 @@ object SaveService {
                         persistenceManger.instanceShownRecords)
 
                 val insertCommands = collections.flatten()
+                        .asSequence()
                         .filter { it.needsInsert() }
                         .map { it.insertCommand }
+                        .toList()
 
                 // update
 
                 val updateCommands = collections.flatten()
+                        .asSequence()
                         .filter { it.needsUpdate() }
                         .map { it.updateCommand }
+                        .toList()
 
                 val deleteCommands = collections.map { delete(it) }
                         .flatten()

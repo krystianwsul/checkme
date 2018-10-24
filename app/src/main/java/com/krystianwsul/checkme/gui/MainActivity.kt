@@ -36,7 +36,7 @@ import com.jakewharton.rxbinding2.widget.textChanges
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
@@ -113,13 +113,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         if (firebaseUser != null) {
             userInfo = UserInfo(firebaseUser)
 
-            DomainFactory.getDomainFactory().setUserInfo(this, SaveService.Source.GUI, userInfo!!)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setUserInfo(this, SaveService.Source.GUI, userInfo!!)
 
             Log.e("asdf", "firebase logged in")
         } else {
             userInfo = null
 
-            DomainFactory.getDomainFactory().clearUserInfo(this)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.clearUserInfo(this)
 
             Log.e("asdf", "firebase logged out")
         }

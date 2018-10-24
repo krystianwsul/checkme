@@ -5,7 +5,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -17,7 +17,6 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-
 import java.util.*
 
 class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, private val instanceDatas: MutableList<GroupListFragment.InstanceData>, private val selectable: Boolean) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
@@ -196,7 +195,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         return View.OnClickListener {
             it.setOnClickListener(null)
 
-            singleInstanceData.Done = DomainFactory.getDomainFactory().setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)
+            singleInstanceData.Done = KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)
             check(singleInstanceData.Done != null)
 
             GroupListFragment.recursiveExists(singleInstanceData)
@@ -363,12 +362,12 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             if (it.hierarchyData != null) {
                 it.hierarchyData.ordinal = ordinal
 
-                DomainFactory.getDomainFactory().setTaskHierarchyOrdinal(groupListFragment.mDataId!!, it.hierarchyData)
+                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskHierarchyOrdinal(groupListFragment.mDataId!!, it.hierarchyData)
             } else {
                 it.ordinal = ordinal
 
 
-                DomainFactory.getDomainFactory().setInstanceOrdinal(groupListFragment.mDataId!!, it.InstanceKey, ordinal)
+                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceOrdinal(groupListFragment.mDataId!!, it.InstanceKey, ordinal)
             }
         }
     }
@@ -483,7 +482,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
                 check(notDoneGroupTreeNode.isExpanded)
 
-                instanceData.Done = DomainFactory.getDomainFactory().setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)
+                instanceData.Done = KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDone(groupAdapter.mGroupListFragment.activity!!, groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)
                 check(instanceData.Done != null)
 
                 GroupListFragment.recursiveExists(instanceData)

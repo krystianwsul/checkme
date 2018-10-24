@@ -13,7 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -129,7 +129,7 @@ class EditInstancesActivity : AbstractActivity() {
 
                 editInstancesViewModel.stop()
 
-                DomainFactory.getDomainFactory().setInstancesAddHourActivity(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
+                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesAddHourActivity(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
 
                 finish()
             }
@@ -138,7 +138,7 @@ class EditInstancesActivity : AbstractActivity() {
                 checkNotNull(mData)
 
                 if (isValidDateTime) {
-                    DomainFactory.getDomainFactory().setInstancesDateTime(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
+                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesDateTime(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
 
                     finish()
                 }

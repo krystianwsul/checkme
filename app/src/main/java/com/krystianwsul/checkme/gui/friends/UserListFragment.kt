@@ -17,13 +17,12 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
-
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
@@ -213,9 +212,9 @@ class UserListFragment : AbstractFragment(), FabUser {
         if (projectId.isNullOrEmpty()) {
             check(saveState.removedIds.isEmpty())
 
-            DomainFactory.getDomainFactory().createProject(activity!!, data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.createProject(activity!!, data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
         } else {
-            DomainFactory.getDomainFactory().updateProject(activity!!, data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.updateProject(activity!!, data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
         }
     }
 

@@ -16,7 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
-
 import java.util.*
 
 class ShowCustomTimesFragment : AbstractFragment(), FabUser {
@@ -269,7 +268,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             val selectedCustomTimeIds = selectedCustomTimeWrappers.map { it.customTimeData.id }
 
-            DomainFactory.getDomainFactory().setCustomTimeCurrent(showCustomTimesFragment.activity!!, dataId, SaveService.Source.GUI, selectedCustomTimeIds)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setCustomTimeCurrent(showCustomTimesFragment.activity!!, dataId, SaveService.Source.GUI, selectedCustomTimeIds)
         }
 
         private inner class CustomTimeHolder(val showCustomTimeRow: View, val timesRowName: TextView) : RecyclerView.ViewHolder(showCustomTimeRow) {

@@ -15,7 +15,7 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
-
 import kotlinx.android.synthetic.main.row_project.view.*
 import java.util.*
 
@@ -77,7 +76,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                         decrementSelected()
                     }
 
-                    DomainFactory.getDomainFactory().setProjectEndTimeStamps(activity!!, dataId!!, SaveService.Source.GUI, projectIds)
+                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setProjectEndTimeStamps(activity!!, dataId!!, SaveService.Source.GUI, projectIds)
                 }
                 else -> throw UnsupportedOperationException()
             }

@@ -14,7 +14,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
@@ -91,7 +91,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         selected = treeViewAdapter!!.selectedNodes
                     } while (selected.isNotEmpty())
 
-                    DomainFactory.getDomainFactory().setTaskEndTimeStamps(activity!!, dataId!!, SaveService.Source.GUI, taskKeys)
+                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskEndTimeStamps(activity!!, dataId!!, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -122,7 +122,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val selectedNodes = treeViewAdapter!!.selectedNodes
             check(!selectedNodes.isEmpty())
 
-            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
+            val projectIdCount = selectedNodes.asSequence()
+                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
                     .distinct()
                     .count()
 
@@ -142,7 +143,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val selectedNodes = treeViewAdapter!!.selectedNodes
             check(!selectedNodes.isEmpty())
 
-            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
+            val projectIdCount = selectedNodes.asSequence()
+                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
                     .distinct()
                     .count()
 
@@ -179,7 +181,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val selectedNodes = treeViewAdapter!!.selectedNodes
             check(selectedNodes.size > 1)
 
-            val projectIdCount = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
+            val projectIdCount = selectedNodes.asSequence()
+                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
                     .distinct()
                     .count()
 
@@ -691,7 +694,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun setOrdinal(ordinal: Double) {
                 childTaskData.hierarchyData!!.ordinal = ordinal
 
-                DomainFactory.getDomainFactory().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
+                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
             }
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)

@@ -11,7 +11,7 @@ import android.text.TextUtils
 import android.view.Menu
 import android.view.MenuItem
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.NotificationWrapperImpl
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -126,7 +126,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     if (!it.exists)
                         showInstanceViewModel.stop()
 
-                    DomainFactory.getDomainFactory().setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
                     if (!it.exists)
                         finish()
@@ -183,7 +183,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
                 first = false
 
-                DomainFactory.getDomainFactory().let {
+                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.let {
                     val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
                     it.setInstanceNotified(this, data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
@@ -202,7 +202,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     }
 
     private fun setDone(done: Boolean) {
-        DomainFactory.getDomainFactory().setInstanceDone(this, dataId, SaveService.Source.GUI, instanceKey, done)
+        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDone(this, dataId, SaveService.Source.GUI, instanceKey, done)
         instanceData!!.done = done
 
         invalidateOptionsMenu()

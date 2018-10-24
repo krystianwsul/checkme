@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
@@ -23,7 +24,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private var observer: Observer? = null
 
-    private val domainFactory = DomainFactory.getDomainFactory()
+    private val domainFactory = KotlinDomainFactory.getKotlinDomainFactory().domainFactory
 
     private val firebaseListener = { domainFactory: DomainFactory ->
         check(domainFactory.isConnected)

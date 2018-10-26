@@ -4,6 +4,8 @@ import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
+import com.krystianwsul.checkme.firebase.RemoteRootUser
+import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 class KotlinDomainFactory {
@@ -40,6 +42,16 @@ class KotlinDomainFactory {
     lateinit var localFactory: LocalFactory
 
     var remoteProjectFactory: RemoteProjectFactory? = null
+
+    var remoteRootUser: RemoteRootUser? = null
+
+    val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
+
+    var tickData: TickData? = null
+
+    var skipSave = false
+
+    val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
     init {
         start = ExactTimeStamp.now

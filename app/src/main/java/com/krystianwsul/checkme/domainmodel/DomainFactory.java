@@ -101,19 +101,6 @@ public class DomainFactory {
 
     private final KotlinDomainFactory kotlinDomainFactory;
 
-    @Nullable
-    private RemoteRootUser mRemoteRootUser;
-
-    @NonNull
-    private final List<Function1<DomainFactory, Unit>> mNotTickFirebaseListeners = new ArrayList<>();
-
-    @Nullable
-    private TickData mTickData = null;
-
-    private boolean mSkipSave = false;
-
-    private final Map<InstanceKey, Long> mLastNotificationBeeps = new HashMap<>();
-
     private static void check(boolean value) {
         if (!value) throw new IllegalStateException();
     }
@@ -133,7 +120,7 @@ public class DomainFactory {
     }
 
     public boolean isHoldingWakeLock() {
-        return mTickData != null && mTickData.getWakelock().isHeld();
+        return kotlinDomainFactory.getTickData() != null && kotlinDomainFactory.getTickData().getWakelock().isHeld();
     }
 
     public synchronized void reset(@NonNull Context context, @NonNull SaveService.Source source) {
@@ -177,7 +164,7 @@ public class DomainFactory {
     }
 
     private void save(@NonNull Context context, @NonNull List<Integer> dataIds, @NonNull SaveService.Source source) {
-        if (mSkipSave)
+        if (kotlinDomainFactory.getSkipSave())
             return;
 
         kotlinDomainFactory.localFactory.save(context, source);
@@ -233,12 +220,12 @@ public class DomainFactory {
 
                 MyCrashlytics.INSTANCE.logException(databaseError.toException());
 
-                if (mTickData != null) {
-                    mTickData.release();
-                    mTickData = null;
+                if (kotlinDomainFactory.getTickData() != null) {
+                    kotlinDomainFactory.getTickData().release();
+                    kotlinDomainFactory.setTickData(null);
                 }
 
-                mNotTickFirebaseListeners.clear();
+                kotlinDomainFactory.getNotTickFirebaseListeners().clear();
                 RemoteFriendFactory.Companion.clearFriendListeners();
             }
         });
@@ -317,32 +304,32 @@ public class DomainFactory {
 
         RemoteFriendFactory.Companion.tryNotifyFriendListeners(); // assuming they're all getters
 
-        if (mTickData == null && mNotTickFirebaseListeners.isEmpty()) {
+        if (kotlinDomainFactory.getTickData() == null && kotlinDomainFactory.getNotTickFirebaseListeners().isEmpty()) {
             updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
 
             save(context, 0, source);
         } else {
-            mSkipSave = true;
+            kotlinDomainFactory.setSkipSave(true);
 
-            if (mTickData == null) {
+            if (kotlinDomainFactory.getTickData() == null) {
                 updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
             } else {
-                updateNotificationsTick(context, source, mTickData.getSilent(), mTickData.getSource());
+                updateNotificationsTick(context, source, kotlinDomainFactory.getTickData().getSilent(), kotlinDomainFactory.getTickData().getSource());
 
                 if (!firstThereforeSilent) {
-                    Log.e("asdf", "not first, clearing mTickData");
+                    Log.e("asdf", "not first, clearing kotlinDomainFactory.getMTickData()");
 
-                    mTickData.release();
-                    mTickData = null;
+                    kotlinDomainFactory.getTickData().release();
+                    kotlinDomainFactory.setTickData(null);
                 } else {
-                    Log.e("asdf", "first, keeping mTickData");
+                    Log.e("asdf", "first, keeping kotlinDomainFactory.getMTickData()");
                 }
             }
 
-            Stream.of(mNotTickFirebaseListeners).forEach(firebaseListener -> firebaseListener.invoke(this));
-            mNotTickFirebaseListeners.clear();
+            Stream.of(kotlinDomainFactory.getNotTickFirebaseListeners()).forEach(firebaseListener -> firebaseListener.invoke(this));
+            kotlinDomainFactory.getNotTickFirebaseListeners().clear();
 
-            mSkipSave = false;
+            kotlinDomainFactory.setSkipSave(false);
 
             save(context, 0, source);
         }
@@ -353,31 +340,31 @@ public class DomainFactory {
         check(userWrapper != null);
 
         RemoteRootUserRecord remoteRootUserRecord = new RemoteRootUserRecord(false, userWrapper);
-        mRemoteRootUser = new RemoteRootUser(remoteRootUserRecord);
+        kotlinDomainFactory.setRemoteRootUser(new RemoteRootUser(remoteRootUserRecord));
     }
 
     public synchronized void addFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
-        mNotTickFirebaseListeners.add(firebaseListener);
+        kotlinDomainFactory.getNotTickFirebaseListeners().add(firebaseListener);
     }
 
     public synchronized void removeFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
-        mNotTickFirebaseListeners.remove(firebaseListener);
+        kotlinDomainFactory.getNotTickFirebaseListeners().remove(firebaseListener);
     }
 
     public synchronized void setFirebaseTickListener(@NonNull Context context, @NonNull SaveService.Source source, @NonNull TickData tickData) {
         check(FirebaseAuth.getInstance().getCurrentUser() != null);
 
-        if ((kotlinDomainFactory.getRemoteProjectFactory() != null) && !kotlinDomainFactory.getRemoteProjectFactory().isSaved() && (mTickData == null)) {
+        if ((kotlinDomainFactory.getRemoteProjectFactory() != null) && !kotlinDomainFactory.getRemoteProjectFactory().isSaved() && (kotlinDomainFactory.getTickData() == null)) {
             updateNotificationsTick(context, source, tickData.getSilent(), tickData.getSource());
 
             tickData.release();
         } else {
-            if (mTickData != null) {
-                mTickData = mergeTickDatas(context, mTickData, tickData);
+            if (kotlinDomainFactory.getTickData() != null) {
+                kotlinDomainFactory.setTickData(mergeTickDatas(context, kotlinDomainFactory.getTickData(), tickData));
             } else {
-                mTickData = tickData;
+                kotlinDomainFactory.setTickData(tickData);
             }
         }
     }
@@ -1786,7 +1773,7 @@ public class DomainFactory {
         check(!TextUtils.isEmpty(name));
         check(kotlinDomainFactory.getRemoteProjectFactory() != null);
         check(kotlinDomainFactory.getUserInfo() != null);
-        check(mRemoteRootUser != null);
+        check(kotlinDomainFactory.getRemoteRootUser() != null);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
@@ -1796,7 +1783,7 @@ public class DomainFactory {
         check(!recordOf.contains(key));
         recordOf.add(key);
 
-        RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().createRemoteProject(name, now, recordOf, mRemoteRootUser);
+        RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().createRemoteProject(name, now, recordOf, kotlinDomainFactory.getRemoteRootUser());
 
         save(context, dataId, source);
 
@@ -2755,7 +2742,7 @@ public class DomainFactory {
     private void notifyInstance(@NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
         long realtime = SystemClock.elapsedRealtime();
 
-        Optional<Long> optional = Stream.of(mLastNotificationBeeps.values()).max(Long::compareTo);
+        Optional<Long> optional = Stream.of(kotlinDomainFactory.getLastNotificationBeeps().values()).max(Long::compareTo);
         if (optional.isPresent() && realtime - optional.get() < 5000) {
             Log.e("asdf", "skipping notification sound for " + instance.getName());
 
@@ -2765,7 +2752,7 @@ public class DomainFactory {
         NotificationWrapper.Companion.getInstance().notifyInstance(this, instance, silent, now);
 
         if (!silent)
-            mLastNotificationBeeps.put(instance.getInstanceKey(), SystemClock.elapsedRealtime());
+            kotlinDomainFactory.getLastNotificationBeeps().put(instance.getInstanceKey(), SystemClock.elapsedRealtime());
     }
 
     private void updateInstance(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
@@ -2773,8 +2760,8 @@ public class DomainFactory {
 
         long realtime = SystemClock.elapsedRealtime();
 
-        if (mLastNotificationBeeps.containsKey(instanceKey)) {
-            long then = mLastNotificationBeeps.get(instanceKey);
+        if (kotlinDomainFactory.getLastNotificationBeeps().containsKey(instanceKey)) {
+            long then = kotlinDomainFactory.getLastNotificationBeeps().get(instanceKey);
 
             check(realtime > then);
 

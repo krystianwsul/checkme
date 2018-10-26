@@ -100,8 +100,7 @@ import kotlin.jvm.functions.Function1;
 @SuppressLint("UseSparseArrays")
 public class DomainFactory {
 
-    @Nullable
-    private UserInfo mUserInfo;
+    private final KotlinDomainFactory kotlinDomainFactory;
 
     @Nullable
     private Query mRecordQuery;
@@ -138,11 +137,13 @@ public class DomainFactory {
         if (!value) throw new IllegalStateException();
     }
 
-    DomainFactory() {
+    DomainFactory(@NonNull KotlinDomainFactory kotlinDomainFactory) {
+        this.kotlinDomainFactory = kotlinDomainFactory;
         mLocalFactory = LocalFactory.Companion.getInstance();
     }
 
-    DomainFactory(@NonNull PersistenceManger persistenceManger) {
+    DomainFactory(@NonNull KotlinDomainFactory kotlinDomainFactory, @NonNull PersistenceManger persistenceManger) {
+        this.kotlinDomainFactory = kotlinDomainFactory;
         mLocalFactory = new LocalFactory(persistenceManger);
     }
 
@@ -155,7 +156,7 @@ public class DomainFactory {
     }
 
     public synchronized void reset(@NonNull Context context, @NonNull SaveService.Source source) {
-        UserInfo userInfo = mUserInfo;
+        UserInfo userInfo = kotlinDomainFactory.getUserInfo();
         clearUserInfo(context);
 
         KotlinDomainFactory.Companion.set_kotlinDomainFactory(null);
@@ -208,17 +209,17 @@ public class DomainFactory {
     // firebase
 
     public synchronized void setUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
-        if (mUserInfo != null) {
+        if (kotlinDomainFactory.getUserInfo() != null) {
             check(mRecordQuery != null);
             check(mUserQuery != null);
 
-            if (mUserInfo.equals(userInfo))
+            if (kotlinDomainFactory.getUserInfo().equals(userInfo))
                 return;
 
             clearUserInfo(context);
         }
 
-        check(mUserInfo == null);
+        check(kotlinDomainFactory.getUserInfo() == null);
 
         check(mRecordQuery == null);
         check(mRecordListener == null);
@@ -226,7 +227,7 @@ public class DomainFactory {
         check(mUserQuery == null);
         check(mUserListener == null);
 
-        mUserInfo = userInfo;
+        kotlinDomainFactory.setUserInfo(userInfo);
 
         Context applicationContext = context.getApplicationContext();
         check(applicationContext != null);
@@ -261,7 +262,7 @@ public class DomainFactory {
         };
         mRecordQuery.addValueEventListener(mRecordListener);
 
-        RemoteFriendFactory.Companion.setListener(mUserInfo);
+        RemoteFriendFactory.Companion.setListener(kotlinDomainFactory.getUserInfo());
 
         mUserQuery = DatabaseWrapper.INSTANCE.getUserQuery(userInfo);
         mUserListener = new ValueEventListener() {
@@ -287,7 +288,7 @@ public class DomainFactory {
     public synchronized void clearUserInfo(@NonNull Context context) {
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        if (mUserInfo == null) {
+        if (kotlinDomainFactory.getUserInfo() == null) {
             check(mRecordQuery == null);
             check(mRecordListener == null);
             check(mUserQuery == null);
@@ -304,7 +305,7 @@ public class DomainFactory {
             mRemoteProjectFactory = null;
             RemoteFriendFactory.Companion.setInstance(null);
 
-            mUserInfo = null;
+            kotlinDomainFactory.setUserInfo(null);
 
             mRecordQuery.removeEventListener(mRecordListener);
             mRecordQuery = null;
@@ -323,14 +324,14 @@ public class DomainFactory {
     }
 
     private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot, @NonNull SaveService.Source source) {
-        check(mUserInfo != null);
+        check(kotlinDomainFactory.getUserInfo() != null);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         mLocalFactory.clearRemoteCustomTimeRecords();
 
         boolean firstThereforeSilent = (mRemoteProjectFactory == null);
-        mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), mUserInfo, mLocalFactory.getUuid(), now);
+        mRemoteProjectFactory = new RemoteProjectFactory(this, dataSnapshot.getChildren(), kotlinDomainFactory.getUserInfo(), mLocalFactory.getUuid(), now);
 
         RemoteFriendFactory.Companion.tryNotifyFriendListeners(); // assuming they're all getters
 
@@ -1003,7 +1004,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowProjectData");
 
         check(mRemoteProjectFactory != null);
-        check(mUserInfo != null);
+        check(kotlinDomainFactory.getUserInfo() != null);
         check(RemoteFriendFactory.Companion.hasFriends());
 
         Map<String, ShowProjectViewModel.UserListData> friendDatas = Stream.of(RemoteFriendFactory.Companion.getFriends()).map(remoteRootUser -> new ShowProjectViewModel.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId())).collect(Collectors.toMap(ShowProjectViewModel.UserListData::getId, userData -> userData));
@@ -1015,8 +1016,7 @@ public class DomainFactory {
 
             name = remoteProject.getName();
 
-            userListDatas = Stream.of(remoteProject.getUsers())
-                    .filterNot(remoteUser -> remoteUser.getId().equals(mUserInfo.getKey())).map(remoteUser -> new ShowProjectViewModel.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
+            userListDatas = Stream.of(remoteProject.getUsers()).filterNot(remoteUser -> remoteUser.getId().equals(kotlinDomainFactory.getUserInfo().getKey())).map(remoteUser -> new ShowProjectViewModel.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
                     .collect(Collectors.toSet());
         } else {
             name = null;
@@ -1333,7 +1333,7 @@ public class DomainFactory {
         Task newParentTask;
         if (!TextUtils.isEmpty(finalProjectId)) {
             check(mRemoteProjectFactory != null);
-            check(mUserInfo != null);
+            check(kotlinDomainFactory.getUserInfo() != null);
 
             newParentTask = mRemoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId);
         } else {
@@ -1671,7 +1671,7 @@ public class DomainFactory {
         Task newParentTask;
         if (!TextUtils.isEmpty(finalProjectId)) {
             check(mRemoteProjectFactory != null);
-            check(mUserInfo != null);
+            check(kotlinDomainFactory.getUserInfo() != null);
 
             newParentTask = mRemoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId);
         } else {
@@ -1749,25 +1749,25 @@ public class DomainFactory {
     public synchronized void removeFriends(@NonNull Set<String> keys) {
         MyCrashlytics.INSTANCE.log("DomainFactory.removeFriends");
 
-        check(mUserInfo != null);
+        check(kotlinDomainFactory.getUserInfo() != null);
         check(mRemoteProjectFactory != null);
         check(RemoteFriendFactory.Companion.hasFriends());
         check(!RemoteFriendFactory.Companion.isSaved());
 
-        Stream.of(keys).forEach(friendId -> RemoteFriendFactory.Companion.removeFriend(mUserInfo.getKey(), friendId));
+        Stream.of(keys).forEach(friendId -> RemoteFriendFactory.Companion.removeFriend(kotlinDomainFactory.getUserInfo().getKey(), friendId));
 
         RemoteFriendFactory.Companion.save();
     }
 
     public synchronized void updateUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateUserInfo");
-        check(mUserInfo != null);
+        check(kotlinDomainFactory.getUserInfo() != null);
         check(mRemoteProjectFactory != null);
 
-        if (mUserInfo.equals(userInfo))
+        if (kotlinDomainFactory.getUserInfo().equals(userInfo))
             return;
 
-        mUserInfo = userInfo;
+        kotlinDomainFactory.setUserInfo(userInfo);
         DatabaseWrapper.INSTANCE.setUserInfo(userInfo, mLocalFactory.getUuid());
 
         mRemoteProjectFactory.updateUserInfo(userInfo);
@@ -1803,14 +1803,14 @@ public class DomainFactory {
 
         check(!TextUtils.isEmpty(name));
         check(mRemoteProjectFactory != null);
-        check(mUserInfo != null);
+        check(kotlinDomainFactory.getUserInfo() != null);
         check(mRemoteRootUser != null);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         Set<String> recordOf = new HashSet<>(friends);
 
-        String key = mUserInfo.getKey();
+        String key = kotlinDomainFactory.getUserInfo().getKey();
         check(!recordOf.contains(key));
         recordOf.add(key);
 
@@ -1825,7 +1825,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setProjectEndTimeStamps");
 
         check(mRemoteProjectFactory != null);
-        check(mUserInfo != null);
+        check(kotlinDomainFactory.getUserInfo() != null);
         check(!projectIds.isEmpty());
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
@@ -2131,7 +2131,7 @@ public class DomainFactory {
         check(!TextUtils.isEmpty(projectId));
 
         check(mRemoteProjectFactory != null);
-        check(mUserInfo != null);
+        check(kotlinDomainFactory.getUserInfo() != null);
 
         LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
         mLocalFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask);
@@ -2516,18 +2516,18 @@ public class DomainFactory {
 
     private void notifyCloud(@NonNull Context context, @NonNull Set<RemoteProject> remoteProjects) {
         if (!remoteProjects.isEmpty()) {
-            check(mUserInfo != null);
+            check(kotlinDomainFactory.getUserInfo() != null);
 
-            BackendNotifier.INSTANCE.notify(context, remoteProjects, mUserInfo, new ArrayList<>());
+            BackendNotifier.INSTANCE.notify(context, remoteProjects, kotlinDomainFactory.getUserInfo(), new ArrayList<>());
         }
     }
 
     private void notifyCloud(@NonNull Context context, @NonNull RemoteProject remoteProject, @NonNull Collection<String> userKeys) {
-        check(mUserInfo != null);
+        check(kotlinDomainFactory.getUserInfo() != null);
 
         Set<RemoteProject> remoteProjects = Collections.singleton(remoteProject);
 
-        BackendNotifier.INSTANCE.notify(context, remoteProjects, mUserInfo, userKeys);
+        BackendNotifier.INSTANCE.notify(context, remoteProjects, kotlinDomainFactory.getUserInfo(), userKeys);
     }
 
     private void updateNotifications(@NonNull Context context, @NonNull ExactTimeStamp now) {

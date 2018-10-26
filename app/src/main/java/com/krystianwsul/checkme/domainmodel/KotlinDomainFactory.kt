@@ -16,9 +16,8 @@ class KotlinDomainFactory {
         }
     }
 
-
     private var start = ExactTimeStamp.now
-    val domainFactory = DomainFactory()
+    val domainFactory = DomainFactory(this)
     private var read: ExactTimeStamp = ExactTimeStamp.now
     private var stop: ExactTimeStamp
 
@@ -31,4 +30,6 @@ class KotlinDomainFactory {
     val readMillis get() = read.long - start.long
 
     val instantiateMillis get() = stop.long - read.long
+
+    var userInfo: UserInfo? = null
 }

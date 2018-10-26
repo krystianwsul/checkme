@@ -23,12 +23,6 @@ class KotlinDomainFactory {
     private var read: ExactTimeStamp = ExactTimeStamp.now
     private var stop: ExactTimeStamp
 
-    init {
-        domainFactory.initialize()
-
-        stop = ExactTimeStamp.now
-    }
-
     val readMillis get() = read.long - start.long
 
     val instantiateMillis get() = stop.long - read.long
@@ -38,4 +32,14 @@ class KotlinDomainFactory {
     var recordQuery: Query? = null
 
     var recordListener: ValueEventListener? = null
+
+    var userQuery: Query? = null
+
+    var userListener: ValueEventListener? = null
+
+    init {
+        domainFactory.initialize()
+
+        stop = ExactTimeStamp.now
+    }
 }

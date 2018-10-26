@@ -103,12 +103,6 @@ public class DomainFactory {
     private final KotlinDomainFactory kotlinDomainFactory;
 
     @Nullable
-    private Query mRecordQuery;
-
-    @Nullable
-    private ValueEventListener mRecordListener;
-
-    @Nullable
     private Query mUserQuery;
 
     @Nullable
@@ -210,7 +204,7 @@ public class DomainFactory {
 
     public synchronized void setUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
         if (kotlinDomainFactory.getUserInfo() != null) {
-            check(mRecordQuery != null);
+            check(kotlinDomainFactory.getRecordQuery() != null);
             check(mUserQuery != null);
 
             if (kotlinDomainFactory.getUserInfo().equals(userInfo))
@@ -221,8 +215,8 @@ public class DomainFactory {
 
         check(kotlinDomainFactory.getUserInfo() == null);
 
-        check(mRecordQuery == null);
-        check(mRecordListener == null);
+        check(kotlinDomainFactory.getRecordQuery() == null);
+        check(kotlinDomainFactory.getRecordListener() == null);
 
         check(mUserQuery == null);
         check(mUserListener == null);
@@ -234,11 +228,11 @@ public class DomainFactory {
 
         DatabaseWrapper.INSTANCE.setUserInfo(userInfo, mLocalFactory.getUuid());
 
-        mRecordQuery = DatabaseWrapper.INSTANCE.getTaskRecordsQuery(userInfo);
-        mRecordListener = new ValueEventListener() {
+        kotlinDomainFactory.setRecordQuery(DatabaseWrapper.INSTANCE.getTaskRecordsQuery(userInfo));
+        kotlinDomainFactory.setRecordListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.e("asdf", "DomainFactory.mRecordListener.onDataChange, dataSnapshot: " + dataSnapshot);
+                Log.e("asdf", "DomainFactory.kotlinDomainFactory.getMRecordListener().onDataChange, dataSnapshot: " + dataSnapshot);
                 check(dataSnapshot != null);
 
                 setRemoteTaskRecords(applicationContext, dataSnapshot, source);
@@ -247,7 +241,7 @@ public class DomainFactory {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 check(databaseError != null);
-                Log.e("asdf", "DomainFactory.mRecordListener.onCancelled", databaseError.toException());
+                Log.e("asdf", "DomainFactory.kotlinDomainFactory.getMRecordListener().onCancelled", databaseError.toException());
 
                 MyCrashlytics.INSTANCE.logException(databaseError.toException());
 
@@ -259,8 +253,8 @@ public class DomainFactory {
                 mNotTickFirebaseListeners.clear();
                 RemoteFriendFactory.Companion.clearFriendListeners();
             }
-        };
-        mRecordQuery.addValueEventListener(mRecordListener);
+        });
+        kotlinDomainFactory.getRecordQuery().addValueEventListener(kotlinDomainFactory.getRecordListener());
 
         RemoteFriendFactory.Companion.setListener(kotlinDomainFactory.getUserInfo());
 
@@ -289,13 +283,13 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         if (kotlinDomainFactory.getUserInfo() == null) {
-            check(mRecordQuery == null);
-            check(mRecordListener == null);
+            check(kotlinDomainFactory.getRecordQuery() == null);
+            check(kotlinDomainFactory.getRecordListener() == null);
             check(mUserQuery == null);
             check(mUserListener == null);
         } else {
-            check(mRecordQuery != null);
-            check(mRecordListener != null);
+            check(kotlinDomainFactory.getRecordQuery() != null);
+            check(kotlinDomainFactory.getRecordListener() != null);
             check(mUserQuery != null);
             check(mUserListener != null);
 
@@ -307,9 +301,9 @@ public class DomainFactory {
 
             kotlinDomainFactory.setUserInfo(null);
 
-            mRecordQuery.removeEventListener(mRecordListener);
-            mRecordQuery = null;
-            mRecordListener = null;
+            kotlinDomainFactory.getRecordQuery().removeEventListener(kotlinDomainFactory.getRecordListener());
+            kotlinDomainFactory.setRecordQuery(null);
+            kotlinDomainFactory.setRecordListener(null);
 
             RemoteFriendFactory.Companion.clearListener();
 

@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.google.firebase.database.Query
+import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 class KotlinDomainFactory {
@@ -32,4 +34,8 @@ class KotlinDomainFactory {
     val instantiateMillis get() = stop.long - read.long
 
     var userInfo: UserInfo? = null
+
+    var recordQuery: Query? = null
+
+    var recordListener: ValueEventListener? = null
 }

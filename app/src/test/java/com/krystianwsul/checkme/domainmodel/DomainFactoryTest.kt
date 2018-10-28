@@ -13,11 +13,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import junit.framework.Assert
-import org.junit.After
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 import org.mockito.Matchers.*
 import org.mockito.Mock
@@ -108,7 +104,7 @@ class DomainFactoryTest {
     fun testRelevantSingleNoChildren() {
         val persistenceManger = newPersistenceManger()
 
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
 
         val startDate = Date(2016, 1, 1)
         val startHourMilli = HourMilli(0, 0, 0, 0)
@@ -172,7 +168,7 @@ class DomainFactoryTest {
     fun testRelevantSingleWithChildren() {
         val persistenceManger = newPersistenceManger()
 
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
 
         val startDate = Date(2016, 1, 1)
         val startHourMilli = HourMilli(0, 0, 0, 0)
@@ -277,7 +273,7 @@ class DomainFactoryTest {
     fun testRelevantSingleAndNoReminderNextDay() {
         val persistenceManger = newPersistenceManger()
 
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
 
         val startDate = Date(2016, 1, 1)
         val startExactTimeStamp = ExactTimeStamp(startDate, HourMilli(1, 0, 0, 0))
@@ -322,7 +318,7 @@ class DomainFactoryTest {
     fun testJoinLeavesPreviousInstances() {
         val persistenceManger = newPersistenceManger()
 
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
 
         val startDate = Date(2016, 11, 9)
         val startHourMilli = HourMilli(1, 0, 0, 0)
@@ -362,7 +358,7 @@ class DomainFactoryTest {
     @Test
     fun testSharedChild() {
         val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
 
         // day 1:
 
@@ -513,7 +509,7 @@ class DomainFactoryTest {
     @Test
     fun testChildAddedToInstanceInPast() {
         val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
 
         // hour 0: check no instances
         // hour 1: add parent for hour 3
@@ -567,7 +563,7 @@ class DomainFactoryTest {
         // hour 6: check two instances, parent has one child
 
         val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
 
         val date = Date(2016, 1, 1)
 
@@ -625,7 +621,7 @@ class DomainFactoryTest {
         // hour 4: check one instance, hour 6
 
         val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
 
         val date = Date(2016, 1, 1)
 

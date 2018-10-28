@@ -5,19 +5,20 @@ import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteRootUser
+import com.krystianwsul.checkme.persistencemodel.PersistenceManger
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
-class KotlinDomainFactory {
+class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     companion object {
 
         var _kotlinDomainFactory: KotlinDomainFactory? = null
 
         @Synchronized
-        fun getKotlinDomainFactory(): KotlinDomainFactory {
+        fun getKotlinDomainFactory(persistenceManager: PersistenceManger? = null): KotlinDomainFactory {
             if (_kotlinDomainFactory == null)
-                _kotlinDomainFactory = KotlinDomainFactory()
+                _kotlinDomainFactory = KotlinDomainFactory(persistenceManager)
             return _kotlinDomainFactory!!
         }
     }
@@ -56,7 +57,10 @@ class KotlinDomainFactory {
     init {
         start = ExactTimeStamp.now
 
-        domainFactory = DomainFactory(this)
+        domainFactory = if (persistenceManager != null)
+            DomainFactory(this, persistenceManager)
+        else
+            DomainFactory(this)
 
         read = ExactTimeStamp.now
 

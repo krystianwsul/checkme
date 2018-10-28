@@ -7,6 +7,7 @@ import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.firebase.RemoteInstance
+import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteRootUser
 import com.krystianwsul.checkme.gui.HierarchyData
@@ -299,4 +300,47 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                     }
                     .toList()
                     .toMap()
+
+    fun getParentTreeDatas(context: Context, now: ExactTimeStamp, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
+        val parentTreeDatas = mutableMapOf<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>()
+
+        parentTreeDatas.putAll(localFactory.tasks
+                .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
+                .map {
+                    val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
+                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getChildTaskDatas(now, it, context, excludedTaskKeys), taskParentKey, it.getScheduleText(context, now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
+
+                    taskParentKey to parentTreeData
+                }
+                .toMap())
+
+        if (remoteProjectFactory != null) {
+            parentTreeDatas.putAll(remoteProjectFactory!!.remoteProjects
+                    .values
+                    .filter { it.current(now) }
+                    .map {
+                        val projectParentKey = CreateTaskViewModel.ParentKey.ProjectParentKey(it.id)
+
+                        val users = it.users.joinToString(", ") { it.name }
+                        val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getProjectTaskTreeDatas(context, now, it, excludedTaskKeys), projectParentKey, users, null, CreateTaskViewModel.SortKey.ProjectSortKey(it.id))
+
+                        projectParentKey to parentTreeData
+                    }
+                    .toMap())
+        }
+
+        return parentTreeDatas
+    }
+
+    fun getProjectTaskTreeDatas(context: Context, now: ExactTimeStamp, remoteProject: RemoteProject, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
+        return remoteProject.tasks
+                .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
+                .map {
+                    val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
+                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getChildTaskDatas(now, it, context, excludedTaskKeys), taskParentKey, it.getScheduleText(context, now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
+
+                    taskParentKey to parentTreeData
+                }
+                .toMap()
+    }
 }

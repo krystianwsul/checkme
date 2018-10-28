@@ -847,11 +847,11 @@ public class DomainFactory {
             if (task instanceof RemoteTask) {
                 RemoteTask remoteTask = (RemoteTask) task;
 
-                parentTreeDatas = getProjectTaskTreeDatas(context, now, remoteTask.getRemoteProject(), excludedTaskKeys);
+                parentTreeDatas = kotlinDomainFactory.getProjectTaskTreeDatas(context, now, remoteTask.getRemoteProject(), excludedTaskKeys);
             } else {
                 check(task instanceof LocalTask);
 
-                parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
+                parentTreeDatas = kotlinDomainFactory.getParentTreeDatas(context, now, excludedTaskKeys);
             }
         } else {
             String projectId = null;
@@ -872,9 +872,9 @@ public class DomainFactory {
 
                 RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjectForce(projectId);
 
-                parentTreeDatas = getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys);
+                parentTreeDatas = kotlinDomainFactory.getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys);
             } else {
-                parentTreeDatas = getParentTreeDatas(context, now, excludedTaskKeys);
+                parentTreeDatas = kotlinDomainFactory.getParentTreeDatas(context, now, excludedTaskKeys);
             }
         }
 
@@ -1803,34 +1803,6 @@ public class DomainFactory {
     }
 
     // internal
-
-    @NonNull
-    private Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> getParentTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
-        Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> parentTreeDatas = new HashMap<>();
-
-        parentTreeDatas.putAll(Stream.of(kotlinDomainFactory.localFactory.getTasks())
-                .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
-                .filter(task -> task.current(now)).filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).collect(Collectors.toMap(task -> new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskViewModel.ParentTreeData(task.getName(), kotlinDomainFactory.getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(task.getStartExactTimeStamp())))));
-
-        if (kotlinDomainFactory.getRemoteProjectFactory() != null) {
-            parentTreeDatas.putAll(Stream.of(kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjects().values()).filter(remoteProject -> remoteProject.current(now)).collect(Collectors.toMap(remoteProject -> new CreateTaskViewModel.ParentKey.ProjectParentKey(remoteProject.getId()), remoteProject -> {
-                        String users = Stream.of(remoteProject.getUsers())
-                                .map(RemoteProjectUser::getName)
-                                .collect(Collectors.joining(", "));
-
-                return new CreateTaskViewModel.ParentTreeData(remoteProject.getName(), getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys), new CreateTaskViewModel.ParentKey.ProjectParentKey(remoteProject.getId()), users, null, new CreateTaskViewModel.SortKey.ProjectSortKey(remoteProject.getId()));
-                    })));
-        }
-
-        return parentTreeDatas;
-    }
-
-    @NonNull
-    private Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> getProjectTaskTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull RemoteProject remoteProject, @NonNull List<TaskKey> excludedTaskKeys) {
-        return Stream.of(remoteProject.getTasks())
-                .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
-                .filter(task -> task.current(now)).filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).collect(Collectors.toMap(task -> new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskViewModel.ParentTreeData(task.getName(), kotlinDomainFactory.getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(task.getStartExactTimeStamp()))));
-    }
 
     @NonNull
     public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull String projectId) {

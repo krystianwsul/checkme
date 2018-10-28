@@ -13,7 +13,8 @@ class WeeklySchedule(
 
     private val time
         get() = mWeeklyScheduleBridge.run {
-            customTimeKey?.let { domainFactory.getCustomTime(it) } ?: NormalTime(hour!!, minute!!)
+            customTimeKey?.let { kotlinDomainFactory.getCustomTime(it) }
+                    ?: NormalTime(hour!!, minute!!)
         }
 
     val timePair get() = mWeeklyScheduleBridge.run { customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!)) }

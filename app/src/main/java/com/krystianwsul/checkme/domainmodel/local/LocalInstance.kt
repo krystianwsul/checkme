@@ -66,14 +66,11 @@ class LocalInstance : Instance {
                 check(hour == null == (minute == null))
                 check(customTimeId == null != (hour == null))
 
-                return if (customTimeId != null) {
-                    domainFactory.getCustomTime(CustomTimeKey(customTimeId))
-                } else {
-                    NormalTime(hour!!, minute!!)
-                }
+                return customTimeId?.let { kotlinDomainFactory.getCustomTime(CustomTimeKey(it)) }
+                        ?: NormalTime(hour!!, minute!!)
             } else {
-                check(mTaskId != null)
-                check(mScheduleDateTime != null)
+                checkNotNull(mTaskId)
+                checkNotNull(mScheduleDateTime)
 
                 return mScheduleDateTime!!.time
             }
@@ -109,13 +106,13 @@ class LocalInstance : Instance {
                 check(mInstanceRecord!!.instanceHour == null || mInstanceRecord!!.instanceCustomTimeId == null)
 
                 return when {
-                    mInstanceRecord!!.instanceCustomTimeId != null -> domainFactory.getCustomTime(CustomTimeKey(mInstanceRecord!!.instanceCustomTimeId!!))
+                    mInstanceRecord!!.instanceCustomTimeId != null -> kotlinDomainFactory.getCustomTime(CustomTimeKey(mInstanceRecord!!.instanceCustomTimeId!!))
                     mInstanceRecord!!.instanceHour != null -> NormalTime(mInstanceRecord!!.instanceHour!!, mInstanceRecord!!.instanceMinute!!)
                     else -> scheduleTime
                 }
             } else {
-                check(mTaskId != null)
-                check(mScheduleDateTime != null)
+                checkNotNull(mTaskId)
+                checkNotNull(mScheduleDateTime)
 
                 return mScheduleDateTime!!.time
             }

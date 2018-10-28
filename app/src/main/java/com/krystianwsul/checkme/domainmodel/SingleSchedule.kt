@@ -18,7 +18,7 @@ class SingleSchedule(
         get() {
             val customTimeKey = singleScheduleBridge.customTimeKey
             return if (customTimeKey != null) {
-                domainFactory.getCustomTime(customTimeKey)
+                kotlinDomainFactory.getCustomTime(customTimeKey)
             } else {
                 val hour = singleScheduleBridge.hour!!
                 val minute = singleScheduleBridge.minute!!
@@ -52,19 +52,9 @@ class SingleSchedule(
 
     override fun getScheduleText(context: Context) = dateTime.getDisplayText(context)
 
-    private fun getInstance(task: Task): Instance {
-        val instanceKey = InstanceKey(task.taskKey, date, timePair)
+    private fun getInstance(task: Task) = kotlinDomainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
 
-        return domainFactory.getInstance(instanceKey)
-    }
-
-    override fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
-        val timeStamp = dateTime.timeStamp
-        return if (timeStamp.toExactTimeStamp() > now)
-            timeStamp
-        else
-            null
-    }
+    override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 
     override fun getInstances(task: Task, givenStartExactTimeStamp: ExactTimeStamp?, givenExactEndTimeStamp: ExactTimeStamp): List<Instance> {
         val instances = ArrayList<Instance>()

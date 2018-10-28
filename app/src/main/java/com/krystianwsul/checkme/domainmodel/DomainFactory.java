@@ -408,11 +408,11 @@ public class DomainFactory {
         Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
-        Instance instance = getInstance(instanceKey);
+        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
         check(instance.isRootInstance(now));
 
         if (instance.getInstanceTimePair().getCustomTimeKey() != null) {
-            CustomTime customTime = getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
+            CustomTime customTime = kotlinDomainFactory.getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
 
             currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
         }
@@ -440,14 +440,14 @@ public class DomainFactory {
         HashMap<InstanceKey, EditInstancesViewModel.InstanceData> instanceDatas = new HashMap<>();
 
         for (InstanceKey instanceKey : instanceKeys) {
-            Instance instance = getInstance(instanceKey);
+            Instance instance = kotlinDomainFactory.getInstance(instanceKey);
             check(instance.isRootInstance(now));
             check(instance.getDone() == null);
 
             instanceDatas.put(instanceKey, new EditInstancesViewModel.InstanceData(instance.getInstanceDateTime(), instance.getName()));
 
             if (instance.getInstanceTimePair().getCustomTimeKey() != null) {
-                CustomTime customTime = getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
+                CustomTime customTime = kotlinDomainFactory.getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
 
                 currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
             }
@@ -550,7 +550,7 @@ public class DomainFactory {
 
         endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMilli(0, 0, 0, 0));
 
-        List<Instance> currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
+        List<Instance> currentInstances = kotlinDomainFactory.getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
         List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
                 .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
@@ -665,7 +665,7 @@ public class DomainFactory {
 
         ArrayList<Instance> instances = new ArrayList<>();
         for (InstanceKey instanceKey : instanceKeys) {
-            Instance instance = getInstance(instanceKey);
+            Instance instance = kotlinDomainFactory.getInstance(instanceKey);
 
             if (instance.isRootInstance(now))
                 instances.add(instance);
@@ -707,7 +707,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Instance instance = getInstance(instanceKey);
+        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
         if (!task.current(now) && !instance.exists()) return new ShowInstanceViewModel.Data(null);
 
         return new ShowInstanceViewModel.Data(new ShowInstanceViewModel.InstanceData(instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)));
@@ -733,7 +733,7 @@ public class DomainFactory {
 
                     CustomTimeKey customTimeKey = singleSchedule.getCustomTimeKey();
                     if (customTimeKey != null)
-                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+                        customTimes.put(customTimeKey, kotlinDomainFactory.getCustomTime(customTimeKey));
 
                     break;
                 }
@@ -750,7 +750,7 @@ public class DomainFactory {
 
                     CustomTimeKey customTimeKey = weeklySchedule.getCustomTimeKey();
                     if (customTimeKey != null)
-                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+                        customTimes.put(customTimeKey, kotlinDomainFactory.getCustomTime(customTimeKey));
 
                     break;
                 }
@@ -761,7 +761,7 @@ public class DomainFactory {
 
                     CustomTimeKey customTimeKey = monthlyDaySchedule.getCustomTimeKey();
                     if (customTimeKey != null)
-                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+                        customTimes.put(customTimeKey, kotlinDomainFactory.getCustomTime(customTimeKey));
 
                     break;
                 }
@@ -772,7 +772,7 @@ public class DomainFactory {
 
                     CustomTimeKey customTimeKey = monthlyWeekSchedule.getCustomTimeKey();
                     if (customTimeKey != null)
-                        customTimes.put(customTimeKey, getCustomTime(customTimeKey));
+                        customTimes.put(customTimeKey, kotlinDomainFactory.getCustomTime(customTimeKey));
 
                     break;
                 }
@@ -991,7 +991,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceDateTime");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
-        Instance instance = getInstance(instanceKey);
+        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
@@ -1012,8 +1012,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        List<Instance> instances = Stream.of(instanceKeys)
-                .map(this::getInstance)
+        List<Instance> instances = Stream.of(instanceKeys).map(kotlinDomainFactory::getInstance)
                 .collect(Collectors.toList());
 
         Stream.of(instances)
@@ -1035,7 +1034,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourService");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
-        Instance instance = getInstance(instanceKey);
+        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
         Calendar calendar = now.getCalendar();
@@ -1058,7 +1057,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourActivity");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
-        Instance instance = getInstance(instanceKey);
+        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
         Calendar calendar = now.getCalendar();
@@ -1087,8 +1086,7 @@ public class DomainFactory {
         Date date = new Date(calendar);
         HourMinute hourMinute = new HourMinute(calendar);
 
-        List<Instance> instances = Stream.of(instanceKeys)
-                .map(this::getInstance)
+        List<Instance> instances = Stream.of(instanceKeys).map(kotlinDomainFactory::getInstance)
                 .collect(Collectors.toList());
 
         Stream.of(instances).forEach(instance -> instance.setInstanceDateTime(date, new TimePair(hourMinute), now));
@@ -1108,7 +1106,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotificationDone");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
-        Instance instance = getInstance(instanceKey);
+        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
@@ -1129,8 +1127,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        List<Instance> instances = Stream.of(instanceKeys)
-                .map(this::getInstance)
+        List<Instance> instances = Stream.of(instanceKeys).map(kotlinDomainFactory::getInstance)
                 .collect(Collectors.toList());
 
         Stream.of(instances)
@@ -1433,7 +1430,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Instance instance = getInstance(instanceKey);
+        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
 
         instance.setOrdinal(ordinal, now);
 
@@ -1808,120 +1805,6 @@ public class DomainFactory {
     // internal
 
     @NonNull
-    public Instance getInstance(@NonNull InstanceKey instanceKey) {
-        Instance instance = kotlinDomainFactory.getExistingInstanceIfPresent(instanceKey);
-        if (instance != null)
-            return instance;
-
-        DateTime dateTime = getDateTime(instanceKey.getScheduleKey().getScheduleDate(), instanceKey.getScheduleKey().getScheduleTimePair());
-
-        return kotlinDomainFactory.generateInstance(instanceKey.getTaskKey(), dateTime); // DateTime -> timePair
-    }
-
-    @NonNull
-    public List<Instance> getPastInstances(@NonNull Task task, @NonNull ExactTimeStamp now) {
-        Map<InstanceKey, Instance> allInstances = new HashMap<>();
-
-        allInstances.putAll(Stream.of(task.getExistingInstances().values())
-                .filter(instance -> instance.getScheduleDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
-
-        allInstances.putAll(Stream.of(task.getInstances(null, now.plusOne(), now))
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance)));
-
-        return new ArrayList<>(allInstances.values());
-    }
-
-    @NonNull
-    private List<Instance> getRootInstances(@Nullable ExactTimeStamp startExactTimeStamp, @NonNull ExactTimeStamp endExactTimeStamp, @NonNull ExactTimeStamp now) {
-        check(startExactTimeStamp == null || startExactTimeStamp.compareTo(endExactTimeStamp) < 0);
-
-        Map<InstanceKey, Instance> allInstances = new HashMap<>();
-
-        for (Instance instance : getExistingInstances()) {
-            ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
-
-            if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
-                continue;
-
-            if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
-                continue;
-
-            allInstances.put(instance.getInstanceKey(), instance);
-        }
-
-        getTasks().forEach(task -> {
-            for (Instance instance : task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
-                ExactTimeStamp instanceExactTimeStamp = instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp();
-
-                if (startExactTimeStamp != null && startExactTimeStamp.compareTo(instanceExactTimeStamp) > 0)
-                    continue;
-
-                if (endExactTimeStamp.compareTo(instanceExactTimeStamp) <= 0)
-                    continue;
-
-                allInstances.put(instance.getInstanceKey(), instance);
-            }
-        });
-
-        return Stream.of(allInstances.values())
-                .filter(instance -> instance.isRootInstance(now))
-                .filter(instance -> instance.isVisible(now))
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    public Time getTime(@NonNull TimePair timePair) {
-        if (timePair.getHourMinute() != null) {
-            check(timePair.getCustomTimeKey() == null);
-
-            return new NormalTime(timePair.getHourMinute());
-        } else {
-            check(timePair.getCustomTimeKey() != null);
-
-            return getCustomTime(timePair.getCustomTimeKey());
-        }
-    }
-
-    @NonNull
-    private DateTime getDateTime(@NonNull Date date, @NonNull TimePair timePair) {
-        return new DateTime(date, getTime(timePair));
-    }
-
-    @Nullable
-    Task getParentTask(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        check(childTask.notDeleted(exactTimeStamp));
-
-        TaskHierarchy parentTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp);
-        if (parentTaskHierarchy == null) {
-            return null;
-        } else {
-            check(parentTaskHierarchy.notDeleted(exactTimeStamp));
-
-            Task parentTask = parentTaskHierarchy.getParentTask();
-            check(parentTask.notDeleted(exactTimeStamp));
-
-            return parentTask;
-        }
-    }
-
-    @NonNull
-    public CustomTime getCustomTime(@NonNull CustomTimeKey customTimeKey) {
-        if (customTimeKey.getLocalCustomTimeId() != null) {
-            check(TextUtils.isEmpty(customTimeKey.getRemoteProjectId()));
-            check(TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId()));
-
-            return kotlinDomainFactory.localFactory.getLocalCustomTime(customTimeKey.getLocalCustomTimeId());
-        } else {
-            check(!TextUtils.isEmpty(customTimeKey.getRemoteProjectId()));
-            check(!TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId()));
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-            return kotlinDomainFactory.getRemoteProjectFactory().getRemoteCustomTime(customTimeKey.getRemoteProjectId(), customTimeKey.getRemoteCustomTimeId());
-        }
-    }
-
-    @NonNull
     private List<LocalCustomTime> getCurrentCustomTimes() {
         return kotlinDomainFactory.localFactory.getCurrentCustomTimes();
     }
@@ -2096,7 +1979,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    private Stream<Task> getTasks() {
+    Stream<Task> getTasks() {
         if (kotlinDomainFactory.getRemoteProjectFactory() != null) {
             return Stream.concat(Stream.of(kotlinDomainFactory.localFactory.getTasks()), Stream.of(kotlinDomainFactory.getRemoteProjectFactory().getTasks()));
         } else {
@@ -2175,7 +2058,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    private List<Instance> getExistingInstances() {
+    List<Instance> getExistingInstances() {
         List<Instance> instances = new ArrayList<>(kotlinDomainFactory.localFactory.getExistingInstances());
 
         if (kotlinDomainFactory.getRemoteProjectFactory() != null)
@@ -2213,7 +2096,7 @@ public class DomainFactory {
 
     @NonNull
     Instance setInstanceDone(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, boolean done) {
-        Instance instance = getInstance(instanceKey);
+        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
 
         instance.setDone(done, now);
 
@@ -2234,10 +2117,10 @@ public class DomainFactory {
             task.updateOldestVisible(now);
 
         // relevant hack
-        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(tasks).collect(Collectors.toMap(Task::getTaskKey, task -> new TaskRelevance(this, task)));
+        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(tasks).collect(Collectors.toMap(Task::getTaskKey, task -> new TaskRelevance(kotlinDomainFactory, task)));
 
         List<Instance> existingInstances = getExistingInstances();
-        List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now);
+        List<Instance> rootInstances = kotlinDomainFactory.getRootInstances(null, now.plusOne(), now);
 
         Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.concat(Stream.of(existingInstances), Stream.of(rootInstances))
                 .distinct()
@@ -2405,7 +2288,7 @@ public class DomainFactory {
     }
 
     private void updateNotifications(@NonNull Context context, boolean silent, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
-        List<Instance> rootInstances = getRootInstances(null, now.plusOne(), now); // 24 hack
+        List<Instance> rootInstances = kotlinDomainFactory.getRootInstances(null, now.plusOne(), now); // 24 hack
 
         Map<InstanceKey, Instance> notificationInstances = Stream.of(rootInstances)
                 .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
@@ -2463,7 +2346,7 @@ public class DomainFactory {
         for (InstanceKey showInstanceKey : showInstanceKeys) {
             check(showInstanceKey != null);
 
-            Instance showInstance = getInstance(showInstanceKey);
+            Instance showInstance = kotlinDomainFactory.getInstance(showInstanceKey);
 
             showInstance.setNotificationShown(true, now);
         }
@@ -2474,7 +2357,7 @@ public class DomainFactory {
             check(hideInstanceKey != null);
 
             if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
-                Instance hideInstance = getInstance(hideInstanceKey);
+                Instance hideInstance = kotlinDomainFactory.getInstance(hideInstanceKey);
 
                 hideInstance.setNotificationShown(false, now);
             } else {
@@ -2497,7 +2380,7 @@ public class DomainFactory {
                 } else { // instances shown
                     for (InstanceKey shownInstanceKey : shownInstanceKeys) {
                         if (allTaskKeys.contains(shownInstanceKey.getTaskKey())) {
-                            Instance shownInstance = getInstance(shownInstanceKey);
+                            Instance shownInstance = kotlinDomainFactory.getInstance(shownInstanceKey);
 
                             NotificationWrapper.Companion.getInstance().cancelNotification(shownInstance.getNotificationId());
                         } else {
@@ -2523,7 +2406,7 @@ public class DomainFactory {
                 } else { // instances shown
                     for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                         if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
-                            Instance instance = getInstance(hideInstanceKey);
+                            Instance instance = kotlinDomainFactory.getInstance(hideInstanceKey);
 
                             NotificationWrapper.Companion.getInstance().cancelNotification(instance.getNotificationId());
                         } else {
@@ -2559,7 +2442,7 @@ public class DomainFactory {
             message += ", hiding " + hideInstanceKeys.size();
             for (InstanceKey hideInstanceKey : hideInstanceKeys) {
                 if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
-                    Instance instance = getInstance(hideInstanceKey);
+                    Instance instance = kotlinDomainFactory.getInstance(hideInstanceKey);
 
                     NotificationWrapper.Companion.getInstance().cancelNotification(instance.getNotificationId());
                 } else {
@@ -2669,7 +2552,7 @@ public class DomainFactory {
 
     private void setInstanceNotified(@NonNull InstanceKey instanceKey, @NonNull ExactTimeStamp now) {
         if (instanceKey.getType() == TaskKey.Type.LOCAL) {
-            Instance instance = getInstance(instanceKey);
+            Instance instance = kotlinDomainFactory.getInstance(instanceKey);
 
             instance.setNotified(now);
             instance.setNotificationShown(false, now);
@@ -2726,7 +2609,7 @@ public class DomainFactory {
         endCalendar.add(Calendar.MINUTE, 1);
         TimeStamp endTimeStamp = new TimeStamp(endCalendar);
 
-        List<Instance> rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
+        List<Instance> rootInstances = kotlinDomainFactory.getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
 
         List<Instance> currentInstances = Stream.of(rootInstances)
                 .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)

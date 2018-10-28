@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.text.TextUtils // todo remove
+import android.text.TextUtils
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
@@ -12,8 +12,9 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManger
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.time.DateTime
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.utils.time.*
+import com.krystianwsul.checkme.utils.time.Date
+import java.util.*
 
 class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
@@ -76,13 +77,13 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     // internal
 
-    fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
+    private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
         val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         return getExistingInstanceIfPresent(instanceKey)
     }
 
-    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance? {
+    private fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance? {
         return if (instanceKey.taskKey.localTaskId != null) {
             check(TextUtils.isEmpty(instanceKey.taskKey.remoteProjectId))
             check(TextUtils.isEmpty(instanceKey.taskKey.remoteTaskId))
@@ -117,7 +118,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
+    private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
         if (taskKey.localTaskId != null) {
             check(TextUtils.isEmpty(taskKey.remoteProjectId))
             check(TextUtils.isEmpty(taskKey.remoteTaskId))
@@ -163,5 +164,103 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         val existingInstance = getExistingInstanceIfPresent(taskKey, scheduleDateTime)
 
         return existingInstance ?: generateInstance(taskKey, scheduleDateTime)
+    }
+
+    fun getInstance(instanceKey: InstanceKey): Instance {
+        getExistingInstanceIfPresent(instanceKey)?.let { return it }
+
+        val dateTime = getDateTime(instanceKey.scheduleKey.scheduleDate, instanceKey.scheduleKey.scheduleTimePair)
+
+        return generateInstance(instanceKey.taskKey, dateTime) // DateTime -> timePair
+    }
+
+    fun getPastInstances(task: Task, now: ExactTimeStamp): List<Instance> {
+        val allInstances = HashMap<InstanceKey, Instance>()
+
+        allInstances.putAll(task.existingInstances
+                .values
+                .filter { it.scheduleDateTime.timeStamp.toExactTimeStamp() <= now }
+                .associateBy { it.instanceKey })
+
+        allInstances.putAll(task.getInstances(null, now.plusOne(), now).associateBy { it.instanceKey })
+
+        return ArrayList(allInstances.values)
+    }
+
+    fun getRootInstances(startExactTimeStamp: ExactTimeStamp?, endExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
+        check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
+
+        val allInstances = HashMap<InstanceKey, Instance>()
+
+        for (instance in domainFactory.existingInstances) {
+            val instanceExactTimeStamp = instance.instanceDateTime
+                    .timeStamp
+                    .toExactTimeStamp()
+
+            if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
+                continue
+
+            if (endExactTimeStamp <= instanceExactTimeStamp)
+                continue
+
+            allInstances[instance.instanceKey] = instance
+        }
+
+        domainFactory.tasks.forEach { task ->
+            for (instance in task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
+                val instanceExactTimeStamp = instance.instanceDateTime.timeStamp.toExactTimeStamp()
+
+                if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
+                    continue
+
+                if (endExactTimeStamp <= instanceExactTimeStamp)
+                    continue
+
+                allInstances[instance.instanceKey] = instance
+            }
+        }
+
+        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now) }
+    }
+
+    fun getTime(timePair: TimePair) = if (timePair.hourMinute != null) {
+        check(timePair.customTimeKey == null)
+
+        NormalTime(timePair.hourMinute)
+    } else {
+        checkNotNull(timePair.customTimeKey)
+
+        getCustomTime(timePair.customTimeKey!!)
+    }
+
+    private fun getDateTime(date: Date, timePair: TimePair) = DateTime(date, getTime(timePair))
+
+    fun getParentTask(childTask: Task, exactTimeStamp: ExactTimeStamp): Task? {
+        check(childTask.notDeleted(exactTimeStamp))
+
+        val parentTaskHierarchy = domainFactory.getParentTaskHierarchy(childTask, exactTimeStamp)
+        return if (parentTaskHierarchy == null) {
+            null
+        } else {
+            check(parentTaskHierarchy.notDeleted(exactTimeStamp))
+
+            val parentTask = parentTaskHierarchy.parentTask
+            check(parentTask.notDeleted(exactTimeStamp))
+
+            parentTask
+        }
+    }
+
+    fun getCustomTime(customTimeKey: CustomTimeKey) = if (customTimeKey.localCustomTimeId != null) {
+        check(TextUtils.isEmpty(customTimeKey.remoteProjectId))
+        check(TextUtils.isEmpty(customTimeKey.remoteCustomTimeId))
+
+        localFactory.getLocalCustomTime(customTimeKey.localCustomTimeId)
+    } else {
+        check(!TextUtils.isEmpty(customTimeKey.remoteProjectId))
+        check(!TextUtils.isEmpty(customTimeKey.remoteCustomTimeId))
+        checkNotNull(remoteProjectFactory)
+
+        remoteProjectFactory!!.getRemoteCustomTime(customTimeKey.remoteProjectId!!, customTimeKey.remoteCustomTimeId!!)
     }
 }

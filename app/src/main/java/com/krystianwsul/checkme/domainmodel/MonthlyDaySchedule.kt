@@ -23,7 +23,7 @@ class MonthlyDaySchedule(
         get() {
             val customTimeKey = monthlyDayScheduleBridge.customTimeKey
             return if (customTimeKey != null) {
-                domainFactory.getCustomTime(customTimeKey)
+                kotlinDomainFactory.getCustomTime(customTimeKey)
             } else {
                 val hour = monthlyDayScheduleBridge.hour!!
                 val minute = monthlyDayScheduleBridge.minute!!

@@ -137,12 +137,12 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         check(notDeleted(exactTimeStamp))
 
-        return domainFactory.getParentTask(this, exactTimeStamp)
+        return kotlinDomainFactory.getParentTask(this, exactTimeStamp)
     }
 
     protected fun updateOldestVisible(now: ExactTimeStamp) {
         // 24 hack
-        val instances = domainFactory.getPastInstances(this, now)
+        val instances = kotlinDomainFactory.getPastInstances(this, now)
 
         val optional = instances.asSequence()
                 .filter { it.isVisible(now) }
@@ -179,7 +179,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
     protected abstract fun setOldestVisible(date: Date)
 
-    protected fun getInstances(givenStartExactTimeStamp: ExactTimeStamp?, givenEndExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
+    fun getInstances(givenStartExactTimeStamp: ExactTimeStamp?, givenEndExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
         var correctedStartExactTimeStamp = givenStartExactTimeStamp
         if (correctedStartExactTimeStamp == null) { // 24 hack
             val oldestVisible = getOldestVisible()

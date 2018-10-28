@@ -1,13 +1,13 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 
-class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
+class TaskRelevance(private val kotlinDomainFactory: KotlinDomainFactory, val task: Task) {
 
     var relevant = false
         private set
@@ -32,7 +32,8 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
         val oldestVisible = task.getOldestVisible()!!
 
         // mark instances relevant
-        domainFactory.getPastInstances(task, now)
+        kotlinDomainFactory.getPastInstances(task, now)
+                .asSequence()
                 .filter { it.scheduleDate >= oldestVisible }
                 .map { instance ->
                     val instanceKey = instance.instanceKey
@@ -42,6 +43,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
 
                     instanceRelevances[instanceKey]!!
                 }
+                .toList()
                 .forEach { it.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
 
         task.existingInstances

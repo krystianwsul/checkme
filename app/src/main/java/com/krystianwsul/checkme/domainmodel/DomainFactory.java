@@ -558,7 +558,7 @@ public class DomainFactory {
 
         List<GroupListFragment.TaskData> taskDatas = null;
         if (position == 0) {
-            taskDatas = getTasks()
+            taskDatas = kotlinDomainFactory.getTasks()
                     .filter(task -> task.current(now))
                     .filter(task -> task.isVisible(now))
                     .filter(task -> task.isRootTask(now))
@@ -641,7 +641,7 @@ public class DomainFactory {
                     if (task.isRootTask(now)) {
                         hierarchyData = null;
                     } else {
-                        TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
+                        TaskHierarchy taskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(task, now);
                         check(taskHierarchy != null);
 
                         hierarchyData = new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal());
@@ -1226,7 +1226,7 @@ public class DomainFactory {
         task.setName(name, note);
 
         if (!task.isRootTask(now)) {
-            TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
+            TaskHierarchy taskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(task, now);
             check(taskHierarchy != null);
 
             taskHierarchy.setEndExactTimeStamp(now);
@@ -1300,7 +1300,7 @@ public class DomainFactory {
                 .map(joinTask -> joinTask.updateProject(context, now, projectId))
                 .collect(Collectors.toList());
 
-        joinTasks(newParentTask, joinTasks, now);
+        kotlinDomainFactory.joinTasks(newParentTask, joinTasks, now);
 
         updateNotifications(context, now);
 
@@ -1358,7 +1358,7 @@ public class DomainFactory {
 
         Task childTask = parentTask.createChildTask(now, name, note);
 
-        joinTasks(childTask, joinTasks, now);
+        kotlinDomainFactory.joinTasks(childTask, joinTasks, now);
 
         updateNotifications(context, now);
 
@@ -1389,7 +1389,7 @@ public class DomainFactory {
 
             newParentTask.addChild(task, now);
         } else if (oldParentTask != newParentTask) {
-            TaskHierarchy oldTaskHierarchy = getParentTaskHierarchy(task, now);
+            TaskHierarchy oldTaskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(task, now);
             check(oldTaskHierarchy != null);
 
             oldTaskHierarchy.setEndExactTimeStamp(now);
@@ -1638,7 +1638,7 @@ public class DomainFactory {
                 .map(joinTask -> joinTask.updateProject(context, now, projectId))
                 .collect(Collectors.toList());
 
-        joinTasks(newParentTask, joinTasks, now);
+        kotlinDomainFactory.joinTasks(newParentTask, joinTasks, now);
 
         updateNotifications(context, now);
 
@@ -1663,7 +1663,7 @@ public class DomainFactory {
 
         task.setName(name, note);
 
-        TaskHierarchy taskHierarchy = getParentTaskHierarchy(task, now);
+        TaskHierarchy taskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(task, now);
         if (taskHierarchy != null)
             taskHierarchy.setEndExactTimeStamp(now);
 
@@ -1805,124 +1805,6 @@ public class DomainFactory {
     // internal
 
     @NonNull
-    public RemoteTask convertLocalToRemote(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull LocalTask startingLocalTask, @NonNull String projectId) {
-        check(!TextUtils.isEmpty(projectId));
-
-        check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-        check(kotlinDomainFactory.getUserInfo() != null);
-
-        LocalToRemoteConversion localToRemoteConversion = new LocalToRemoteConversion();
-        kotlinDomainFactory.localFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask);
-
-        updateNotifications(context, true, now, Stream.of(localToRemoteConversion.mLocalTasks.values())
-                .map(pair -> pair.getFirst().getTaskKey())
-                .collect(Collectors.toList()));
-
-        RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjectForce(projectId);
-
-        for (kotlin.Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
-            check(pair != null);
-
-            RemoteTask remoteTask = remoteProject.copyLocalTask(pair.getFirst(), pair.getSecond(), now);
-            localToRemoteConversion.mRemoteTasks.put(pair.getFirst().getId(), remoteTask);
-        }
-
-        for (LocalTaskHierarchy localTaskHierarchy : localToRemoteConversion.mLocalTaskHierarchies) {
-            check(localTaskHierarchy != null);
-
-            RemoteTask parentRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getParentTaskId());
-            check(parentRemoteTask != null);
-
-            RemoteTask childRemoteTask = localToRemoteConversion.mRemoteTasks.get(localTaskHierarchy.getChildTaskId());
-            check(childRemoteTask != null);
-
-            RemoteTaskHierarchy remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, parentRemoteTask.getId(), childRemoteTask.getId());
-            localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy);
-        }
-
-        for (kotlin.Pair<LocalTask, List<LocalInstance>> pair : localToRemoteConversion.mLocalTasks.values()) {
-            Stream.of(pair.getSecond())
-                    .forEach(LocalInstance::delete);
-
-            pair.getFirst().delete();
-        }
-
-        RemoteTask remoteTask = localToRemoteConversion.mRemoteTasks.get(startingLocalTask.getId());
-        check(remoteTask != null);
-
-        return remoteTask;
-    }
-
-    private void joinTasks(@NonNull Task newParentTask, @NonNull List<Task> joinTasks, @NonNull ExactTimeStamp now) {
-        check(newParentTask.current(now));
-        check(joinTasks.size() > 1);
-
-        for (Task joinTask : joinTasks) {
-            check(joinTask != null);
-            check(joinTask.current(now));
-
-            if (joinTask.isRootTask(now)) {
-                Stream.of(joinTask.getCurrentSchedules(now))
-                        .forEach(schedule -> schedule.setEndExactTimeStamp(now));
-            } else {
-                TaskHierarchy taskHierarchy = getParentTaskHierarchy(joinTask, now);
-                check(taskHierarchy != null);
-
-                taskHierarchy.setEndExactTimeStamp(now);
-            }
-
-            newParentTask.addChild(joinTask, now);
-        }
-    }
-
-    @Nullable
-    TaskHierarchy getParentTaskHierarchy(@NonNull Task childTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        if (childTask.current(exactTimeStamp)) {
-            check(childTask.notDeleted(exactTimeStamp));
-
-            TaskKey childTaskKey = childTask.getTaskKey();
-
-            List<TaskHierarchy> taskHierarchies = Stream.of(childTask.getTaskHierarchiesByChildTaskKey(childTaskKey))
-                    .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp))
-                    .collect(Collectors.toList());
-
-            if (taskHierarchies.isEmpty()) {
-                return null;
-            } else {
-                check(taskHierarchies.size() == 1);
-                return taskHierarchies.get(0);
-            }
-        } else {
-            // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
-            // żeby można było dodawać child instances do past parent instance
-
-            check(childTask.notDeleted(exactTimeStamp));
-
-            TaskKey childTaskKey = childTask.getTaskKey();
-
-            List<TaskHierarchy> taskHierarchies = Stream.of(childTask.getTaskHierarchiesByChildTaskKey(childTaskKey))
-                    .filter(taskHierarchy -> taskHierarchy.getStartExactTimeStamp().equals(childTask.getStartExactTimeStamp()))
-                    .collect(Collectors.toList());
-
-            if (taskHierarchies.isEmpty()) {
-                return null;
-            } else {
-                check(taskHierarchies.size() == 1);
-                return taskHierarchies.get(0);
-            }
-        }
-    }
-
-    @NonNull
-    Stream<Task> getTasks() {
-        if (kotlinDomainFactory.getRemoteProjectFactory() != null) {
-            return Stream.concat(Stream.of(kotlinDomainFactory.localFactory.getTasks()), Stream.of(kotlinDomainFactory.getRemoteProjectFactory().getTasks()));
-        } else {
-            return Stream.of(kotlinDomainFactory.localFactory.getTasks());
-        }
-    }
-
-    @NonNull
     private List<CustomTime> getCustomTimes() {
         List<CustomTime> customTimes = new ArrayList<>(kotlinDomainFactory.localFactory.getLocalCustomTimes());
 
@@ -2017,7 +1899,7 @@ public class DomainFactory {
     TaskListFragment.TaskData getMainData(@NonNull ExactTimeStamp now, @NonNull Context context) {
         List<TaskListFragment.ChildTaskData> childTaskDatas;
 
-        childTaskDatas = getTasks()
+        childTaskDatas = kotlinDomainFactory.getTasks()
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))
                 .filter(task -> task.isRootTask(now))
@@ -2046,7 +1928,7 @@ public class DomainFactory {
 
     @NonNull
     Irrelevant setIrrelevant(@NonNull ExactTimeStamp now) {
-        List<Task> tasks = getTasks().collect(Collectors.toList());
+        List<Task> tasks = kotlinDomainFactory.getTasks().collect(Collectors.toList());
 
         for (Task task : tasks)
             task.updateOldestVisible(now);
@@ -2222,7 +2104,7 @@ public class DomainFactory {
         return taskKeys;
     }
 
-    private void updateNotifications(@NonNull Context context, boolean silent, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
+    void updateNotifications(@NonNull Context context, boolean silent, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
         List<Instance> rootInstances = kotlinDomainFactory.getRootInstances(null, now.plusOne(), now); // 24 hack
 
         Map<InstanceKey, Instance> notificationInstances = Stream.of(rootInstances)
@@ -2429,7 +2311,7 @@ public class DomainFactory {
             nextAlarm = minInstancesTimeStamp.get();
 
         //noinspection Convert2MethodRef
-        Optional<TimeStamp> minSchedulesTimeStamp = getTasks()
+        Optional<TimeStamp> minSchedulesTimeStamp = kotlinDomainFactory.getTasks()
                 .filter(task -> task.current(now))
                 .filter(task -> task.isRootTask(now))
                 .flatMap(task -> Stream.of(task.getCurrentSchedules(now)))

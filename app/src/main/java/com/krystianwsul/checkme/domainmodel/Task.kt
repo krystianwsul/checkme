@@ -94,7 +94,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
         return parentTask?.getRootTask(exactTimeStamp) ?: this
     }
 
-    protected fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
+    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(current(exactTimeStamp))
 
         return schedules.filter { it.current(exactTimeStamp) }
@@ -122,7 +122,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
         getChildTaskHierarchies(now).forEach { it.setEndExactTimeStamp(now) }
 
-        val parentTaskHierarchy = domainFactory.getParentTaskHierarchy(this, now)
+        val parentTaskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(this, now)
         if (parentTaskHierarchy != null) {
             check(parentTaskHierarchy.current(now))
 

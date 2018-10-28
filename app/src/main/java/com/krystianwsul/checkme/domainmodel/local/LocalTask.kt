@@ -114,7 +114,7 @@ class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord
         return if (TextUtils.isEmpty(projectId)) {
             this
         } else {
-            domainFactory.convertLocalToRemote(context, now, this, projectId!!)
+            kotlinDomainFactory.convertLocalToRemote(context, now, this, projectId!!)
         }
     }
 }

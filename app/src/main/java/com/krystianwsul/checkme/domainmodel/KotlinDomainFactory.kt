@@ -2,14 +2,13 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.content.Context
 import android.text.TextUtils
+import com.annimon.stream.Stream
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
-import com.krystianwsul.checkme.firebase.RemoteInstance
-import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory
-import com.krystianwsul.checkme.firebase.RemoteRootUser
+import com.krystianwsul.checkme.domainmodel.local.LocalTask
+import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger
@@ -211,7 +210,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             allInstances[instance.instanceKey] = instance
         }
 
-        domainFactory.tasks.forEach { task ->
+        getTasks().forEach { task ->
             for (instance in task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
                 val instanceExactTimeStamp = instance.instanceDateTime.timeStamp.toExactTimeStamp()
 
@@ -243,7 +242,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
     fun getParentTask(childTask: Task, exactTimeStamp: ExactTimeStamp): Task? {
         check(childTask.notDeleted(exactTimeStamp))
 
-        val parentTaskHierarchy = domainFactory.getParentTaskHierarchy(childTask, exactTimeStamp)
+        val parentTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp)
         return if (parentTaskHierarchy == null) {
             null
         } else {
@@ -287,7 +286,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 .toMutableMap()
     }
 
-    fun getChildTaskDatas(now: ExactTimeStamp, parentTask: Task, context: Context, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> =
+    private fun getChildTaskDatas(now: ExactTimeStamp, parentTask: Task, context: Context, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> =
             parentTask.getChildTaskHierarchies(now)
                     .asSequence()
                     .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
@@ -342,5 +341,105 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                     taskParentKey to parentTreeData
                 }
                 .toMap()
+    }
+
+    fun convertLocalToRemote(context: Context, now: ExactTimeStamp, startingLocalTask: LocalTask, projectId: String): RemoteTask {
+        check(!TextUtils.isEmpty(projectId))
+
+        checkNotNull(remoteProjectFactory)
+        checkNotNull(userInfo)
+
+        val localToRemoteConversion = DomainFactory.LocalToRemoteConversion()
+        localFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask)
+
+        domainFactory.updateNotifications(context, true, now, localToRemoteConversion.mLocalTasks
+                .values
+                .map { it.first.taskKey })
+
+        val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
+
+        for (pair in localToRemoteConversion.mLocalTasks.values) {
+            checkNotNull(pair)
+
+            val remoteTask = remoteProject.copyLocalTask(pair!!.first, pair.second, now)
+            localToRemoteConversion.mRemoteTasks[pair.first.id] = remoteTask
+        }
+
+        for (localTaskHierarchy in localToRemoteConversion.mLocalTaskHierarchies) {
+            checkNotNull(localTaskHierarchy)
+
+            val parentRemoteTask = localToRemoteConversion.mRemoteTasks[localTaskHierarchy!!.parentTaskId]!!
+            val childRemoteTask = localToRemoteConversion.mRemoteTasks[localTaskHierarchy.childTaskId]!!
+
+            val remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, parentRemoteTask.id, childRemoteTask.id)
+
+            localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy)
+        }
+
+        for (pair in localToRemoteConversion.mLocalTasks.values) {
+            pair.second.forEach { it.delete() }
+
+            pair.first.delete()
+        }
+
+        return localToRemoteConversion.mRemoteTasks[startingLocalTask.id]!!
+    }
+
+    fun joinTasks(newParentTask: Task, joinTasks: List<Task>, now: ExactTimeStamp) {
+        check(newParentTask.current(now))
+        check(joinTasks.size > 1)
+
+        for (joinTask in joinTasks) {
+            check(joinTask.current(now))
+
+            if (joinTask.isRootTask(now)) {
+                joinTask.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+            } else {
+                val taskHierarchy = getParentTaskHierarchy(joinTask, now)!!
+
+                taskHierarchy.setEndExactTimeStamp(now)
+            }
+
+            newParentTask.addChild(joinTask, now)
+        }
+    }
+
+    fun getParentTaskHierarchy(childTask: Task, exactTimeStamp: ExactTimeStamp): TaskHierarchy? {
+        if (childTask.current(exactTimeStamp)) {
+            check(childTask.notDeleted(exactTimeStamp))
+
+            val childTaskKey = childTask.taskKey
+
+            val taskHierarchies = childTask.getTaskHierarchiesByChildTaskKey(childTaskKey).filter { it.current(exactTimeStamp) }
+
+            return if (taskHierarchies.isEmpty()) {
+                null
+            } else {
+                taskHierarchies.single()
+            }
+        } else {
+            // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
+            // żeby można było dodawać child instances do past parent instance
+
+            check(childTask.notDeleted(exactTimeStamp))
+
+            val childTaskKey = childTask.taskKey
+
+            val taskHierarchies = childTask.getTaskHierarchiesByChildTaskKey(childTaskKey).filter { it.startExactTimeStamp == childTask.startExactTimeStamp }
+
+            return if (taskHierarchies.isEmpty()) {
+                null
+            } else {
+                taskHierarchies.single()
+            }
+        }
+    }
+
+    fun getTasks(): Stream<Task> { // todo eliminate stream
+        return if (remoteProjectFactory != null) {
+            Stream.concat<Task>(Stream.of<LocalTask>(localFactory.tasks), Stream.of<RemoteTask>(remoteProjectFactory!!.tasks))
+        } else {
+            Stream.of<Task>(localFactory.tasks)
+        }
     }
 }

@@ -47,3 +47,5 @@
 -keep class com.google.firebase.** { *; }
 
 -keep class android.arch.lifecycle.** {*;}
+
+-dontwarn com.android.support.v4.media.**

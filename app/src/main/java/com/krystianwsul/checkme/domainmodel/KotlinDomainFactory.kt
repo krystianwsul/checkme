@@ -6,9 +6,11 @@ import com.annimon.stream.Collectors
 import com.annimon.stream.Stream
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
+import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
+import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
@@ -529,5 +531,119 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         domainFactory.notifyCloud(context, instance.remoteNullableProject)
 
         return instance
+    }
+
+    fun setIrrelevant(now: ExactTimeStamp): Irrelevant {
+        val tasks = getTasks().collect(Collectors.toList<Task>())
+
+        for (task in tasks)
+            task.updateOldestVisible(now)
+
+        // relevant hack
+        val taskRelevances = tasks.map { it.taskKey to TaskRelevance(this, it) }.toMap()
+
+        val existingInstances = getExistingInstances()
+        val rootInstances = getRootInstances(null, now.plusOne(), now)
+
+        val instanceRelevances = (existingInstances + rootInstances)
+                .asSequence()
+                .distinct()
+                .map { it.instanceKey to InstanceRelevance(it) }
+                .toList()
+                .toMap()
+                .toMutableMap()
+
+        val localCustomTimeRelevances = localFactory.localCustomTimes
+                .map { it.id to LocalCustomTimeRelevance(it) }
+                .toMap()
+
+        tasks.asSequence()
+                .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now) }
+                .map { taskRelevances[it.taskKey]!! }.toList()
+                .forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
+
+        rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
+
+        existingInstances.asSequence()
+                .filter { it.isRootInstance(now) && it.isVisible(now) }
+                .map { instanceRelevances[it.instanceKey]!! }.toList()
+                .forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
+
+        getCurrentCustomTimes().map { localCustomTimeRelevances[it.id]!! }.forEach { it.setRelevant() }
+
+        val relevantTasks = taskRelevances.values
+                .filter { it.relevant }
+                .map { it.task }
+
+        val irrelevantTasks = ArrayList<Task>(tasks)
+        irrelevantTasks.removeAll(relevantTasks)
+
+        check(irrelevantTasks.none { it.isVisible(now) })
+
+        val relevantExistingInstances = instanceRelevances.values
+                .filter { it.relevant }
+                .map { it.instance }
+                .filter { it.exists() }
+
+        val irrelevantExistingInstances = ArrayList<Instance>(existingInstances)
+        irrelevantExistingInstances.removeAll(relevantExistingInstances)
+
+        check(irrelevantExistingInstances.none { it.isVisible(now) })
+
+        val relevantLocalCustomTimes = localCustomTimeRelevances.values
+                .filter { it.relevant }
+                .map { it.localCustomTime }
+
+        val irrelevantLocalCustomTimes = ArrayList<LocalCustomTime>(localFactory.localCustomTimes)
+        irrelevantLocalCustomTimes.removeAll(relevantLocalCustomTimes)
+
+        check(irrelevantLocalCustomTimes.none { it.current })
+
+        irrelevantExistingInstances.forEach { it.delete() }
+        irrelevantTasks.forEach { it.delete() }
+        irrelevantLocalCustomTimes.forEach { it.delete() }
+
+        val irrelevantRemoteCustomTimes: MutableList<RemoteCustomTime>?
+        val irrelevantRemoteProjects: MutableList<RemoteProject>?
+        if (remoteProjectFactory != null) {
+            val remoteCustomTimes = remoteProjectFactory!!.remoteCustomTimes
+            val remoteCustomTimeRelevances = remoteCustomTimes.map { kotlin.Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
+
+            val remoteProjects = remoteProjectFactory!!.remoteProjects.values
+            val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()
+
+            remoteProjects.filter { it.current(now) }
+                    .map { remoteProjectRelevances[it.id]!! }
+                    .forEach { it.setRelevant() }
+
+            taskRelevances.values
+                    .filter { it.relevant }
+                    .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
+
+            instanceRelevances.values
+                    .filter { it.relevant }
+                    .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
+
+            val relevantRemoteCustomTimes = remoteCustomTimeRelevances.values
+                    .filter { it.relevant }
+                    .map { it.remoteCustomTime }
+
+            irrelevantRemoteCustomTimes = ArrayList(remoteCustomTimes)
+            irrelevantRemoteCustomTimes.removeAll(relevantRemoteCustomTimes)
+            irrelevantRemoteCustomTimes.forEach { it.delete() }
+
+            val relevantRemoteProjects = remoteProjectRelevances.values
+                    .filter { it.relevant }
+                    .map { it.remoteProject }
+
+            irrelevantRemoteProjects = ArrayList(remoteProjects)
+            irrelevantRemoteProjects.removeAll(relevantRemoteProjects)
+            irrelevantRemoteProjects.forEach { it.delete() }
+        } else {
+            irrelevantRemoteCustomTimes = null
+            irrelevantRemoteProjects = null
+        }
+
+        return Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
     }
 }

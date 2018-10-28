@@ -23,13 +23,7 @@ import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
-import com.krystianwsul.checkme.domainmodel.relevance.InstanceRelevance;
-import com.krystianwsul.checkme.domainmodel.relevance.LocalCustomTimeRelevance;
-import com.krystianwsul.checkme.domainmodel.relevance.RemoteCustomTimeRelevance;
-import com.krystianwsul.checkme.domainmodel.relevance.RemoteProjectRelevance;
-import com.krystianwsul.checkme.domainmodel.relevance.TaskRelevance;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
-import com.krystianwsul.checkme.firebase.RemoteCustomTime;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory;
@@ -1677,7 +1671,7 @@ public class DomainFactory {
     Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull SaveService.Source source, boolean silent) {
         updateNotifications(context, silent, now, new ArrayList<>());
 
-        Irrelevant irrelevant = setIrrelevant(now);
+        Irrelevant irrelevant = kotlinDomainFactory.setIrrelevant(now);
 
         if (kotlinDomainFactory.getRemoteProjectFactory() != null)
             kotlinDomainFactory.localFactory.deleteInstanceShownRecords(kotlinDomainFactory.getRemoteProjectFactory().getTaskKeys());
@@ -1797,146 +1791,6 @@ public class DomainFactory {
     }
 
     // internal
-
-    @NonNull
-    Irrelevant setIrrelevant(@NonNull ExactTimeStamp now) {
-        List<Task> tasks = kotlinDomainFactory.getTasks().collect(Collectors.toList());
-
-        for (Task task : tasks)
-            task.updateOldestVisible(now);
-
-        // relevant hack
-        Map<TaskKey, TaskRelevance> taskRelevances = Stream.of(tasks).collect(Collectors.toMap(Task::getTaskKey, task -> new TaskRelevance(kotlinDomainFactory, task)));
-
-        List<Instance> existingInstances = kotlinDomainFactory.getExistingInstances();
-        List<Instance> rootInstances = kotlinDomainFactory.getRootInstances(null, now.plusOne(), now);
-
-        Map<InstanceKey, InstanceRelevance> instanceRelevances = Stream.concat(Stream.of(existingInstances), Stream.of(rootInstances))
-                .distinct()
-                .collect(Collectors.toMap(Instance::getInstanceKey, InstanceRelevance::new));
-
-        Map<Integer, LocalCustomTimeRelevance> localCustomTimeRelevances = Stream.of(kotlinDomainFactory.localFactory.getLocalCustomTimes()).collect(Collectors.toMap(LocalCustomTime::getId, LocalCustomTimeRelevance::new));
-
-        Stream.of(tasks)
-                .filter(task -> task.current(now))
-                .filter(task -> task.isRootTask(now))
-                .filter(task -> task.isVisible(now))
-                .map(Task::getTaskKey)
-                .map(taskRelevances::get)
-                .forEach(taskRelevance -> taskRelevance.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now));
-
-        Stream.of(rootInstances)
-                .map(Instance::getInstanceKey)
-                .map(instanceRelevances::get)
-                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now));
-
-        Stream.of(existingInstances)
-                .filter(instance -> instance.isRootInstance(now))
-                .filter(instance -> instance.isVisible(now))
-                .map(Instance::getInstanceKey)
-                .map(instanceRelevances::get)
-                .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now));
-
-        Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .map(LocalCustomTime::getId)
-                .map(localCustomTimeRelevances::get)
-                .forEach(LocalCustomTimeRelevance::setRelevant);
-
-        List<Task> relevantTasks = Stream.of(taskRelevances.values())
-                .filter(TaskRelevance::getRelevant)
-                .map(TaskRelevance::getTask)
-                .collect(Collectors.toList());
-
-        List<Task> irrelevantTasks = new ArrayList<>(tasks);
-        irrelevantTasks.removeAll(relevantTasks);
-
-        check(Stream.of(irrelevantTasks)
-                .noneMatch(task -> task.isVisible(now)));
-
-        List<Instance> relevantExistingInstances = Stream.of(instanceRelevances.values())
-                .filter(InstanceRelevance::getRelevant)
-                .map(InstanceRelevance::getInstance)
-                .filter(Instance::exists)
-                .collect(Collectors.toList());
-
-        List<Instance> irrelevantExistingInstances = new ArrayList<>(existingInstances);
-        irrelevantExistingInstances.removeAll(relevantExistingInstances);
-
-        check(Stream.of(irrelevantExistingInstances)
-                .noneMatch(instance -> instance.isVisible(now)));
-
-        List<LocalCustomTime> relevantLocalCustomTimes = Stream.of(localCustomTimeRelevances.values())
-                .filter(LocalCustomTimeRelevance::getRelevant)
-                .map(LocalCustomTimeRelevance::getLocalCustomTime)
-                .collect(Collectors.toList());
-
-        List<LocalCustomTime> irrelevantLocalCustomTimes = new ArrayList<>(kotlinDomainFactory.localFactory.getLocalCustomTimes());
-        irrelevantLocalCustomTimes.removeAll(relevantLocalCustomTimes);
-
-        check(Stream.of(irrelevantLocalCustomTimes)
-                .noneMatch(LocalCustomTime::getCurrent));
-
-        Stream.of(irrelevantExistingInstances)
-                .forEach(Instance::delete);
-
-        Stream.of(irrelevantTasks)
-                .forEach(Task::delete);
-
-        Stream.of(irrelevantLocalCustomTimes)
-                .forEach(LocalCustomTime::delete);
-
-        List<RemoteCustomTime> irrelevantRemoteCustomTimes;
-        List<RemoteProject> irrelevantRemoteProjects;
-        if (kotlinDomainFactory.getRemoteProjectFactory() != null) {
-            List<RemoteCustomTime> remoteCustomTimes = kotlinDomainFactory.getRemoteProjectFactory().getRemoteCustomTimes();
-            Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance> remoteCustomTimeRelevances = Stream.of(remoteCustomTimes).collect(Collectors.toMap(remoteCustomTime -> new kotlin.Pair<>(remoteCustomTime.getProjectId(), remoteCustomTime.getId()), RemoteCustomTimeRelevance::new));
-
-            Collection<RemoteProject> remoteProjects = kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjects().values();
-            Map<String, RemoteProjectRelevance> remoteProjectRelevances = Stream.of(remoteProjects)
-                    .collect(Collectors.toMap(RemoteProject::getId, RemoteProjectRelevance::new));
-
-            Stream.of(remoteProjects)
-                    .filter(remoteProject -> remoteProject.current(now))
-                    .map(RemoteProject::getId)
-                    .map(remoteProjectRelevances::get)
-                    .forEach(RemoteProjectRelevance::setRelevant);
-
-            Stream.of(taskRelevances.values())
-                    .filter(TaskRelevance::getRelevant)
-                    .forEach(taskRelevance -> taskRelevance.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances));
-
-            Stream.of(instanceRelevances.values())
-                    .filter(InstanceRelevance::getRelevant)
-                    .forEach(instanceRelevance -> instanceRelevance.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances));
-
-            List<RemoteCustomTime> relevantRemoteCustomTimes = Stream.of(remoteCustomTimeRelevances.values())
-                    .filter(RemoteCustomTimeRelevance::getRelevant)
-                    .map(RemoteCustomTimeRelevance::getRemoteCustomTime)
-                    .collect(Collectors.toList());
-
-            irrelevantRemoteCustomTimes = new ArrayList<>(remoteCustomTimes);
-            irrelevantRemoteCustomTimes.removeAll(relevantRemoteCustomTimes);
-
-            Stream.of(irrelevantRemoteCustomTimes)
-                    .forEach(RemoteCustomTime::delete);
-
-            List<RemoteProject> relevantRemoteProjects = Stream.of(remoteProjectRelevances.values())
-                    .filter(RemoteProjectRelevance::getRelevant)
-                    .map(RemoteProjectRelevance::getRemoteProject)
-                    .collect(Collectors.toList());
-
-            irrelevantRemoteProjects = new ArrayList<>(remoteProjects);
-            irrelevantRemoteProjects.removeAll(relevantRemoteProjects);
-
-            Stream.of(irrelevantRemoteProjects)
-                    .forEach(RemoteProject::delete);
-        } else {
-            irrelevantRemoteCustomTimes = null;
-            irrelevantRemoteProjects = null;
-        }
-
-        return new Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects);
-    }
 
     void notifyCloud(@NonNull Context context, @Nullable RemoteProject remoteProject) {
         Set<RemoteProject> remoteProjects = new HashSet<>();

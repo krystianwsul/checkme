@@ -137,7 +137,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
         return kotlinDomainFactory.getParentTask(this, exactTimeStamp)
     }
 
-    protected fun updateOldestVisible(now: ExactTimeStamp) {
+    fun updateOldestVisible(now: ExactTimeStamp) {
         // 24 hack
         val instances = kotlinDomainFactory.getPastInstances(this, now)
 

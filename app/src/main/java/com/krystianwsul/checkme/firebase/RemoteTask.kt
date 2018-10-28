@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import android.content.Context
 import android.text.TextUtils
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
@@ -83,17 +84,11 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
     }
 
     override fun getOldestVisible(): Date? {
-        return if (remoteTaskRecord.oldestVisibleYear != null) {
-            checkNotNull(remoteTaskRecord.oldestVisibleMonth != null)
-            checkNotNull(remoteTaskRecord.oldestVisibleDay != null)
-
+        return if (remoteTaskRecord.oldestVisibleYear != null && remoteTaskRecord.oldestVisibleMonth != null && remoteTaskRecord.oldestVisibleDay != null) {
             Date(remoteTaskRecord.oldestVisibleYear!!, remoteTaskRecord.oldestVisibleMonth!!, remoteTaskRecord.oldestVisibleDay!!)
         } else {
-            if (remoteTaskRecord.oldestVisibleMonth != null || remoteTaskRecord.oldestVisibleDay != null)
-                throw MissingDayException("projectId: ${remoteProject.id}, taskId: $id, oldestVisibleYear: ${remoteTaskRecord.oldestVisibleYear}, oldestVisibleMonth: ${remoteTaskRecord.oldestVisibleMonth}, oldestVisibleDay: ${remoteTaskRecord.oldestVisibleDay}")
-
-            check(remoteTaskRecord.oldestVisibleMonth == null)
-            check(remoteTaskRecord.oldestVisibleDay == null)
+            if (remoteTaskRecord.oldestVisibleYear != null || remoteTaskRecord.oldestVisibleMonth != null || remoteTaskRecord.oldestVisibleDay != null)
+                MyCrashlytics.logException(MissingDayException("projectId: ${remoteProject.id}, taskId: $id, oldestVisibleYear: ${remoteTaskRecord.oldestVisibleYear}, oldestVisibleMonth: ${remoteTaskRecord.oldestVisibleMonth}, oldestVisibleDay: ${remoteTaskRecord.oldestVisibleDay}"))
 
             null
         }

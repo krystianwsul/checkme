@@ -28,7 +28,7 @@ class RemoteInstance : Instance {
             remoteInstanceRecord!!.taskId
         } else {
             check(!TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime != null)
+            checkNotNull(_scheduleDateTime)
 
             _taskId!!
         }
@@ -41,7 +41,7 @@ class RemoteInstance : Instance {
             Date(remoteInstanceRecord!!.scheduleYear, remoteInstanceRecord!!.scheduleMonth, remoteInstanceRecord!!.scheduleDay)
         } else {
             check(!TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime != null)
+            checkNotNull(_scheduleDateTime)
 
             _scheduleDateTime!!.date
         }
@@ -62,7 +62,7 @@ class RemoteInstance : Instance {
                     ?: NormalTime(hour!!, minute!!)
         } else {
             check(!TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime != null)
+            checkNotNull(_scheduleDateTime)
 
             _scheduleDateTime!!.time
         }
@@ -77,8 +77,8 @@ class RemoteInstance : Instance {
             check(_scheduleDateTime == null)
 
             if (remoteInstanceRecord!!.instanceYear != null) {
-                check(remoteInstanceRecord!!.instanceMonth != null)
-                check(remoteInstanceRecord!!.instanceDay != null)
+                checkNotNull(remoteInstanceRecord!!.instanceMonth)
+                checkNotNull(remoteInstanceRecord!!.instanceDay)
 
                 Date(remoteInstanceRecord!!.instanceYear!!, remoteInstanceRecord!!.instanceMonth!!, remoteInstanceRecord!!.instanceDay!!)
             } else {
@@ -88,8 +88,8 @@ class RemoteInstance : Instance {
                 scheduleDate
             }
         } else {
-            check(_taskId != null)
-            check(_scheduleDateTime != null)
+            checkNotNull(_taskId)
+            checkNotNull(_scheduleDateTime)
 
             _scheduleDateTime!!.date
         }
@@ -108,8 +108,8 @@ class RemoteInstance : Instance {
                 else -> scheduleTime
             }
         } else {
-            check(_taskId != null)
-            check(_scheduleDateTime != null)
+            checkNotNull(_taskId)
+            checkNotNull(_scheduleDateTime)
 
             _scheduleDateTime!!.time
         }
@@ -132,7 +132,7 @@ class RemoteInstance : Instance {
             customTimeId?.let { domainFactory.getCustomTimeKey(remoteProject.id, it) }
         } else {
             check(!TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime != null)
+            checkNotNull(_scheduleDateTime)
 
             val customTimeKey = _scheduleDateTime!!.time.timePair.customTimeKey
             if (customTimeKey == null) {
@@ -161,13 +161,13 @@ class RemoteInstance : Instance {
 
                 null
             } else {
-                check(minute != null)
+                checkNotNull(minute)
 
                 HourMinute(hour, minute!!)
             }
         } else {
             check(!TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime != null)
+            checkNotNull(_scheduleDateTime)
 
             _scheduleDateTime!!.time.timePair.hourMinute
         }
@@ -247,7 +247,7 @@ class RemoteInstance : Instance {
         if (instanceShownRecord == null)
             createInstanceShownRecord()
 
-        check(instanceShownRecord != null)
+        checkNotNull(instanceShownRecord)
 
         instanceShownRecord!!.notified = false
     }
@@ -283,7 +283,7 @@ class RemoteInstance : Instance {
         if (instanceShownRecord == null)
             createInstanceShownRecord()
 
-        check(instanceShownRecord != null)
+        checkNotNull(instanceShownRecord)
 
         instanceShownRecord!!.notificationShown = notificationShown
     }
@@ -293,14 +293,13 @@ class RemoteInstance : Instance {
             if (remoteInstanceRecord == null)
                 createInstanceHierarchy(now)
 
-            check(remoteInstanceRecord != null)
+            checkNotNull(remoteInstanceRecord)
 
             remoteInstanceRecord!!.done = now.long
 
-            if (instanceShownRecord != null)
-                instanceShownRecord!!.notified = false
+            instanceShownRecord?.notified = false
         } else {
-            check(remoteInstanceRecord != null)
+            checkNotNull(remoteInstanceRecord)
 
             remoteInstanceRecord!!.done = null
         }
@@ -316,10 +315,7 @@ class RemoteInstance : Instance {
     }
 
     override fun delete() {
-        check(remoteInstanceRecord != null)
-
-        val remoteProjectFactory = kotlinDomainFactory.remoteProjectFactory
-        check(remoteProjectFactory != null)
+        checkNotNull(remoteInstanceRecord)
 
         task.deleteInstance(this)
 

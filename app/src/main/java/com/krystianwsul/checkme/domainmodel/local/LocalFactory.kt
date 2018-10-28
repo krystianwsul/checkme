@@ -372,9 +372,7 @@ class LocalFactory {
         return _localCustomTimes[localCustomTimeId]!!
     }
 
-    fun clearRemoteCustomTimeRecords() {
-        _localCustomTimes.values.forEach { it.clearRemoteRecords() }
-    }
+    fun clearRemoteCustomTimeRecords() = _localCustomTimes.values.forEach { it.clearRemoteRecords() }
 
     fun getLocalCustomTime(remoteProjectId: String, remoteCustomTimeId: String) = _localCustomTimes.values.singleOrNull { it.hasRemoteRecord(remoteProjectId) && it.getRemoteId(remoteProjectId) == remoteCustomTimeId }
 

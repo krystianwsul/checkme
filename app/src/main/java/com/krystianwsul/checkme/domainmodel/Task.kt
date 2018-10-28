@@ -89,10 +89,8 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
         return false
     }// bo inheritance i testy
 
-    private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task {
-        val parentTask = getParentTask(exactTimeStamp)
-        return parentTask?.getRootTask(exactTimeStamp) ?: this
-    }
+    private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp)
+            ?: this
 
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(current(exactTimeStamp))
@@ -122,11 +120,10 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
         getChildTaskHierarchies(now).forEach { it.setEndExactTimeStamp(now) }
 
-        val parentTaskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(this, now)
-        if (parentTaskHierarchy != null) {
-            check(parentTaskHierarchy.current(now))
+        kotlinDomainFactory.getParentTaskHierarchy(this, now)?.let {
+            check(it.current(now))
 
-            parentTaskHierarchy.setEndExactTimeStamp(now)
+            it.setEndExactTimeStamp(now)
         }
 
         setMyEndExactTimeStamp(now)
@@ -219,7 +216,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
         instances.addAll(taskHierarchies.map { it.parentTask }
                 .flatMap { it.getInstances(startExactTimeStamp, endExactTimeStamp, now) }
-                .flatMap { instance -> instance.getChildInstances(now) }
+                .flatMap { it.getChildInstances(now) }
                 .asSequence()
                 .map { it.first }
                 .filter { it.taskKey == taskKey }
@@ -262,7 +259,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
     abstract fun deleteSchedule(schedule: Schedule)
 
-    private class OldestVisibleException4 internal constructor(message: String) : Exception(message)
+    private class OldestVisibleException4(message: String) : Exception(message)
 
     abstract fun belongsToRemoteProject(): Boolean
 

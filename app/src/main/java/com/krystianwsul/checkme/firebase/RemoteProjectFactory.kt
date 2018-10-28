@@ -23,8 +23,6 @@ class RemoteProjectFactory(
         private val userInfo: UserInfo,
         private val uuid: String, now: ExactTimeStamp) {
 
-    private val domainFactory = kotlinDomainFactory.domainFactory
-
     private val remoteProjectManager = RemoteProjectManager(kotlinDomainFactory, children)
 
     val remoteProjects = remoteProjectManager.remoteProjectRecords

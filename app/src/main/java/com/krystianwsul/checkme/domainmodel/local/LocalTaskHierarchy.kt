@@ -30,8 +30,8 @@ class LocalTaskHierarchy(
 
     override var ordinal: Double
         get() = taskHierarchyRecord.ordinal ?: taskHierarchyRecord.startTime.toDouble()
-        set(ordinal) {
-            taskHierarchyRecord.ordinal = ordinal
+        set(value) {
+            taskHierarchyRecord.ordinal = value
         }
 
     override val taskHierarchyKey get() = TaskHierarchyKey.LocalTaskHierarchyKey(taskHierarchyRecord.id)

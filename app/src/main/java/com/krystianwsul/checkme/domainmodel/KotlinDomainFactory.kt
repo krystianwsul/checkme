@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.content.Context
 import android.text.TextUtils
+import com.annimon.stream.Collectors
 import com.annimon.stream.Stream
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
@@ -13,6 +14,7 @@ import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
@@ -197,7 +199,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
         val allInstances = HashMap<InstanceKey, Instance>()
 
-        for (instance in domainFactory.existingInstances) {
+        for (instance in getExistingInstances()) {
             val instanceExactTimeStamp = instance.instanceDateTime
                     .timeStamp
                     .toExactTimeStamp()
@@ -490,5 +492,42 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                     TaskListFragment.ChildTaskData(childTask.name, childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.note, childTask.startExactTimeStamp, childTask.taskKey, HierarchyData(it.taskHierarchyKey, it.ordinal))
                 }
                 .toList()
+    }
+
+    fun getExistingInstances() = localFactory.existingInstances
+            .toMutableList<Instance>()
+            .apply {
+                remoteProjectFactory?.let { addAll(it.existingInstances) }
+            }
+
+    fun getChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now)
+            .map {
+                val childTask = it.childTask
+
+                GroupListFragment.TaskData(childTask.taskKey, childTask.name, getChildTaskDatas(childTask, now), childTask.startExactTimeStamp, childTask.note)
+            }
+
+    fun getMainData(now: ExactTimeStamp, context: Context): TaskListFragment.TaskData {
+        val childTaskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) }
+                .map { TaskListFragment.ChildTaskData(it.name, it.getScheduleText(context, now), getChildTaskDatas(it, now, context), it.note, it.startExactTimeStamp, it.taskKey, null) }
+                .collect(Collectors.toList())
+                .toMutableList()
+                .apply { sortDescending() }
+
+        return TaskListFragment.TaskData(childTaskDatas, null)
+    }
+
+    fun setInstanceDone(context: Context, now: ExactTimeStamp, dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): Instance {
+        val instance = getInstance(instanceKey)
+
+        instance.setDone(done, now)
+
+        domainFactory.updateNotifications(context, now)
+
+        domainFactory.save(context, dataId, source)
+
+        domainFactory.notifyCloud(context, instance.remoteNullableProject)
+
+        return instance
     }
 }

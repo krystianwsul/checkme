@@ -47,7 +47,6 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.notifications.TickJobIntentService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
-import com.krystianwsul.checkme.persistencemodel.PersistenceManger;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -107,17 +106,9 @@ public class DomainFactory {
 
     DomainFactory(@NonNull KotlinDomainFactory kotlinDomainFactory) {
         this.kotlinDomainFactory = kotlinDomainFactory;
-        kotlinDomainFactory.localFactory = LocalFactory.Companion.getInstance();
     }
 
-    DomainFactory(@NonNull KotlinDomainFactory kotlinDomainFactory, @NonNull PersistenceManger persistenceManger) {
-        this.kotlinDomainFactory = kotlinDomainFactory;
-        kotlinDomainFactory.localFactory = new LocalFactory(persistenceManger);
-    }
-
-    void initialize() {
-        kotlinDomainFactory.localFactory.initialize(this);
-    }
+    // misc
 
     public boolean isHoldingWakeLock() {
         return kotlinDomainFactory.getTickData() != null && kotlinDomainFactory.getTickData().getWakelock().isHeld();

@@ -40,7 +40,8 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
     var userQuery: Query? = null
     var userListener: ValueEventListener? = null
 
-    lateinit var localFactory: LocalFactory
+    @JvmField
+    var localFactory: LocalFactory
 
     var remoteProjectFactory: RemoteProjectFactory? = null
 
@@ -57,14 +58,12 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
     init {
         start = ExactTimeStamp.now
 
-        domainFactory = if (persistenceManager != null)
-            DomainFactory(this, persistenceManager)
-        else
-            DomainFactory(this)
+        domainFactory = DomainFactory(this)
+        localFactory = persistenceManager?.let { LocalFactory(it) } ?: LocalFactory.instance
 
         read = ExactTimeStamp.now
 
-        domainFactory.initialize()
+        localFactory.initialize(domainFactory)
 
         stop = ExactTimeStamp.now
     }

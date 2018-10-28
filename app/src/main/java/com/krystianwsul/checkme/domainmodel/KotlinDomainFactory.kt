@@ -528,7 +528,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
         domainFactory.save(context, dataId, source)
 
-        domainFactory.notifyCloud(context, instance.remoteNullableProject)
+        notifyCloud(context, instance.remoteNullableProject)
 
         return instance
     }
@@ -645,5 +645,20 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
 
         return Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
+    }
+
+    fun notifyCloud(context: Context, remoteProject: RemoteProject?) {
+        val remoteProjects = mutableSetOf<RemoteProject>()
+        remoteProject?.let { remoteProjects.add(it) }
+
+        notifyCloud(context, remoteProjects)
+    }
+
+    fun notifyCloud(context: Context, remoteProjects: Set<RemoteProject>) {
+        if (!remoteProjects.isEmpty()) {
+            checkNotNull(userInfo)
+
+            BackendNotifier.notify(context, remoteProjects, userInfo!!, ArrayList())
+        }
     }
 }

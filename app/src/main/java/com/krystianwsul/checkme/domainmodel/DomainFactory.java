@@ -993,7 +993,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, instance.getRemoteNullableProject());
     }
 
     public synchronized void setInstancesDateTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
@@ -1019,7 +1019,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(context, remoteProjects);
     }
 
     public synchronized void setInstanceAddHourService(@NonNull Context context, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
@@ -1042,7 +1042,7 @@ public class DomainFactory {
 
         save(context, 0, source);
 
-        notifyCloud(context, instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, instance.getRemoteNullableProject());
     }
 
     public synchronized void setInstanceAddHourActivity(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
@@ -1064,7 +1064,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, instance.getRemoteNullableProject());
     }
 
     public synchronized void setInstancesAddHourActivity(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Collection<InstanceKey> instanceKeys) {
@@ -1091,7 +1091,7 @@ public class DomainFactory {
                 .filter(remoteProject -> remoteProject != null)
                 .collect(Collectors.toSet());
 
-        notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(context, remoteProjects);
     }
 
     public synchronized void setInstanceNotificationDone(@NonNull Context context, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
@@ -1109,7 +1109,7 @@ public class DomainFactory {
 
         save(context, 0, source);
 
-        notifyCloud(context, instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, instance.getRemoteNullableProject());
     }
 
     @NonNull
@@ -1134,7 +1134,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(context, remoteProjects);
 
         return now;
     }
@@ -1191,7 +1191,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
 
         return task;
     }
@@ -1230,7 +1230,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
@@ -1297,7 +1297,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, newParentTask.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, newParentTask.getRemoteNullableProject());
     }
 
     Task createChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
@@ -1312,7 +1312,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, childTask.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, childTask.getRemoteNullableProject());
 
         return childTask;
     }
@@ -1354,7 +1354,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, childTask.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, childTask.getRemoteNullableProject());
     }
 
     @NonNull
@@ -1391,7 +1391,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
@@ -1411,7 +1411,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
     }
 
     public synchronized void setInstanceOrdinal(int dataId, @NonNull InstanceKey instanceKey, double ordinal) {
@@ -1428,7 +1428,7 @@ public class DomainFactory {
 
         save(MyApplication.Companion.getInstance(), dataId, SaveService.Source.GUI);
 
-        notifyCloud(MyApplication.Companion.getInstance(), instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(MyApplication.Companion.getInstance(), instance.getRemoteNullableProject());
     }
 
     public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull HierarchyData hierarchyData) {
@@ -1462,7 +1462,7 @@ public class DomainFactory {
         save(MyApplication.Companion.getInstance(), dataId, SaveService.Source.GUI);
 
         if (remoteProject != null)
-            notifyCloud(MyApplication.Companion.getInstance(), remoteProject);
+            kotlinDomainFactory.notifyCloud(MyApplication.Companion.getInstance(), remoteProject);
     }
 
     public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull ArrayList<TaskKey> taskKeys) {
@@ -1491,7 +1491,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(context, remoteProjects);
     }
 
     public synchronized int createCustomTime(@NonNull Context context, @NonNull SaveService.Source source, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
@@ -1568,7 +1568,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
 
         return task;
     }
@@ -1632,7 +1632,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, newParentTask.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, newParentTask.getRemoteNullableProject());
     }
 
     @NonNull
@@ -1662,7 +1662,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
@@ -1762,7 +1762,7 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, remoteProject);
+        kotlinDomainFactory.notifyCloud(context, remoteProject);
     }
 
     public synchronized void setProjectEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Set<String> projectIds) {
@@ -1787,26 +1787,10 @@ public class DomainFactory {
 
         save(context, dataId, source);
 
-        notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(context, remoteProjects);
     }
 
     // internal
-
-    void notifyCloud(@NonNull Context context, @Nullable RemoteProject remoteProject) {
-        Set<RemoteProject> remoteProjects = new HashSet<>();
-        if (remoteProject != null)
-            remoteProjects.add(remoteProject);
-
-        notifyCloud(context, remoteProjects);
-    }
-
-    private void notifyCloud(@NonNull Context context, @NonNull Set<RemoteProject> remoteProjects) {
-        if (!remoteProjects.isEmpty()) {
-            check(kotlinDomainFactory.getUserInfo() != null);
-
-            BackendNotifier.INSTANCE.notify(context, remoteProjects, kotlinDomainFactory.getUserInfo(), new ArrayList<>());
-        }
-    }
 
     private void notifyCloud(@NonNull Context context, @NonNull RemoteProject remoteProject, @NonNull Collection<String> userKeys) {
         check(kotlinDomainFactory.getUserInfo() != null);

@@ -20,7 +20,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyApplication;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
-import com.krystianwsul.checkme.domainmodel.local.LocalFactory;
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
@@ -144,7 +143,7 @@ public class DomainFactory {
     }
 
     public int getCustomTimeCount() {
-        return getCustomTimes().size();
+        return kotlinDomainFactory.getCustomTimes().size();
     }
 
     private void save(@NonNull Context context, int dataId, @NonNull SaveService.Source source) {
@@ -618,7 +617,7 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskInstancesData");
 
-        Task task = getTaskForce(taskKey);
+        Task task = kotlinDomainFactory.getTaskForce(taskKey);
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
@@ -702,7 +701,7 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowInstanceData");
 
-        Task task = getTaskIfPresent(instanceKey.getTaskKey());
+        Task task = kotlinDomainFactory.getTaskIfPresent(instanceKey.getTaskKey());
         if (task == null) return new ShowInstanceViewModel.Data(null);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
@@ -815,7 +814,7 @@ public class DomainFactory {
         CreateTaskViewModel.TaskData taskData = null;
         Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> parentTreeDatas;
         if (taskKey != null) {
-            Task task = getTaskForce(taskKey);
+            Task task = kotlinDomainFactory.getTaskForce(taskKey);
 
             CreateTaskViewModel.ParentKey.TaskParentKey taskParentKey;
             List<CreateTaskViewModel.ScheduleData> scheduleDatas = null;
@@ -893,14 +892,14 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Task task = getTaskForce(taskKey);
+        Task task = kotlinDomainFactory.getTaskForce(taskKey);
         check(task.current(now));
 
         List<TaskListFragment.ChildTaskData> childTaskDatas = Stream.of(task.getChildTaskHierarchies(now))
                 .map(taskHierarchy -> {
                     Task childTask = taskHierarchy.getChildTask();
 
-                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), kotlinDomainFactory.getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
                 })
                 .collect(Collectors.toList());
         Collections.sort(childTaskDatas, TaskListFragment.ChildTaskData::compareTo);
@@ -1218,7 +1217,7 @@ public class DomainFactory {
         check(!TextUtils.isEmpty(name));
         check(!scheduleDatas.isEmpty());
 
-        Task task = getTaskForce(taskKey);
+        Task task = kotlinDomainFactory.getTaskForce(taskKey);
         check(task.current(now));
 
         task = task.updateProject(context, now, projectId);
@@ -1282,8 +1281,7 @@ public class DomainFactory {
             finalProjectId = null;
         }
 
-        List<Task> joinTasks = Stream.of(joinTaskKeys)
-                .map(this::getTaskForce)
+        List<Task> joinTasks = Stream.of(joinTaskKeys).map(kotlinDomainFactory::getTaskForce)
                 .collect(Collectors.toList());
 
         Task newParentTask;
@@ -1312,7 +1310,7 @@ public class DomainFactory {
     Task createChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         check(!TextUtils.isEmpty(name));
 
-        Task parentTask = getTaskForce(parentTaskKey);
+        Task parentTask = kotlinDomainFactory.getTaskForce(parentTaskKey);
         check(parentTask.current(now));
 
         Task childTask = parentTask.createChildTask(now, name, note);
@@ -1344,7 +1342,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Task parentTask = getTaskForce(parentTaskKey);
+        Task parentTask = kotlinDomainFactory.getTaskForce(parentTaskKey);
         check(parentTask.current(now));
 
         List<String> joinProjectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
@@ -1352,8 +1350,7 @@ public class DomainFactory {
                 .collect(Collectors.toList());
         check(joinProjectIds.size() == 1);
 
-        List<Task> joinTasks = Stream.of(joinTaskKeys)
-                .map(this::getTaskForce)
+        List<Task> joinTasks = Stream.of(joinTaskKeys).map(kotlinDomainFactory::getTaskForce)
                 .collect(Collectors.toList());
 
         Task childTask = parentTask.createChildTask(now, name, note);
@@ -1374,10 +1371,10 @@ public class DomainFactory {
 
         check(!TextUtils.isEmpty(name));
 
-        Task task = getTaskForce(taskKey);
+        Task task = kotlinDomainFactory.getTaskForce(taskKey);
         check(task.current(now));
 
-        Task newParentTask = getTaskForce(parentTaskKey);
+        Task newParentTask = kotlinDomainFactory.getTaskForce(parentTaskKey);
         check(task.current(now));
 
         task.setName(name, note);
@@ -1412,7 +1409,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Task task = getTaskForce(taskKey);
+        Task task = kotlinDomainFactory.getTaskForce(taskKey);
         check(task.current(now));
 
         task.setEndExactTimeStamp(now);
@@ -1483,8 +1480,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        List<Task> tasks = Stream.of(taskKeys)
-                .map(this::getTaskForce)
+        List<Task> tasks = Stream.of(taskKeys).map(kotlinDomainFactory::getTaskForce)
                 .collect(Collectors.toList());
 
         check(Stream.of(tasks)
@@ -1519,7 +1515,7 @@ public class DomainFactory {
         check(hourMinutes.get(DayOfWeek.FRIDAY) != null);
         check(hourMinutes.get(DayOfWeek.SATURDAY) != null);
 
-        LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.createLocalCustomTime(this, name, hourMinutes);
+        LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.createLocalCustomTime(kotlinDomainFactory, name, hourMinutes);
 
         save(context, 0, source);
 
@@ -1620,8 +1616,7 @@ public class DomainFactory {
             finalProjectId = null;
         }
 
-        List<Task> joinTasks = Stream.of(joinTaskKeys)
-                .map(this::getTaskForce)
+        List<Task> joinTasks = Stream.of(joinTaskKeys).map(kotlinDomainFactory::getTaskForce)
                 .collect(Collectors.toList());
 
         Task newParentTask;
@@ -1656,7 +1651,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Task task = getTaskForce(taskKey);
+        Task task = kotlinDomainFactory.getTaskForce(taskKey);
         check(task.current(now));
 
         task = task.updateProject(context, now, projectId);
@@ -1805,76 +1800,6 @@ public class DomainFactory {
     // internal
 
     @NonNull
-    private List<CustomTime> getCustomTimes() {
-        List<CustomTime> customTimes = new ArrayList<>(kotlinDomainFactory.localFactory.getLocalCustomTimes());
-
-        if (kotlinDomainFactory.getRemoteProjectFactory() != null)
-            customTimes.addAll(kotlinDomainFactory.getRemoteProjectFactory().getRemoteCustomTimes());
-
-        return customTimes;
-    }
-
-    @NonNull
-    Task getTaskForce(@NonNull TaskKey taskKey) {
-        if (taskKey.getLocalTaskId() != null) {
-            check(TextUtils.isEmpty(taskKey.getRemoteTaskId()));
-
-            return kotlinDomainFactory.localFactory.getTaskForce(taskKey.getLocalTaskId());
-        } else {
-            check(!TextUtils.isEmpty(taskKey.getRemoteTaskId()));
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-            return kotlinDomainFactory.getRemoteProjectFactory().getTaskForce(taskKey);
-        }
-    }
-
-    @Nullable
-    private Task getTaskIfPresent(@NonNull TaskKey taskKey) {
-        if (taskKey.getLocalTaskId() != null) {
-            check(TextUtils.isEmpty(taskKey.getRemoteTaskId()));
-
-            return kotlinDomainFactory.localFactory.getTaskIfPresent(taskKey.getLocalTaskId());
-        } else {
-            check(!TextUtils.isEmpty(taskKey.getRemoteTaskId()));
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-            return kotlinDomainFactory.getRemoteProjectFactory().getTaskIfPresent(taskKey);
-        }
-    }
-
-    @NonNull
-    List<TaskHierarchy> getChildTaskHierarchies(@NonNull Task parentTask, @NonNull ExactTimeStamp exactTimeStamp) {
-        check(parentTask.current(exactTimeStamp));
-
-        return Stream.of(parentTask.getTaskHierarchiesByParentTaskKey(parentTask.getTaskKey()))
-                .filter(taskHierarchy -> taskHierarchy.current(exactTimeStamp) && taskHierarchy.getChildTask().current(exactTimeStamp))
-                .sortBy(TaskHierarchy::getOrdinal)
-                .collect(Collectors.toList());
-    }
-
-    @NonNull
-    private List<TaskListFragment.ChildTaskData> getChildTaskDatas(@NonNull Task parentTask, @NonNull ExactTimeStamp now, @NonNull Context context) {
-        return Stream.of(parentTask.getChildTaskHierarchies(now))
-                .sortBy(TaskHierarchy::getOrdinal)
-                .map(taskHierarchy -> {
-                    Task childTask = taskHierarchy.getChildTask();
-
-                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Nullable
-    public RemoteProjectFactory getRemoteFactory() {
-        return kotlinDomainFactory.getRemoteProjectFactory();
-    }
-
-    @NonNull
-    public LocalFactory getLocalFactory() {
-        return kotlinDomainFactory.localFactory;
-    }
-
-    @NonNull
     List<Instance> getExistingInstances() {
         List<Instance> instances = new ArrayList<>(kotlinDomainFactory.localFactory.getExistingInstances());
 
@@ -1902,8 +1827,7 @@ public class DomainFactory {
         childTaskDatas = kotlinDomainFactory.getTasks()
                 .filter(task -> task.current(now))
                 .filter(task -> task.isVisible(now))
-                .filter(task -> task.isRootTask(now))
-                .map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey(), null))
+                .filter(task -> task.isRootTask(now)).map(task -> new TaskListFragment.ChildTaskData(task.getName(), task.getScheduleText(context, now), kotlinDomainFactory.getChildTaskDatas(task, now, context), task.getNote(), task.getStartExactTimeStamp(), task.getTaskKey(), null))
                 .collect(Collectors.toList());
 
         Collections.sort(childTaskDatas, (TaskListFragment.ChildTaskData lhs, TaskListFragment.ChildTaskData rhs) -> -lhs.compareTo(rhs));

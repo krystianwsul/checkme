@@ -29,7 +29,7 @@ class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord
 
     override val schedules get() = mSchedules
 
-    override val existingInstances get() = HashMap<ScheduleKey, Instance>(domainFactory.localFactory.getExistingInstances(taskKey))
+    override val existingInstances get() = HashMap<ScheduleKey, Instance>(kotlinDomainFactory.localFactory.getExistingInstances(taskKey))
 
     override val remoteNullableProject: RemoteProject? = null
 
@@ -73,20 +73,20 @@ class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord
     override fun delete() {
         val taskKey = taskKey
 
-        ArrayList(domainFactory.localFactory.getTaskHierarchiesByChildTaskKey(taskKey)).forEach { it.delete() }
+        ArrayList(kotlinDomainFactory.localFactory.getTaskHierarchiesByChildTaskKey(taskKey)).forEach { it.delete() }
 
         ArrayList(schedules).forEach { it.delete() }
 
-        domainFactory.localFactory.deleteTask(this)
+        kotlinDomainFactory.localFactory.deleteTask(this)
         taskRecord.delete()
     }
 
-    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?) = domainFactory.localFactory.createChildTask(kotlinDomainFactory, now, this, name, note)
+    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?) = kotlinDomainFactory.localFactory.createChildTask(kotlinDomainFactory, now, this, name, note)
 
     override fun addSchedules(scheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) {
         check(!scheduleDatas.isEmpty())
 
-        val schedules = domainFactory.localFactory.createSchedules(kotlinDomainFactory, this, scheduleDatas, now)
+        val schedules = kotlinDomainFactory.localFactory.createSchedules(kotlinDomainFactory, this, scheduleDatas, now)
         check(!schedules.isEmpty())
 
         addSchedules(schedules)
@@ -95,7 +95,7 @@ class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is LocalTask)
 
-        domainFactory.localFactory.createTaskHierarchy(domainFactory, this, childTask as LocalTask, now)
+        kotlinDomainFactory.localFactory.createTaskHierarchy(kotlinDomainFactory, this, childTask as LocalTask, now)
     }
 
     override fun deleteSchedule(schedule: Schedule) {
@@ -104,9 +104,9 @@ class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord
         mSchedules.remove(schedule)
     }
 
-    override fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy> = domainFactory.localFactory.getTaskHierarchiesByChildTaskKey(childTaskKey)
+    override fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy> = kotlinDomainFactory.localFactory.getTaskHierarchiesByChildTaskKey(childTaskKey)
 
-    override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> = domainFactory.localFactory.getTaskHierarchiesByParentTaskKey(parentTaskKey)
+    override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> = kotlinDomainFactory.localFactory.getTaskHierarchiesByParentTaskKey(parentTaskKey)
 
     override fun belongsToRemoteProject() = false
 

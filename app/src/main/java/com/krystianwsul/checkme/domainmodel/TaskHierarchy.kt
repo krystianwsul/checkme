@@ -4,7 +4,9 @@ import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
-abstract class TaskHierarchy(protected val domainFactory: DomainFactory) {
+abstract class TaskHierarchy(protected val kotlinDomainFactory: KotlinDomainFactory) {
+
+    protected val domainFactory = kotlinDomainFactory.domainFactory
 
     abstract val startExactTimeStamp: ExactTimeStamp
 

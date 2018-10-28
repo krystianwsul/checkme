@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.local
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.persistencemodel.TaskHierarchyRecord
 import com.krystianwsul.checkme.utils.TaskHierarchyKey
@@ -8,8 +8,9 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 
-
-class LocalTaskHierarchy(domainFactory: DomainFactory, private val taskHierarchyRecord: TaskHierarchyRecord) : TaskHierarchy(domainFactory) {
+class LocalTaskHierarchy(
+        kotlinDomainFactory: KotlinDomainFactory,
+        private val taskHierarchyRecord: TaskHierarchyRecord) : TaskHierarchy(kotlinDomainFactory) {
 
     val id get() = taskHierarchyRecord.id
 
@@ -23,9 +24,9 @@ class LocalTaskHierarchy(domainFactory: DomainFactory, private val taskHierarchy
 
     val childTaskId get() = taskHierarchyRecord.childTaskId
 
-    override val parentTask get() = domainFactory.localFactory.getTaskForce(parentTaskId)
+    override val parentTask get() = kotlinDomainFactory.localFactory.getTaskForce(parentTaskId)
 
-    override val childTask get() = domainFactory.localFactory.getTaskForce(childTaskId)
+    override val childTask get() = kotlinDomainFactory.localFactory.getTaskForce(childTaskId)
 
     override var ordinal: Double
         get() = taskHierarchyRecord.ordinal ?: taskHierarchyRecord.startTime.toDouble()
@@ -44,7 +45,7 @@ class LocalTaskHierarchy(domainFactory: DomainFactory, private val taskHierarchy
     }
 
     override fun delete() {
-        domainFactory.localFactory.deleteTaskHierarchy(this)
+        kotlinDomainFactory.localFactory.deleteTaskHierarchy(this)
 
         taskHierarchyRecord.delete()
     }

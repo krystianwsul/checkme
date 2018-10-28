@@ -116,7 +116,7 @@ class RemoteInstance : Instance {
 
     override val name get() = task.name
 
-    private val remoteFactory get() = domainFactory.remoteFactory!!
+    private val remoteFactory get() = kotlinDomainFactory.remoteProjectFactory!!
 
     override val notified get() = instanceShownRecord?.notified == true
 
@@ -255,7 +255,7 @@ class RemoteInstance : Instance {
     private fun createInstanceShownRecord() {
         check(instanceShownRecord == null)
 
-        instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(kotlinDomainFactory, taskId, scheduleDateTime, task.remoteProject.id)
+        instanceShownRecord = kotlinDomainFactory.localFactory.createInstanceShownRecord(kotlinDomainFactory, taskId, scheduleDateTime, task.remoteProject.id)
     }
 
     override fun createInstanceHierarchy(now: ExactTimeStamp) {
@@ -318,7 +318,7 @@ class RemoteInstance : Instance {
     override fun delete() {
         check(remoteInstanceRecord != null)
 
-        val remoteProjectFactory = domainFactory.remoteFactory
+        val remoteProjectFactory = kotlinDomainFactory.remoteProjectFactory
         check(remoteProjectFactory != null)
 
         task.deleteInstance(this)

@@ -48,7 +48,7 @@ class RemoteProject(
 
     private fun getEndExactTimeStamp() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
 
-    private val remoteFactory get() = domainFactory.remoteFactory!!
+    private val remoteFactory get() = kotlinDomainFactory.remoteProjectFactory!!
 
     val tasks get() = remoteTasks.values
 
@@ -67,8 +67,8 @@ class RemoteProject(
 
             remoteCustomTimes[remoteCustomTime.customTimeKey.remoteCustomTimeId!!] = remoteCustomTime
 
-            if (remoteCustomTimeRecord.ownerId == domainFactory.localFactory.uuid && domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
-                val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
+            if (remoteCustomTimeRecord.ownerId == kotlinDomainFactory.localFactory.uuid && kotlinDomainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
+                val localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
 
                 localCustomTime.addRemoteCustomTimeRecord(remoteCustomTimeRecord)
             }
@@ -82,7 +82,7 @@ class RemoteProject(
 
         remoteProjectRecord.remoteTaskHierarchyRecords
                 .values
-                .map { RemoteTaskHierarchy(domainFactory, this, it) }
+                .map { RemoteTaskHierarchy(kotlinDomainFactory, this, it) }
                 .forEach { remoteTaskHierarchies.add(it.id, it) }
 
         remoteUsers = remoteProjectRecord.remoteUserRecords
@@ -108,7 +108,7 @@ class RemoteProject(
         val taskHierarchyJson = TaskHierarchyJson(parentRemoteTask.id, childRemoteTask.id, now.long, null, null)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
-        val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
+        val remoteTaskHierarchy = RemoteTaskHierarchy(kotlinDomainFactory, this, remoteTaskHierarchyRecord)
 
         remoteTaskHierarchies.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
     }
@@ -193,7 +193,7 @@ class RemoteProject(
         val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, localTaskHierarchy.startExactTimeStamp.long, endTime, localTaskHierarchy.ordinal)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
-        val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
+        val remoteTaskHierarchy = RemoteTaskHierarchy(kotlinDomainFactory, this, remoteTaskHierarchyRecord)
 
         remoteTaskHierarchies.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
 

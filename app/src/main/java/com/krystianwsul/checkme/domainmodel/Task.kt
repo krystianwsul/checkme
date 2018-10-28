@@ -64,7 +64,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
         check(current(exactTimeStamp))
 
-        return domainFactory.getChildTaskHierarchies(this, exactTimeStamp)
+        return kotlinDomainFactory.getChildTaskHierarchies(this, exactTimeStamp)
     }
 
     fun notDeleted(exactTimeStamp: ExactTimeStamp): Boolean {

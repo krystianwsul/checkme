@@ -73,7 +73,7 @@ class LocalFactory {
 
     fun initialize(kotlinDomainFactory: KotlinDomainFactory) {
         _localCustomTimes.putAll(persistenceManager.customTimeRecords
-                .map { LocalCustomTime(kotlinDomainFactory.domainFactory, it) }
+                .map { LocalCustomTime(kotlinDomainFactory, it) }
                 .map { it.id to it })
 
         persistenceManager.taskRecords.forEach { taskRecord ->
@@ -85,7 +85,7 @@ class LocalFactory {
         }
 
         persistenceManager.taskHierarchyRecords
-                .map { LocalTaskHierarchy(kotlinDomainFactory.domainFactory, it) }
+                .map { LocalTaskHierarchy(kotlinDomainFactory, it) }
                 .forEach { localTaskHierarchies.add(it.id, it) }
 
         persistenceManager.instanceRecords
@@ -301,13 +301,13 @@ class LocalFactory {
         }.flatten()
     }
 
-    fun createTaskHierarchy(domainFactory: DomainFactory, parentLocalTask: LocalTask, childLocalTask: LocalTask, startExactTimeStamp: ExactTimeStamp) {
+    fun createTaskHierarchy(kotlinDomainFactory: KotlinDomainFactory, parentLocalTask: LocalTask, childLocalTask: LocalTask, startExactTimeStamp: ExactTimeStamp) {
         check(parentLocalTask.current(startExactTimeStamp))
         check(childLocalTask.current(startExactTimeStamp))
 
         val taskHierarchyRecord = persistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp)
 
-        val localTaskHierarchy = LocalTaskHierarchy(domainFactory, taskHierarchyRecord)
+        val localTaskHierarchy = LocalTaskHierarchy(kotlinDomainFactory, taskHierarchyRecord)
         localTaskHierarchies.add(localTaskHierarchy.id, localTaskHierarchy)
     }
 
@@ -316,7 +316,7 @@ class LocalFactory {
         check(parentTask.current(now))
 
         return createLocalTaskHelper(kotlinDomainFactory, name, now, note).also {
-            createTaskHierarchy(kotlinDomainFactory.domainFactory, parentTask, it, now)
+            createTaskHierarchy(kotlinDomainFactory, parentTask, it, now)
         }
     }
 
@@ -345,7 +345,7 @@ class LocalFactory {
         parentLocalTaskHierarchies.map { it.parentTask }.forEach { convertLocalToRemoteHelper(localToRemoteConversion, it) }
     }
 
-    fun createLocalCustomTime(domainFactory: DomainFactory, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTime {
+    fun createLocalCustomTime(kotlinDomainFactory: KotlinDomainFactory, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTime {
         check(name.isNotEmpty())
 
         checkNotNull(hourMinutes[DayOfWeek.SUNDAY])
@@ -358,7 +358,7 @@ class LocalFactory {
 
         val localCustomTimeRecord = persistenceManager.createCustomTimeRecord(name, hourMinutes)
 
-        val localCustomTime = LocalCustomTime(domainFactory, localCustomTimeRecord)
+        val localCustomTime = LocalCustomTime(kotlinDomainFactory, localCustomTimeRecord)
         check(!_localCustomTimes.containsKey(localCustomTime.id))
 
         _localCustomTimes[localCustomTime.id] = localCustomTime

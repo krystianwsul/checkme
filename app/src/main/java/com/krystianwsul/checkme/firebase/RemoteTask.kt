@@ -25,7 +25,7 @@ class RemoteTask(
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
-            .map { RemoteInstance(kotlinDomainFactory, this.remoteProject, it, domainFactory.localFactory.getInstanceShownRecord(this.remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
+            .map { RemoteInstance(kotlinDomainFactory, remoteProject, it, kotlinDomainFactory.localFactory.getInstanceShownRecord(this.remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
@@ -33,7 +33,7 @@ class RemoteTask(
 
     override val name get() = remoteTaskRecord.name
 
-    private val remoteFactory get() = domainFactory.remoteFactory!!
+    private val remoteFactory get() = kotlinDomainFactory.remoteProjectFactory!!
 
     override val schedules get() = remoteSchedules
 

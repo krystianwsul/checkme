@@ -191,7 +191,7 @@ class LocalInstance : Instance {
         }
 
     override val task: LocalTask
-        get() = domainFactory.localFactory.getTaskForce(taskId)
+        get() = kotlinDomainFactory.localFactory.getTaskForce(taskId)
 
     override val remoteNullableProject: RemoteProject?
         get() = null
@@ -275,7 +275,7 @@ class LocalInstance : Instance {
     private fun createInstanceRecord(now: ExactTimeStamp) {
         val localTask = task
 
-        mInstanceRecord = domainFactory.localFactory.createInstanceRecord(localTask, this, scheduleDate, scheduleTimePair, now)
+        mInstanceRecord = kotlinDomainFactory.localFactory.createInstanceRecord(localTask, this, scheduleDate, scheduleTimePair, now)
 
         mTaskId = null
         mScheduleDateTime = null
@@ -306,9 +306,9 @@ class LocalInstance : Instance {
     }
 
     override fun delete() {
-        check(mInstanceRecord != null)
+        checkNotNull(mInstanceRecord)
 
-        domainFactory.localFactory.deleteInstance(this)
+        kotlinDomainFactory.localFactory.deleteInstance(this)
 
         mInstanceRecord!!.delete()
     }

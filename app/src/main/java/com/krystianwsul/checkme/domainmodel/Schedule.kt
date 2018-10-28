@@ -50,7 +50,7 @@ abstract class Schedule(protected val kotlinDomainFactory: KotlinDomainFactory) 
     abstract fun getNextAlarm(now: ExactTimeStamp): TimeStamp?
 
     fun delete() {
-        domainFactory.getTaskForce(scheduleBridge.rootTaskKey).deleteSchedule(this)
+        kotlinDomainFactory.getTaskForce(scheduleBridge.rootTaskKey).deleteSchedule(this)
         scheduleBridge.delete()
     }
 }

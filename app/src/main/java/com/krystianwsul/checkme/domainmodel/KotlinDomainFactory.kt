@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
@@ -441,5 +442,53 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         } else {
             Stream.of<Task>(localFactory.tasks)
         }
+    }
+
+    fun getCustomTimes() = localFactory.localCustomTimes.toMutableList<CustomTime>().apply {
+        remoteProjectFactory?.let { addAll(it.remoteCustomTimes) }
+    }
+
+    fun getTaskForce(taskKey: TaskKey) = if (taskKey.localTaskId != null) {
+        check(TextUtils.isEmpty(taskKey.remoteTaskId))
+
+        localFactory.getTaskForce(taskKey.localTaskId)
+    } else {
+        check(!TextUtils.isEmpty(taskKey.remoteTaskId))
+        checkNotNull(remoteProjectFactory)
+
+        remoteProjectFactory!!.getTaskForce(taskKey)
+    }
+
+    fun getTaskIfPresent(taskKey: TaskKey) = if (taskKey.localTaskId != null) {
+        check(TextUtils.isEmpty(taskKey.remoteTaskId))
+
+        localFactory.getTaskIfPresent(taskKey.localTaskId)
+    } else {
+        check(!TextUtils.isEmpty(taskKey.remoteTaskId))
+        checkNotNull(remoteProjectFactory)
+
+        remoteProjectFactory!!.getTaskIfPresent(taskKey)
+    }
+
+    fun getChildTaskHierarchies(parentTask: Task, exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
+        check(parentTask.current(exactTimeStamp))
+
+        return parentTask.getTaskHierarchiesByParentTaskKey(parentTask.taskKey)
+                .asSequence()
+                .filter { it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp) }
+                .sortedBy { it.ordinal }
+                .toList()
+    }
+
+    fun getChildTaskDatas(parentTask: Task, now: ExactTimeStamp, context: Context): List<TaskListFragment.ChildTaskData> {
+        return parentTask.getChildTaskHierarchies(now)
+                .asSequence()
+                .sortedBy { it.ordinal }
+                .map {
+                    val childTask = it.childTask
+
+                    TaskListFragment.ChildTaskData(childTask.name, childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.note, childTask.startExactTimeStamp, childTask.taskKey, HierarchyData(it.taskHierarchyKey, it.ordinal))
+                }
+                .toList()
     }
 }

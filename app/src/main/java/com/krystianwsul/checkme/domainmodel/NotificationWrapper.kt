@@ -17,9 +17,9 @@ abstract class NotificationWrapper {
 
     abstract fun cancelNotification(id: Int)
 
-    abstract fun notifyInstance(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp)
+    abstract fun notifyInstance(kotlinDomainFactory: KotlinDomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp)
 
-    abstract fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp)
+    abstract fun notifyGroup(kotlinDomainFactory: KotlinDomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp)
 
     abstract fun cleanGroup(lastNotificationId: Int?)
 

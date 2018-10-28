@@ -16,11 +16,15 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 import java.util.*
 
-class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject, private val remoteTaskRecord: RemoteTaskRecord, now: ExactTimeStamp) : Task(domainFactory) {
+class RemoteTask(
+        kotlinDomainFactory: KotlinDomainFactory,
+        val remoteProject: RemoteProject,
+        private val remoteTaskRecord: RemoteTaskRecord,
+        now: ExactTimeStamp) : Task(kotlinDomainFactory) {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
-            .map { RemoteInstance(domainFactory, this.remoteProject, it, domainFactory.localFactory.getInstanceShownRecord(this.remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
+            .map { RemoteInstance(kotlinDomainFactory, this.remoteProject, it, domainFactory.localFactory.getInstanceShownRecord(this.remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
@@ -49,23 +53,23 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
     init {
         remoteSchedules.addAll(remoteTaskRecord.remoteSingleScheduleRecords
                 .values
-                .map { SingleSchedule(domainFactory, RemoteSingleScheduleBridge(domainFactory, it)) })
+                .map { SingleSchedule(kotlinDomainFactory, RemoteSingleScheduleBridge(domainFactory, it)) })
 
         remoteSchedules.addAll(remoteTaskRecord.remoteDailyScheduleRecords
                 .values
-                .map { WeeklySchedule(domainFactory, RemoteDailyScheduleBridge(domainFactory, it)) })
+                .map { WeeklySchedule(kotlinDomainFactory, RemoteDailyScheduleBridge(domainFactory, it)) })
 
         remoteSchedules.addAll(remoteTaskRecord.remoteWeeklyScheduleRecords
                 .values
-                .map { WeeklySchedule(domainFactory, RemoteWeeklyScheduleBridge(domainFactory, it)) })
+                .map { WeeklySchedule(kotlinDomainFactory, RemoteWeeklyScheduleBridge(domainFactory, it)) })
 
         remoteSchedules.addAll(remoteTaskRecord.remoteMonthlyDayScheduleRecords
                 .values
-                .map { MonthlyDaySchedule(domainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, it)) })
+                .map { MonthlyDaySchedule(kotlinDomainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, it)) })
 
         remoteSchedules.addAll(remoteTaskRecord.remoteMonthlyWeekScheduleRecords
                 .values
-                .map { MonthlyWeekSchedule(domainFactory, RemoteMonthlyWeekScheduleBridge(domainFactory, it)) })
+                .map { MonthlyWeekSchedule(kotlinDomainFactory, RemoteMonthlyWeekScheduleBridge(domainFactory, it)) })
     }
 
     override fun getEndExactTimeStamp() = remoteTaskRecord.endTime?.let { ExactTimeStamp(it) }
@@ -142,7 +146,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
-        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(domainFactory, instanceJson, scheduleKey)
+        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey)
 
         existingRemoteInstances[remoteInstance.scheduleKey] = remoteInstance
 
@@ -185,7 +189,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, remoteCustomTimeId, hour, minute)))
 
-                    remoteSchedules.add(SingleSchedule(domainFactory, RemoteSingleScheduleBridge(domainFactory, remoteSingleScheduleRecord)))
+                    remoteSchedules.add(SingleSchedule(kotlinDomainFactory, RemoteSingleScheduleBridge(domainFactory, remoteSingleScheduleRecord)))
                 }
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> {
@@ -211,7 +215,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     for (dayOfWeek in daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(now.long, null, dayOfWeek.ordinal, remoteCustomTimeId, hour, minute)))
 
-                        remoteSchedules.add(WeeklySchedule(domainFactory, RemoteWeeklyScheduleBridge(domainFactory, remoteWeeklyScheduleRecord)))
+                        remoteSchedules.add(WeeklySchedule(kotlinDomainFactory, RemoteWeeklyScheduleBridge(domainFactory, remoteWeeklyScheduleRecord)))
                     }
                 }
                 ScheduleType.MONTHLY_DAY -> {
@@ -236,7 +240,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(now.long, null, dayOfMonth, beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
-                    remoteSchedules.add(MonthlyDaySchedule(domainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)))
+                    remoteSchedules.add(MonthlyDaySchedule(kotlinDomainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)))
                 }
                 ScheduleType.MONTHLY_WEEK -> {
                     val (dayOfMonth, dayOfWeek, beginningOfMonth, TimePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData
@@ -260,7 +264,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(now.long, null, dayOfMonth, dayOfWeek.ordinal, beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
-                    remoteSchedules.add(MonthlyWeekSchedule(domainFactory, RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)))
+                    remoteSchedules.add(MonthlyWeekSchedule(kotlinDomainFactory, RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)))
                 }
             }
         }
@@ -295,7 +299,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(singleSchedule.startTime, singleSchedule.endTime, date.year, date.month, date.day, remoteCustomTimeId, hour, minute)))
 
-                    remoteSchedules.add(SingleSchedule(domainFactory, RemoteSingleScheduleBridge(domainFactory, remoteSingleScheduleRecord)))
+                    remoteSchedules.add(SingleSchedule(kotlinDomainFactory, RemoteSingleScheduleBridge(domainFactory, remoteSingleScheduleRecord)))
                 }
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> {
@@ -323,7 +327,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
                     for (dayOfWeek in weeklySchedule.daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(schedule.startTime, schedule.endTime, dayOfWeek.ordinal, remoteCustomTimeId, hour, minute)))
 
-                        remoteSchedules.add(WeeklySchedule(domainFactory, RemoteWeeklyScheduleBridge(domainFactory, remoteWeeklyScheduleRecord)))
+                        remoteSchedules.add(WeeklySchedule(kotlinDomainFactory, RemoteWeeklyScheduleBridge(domainFactory, remoteWeeklyScheduleRecord)))
                     }
                 }
                 ScheduleType.MONTHLY_DAY -> {
@@ -350,7 +354,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(schedule.startTime, schedule.endTime, monthlyDaySchedule.dayOfMonth, monthlyDaySchedule.beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
-                    remoteSchedules.add(MonthlyDaySchedule(domainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)))
+                    remoteSchedules.add(MonthlyDaySchedule(kotlinDomainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)))
                 }
                 ScheduleType.MONTHLY_WEEK -> {
                     val monthlyWeekScheduleData = schedule as MonthlyWeekSchedule
@@ -376,7 +380,7 @@ class RemoteTask(domainFactory: DomainFactory, val remoteProject: RemoteProject,
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(schedule.startTime, schedule.endTime, monthlyWeekScheduleData.dayOfMonth, monthlyWeekScheduleData.dayOfWeek.ordinal, monthlyWeekScheduleData.beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
-                    remoteSchedules.add(MonthlyWeekSchedule(domainFactory, RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)))
+                    remoteSchedules.add(MonthlyWeekSchedule(kotlinDomainFactory, RemoteMonthlyWeekScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord)))
                 }
             }
         }

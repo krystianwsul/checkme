@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
 import com.google.firebase.database.DataSnapshot
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
@@ -15,16 +15,21 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-
 import java.util.*
 
-class RemoteProjectFactory(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>, private val userInfo: UserInfo, private val uuid: String, now: ExactTimeStamp) {
+class RemoteProjectFactory(
+        private val kotlinDomainFactory: KotlinDomainFactory,
+        children: Iterable<DataSnapshot>,
+        private val userInfo: UserInfo,
+        private val uuid: String, now: ExactTimeStamp) {
 
-    private val remoteProjectManager = RemoteProjectManager(domainFactory, children)
+    private val domainFactory = kotlinDomainFactory.domainFactory
+
+    private val remoteProjectManager = RemoteProjectManager(kotlinDomainFactory, children)
 
     val remoteProjects = remoteProjectManager.remoteProjectRecords
             .values
-            .map { RemoteProject(domainFactory, it, userInfo, uuid, now) }
+            .map { RemoteProject(kotlinDomainFactory, it, userInfo, uuid, now) }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -37,6 +42,7 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
     val instanceCount
         get() = remoteProjects.values
                 .flatMap { it.tasks }
+                .asSequence()
                 .map { it.existingInstances.size }
                 .sum()
 
@@ -80,9 +86,9 @@ class RemoteProjectFactory(private val domainFactory: DomainFactory, children: I
 
         val projectJson = ProjectJson(name, now.long, users = userJsons)
 
-        val remoteProjectRecord = remoteProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
+        val remoteProjectRecord = remoteProjectManager.newRemoteProjectRecord(kotlinDomainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+        val remoteProject = RemoteProject(kotlinDomainFactory, remoteProjectRecord, userInfo, uuid, now)
 
         check(!this.remoteProjects.containsKey(remoteProject.id))
 

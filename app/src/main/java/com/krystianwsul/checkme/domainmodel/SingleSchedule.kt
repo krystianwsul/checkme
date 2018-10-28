@@ -8,7 +8,9 @@ import com.krystianwsul.checkme.utils.time.Date
 
 import java.util.*
 
-class SingleSchedule(domainFactory: DomainFactory, private val singleScheduleBridge: SingleScheduleBridge) : Schedule(domainFactory) {
+class SingleSchedule(
+        kotlinDomainFactory: KotlinDomainFactory,
+        private val singleScheduleBridge: SingleScheduleBridge) : Schedule(kotlinDomainFactory) {
 
     override val scheduleBridge get() = singleScheduleBridge
 

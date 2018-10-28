@@ -13,7 +13,7 @@ import io.reactivex.annotations.Nullable
 import java.util.*
 import kotlin.collections.HashMap
 
-abstract class Instance(protected val domainFactory: DomainFactory) {
+abstract class Instance(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
     companion object {
 
@@ -37,6 +37,8 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
             return hash
         }
     }
+
+    protected val domainFactory = kotlinDomainFactory.domainFactory
 
     val instanceKey get() = InstanceKey(taskKey, scheduleKey)
 
@@ -111,7 +113,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
             val childTaskKey = taskHierarchy.childTaskKey
 
             if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {
-                val childInstance = domainFactory.getInstance(childTaskKey, scheduleDateTime)
+                val childInstance = kotlinDomainFactory.getInstance(childTaskKey, scheduleDateTime)
 
                 val parentInstance = childInstance.getParentInstance(now)
                 if (parentInstance?.instanceKey == instanceKey)
@@ -185,14 +187,14 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
 
-        fun Task.message() = "name: $name, start: $startExactTimeStamp, end: " + getEndExactTimeStamp()
+        fun message(task: Task) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
 
         if (!parentTask.current(hierarchyExactTimeStamp.first)) {
-            MyCrashlytics.logException(ParentInstanceException("instance: " + toString() + ", task: " + task.message() + ", parentTask: " + parentTask.message() + ", hierarchy: " + hierarchyExactTimeStamp))
+            MyCrashlytics.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
             return null
         }
 
-        return domainFactory.getInstance(parentTask.taskKey, scheduleDateTime)
+        return kotlinDomainFactory.getInstance(parentTask.taskKey, scheduleDateTime)
     }
 
     abstract fun delete()

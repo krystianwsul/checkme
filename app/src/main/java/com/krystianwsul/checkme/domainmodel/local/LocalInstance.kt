@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import android.text.TextUtils
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
@@ -205,15 +205,14 @@ class LocalInstance : Instance {
     override val remoteCustomTimeKey: Pair<String, String>?
         get() = null
 
-    internal constructor(domainFactory: DomainFactory, instanceRecord: InstanceRecord) : super(domainFactory) {
-
+    constructor(kotlinDomainFactory: KotlinDomainFactory, instanceRecord: InstanceRecord) : super(kotlinDomainFactory) {
         mInstanceRecord = instanceRecord
 
         mTaskId = null
         mScheduleDateTime = null
     }
 
-    constructor(domainFactory: DomainFactory, taskId: Int, scheduleDateTime: DateTime) : super(domainFactory) {
+    constructor(kotlinDomainFactory: KotlinDomainFactory, taskId: Int, scheduleDateTime: DateTime) : super(kotlinDomainFactory) {
 
         mInstanceRecord = null
 

@@ -2,10 +2,9 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import android.util.Log
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.*
-
 import java.util.*
 
 class RemoteProjectRecord : RemoteRecord {
@@ -70,25 +69,25 @@ class RemoteProjectRecord : RemoteRecord {
 
     val endTime get() = projectJson.endTime
 
-    constructor(domainFactory: DomainFactory, id: String, jsonWrapper: JsonWrapper) : super(false) {
+    constructor(kotlinDomainFactory: KotlinDomainFactory, id: String, jsonWrapper: JsonWrapper) : super(false) {
         this.id = id
         this.jsonWrapper = jsonWrapper
 
-        initialize(domainFactory)
+        initialize(kotlinDomainFactory)
     }
 
-    constructor(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) : super(true) {
+    constructor(kotlinDomainFactory: KotlinDomainFactory, jsonWrapper: JsonWrapper) : super(true) {
         id = DatabaseWrapper.getRootRecordId()
         this.jsonWrapper = jsonWrapper
 
-        initialize(domainFactory)
+        initialize(kotlinDomainFactory)
     }
 
-    private fun initialize(domainFactory: DomainFactory) {
+    private fun initialize(kotlinDomainFactory: KotlinDomainFactory) {
         for ((id, taskJson) in projectJson.tasks) {
             check(!TextUtils.isEmpty(id))
 
-            remoteTaskRecords[id] = RemoteTaskRecord(domainFactory, id, this, taskJson)
+            remoteTaskRecords[id] = RemoteTaskRecord(kotlinDomainFactory, id, this, taskJson)
         }
 
         for ((id, taskHierarchyJson) in projectJson.taskHierarchies) {
@@ -183,8 +182,8 @@ class RemoteProjectRecord : RemoteRecord {
         }
     }
 
-    fun newRemoteTaskRecord(domainFactory: DomainFactory, taskJson: TaskJson): RemoteTaskRecord {
-        val remoteTaskRecord = RemoteTaskRecord(domainFactory, this, taskJson)
+    fun newRemoteTaskRecord(kotlinDomainFactory: KotlinDomainFactory, taskJson: TaskJson): RemoteTaskRecord {
+        val remoteTaskRecord = RemoteTaskRecord(kotlinDomainFactory, this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
         remoteTaskRecords[remoteTaskRecord.id] = remoteTaskRecord

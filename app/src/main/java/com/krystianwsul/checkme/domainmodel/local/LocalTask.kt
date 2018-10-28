@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 import java.util.*
 
-class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord) : Task(domainFactory) {
+class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord: TaskRecord) : Task(kotlinDomainFactory) {
 
     private val mSchedules = ArrayList<Schedule>()
 
@@ -81,12 +81,12 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
         taskRecord.delete()
     }
 
-    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?) = domainFactory.localFactory.createChildTask(domainFactory, now, this, name, note)
+    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?) = domainFactory.localFactory.createChildTask(kotlinDomainFactory, now, this, name, note)
 
     override fun addSchedules(scheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) {
         check(!scheduleDatas.isEmpty())
 
-        val schedules = domainFactory.localFactory.createSchedules(domainFactory, this, scheduleDatas, now)
+        val schedules = domainFactory.localFactory.createSchedules(kotlinDomainFactory, this, scheduleDatas, now)
         check(!schedules.isEmpty())
 
         addSchedules(schedules)

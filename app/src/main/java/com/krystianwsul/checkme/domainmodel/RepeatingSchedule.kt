@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.utils.time.HourMilli
 
 import java.util.*
 
-abstract class RepeatingSchedule(domainFactory: DomainFactory) : Schedule(domainFactory) {
+abstract class RepeatingSchedule(kotlinDomainFactory: KotlinDomainFactory) : Schedule(kotlinDomainFactory) {
 
     override fun getInstances(task: Task, givenStartExactTimeStamp: ExactTimeStamp?, givenExactEndTimeStamp: ExactTimeStamp): List<Instance> {
         val myStartTimeStamp = startExactTimeStamp

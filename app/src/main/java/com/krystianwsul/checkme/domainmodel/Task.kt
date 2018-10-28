@@ -12,7 +12,9 @@ import com.krystianwsul.checkme.utils.time.HourMilli
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
-abstract class Task(protected val domainFactory: DomainFactory) {
+abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
+
+    protected val domainFactory = kotlinDomainFactory.domainFactory
 
     abstract val startExactTimeStamp: ExactTimeStamp
 
@@ -142,7 +144,9 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         // 24 hack
         val instances = domainFactory.getPastInstances(this, now)
 
-        val optional = instances.filter { it.isVisible(now) }.minBy { it.scheduleDateTime }
+        val optional = instances.asSequence()
+                .filter { it.isVisible(now) }
+                .minBy { it.scheduleDateTime }
 
         var oldestVisible: Date
 
@@ -216,8 +220,10 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         instances.addAll(taskHierarchies.map { it.parentTask }
                 .flatMap { it.getInstances(startExactTimeStamp, endExactTimeStamp, now) }
                 .flatMap { instance -> instance.getChildInstances(now) }
+                .asSequence()
                 .map { it.first }
-                .filter { it.taskKey == taskKey })
+                .filter { it.taskKey == taskKey }
+                .toList())
 
         return instances
     }

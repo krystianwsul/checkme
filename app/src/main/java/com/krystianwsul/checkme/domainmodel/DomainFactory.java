@@ -32,7 +32,6 @@ import com.krystianwsul.checkme.domainmodel.relevance.TaskRelevance;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteCustomTime;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
-import com.krystianwsul.checkme.firebase.RemoteInstance;
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
@@ -291,7 +290,7 @@ public class DomainFactory {
         kotlinDomainFactory.localFactory.clearRemoteCustomTimeRecords();
 
         boolean firstThereforeSilent = (kotlinDomainFactory.getRemoteProjectFactory() == null);
-        kotlinDomainFactory.setRemoteProjectFactory(new RemoteProjectFactory(this, dataSnapshot.getChildren(), kotlinDomainFactory.getUserInfo(), kotlinDomainFactory.localFactory.getUuid(), now));
+        kotlinDomainFactory.setRemoteProjectFactory(new RemoteProjectFactory(kotlinDomainFactory, dataSnapshot.getChildren(), kotlinDomainFactory.getUserInfo(), kotlinDomainFactory.localFactory.getUuid(), now));
 
         RemoteFriendFactory.Companion.tryNotifyFriendListeners(); // assuming they're all getters
 
@@ -1192,7 +1191,7 @@ public class DomainFactory {
 
         Task task;
         if (TextUtils.isEmpty(projectId)) {
-            task = kotlinDomainFactory.localFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
+            task = kotlinDomainFactory.localFactory.createScheduleRootTask(kotlinDomainFactory, now, name, scheduleDatas, note);
         } else {
             check(kotlinDomainFactory.getRemoteProjectFactory() != null);
 
@@ -1297,7 +1296,7 @@ public class DomainFactory {
 
             newParentTask = kotlinDomainFactory.getRemoteProjectFactory().createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId);
         } else {
-            newParentTask = kotlinDomainFactory.localFactory.createScheduleRootTask(this, now, name, scheduleDatas, note);
+            newParentTask = kotlinDomainFactory.localFactory.createScheduleRootTask(kotlinDomainFactory, now, name, scheduleDatas, note);
         }
 
         joinTasks = Stream.of(joinTasks)
@@ -1572,7 +1571,7 @@ public class DomainFactory {
 
         Task task;
         if (TextUtils.isEmpty(projectId)) {
-            task = kotlinDomainFactory.localFactory.createLocalTaskHelper(this, name, now, note);
+            task = kotlinDomainFactory.localFactory.createLocalTaskHelper(kotlinDomainFactory, name, now, note);
         } else {
             check(kotlinDomainFactory.getRemoteProjectFactory() != null);
 
@@ -1635,7 +1634,7 @@ public class DomainFactory {
 
             newParentTask = kotlinDomainFactory.getRemoteProjectFactory().createRemoteTaskHelper(now, name, note, finalProjectId);
         } else {
-            newParentTask = kotlinDomainFactory.localFactory.createLocalTaskHelper(this, name, now, note);
+            newParentTask = kotlinDomainFactory.localFactory.createLocalTaskHelper(kotlinDomainFactory, name, now, note);
         }
 
         joinTasks = Stream.of(joinTasks)
@@ -1808,113 +1807,15 @@ public class DomainFactory {
 
     // internal
 
-    @Nullable
-    private Instance getExistingInstanceIfPresent(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
-        InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDateTime.getDate(), scheduleDateTime.getTime().getTimePair());
-
-        return getExistingInstanceIfPresent(instanceKey);
-    }
-
-    @Nullable
-    private Instance getExistingInstanceIfPresent(@NonNull InstanceKey instanceKey) {
-        if (instanceKey.getTaskKey().getLocalTaskId() != null) {
-            check(TextUtils.isEmpty(instanceKey.getTaskKey().getRemoteProjectId()));
-            check(TextUtils.isEmpty(instanceKey.getTaskKey().getRemoteTaskId()));
-
-            return kotlinDomainFactory.localFactory.getExistingInstanceIfPresent(instanceKey);
-        } else {
-            check(!TextUtils.isEmpty(instanceKey.getTaskKey().getRemoteProjectId()));
-            check(!TextUtils.isEmpty(instanceKey.getTaskKey().getRemoteTaskId()));
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-            return kotlinDomainFactory.getRemoteProjectFactory().getExistingInstanceIfPresent(instanceKey);
-        }
-    }
-
-    @NonNull
-    public String getRemoteCustomTimeId(@NonNull String projectId, @NonNull CustomTimeKey customTimeKey) {
-        if (!TextUtils.isEmpty(customTimeKey.getRemoteProjectId())) {
-            check(!TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId()));
-            check(customTimeKey.getLocalCustomTimeId() == null);
-
-            check(customTimeKey.getRemoteProjectId().equals(projectId));
-
-            return customTimeKey.getRemoteCustomTimeId();
-        } else {
-            check(TextUtils.isEmpty(customTimeKey.getRemoteCustomTimeId()));
-            check(customTimeKey.getLocalCustomTimeId() != null);
-
-            LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(customTimeKey.getLocalCustomTimeId());
-
-            check(localCustomTime.hasRemoteRecord(projectId));
-
-            return localCustomTime.getRemoteId(projectId);
-        }
-    }
-
-    @NonNull
-    private Instance generateInstance(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
-        if (taskKey.getLocalTaskId() != null) {
-            check(TextUtils.isEmpty(taskKey.getRemoteProjectId()));
-            check(TextUtils.isEmpty(taskKey.getRemoteTaskId()));
-
-            return new LocalInstance(this, taskKey.getLocalTaskId(), scheduleDateTime);
-        } else {
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-            check(!TextUtils.isEmpty(taskKey.getRemoteProjectId()));
-            check(!TextUtils.isEmpty(taskKey.getRemoteTaskId()));
-
-            String remoteCustomTimeId;
-            Integer hour;
-            Integer minute;
-
-            CustomTimeKey customTimeKey = scheduleDateTime.getTime().getTimePair().getCustomTimeKey();
-            HourMinute hourMinute = scheduleDateTime.getTime().getTimePair().getHourMinute();
-
-            if (customTimeKey != null) {
-                check(hourMinute == null);
-
-                remoteCustomTimeId = getRemoteCustomTimeId(taskKey.getRemoteProjectId(), customTimeKey);
-
-                hour = null;
-                minute = null;
-            } else {
-                check(hourMinute != null);
-
-                remoteCustomTimeId = null;
-
-                hour = hourMinute.getHour();
-                minute = hourMinute.getMinute();
-            }
-
-            InstanceShownRecord instanceShownRecord = kotlinDomainFactory.localFactory.getInstanceShownRecord(taskKey.getRemoteProjectId(), taskKey.getRemoteTaskId(), scheduleDateTime.getDate().getYear(), scheduleDateTime.getDate().getMonth(), scheduleDateTime.getDate().getDay(), remoteCustomTimeId, hour, minute);
-
-            RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().getTaskForce(taskKey).getRemoteProject();
-
-            return new RemoteInstance(this, remoteProject, taskKey.getRemoteTaskId(), scheduleDateTime, instanceShownRecord);
-        }
-    }
-
-    @NonNull
-    public Instance getInstance(@NonNull TaskKey taskKey, @NonNull DateTime scheduleDateTime) {
-        Instance existingInstance = getExistingInstanceIfPresent(taskKey, scheduleDateTime);
-
-        if (existingInstance != null) {
-            return existingInstance;
-        } else {
-            return generateInstance(taskKey, scheduleDateTime);
-        }
-    }
-
     @NonNull
     public Instance getInstance(@NonNull InstanceKey instanceKey) {
-        Instance instance = getExistingInstanceIfPresent(instanceKey);
+        Instance instance = kotlinDomainFactory.getExistingInstanceIfPresent(instanceKey);
         if (instance != null)
             return instance;
 
         DateTime dateTime = getDateTime(instanceKey.getScheduleKey().getScheduleDate(), instanceKey.getScheduleKey().getScheduleTimePair());
 
-        return generateInstance(instanceKey.getTaskKey(), dateTime); // DateTime -> timePair
+        return kotlinDomainFactory.generateInstance(instanceKey.getTaskKey(), dateTime); // DateTime -> timePair
     }
 
     @NonNull
@@ -2589,9 +2490,9 @@ public class DomainFactory {
             if (notificationInstances.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
+                        NotificationWrapper.Companion.getInstance().notifyGroup(kotlinDomainFactory, notificationInstances.values(), silent, now);
                     } else {
-                        NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), true, now);
+                        NotificationWrapper.Companion.getInstance().notifyGroup(kotlinDomainFactory, notificationInstances.values(), true, now);
                     }
                 } else { // instances shown
                     for (InstanceKey shownInstanceKey : shownInstanceKeys) {
@@ -2608,7 +2509,7 @@ public class DomainFactory {
                         }
                     }
 
-                    NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), silent, now);
+                    NotificationWrapper.Companion.getInstance().notifyGroup(kotlinDomainFactory, notificationInstances.values(), silent, now);
                 }
             } else { // show instances
                 if (shownInstanceKeys.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
@@ -2652,7 +2553,7 @@ public class DomainFactory {
                 NotificationWrapper.Companion.getInstance().cancelNotification(0);
             } else {
                 message += ", sg";
-                NotificationWrapper.Companion.getInstance().notifyGroup(this, notificationInstances.values(), true, now);
+                NotificationWrapper.Companion.getInstance().notifyGroup(kotlinDomainFactory, notificationInstances.values(), true, now);
             }
 
             message += ", hiding " + hideInstanceKeys.size();
@@ -2740,7 +2641,7 @@ public class DomainFactory {
             silent = true;
         }
 
-        NotificationWrapper.Companion.getInstance().notifyInstance(this, instance, silent, now);
+        NotificationWrapper.Companion.getInstance().notifyInstance(kotlinDomainFactory, instance, silent, now);
 
         if (!silent)
             kotlinDomainFactory.getLastNotificationBeeps().put(instance.getInstanceKey(), SystemClock.elapsedRealtime());
@@ -2763,7 +2664,7 @@ public class DomainFactory {
             }
         }
 
-        NotificationWrapper.Companion.getInstance().notifyInstance(this, instance, true, now);
+        NotificationWrapper.Companion.getInstance().notifyInstance(kotlinDomainFactory, instance, true, now);
     }
 
     private void setInstanceNotified(@NonNull InstanceKey instanceKey, @NonNull ExactTimeStamp now) {

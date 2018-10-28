@@ -7,7 +7,9 @@ import com.krystianwsul.checkme.utils.time.Date
 
 import java.util.*
 
-class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBridge: WeeklyScheduleBridge) : RepeatingSchedule(domainFactory) {
+class WeeklySchedule(
+        kotlinDomainFactory: KotlinDomainFactory,
+        private val mWeeklyScheduleBridge: WeeklyScheduleBridge) : RepeatingSchedule(kotlinDomainFactory) {
 
     private val time
         get() = mWeeklyScheduleBridge.run {
@@ -18,6 +20,7 @@ class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBr
 
     val daysOfWeek
         get() = mWeeklyScheduleBridge.daysOfWeek
+                .asSequence()
                 .map { DayOfWeek.values()[it] }
                 .toSet()
 
@@ -43,7 +46,7 @@ class WeeklySchedule(domainFactory: DomainFactory, private val mWeeklyScheduleBr
         val scheduleDateTime = DateTime(date, time)
         check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
-        return domainFactory.getInstance(task.taskKey, scheduleDateTime)
+        return kotlinDomainFactory.getInstance(task.taskKey, scheduleDateTime)
     }
 
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp {

@@ -9,7 +9,9 @@ import com.krystianwsul.checkme.utils.time.Date
 
 import java.util.*
 
-class MonthlyWeekSchedule(domainFactory: DomainFactory, private val monthlyWeekScheduleBridge: MonthlyWeekScheduleBridge) : RepeatingSchedule(domainFactory) {
+class MonthlyWeekSchedule(
+        kotlinDomainFactory: KotlinDomainFactory,
+        private val monthlyWeekScheduleBridge: MonthlyWeekScheduleBridge) : RepeatingSchedule(kotlinDomainFactory) {
 
     override val scheduleBridge get() = monthlyWeekScheduleBridge
 
@@ -74,7 +76,7 @@ class MonthlyWeekSchedule(domainFactory: DomainFactory, private val monthlyWeekS
         val scheduleDateTime = DateTime(date, time)
         check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
-        return domainFactory.getInstance(task.taskKey, scheduleDateTime)
+        return kotlinDomainFactory.getInstance(task.taskKey, scheduleDateTime)
     }
 
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {

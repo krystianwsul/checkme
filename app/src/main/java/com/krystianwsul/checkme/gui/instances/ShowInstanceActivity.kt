@@ -33,8 +33,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     companion object {
 
-        private val INSTANCE_KEY = "instanceKey"
-        private val SET_NOTIFIED_KEY = "setNotified"
+        private const val INSTANCE_KEY = "instanceKey"
+        private const val SET_NOTIFIED_KEY = "setNotified"
 
         fun getIntent(context: Context, instanceKey: InstanceKey) = Intent(context, ShowInstanceActivity::class.java).apply { putExtra(INSTANCE_KEY, instanceKey as Parcelable) }
 
@@ -183,10 +183,10 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
                 first = false
 
-                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.let {
+                KotlinDomainFactory.getKotlinDomainFactory().let {
                     val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
-                    it.setInstanceNotified(this, data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
+                    it.domainFactory.setInstanceNotified(this, data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
                 }
             }
 

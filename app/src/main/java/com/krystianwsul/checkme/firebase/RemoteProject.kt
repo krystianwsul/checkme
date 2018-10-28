@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
@@ -15,10 +15,16 @@ import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-
 import java.util.*
 
-class RemoteProject(private val domainFactory: DomainFactory, private val remoteProjectRecord: RemoteProjectRecord, userInfo: UserInfo, uuid: String, now: ExactTimeStamp) {
+class RemoteProject(
+        private val kotlinDomainFactory: KotlinDomainFactory,
+        private val remoteProjectRecord: RemoteProjectRecord,
+        userInfo: UserInfo,
+        uuid: String,
+        now: ExactTimeStamp) {
+
+    private val domainFactory = kotlinDomainFactory.domainFactory
 
     private val remoteTasks: MutableMap<String, RemoteTask>
 
@@ -70,7 +76,7 @@ class RemoteProject(private val domainFactory: DomainFactory, private val remote
 
         remoteTasks = remoteProjectRecord.remoteTaskRecords
                 .values
-                .map { RemoteTask(domainFactory, this, it, now) }
+                .map { RemoteTask(kotlinDomainFactory, this, it, now) }
                 .associateBy { it.id }
                 .toMutableMap()
 
@@ -89,9 +95,9 @@ class RemoteProject(private val domainFactory: DomainFactory, private val remote
     }
 
     fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask {
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
+        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(kotlinDomainFactory, taskJson)
 
-        val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
+        val remoteTask = RemoteTask(kotlinDomainFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))
         remoteTasks[remoteTask.id] = remoteTask
 
@@ -134,13 +140,13 @@ class RemoteProject(private val domainFactory: DomainFactory, private val remote
             if (scheduleKey.scheduleTimePair.customTimeKey != null)
                 remoteFactory.getRemoteCustomTimeId(scheduleKey.scheduleTimePair.customTimeKey, this)
 
-            instanceJsons[RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey)] = instanceJson
+            instanceJsons[RemoteInstanceRecord.scheduleKeyToString(kotlinDomainFactory, remoteProjectRecord.id, scheduleKey)] = instanceJson
         }
 
         val taskJson = TaskJson(localTask.name, localTask.startExactTimeStamp.long, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.note, instanceJsons)
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
+        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(kotlinDomainFactory, taskJson)
 
-        val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
+        val remoteTask = RemoteTask(kotlinDomainFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))
 
         remoteTasks[remoteTask.id] = remoteTask
@@ -195,7 +201,7 @@ class RemoteProject(private val domainFactory: DomainFactory, private val remote
     }
 
     fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) {
-        remoteProjectRecord.updateRecordOf(addedFriends.map { it.id }.toSet(), removedFriends)
+        remoteProjectRecord.updateRecordOf(addedFriends.asSequence().map { it.id }.toSet(), removedFriends)
 
         for (addedFriend in addedFriends)
             addUser(addedFriend)

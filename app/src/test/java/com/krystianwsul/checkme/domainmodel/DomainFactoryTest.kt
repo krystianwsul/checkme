@@ -38,9 +38,9 @@ class DomainFactoryTest {
 
                 override fun cancelNotification(id: Int) = Unit
 
-                override fun notifyInstance(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) = Unit
+                override fun notifyInstance(kotlinDomainFactory: KotlinDomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) = Unit
 
-                override fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) = Unit
+                override fun notifyGroup(kotlinDomainFactory: KotlinDomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) = Unit
 
                 override fun cleanGroup(lastNotificationId: Int?) = Unit
 
@@ -103,8 +103,8 @@ class DomainFactoryTest {
     @Test
     fun testRelevantSingleNoChildren() {
         val persistenceManger = newPersistenceManger()
-
-        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
+        val kotlinDomainFactory = KotlinDomainFactory(persistenceManger)
+        val domainFactory = kotlinDomainFactory.domainFactory
 
         val startDate = Date(2016, 1, 1)
         val startHourMilli = HourMilli(0, 0, 0, 0)
@@ -124,7 +124,7 @@ class DomainFactoryTest {
 
         val scheduleDateTime = DateTime(startDate, NormalTime(scheduleHourMinute))
 
-        var rootInstance = domainFactory.getInstance(rootTask.taskKey, scheduleDateTime)
+        var rootInstance = kotlinDomainFactory.getInstance(rootTask.taskKey, scheduleDateTime)
 
         Assert.assertTrue(!rootInstance.exists())
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp))
@@ -168,7 +168,8 @@ class DomainFactoryTest {
     fun testRelevantSingleWithChildren() {
         val persistenceManger = newPersistenceManger()
 
-        val domainFactory = KotlinDomainFactory(persistenceManger).domainFactory
+        val kotlinDomainFactory = KotlinDomainFactory(persistenceManger)
+        val domainFactory = kotlinDomainFactory.domainFactory
 
         val startDate = Date(2016, 1, 1)
         val startHourMilli = HourMilli(0, 0, 0, 0)
@@ -208,7 +209,7 @@ class DomainFactoryTest {
 
         val scheduleDateTime = DateTime(startDate, NormalTime(scheduleHourMinute))
 
-        var rootInstance = domainFactory.getInstance(rootTask.taskKey, scheduleDateTime)
+        var rootInstance = kotlinDomainFactory.getInstance(rootTask.taskKey, scheduleDateTime)
 
         Assert.assertTrue(!rootInstance.exists())
         Assert.assertTrue(rootInstance.isVisible(startExactTimeStamp))
@@ -220,14 +221,14 @@ class DomainFactoryTest {
         rootInstance = domainFactory.setInstanceDone(mContext, doneExactTimeStamp, 0, SaveService.Source.GUI, rootInstance.instanceKey, true)
         Assert.assertTrue(rootInstance.exists())
 
-        var childInstanceDone = domainFactory.getInstance(childTaskDone.taskKey, scheduleDateTime)
+        var childInstanceDone = kotlinDomainFactory.getInstance(childTaskDone.taskKey, scheduleDateTime)
         Assert.assertTrue(!childInstanceDone.exists())
         Assert.assertTrue(childInstanceDone.isVisible(doneExactTimeStamp))
 
         childInstanceDone = domainFactory.setInstanceDone(mContext, doneExactTimeStamp, 0, SaveService.Source.GUI, childInstanceDone.instanceKey, true)
         Assert.assertTrue(childInstanceDone.exists())
 
-        var childInstanceExists = domainFactory.getInstance(childTaskExists.taskKey, scheduleDateTime)
+        var childInstanceExists = kotlinDomainFactory.getInstance(childTaskExists.taskKey, scheduleDateTime)
         Assert.assertTrue(!childInstanceExists.exists())
         Assert.assertTrue(childInstanceExists.isVisible(doneExactTimeStamp))
 
@@ -237,7 +238,7 @@ class DomainFactoryTest {
         childInstanceExists = domainFactory.setInstanceDone(mContext, doneExactTimeStamp, 0, SaveService.Source.GUI, childInstanceExists.instanceKey, false)
         Assert.assertTrue(childInstanceExists.exists())
 
-        val childInstanceDoesntExist = domainFactory.getInstance(childTaskDoesntExist.taskKey, scheduleDateTime)
+        val childInstanceDoesntExist = kotlinDomainFactory.getInstance(childTaskDoesntExist.taskKey, scheduleDateTime)
         Assert.assertTrue(!childInstanceDoesntExist.exists())
         Assert.assertTrue(childInstanceDoesntExist.isVisible(doneExactTimeStamp))
 

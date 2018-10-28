@@ -61,7 +61,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
         }
     }
 
-    protected fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
+    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
         check(current(exactTimeStamp))
 
         return domainFactory.getChildTaskHierarchies(this, exactTimeStamp)

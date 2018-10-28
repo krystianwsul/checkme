@@ -989,7 +989,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             var Exists: Boolean,
             val InstanceTimePair: TimePair,
             val mNote: String?,
-            val children: HashMap<InstanceKey, InstanceData>,
+            val children: MutableMap<InstanceKey, InstanceData>,
             val hierarchyData: HierarchyData?,
             var ordinal: Double) : InstanceDataParent, Comparable<InstanceData> {
 

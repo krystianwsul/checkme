@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import android.content.Context
 import android.text.TextUtils
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
@@ -8,12 +9,15 @@ import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.firebase.RemoteInstance
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteRootUser
+import com.krystianwsul.checkme.gui.HierarchyData
+import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
 class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
@@ -263,4 +267,36 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
         remoteProjectFactory!!.getRemoteCustomTime(customTimeKey.remoteProjectId!!, customTimeKey.remoteCustomTimeId!!)
     }
+
+    fun getCurrentCustomTimes() = localFactory.currentCustomTimes
+
+    fun getChildInstanceDatas(instance: Instance, now: ExactTimeStamp): MutableMap<InstanceKey, GroupListFragment.InstanceData> {
+        return instance.getChildInstances(now)
+                .map { (childInstance, taskHierarchy) ->
+                    val childTask = childInstance.task
+
+                    val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
+
+                    val children = getChildInstanceDatas(childInstance, now)
+                    val instanceData = GroupListFragment.InstanceData(childInstance.done, childInstance.instanceKey, null, childInstance.name, childInstance.instanceDateTime.timeStamp, childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.instanceDateTime.time.timePair, childTask.note, children, HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal), childInstance.ordinal)
+                    children.values.forEach { it.instanceDataParent = instanceData }
+                    childInstance.instanceKey to instanceData
+                }
+                .toMap()
+                .toMutableMap()
+    }
+
+    fun getChildTaskDatas(now: ExactTimeStamp, parentTask: Task, context: Context, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> =
+            parentTask.getChildTaskHierarchies(now)
+                    .asSequence()
+                    .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
+                    .map {
+                        val childTask = it.childTask
+                        val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.childTaskKey)
+                        val parentTreeData = CreateTaskViewModel.ParentTreeData(childTask.name, getChildTaskDatas(now, childTask, context, excludedTaskKeys), CreateTaskViewModel.ParentKey.TaskParentKey(childTask.taskKey), childTask.getScheduleText(context, now), childTask.note, CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp))
+
+                        taskParentKey to parentTreeData
+                    }
+                    .toList()
+                    .toMap()
 }

@@ -405,7 +405,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
+        Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
         Instance instance = kotlinDomainFactory.getInstance(instanceKey);
@@ -434,7 +434,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(getCurrentCustomTimes())
+        Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
         HashMap<InstanceKey, EditInstancesViewModel.InstanceData> instanceDatas = new HashMap<>();
@@ -483,7 +483,7 @@ public class DomainFactory {
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimesData");
 
-        List<LocalCustomTime> currentCustomTimes = getCurrentCustomTimes();
+        List<LocalCustomTime> currentCustomTimes = kotlinDomainFactory.getCurrentCustomTimes();
 
         ArrayList<ShowCustomTimesViewModel.CustomTimeData> entries = new ArrayList<>();
         for (LocalCustomTime localCustomTime : currentCustomTimes) {
@@ -552,7 +552,7 @@ public class DomainFactory {
 
         List<Instance> currentInstances = kotlinDomainFactory.getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
 
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -573,7 +573,7 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
+            Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
             GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(instanceData.getInstanceKey(), instanceData);
@@ -601,7 +601,7 @@ public class DomainFactory {
         HourMinute hourMinute = timeStamp.getHourMinute();
 
         Time time = null;
-        for (CustomTime customTime : getCurrentCustomTimes())
+        for (CustomTime customTime : kotlinDomainFactory.getCurrentCustomTimes())
             if (customTime.getHourMinute(dayOfWeek).equals(hourMinute))
                 time = customTime;
         if (time == null)
@@ -621,7 +621,7 @@ public class DomainFactory {
         Task task = getTaskForce(taskKey);
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -635,7 +635,7 @@ public class DomainFactory {
 
         HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = Stream.of(allInstances)
                 .collect(Collectors.toMap(Instance::getInstanceKey, instance -> {
-                    HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
+                    Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
 
                     HierarchyData hierarchyData;
                     if (task.isRootTask(now)) {
@@ -673,7 +673,7 @@ public class DomainFactory {
 
         Collections.sort(instances, (lhs, rhs) -> lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime()));
 
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -683,7 +683,7 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
+            Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
             GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
@@ -803,7 +803,7 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Map<CustomTimeKey, CustomTime> customTimes = Stream.of(getCurrentCustomTimes())
+        Map<CustomTimeKey, CustomTime> customTimes = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
 
         List<TaskKey> excludedTaskKeys = new ArrayList<>();
@@ -1805,48 +1805,12 @@ public class DomainFactory {
     // internal
 
     @NonNull
-    private List<LocalCustomTime> getCurrentCustomTimes() {
-        return kotlinDomainFactory.localFactory.getCurrentCustomTimes();
-    }
-
-    @NonNull
-    private HashMap<InstanceKey, GroupListFragment.InstanceData> getChildInstanceDatas(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
-        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
-
-        for (kotlin.Pair<Instance, TaskHierarchy> pair : instance.getChildInstances(now)) {
-            Instance childInstance = pair.getFirst();
-            TaskHierarchy taskHierarchy = pair.getSecond();
-
-            Task childTask = childInstance.getTask();
-
-            Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
-
-            HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(childInstance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()), childInstance.getOrdinal());
-            Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
-            instanceDatas.put(childInstance.getInstanceKey(), instanceData);
-        }
-
-        return instanceDatas;
-    }
-
-    @NonNull
-    private Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> getChildTaskDatas(@NonNull ExactTimeStamp now, @NonNull Task parentTask, @NonNull Context context, @NonNull List<TaskKey> excludedTaskKeys) {
-        return Stream.of(parentTask.getChildTaskHierarchies(now)).filterNot(taskHierarchy -> excludedTaskKeys.contains(taskHierarchy.getChildTaskKey())).collect(Collectors.toMap(taskHierarchy -> new CreateTaskViewModel.ParentKey.TaskParentKey(taskHierarchy.getChildTaskKey()), taskHierarchy -> {
-                    Task childTask = taskHierarchy.getChildTask();
-
-            return new CreateTaskViewModel.ParentTreeData(childTask.getName(), getChildTaskDatas(now, childTask, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(childTask.getTaskKey()), childTask.getScheduleText(context, now), childTask.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(childTask.getStartExactTimeStamp()));
-                }));
-    }
-
-    @NonNull
     private Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> getParentTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> excludedTaskKeys) {
         Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> parentTreeDatas = new HashMap<>();
 
         parentTreeDatas.putAll(Stream.of(kotlinDomainFactory.localFactory.getTasks())
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
-                .filter(task -> task.current(now))
-                .filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).collect(Collectors.toMap(task -> new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskViewModel.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(task.getStartExactTimeStamp())))));
+                .filter(task -> task.current(now)).filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).collect(Collectors.toMap(task -> new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskViewModel.ParentTreeData(task.getName(), kotlinDomainFactory.getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(task.getStartExactTimeStamp())))));
 
         if (kotlinDomainFactory.getRemoteProjectFactory() != null) {
             parentTreeDatas.putAll(Stream.of(kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjects().values()).filter(remoteProject -> remoteProject.current(now)).collect(Collectors.toMap(remoteProject -> new CreateTaskViewModel.ParentKey.ProjectParentKey(remoteProject.getId()), remoteProject -> {
@@ -1865,8 +1829,7 @@ public class DomainFactory {
     private Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> getProjectTaskTreeDatas(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull RemoteProject remoteProject, @NonNull List<TaskKey> excludedTaskKeys) {
         return Stream.of(remoteProject.getTasks())
                 .filterNot(task -> excludedTaskKeys.contains(task.getTaskKey()))
-                .filter(task -> task.current(now))
-                .filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).collect(Collectors.toMap(task -> new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskViewModel.ParentTreeData(task.getName(), getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(task.getStartExactTimeStamp()))));
+                .filter(task -> task.current(now)).filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).collect(Collectors.toMap(task -> new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task -> new CreateTaskViewModel.ParentTreeData(task.getName(), kotlinDomainFactory.getChildTaskDatas(now, task, context, excludedTaskKeys), new CreateTaskViewModel.ParentKey.TaskParentKey(task.getTaskKey()), task.getScheduleText(context, now), task.getNote(), new CreateTaskViewModel.SortKey.TaskSortKey(task.getStartExactTimeStamp()))));
     }
 
     @NonNull
@@ -2148,7 +2111,7 @@ public class DomainFactory {
                 .map(instanceRelevances::get)
                 .forEach(instanceRelevance -> instanceRelevance.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now));
 
-        Stream.of(getCurrentCustomTimes())
+        Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .map(LocalCustomTime::getId)
                 .map(localCustomTimeRelevances::get)
                 .forEach(LocalCustomTimeRelevance::setRelevant);
@@ -2615,7 +2578,7 @@ public class DomainFactory {
                 .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
                 .collect(Collectors.toList());
 
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -2625,7 +2588,7 @@ public class DomainFactory {
 
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
-            HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(instance, now);
+            Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
             GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
@@ -2642,7 +2605,7 @@ public class DomainFactory {
     private GroupListFragment.DataWrapper getGroupListData(@NonNull Instance instance, @NonNull Task task, @NonNull ExactTimeStamp now) {
         HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
 
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(getCurrentCustomTimes())
+        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
                 .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
                 .collect(Collectors.toList());
 
@@ -2653,7 +2616,7 @@ public class DomainFactory {
 
             Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
 
-            HashMap<InstanceKey, GroupListFragment.InstanceData> children = getChildInstanceDatas(childInstance, now);
+            Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(childInstance, now);
             GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()), childInstance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(childInstance.getInstanceKey(), instanceData);

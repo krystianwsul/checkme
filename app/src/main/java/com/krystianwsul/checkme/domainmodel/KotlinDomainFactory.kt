@@ -30,7 +30,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
-class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
+open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     companion object {
 
@@ -74,7 +74,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     var skipSave = false
 
-    val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
+    private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
     init {
         start = ExactTimeStamp.now
@@ -102,6 +102,16 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     // todo eliminate context
     fun save(context: Context, dataId: Int, source: SaveService.Source) = save(context, listOf(dataId), source)
+
+    fun save(context: Context, dataIds: List<Int>, source: SaveService.Source) {
+        if (skipSave)
+            return
+
+        localFactory.save(context, source)
+        remoteProjectFactory?.save()
+
+        ObserverHolder.notifyDomainObservers(dataIds)
+    }
 
     // internal
 
@@ -1004,16 +1014,4 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String) = localFactory.getLocalCustomTime(remoteProjectId, remoteCustomTimeId)?.customTimeKey
             ?: CustomTimeKey(remoteProjectId, remoteCustomTimeId)
-
-    fun save(context: Context, dataIds: List<Int>, source: SaveService.Source) {
-        if (skipSave)
-            return
-
-        localFactory.save(context, source)
-
-        if (remoteProjectFactory != null)
-            remoteProjectFactory!!.save()
-
-        ObserverHolder.notifyDomainObservers(dataIds)
-    }
 }

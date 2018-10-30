@@ -334,8 +334,6 @@ class PersistenceManger(
             scheduleHour = null
             scheduleMinute = null
         } else {
-            check(scheduleTimePair.hourMinute != null)
-
             scheduleCustomTimeId = null
 
             scheduleHour = scheduleTimePair.hourMinute!!.hour

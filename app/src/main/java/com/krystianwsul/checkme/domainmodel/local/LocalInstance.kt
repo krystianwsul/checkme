@@ -32,11 +32,9 @@ class LocalInstance : Instance {
             }
         }
 
-    override val taskKey: TaskKey
-        get() = TaskKey(taskId)
+    override val taskKey get() = TaskKey(taskId)
 
-    override val name: String
-        get() = task.name
+    override val name get() = task.name
 
     override val scheduleDate: Date
         get() {
@@ -118,7 +116,7 @@ class LocalInstance : Instance {
             }
         }
 
-    override val done = mInstanceRecord?.done?.let { ExactTimeStamp(it) }
+    override val done get() = mInstanceRecord?.done?.let { ExactTimeStamp(it) }
 
     val hierarchyTime get() = mInstanceRecord!!.hierarchyTime
 

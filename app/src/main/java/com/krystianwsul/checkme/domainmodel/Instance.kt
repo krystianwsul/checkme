@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.content.Context
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.CustomTimeKey
@@ -138,7 +137,7 @@ abstract class Instance(protected val kotlinDomainFactory: KotlinDomainFactory) 
 
     fun isRootInstance(now: ExactTimeStamp) = getParentInstance(now) == null
 
-    fun getDisplayText(context: Context, now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime.getDisplayText(context) else null
+    fun getDisplayText(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime.getDisplayText() else null
 
     abstract fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp)
 

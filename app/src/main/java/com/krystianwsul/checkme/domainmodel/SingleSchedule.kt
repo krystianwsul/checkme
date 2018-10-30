@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.time.*
@@ -49,7 +48,7 @@ class SingleSchedule(
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    override fun getScheduleText() = dateTime.getDisplayText(MyApplication.context)
+    override fun getScheduleText() = dateTime.getDisplayText()
 
     private fun getInstance(task: Task) = kotlinDomainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
 

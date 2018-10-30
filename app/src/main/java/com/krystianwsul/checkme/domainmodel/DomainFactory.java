@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -13,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.krystianwsul.checkme.MyApplication;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
@@ -433,7 +431,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized DayViewModel.DayData getGroupListData(@NonNull Context context, @NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
+    public synchronized DayViewModel.DayData getGroupListData(@NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
@@ -507,7 +505,7 @@ public class DomainFactory {
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
             Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(instanceData.getInstanceKey(), instanceData);
         }
@@ -522,7 +520,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowGroupViewModel.Data getShowGroupData(@NonNull Context context, @NonNull TimeStamp timeStamp) {
+    public synchronized ShowGroupViewModel.Data getShowGroupData(@NonNull TimeStamp timeStamp) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowGroupData");
@@ -540,7 +538,7 @@ public class DomainFactory {
         if (time == null)
             time = new NormalTime(hourMinute);
 
-        String displayText = new DateTime(date, time).getDisplayText(context);
+        String displayText = new DateTime(date, time).getDisplayText();
 
         return new ShowGroupViewModel.Data(displayText, kotlinDomainFactory.getGroupListData(timeStamp, now));
     }
@@ -580,14 +578,14 @@ public class DomainFactory {
                         hierarchyData = new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal());
                     }
 
-                    return new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(MyApplication.Companion.getInstance(), now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, hierarchyData, instance.getOrdinal());
+                    return new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, hierarchyData, instance.getOrdinal());
                 }, HashMap::new));
 
         return new ShowTaskInstancesViewModel.Data(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
     }
 
     @NonNull
-    public synchronized ShowNotificationGroupViewModel.Data getShowNotificationGroupData(@NonNull Context context, @NonNull Set<InstanceKey> instanceKeys) {
+    public synchronized ShowNotificationGroupViewModel.Data getShowNotificationGroupData(@NonNull Set<InstanceKey> instanceKeys) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
@@ -617,7 +615,7 @@ public class DomainFactory {
             Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
 
             Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(context, now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
+            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
             Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
             instanceDatas.put(instance.getInstanceKey(), instanceData);
         }
@@ -630,7 +628,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowInstanceViewModel.Data getShowInstanceData(@NonNull Context context, @NonNull InstanceKey instanceKey) {
+    public synchronized ShowInstanceViewModel.Data getShowInstanceData(@NonNull InstanceKey instanceKey) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowInstanceData");
@@ -643,7 +641,7 @@ public class DomainFactory {
         Instance instance = kotlinDomainFactory.getInstance(instanceKey);
         if (!task.current(now) && !instance.exists()) return new ShowInstanceViewModel.Data(null);
 
-        return new ShowInstanceViewModel.Data(new ShowInstanceViewModel.InstanceData(instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), kotlinDomainFactory.getGroupListData(instance, task, now)));
+        return new ShowInstanceViewModel.Data(new ShowInstanceViewModel.InstanceData(instance.getName(), instance.getDisplayText(now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), kotlinDomainFactory.getGroupListData(instance, task, now)));
     }
 
     @NonNull

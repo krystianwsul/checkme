@@ -135,7 +135,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
             val timeText = customTimeData?.Name ?: hourMinute.toString()
 
-            val text = date.getDisplayText(groupListFragment.activity!!) + ", " + timeText
+            val text = date.getDisplayText() + ", " + timeText
 
             return Pair(text, ContextCompat.getColor(groupListFragment.activity!!, R.color.textSecondary))
         }

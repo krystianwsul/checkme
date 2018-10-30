@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
@@ -16,7 +15,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
         internalStart(if (instanceKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING)
     }
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowInstanceData(MyApplication.instance, instanceKey)
+    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowInstanceData(instanceKey)
 
     data class Data(val instanceData: InstanceData?) : DomainData()
 

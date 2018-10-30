@@ -302,7 +302,7 @@ class EditInstancesActivity : AbstractActivity() {
     private fun updateDateText() {
         checkNotNull(mDate)
 
-        editInstanceDate.setText(mDate!!.getDisplayText(this))
+        editInstanceDate.setText(mDate!!.getDisplayText())
 
         updateTimeText()
 

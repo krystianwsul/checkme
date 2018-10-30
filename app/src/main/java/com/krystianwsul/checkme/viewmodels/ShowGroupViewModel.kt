@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.time.TimeStamp
@@ -15,7 +14,8 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
         internalStart(FirebaseLevel.WANT)
     }
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowGroupData(MyApplication.instance, timeStamp)
+    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowGroupData(timeStamp)
+
     data class Data(val displayText: String, val dataWrapper: GroupListFragment.DataWrapper?) : DomainData() {
 
         init {

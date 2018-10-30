@@ -75,7 +75,7 @@ class SingleScheduleEntry : ScheduleEntry {
     }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String {
-        return mDate.getDisplayText(context) + ", " + if (mTimePair.customTimeKey != null) {
+        return mDate.getDisplayText() + ", " + if (mTimePair.customTimeKey != null) {
             check(mTimePair.hourMinute == null)
 
             val customTimeData = customTimeDatas[mTimePair.customTimeKey]!!

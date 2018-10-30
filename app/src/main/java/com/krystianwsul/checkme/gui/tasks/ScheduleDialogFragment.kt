@@ -496,7 +496,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
         when (mScheduleDialogData.scheduleType) {
             ScheduleType.SINGLE -> {
-                mScheduleDialogDate.text = mScheduleDialogData.date.getDisplayText(context!!)
+                mScheduleDialogDate.text = mScheduleDialogData.date.getDisplayText()
 
                 mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
                     val customTimeData = mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!

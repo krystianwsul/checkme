@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.utils.time
 
-import android.content.Context
 import android.os.Parcelable
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import kotlinx.android.parcel.Parcelize
 import org.joda.time.LocalDate
@@ -27,7 +27,7 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     override fun toString() = DateTimeFormat.forStyle("S-").print(LocalDate(year, month, day))!!
 
-    fun getDisplayText(context: Context): String {
+    fun getDisplayText(): String {
         val todayCalendar = Calendar.getInstance()
         val todayDate = Date(todayCalendar)
 
@@ -38,6 +38,8 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
         val tomorrowCalendar = Calendar.getInstance()
         tomorrowCalendar.add(Calendar.DATE, 1)
         val tomorrowDate = Date(tomorrowCalendar)
+
+        val context = MyApplication.context
 
         return when (this) {
             todayDate -> context.getString(R.string.today)

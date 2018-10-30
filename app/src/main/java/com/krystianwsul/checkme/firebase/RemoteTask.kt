@@ -127,7 +127,7 @@ class RemoteTask(
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is RemoteTask)
 
-        remoteProject.createTaskHierarchy(this, childTask as RemoteTask, now)
+        remoteProject.createTaskHierarchy(this, childTask, now)
     }
 
     override fun deleteSchedule(schedule: Schedule) {
@@ -175,8 +175,6 @@ class RemoteTask(
                         hour = null
                         minute = null
                     } else {
-                        check(timePair.hourMinute != null)
-
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
                         minute = timePair.hourMinute.minute
@@ -200,8 +198,6 @@ class RemoteTask(
                         hour = null
                         minute = null
                     } else {
-                        check(timePair.hourMinute != null)
-
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
                         minute = timePair.hourMinute.minute
@@ -226,8 +222,6 @@ class RemoteTask(
                         hour = null
                         minute = null
                     } else {
-                        check(timePair.hourMinute != null)
-
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
                         minute = timePair.hourMinute.minute
@@ -250,8 +244,6 @@ class RemoteTask(
                         hour = null
                         minute = null
                     } else {
-                        check(TimePair.hourMinute != null)
-
                         remoteCustomTimeId = null
                         hour = TimePair.hourMinute!!.hour
                         minute = TimePair.hourMinute.minute
@@ -285,8 +277,6 @@ class RemoteTask(
                         hour = null
                         minute = null
                     } else {
-                        check(timePair.hourMinute != null)
-
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
                         minute = timePair.hourMinute.minute
@@ -312,8 +302,6 @@ class RemoteTask(
                         hour = null
                         minute = null
                     } else {
-                        check(timePair.hourMinute != null)
-
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
                         minute = timePair.hourMinute.minute
@@ -340,8 +328,6 @@ class RemoteTask(
                         hour = null
                         minute = null
                     } else {
-                        check(timePair.hourMinute != null)
-
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
                         minute = timePair.hourMinute.minute
@@ -366,8 +352,6 @@ class RemoteTask(
                         hour = null
                         minute = null
                     } else {
-                        check(timePair.hourMinute != null)
-
                         remoteCustomTimeId = null
                         hour = timePair.hourMinute!!.hour
                         minute = timePair.hourMinute.minute

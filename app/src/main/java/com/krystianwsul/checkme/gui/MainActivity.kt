@@ -837,10 +837,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             Log.e("asdf", "signInWithCredential:onComplete:" + task.isSuccessful)
 
                             if (!task.isSuccessful) {
-                                val exception = task.exception
-                                checkNotNull(exception)
+                                val exception = task.exception!!
 
-                                Log.e("asdf", "firebase signin error: " + exception!!)
+                                Log.e("asdf", "firebase signin error: " + exception)
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
 

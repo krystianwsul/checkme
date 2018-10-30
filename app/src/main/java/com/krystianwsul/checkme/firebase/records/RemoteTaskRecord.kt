@@ -236,9 +236,7 @@ class RemoteTaskRecord : RemoteRecord {
                 values[key] = createObject
             }
             else -> {
-                check(update != null)
-
-                if (!update!!.isEmpty()) {
+                if (update!!.isNotEmpty()) {
                     Log.e("asdf", "RemoteTaskRecord.getValues updating " + this)
 
                     updated = true

@@ -67,12 +67,13 @@ class ShowCustomTimeActivity : AbstractActivity() {
     private val discardDialogListener = this@ShowCustomTimeActivity::finish
 
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
-        check(editedDayOfWeek != null)
-        check(timeViews.containsKey(editedDayOfWeek))
-        check(hourMinutes.containsKey(editedDayOfWeek))
+        editedDayOfWeek!!.let {
+            check(timeViews.containsKey(it))
+            check(hourMinutes.containsKey(it))
 
-        hourMinutes[editedDayOfWeek!!] = hourMinute
-        timeViews[editedDayOfWeek!!]!!.text = hourMinute.toString()
+            hourMinutes[it] = hourMinute
+            timeViews[it]!!.text = hourMinute.toString()
+        }
 
         editedDayOfWeek = null
     }

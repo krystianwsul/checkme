@@ -43,13 +43,12 @@ class EditInstancesActivity : AbstractActivity() {
         private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
         private const val DISCARD_TAG = "discard"
 
-        fun getIntent(instanceKeys: ArrayList<InstanceKey>?): Intent {
-            checkNotNull(instanceKeys)
-            check(instanceKeys!!.size > 1)
+        fun getIntent(instanceKeys: ArrayList<InstanceKey>): Intent {
+            check(instanceKeys.size > 1)
 
-            val intent = Intent(MyApplication.instance, EditInstancesActivity::class.java)
-            intent.putParcelableArrayListExtra(INSTANCE_KEYS, instanceKeys)
-            return intent
+            return Intent(MyApplication.instance, EditInstancesActivity::class.java).apply {
+                putParcelableArrayListExtra(INSTANCE_KEYS, instanceKeys)
+            }
         }
     }
 
@@ -317,10 +316,9 @@ class EditInstancesActivity : AbstractActivity() {
         checkNotNull(mDate)
 
         if (mTimePairPersist!!.customTimeKey != null) {
-            val customTimeData = mData!!.customTimeDatas[mTimePairPersist!!.customTimeKey]
-            checkNotNull(customTimeData)
+            val customTimeData = mData!!.customTimeDatas[mTimePairPersist!!.customTimeKey]!!
 
-            editInstanceTime.setText(customTimeData!!.name + " (" + customTimeData.hourMinutes[mDate!!.dayOfWeek] + ")")
+            editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[mDate!!.dayOfWeek] + ")")
         } else {
             editInstanceTime.setText(mTimePairPersist!!.hourMinute.toString())
         }

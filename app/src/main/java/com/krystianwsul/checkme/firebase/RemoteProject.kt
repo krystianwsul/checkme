@@ -157,7 +157,7 @@ class RemoteProject(
     }
 
     private fun getInstanceJson(localInstance: LocalInstance): InstanceJson {
-        val done = if (localInstance.done != null) localInstance.done!!.long else null
+        val done = localInstance.done?.long
 
         val instanceDate = localInstance.instanceDate
         val instanceTimePair = localInstance.instanceTimePair
@@ -173,9 +173,9 @@ class RemoteProject(
             instanceHour = instanceTimePair.hourMinute.hour
             instanceMinute = instanceTimePair.hourMinute.minute
         } else {
-            check(instanceTimePair.customTimeKey != null)
+            checkNotNull(instanceTimePair.customTimeKey)
 
-            instanceRemoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(instanceTimePair.customTimeKey!!, this)
+            instanceRemoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(instanceTimePair.customTimeKey, this)
 
             instanceHour = null
             instanceMinute = null

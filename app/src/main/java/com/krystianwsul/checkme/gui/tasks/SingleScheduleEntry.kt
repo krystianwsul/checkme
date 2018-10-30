@@ -17,19 +17,16 @@ class SingleScheduleEntry : ScheduleEntry {
 
     companion object {
 
+        @Suppress("unused")
         @JvmField
         val CREATOR: Parcelable.Creator<SingleScheduleEntry> = object : Parcelable.Creator<SingleScheduleEntry> {
 
             override fun createFromParcel(parcel: Parcel) = parcel.run {
-                val date = readParcelable<Date>(Date::class.java.classLoader)
-                check(date != null)
-
-                val timePair = readParcelable<TimePair>(TimePair::class.java.classLoader)
-                check(timePair != null)
-
+                val date = readParcelable<Date>(Date::class.java.classLoader)!!
+                val timePair = readParcelable<TimePair>(TimePair::class.java.classLoader)!!
                 val error = readString()
 
-                SingleScheduleEntry(date!!, timePair!!, error)
+                SingleScheduleEntry(date, timePair, error)
             }
 
             override fun newArray(size: Int) = arrayOfNulls<SingleScheduleEntry>(size)
@@ -81,13 +78,10 @@ class SingleScheduleEntry : ScheduleEntry {
         return mDate.getDisplayText(context) + ", " + if (mTimePair.customTimeKey != null) {
             check(mTimePair.hourMinute == null)
 
-            val customTimeData = customTimeDatas[mTimePair.customTimeKey]
-            check(customTimeData != null)
+            val customTimeData = customTimeDatas[mTimePair.customTimeKey]!!
 
-            customTimeData!!.name + " (" + customTimeData.hourMinutes[mDate.dayOfWeek] + ")"
+            customTimeData.name + " (" + customTimeData.hourMinutes[mDate.dayOfWeek] + ")"
         } else {
-            check(mTimePair.hourMinute != null)
-
             mTimePair.hourMinute!!.toString()
         }
     }

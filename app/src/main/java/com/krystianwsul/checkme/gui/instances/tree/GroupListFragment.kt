@@ -873,9 +873,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 return ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys)
             }
 
-        private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>?, expansionState: GroupListFragment.ExpansionState?, selectedNodes: ArrayList<InstanceKey>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
-            check(instanceDatas != null)
-
+        private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>, expansionState: GroupListFragment.ExpansionState?, selectedNodes: ArrayList<InstanceKey>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
             mTreeViewAdapter = TreeViewAdapter(this, if (mShowFab) R.layout.row_group_list_fab_padding else null)
 
             treeNodeCollection = TreeNodeCollection(mTreeViewAdapter!!)
@@ -902,7 +900,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 unscheduledExpanded = false
             }
 
-            treeNodeCollection.nodes = mNodeCollection!!.initialize(instanceDatas!!, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTaskKeys)
+            treeNodeCollection.nodes = mNodeCollection!!.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTaskKeys)
 
             mTreeViewAdapter!!.setTreeNodeCollection(treeNodeCollection)
 
@@ -1013,7 +1011,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             return if (hierarchyData != null) {
                 checkNotNull(other.hierarchyData)
 
-                hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
+                hierarchyData.ordinal.compareTo(other.hierarchyData.ordinal)
             } else {
                 check(other.hierarchyData == null)
 

@@ -15,10 +15,8 @@ class InsertCommand(private val tableName: String, private val contentValues: Co
         check(contentValues.size() > 0)
     }
 
-    internal fun execute(sqLiteDatabase: SQLiteDatabase?) {
-        check(sqLiteDatabase != null)
-
-        val id = sqLiteDatabase!!.insert(tableName, null, contentValues)
+    fun execute(sqLiteDatabase: SQLiteDatabase) {
+        val id = sqLiteDatabase.insert(tableName, null, contentValues)
         check(id != -1L)
     }
 }

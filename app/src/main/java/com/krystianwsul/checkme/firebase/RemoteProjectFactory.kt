@@ -105,7 +105,7 @@ class RemoteProjectFactory(
         check(customTimeKey.localCustomTimeId != null)
         check(TextUtils.isEmpty(customTimeKey.remoteCustomTimeId))
 
-        val localCustomTimeId = customTimeKey.localCustomTimeId!!
+        val localCustomTimeId = customTimeKey.localCustomTimeId
 
         val localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
 
@@ -124,12 +124,9 @@ class RemoteProjectFactory(
         check(!TextUtils.isEmpty(remoteProjectId))
         check(!TextUtils.isEmpty(remoteCustomTimeId))
 
-        check(this.remoteProjects.containsKey(remoteProjectId))
+        check(remoteProjects.containsKey(remoteProjectId))
 
-        val remoteProject = this.remoteProjects[remoteProjectId]
-        check(remoteProject != null)
-
-        return remoteProject!!.getRemoteCustomTime(remoteCustomTimeId)
+        return remoteProjects[remoteProjectId]!!.getRemoteCustomTime(remoteCustomTimeId)
     }
 
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance? {

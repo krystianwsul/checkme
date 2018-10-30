@@ -39,9 +39,7 @@ abstract class RemoteRecord(protected val create: Boolean) {
             created = true
             values[key] = createObject
         } else {
-            check(update != null)
-
-            if (!update!!.isEmpty()) {
+            if (update!!.isNotEmpty()) {
                 Log.e("asdf", "RemoteRecord.getValues updating " + this)
 
                 updated = true
@@ -59,8 +57,6 @@ abstract class RemoteRecord(protected val create: Boolean) {
         if (create) {
             check(update == null)
         } else {
-            check(update != null)
-
             update!![key] = obj
         }
     }

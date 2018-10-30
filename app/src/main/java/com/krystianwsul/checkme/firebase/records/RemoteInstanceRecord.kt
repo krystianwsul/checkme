@@ -27,16 +27,14 @@ class RemoteInstanceRecord(
         private val customTimePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
         fun scheduleKeyToString(kotlinDomainFactory: KotlinDomainFactory, projectId: String, scheduleKey: ScheduleKey): String {
-            var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day
+            var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
             key += scheduleKey.scheduleTimePair.let {
                 if (it.customTimeKey != null) {
                     check(it.hourMinute == null)
 
-                    "-" + kotlinDomainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
+                    kotlinDomainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
                 } else {
-                    checkNotNull(it.hourMinute)
-
-                    "-" + it.hourMinute!!.hour + "-" + it.hourMinute.minute
+                    it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
                 }
             }
 
@@ -71,8 +69,6 @@ class RemoteInstanceRecord(
             }
         }
     }
-
-    private val domainFactory = kotlinDomainFactory.domainFactory
 
     override val key by lazy { remoteTaskRecord.key + "/instances/" + scheduleKeyToString(kotlinDomainFactory, remoteTaskRecord.projectId, scheduleKey) }
 

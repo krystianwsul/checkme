@@ -2,8 +2,6 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -37,7 +35,6 @@ import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.notifications.TickJobIntentService;
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -72,7 +69,6 @@ import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -269,7 +265,7 @@ public class DomainFactory {
             kotlinDomainFactory.setUserQuery(null);
             kotlinDomainFactory.setUserListener(null);
 
-            updateNotifications(context, now);
+            kotlinDomainFactory.updateNotifications(context, now);
 
             ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
         }
@@ -288,14 +284,14 @@ public class DomainFactory {
         RemoteFriendFactory.Companion.tryNotifyFriendListeners(); // assuming they're all getters
 
         if (kotlinDomainFactory.getTickData() == null && kotlinDomainFactory.getNotTickFirebaseListeners().isEmpty()) {
-            updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
+            kotlinDomainFactory.updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
 
             save(context, 0, source);
         } else {
             kotlinDomainFactory.setSkipSave(true);
 
             if (kotlinDomainFactory.getTickData() == null) {
-                updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
+                kotlinDomainFactory.updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
             } else {
                 updateNotificationsTick(context, source, kotlinDomainFactory.getTickData().getSilent(), kotlinDomainFactory.getTickData().getSource());
 
@@ -989,7 +985,7 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1015,7 +1011,7 @@ public class DomainFactory {
                 .map(Instance::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1038,7 +1034,7 @@ public class DomainFactory {
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
         instance.setNotificationShown(false, now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, 0, source);
 
@@ -1060,7 +1056,7 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1083,7 +1079,7 @@ public class DomainFactory {
 
         Stream.of(instances).forEach(instance -> instance.setInstanceDateTime(date, new TimePair(hourMinute), now));
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1105,7 +1101,7 @@ public class DomainFactory {
         instance.setDone(true, now);
         instance.setNotificationShown(false, now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, 0, source);
 
@@ -1130,7 +1126,7 @@ public class DomainFactory {
                 .map(Instance::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1187,7 +1183,7 @@ public class DomainFactory {
             task = kotlinDomainFactory.getRemoteProjectFactory().createScheduleRootTask(now, name, scheduleDatas, note, projectId);
         }
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1226,7 +1222,7 @@ public class DomainFactory {
 
         task.updateSchedules(scheduleDatas, now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1293,7 +1289,7 @@ public class DomainFactory {
 
         kotlinDomainFactory.joinTasks(newParentTask, joinTasks, now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1308,7 +1304,7 @@ public class DomainFactory {
 
         Task childTask = parentTask.createChildTask(now, name, note);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1350,7 +1346,7 @@ public class DomainFactory {
 
         kotlinDomainFactory.joinTasks(childTask, joinTasks, now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1387,7 +1383,7 @@ public class DomainFactory {
             newParentTask.addChild(task, now);
         }
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1407,7 +1403,7 @@ public class DomainFactory {
 
         task.setEndExactTimeStamp(now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1424,7 +1420,7 @@ public class DomainFactory {
 
         instance.setOrdinal(ordinal, now);
 
-        updateNotifications(MyApplication.Companion.getInstance(), now);
+        kotlinDomainFactory.updateNotifications(MyApplication.Companion.getInstance(), now);
 
         save(MyApplication.Companion.getInstance(), dataId, SaveService.Source.GUI);
 
@@ -1457,7 +1453,7 @@ public class DomainFactory {
 
         taskHierarchy.setOrdinal(hierarchyData.getOrdinal());
 
-        updateNotifications(MyApplication.Companion.getInstance(), now);
+        kotlinDomainFactory.updateNotifications(MyApplication.Companion.getInstance(), now);
 
         save(MyApplication.Companion.getInstance(), dataId, SaveService.Source.GUI);
 
@@ -1487,7 +1483,7 @@ public class DomainFactory {
                 .map(Task::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1564,7 +1560,7 @@ public class DomainFactory {
             task = kotlinDomainFactory.getRemoteProjectFactory().createRemoteTaskHelper(now, name, note, projectId);
         }
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1628,7 +1624,7 @@ public class DomainFactory {
 
         kotlinDomainFactory.joinTasks(newParentTask, joinTasks, now);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1658,7 +1654,7 @@ public class DomainFactory {
         Stream.of(task.getCurrentSchedules(now))
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1669,7 +1665,7 @@ public class DomainFactory {
 
     @NonNull
     Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull SaveService.Source source, boolean silent) {
-        updateNotifications(context, silent, now, new ArrayList<>());
+        kotlinDomainFactory.updateNotifications(context, silent, now, new ArrayList<>());
 
         Irrelevant irrelevant = kotlinDomainFactory.setIrrelevant(now);
 
@@ -1735,11 +1731,11 @@ public class DomainFactory {
         remoteProject.updateRecordOf(Stream.of(addedFriends).map(RemoteFriendFactory.Companion::getFriend)
                 .collect(Collectors.toSet()), removedFriends);
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
-        notifyCloud(context, remoteProject, removedFriends);
+        kotlinDomainFactory.notifyCloud(context, remoteProject, removedFriends);
     }
 
     public synchronized void createProject(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull Set<String> friends) {
@@ -1783,7 +1779,7 @@ public class DomainFactory {
         Stream.of(remoteProjects)
                 .forEach(remoteProject -> remoteProject.setEndExactTimeStamp(now));
 
-        updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(context, now);
 
         save(context, dataId, source);
 
@@ -1792,256 +1788,7 @@ public class DomainFactory {
 
     // internal
 
-    private void notifyCloud(@NonNull Context context, @NonNull RemoteProject remoteProject, @NonNull Collection<String> userKeys) {
-        check(kotlinDomainFactory.getUserInfo() != null);
-
-        Set<RemoteProject> remoteProjects = Collections.singleton(remoteProject);
-
-        BackendNotifier.INSTANCE.notify(context, remoteProjects, kotlinDomainFactory.getUserInfo(), userKeys);
-    }
-
-    void updateNotifications(@NonNull Context context, @NonNull ExactTimeStamp now) {
-        updateNotifications(context, true, now, new ArrayList<>());
-    }
-
-    @NonNull
-    private Set<TaskKey> getTaskKeys() {
-        HashSet<TaskKey> taskKeys = new HashSet<>(Stream.of(kotlinDomainFactory.localFactory.getTaskIds()).map(TaskKey::new).collect(Collectors.toList()));
-
-        if (kotlinDomainFactory.getRemoteProjectFactory() != null)
-            taskKeys.addAll(kotlinDomainFactory.getRemoteProjectFactory().getTaskKeys());
-
-        return taskKeys;
-    }
-
-    void updateNotifications(@NonNull Context context, boolean silent, @NonNull ExactTimeStamp now, @NonNull List<TaskKey> removedTaskKeys) {
-        List<Instance> rootInstances = kotlinDomainFactory.getRootInstances(null, now.plusOne(), now); // 24 hack
-
-        Map<InstanceKey, Instance> notificationInstances = Stream.of(rootInstances)
-                .filter(instance -> (instance.getDone() == null) && !instance.getNotified() && instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0)
-                .filterNot(instance -> removedTaskKeys.contains(instance.getTaskKey()))
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> instance));
-
-        HashSet<InstanceKey> shownInstanceKeys = new HashSet<>(Stream.of(kotlinDomainFactory.getExistingInstances())
-                .filter(Instance::getNotificationShown)
-                .map(Instance::getInstanceKey)
-                .collect(Collectors.toSet()));
-
-        Map<InstanceKey, kotlin.Pair<Integer, InstanceShownRecord>> instanceShownRecordNotificationDatas = new HashMap<>();
-        for (InstanceShownRecord instanceShownRecord : kotlinDomainFactory.localFactory.getInstanceShownRecords()) {
-            if (!instanceShownRecord.getNotificationShown())
-                continue;
-
-            Date scheduleDate = new Date(instanceShownRecord.getScheduleYear(), instanceShownRecord.getScheduleMonth(), instanceShownRecord.getScheduleDay());
-            String remoteCustomTimeId = instanceShownRecord.getScheduleCustomTimeId();
-
-            CustomTimeKey customTimeKey;
-            HourMinute hourMinute;
-
-            if (!TextUtils.isEmpty(remoteCustomTimeId)) {
-                check(instanceShownRecord.getScheduleHour() == null);
-                check(instanceShownRecord.getScheduleMinute() == null);
-
-                //noinspection ConstantConditions
-                customTimeKey = getCustomTimeKey(instanceShownRecord.getProjectId(), remoteCustomTimeId);
-                hourMinute = null;
-            } else {
-                check(instanceShownRecord.getScheduleHour() != null);
-                check(instanceShownRecord.getScheduleMinute() != null);
-
-                customTimeKey = null;
-                hourMinute = new HourMinute(instanceShownRecord.getScheduleHour(), instanceShownRecord.getScheduleMinute());
-            }
-
-            @SuppressWarnings("ConstantConditions") TaskKey taskKey = new TaskKey(instanceShownRecord.getProjectId(), instanceShownRecord.getTaskId());
-
-            InstanceKey instanceKey = new InstanceKey(taskKey, scheduleDate, new TimePair(customTimeKey, hourMinute));
-
-            shownInstanceKeys.add(instanceKey);
-
-            instanceShownRecordNotificationDatas.put(instanceKey, new kotlin.Pair<>(Instance.Companion.getNotificationId(scheduleDate, customTimeKey, hourMinute, taskKey), instanceShownRecord));
-        }
-
-        List<InstanceKey> showInstanceKeys = Stream.of(notificationInstances.keySet())
-                .filter(instanceKey -> !shownInstanceKeys.contains(instanceKey))
-                .collect(Collectors.toList());
-
-        Set<InstanceKey> hideInstanceKeys = Stream.of(shownInstanceKeys)
-                .filter(instanceKey -> !notificationInstances.containsKey(instanceKey))
-                .collect(Collectors.toSet());
-
-        for (InstanceKey showInstanceKey : showInstanceKeys) {
-            check(showInstanceKey != null);
-
-            Instance showInstance = kotlinDomainFactory.getInstance(showInstanceKey);
-
-            showInstance.setNotificationShown(true, now);
-        }
-
-        Set<TaskKey> allTaskKeys = getTaskKeys();
-
-        for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-            check(hideInstanceKey != null);
-
-            if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
-                Instance hideInstance = kotlinDomainFactory.getInstance(hideInstanceKey);
-
-                hideInstance.setNotificationShown(false, now);
-            } else {
-                check(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
-
-                instanceShownRecordNotificationDatas.get(hideInstanceKey).getSecond().setNotificationShown(false);
-            }
-        }
-
-        String message = "";
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            if (notificationInstances.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // show group
-                if (shownInstanceKeys.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
-                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        NotificationWrapper.Companion.getInstance().notifyGroup(kotlinDomainFactory, notificationInstances.values(), silent, now);
-                    } else {
-                        NotificationWrapper.Companion.getInstance().notifyGroup(kotlinDomainFactory, notificationInstances.values(), true, now);
-                    }
-                } else { // instances shown
-                    for (InstanceKey shownInstanceKey : shownInstanceKeys) {
-                        if (allTaskKeys.contains(shownInstanceKey.getTaskKey())) {
-                            Instance shownInstance = kotlinDomainFactory.getInstance(shownInstanceKey);
-
-                            NotificationWrapper.Companion.getInstance().cancelNotification(shownInstance.getNotificationId());
-                        } else {
-                            check(instanceShownRecordNotificationDatas.containsKey(shownInstanceKey));
-
-                            int notificationId = instanceShownRecordNotificationDatas.get(shownInstanceKey).getFirst();
-
-                            NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
-                        }
-                    }
-
-                    NotificationWrapper.Companion.getInstance().notifyGroup(kotlinDomainFactory, notificationInstances.values(), silent, now);
-                }
-            } else { // show instances
-                if (shownInstanceKeys.size() > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
-                    NotificationWrapper.Companion.getInstance().cancelNotification(0);
-
-                    for (Instance instance : notificationInstances.values()) {
-                        check(instance != null);
-
-                        notifyInstance(instance, silent, now);
-                    }
-                } else { // instances shown
-                    for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                        if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
-                            Instance instance = kotlinDomainFactory.getInstance(hideInstanceKey);
-
-                            NotificationWrapper.Companion.getInstance().cancelNotification(instance.getNotificationId());
-                        } else {
-                            check(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
-
-                            int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).getFirst();
-
-                            NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
-                        }
-                    }
-
-                    for (InstanceKey showInstanceKey : showInstanceKeys) {
-                        Instance instance = notificationInstances.get(showInstanceKey);
-                        check(instance != null);
-
-                        notifyInstance(instance, silent, now);
-                    }
-
-                    Stream.of(notificationInstances.values())
-                            .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                            .forEach(instance -> updateInstance(instance, now));
-                }
-            }
-        } else {
-            if (notificationInstances.isEmpty()) {
-                message += ", hg";
-                NotificationWrapper.Companion.getInstance().cancelNotification(0);
-            } else {
-                message += ", sg";
-                NotificationWrapper.Companion.getInstance().notifyGroup(kotlinDomainFactory, notificationInstances.values(), true, now);
-            }
-
-            message += ", hiding " + hideInstanceKeys.size();
-            for (InstanceKey hideInstanceKey : hideInstanceKeys) {
-                if (allTaskKeys.contains(hideInstanceKey.getTaskKey())) {
-                    Instance instance = kotlinDomainFactory.getInstance(hideInstanceKey);
-
-                    NotificationWrapper.Companion.getInstance().cancelNotification(instance.getNotificationId());
-                } else {
-                    check(instanceShownRecordNotificationDatas.containsKey(hideInstanceKey));
-
-                    int notificationId = instanceShownRecordNotificationDatas.get(hideInstanceKey).getFirst();
-
-                    NotificationWrapper.Companion.getInstance().cancelNotification(notificationId);
-                }
-            }
-
-            message += ", s " + showInstanceKeys.size();
-            for (InstanceKey showInstanceKey : showInstanceKeys) {
-                Instance instance = notificationInstances.get(showInstanceKey);
-                check(instance != null);
-
-                notifyInstance(instance, silent, now);
-            }
-
-            List<Instance> updateInstances = Stream.of(notificationInstances.values())
-                    .filter(instance -> !showInstanceKeys.contains(instance.getInstanceKey()))
-                    .collect(Collectors.toList());
-
-            message += ", u " + updateInstances.size();
-            Stream.of(updateInstances)
-                    .forEach(instance -> updateInstance(instance, now));
-        }
-
-        SharedPreferences sharedPreferences = context.getSharedPreferences(TickJobIntentService.Companion.getTICK_PREFERENCES(), Context.MODE_PRIVATE);
-        check(sharedPreferences != null);
-
-        String tickLog = sharedPreferences.getString(TickJobIntentService.Companion.getTICK_LOG(), "");
-        List<String> tickLogArr = Arrays.asList(TextUtils.split(tickLog, "\n"));
-        List<String> tickLogArrTrimmed = new ArrayList<>(tickLogArr.subList(Math.max(tickLogArr.size() - 20, 0), tickLogArr.size()));
-        tickLogArrTrimmed.add(now.toString() + " s? " + (silent ? "t" : "f") + message);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        if (!silent)
-            editor.putLong(TickJobIntentService.Companion.getLAST_TICK_KEY(), now.getLong());
-
-        Optional<TimeStamp> minInstancesTimeStamp = Stream.of(kotlinDomainFactory.getExistingInstances())
-                .map(existingInstance -> existingInstance.getInstanceDateTime().getTimeStamp())
-                .filter(timeStamp -> timeStamp.toExactTimeStamp().compareTo(now) > 0)
-                .min(TimeStamp::compareTo);
-
-        TimeStamp nextAlarm = null;
-        if (minInstancesTimeStamp.isPresent())
-            nextAlarm = minInstancesTimeStamp.get();
-
-        //noinspection Convert2MethodRef
-        Optional<TimeStamp> minSchedulesTimeStamp = kotlinDomainFactory.getTasks()
-                .filter(task -> task.current(now))
-                .filter(task -> task.isRootTask(now))
-                .flatMap(task -> Stream.of(task.getCurrentSchedules(now)))
-                .map(schedule -> schedule.getNextAlarm(now))
-                .filter(timeStamp -> timeStamp != null)
-                .min(TimeStamp::compareTo);
-
-        if (minSchedulesTimeStamp.isPresent() && (nextAlarm == null || nextAlarm.compareTo(minSchedulesTimeStamp.get()) > 0))
-            nextAlarm = minSchedulesTimeStamp.get();
-
-        NotificationWrapper.Companion.getInstance().updateAlarm(nextAlarm);
-
-        if (nextAlarm != null)
-            tickLogArrTrimmed.add("next tick: " + nextAlarm);
-
-        editor.putString(TickJobIntentService.Companion.getTICK_LOG(), TextUtils.join("\n", tickLogArrTrimmed));
-        editor.apply();
-    }
-
-    private void notifyInstance(@NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
+    void notifyInstance(@NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
         long realtime = SystemClock.elapsedRealtime();
 
         Optional<Long> optional = Stream.of(kotlinDomainFactory.getLastNotificationBeeps().values()).max(Long::compareTo);
@@ -2057,7 +1804,7 @@ public class DomainFactory {
             kotlinDomainFactory.getLastNotificationBeeps().put(instance.getInstanceKey(), SystemClock.elapsedRealtime());
     }
 
-    private void updateInstance(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
+    void updateInstance(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
         InstanceKey instanceKey = instance.getInstanceKey();
 
         long realtime = SystemClock.elapsedRealtime();

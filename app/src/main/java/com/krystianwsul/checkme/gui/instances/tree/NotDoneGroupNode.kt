@@ -391,7 +391,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
                             Pair(children, color())
                         } else if (!instanceData.mNote.isNullOrEmpty()) {
-                            Pair(instanceData.mNote!!, color())
+                            Pair(instanceData.mNote, color())
                         } else {
                             null
                         }

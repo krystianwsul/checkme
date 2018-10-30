@@ -31,7 +31,7 @@ object DataDiff {
             checkNotNull(oldInstanceData)
 
             if (!newInstanceDatas.keys.contains(instanceKey)) {
-                sDiff.add(indent + oldInstanceData!!.Name + " missing from newData")
+                sDiff.add(indent + oldInstanceData.Name + " missing from newData")
                 continue
             }
 
@@ -39,9 +39,9 @@ object DataDiff {
             checkNotNull(newInstanceData)
 
             if (oldInstanceData != newInstanceData) {
-                sDiff.add(indent + "difference in " + oldInstanceData!!.Name + ":")
+                sDiff.add(indent + "difference in " + oldInstanceData.Name + ":")
 
-                diffInstance(indent + "\t", oldInstanceData, newInstanceData!!)
+                diffInstance(indent + "\t", oldInstanceData, newInstanceData)
             }
         }
     }

@@ -27,14 +27,11 @@ class DatePickerDialogFragment : AbstractDialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val args = arguments
-        check(args != null)
-        check(args!!.containsKey(DATE_KEY))
+        check(arguments!!.containsKey(DATE_KEY))
 
-        val date = args.getParcelable<Date>(DATE_KEY)
-        check(date != null)
+        val date = arguments!!.getParcelable<Date>(DATE_KEY)!!
 
-        val datePickerDialog = DatePickerDialog(requireActivity(), mOnDateSetListener, date!!.year, date.month - 1, date.day)
+        val datePickerDialog = DatePickerDialog(requireActivity(), mOnDateSetListener, date.year, date.month - 1, date.day)
         datePickerDialog.datePicker.minDate = ExactTimeStamp.now.long - 1000 // -1000 odejmuje sekundę żeby obejść bug na ver. < 5.0
 
         return datePickerDialog

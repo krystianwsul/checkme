@@ -18,6 +18,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
 
     companion object {
 
+        @Suppress("unused")
         @JvmField
         val CREATOR: Parcelable.Creator<WeeklyScheduleEntry> = object : Parcelable.Creator<WeeklyScheduleEntry> {
 
@@ -60,8 +61,6 @@ class WeeklyScheduleEntry : ScheduleEntry {
 
             customTimeDatas[timePair.customTimeKey]!!.name
         } else {
-            check(timePair.hourMinute != null)
-
             timePair.hourMinute!!.toString()
         }
     }

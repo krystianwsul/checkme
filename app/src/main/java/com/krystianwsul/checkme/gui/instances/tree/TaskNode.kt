@@ -76,7 +76,7 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
         } else {
             check(!taskData.mNote.isNullOrEmpty())
 
-            taskData.mNote!!
+            taskData.mNote
         }
 
         val color = ContextCompat.getColor(groupListFragment.activity!!, R.color.textSecondary)

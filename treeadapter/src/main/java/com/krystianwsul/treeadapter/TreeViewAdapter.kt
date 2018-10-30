@@ -100,7 +100,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         return if (viewType == TYPE_PADDING) {
             checkNotNull(paddingLayout)
 
-            PaddingHolder(LayoutInflater.from(parent.context).inflate(paddingLayout!!, parent, false)!!)
+            PaddingHolder(LayoutInflater.from(parent.context).inflate(paddingLayout, parent, false)!!)
         } else {
             treeModelAdapter.onCreateViewHolder(parent, viewType)
         }

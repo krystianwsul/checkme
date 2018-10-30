@@ -118,49 +118,25 @@ class LocalInstance : Instance {
             }
         }
 
-    override val done: ExactTimeStamp?
-        get() {
-            if (mInstanceRecord == null)
-                return null
+    override val done = mInstanceRecord?.done?.let { ExactTimeStamp(it) }
 
-            val done = mInstanceRecord!!.done
-            return if (done != null)
-                ExactTimeStamp(done)
-            else
-                null
-        }
+    val hierarchyTime get() = mInstanceRecord!!.hierarchyTime
 
-    val hierarchyTime: Long
-        get() {
-            check(mInstanceRecord != null)
+    override val notified get() = mInstanceRecord?.notified == true
 
-            return mInstanceRecord!!.hierarchyTime
-        }
-
-    override val notified: Boolean
-        get() = mInstanceRecord != null && mInstanceRecord!!.notified
-
-    override val notificationShown: Boolean
-        get() = mInstanceRecord != null && mInstanceRecord!!.notificationShown
+    override val notificationShown get() = mInstanceRecord?.notificationShown == true
 
     override val scheduleCustomTimeKey: CustomTimeKey?
         get() {
-            if (mInstanceRecord != null) {
+            return if (mInstanceRecord != null) {
                 check(mTaskId == null)
                 check(mScheduleDateTime == null)
 
-                val customTimeId = mInstanceRecord!!.scheduleCustomTimeId
-
-                return if (customTimeId != null) {
-                    CustomTimeKey(customTimeId)
-                } else {
-                    null
-                }
+                mInstanceRecord!!.scheduleCustomTimeId?.let { CustomTimeKey(it) }
             } else {
-                check(mTaskId != null)
-                check(mScheduleDateTime != null)
+                checkNotNull(mTaskId)
 
-                return mScheduleDateTime!!.time.timePair.customTimeKey
+                mScheduleDateTime!!.time.timePair.customTimeKey
             }
         }
 
@@ -178,9 +154,9 @@ class LocalInstance : Instance {
 
                     null
                 } else {
-                    check(minute != null)
+                    checkNotNull(minute)
 
-                    HourMinute(hour, minute!!)
+                    HourMinute(hour, minute)
                 }
             } else {
                 check(mTaskId != null)
@@ -190,17 +166,13 @@ class LocalInstance : Instance {
             }
         }
 
-    override val task: LocalTask
-        get() = kotlinDomainFactory.localFactory.getTaskForce(taskId)
+    override val task get() = kotlinDomainFactory.localFactory.getTaskForce(taskId)
 
-    override val remoteNullableProject: RemoteProject?
-        get() = null
+    override val remoteNullableProject: RemoteProject? = null
 
-    override val remoteNonNullProject: RemoteProject
-        get() = throw UnsupportedOperationException()
+    override val remoteNonNullProject get() = throw UnsupportedOperationException()
 
-    override val remoteCustomTimeKey: Pair<String, String>?
-        get() = null
+    override val remoteCustomTimeKey: Pair<String, String>? = null
 
     constructor(kotlinDomainFactory: KotlinDomainFactory, instanceRecord: InstanceRecord) : super(kotlinDomainFactory) {
         mInstanceRecord = instanceRecord
@@ -210,7 +182,6 @@ class LocalInstance : Instance {
     }
 
     constructor(kotlinDomainFactory: KotlinDomainFactory, taskId: Int, scheduleDateTime: DateTime) : super(kotlinDomainFactory) {
-
         mInstanceRecord = null
 
         mTaskId = taskId
@@ -223,27 +194,29 @@ class LocalInstance : Instance {
         if (mInstanceRecord == null)
             createInstanceHierarchy(now)
 
-        mInstanceRecord!!.instanceYear = date.year
-        mInstanceRecord!!.instanceMonth = date.month
-        mInstanceRecord!!.instanceDay = date.day
+        mInstanceRecord!!.let {
+            it.instanceYear = date.year
+            it.instanceMonth = date.month
+            it.instanceDay = date.day
 
-        if (timePair.customTimeKey != null) {
-            check(timePair.hourMinute == null)
-            check(timePair.customTimeKey.localCustomTimeId != null)
-            check(TextUtils.isEmpty(timePair.customTimeKey.remoteCustomTimeId))
+            if (timePair.customTimeKey != null) {
+                check(timePair.hourMinute == null)
+                checkNotNull(timePair.customTimeKey.localCustomTimeId)
+                check(TextUtils.isEmpty(timePair.customTimeKey.remoteCustomTimeId))
 
-            mInstanceRecord!!.instanceCustomTimeId = timePair.customTimeKey.localCustomTimeId
-            mInstanceRecord!!.instanceHour = null
-            mInstanceRecord!!.instanceMinute = null
-        } else {
-            check(timePair.hourMinute != null)
+                it.instanceCustomTimeId = timePair.customTimeKey.localCustomTimeId
+                it.instanceHour = null
+                it.instanceMinute = null
+            } else {
+                checkNotNull(timePair.hourMinute)
 
-            mInstanceRecord!!.instanceCustomTimeId = null
-            mInstanceRecord!!.instanceHour = timePair.hourMinute!!.hour
-            mInstanceRecord!!.instanceMinute = timePair.hourMinute.minute
+                it.instanceCustomTimeId = null
+                it.instanceHour = timePair.hourMinute.hour
+                it.instanceMinute = timePair.hourMinute.minute
+            }
+
+            it.notified = false
         }
-
-        mInstanceRecord!!.notified = false
     }
 
     override fun setDone(done: Boolean, now: ExactTimeStamp) {
@@ -251,12 +224,9 @@ class LocalInstance : Instance {
             if (mInstanceRecord == null)
                 createInstanceHierarchy(now)
 
-            check(mInstanceRecord != null)
-
             mInstanceRecord!!.done = now.long
             mInstanceRecord!!.notified = false
         } else {
-            check(mInstanceRecord != null)
             mInstanceRecord!!.done = null
         }
     }
@@ -265,8 +235,7 @@ class LocalInstance : Instance {
         check(mInstanceRecord == null != (mScheduleDateTime == null))
         check(mTaskId == null == (mScheduleDateTime == null))
 
-        val parentInstance = getParentInstance(now)
-        parentInstance?.createInstanceHierarchy(now)
+        getParentInstance(now)?.createInstanceHierarchy(now)
 
         if (mInstanceRecord == null)
             createInstanceRecord(now)
@@ -285,15 +254,12 @@ class LocalInstance : Instance {
         if (mInstanceRecord == null)
             createInstanceHierarchy(now)
 
-        check(mInstanceRecord != null)
         mInstanceRecord!!.notified = true
     }
 
     override fun setNotificationShown(notificationShown: Boolean, now: ExactTimeStamp) {
         if (mInstanceRecord == null)
             createInstanceHierarchy(now)
-
-        check(mInstanceRecord != null)
 
         mInstanceRecord!!.notificationShown = notificationShown
     }

@@ -290,10 +290,9 @@ class EditInstanceActivity : AbstractActivity() {
         check(mDate != null)
 
         if (mTimePairPersist!!.customTimeKey != null) {
-            val customTimeData = mData!!.customTimeDatas[mTimePairPersist!!.customTimeKey]
-            check(customTimeData != null)
+            val customTimeData = mData!!.customTimeDatas[mTimePairPersist!!.customTimeKey]!!
 
-            editInstanceTime.setText(customTimeData!!.name + " (" + customTimeData.hourMinutes[mDate!!.dayOfWeek] + ")")
+            editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[mDate!!.dayOfWeek] + ")")
         } else {
             editInstanceTime.setText(mTimePairPersist!!.hourMinute.toString())
         }

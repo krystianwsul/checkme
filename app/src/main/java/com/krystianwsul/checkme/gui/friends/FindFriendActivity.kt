@@ -101,16 +101,15 @@ class FindFriendActivity : AppCompatActivity() {
         val key = UserData.getKey(findFriendEmail.text.toString())
 
         valueEventListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot?) {
-                checkNotNull(dataSnapshot)
 
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
                 databaseReference!!.removeEventListener(valueEventListener!!)
 
                 loading = false
                 valueEventListener = null
                 databaseReference = null
 
-                if (dataSnapshot!!.exists()) {
+                if (dataSnapshot.exists()) {
                     userData = dataSnapshot.getValue(UserData::class.java)!!
                 } else {
                     Toast.makeText(this@FindFriendActivity, R.string.userNotFound, Toast.LENGTH_SHORT).show()
@@ -119,9 +118,7 @@ class FindFriendActivity : AppCompatActivity() {
                 updateLayout()
             }
 
-            override fun onCancelled(databaseError: DatabaseError?) {
-                checkNotNull(databaseError)
-
+            override fun onCancelled(databaseError: DatabaseError) {
                 databaseReference!!.removeEventListener(valueEventListener!!)
 
                 loading = false
@@ -130,7 +127,7 @@ class FindFriendActivity : AppCompatActivity() {
 
                 updateLayout()
 
-                MyCrashlytics.logException(databaseError!!.toException())
+                MyCrashlytics.logException(databaseError.toException())
 
                 Toast.makeText(this@FindFriendActivity, R.string.connectionError, Toast.LENGTH_SHORT).show()
             }

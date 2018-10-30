@@ -95,7 +95,7 @@ class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is LocalTask)
 
-        kotlinDomainFactory.localFactory.createTaskHierarchy(kotlinDomainFactory, this, childTask as LocalTask, now)
+        kotlinDomainFactory.localFactory.createTaskHierarchy(kotlinDomainFactory, this, childTask, now)
     }
 
     override fun deleteSchedule(schedule: Schedule) {

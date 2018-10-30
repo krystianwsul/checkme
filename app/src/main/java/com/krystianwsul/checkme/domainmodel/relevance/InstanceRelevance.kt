@@ -17,25 +17,18 @@ class InstanceRelevance(val instance: Instance) {
         relevant = true
 
         // set task relevant
-        val taskRelevance = taskRelevances[instance.taskKey]
-        check(taskRelevance != null)
-
-        taskRelevance!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
+        taskRelevances[instance.taskKey]!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
 
         // set parent instance relevant
         if (!instance.isRootInstance(now)) {
-            val parentInstance = instance.getParentInstance(now)
-            check(parentInstance != null)
+            val parentInstance = instance.getParentInstance(now)!!
 
-            val parentInstanceKey = parentInstance!!.instanceKey
+            val parentInstanceKey = parentInstance.instanceKey
 
             if (!instanceRelevances.containsKey(parentInstanceKey))
                 instanceRelevances[parentInstanceKey] = InstanceRelevance(parentInstance)
 
-            val parentInstanceRelevance = instanceRelevances[parentInstanceKey]
-            check(parentInstanceRelevance != null)
-
-            parentInstanceRelevance!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
+            instanceRelevances[parentInstanceKey]!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
         }
 
         // set child instances relevant

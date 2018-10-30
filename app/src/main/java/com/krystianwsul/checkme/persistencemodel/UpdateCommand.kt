@@ -16,10 +16,8 @@ class UpdateCommand(private val tableName: String, private val contentValues: Co
         check(!TextUtils.isEmpty(whereClause))
     }
 
-    fun execute(sqLiteDatabase: SQLiteDatabase?) {
-        check(sqLiteDatabase != null)
-
-        val updated = sqLiteDatabase!!.update(tableName, contentValues, whereClause, null)
+    fun execute(sqLiteDatabase: SQLiteDatabase) {
+        val updated = sqLiteDatabase.update(tableName, contentValues, whereClause, null)
 
         if (updated != 1)
             throw IllegalStateException("tableName == $tableName, whereClause == $whereClause, updated == $updated contentValues: " + contentValues.keySet().joinToString(", ") { it + ": " + contentValues.get(it) })

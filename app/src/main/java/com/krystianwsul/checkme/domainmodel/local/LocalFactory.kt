@@ -186,8 +186,6 @@ class LocalFactory {
             hour = timePair.hourMinute.hour
             minute = timePair.hourMinute.minute
         } else {
-            checkNotNull(timePair.customTimeKey)
-
             remoteCustomTimeId = kotlinDomainFactory.getRemoteCustomTimeId(projectId, timePair.customTimeKey!!)
 
             hour = null

@@ -476,9 +476,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val treeNodes = mutableListOf<TreeNode>()
 
             if (!taskData.note.isNullOrEmpty()) {
-                val noteNode = NoteNode(taskData.note!!)
+                val noteNode = NoteNode(taskData.note)
 
-                treeNodes.add(noteNode.initialize(this.treeNodeCollection))
+                treeNodes.add(noteNode.initialize(treeNodeCollection))
             }
 
             for (childTaskData in taskData.childTaskDatas) {
@@ -789,8 +789,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val hierarchyData: HierarchyData?) : Comparable<ChildTaskData> {
 
         override fun compareTo(other: ChildTaskData) = if (hierarchyData != null) {
-            checkNotNull(other.hierarchyData)
-
             hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
         } else {
             check(other.hierarchyData == null)

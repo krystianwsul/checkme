@@ -163,7 +163,7 @@ class RemoteInstance : Instance {
             } else {
                 checkNotNull(minute)
 
-                HourMinute(hour, minute!!)
+                HourMinute(hour, minute)
             }
         } else {
             check(!TextUtils.isEmpty(_taskId))
@@ -237,10 +237,10 @@ class RemoteInstance : Instance {
             remoteInstanceRecord!!.instanceHour = null
             remoteInstanceRecord!!.instanceMinute = null
         } else {
-            check(timePair.hourMinute != null)
+            checkNotNull(timePair.hourMinute)
 
             remoteInstanceRecord!!.instanceCustomTimeId = null
-            remoteInstanceRecord!!.instanceHour = timePair.hourMinute!!.hour
+            remoteInstanceRecord!!.instanceHour = timePair.hourMinute.hour
             remoteInstanceRecord!!.instanceMinute = timePair.hourMinute.minute
         }
 

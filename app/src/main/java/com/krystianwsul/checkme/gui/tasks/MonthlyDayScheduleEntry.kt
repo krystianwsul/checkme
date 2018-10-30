@@ -26,12 +26,11 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
 
                 val beginningOfMonth = parcel.readInt() == 1
 
-                val timePair = parcel.readParcelable<TimePair>(TimePair::class.java.classLoader)
-                check(timePair != null)
+                val timePair = parcel.readParcelable<TimePair>(TimePair::class.java.classLoader)!!
 
                 val error = parcel.readString()
 
-                return MonthlyDayScheduleEntry(monthDayNumber, beginningOfMonth, timePair!!, error)
+                return MonthlyDayScheduleEntry(monthDayNumber, beginningOfMonth, timePair, error)
             }
 
             override fun newArray(size: Int): Array<MonthlyDayScheduleEntry?> = arrayOfNulls(size)

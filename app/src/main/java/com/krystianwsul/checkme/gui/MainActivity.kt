@@ -113,13 +113,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         if (firebaseUser != null) {
             userInfo = UserInfo(firebaseUser)
 
-            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setUserInfo(this, SaveService.Source.GUI, userInfo!!)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setUserInfo(SaveService.Source.GUI, userInfo!!)
 
             Log.e("asdf", "firebase logged in")
         } else {
             userInfo = null
 
-            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.clearUserInfo(this)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.clearUserInfo()
 
             Log.e("asdf", "firebase logged out")
         }
@@ -839,7 +839,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             if (!task.isSuccessful) {
                                 val exception = task.exception!!
 
-                                Log.e("asdf", "firebase signin error: " + exception)
+                                Log.e("asdf", "firebase signin error: $exception")
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
 

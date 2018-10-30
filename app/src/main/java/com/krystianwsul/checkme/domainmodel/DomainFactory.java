@@ -91,15 +91,14 @@ public class DomainFactory {
 
     // misc
 
-    public synchronized void reset(@NonNull Context context, @NonNull SaveService.Source source) {
+    public synchronized void reset(@NonNull SaveService.Source source) {
         UserInfo userInfo = kotlinDomainFactory.getUserInfo();
-        clearUserInfo(context);
+        clearUserInfo();
 
         KotlinDomainFactory.Companion.set_kotlinDomainFactory(null);
         kotlinDomainFactory.localFactory.reset();
 
-        if (userInfo != null)
-            setUserInfo(context, source, userInfo);
+        if (userInfo != null) setUserInfo(source, userInfo);
 
         ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
 
@@ -108,7 +107,7 @@ public class DomainFactory {
 
     // firebase
 
-    public synchronized void setUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
+    public synchronized void setUserInfo(@NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
         if (kotlinDomainFactory.getUserInfo() != null) {
             check(kotlinDomainFactory.getRecordQuery() != null);
             check(kotlinDomainFactory.getUserQuery() != null);
@@ -116,7 +115,7 @@ public class DomainFactory {
             if (kotlinDomainFactory.getUserInfo().equals(userInfo))
                 return;
 
-            clearUserInfo(context);
+            clearUserInfo();
         }
 
         check(kotlinDomainFactory.getUserInfo() == null);
@@ -129,9 +128,6 @@ public class DomainFactory {
 
         kotlinDomainFactory.setUserInfo(userInfo);
 
-        Context applicationContext = context.getApplicationContext();
-        check(applicationContext != null);
-
         DatabaseWrapper.INSTANCE.setUserInfo(userInfo, kotlinDomainFactory.localFactory.getUuid());
 
         kotlinDomainFactory.setRecordQuery(DatabaseWrapper.INSTANCE.getTaskRecordsQuery(userInfo));
@@ -141,7 +137,7 @@ public class DomainFactory {
                 Log.e("asdf", "DomainFactory.kotlinDomainFactory.getMRecordListener().onDataChange, dataSnapshot: " + dataSnapshot);
                 check(dataSnapshot != null);
 
-                setRemoteTaskRecords(applicationContext, dataSnapshot, source);
+                setRemoteTaskRecords(dataSnapshot, source);
             }
 
             @Override
@@ -185,7 +181,7 @@ public class DomainFactory {
         kotlinDomainFactory.getUserQuery().addValueEventListener(kotlinDomainFactory.getUserListener());
     }
 
-    public synchronized void clearUserInfo(@NonNull Context context) {
+    public synchronized void clearUserInfo() {
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         if (kotlinDomainFactory.getUserInfo() == null) {
@@ -217,13 +213,13 @@ public class DomainFactory {
             kotlinDomainFactory.setUserQuery(null);
             kotlinDomainFactory.setUserListener(null);
 
-            kotlinDomainFactory.updateNotifications(context, now);
+            kotlinDomainFactory.updateNotifications(now);
 
             ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
         }
     }
 
-    private synchronized void setRemoteTaskRecords(@NonNull Context context, @NonNull DataSnapshot dataSnapshot, @NonNull SaveService.Source source) {
+    private synchronized void setRemoteTaskRecords(@NonNull DataSnapshot dataSnapshot, @NonNull SaveService.Source source) {
         check(kotlinDomainFactory.getUserInfo() != null);
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
@@ -236,16 +232,16 @@ public class DomainFactory {
         RemoteFriendFactory.Companion.tryNotifyFriendListeners(); // assuming they're all getters
 
         if (kotlinDomainFactory.getTickData() == null && kotlinDomainFactory.getNotTickFirebaseListeners().isEmpty()) {
-            kotlinDomainFactory.updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
+            kotlinDomainFactory.updateNotifications(firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
 
-            kotlinDomainFactory.save(context, 0, source);
+            kotlinDomainFactory.save(0, source);
         } else {
             kotlinDomainFactory.setSkipSave(true);
 
             if (kotlinDomainFactory.getTickData() == null) {
-                kotlinDomainFactory.updateNotifications(context, firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
+                kotlinDomainFactory.updateNotifications(firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
             } else {
-                updateNotificationsTick(context, source, kotlinDomainFactory.getTickData().getSilent(), kotlinDomainFactory.getTickData().getSource());
+                updateNotificationsTick(source, kotlinDomainFactory.getTickData().getSilent(), kotlinDomainFactory.getTickData().getSource());
 
                 if (!firstThereforeSilent) {
                     Log.e("asdf", "not first, clearing kotlinDomainFactory.getMTickData()");
@@ -262,7 +258,7 @@ public class DomainFactory {
 
             kotlinDomainFactory.setSkipSave(false);
 
-            kotlinDomainFactory.save(context, 0, source);
+            kotlinDomainFactory.save(0, source);
         }
     }
 
@@ -284,16 +280,16 @@ public class DomainFactory {
         kotlinDomainFactory.getNotTickFirebaseListeners().remove(firebaseListener);
     }
 
-    public synchronized void setFirebaseTickListener(@NonNull Context context, @NonNull SaveService.Source source, @NonNull TickData tickData) {
+    public synchronized void setFirebaseTickListener(@NonNull SaveService.Source source, @NonNull TickData tickData) {
         check(FirebaseAuth.getInstance().getCurrentUser() != null);
 
         if ((kotlinDomainFactory.getRemoteProjectFactory() != null) && !kotlinDomainFactory.getRemoteProjectFactory().isSaved() && (kotlinDomainFactory.getTickData() == null)) {
-            updateNotificationsTick(context, source, tickData.getSilent(), tickData.getSource());
+            updateNotificationsTick(source, tickData.getSilent(), tickData.getSource());
 
             tickData.release();
         } else {
             if (kotlinDomainFactory.getTickData() != null) {
-                kotlinDomainFactory.setTickData(mergeTickDatas(context, kotlinDomainFactory.getTickData(), tickData));
+                kotlinDomainFactory.setTickData(mergeTickDatas(kotlinDomainFactory.getTickData(), tickData));
             } else {
                 kotlinDomainFactory.setTickData(tickData);
             }
@@ -301,7 +297,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    private static TickData mergeTickDatas(@NonNull Context context, @NonNull TickData oldTickData, @NonNull TickData newTickData) {
+    private static TickData mergeTickDatas(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
         boolean silent = (oldTickData.getSilent() && newTickData.getSilent());
 
         String source = "merged (" + oldTickData + ", " + newTickData + ")";
@@ -312,7 +308,7 @@ public class DomainFactory {
         List<Function0<kotlin.Unit>> listeners = new ArrayList<>(oldTickData.getListeners());
         listeners.addAll(newTickData.getListeners());
 
-        return new TickData(silent, source, context, listeners);
+        return new TickData(silent, source, listeners);
     }
 
     public synchronized boolean isConnected() {
@@ -500,10 +496,7 @@ public class DomainFactory {
         List<GroupListFragment.TaskData> taskDatas = null;
         if (position == 0) {
             taskDatas = kotlinDomainFactory.getTasks()
-                    .filter(task -> task.current(now))
-                    .filter(task -> task.isVisible(now))
-                    .filter(task -> task.isRootTask(now))
-                    .filter(task -> task.getCurrentSchedules(now).isEmpty()).map(task -> new GroupListFragment.TaskData(task.getTaskKey(), task.getName(), kotlinDomainFactory.getChildTaskDatas(task, now), task.getStartExactTimeStamp(), task.getNote()))
+                    .filter(task -> task.current(now)).filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).filter(task -> task.getCurrentSchedules(now).isEmpty()).map(task -> new GroupListFragment.TaskData(task.getTaskKey(), task.getName(), kotlinDomainFactory.getGroupListChildTaskDatas(task, now), task.getStartExactTimeStamp(), task.getNote()))
                     .collect(Collectors.toList());
         }
 
@@ -734,7 +727,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized CreateTaskViewModel.Data getCreateTaskData(@Nullable TaskKey taskKey, @NonNull Context context, @Nullable List<TaskKey> joinTaskKeys) {
+    public synchronized CreateTaskViewModel.Data getCreateTaskData(@Nullable TaskKey taskKey, @Nullable List<TaskKey> joinTaskKeys) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getCreateTaskData");
@@ -787,11 +780,11 @@ public class DomainFactory {
             if (task instanceof RemoteTask) {
                 RemoteTask remoteTask = (RemoteTask) task;
 
-                parentTreeDatas = kotlinDomainFactory.getProjectTaskTreeDatas(context, now, remoteTask.getRemoteProject(), excludedTaskKeys);
+                parentTreeDatas = kotlinDomainFactory.getProjectTaskTreeDatas(now, remoteTask.getRemoteProject(), excludedTaskKeys);
             } else {
                 check(task instanceof LocalTask);
 
-                parentTreeDatas = kotlinDomainFactory.getParentTreeDatas(context, now, excludedTaskKeys);
+                parentTreeDatas = kotlinDomainFactory.getParentTreeDatas(now, excludedTaskKeys);
             }
         } else {
             String projectId = null;
@@ -812,9 +805,9 @@ public class DomainFactory {
 
                 RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjectForce(projectId);
 
-                parentTreeDatas = kotlinDomainFactory.getProjectTaskTreeDatas(context, now, remoteProject, excludedTaskKeys);
+                parentTreeDatas = kotlinDomainFactory.getProjectTaskTreeDatas(now, remoteProject, excludedTaskKeys);
             } else {
-                parentTreeDatas = kotlinDomainFactory.getParentTreeDatas(context, now, excludedTaskKeys);
+                parentTreeDatas = kotlinDomainFactory.getParentTreeDatas(now, excludedTaskKeys);
             }
         }
 
@@ -826,7 +819,7 @@ public class DomainFactory {
     }
 
     @NonNull
-    public synchronized ShowTaskViewModel.Data getShowTaskData(@NonNull TaskKey taskKey, @NonNull Context context) {
+    public synchronized ShowTaskViewModel.Data getShowTaskData(@NonNull TaskKey taskKey) {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskData");
@@ -840,23 +833,23 @@ public class DomainFactory {
                 .map(taskHierarchy -> {
                     Task childTask = taskHierarchy.getChildTask();
 
-                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(context, now), kotlinDomainFactory.getChildTaskDatas(childTask, now, context), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
+                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(now), kotlinDomainFactory.getTaskListChildTaskDatas(childTask, now), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
                 })
                 .collect(Collectors.toList());
         Collections.sort(childTaskDatas, TaskListFragment.ChildTaskData::compareTo);
 
-        return new ShowTaskViewModel.Data(task.getName(), task.getScheduleText(context, now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()), !task.getExistingInstances().isEmpty());
+        return new ShowTaskViewModel.Data(task.getName(), task.getScheduleText(now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()), !task.getExistingInstances().isEmpty());
     }
 
     @NonNull
-    public synchronized MainViewModel.Data getMainData(@NonNull Context context) {
+    public synchronized MainViewModel.Data getMainData() {
         fakeDelay();
 
         MyCrashlytics.INSTANCE.log("DomainFactory.getMainData");
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        return new MainViewModel.Data(kotlinDomainFactory.getMainData(now, context));
+        return new MainViewModel.Data(kotlinDomainFactory.getMainData(now));
     }
 
     @NonNull
@@ -927,7 +920,7 @@ public class DomainFactory {
 
     // sets
 
-    public synchronized void setInstanceDateTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
+    public synchronized void setInstanceDateTime(int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceDateTime");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -937,14 +930,14 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
     }
 
-    public synchronized void setInstancesDateTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
+    public synchronized void setInstancesDateTime(int dataId, @NonNull SaveService.Source source, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesDateTime");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -963,14 +956,14 @@ public class DomainFactory {
                 .map(Instance::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(remoteProjects);
     }
 
-    public synchronized void setInstanceAddHourService(@NonNull Context context, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceAddHourService(@NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourService");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -986,14 +979,14 @@ public class DomainFactory {
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
         instance.setNotificationShown(false, now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, 0, source);
+        kotlinDomainFactory.save(0, source);
 
-        kotlinDomainFactory.notifyCloud(context, instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
     }
 
-    public synchronized void setInstanceAddHourActivity(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceAddHourActivity(int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourActivity");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1008,14 +1001,14 @@ public class DomainFactory {
 
         instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
     }
 
-    public synchronized void setInstancesAddHourActivity(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Collection<InstanceKey> instanceKeys) {
+    public synchronized void setInstancesAddHourActivity(int dataId, @NonNull SaveService.Source source, @NonNull Collection<InstanceKey> instanceKeys) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourActivity");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1031,18 +1024,18 @@ public class DomainFactory {
 
         Stream.of(instances).forEach(instance -> instance.setInstanceDateTime(date, new TimePair(hourMinute), now));
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
         @SuppressWarnings("Convert2MethodRef") Set<RemoteProject> remoteProjects = Stream.of(instances).map(Instance::getRemoteNullableProject)
                 .filter(remoteProject -> remoteProject != null)
                 .collect(Collectors.toSet());
 
-        kotlinDomainFactory.notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(remoteProjects);
     }
 
-    public synchronized void setInstanceNotificationDone(@NonNull Context context, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceNotificationDone(@NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotificationDone");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1053,15 +1046,15 @@ public class DomainFactory {
         instance.setDone(true, now);
         instance.setNotificationShown(false, now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, 0, source);
+        kotlinDomainFactory.save(0, source);
 
-        kotlinDomainFactory.notifyCloud(context, instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
     }
 
     @NonNull
-    public synchronized ExactTimeStamp setInstancesDone(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
+    public synchronized ExactTimeStamp setInstancesDone(int dataId, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesDone");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1078,27 +1071,27 @@ public class DomainFactory {
                 .map(Instance::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(remoteProjects);
 
         return now;
     }
 
-    public synchronized ExactTimeStamp setInstanceDone(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, boolean done) {
+    public synchronized ExactTimeStamp setInstanceDone(int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, boolean done) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceDone");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        Instance instance = kotlinDomainFactory.setInstanceDone(context, now, dataId, source, instanceKey, done);
+        Instance instance = kotlinDomainFactory.setInstanceDone(now, dataId, source, instanceKey, done);
 
         return instance.getDone();
     }
 
-    public synchronized void setInstancesNotified(@NonNull Context context, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
+    public synchronized void setInstancesNotified(@NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesNotified");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1109,20 +1102,20 @@ public class DomainFactory {
         for (InstanceKey instanceKey : instanceKeys)
             kotlinDomainFactory.setInstanceNotified(instanceKey, now);
 
-        kotlinDomainFactory.save(context, 0, source);
+        kotlinDomainFactory.save(0, source);
     }
 
-    public synchronized void setInstanceNotified(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
+    public synchronized void setInstanceNotified(int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotified");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
         kotlinDomainFactory.setInstanceNotified(instanceKey, ExactTimeStamp.Companion.getNow());
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
     }
 
     @NonNull
-    Task createScheduleRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    Task createScheduleRootTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         check(!TextUtils.isEmpty(name));
         check(!scheduleDatas.isEmpty());
 
@@ -1135,33 +1128,33 @@ public class DomainFactory {
             task = kotlinDomainFactory.getRemoteProjectFactory().createScheduleRootTask(now, name, scheduleDatas, note, projectId);
         }
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
 
         return task;
     }
 
-    public synchronized void createScheduleRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createScheduleRootTask(int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleRootTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        createScheduleRootTask(context, now, dataId, source, name, scheduleDatas, note, projectId);
+        createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId);
     }
 
     @NonNull
-    TaskKey updateScheduleTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    TaskKey updateScheduleTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         check(!TextUtils.isEmpty(name));
         check(!scheduleDatas.isEmpty());
 
         Task task = kotlinDomainFactory.getTaskForce(taskKey);
         check(task.current(now));
 
-        task = task.updateProject(context, now, projectId);
+        task = task.updateProject(now, projectId);
 
         task.setName(name, note);
 
@@ -1174,17 +1167,17 @@ public class DomainFactory {
 
         task.updateSchedules(scheduleDatas, now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
 
     @NonNull
-    public synchronized TaskKey updateScheduleTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
+    public synchronized TaskKey updateScheduleTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateScheduleTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1193,10 +1186,10 @@ public class DomainFactory {
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        return updateScheduleTask(context, now, dataId, source, taskKey, name, scheduleDatas, note, projectId);
+        return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId);
     }
 
-    public synchronized void createScheduleJoinRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createScheduleJoinRootTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleJoinRootTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1235,20 +1228,19 @@ public class DomainFactory {
             newParentTask = kotlinDomainFactory.localFactory.createScheduleRootTask(kotlinDomainFactory, now, name, scheduleDatas, note);
         }
 
-        joinTasks = Stream.of(joinTasks)
-                .map(joinTask -> joinTask.updateProject(context, now, projectId))
+        joinTasks = Stream.of(joinTasks).map(joinTask -> joinTask.updateProject(now, projectId))
                 .collect(Collectors.toList());
 
         kotlinDomainFactory.joinTasks(newParentTask, joinTasks, now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, newParentTask.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(newParentTask.getRemoteNullableProject());
     }
 
-    Task createChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
+    Task createChildTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         check(!TextUtils.isEmpty(name));
 
         Task parentTask = kotlinDomainFactory.getTaskForce(parentTaskKey);
@@ -1256,25 +1248,25 @@ public class DomainFactory {
 
         Task childTask = parentTask.createChildTask(now, name, note);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, childTask.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(childTask.getRemoteNullableProject());
 
         return childTask;
     }
 
-    public synchronized void createChildTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
+    public synchronized void createChildTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createChildTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        createChildTask(context, now, dataId, source, parentTaskKey, name, note);
+        createChildTask(now, dataId, source, parentTaskKey, name, note);
     }
 
-    public synchronized void createJoinChildTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
+    public synchronized void createJoinChildTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createJoinChildTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1298,15 +1290,15 @@ public class DomainFactory {
 
         kotlinDomainFactory.joinTasks(childTask, joinTasks, now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, childTask.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(childTask.getRemoteNullableProject());
     }
 
     @NonNull
-    public synchronized TaskKey updateChildTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
+    public synchronized TaskKey updateChildTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateChildTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1335,16 +1327,16 @@ public class DomainFactory {
             newParentTask.addChild(task, now);
         }
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
 
-    public synchronized void setTaskEndTimeStamp(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey) {
+    public synchronized void setTaskEndTimeStamp(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setTaskEndTimeStamp");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1355,11 +1347,11 @@ public class DomainFactory {
 
         task.setEndExactTimeStamp(now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
     }
 
     public synchronized void setInstanceOrdinal(int dataId, @NonNull InstanceKey instanceKey, double ordinal) {
@@ -1372,11 +1364,11 @@ public class DomainFactory {
 
         instance.setOrdinal(ordinal, now);
 
-        kotlinDomainFactory.updateNotifications(MyApplication.Companion.getInstance(), now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(MyApplication.Companion.getInstance(), dataId, SaveService.Source.GUI);
+        kotlinDomainFactory.save(dataId, SaveService.Source.GUI);
 
-        kotlinDomainFactory.notifyCloud(MyApplication.Companion.getInstance(), instance.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
     }
 
     public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull HierarchyData hierarchyData) {
@@ -1405,15 +1397,14 @@ public class DomainFactory {
 
         taskHierarchy.setOrdinal(hierarchyData.getOrdinal());
 
-        kotlinDomainFactory.updateNotifications(MyApplication.Companion.getInstance(), now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(MyApplication.Companion.getInstance(), dataId, SaveService.Source.GUI);
+        kotlinDomainFactory.save(dataId, SaveService.Source.GUI);
 
-        if (remoteProject != null)
-            kotlinDomainFactory.notifyCloud(MyApplication.Companion.getInstance(), remoteProject);
+        if (remoteProject != null) kotlinDomainFactory.notifyCloud(remoteProject);
     }
 
-    public synchronized void setTaskEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull ArrayList<TaskKey> taskKeys) {
+    public synchronized void setTaskEndTimeStamps(int dataId, @NonNull SaveService.Source source, @NonNull ArrayList<TaskKey> taskKeys) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setTaskEndTimeStamps");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1435,14 +1426,14 @@ public class DomainFactory {
                 .map(Task::getRemoteNonNullProject)
                 .collect(Collectors.toSet());
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(remoteProjects);
     }
 
-    public synchronized int createCustomTime(@NonNull Context context, @NonNull SaveService.Source source, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
+    public synchronized int createCustomTime(@NonNull SaveService.Source source, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createCustomTime");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1458,12 +1449,12 @@ public class DomainFactory {
 
         LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.createLocalCustomTime(kotlinDomainFactory, name, hourMinutes);
 
-        kotlinDomainFactory.save(context, 0, source);
+        kotlinDomainFactory.save(0, source);
 
         return localCustomTime.getId();
     }
 
-    public synchronized void updateCustomTime(@NonNull Context context, int dataId, @NonNull SaveService.Source source, int localCustomTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
+    public synchronized void updateCustomTime(int dataId, @NonNull SaveService.Source source, int localCustomTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateCustomTime");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1481,10 +1472,10 @@ public class DomainFactory {
                 localCustomTime.setHourMinute(dayOfWeek, hourMinute);
         }
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
     }
 
-    public synchronized void setCustomTimeCurrent(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull List<Integer> localCustomTimeIds) {
+    public synchronized void setCustomTimeCurrent(int dataId, @NonNull SaveService.Source source, @NonNull List<Integer> localCustomTimeIds) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setCustomTimeCurrent");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1496,11 +1487,11 @@ public class DomainFactory {
             localCustomTime.setCurrent();
         }
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
     }
 
     @NonNull
-    Task createRootTask(@NonNull Context context, @NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
+    Task createRootTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         check(!TextUtils.isEmpty(name));
 
         Task task;
@@ -1512,25 +1503,25 @@ public class DomainFactory {
             task = kotlinDomainFactory.getRemoteProjectFactory().createRemoteTaskHelper(now, name, note, projectId);
         }
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
 
         return task;
     }
 
-    public synchronized void createRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createRootTask(int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createRootTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        createRootTask(context, now, dataId, source, name, note, projectId);
+        createRootTask(now, dataId, source, name, note, projectId);
     }
 
-    public synchronized void createJoinRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
+    public synchronized void createJoinRootTask(int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createJoinRootTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1570,21 +1561,20 @@ public class DomainFactory {
             newParentTask = kotlinDomainFactory.localFactory.createLocalTaskHelper(kotlinDomainFactory, name, now, note);
         }
 
-        joinTasks = Stream.of(joinTasks)
-                .map(joinTask -> joinTask.updateProject(context, now, projectId))
+        joinTasks = Stream.of(joinTasks).map(joinTask -> joinTask.updateProject(now, projectId))
                 .collect(Collectors.toList());
 
         kotlinDomainFactory.joinTasks(newParentTask, joinTasks, now);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, newParentTask.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(newParentTask.getRemoteNullableProject());
     }
 
     @NonNull
-    public synchronized TaskKey updateRootTask(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @Nullable String projectId) {
+    public synchronized TaskKey updateRootTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateRootTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
@@ -1595,7 +1585,7 @@ public class DomainFactory {
         Task task = kotlinDomainFactory.getTaskForce(taskKey);
         check(task.current(now));
 
-        task = task.updateProject(context, now, projectId);
+        task = task.updateProject(now, projectId);
 
         task.setName(name, note);
 
@@ -1606,36 +1596,36 @@ public class DomainFactory {
         Stream.of(task.getCurrentSchedules(now))
                 .forEach(schedule -> schedule.setEndExactTimeStamp(now));
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, task.getRemoteNullableProject());
+        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
 
         return task.getTaskKey();
     }
 
     @NonNull
-    Irrelevant updateNotificationsTick(@NonNull Context context, @NonNull ExactTimeStamp now, @NonNull SaveService.Source source, boolean silent) {
-        kotlinDomainFactory.updateNotifications(context, silent, now, new ArrayList<>());
+    Irrelevant updateNotificationsTick(@NonNull ExactTimeStamp now, @NonNull SaveService.Source source, boolean silent) {
+        kotlinDomainFactory.updateNotifications(silent, now, new ArrayList<>());
 
         Irrelevant irrelevant = kotlinDomainFactory.setIrrelevant(now);
 
         if (kotlinDomainFactory.getRemoteProjectFactory() != null)
             kotlinDomainFactory.localFactory.deleteInstanceShownRecords(kotlinDomainFactory.getRemoteProjectFactory().getTaskKeys());
 
-        kotlinDomainFactory.save(context, 0, source);
+        kotlinDomainFactory.save(0, source);
 
         return irrelevant;
     }
 
-    public synchronized void updateNotificationsTick(@NonNull Context context, @NonNull SaveService.Source source, boolean silent, @NonNull String sourceName) {
+    public synchronized void updateNotificationsTick(@NonNull SaveService.Source source, boolean silent, @NonNull String sourceName) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateNotificationsTick source: " + sourceName);
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
-        updateNotificationsTick(context, now, source, silent);
+        updateNotificationsTick(now, source, silent);
     }
 
     public synchronized void removeFriends(@NonNull Set<String> keys) {
@@ -1651,7 +1641,7 @@ public class DomainFactory {
         RemoteFriendFactory.Companion.save();
     }
 
-    public synchronized void updateUserInfo(@NonNull Context context, @NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
+    public synchronized void updateUserInfo(@NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateUserInfo");
         check(kotlinDomainFactory.getUserInfo() != null);
         check(kotlinDomainFactory.getRemoteProjectFactory() != null);
@@ -1664,10 +1654,10 @@ public class DomainFactory {
 
         kotlinDomainFactory.getRemoteProjectFactory().updateUserInfo(userInfo);
 
-        kotlinDomainFactory.save(context, 0, source);
+        kotlinDomainFactory.save(0, source);
     }
 
-    public synchronized void updateProject(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String projectId, @NonNull String name, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
+    public synchronized void updateProject(int dataId, @NonNull SaveService.Source source, @NonNull String projectId, @NonNull String name, @NonNull Set<String> addedFriends, @NonNull Set<String> removedFriends) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateProject");
 
         check(!TextUtils.isEmpty(projectId));
@@ -1683,14 +1673,14 @@ public class DomainFactory {
         remoteProject.updateRecordOf(Stream.of(addedFriends).map(RemoteFriendFactory.Companion::getFriend)
                 .collect(Collectors.toSet()), removedFriends);
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, remoteProject, removedFriends);
+        kotlinDomainFactory.notifyCloud(remoteProject, removedFriends);
     }
 
-    public synchronized void createProject(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull Set<String> friends) {
+    public synchronized void createProject(int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull Set<String> friends) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createProject");
 
         check(!TextUtils.isEmpty(name));
@@ -1708,12 +1698,12 @@ public class DomainFactory {
 
         RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().createRemoteProject(name, now, recordOf, kotlinDomainFactory.getRemoteRootUser());
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, remoteProject);
+        kotlinDomainFactory.notifyCloud(remoteProject);
     }
 
-    public synchronized void setProjectEndTimeStamps(@NonNull Context context, int dataId, @NonNull SaveService.Source source, @NonNull Set<String> projectIds) {
+    public synchronized void setProjectEndTimeStamps(int dataId, @NonNull SaveService.Source source, @NonNull Set<String> projectIds) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setProjectEndTimeStamps");
 
         check(kotlinDomainFactory.getRemoteProjectFactory() != null);
@@ -1731,11 +1721,11 @@ public class DomainFactory {
         Stream.of(remoteProjects)
                 .forEach(remoteProject -> remoteProject.setEndExactTimeStamp(now));
 
-        kotlinDomainFactory.updateNotifications(context, now);
+        kotlinDomainFactory.updateNotifications(now);
 
-        kotlinDomainFactory.save(context, dataId, source);
+        kotlinDomainFactory.save(dataId, source);
 
-        kotlinDomainFactory.notifyCloud(context, remoteProjects);
+        kotlinDomainFactory.notifyCloud(remoteProjects);
     }
 
     // internal

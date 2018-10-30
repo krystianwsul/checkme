@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.content.Context
-
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -45,7 +43,7 @@ abstract class Schedule(protected val kotlinDomainFactory: KotlinDomainFactory) 
 
     abstract fun isVisible(task: Task, now: ExactTimeStamp): Boolean
 
-    abstract fun getScheduleText(context: Context): String
+    abstract fun getScheduleText(): String
 
     abstract fun getNextAlarm(now: ExactTimeStamp): TimeStamp?
 

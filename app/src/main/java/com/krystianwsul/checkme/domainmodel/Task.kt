@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.content.Context
 import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.RemoteProject
@@ -43,7 +42,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
-    fun getScheduleText(context: Context, exactTimeStamp: ExactTimeStamp): String? {
+    fun getScheduleText(exactTimeStamp: ExactTimeStamp): String? {
         check(current(exactTimeStamp))
 
         val currentSchedules = getCurrentSchedules(exactTimeStamp)
@@ -54,7 +53,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
             check(currentSchedules.all { it.current(exactTimeStamp) })
 
-            return currentSchedules.joinToString(", ") { it.getScheduleText(context) }
+            return currentSchedules.joinToString(", ") { it.getScheduleText() }
         } else {
             check(currentSchedules.isEmpty())
             return null
@@ -263,5 +262,5 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
     abstract fun belongsToRemoteProject(): Boolean
 
-    abstract fun updateProject(context: Context, now: ExactTimeStamp, projectId: String?): Task
+    abstract fun updateProject(now: ExactTimeStamp, projectId: String?): Task
 }

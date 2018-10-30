@@ -123,7 +123,7 @@ class EditInstanceActivity : AbstractActivity() {
 
                 editInstanceViewModel.stop()
 
-                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceAddHourActivity(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceKey)
+                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceAddHourActivity(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceKey)
 
                 finish()
             }
@@ -134,7 +134,7 @@ class EditInstanceActivity : AbstractActivity() {
                 if (isValidDateTime) {
                     editInstanceViewModel.stop()
 
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDateTime(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceKey, mDate!!, mTimePairPersist!!.timePair)
+                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDateTime(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceKey, mDate!!, mTimePairPersist!!.timePair)
                     finish()
                 }
             }

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import android.annotation.SuppressLint
-import android.content.Context
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.persistencemodel.*
 import com.krystianwsul.checkme.utils.*
@@ -138,9 +137,7 @@ class LocalFactory {
         return MonthlyWeekSchedule(kotlinDomainFactory, LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord))
     }
 
-    fun save(context: Context, source: SaveService.Source) {
-        persistenceManager.save(context, source)
-    }
+    fun save(source: SaveService.Source) = persistenceManager.save(source)
 
     fun getInstanceShownRecord(projectId: String, taskId: String, scheduleYear: Int, scheduleMonth: Int, scheduleDay: Int, scheduleCustomTimeId: String?, scheduleHour: Int?, scheduleMinute: Int?): InstanceShownRecord? {
         val matches: List<InstanceShownRecord>

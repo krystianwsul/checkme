@@ -126,7 +126,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     if (!it.exists)
                         showInstanceViewModel.stop()
 
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskEndTimeStamp(this, dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskEndTimeStamp(dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
                     if (!it.exists)
                         finish()
@@ -186,7 +186,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                 KotlinDomainFactory.getKotlinDomainFactory().let {
                     val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
-                    it.domainFactory.setInstanceNotified(this, data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
+                    it.domainFactory.setInstanceNotified(data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
                 }
             }
 
@@ -202,7 +202,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     }
 
     private fun setDone(done: Boolean) {
-        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDone(this, dataId, SaveService.Source.GUI, instanceKey, done)
+        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDone(dataId, SaveService.Source.GUI, instanceKey, done)
         instanceData!!.done = done
 
         invalidateOptionsMenu()

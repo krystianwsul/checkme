@@ -1,12 +1,12 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.content.Context
 import android.util.Log
 import com.android.volley.NoConnectionError
 import com.android.volley.Request
 import com.android.volley.TimeoutError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.RemoteProject
@@ -30,7 +30,7 @@ object BackendNotifier {
         return PREFIX + parameters.joinToString("&")
     }
 
-    fun notify(context: Context, remoteProjects: Set<RemoteProject>, userInfo: UserInfo, userKeys: Collection<String>) {
+    fun notify(remoteProjects: Set<RemoteProject>, userInfo: UserInfo, userKeys: Collection<String>) {
         val root = DatabaseWrapper.root
 
         val production = when (root) {
@@ -44,13 +44,13 @@ object BackendNotifier {
         val url = getUrl(projectIds, production, userKeys, userInfo.token)
         check(url.isNotEmpty())
 
-        run(context, url)
+        run(url)
     }
 
-    private fun run(context: Context, url: String) {
+    private fun run(url: String) {
         check(url.isNotEmpty())
 
-        val queue = Volley.newRequestQueue(context.applicationContext)
+        val queue = Volley.newRequestQueue(MyApplication.instance)
 
         val stringRequest = StringRequest(
                 Request.Method.GET, url,

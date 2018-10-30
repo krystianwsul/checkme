@@ -91,7 +91,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         selected = treeViewAdapter!!.selectedNodes
                     } while (selected.isNotEmpty())
 
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskEndTimeStamps(activity!!, dataId!!, SaveService.Source.GUI, taskKeys)
+                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }

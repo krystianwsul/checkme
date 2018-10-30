@@ -50,8 +50,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
 
         actionBar.title = null
 
-        val showGroupFab = findViewById<FloatingActionButton>(R.id.show_group_fab)
-        check(showGroupFab != null)
+        val showGroupFab = findViewById<FloatingActionButton>(R.id.show_group_fab)!!
 
         check(intent.hasExtra(TIME_KEY))
 
@@ -66,7 +65,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
                     .commit()
         }
 
-        groupListFragment.setFab(showGroupFab!!)
+        groupListFragment.setFab(showGroupFab)
 
         showGroupViewModel = getViewModel<ShowGroupViewModel>().apply {
             start(timeStamp)

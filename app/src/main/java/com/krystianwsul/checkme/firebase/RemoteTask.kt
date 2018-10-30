@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import android.content.Context
 import android.text.TextUtils
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.*
@@ -14,7 +13,6 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-
 import java.util.*
 
 class RemoteTask(
@@ -371,7 +369,7 @@ class RemoteTask(
 
     override fun belongsToRemoteProject() = true
 
-    override fun updateProject(context: Context, now: ExactTimeStamp, projectId: String?): RemoteTask {
+    override fun updateProject(now: ExactTimeStamp, projectId: String?): RemoteTask {
         check(TextUtils.isEmpty(projectId))
 
         return this

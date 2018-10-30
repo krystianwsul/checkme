@@ -32,9 +32,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 val userInfo = UserInfo(firebaseUser)
 
                 KotlinDomainFactory.getKotlinDomainFactory().domainFactory.let {
-                    it.setUserInfo(this, SaveService.Source.SERVICE, userInfo)
+                    it.setUserInfo(SaveService.Source.SERVICE, userInfo)
 
-                    it.setFirebaseTickListener(this, SaveService.Source.SERVICE, TickData(false, "MyFirebaseMessagingService", this, listOf()))
+                    it.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(false, "MyFirebaseMessagingService", listOf()))
                 }
             }
         } else {

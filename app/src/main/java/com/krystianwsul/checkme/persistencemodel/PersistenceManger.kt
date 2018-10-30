@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.persistencemodel
 
 import android.annotation.SuppressLint
-import android.content.Context
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
@@ -347,9 +346,7 @@ class PersistenceManger(
         }
     }
 
-    fun save(context: Context, source: SaveService.Source) {
-        SaveService.Factory.instance.startService(context, this, source)
-    }
+    fun save(source: SaveService.Source) = SaveService.Factory.instance.startService(this, source)
 
     fun createInstanceShownRecord(remoteTaskId: String, scheduleDate: Date, remoteCustomTimeId: String?, hour: Int?, minute: Int?, projectId: String): InstanceShownRecord {
         check(remoteTaskId.isNotEmpty())

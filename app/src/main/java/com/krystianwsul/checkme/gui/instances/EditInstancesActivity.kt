@@ -128,7 +128,7 @@ class EditInstancesActivity : AbstractActivity() {
 
                 editInstancesViewModel.stop()
 
-                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesAddHourActivity(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
+                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesAddHourActivity(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
 
                 finish()
             }
@@ -137,7 +137,7 @@ class EditInstancesActivity : AbstractActivity() {
                 checkNotNull(mData)
 
                 if (isValidDateTime) {
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesDateTime(this, mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
+                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesDateTime(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
 
                     finish()
                 }

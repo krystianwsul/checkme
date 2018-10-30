@@ -1,12 +1,11 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.content.Context
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-
 import java.util.*
 
 class MonthlyWeekSchedule(
@@ -53,7 +52,8 @@ class MonthlyWeekSchedule(
 
     override val scheduleType get() = ScheduleType.MONTHLY_WEEK
 
-    override fun getScheduleText(context: Context): String {
+    override fun getScheduleText(): String {
+        val context = MyApplication.context
         val day = monthlyWeekScheduleBridge.dayOfMonth.toString() + " " + dayOfWeek + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (monthlyWeekScheduleBridge.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day: $time"

@@ -9,6 +9,7 @@ import com.annimon.stream.Collectors
 import com.annimon.stream.Stream
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
@@ -100,14 +101,13 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     val customTimeCount get() = customTimes.size
 
-    // todo eliminate context
-    fun save(context: Context, dataId: Int, source: SaveService.Source) = save(context, listOf(dataId), source)
+    fun save(dataId: Int, source: SaveService.Source) = save(listOf(dataId), source)
 
-    fun save(context: Context, dataIds: List<Int>, source: SaveService.Source) {
+    fun save(dataIds: List<Int>, source: SaveService.Source) {
         if (skipSave)
             return
 
-        localFactory.save(context, source)
+        localFactory.save(source)
         remoteProjectFactory?.save()
 
         ObserverHolder.notifyDomainObservers(dataIds)
@@ -322,28 +322,28 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 .toMutableMap()
     }
 
-    private fun getChildTaskDatas(now: ExactTimeStamp, parentTask: Task, context: Context, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> =
+    private fun getTaskListChildTaskDatas(now: ExactTimeStamp, parentTask: Task, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> =
             parentTask.getChildTaskHierarchies(now)
                     .asSequence()
                     .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
                     .map {
                         val childTask = it.childTask
                         val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.childTaskKey)
-                        val parentTreeData = CreateTaskViewModel.ParentTreeData(childTask.name, getChildTaskDatas(now, childTask, context, excludedTaskKeys), CreateTaskViewModel.ParentKey.TaskParentKey(childTask.taskKey), childTask.getScheduleText(context, now), childTask.note, CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp))
+                        val parentTreeData = CreateTaskViewModel.ParentTreeData(childTask.name, getTaskListChildTaskDatas(now, childTask, excludedTaskKeys), CreateTaskViewModel.ParentKey.TaskParentKey(childTask.taskKey), childTask.getScheduleText(now), childTask.note, CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp))
 
                         taskParentKey to parentTreeData
                     }
                     .toList()
                     .toMap()
 
-    fun getParentTreeDatas(context: Context, now: ExactTimeStamp, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
+    fun getParentTreeDatas(now: ExactTimeStamp, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         val parentTreeDatas = mutableMapOf<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>()
 
         parentTreeDatas.putAll(localFactory.tasks
                 .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
-                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getChildTaskDatas(now, it, context, excludedTaskKeys), taskParentKey, it.getScheduleText(context, now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
+                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
 
                     taskParentKey to parentTreeData
                 }
@@ -357,7 +357,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                         val projectParentKey = CreateTaskViewModel.ParentKey.ProjectParentKey(it.id)
 
                         val users = it.users.joinToString(", ") { it.name }
-                        val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getProjectTaskTreeDatas(context, now, it, excludedTaskKeys), projectParentKey, users, null, CreateTaskViewModel.SortKey.ProjectSortKey(it.id))
+                        val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getProjectTaskTreeDatas(now, it, excludedTaskKeys), projectParentKey, users, null, CreateTaskViewModel.SortKey.ProjectSortKey(it.id))
 
                         projectParentKey to parentTreeData
                     }
@@ -367,19 +367,19 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return parentTreeDatas
     }
 
-    fun getProjectTaskTreeDatas(context: Context, now: ExactTimeStamp, remoteProject: RemoteProject, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
+    fun getProjectTaskTreeDatas(now: ExactTimeStamp, remoteProject: RemoteProject, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         return remoteProject.tasks
                 .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
-                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getChildTaskDatas(now, it, context, excludedTaskKeys), taskParentKey, it.getScheduleText(context, now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
+                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
 
                     taskParentKey to parentTreeData
                 }
                 .toMap()
     }
 
-    fun convertLocalToRemote(context: Context, now: ExactTimeStamp, startingLocalTask: LocalTask, projectId: String): RemoteTask {
+    fun convertLocalToRemote(now: ExactTimeStamp, startingLocalTask: LocalTask, projectId: String): RemoteTask {
         check(!TextUtils.isEmpty(projectId))
 
         checkNotNull(remoteProjectFactory)
@@ -388,7 +388,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         val localToRemoteConversion = LocalToRemoteConversion()
         localFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask)
 
-        updateNotifications(context, true, now, localToRemoteConversion.localTasks
+        updateNotifications(true, now, localToRemoteConversion.localTasks
                 .values
                 .map { it.first.taskKey })
 
@@ -516,14 +516,14 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 .toList()
     }
 
-    fun getChildTaskDatas(parentTask: Task, now: ExactTimeStamp, context: Context): List<TaskListFragment.ChildTaskData> {
+    fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(now)
                 .asSequence()
                 .sortedBy { it.ordinal }
                 .map {
                     val childTask = it.childTask
 
-                    TaskListFragment.ChildTaskData(childTask.name, childTask.getScheduleText(context, now), getChildTaskDatas(childTask, now, context), childTask.note, childTask.startExactTimeStamp, childTask.taskKey, HierarchyData(it.taskHierarchyKey, it.ordinal))
+                    TaskListFragment.ChildTaskData(childTask.name, childTask.getScheduleText(now), getTaskListChildTaskDatas(childTask, now), childTask.note, childTask.startExactTimeStamp, childTask.taskKey, HierarchyData(it.taskHierarchyKey, it.ordinal))
                 }
                 .toList()
     }
@@ -534,16 +534,16 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 remoteProjectFactory?.let { addAll(it.existingInstances) }
             }
 
-    fun getChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now)
+    fun getGroupListChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now)
             .map {
                 val childTask = it.childTask
 
-                GroupListFragment.TaskData(childTask.taskKey, childTask.name, getChildTaskDatas(childTask, now), childTask.startExactTimeStamp, childTask.note)
+                GroupListFragment.TaskData(childTask.taskKey, childTask.name, getGroupListChildTaskDatas(childTask, now), childTask.startExactTimeStamp, childTask.note)
             }
 
-    fun getMainData(now: ExactTimeStamp, context: Context): TaskListFragment.TaskData {
+    fun getMainData(now: ExactTimeStamp): TaskListFragment.TaskData {
         val childTaskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) }
-                .map { TaskListFragment.ChildTaskData(it.name, it.getScheduleText(context, now), getChildTaskDatas(it, now, context), it.note, it.startExactTimeStamp, it.taskKey, null) }
+                .map { TaskListFragment.ChildTaskData(it.name, it.getScheduleText(now), getTaskListChildTaskDatas(it, now), it.note, it.startExactTimeStamp, it.taskKey, null) }
                 .collect(Collectors.toList())
                 .toMutableList()
                 .apply { sortDescending() }
@@ -551,16 +551,16 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return TaskListFragment.TaskData(childTaskDatas, null)
     }
 
-    fun setInstanceDone(context: Context, now: ExactTimeStamp, dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): Instance {
+    fun setInstanceDone(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): Instance {
         val instance = getInstance(instanceKey)
 
         instance.setDone(done, now)
 
-        updateNotifications(context, now)
+        updateNotifications(now)
 
-        save(context, dataId, source)
+        save(dataId, source)
 
-        notifyCloud(context, instance.remoteNullableProject)
+        notifyCloud(instance.remoteNullableProject)
 
         return instance
     }
@@ -679,25 +679,25 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
     }
 
-    fun notifyCloud(context: Context, remoteProject: RemoteProject?) { // todo check all functions for possible overloads
+    fun notifyCloud(remoteProject: RemoteProject?) { // todo check all functions for possible overloads
         val remoteProjects = setOf(remoteProject)
                 .filterNotNull()
                 .toSet()
 
-        notifyCloud(context, remoteProjects)
+        notifyCloud(remoteProjects)
     }
 
-    fun notifyCloud(context: Context, remoteProjects: Set<RemoteProject>) {
+    fun notifyCloud(remoteProjects: Set<RemoteProject>) {
         if (!remoteProjects.isEmpty()) {
             checkNotNull(userInfo)
 
-            BackendNotifier.notify(context, remoteProjects, userInfo!!, listOf())
+            BackendNotifier.notify(remoteProjects, userInfo!!, listOf())
         }
     }
 
-    fun notifyCloud(context: Context, remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(context, setOf(remoteProject), userInfo!!, userKeys)
+    fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(setOf(remoteProject), userInfo!!, userKeys)
 
-    fun updateNotifications(context: Context, now: ExactTimeStamp) = updateNotifications(context, true, now, mutableListOf())
+    fun updateNotifications(now: ExactTimeStamp) = updateNotifications(true, now, mutableListOf())
 
     private val taskKeys
         get() = localFactory.taskIds
@@ -705,7 +705,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 .toMutableSet()
                 .apply { remoteProjectFactory?.let { addAll(it.taskKeys) } }
 
-    fun updateNotifications(context: Context, silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>) {
+    fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>) {
         val rootInstances = getRootInstances(null, now.plusOne(), now) // 24 hack
 
         val notificationInstances = rootInstances.filter { it.done == null && !it.notified && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !removedTaskKeys.contains(it.taskKey) }.associateBy { it.instanceKey }
@@ -839,7 +839,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             updateInstances.forEach { updateInstance(it, now) }
         }
 
-        val sharedPreferences = context.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)!!
+        val sharedPreferences = MyApplication.context.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)!!
 
         val tickLog = sharedPreferences.getString(TickJobIntentService.TICK_LOG, "")
         val tickLogArr = Arrays.asList(*TextUtils.split(tickLog, "\n"))

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.local
 
-import android.content.Context
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.firebase.RemoteProject
@@ -10,7 +9,6 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-
 import java.util.*
 
 class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord: TaskRecord) : Task(kotlinDomainFactory) {
@@ -110,11 +108,11 @@ class LocalTask(kotlinDomainFactory: KotlinDomainFactory, private val taskRecord
 
     override fun belongsToRemoteProject() = false
 
-    override fun updateProject(context: Context, now: ExactTimeStamp, projectId: String?): Task {
+    override fun updateProject(now: ExactTimeStamp, projectId: String?): Task {
         return if (TextUtils.isEmpty(projectId)) {
             this
         } else {
-            kotlinDomainFactory.convertLocalToRemote(context, now, this, projectId!!)
+            kotlinDomainFactory.convertLocalToRemote(now, this, projectId!!)
         }
     }
 }

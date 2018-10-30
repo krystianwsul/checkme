@@ -24,9 +24,9 @@ class TickJobIntentService : JobIntentService() {
         private const val SILENT_KEY = "silent"
         private const val SOURCE_KEY = "source"
 
-        val TICK_PREFERENCES = "tickPreferences"
-        val LAST_TICK_KEY = "lastTick"
-        val TICK_LOG = "tickLog"
+        const val TICK_PREFERENCES = "tickPreferences"
+        const val LAST_TICK_KEY = "lastTick"
+        const val TICK_LOG = "tickLog"
 
         // DON'T HOLD STATE IN STATIC VARIABLES
 
@@ -67,20 +67,20 @@ class TickJobIntentService : JobIntentService() {
 
             if (domainFactory.isConnected) {
                 return if (domainFactory.isConnectedAndSaved) {
-                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, TickData(silent, sourceName, MyApplication.instance, listeners))
+                    domainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
                     true
                 } else {
-                    domainFactory.updateNotificationsTick(MyApplication.instance, SaveService.Source.SERVICE, silent, sourceName)
+                    domainFactory.updateNotificationsTick(SaveService.Source.SERVICE, silent, sourceName)
                     false
                 }
             } else {
-                domainFactory.updateNotificationsTick(MyApplication.instance, SaveService.Source.SERVICE, silent, sourceName)
+                domainFactory.updateNotificationsTick(SaveService.Source.SERVICE, silent, sourceName)
 
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 return if (firebaseUser != null) {
-                    domainFactory.setUserInfo(MyApplication.instance, SaveService.Source.SERVICE, UserInfo(firebaseUser))
+                    domainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
 
-                    domainFactory.setFirebaseTickListener(MyApplication.instance, SaveService.Source.SERVICE, TickData(silent, sourceName, MyApplication.instance, listeners))
+                    domainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
 
                     true
                 } else {
@@ -90,7 +90,5 @@ class TickJobIntentService : JobIntentService() {
         }
     }
 
-    override fun onHandleWork(intent: Intent) {
-        tick(intent)
-    }
+    override fun onHandleWork(intent: Intent) = tick(intent)
 }

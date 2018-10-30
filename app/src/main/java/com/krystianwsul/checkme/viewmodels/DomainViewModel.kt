@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.viewmodels
 import android.arch.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
@@ -51,7 +50,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                 if (firebaseUser != null && !domainFactory.isConnected) {
                     val userInfo = UserInfo(firebaseUser)
 
-                    domainFactory.setUserInfo(MyApplication.instance, SaveService.Source.GUI, userInfo)
+                    domainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
                     domainFactory.addFirebaseListener(firebaseListener)
                 }
             }
@@ -63,7 +62,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
                     val userInfo = UserInfo(firebaseUser)
 
-                    domainFactory.setUserInfo(MyApplication.instance, SaveService.Source.GUI, userInfo)
+                    domainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
                     domainFactory.addFirebaseListener(firebaseListener)
                 }
             }
@@ -74,7 +73,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                     FirebaseAuth.getInstance().currentUser?.let {
                         val userInfo = UserInfo(it)
 
-                        domainFactory.setUserInfo(MyApplication.instance, SaveService.Source.GUI, userInfo)
+                        domainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
                         RemoteFriendFactory.addFriendListener { firebaseListener(domainFactory) }
                     }
                 }

@@ -268,7 +268,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             val selectedCustomTimeIds = selectedCustomTimeWrappers.map { it.customTimeData.id }
 
-            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setCustomTimeCurrent(showCustomTimesFragment.activity!!, dataId, SaveService.Source.GUI, selectedCustomTimeIds)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setCustomTimeCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds)
         }
 
         private inner class CustomTimeHolder(val showCustomTimeRow: View, val timesRowName: TextView) : RecyclerView.ViewHolder(showCustomTimeRow) {

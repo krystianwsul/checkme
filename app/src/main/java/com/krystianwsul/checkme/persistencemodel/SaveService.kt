@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.persistencemodel
 
-import android.content.Context
 import android.util.Log
 import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import io.reactivex.Observable
@@ -8,7 +7,7 @@ import io.reactivex.schedulers.Schedulers
 
 object SaveService {
 
-    private fun save(context: Context, insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>, source: Source) {
+    private fun save(insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>, source: Source) {
         Log.e("asdf", "SaveService.save")
 
         try {
@@ -31,7 +30,7 @@ object SaveService {
                 sqLiteDatabase.endTransaction()
             }
         } catch (e: Exception) {
-            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.reset(context, source)
+            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.reset(source)
             throw e
         }
     }
@@ -43,11 +42,11 @@ object SaveService {
             var instance: Factory = FactoryImpl()
         }
 
-        abstract fun startService(context: Context, persistenceManger: PersistenceManger, source: Source)
+        abstract fun startService(persistenceManger: PersistenceManger, source: Source)
 
         private class FactoryImpl : Factory() {
 
-            override fun startService(context: Context, persistenceManger: PersistenceManger, source: Source) {
+            override fun startService(persistenceManger: PersistenceManger, source: Source) {
                 val collections = listOf(
                         persistenceManger.customTimeRecords,
                         persistenceManger.taskRecords,
@@ -80,10 +79,10 @@ object SaveService {
                         .toMutableList()
 
                 when (source) {
-                    Source.GUI -> Observable.fromCallable { save(context, insertCommands, updateCommands, deleteCommands, source) }
+                    Source.GUI -> Observable.fromCallable { save(insertCommands, updateCommands, deleteCommands, source) }
                             .subscribeOn(Schedulers.io())
                             .subscribe()
-                    Source.SERVICE -> save(context, insertCommands, updateCommands, deleteCommands, source)
+                    Source.SERVICE -> save(insertCommands, updateCommands, deleteCommands, source)
                 }
             }
 

@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import android.os.Parcelable
 import android.text.TextUtils
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
@@ -30,7 +29,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         internalStart(firebaseLevel)
     }
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(taskKey, MyApplication.instance, joinTaskKeys)
+    override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(taskKey, joinTaskKeys)
 
     sealed class ScheduleData {
 

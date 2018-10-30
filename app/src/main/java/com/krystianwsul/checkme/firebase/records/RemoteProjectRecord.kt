@@ -158,8 +158,6 @@ class RemoteProjectRecord : RemoteRecord {
                 values[key] = createObject
             }
             else -> {
-                check(update != null)
-
                 if (!update!!.isEmpty()) {
                     Log.e("asdf", "RemoteProjectRecord.getValues updating " + this)
 

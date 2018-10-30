@@ -89,6 +89,20 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         stop = ExactTimeStamp.now
     }
 
+    // misc
+
+    val isHoldingWakeLock get() = tickData?.wakelock?.isHeld == true
+
+    val taskCount get() = localFactory.taskCount + (remoteProjectFactory?.taskCount ?: 0)
+
+    val instanceCount
+        get() = localFactory.instanceCount + (remoteProjectFactory?.instanceCount ?: 0)
+
+    val customTimeCount get() = customTimes.size
+
+    // todo eliminate context
+    fun save(context: Context, dataId: Int, source: SaveService.Source) = save(context, listOf(dataId), source)
+
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
@@ -455,7 +469,8 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun getCustomTimes() = localFactory.localCustomTimes.toMutableList<CustomTime>().apply {
+    private val customTimes
+        get() = localFactory.localCustomTimes.toMutableList<CustomTime>().apply {
         remoteProjectFactory?.let { addAll(it.remoteCustomTimes) }
     }
 
@@ -533,7 +548,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
         updateNotifications(context, now)
 
-        domainFactory.save(context, dataId, source)
+        save(context, dataId, source)
 
         notifyCloud(context, instance.remoteNullableProject)
 
@@ -654,7 +669,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
     }
 
-    fun notifyCloud(context: Context, remoteProject: RemoteProject?) {
+    fun notifyCloud(context: Context, remoteProject: RemoteProject?) { // todo check all functions for possible overloads
         val remoteProjects = setOf(remoteProject)
                 .filterNotNull()
                 .toSet()
@@ -989,4 +1004,16 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String) = localFactory.getLocalCustomTime(remoteProjectId, remoteCustomTimeId)?.customTimeKey
             ?: CustomTimeKey(remoteProjectId, remoteCustomTimeId)
+
+    fun save(context: Context, dataIds: List<Int>, source: SaveService.Source) {
+        if (skipSave)
+            return
+
+        localFactory.save(context, source)
+
+        if (remoteProjectFactory != null)
+            remoteProjectFactory!!.save()
+
+        ObserverHolder.notifyDomainObservers(dataIds)
+    }
 }

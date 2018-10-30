@@ -36,49 +36,46 @@ class DebugFragment : AbstractFragment() {
         debugTick.setOnClickListener { TickJobIntentService.startServiceDebug(activity!!, "DebugFragment: TickService.startServiceDebug") }
 
         debugLoad.setOnClickListener {
-            val stringBuilder = StringBuilder()
+            debugData.text = StringBuilder().apply {
+                val sharedPreferences = activity!!.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)
+                val lastTick = sharedPreferences.getLong(TickJobIntentService.LAST_TICK_KEY, -1)
+                val tickLog = sharedPreferences.getString(TickJobIntentService.TICK_LOG, "")
 
-            val sharedPreferences = activity!!.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)
-            val lastTick = sharedPreferences.getLong(TickJobIntentService.LAST_TICK_KEY, -1)
-            val tickLog = sharedPreferences.getString(TickJobIntentService.TICK_LOG, "")
+                val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
 
-            val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
+                val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
 
-            stringBuilder.append("last beeping tick: ")
-            stringBuilder.append(lastTickExactTimeStamp.toString())
-            stringBuilder.append("\ntick log:\n")
-            stringBuilder.append(tickLog)
+                append("last beeping tick: ")
+                append(lastTickExactTimeStamp.toString())
+                append("\ntick log:\n")
+                append(tickLog)
 
-            val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
-            val domainFactory = kotlinDomainFactory.domainFactory
+                append("\ndata load time: ")
+                append(kotlinDomainFactory.readMillis + kotlinDomainFactory.instantiateMillis)
+                append("ms (")
+                append(kotlinDomainFactory.readMillis)
+                append(" + ")
+                append(kotlinDomainFactory.instantiateMillis)
+                append(")")
 
-            stringBuilder.append("\ndata load time: ")
-            stringBuilder.append(kotlinDomainFactory.readMillis + kotlinDomainFactory.instantiateMillis)
-            stringBuilder.append("ms (")
-            stringBuilder.append(kotlinDomainFactory.readMillis)
-            stringBuilder.append(" + ")
-            stringBuilder.append(kotlinDomainFactory.instantiateMillis)
-            stringBuilder.append(")")
+                append("\ntasks: ")
+                append(kotlinDomainFactory.taskCount)
+                append(", instances: ")
+                append(kotlinDomainFactory.instanceCount)
+                append(", custom times: ")
+                append(kotlinDomainFactory.customTimeCount)
 
-            stringBuilder.append("\ntasks: ")
-            stringBuilder.append(domainFactory.taskCount)
-            stringBuilder.append(", instances: ")
-            stringBuilder.append(domainFactory.instanceCount)
-            stringBuilder.append(", custom times: ")
-            stringBuilder.append(domainFactory.customTimeCount)
+                val t1 = ExactTimeStamp.now
+                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.getGroupListData(activity!!, ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
+                val t2 = ExactTimeStamp.now
 
-            val t1 = ExactTimeStamp.now
-            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.getGroupListData(activity!!, ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
-            val t2 = ExactTimeStamp.now
+                append("\ntoday: ")
+                append(t2.long - t1.long)
+                append(" ms")
 
-            stringBuilder.append("\ntoday: ")
-            stringBuilder.append(t2.long - t1.long)
-            stringBuilder.append(" ms")
-
-            stringBuilder.append("\ncrashlytics enabled: ")
-            stringBuilder.append(MyCrashlytics.enabled)
-
-            debugData.text = stringBuilder
+                append("\ncrashlytics enabled: ")
+                append(MyCrashlytics.enabled)
+            }
         }
 
         debugDiffButton.setOnClickListener { debugDiffText.text = DataDiff.diff }

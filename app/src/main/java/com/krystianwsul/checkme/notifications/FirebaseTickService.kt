@@ -15,7 +15,7 @@ class FirebaseTickService : JobService() {
     }
 
     override fun onStopJob(job: JobParameters): Boolean {
-        if (!KotlinDomainFactory.getKotlinDomainFactory().domainFactory.isHoldingWakeLock)
+        if (!KotlinDomainFactory.getKotlinDomainFactory().isHoldingWakeLock)
             return false
 
         return running

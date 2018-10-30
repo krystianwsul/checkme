@@ -300,14 +300,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             override fun compareTo(other: ModelNode): Int {
                 check(other is ProjectNode)
 
-                val projectNode = other as ProjectNode
-
-                return projectData.id.compareTo(projectNode.projectData.id)
+                return projectData.id.compareTo(other.projectData.id)
             }
 
-            fun remove() {
-                projectListAdapter.remove(this)
-            }
+            fun remove() = projectListAdapter.remove(this)
         }
     }
 

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.text.TextUtils
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,7 +39,7 @@ class BackendNotifierTest {
     @Test
     fun testOneProjectDevelopment() {
         val projects = TreeSet(listOf("-KXvJTar2cCxxrGCtN_w"))
-        val correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&senderToken=asdf"
+        val correctUrl = "https://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&senderToken=asdf"
 
         val url = BackendNotifier.getUrl(projects, false, ArrayList(), "asdf")
 
@@ -49,7 +49,7 @@ class BackendNotifierTest {
     @Test
     fun testOneProjectProduction() {
         val projects = TreeSet(listOf("-KXvJTar2cCxxrGCtN_w"))
-        val correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&production=1&senderToken=asdf"
+        val correctUrl = "https://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&production=1&senderToken=asdf"
 
         val url = BackendNotifier.getUrl(projects, true, ArrayList(), "asdf")
 
@@ -59,7 +59,7 @@ class BackendNotifierTest {
     @Test
     fun testTwoProjectsDevelopment() {
         val projects = TreeSet(Arrays.asList("-KXvJTar2cCxxrGCtN_w", "asdf"))
-        val correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&senderToken=asdf"
+        val correctUrl = "https://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&senderToken=asdf"
 
         val url = BackendNotifier.getUrl(projects, false, ArrayList(), "asdf")
 
@@ -69,7 +69,7 @@ class BackendNotifierTest {
     @Test
     fun testTwoProjectsProduction() {
         val projects = TreeSet(Arrays.asList("-KXvJTar2cCxxrGCtN_w", "asdf"))
-        val correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&production=1&senderToken=asdf"
+        val correctUrl = "https://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&production=1&senderToken=asdf"
 
         val url = BackendNotifier.getUrl(projects, true, ArrayList(), "asdf")
 
@@ -80,7 +80,7 @@ class BackendNotifierTest {
     fun testTwoProjectsTwoUsersProduction() {
         val projects = TreeSet(Arrays.asList("-KXvJTar2cCxxrGCtN_w", "asdf"))
         val userKeys = TreeSet(Arrays.asList("a", "b"))
-        val correctUrl = "http://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&userKeys=a&userKeys=b&production=1&senderToken=asdf"
+        val correctUrl = "https://check-me-add47.appspot.com/notify?projects=-KXvJTar2cCxxrGCtN_w&projects=asdf&userKeys=a&userKeys=b&production=1&senderToken=asdf"
 
         val url = BackendNotifier.getUrl(projects, true, userKeys, "asdf")
 

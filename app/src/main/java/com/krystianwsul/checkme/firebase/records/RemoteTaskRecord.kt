@@ -2,14 +2,12 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import android.util.Log
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.utils.ScheduleKey
-
 import java.util.*
 
 class RemoteTaskRecord : RemoteRecord {
@@ -20,7 +18,6 @@ class RemoteTaskRecord : RemoteRecord {
     }
 
     private val kotlinDomainFactory: KotlinDomainFactory
-    private val domainFactory: DomainFactory
 
     val id: String
 
@@ -109,7 +106,6 @@ class RemoteTaskRecord : RemoteRecord {
 
     constructor(kotlinDomainFactory: KotlinDomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : super(false) {
         this.kotlinDomainFactory = kotlinDomainFactory
-        this.domainFactory = kotlinDomainFactory.domainFactory
         this.id = id
         this.remoteProjectRecord = remoteProjectRecord
         this.taskJson = taskJson
@@ -119,7 +115,6 @@ class RemoteTaskRecord : RemoteRecord {
 
     constructor(kotlinDomainFactory: KotlinDomainFactory, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : super(true) {
         this.kotlinDomainFactory = kotlinDomainFactory
-        this.domainFactory = kotlinDomainFactory.domainFactory
         id = DatabaseWrapper.getTaskRecordId(remoteProjectRecord.id)
         this.remoteProjectRecord = remoteProjectRecord
         this.taskJson = taskJson
@@ -131,7 +126,7 @@ class RemoteTaskRecord : RemoteRecord {
         for ((key, instanceJson) in taskJson.instances) {
             check(!TextUtils.isEmpty(key))
 
-            val scheduleKey = RemoteInstanceRecord.stringToScheduleKey(domainFactory, remoteProjectRecord.id, key)
+            val scheduleKey = RemoteInstanceRecord.stringToScheduleKey(kotlinDomainFactory, remoteProjectRecord.id, key)
 
             val remoteInstanceRecord = RemoteInstanceRecord(false, kotlinDomainFactory, this, instanceJson, scheduleKey)
 

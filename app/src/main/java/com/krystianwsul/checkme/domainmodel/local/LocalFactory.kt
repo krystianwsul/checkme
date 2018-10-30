@@ -324,17 +324,17 @@ class LocalFactory {
         return persistenceManager.createInstanceRecord(localTask, scheduleDate, scheduleTimePair, now)
     }
 
-    fun convertLocalToRemoteHelper(localToRemoteConversion: DomainFactory.LocalToRemoteConversion, localTask: LocalTask) {
-        if (localToRemoteConversion.mLocalTasks.containsKey(localTask.id))
+    fun convertLocalToRemoteHelper(localToRemoteConversion: LocalToRemoteConversion, localTask: LocalTask) {
+        if (localToRemoteConversion.localTasks.containsKey(localTask.id))
             return
 
         val taskKey = localTask.taskKey
 
-        localToRemoteConversion.mLocalTasks[localTask.id] = Pair(localTask, ArrayList(existingLocalInstances[taskKey].values))
+        localToRemoteConversion.localTasks[localTask.id] = Pair(localTask, ArrayList(existingLocalInstances[taskKey].values))
 
         val parentLocalTaskHierarchies = localTaskHierarchies.getByChildTaskKey(taskKey)
 
-        localToRemoteConversion.mLocalTaskHierarchies.addAll(parentLocalTaskHierarchies)
+        localToRemoteConversion.localTaskHierarchies.addAll(parentLocalTaskHierarchies)
 
         localTaskHierarchies.getByParentTaskKey(taskKey)
                 .map { it.childTask }

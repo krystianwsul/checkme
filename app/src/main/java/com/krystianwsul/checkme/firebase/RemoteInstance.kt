@@ -129,7 +129,7 @@ class RemoteInstance : Instance {
 
             val customTimeId = remoteInstanceRecord!!.scheduleCustomTimeId
 
-            customTimeId?.let { domainFactory.getCustomTimeKey(remoteProject.id, it) }
+            customTimeId?.let { kotlinDomainFactory.getCustomTimeKey(remoteProject.id, it) }
         } else {
             check(!TextUtils.isEmpty(_taskId))
             checkNotNull(_scheduleDateTime)
@@ -141,7 +141,7 @@ class RemoteInstance : Instance {
                 if (!TextUtils.isEmpty(customTimeKey.remoteCustomTimeId)) {
                     check(!TextUtils.isEmpty(customTimeKey.remoteProjectId))
 
-                    domainFactory.getCustomTimeKey(customTimeKey.remoteProjectId!!, customTimeKey.remoteCustomTimeId!!)
+                    kotlinDomainFactory.getCustomTimeKey(customTimeKey.remoteProjectId!!, customTimeKey.remoteCustomTimeId!!)
                 } else {
                     customTimeKey
                 }

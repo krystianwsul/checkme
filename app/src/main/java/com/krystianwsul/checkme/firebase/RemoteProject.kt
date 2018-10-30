@@ -24,14 +24,9 @@ class RemoteProject(
         uuid: String,
         now: ExactTimeStamp) {
 
-    private val domainFactory = kotlinDomainFactory.domainFactory
-
     private val remoteTasks: MutableMap<String, RemoteTask>
-
     private val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
-
     private val remoteCustomTimes = HashMap<String, RemoteCustomTime>()
-
     private val remoteUsers: MutableMap<String, RemoteProjectUser>
 
     val id by lazy { remoteProjectRecord.id }
@@ -44,9 +39,9 @@ class RemoteProject(
             remoteProjectRecord.name = name
         }
 
-    private val startExactTimeStamp get() = ExactTimeStamp(remoteProjectRecord.startTime)
+    private val startExactTimeStamp by lazy { ExactTimeStamp(remoteProjectRecord.startTime) }
 
-    private fun getEndExactTimeStamp() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
+    private val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
 
     private val remoteFactory get() = kotlinDomainFactory.remoteProjectFactory!!
 
@@ -60,7 +55,7 @@ class RemoteProject(
 
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
-            val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
+            val remoteCustomTime = RemoteCustomTime(kotlinDomainFactory, this, remoteCustomTimeRecord)
 
             check(!TextUtils.isEmpty(remoteCustomTime.customTimeKey.remoteCustomTimeId))
             check(!remoteCustomTimes.containsKey(remoteCustomTime.customTimeKey.remoteCustomTimeId))
@@ -257,7 +252,7 @@ class RemoteProject(
     fun newRemoteCustomTime(customTimeJson: CustomTimeJson): RemoteCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
-        val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
+        val remoteCustomTime = RemoteCustomTime(kotlinDomainFactory, this, remoteCustomTimeRecord)
 
         check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
 
@@ -296,8 +291,7 @@ class RemoteProject(
     }
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {
-        val startExactTimeStamp = startExactTimeStamp
-        val endExactTimeStamp = getEndExactTimeStamp()
+        val endExactTimeStamp = endExactTimeStamp
 
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }

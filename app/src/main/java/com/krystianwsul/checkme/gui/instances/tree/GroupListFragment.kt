@@ -966,7 +966,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             val TaskEditable: Boolean?,
             val TaskDatas: List<TaskData>?,
             val mNote: String?,
-            val instanceDatas: HashMap<InstanceKey, InstanceData>) : InstanceDataParent {
+            val instanceDatas: MutableMap<InstanceKey, InstanceData>) : InstanceDataParent {
 
         override fun remove(instanceKey: InstanceKey) {
             check(instanceDatas.containsKey(instanceKey))

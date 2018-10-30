@@ -2,7 +2,9 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.content.Context
 import android.os.Build
+import android.os.SystemClock
 import android.text.TextUtils
+import android.util.Log
 import com.annimon.stream.Collectors
 import com.annimon.stream.Stream
 import com.google.firebase.database.Query
@@ -17,6 +19,7 @@ import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
+import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
@@ -358,40 +361,40 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         checkNotNull(remoteProjectFactory)
         checkNotNull(userInfo)
 
-        val localToRemoteConversion = DomainFactory.LocalToRemoteConversion()
+        val localToRemoteConversion = LocalToRemoteConversion()
         localFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask)
 
-        updateNotifications(context, true, now, localToRemoteConversion.mLocalTasks
+        updateNotifications(context, true, now, localToRemoteConversion.localTasks
                 .values
                 .map { it.first.taskKey })
 
         val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
 
-        for (pair in localToRemoteConversion.mLocalTasks.values) {
+        for (pair in localToRemoteConversion.localTasks.values) {
             checkNotNull(pair)
 
             val remoteTask = remoteProject.copyLocalTask(pair.first, pair.second, now)
-            localToRemoteConversion.mRemoteTasks[pair.first.id] = remoteTask
+            localToRemoteConversion.remoteTasks[pair.first.id] = remoteTask
         }
 
-        for (localTaskHierarchy in localToRemoteConversion.mLocalTaskHierarchies) {
+        for (localTaskHierarchy in localToRemoteConversion.localTaskHierarchies) {
             checkNotNull(localTaskHierarchy)
 
-            val parentRemoteTask = localToRemoteConversion.mRemoteTasks[localTaskHierarchy.parentTaskId]!!
-            val childRemoteTask = localToRemoteConversion.mRemoteTasks[localTaskHierarchy.childTaskId]!!
+            val parentRemoteTask = localToRemoteConversion.remoteTasks[localTaskHierarchy.parentTaskId]!!
+            val childRemoteTask = localToRemoteConversion.remoteTasks[localTaskHierarchy.childTaskId]!!
 
             val remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, parentRemoteTask.id, childRemoteTask.id)
 
-            localToRemoteConversion.mRemoteTaskHierarchies.add(remoteTaskHierarchy)
+            localToRemoteConversion.remoteTaskHierarchies.add(remoteTaskHierarchy)
         }
 
-        for (pair in localToRemoteConversion.mLocalTasks.values) {
+        for (pair in localToRemoteConversion.localTasks.values) {
             pair.second.forEach { it.delete() }
 
             pair.first.delete()
         }
 
-        return localToRemoteConversion.mRemoteTasks[startingLocalTask.id]!!
+        return localToRemoteConversion.remoteTasks[startingLocalTask.id]!!
     }
 
     fun joinTasks(newParentTask: Task, joinTasks: List<Task>, now: ExactTimeStamp) {
@@ -653,7 +656,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     fun notifyCloud(context: Context, remoteProject: RemoteProject?) {
         val remoteProjects = setOf(remoteProject)
-                .requireNoNulls()
+                .filterNotNull()
                 .toSet()
 
         notifyCloud(context, remoteProjects)
@@ -694,12 +697,11 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
                     val customTimeKey: CustomTimeKey?
                     val hourMinute: HourMinute?
-
                     if (!TextUtils.isEmpty(remoteCustomTimeId)) {
                         check(instanceShownRecord.scheduleHour == null)
                         check(instanceShownRecord.scheduleMinute == null)
 
-                        customTimeKey = domainFactory.getCustomTimeKey(instanceShownRecord.projectId, remoteCustomTimeId!!)
+                        customTimeKey = getCustomTimeKey(instanceShownRecord.projectId, remoteCustomTimeId!!)
                         hourMinute = null
                     } else {
                         checkNotNull(instanceShownRecord.scheduleHour)
@@ -762,7 +764,7 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                     NotificationWrapper.instance.cancelNotification(0)
 
                     for (instance in notificationInstances.values)
-                        domainFactory.notifyInstance(instance, silent, now)
+                        notifyInstance(instance, silent, now)
                 } else { // instances shown
                     for (hideInstanceKey in hideInstanceKeys) {
                         if (allTaskKeys.contains(hideInstanceKey.taskKey)) {
@@ -775,11 +777,11 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                     }
 
                     for (showInstanceKey in showInstanceKeys)
-                        domainFactory.notifyInstance(notificationInstances[showInstanceKey]!!, silent, now)
+                        notifyInstance(notificationInstances[showInstanceKey]!!, silent, now)
 
                     notificationInstances.values
                             .filter { !showInstanceKeys.contains(it.instanceKey) }
-                            .forEach { domainFactory.updateInstance(it, now) }
+                            .forEach { updateInstance(it, now) }
                 }
             }
         } else {
@@ -804,12 +806,12 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
             message += ", s " + showInstanceKeys.size
             for (showInstanceKey in showInstanceKeys)
-                domainFactory.notifyInstance(notificationInstances[showInstanceKey]!!, silent, now)
+                notifyInstance(notificationInstances[showInstanceKey]!!, silent, now)
 
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
             message += ", u " + updateInstances.size
-            updateInstances.forEach { domainFactory.updateInstance(it, now) }
+            updateInstances.forEach { updateInstance(it, now) }
         }
 
         val sharedPreferences = context.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)!!
@@ -845,4 +847,146 @@ class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         editor.putString(TickJobIntentService.TICK_LOG, TextUtils.join("\n", tickLogArrTrimmed))
         editor.apply()
     }
+
+    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {
+        var reallySilent = silent
+        val realtime = SystemClock.elapsedRealtime()
+
+        val optional = lastNotificationBeeps.values.max()
+        if (optional?.let { realtime - it < 5000 } == true) {
+            Log.e("asdf", "skipping notification sound for " + instance.name)
+
+            reallySilent = true
+        }
+
+        NotificationWrapper.instance.notifyInstance(this, instance, reallySilent, now)
+
+        if (!reallySilent)
+            lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
+    }
+
+    private fun updateInstance(instance: Instance, now: ExactTimeStamp) {
+        val instanceKey = instance.instanceKey
+
+        val realtime = SystemClock.elapsedRealtime()
+
+        if (lastNotificationBeeps.containsKey(instanceKey)) {
+            val then = lastNotificationBeeps[instanceKey]!!
+
+            check(realtime > then)
+
+            if (realtime - then < 5000) {
+                Log.e("asdf", "skipping notification update for " + instance.name)
+
+                return
+            }
+        }
+
+        NotificationWrapper.instance.notifyInstance(this, instance, true, now)
+    }
+
+    fun setInstanceNotified(instanceKey: InstanceKey, now: ExactTimeStamp) {
+        if (instanceKey.type === TaskKey.Type.LOCAL) {
+            val instance = getInstance(instanceKey)
+
+            instance.setNotified(now)
+            instance.setNotificationShown(false, now)
+        } else {
+            val taskKey = instanceKey.taskKey
+
+            val projectId = taskKey.remoteProjectId
+            check(!TextUtils.isEmpty(projectId))
+
+            val taskId = taskKey.remoteTaskId
+            check(!TextUtils.isEmpty(taskId))
+
+            val scheduleKey = instanceKey.scheduleKey
+            val scheduleDate = scheduleKey.scheduleDate
+
+            val stream = localFactory.instanceShownRecords
+                    .asSequence()
+                    .filter { it.projectId == projectId && it.taskId == taskId && it.scheduleYear == scheduleDate.year && it.scheduleMonth == scheduleDate.month && it.scheduleDay == scheduleDate.day }
+
+            val matches: Sequence<InstanceShownRecord>
+            if (scheduleKey.scheduleTimePair.customTimeKey != null) {
+                check(scheduleKey.scheduleTimePair.hourMinute == null)
+
+                check(scheduleKey.scheduleTimePair.customTimeKey.type === TaskKey.Type.REMOTE) // remote custom time key hack
+                check(scheduleKey.scheduleTimePair.customTimeKey.localCustomTimeId == null)
+                check(projectId == scheduleKey.scheduleTimePair.customTimeKey.remoteProjectId)
+
+                val customTimeId = scheduleKey.scheduleTimePair.customTimeKey.remoteCustomTimeId
+                check(!TextUtils.isEmpty(customTimeId))
+
+                matches = stream.filter { customTimeId == it.scheduleCustomTimeId }
+            } else {
+                check(scheduleKey.scheduleTimePair.hourMinute != null)
+
+                val hourMinute = scheduleKey.scheduleTimePair.hourMinute
+
+                matches = stream.filter { hourMinute.hour == it.scheduleHour && hourMinute.minute == it.scheduleMinute }
+            }
+
+            val instanceShownRecord = matches.single()
+
+            instanceShownRecord.notified = true
+            instanceShownRecord.notificationShown = false
+        }
+    }
+
+    fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListFragment.DataWrapper {
+        val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
+        val endTimeStamp = TimeStamp(endCalendar)
+
+        val rootInstances = getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now)
+
+        val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
+
+        val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+
+        val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
+        for (instance in currentInstances) {
+            val task = instance.task
+
+            val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+
+            val children = getChildInstanceDatas(instance, now)
+            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, null, instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
+            children.values.forEach { it.instanceDataParent = instanceData }
+            instanceDatas[instance.instanceKey] = instanceData
+        }
+
+        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, null, null, instanceDatas)
+
+        instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+
+        return dataWrapper
+    }
+
+    fun getGroupListData(instance: Instance, task: Task, now: ExactTimeStamp): GroupListFragment.DataWrapper {
+        val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+
+        val instanceDatas = instance.getChildInstances(now)
+                .map { (childInstance, taskHierarchy) ->
+                    val childTask = childInstance.task
+
+                    val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
+
+                    val children = getChildInstanceDatas(childInstance, now)
+                    val instanceData = GroupListFragment.InstanceData(childInstance.done, childInstance.instanceKey, null, childInstance.name, childInstance.instanceDateTime.timeStamp, childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.instanceDateTime.time.timePair, childTask.note, children, HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal), childInstance.ordinal)
+                    children.values.forEach { it.instanceDataParent = instanceData }
+                    childInstance.instanceKey to instanceData
+                }
+                .toMap()
+                .toMutableMap()
+
+        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, task.note, instanceDatas)
+
+        instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+
+        return dataWrapper
+    }
+
+    fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String) = localFactory.getLocalCustomTime(remoteProjectId, remoteCustomTimeId)?.customTimeKey
+            ?: CustomTimeKey(remoteProjectId, remoteCustomTimeId)
 }

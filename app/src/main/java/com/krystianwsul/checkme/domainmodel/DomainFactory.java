@@ -2,14 +2,12 @@ package com.krystianwsul.checkme.domainmodel;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.annimon.stream.Collectors;
-import com.annimon.stream.Optional;
 import com.annimon.stream.Stream;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -18,9 +16,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyApplication;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
-import com.krystianwsul.checkme.domainmodel.local.LocalInstance;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
-import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
@@ -28,18 +24,15 @@ import com.krystianwsul.checkme.firebase.RemoteProjectFactory;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
 import com.krystianwsul.checkme.firebase.RemoteRootUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
-import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy;
 import com.krystianwsul.checkme.firebase.json.UserWrapper;
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
 import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.ScheduleKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
@@ -597,7 +590,7 @@ public class DomainFactory {
 
         String displayText = new DateTime(date, time).getDisplayText(context);
 
-        return new ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now));
+        return new ShowGroupViewModel.Data(displayText, kotlinDomainFactory.getGroupListData(timeStamp, now));
     }
 
     @NonNull
@@ -698,7 +691,7 @@ public class DomainFactory {
         Instance instance = kotlinDomainFactory.getInstance(instanceKey);
         if (!task.current(now) && !instance.exists()) return new ShowInstanceViewModel.Data(null);
 
-        return new ShowInstanceViewModel.Data(new ShowInstanceViewModel.InstanceData(instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)));
+        return new ShowInstanceViewModel.Data(new ShowInstanceViewModel.InstanceData(instance.getName(), instance.getDisplayText(context, now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), kotlinDomainFactory.getGroupListData(instance, task, now)));
     }
 
     @NonNull
@@ -1155,7 +1148,7 @@ public class DomainFactory {
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
 
         for (InstanceKey instanceKey : instanceKeys)
-            setInstanceNotified(instanceKey, now);
+            kotlinDomainFactory.setInstanceNotified(instanceKey, now);
 
         save(context, 0, source);
     }
@@ -1164,7 +1157,7 @@ public class DomainFactory {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotified");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
 
-        setInstanceNotified(instanceKey, ExactTimeStamp.Companion.getNow());
+        kotlinDomainFactory.setInstanceNotified(instanceKey, ExactTimeStamp.Companion.getNow());
 
         save(context, dataId, source);
     }
@@ -1787,175 +1780,4 @@ public class DomainFactory {
     }
 
     // internal
-
-    void notifyInstance(@NonNull Instance instance, boolean silent, @NonNull ExactTimeStamp now) {
-        long realtime = SystemClock.elapsedRealtime();
-
-        Optional<Long> optional = Stream.of(kotlinDomainFactory.getLastNotificationBeeps().values()).max(Long::compareTo);
-        if (optional.isPresent() && realtime - optional.get() < 5000) {
-            Log.e("asdf", "skipping notification sound for " + instance.getName());
-
-            silent = true;
-        }
-
-        NotificationWrapper.Companion.getInstance().notifyInstance(kotlinDomainFactory, instance, silent, now);
-
-        if (!silent)
-            kotlinDomainFactory.getLastNotificationBeeps().put(instance.getInstanceKey(), SystemClock.elapsedRealtime());
-    }
-
-    void updateInstance(@NonNull Instance instance, @NonNull ExactTimeStamp now) {
-        InstanceKey instanceKey = instance.getInstanceKey();
-
-        long realtime = SystemClock.elapsedRealtime();
-
-        if (kotlinDomainFactory.getLastNotificationBeeps().containsKey(instanceKey)) {
-            long then = kotlinDomainFactory.getLastNotificationBeeps().get(instanceKey);
-
-            check(realtime > then);
-
-            if (realtime - then < 5000) {
-                Log.e("asdf", "skipping notification update for " + instance.getName());
-
-                return;
-            }
-        }
-
-        NotificationWrapper.Companion.getInstance().notifyInstance(kotlinDomainFactory, instance, true, now);
-    }
-
-    private void setInstanceNotified(@NonNull InstanceKey instanceKey, @NonNull ExactTimeStamp now) {
-        if (instanceKey.getType() == TaskKey.Type.LOCAL) {
-            Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-
-            instance.setNotified(now);
-            instance.setNotificationShown(false, now);
-        } else {
-            TaskKey taskKey = instanceKey.getTaskKey();
-
-            String projectId = taskKey.getRemoteProjectId();
-            check(!TextUtils.isEmpty(projectId));
-
-            String taskId = taskKey.getRemoteTaskId();
-            check(!TextUtils.isEmpty(taskId));
-
-            ScheduleKey scheduleKey = instanceKey.getScheduleKey();
-            Date scheduleDate = scheduleKey.getScheduleDate();
-
-            @SuppressWarnings("ConstantConditions") Stream<InstanceShownRecord> stream = Stream.of(kotlinDomainFactory.localFactory.getInstanceShownRecords()).filter(instanceShownRecord -> instanceShownRecord.getProjectId().equals(projectId)).filter(instanceShownRecord -> instanceShownRecord.getTaskId().equals(taskId)).filter(instanceShownRecord -> instanceShownRecord.getScheduleYear() == scheduleDate.getYear()).filter(instanceShownRecord -> instanceShownRecord.getScheduleMonth() == scheduleDate.getMonth()).filter(instanceShownRecord -> instanceShownRecord.getScheduleDay() == scheduleDate.getDay());
-
-            List<InstanceShownRecord> matches;
-            if (scheduleKey.getScheduleTimePair().getCustomTimeKey() != null) {
-                check(scheduleKey.getScheduleTimePair().getHourMinute() == null);
-
-                check(scheduleKey.getScheduleTimePair().getCustomTimeKey().getType() == TaskKey.Type.REMOTE); // remote custom time key hack
-                check(scheduleKey.getScheduleTimePair().getCustomTimeKey().getLocalCustomTimeId() == null);
-                check(projectId.equals(scheduleKey.getScheduleTimePair().getCustomTimeKey().getRemoteProjectId()));
-
-                String customTimeId = scheduleKey.getScheduleTimePair().getCustomTimeKey().getRemoteCustomTimeId();
-                check(!TextUtils.isEmpty(customTimeId));
-
-                matches = stream.filter(instanceShownRecord -> customTimeId.equals(instanceShownRecord.getScheduleCustomTimeId()))
-                        .collect(Collectors.toList());
-            } else {
-                check(scheduleKey.getScheduleTimePair().getHourMinute() != null);
-
-                HourMinute hourMinute = scheduleKey.getScheduleTimePair().getHourMinute();
-
-                matches = stream.filter(instanceShownRecord -> Integer.valueOf(hourMinute.getHour()).equals(instanceShownRecord.getScheduleHour()))
-                        .filter(instanceShownRecord -> Integer.valueOf(hourMinute.getMinute()).equals(instanceShownRecord.getScheduleMinute()))
-                        .collect(Collectors.toList());
-            }
-
-            check(matches.size() == 1);
-
-            InstanceShownRecord instanceShownRecord = matches.get(0);
-            check(instanceShownRecord != null);
-
-            instanceShownRecord.setNotified(true);
-            instanceShownRecord.setNotificationShown(false);
-        }
-    }
-
-    @NonNull
-    private GroupListFragment.DataWrapper getGroupListData(@NonNull TimeStamp timeStamp, @NonNull ExactTimeStamp now) {
-        Calendar endCalendar = timeStamp.getCalendar();
-        endCalendar.add(Calendar.MINUTE, 1);
-        TimeStamp endTimeStamp = new TimeStamp(endCalendar);
-
-        List<Instance> rootInstances = kotlinDomainFactory.getRootInstances(timeStamp.toExactTimeStamp(), endTimeStamp.toExactTimeStamp(), now);
-
-        List<Instance> currentInstances = Stream.of(rootInstances)
-                .filter(instance -> instance.getInstanceDateTime().getTimeStamp().compareTo(timeStamp) == 0)
-                .collect(Collectors.toList());
-
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
-                .collect(Collectors.toList());
-
-        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
-        for (Instance instance : currentInstances) {
-            Task task = instance.getTask();
-
-            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-
-            Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), null, instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
-            Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
-            instanceDatas.put(instance.getInstanceKey(), instanceData);
-        }
-
-        GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, null, null, null, instanceDatas);
-
-        Stream.of(instanceDatas.values()).forEach(instanceData -> instanceData.setInstanceDataParent(dataWrapper));
-
-        return dataWrapper;
-    }
-
-    @NonNull
-    private GroupListFragment.DataWrapper getGroupListData(@NonNull Instance instance, @NonNull Task task, @NonNull ExactTimeStamp now) {
-        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
-
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
-                .collect(Collectors.toList());
-
-        for (kotlin.Pair<Instance, TaskHierarchy> pair : instance.getChildInstances(now)) {
-            Instance childInstance = pair.getFirst();
-            TaskHierarchy taskHierarchy = pair.getSecond();
-            Task childTask = childInstance.getTask();
-
-            Boolean isRootTask = (childTask.current(now) ? childTask.isRootTask(now) : null);
-
-            Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(childInstance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(childInstance.getDone(), childInstance.getInstanceKey(), null, childInstance.getName(), childInstance.getInstanceDateTime().getTimeStamp(), childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.getInstanceDateTime().getTime().getTimePair(), childTask.getNote(), children, new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()), childInstance.getOrdinal());
-            Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
-            instanceDatas.put(childInstance.getInstanceKey(), instanceData);
-        }
-
-        GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, task.getNote(), instanceDatas);
-
-        Stream.of(instanceDatas.values()).forEach(instanceData -> instanceData.setInstanceDataParent(dataWrapper));
-
-        return dataWrapper;
-    }
-
-    @NonNull
-    public CustomTimeKey getCustomTimeKey(@NonNull String remoteProjectId, @NonNull String remoteCustomTimeId) {
-        LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(remoteProjectId, remoteCustomTimeId);
-
-        if (localCustomTime == null) {
-            return new CustomTimeKey(remoteProjectId, remoteCustomTimeId);
-        } else {
-            return localCustomTime.getCustomTimeKey();
-        }
-    }
-
-    public static class LocalToRemoteConversion {
-        public final Map<Integer, kotlin.Pair<LocalTask, List<LocalInstance>>> mLocalTasks = new HashMap<>();
-        public final List<LocalTaskHierarchy> mLocalTaskHierarchies = new ArrayList<>();
-
-        final Map<Integer, RemoteTask> mRemoteTasks = new HashMap<>();
-        final List<RemoteTaskHierarchy> mRemoteTaskHierarchies = new ArrayList<>();
-    }
 }

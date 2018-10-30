@@ -1,17 +1,13 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.text.TextUtils
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
-
-
-
 import java.util.regex.Pattern
 
 class RemoteInstanceRecord(
@@ -41,7 +37,7 @@ class RemoteInstanceRecord(
             return key
         }
 
-        fun stringToScheduleKey(domainFactory: DomainFactory, projectId: String, key: String): ScheduleKey {
+        fun stringToScheduleKey(kotlinDomainFactory: KotlinDomainFactory, projectId: String, key: String): ScheduleKey {
             val hourMinuteMatcher = hourMinutePattern.matcher(key)
 
             if (hourMinuteMatcher.matches()) {
@@ -63,7 +59,7 @@ class RemoteInstanceRecord(
                 val customTimeId = customTimeMatcher.group(4)
                 check(!TextUtils.isEmpty(customTimeId))
 
-                val customTimeKey = domainFactory.getCustomTimeKey(projectId, customTimeId)
+                val customTimeKey = kotlinDomainFactory.getCustomTimeKey(projectId, customTimeId)
 
                 return ScheduleKey(Date(year, month, day), TimePair(customTimeKey))
             }

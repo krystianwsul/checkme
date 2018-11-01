@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -17,7 +16,6 @@ import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.gui.HierarchyData;
-import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
@@ -26,21 +24,14 @@ import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.Date;
-import com.krystianwsul.checkme.utils.time.DateTime;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMilli;
 import com.krystianwsul.checkme.utils.time.HourMinute;
-import com.krystianwsul.checkme.utils.time.NormalTime;
-import com.krystianwsul.checkme.utils.time.Time;
 import com.krystianwsul.checkme.utils.time.TimePair;
-import com.krystianwsul.checkme.utils.time.TimeStamp;
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
-import com.krystianwsul.checkme.viewmodels.DayViewModel;
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
-import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
@@ -76,115 +67,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-    @NonNull
-    public synchronized DayViewModel.DayData getGroupListData(@NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
-
-        check(position >= 0);
-
-        ExactTimeStamp startExactTimeStamp;
-        ExactTimeStamp endExactTimeStamp;
-
-        if (position == 0) {
-            startExactTimeStamp = null;
-        } else {
-            Calendar startCalendar = now.getCalendar();
-
-            switch (timeRange) {
-                case DAY:
-                    startCalendar.add(Calendar.DATE, position);
-                    break;
-                case WEEK:
-                    startCalendar.add(Calendar.WEEK_OF_YEAR, position);
-                    startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.getFirstDayOfWeek());
-                    break;
-                case MONTH:
-                    startCalendar.add(Calendar.MONTH, position);
-                    startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
-            }
-
-            startExactTimeStamp = new ExactTimeStamp(new Date(startCalendar), new HourMilli(0, 0, 0, 0));
-        }
-
-        Calendar endCalendar = now.getCalendar();
-
-        switch (timeRange) {
-            case DAY:
-                endCalendar.add(Calendar.DATE, position + 1);
-                break;
-            case WEEK:
-                endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1);
-                endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.getFirstDayOfWeek());
-                break;
-            case MONTH:
-                endCalendar.add(Calendar.MONTH, position + 1);
-                endCalendar.set(Calendar.DAY_OF_MONTH, 1);
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-
-        endExactTimeStamp = new ExactTimeStamp(new Date(endCalendar), new HourMilli(0, 0, 0, 0));
-
-        List<Instance> currentInstances = kotlinDomainFactory.getRootInstances(startExactTimeStamp, endExactTimeStamp, now);
-
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
-                .collect(Collectors.toList());
-
-        List<GroupListFragment.TaskData> taskDatas = null;
-        if (position == 0) {
-            taskDatas = kotlinDomainFactory.getTasks()
-                    .filter(task -> task.current(now)).filter(task -> task.isVisible(now)).filter(task -> task.isRootTask(now)).filter(task -> task.getCurrentSchedules(now).isEmpty()).map(task -> new GroupListFragment.TaskData(task.getTaskKey(), task.getName(), kotlinDomainFactory.getGroupListChildTaskDatas(task, now), task.getStartExactTimeStamp(), task.getNote()))
-                    .collect(Collectors.toList());
-        }
-
-        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
-        for (Instance instance : currentInstances) {
-            Task task = instance.getTask();
-
-            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-
-            Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
-            Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
-            instanceDatas.put(instanceData.getInstanceKey(), instanceData);
-        }
-
-        GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas);
-        DayViewModel.DayData data = new DayViewModel.DayData(dataWrapper);
-
-        Stream.of(instanceDatas.values()).forEach(instanceData -> instanceData.setInstanceDataParent(dataWrapper));
-
-        Log.e("asdf", "getShowNotificationGroupData returning " + data);
-        return data;
-    }
-
-    @NonNull
-    public synchronized ShowGroupViewModel.Data getShowGroupData(@NonNull TimeStamp timeStamp) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowGroupData");
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Date date = timeStamp.getDate();
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-        HourMinute hourMinute = timeStamp.getHourMinute();
-
-        Time time = null;
-        for (CustomTime customTime : kotlinDomainFactory.getCurrentCustomTimes())
-            if (customTime.getHourMinute(dayOfWeek).equals(hourMinute))
-                time = customTime;
-        if (time == null)
-            time = new NormalTime(hourMinute);
-
-        String displayText = new DateTime(date, time).getDisplayText();
-
-        return new ShowGroupViewModel.Data(displayText, kotlinDomainFactory.getGroupListData(timeStamp, now));
-    }
 
     @NonNull
     public synchronized ShowTaskInstancesViewModel.Data getShowTaskInstancesData(@NonNull TaskKey taskKey) {

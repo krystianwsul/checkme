@@ -16,7 +16,7 @@ class DayViewModel : DomainViewModel<DayViewModel.DayData>() {
         internalStart(FirebaseLevel.WANT)
     }
 
-    override fun getData() = domainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)
+    override fun getData() = kotlinDomainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)
 
     data class DayData(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()
 }

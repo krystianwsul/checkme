@@ -66,7 +66,7 @@ class DebugFragment : AbstractFragment() {
                 append(kotlinDomainFactory.customTimeCount)
 
                 val t1 = ExactTimeStamp.now
-                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
+                KotlinDomainFactory.getKotlinDomainFactory().getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
                 val t2 = ExactTimeStamp.now
 
                 append("\ntoday: ")

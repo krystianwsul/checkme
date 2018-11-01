@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.UserWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
+import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
@@ -37,6 +38,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.*
 import java.util.*
 
+@Suppress("LeakingThis")
 open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     companion object {
@@ -75,11 +77,11 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     var userInfo: UserInfo? = null
 
-    var recordQuery: Query? = null
-    var recordListener: ValueEventListener? = null
+    private var recordQuery: Query? = null
+    private var recordListener: ValueEventListener? = null
 
-    var userQuery: Query? = null
-    var userListener: ValueEventListener? = null
+    private var userQuery: Query? = null
+    private var userListener: ValueEventListener? = null
 
     @JvmField
     var localFactory: LocalFactory
@@ -92,7 +94,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     var tickData: TickData? = null
 
-    var skipSave = false
+    private var skipSave = false
 
     private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
@@ -385,7 +387,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
             val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstanceViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
 
-            return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp().compareTo(now) <= 0)
+            return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
         }
     }
 
@@ -445,6 +447,105 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             val entries = getCurrentCustomTimes().map { ShowCustomTimesViewModel.CustomTimeData(it.id, it.name) }
 
             return ShowCustomTimesViewModel.Data(entries)
+        }
+    }
+
+    //@Synchronized
+    fun getGroupListData(now: ExactTimeStamp, position: Int, timeRange: MainActivity.TimeRange): DayViewModel.DayData {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
+
+            check(position >= 0)
+
+            val startExactTimeStamp: ExactTimeStamp?
+            val endExactTimeStamp: ExactTimeStamp
+
+            if (position == 0) {
+                startExactTimeStamp = null
+            } else {
+                val startCalendar = now.calendar
+
+                when (timeRange) {
+                    MainActivity.TimeRange.DAY -> startCalendar.add(Calendar.DATE, position)
+                    MainActivity.TimeRange.WEEK -> {
+                        startCalendar.add(Calendar.WEEK_OF_YEAR, position)
+                        startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.firstDayOfWeek)
+                    }
+                    MainActivity.TimeRange.MONTH -> {
+                        startCalendar.add(Calendar.MONTH, position)
+                        startCalendar.set(Calendar.DAY_OF_MONTH, 1)
+                    }
+                }
+
+                startExactTimeStamp = ExactTimeStamp(Date(startCalendar), HourMilli(0, 0, 0, 0))
+            }
+
+            val endCalendar = now.calendar
+
+            when (timeRange) {
+                MainActivity.TimeRange.DAY -> endCalendar.add(Calendar.DATE, position + 1)
+                MainActivity.TimeRange.WEEK -> {
+                    endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1)
+                    endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.firstDayOfWeek)
+                }
+                MainActivity.TimeRange.MONTH -> {
+                    endCalendar.add(Calendar.MONTH, position + 1)
+                    endCalendar.set(Calendar.DAY_OF_MONTH, 1)
+                }
+            }
+
+            endExactTimeStamp = ExactTimeStamp(Date(endCalendar), HourMilli(0, 0, 0, 0))
+
+            val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
+
+            val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+
+            var taskDatas: List<GroupListFragment.TaskData>? = null
+            if (position == 0) {
+                taskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
+                        .map { GroupListFragment.TaskData(it.taskKey, it.name, getGroupListChildTaskDatas(it, now), it.startExactTimeStamp, it.note) }
+                        .collect(Collectors.toList())
+            }
+
+            val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
+            for (instance in currentInstances) {
+                val task = instance.task
+
+                val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+
+                val children = getChildInstanceDatas(instance, now)
+                val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
+                children.values.forEach { it.instanceDataParent = instanceData }
+                instanceDatas[instanceData.InstanceKey] = instanceData
+            }
+
+            val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas)
+            val data = DayViewModel.DayData(dataWrapper)
+
+            instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+
+            Log.e("asdf", "getShowNotificationGroupData returning $data")
+            return data
+        }
+    }
+
+    //@Synchronized
+    fun getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getShowGroupData")
+
+            val now = ExactTimeStamp.now
+
+            val date = timeStamp.date
+            val dayOfWeek = date.dayOfWeek
+            val hourMinute = timeStamp.hourMinute
+
+            val time = getCurrentCustomTimes().firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
+                    ?: NormalTime(hourMinute)
+
+            val displayText = DateTime(date, time).getDisplayText()
+
+            return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
         }
     }
 
@@ -560,7 +661,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return ArrayList(allInstances.values)
     }
 
-    fun getRootInstances(startExactTimeStamp: ExactTimeStamp?, endExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
+    private fun getRootInstances(startExactTimeStamp: ExactTimeStamp?, endExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
         check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
         val allInstances = HashMap<InstanceKey, Instance>()
@@ -806,7 +907,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun getTasks(): Stream<Task> {
+    private fun getTasks(): Stream<Task> {
         return if (remoteProjectFactory != null) {
             Stream.concat<Task>(Stream.of<LocalTask>(localFactory.tasks), Stream.of<RemoteTask>(remoteProjectFactory!!.tasks))
         } else {
@@ -816,8 +917,8 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     private val customTimes
         get() = localFactory.localCustomTimes.toMutableList<CustomTime>().apply {
-        remoteProjectFactory?.let { addAll(it.remoteCustomTimes) }
-    }
+            remoteProjectFactory?.let { addAll(it.remoteCustomTimes) }
+        }
 
     fun getTaskForce(taskKey: TaskKey) = if (taskKey.localTaskId != null) {
         check(TextUtils.isEmpty(taskKey.remoteTaskId))
@@ -869,7 +970,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 remoteProjectFactory?.let { addAll(it.existingInstances) }
             }
 
-    fun getGroupListChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now)
+    private fun getGroupListChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now)
             .map {
                 val childTask = it.childTask
 

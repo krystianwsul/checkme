@@ -13,7 +13,7 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
         internalStart(FirebaseLevel.WANT)
     }
 
-    override fun getData() = domainFactory.getShowGroupData(timeStamp)
+    override fun getData() = kotlinDomainFactory.getShowGroupData(timeStamp)
 
     data class Data(val displayText: String, val dataWrapper: GroupListFragment.DataWrapper?) : DomainData() {
 

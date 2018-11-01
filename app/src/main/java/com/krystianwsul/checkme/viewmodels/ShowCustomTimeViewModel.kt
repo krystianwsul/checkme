@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
-import java.util.*
 
 class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() {
 
@@ -14,9 +13,9 @@ class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() 
         internalStart(FirebaseLevel.NOTHING)
     }
 
-    override fun getData() = domainFactory.getShowCustomTimeData(customTimeId)
+    override fun getData() = kotlinDomainFactory.getShowCustomTimeData(customTimeId)
 
-    data class Data(val id: Int, val name: String, val hourMinutes: HashMap<DayOfWeek, HourMinute>) : DomainData() {
+    data class Data(val id: Int, val name: String, val hourMinutes: Map<DayOfWeek, HourMinute>) : DomainData() {
 
         init {
             check(name.isNotEmpty())

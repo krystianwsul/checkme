@@ -34,9 +34,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel
-import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
+import com.krystianwsul.checkme.viewmodels.*
 import java.util.*
 
 open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
@@ -423,6 +421,30 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             val showHour = instanceDatas.values.all { it.instanceDateTime.timeStamp.toExactTimeStamp() < now }
 
             return EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
+        }
+    }
+
+    //@Synchronized
+    fun getShowCustomTimeData(localCustomTimeId: Int): ShowCustomTimeViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
+
+            val localCustomTime = localFactory.getLocalCustomTime(localCustomTimeId)
+
+            val hourMinutes = DayOfWeek.values().associate { it to localCustomTime.getHourMinute(it) }
+
+            return ShowCustomTimeViewModel.Data(localCustomTime.id, localCustomTime.name, hourMinutes)
+        }
+    }
+
+    //@Synchronized
+    fun getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getShowCustomTimesData")
+
+            val entries = getCurrentCustomTimes().map { ShowCustomTimesViewModel.CustomTimeData(it.id, it.name) }
+
+            return ShowCustomTimesViewModel.Data(entries)
         }
     }
 

@@ -4,7 +4,7 @@ class ShowCustomTimesViewModel : DomainViewModel<ShowCustomTimesViewModel.Data>(
 
     fun start() = internalStart(FirebaseLevel.NOTHING)
 
-    override fun getData() = domainFactory.showCustomTimesData
+    override fun getData() = kotlinDomainFactory.getShowCustomTimesData()
 
     data class Data(val entries: List<CustomTimeData>) : DomainData()
 

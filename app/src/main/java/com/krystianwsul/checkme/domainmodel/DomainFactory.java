@@ -40,8 +40,6 @@ import com.krystianwsul.checkme.viewmodels.DayViewModel;
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
-import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel;
-import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel;
@@ -78,35 +76,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-    @NonNull
-    public synchronized ShowCustomTimeViewModel.Data getShowCustomTimeData(int localCustomTimeId) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimeData");
-
-        LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(localCustomTimeId);
-
-        HashMap<DayOfWeek, HourMinute> hourMinutes = new HashMap<>();
-        for (DayOfWeek dayOfWeek : DayOfWeek.values())
-            hourMinutes.put(dayOfWeek, localCustomTime.getHourMinute(dayOfWeek));
-
-        return new ShowCustomTimeViewModel.Data(localCustomTime.getId(), localCustomTime.getName(), hourMinutes);
-    }
-
-    @NonNull
-    public synchronized ShowCustomTimesViewModel.Data getShowCustomTimesData() {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimesData");
-
-        List<LocalCustomTime> currentCustomTimes = kotlinDomainFactory.getCurrentCustomTimes();
-
-        ArrayList<ShowCustomTimesViewModel.CustomTimeData> entries = new ArrayList<>();
-        for (LocalCustomTime localCustomTime : currentCustomTimes) {
-            check(localCustomTime != null);
-
-            entries.add(new ShowCustomTimesViewModel.CustomTimeData(localCustomTime.getId(), localCustomTime.getName()));
-        }
-
-        return new ShowCustomTimesViewModel.Data(entries);
-    }
 
     @NonNull
     public synchronized DayViewModel.DayData getGroupListData(@NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {

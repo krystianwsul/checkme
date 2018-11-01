@@ -16,7 +16,6 @@ import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.gui.HierarchyData;
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.CustomTimeKey;
@@ -33,7 +32,6 @@ import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
-import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel;
 
@@ -66,47 +64,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-    @NonNull
-    public synchronized ShowNotificationGroupViewModel.Data getShowNotificationGroupData(@NonNull Set<InstanceKey> instanceKeys) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
-
-        check(!instanceKeys.isEmpty());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        ArrayList<Instance> instances = new ArrayList<>();
-        for (InstanceKey instanceKey : instanceKeys) {
-            Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-
-            if (instance.isRootInstance(now))
-                instances.add(instance);
-        }
-
-        Collections.sort(instances, (lhs, rhs) -> lhs.getInstanceDateTime().compareTo(rhs.getInstanceDateTime()));
-
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
-                .collect(Collectors.toList());
-
-        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = new HashMap<>();
-        for (Instance instance : instances) {
-            Task task = instance.getTask();
-
-            Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-
-            Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
-            GroupListFragment.InstanceData instanceData = new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, null, instance.getOrdinal());
-            Stream.of(children.values()).forEach(child -> child.setInstanceDataParent(instanceData));
-            instanceDatas.put(instance.getInstanceKey(), instanceData);
-        }
-
-        GroupListFragment.DataWrapper dataWrapper = new GroupListFragment.DataWrapper(customTimeDatas, null, null, null, instanceDatas);
-
-        Stream.of(instanceDatas.values()).forEach(instanceData -> instanceData.setInstanceDataParent(dataWrapper));
-
-        return new ShowNotificationGroupViewModel.Data(dataWrapper);
-    }
 
     @NonNull
     public synchronized ShowInstanceViewModel.Data getShowInstanceData(@NonNull InstanceKey instanceKey) {

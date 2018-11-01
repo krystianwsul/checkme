@@ -585,6 +585,40 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    //@Synchronized
+    fun getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
+
+            check(!instanceKeys.isEmpty())
+
+            val now = ExactTimeStamp.now
+
+            val instances = instanceKeys.map { getInstance(it) }
+                    .filter { it.isRootInstance(now) }
+                    .sortedBy { it.instanceDateTime }
+
+            val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+
+            val instanceDatas = instances.associate { instance ->
+                val task = instance.task
+
+                val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+
+                val children = getChildInstanceDatas(instance, now)
+                val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
+                children.values.forEach { it.instanceDataParent = instanceData }
+                instance.instanceKey to instanceData
+            }.toMutableMap()
+
+            val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, null, null, instanceDatas)
+
+            instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+
+            return ShowNotificationGroupViewModel.Data(dataWrapper)
+        }
+    }
+
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
@@ -778,7 +812,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     fun getCurrentCustomTimes() = localFactory.currentCustomTimes
 
-    fun getChildInstanceDatas(instance: Instance, now: ExactTimeStamp): MutableMap<InstanceKey, GroupListFragment.InstanceData> {
+    private fun getChildInstanceDatas(instance: Instance, now: ExactTimeStamp): MutableMap<InstanceKey, GroupListFragment.InstanceData> {
         return instance.getChildInstances(now)
                 .map { (childInstance, taskHierarchy) ->
                     val childTask = childInstance.task

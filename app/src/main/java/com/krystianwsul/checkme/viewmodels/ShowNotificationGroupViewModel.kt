@@ -21,7 +21,7 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
         internalStart(firebaseLevel)
     }
 
-    override fun getData() = domainFactory.getShowNotificationGroupData(instanceKeys)
+    override fun getData() = kotlinDomainFactory.getShowNotificationGroupData(instanceKeys)
 
     data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()
 }

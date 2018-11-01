@@ -37,7 +37,6 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
 import com.krystianwsul.checkme.viewmodels.DayViewModel;
-import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel;
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
@@ -81,30 +80,7 @@ public class DomainFactory {
 
     // gets
 
-    @NonNull
-    public synchronized EditInstanceViewModel.Data getEditInstanceData(@NonNull InstanceKey instanceKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstanceData");
 
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
-
-        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-        check(instance.isRootInstance(now));
-
-        if (instance.getInstanceTimePair().getCustomTimeKey() != null) {
-            CustomTime customTime = kotlinDomainFactory.getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
-
-            currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
-        }
-
-        Map<CustomTimeKey, EditInstanceViewModel.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : currentCustomTimes.values())
-            customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstanceViewModel.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
-
-        return new EditInstanceViewModel.Data(instance.getInstanceKey(), instance.getInstanceDate(), instance.getInstanceTimePair(), instance.getName(), customTimeDatas, (instance.getDone() != null), instance.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) <= 0);
-    }
 
     @NonNull
     public synchronized EditInstancesViewModel.Data getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {

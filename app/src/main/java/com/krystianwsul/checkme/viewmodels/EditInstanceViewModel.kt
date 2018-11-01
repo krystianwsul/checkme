@@ -19,7 +19,7 @@ class EditInstanceViewModel : DomainViewModel<EditInstanceViewModel.Data>() {
         internalStart(if (instanceKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING)
     }
 
-    override fun getData() = domainFactory.getEditInstanceData(instanceKey)
+    override fun getData() = kotlinDomainFactory.getEditInstanceData(instanceKey)
 
     data class Data(
             val instanceKey: InstanceKey,

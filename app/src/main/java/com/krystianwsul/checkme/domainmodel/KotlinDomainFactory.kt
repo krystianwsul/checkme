@@ -35,6 +35,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel
 import java.util.*
 
 open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
@@ -362,6 +363,32 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 return remoteProjectFactory!!.isSaved
             }
         }
+
+    // gets
+
+    //@Synchronized
+    fun getEditInstanceData(instanceKey: InstanceKey): EditInstanceViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getEditInstanceData")
+
+            val now = ExactTimeStamp.now
+
+            val currentCustomTimes = getCurrentCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
+
+            val instance = getInstance(instanceKey)
+            check(instance.isRootInstance(now))
+
+            if (instance.instanceTimePair.customTimeKey != null) {
+                val customTime = getCustomTime(instance.instanceTimePair.customTimeKey!!)
+
+                currentCustomTimes[customTime.customTimeKey] = customTime
+            }
+
+            val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstanceViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
+
+            return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp().compareTo(now) <= 0)
+        }
+    }
 
     // internal
 

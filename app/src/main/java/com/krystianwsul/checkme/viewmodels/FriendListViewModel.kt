@@ -1,12 +1,10 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-
 class FriendListViewModel : DomainViewModel<FriendListViewModel.Data>() {
 
     fun start() = internalStart(FirebaseLevel.FRIEND)
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.friendListData
+    override fun getData() = domainFactory.friendListData
 
     data class Data(val userListDatas: Set<UserListData>) : DomainData()
 

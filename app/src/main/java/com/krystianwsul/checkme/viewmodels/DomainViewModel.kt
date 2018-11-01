@@ -23,8 +23,8 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private var observer: Observer? = null
 
-    private val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
-    private val domainFactory = kotlinDomainFactory.domainFactory
+    protected val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+    protected val domainFactory = kotlinDomainFactory.domainFactory
 
     private val firebaseListener = { _: DomainFactory ->
         check(kotlinDomainFactory.isConnected)
@@ -94,7 +94,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
         if (firebaseLevel == FirebaseLevel.FRIEND && !(kotlinDomainFactory.isConnected && RemoteFriendFactory.hasFriends()))
             return
 
-        Single.fromCallable { getData(domainFactory) }
+        Single.fromCallable { getData() }
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { loaded ->
@@ -104,7 +104,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                 .addTo(compositeDisposable)
     }
 
-    protected abstract fun getData(domainFactory: DomainFactory): D
+    protected abstract fun getData(): D
 
     override fun onCleared() = stop()
 

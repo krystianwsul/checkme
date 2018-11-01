@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-
 class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
 
     private var projectId: String? = null
@@ -12,7 +10,7 @@ class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
         internalStart(FirebaseLevel.FRIEND)
     }
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowProjectData(projectId)
+    override fun getData() = domainFactory.getShowProjectData(projectId)
 
     data class Data(
             val name: String?,

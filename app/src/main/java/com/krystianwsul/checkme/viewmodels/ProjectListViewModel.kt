@@ -1,13 +1,12 @@
 package com.krystianwsul.checkme.viewmodels
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import java.util.*
 
 class ProjectListViewModel : DomainViewModel<ProjectListViewModel.Data>() {
 
     fun start() = internalStart(FirebaseLevel.NEED)
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.projectListData
+    override fun getData() = domainFactory.projectListData
 
     data class Data(val projectDatas: TreeMap<String, ProjectData>) : DomainData()
 

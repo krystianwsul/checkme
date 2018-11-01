@@ -237,8 +237,8 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
         val addScheduleDatas = ArrayList(newScheduleDatas)
 
         val oldSchedules = getCurrentSchedules(now)
-        val scheduleDatas = domainFactory.getScheduleDatas(oldSchedules, now).second
-        for ((key, value) in scheduleDatas!!) {
+        val scheduleDatas = kotlinDomainFactory.getScheduleDatas(oldSchedules, now).second
+        for ((key, value) in scheduleDatas) {
             if (addScheduleDatas.contains(key)) {
                 addScheduleDatas.remove(key)
             } else {

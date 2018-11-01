@@ -31,7 +31,6 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
-import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel;
 
@@ -66,101 +65,6 @@ public class DomainFactory {
     // gets
 
     @NonNull
-    public synchronized ShowInstanceViewModel.Data getShowInstanceData(@NonNull InstanceKey instanceKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowInstanceData");
-
-        Task task = kotlinDomainFactory.getTaskIfPresent(instanceKey.getTaskKey());
-        if (task == null) return new ShowInstanceViewModel.Data(null);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-        if (!task.current(now) && !instance.exists()) return new ShowInstanceViewModel.Data(null);
-
-        return new ShowInstanceViewModel.Data(new ShowInstanceViewModel.InstanceData(instance.getName(), instance.getDisplayText(now), instance.getDone() != null, task.current(now), instance.isRootInstance(now), instance.exists(), kotlinDomainFactory.getGroupListData(instance, task, now)));
-    }
-
-    @NonNull
-    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> getScheduleDatas(List<Schedule> schedules, ExactTimeStamp now) {
-        Map<CustomTimeKey, CustomTime> customTimes = new HashMap<>();
-
-        Map<CreateTaskViewModel.ScheduleData, List<Schedule>> scheduleDatas = new HashMap<>();
-
-        Map<TimePair, List<WeeklySchedule>> weeklySchedules = new HashMap<>();
-
-        for (Schedule schedule : schedules) {
-            check(schedule != null);
-            check(schedule.current(now));
-
-            switch (schedule.getScheduleType()) {
-                case SINGLE: {
-                    SingleSchedule singleSchedule = (SingleSchedule) schedule;
-
-                    scheduleDatas.put(new CreateTaskViewModel.ScheduleData.SingleScheduleData(singleSchedule.getDate(), singleSchedule.getTimePair()), Collections.singletonList(schedule));
-
-                    CustomTimeKey customTimeKey = singleSchedule.getCustomTimeKey();
-                    if (customTimeKey != null)
-                        customTimes.put(customTimeKey, kotlinDomainFactory.getCustomTime(customTimeKey));
-
-                    break;
-                }
-                case DAILY: {
-                    throw new UnsupportedOperationException();
-                }
-                case WEEKLY: {
-                    WeeklySchedule weeklySchedule = (WeeklySchedule) schedule;
-
-                    TimePair timePair = weeklySchedule.getTimePair();
-                    if (!weeklySchedules.containsKey(timePair))
-                        weeklySchedules.put(timePair, new ArrayList<>());
-                    weeklySchedules.get(timePair).add(weeklySchedule);
-
-                    CustomTimeKey customTimeKey = weeklySchedule.getCustomTimeKey();
-                    if (customTimeKey != null)
-                        customTimes.put(customTimeKey, kotlinDomainFactory.getCustomTime(customTimeKey));
-
-                    break;
-                }
-                case MONTHLY_DAY: {
-                    MonthlyDaySchedule monthlyDaySchedule = (MonthlyDaySchedule) schedule;
-
-                    scheduleDatas.put(new CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData(monthlyDaySchedule.getDayOfMonth(), monthlyDaySchedule.getBeginningOfMonth(), monthlyDaySchedule.getTimePair()), Collections.singletonList(schedule));
-
-                    CustomTimeKey customTimeKey = monthlyDaySchedule.getCustomTimeKey();
-                    if (customTimeKey != null)
-                        customTimes.put(customTimeKey, kotlinDomainFactory.getCustomTime(customTimeKey));
-
-                    break;
-                }
-                case MONTHLY_WEEK: {
-                    MonthlyWeekSchedule monthlyWeekSchedule = (MonthlyWeekSchedule) schedule;
-
-                    scheduleDatas.put(new CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData(monthlyWeekSchedule.getDayOfMonth(), monthlyWeekSchedule.getDayOfWeek(), monthlyWeekSchedule.getBeginningOfMonth(), monthlyWeekSchedule.getTimePair()), Collections.singletonList(schedule));
-
-                    CustomTimeKey customTimeKey = monthlyWeekSchedule.getCustomTimeKey();
-                    if (customTimeKey != null)
-                        customTimes.put(customTimeKey, kotlinDomainFactory.getCustomTime(customTimeKey));
-
-                    break;
-                }
-                default: {
-                    throw new UnsupportedOperationException();
-                }
-            }
-        }
-
-        for (Map.Entry<TimePair, List<WeeklySchedule>> entry : weeklySchedules.entrySet()) {
-            Set<DayOfWeek> daysOfWeek = Stream.of(entry.getValue())
-                    .map(WeeklySchedule::getDaysOfWeek)
-                    .flatMap(Stream::of)
-                    .collect(Collectors.toSet());
-            scheduleDatas.put(new CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, entry.getKey()), new ArrayList<>(entry.getValue()));
-        }
-
-        return new kotlin.Pair<>(customTimes, scheduleDatas);
-    }
-
-    @NonNull
     public synchronized CreateTaskViewModel.Data getCreateTaskData(@Nullable TaskKey taskKey, @Nullable List<TaskKey> joinTaskKeys) {
         MyCrashlytics.INSTANCE.log("DomainFactory.getCreateTaskData");
 
@@ -191,7 +95,7 @@ public class DomainFactory {
                 taskParentKey = null;
 
                 if (!schedules.isEmpty()) {
-                    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> pair = getScheduleDatas(schedules, now);
+                    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> pair = kotlinDomainFactory.getScheduleDatas(schedules, now);
                     customTimes.putAll(pair.getFirst());
                     scheduleDatas = new ArrayList<>(pair.getSecond().keySet());
                 }

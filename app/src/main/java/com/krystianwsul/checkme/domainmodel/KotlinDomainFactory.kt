@@ -619,6 +619,67 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    //@Synchronized
+    fun getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getShowInstanceData")
+
+            val task = getTaskIfPresent(instanceKey.taskKey)
+                    ?: return ShowInstanceViewModel.Data(null)
+
+            val now = ExactTimeStamp.now
+
+            val instance = getInstance(instanceKey)
+            return if (!task.current(now) && !instance.exists()) ShowInstanceViewModel.Data(null) else ShowInstanceViewModel.Data(ShowInstanceViewModel.InstanceData(instance.name, instance.getDisplayText(now), instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)))
+        }
+    }
+
+    fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {
+        val customTimes = HashMap<CustomTimeKey, CustomTime>()
+
+        val scheduleDatas = HashMap<CreateTaskViewModel.ScheduleData, List<Schedule>>()
+
+        val weeklySchedules = HashMap<TimePair, MutableList<WeeklySchedule>>()
+
+        for (schedule in schedules) {
+            check(schedule.current(now))
+
+            when (schedule) {
+                is SingleSchedule -> {
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.SingleScheduleData(schedule.date, schedule.timePair)] = listOf<Schedule>(schedule)
+
+                    schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
+                }
+                is WeeklySchedule -> {
+                    val timePair = schedule.timePair
+                    if (!weeklySchedules.containsKey(timePair))
+                        weeklySchedules[timePair] = ArrayList()
+                    weeklySchedules[timePair]!!.add(schedule)
+
+                    schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
+                }
+                is MonthlyDaySchedule -> {
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData(schedule.dayOfMonth, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
+
+                    schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
+                }
+                is MonthlyWeekSchedule -> {
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData(schedule.dayOfMonth, schedule.dayOfWeek, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
+
+                    schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
+                }
+                else -> throw UnsupportedOperationException()
+            }
+        }
+
+        for ((key, value) in weeklySchedules) {
+            val daysOfWeek = value.flatMap { it.daysOfWeek }.toSet()
+            scheduleDatas[CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, key)] = ArrayList<Schedule>(value)
+        }
+
+        return Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>>(customTimes, scheduleDatas)
+    }
+
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
@@ -1001,7 +1062,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         remoteProjectFactory!!.getTaskForce(taskKey)
     }
 
-    fun getTaskIfPresent(taskKey: TaskKey) = if (taskKey.localTaskId != null) {
+    private fun getTaskIfPresent(taskKey: TaskKey) = if (taskKey.localTaskId != null) {
         check(TextUtils.isEmpty(taskKey.remoteTaskId))
 
         localFactory.getTaskIfPresent(taskKey.localTaskId)
@@ -1494,7 +1555,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return dataWrapper
     }
 
-    fun getGroupListData(instance: Instance, task: Task, now: ExactTimeStamp): GroupListFragment.DataWrapper {
+    private fun getGroupListData(instance: Instance, task: Task, now: ExactTimeStamp): GroupListFragment.DataWrapper {
         val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
 
         val instanceDatas = instance.getChildInstances(now)

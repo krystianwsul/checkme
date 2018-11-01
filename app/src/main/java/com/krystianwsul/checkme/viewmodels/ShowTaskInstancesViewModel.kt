@@ -18,7 +18,7 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
         internalStart(firebaseLevel)
     }
 
-    override fun getData() = domainFactory.getShowTaskInstancesData(taskKey)
+    override fun getData() = kotlinDomainFactory.getShowTaskInstancesData(taskKey)
 
     data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()
 }

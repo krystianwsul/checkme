@@ -549,6 +549,42 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    //@Synchronized
+    fun getShowTaskInstancesData(taskKey: TaskKey): ShowTaskInstancesViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
+
+            val task = getTaskForce(taskKey)
+            val now = ExactTimeStamp.now
+
+            val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+
+            val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+
+            val existingInstances = task.existingInstances.values
+            val pastInstances = task.getInstances(null, now, now)
+
+            val allInstances = existingInstances.toMutableSet()
+            allInstances.addAll(pastInstances)
+
+            val instanceDatas = allInstances.associate {
+                val children = getChildInstanceDatas(it, now)
+
+                val hierarchyData = if (task.isRootTask(now)) {
+                    null
+                } else {
+                    val taskHierarchy = getParentTaskHierarchy(task, now)!!
+
+                    HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal)
+                }
+
+                it.instanceKey to GroupListFragment.InstanceData(it.done, it.instanceKey, it.getDisplayText(now), it.name, it.instanceDateTime.timeStamp, task.current(now), it.isRootInstance(now), isRootTask, it.exists(), it.instanceDateTime.time.timePair, task.note, children, hierarchyData, it.ordinal)
+            }.toMutableMap()
+
+            return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas))
+        }
+    }
+
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
@@ -1395,7 +1431,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListFragment.DataWrapper {
+    private fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListFragment.DataWrapper {
         val endCalendar = timeStamp.calendar.apply { add(Calendar.MINUTE, 1) }
         val endTimeStamp = TimeStamp(endCalendar)
 

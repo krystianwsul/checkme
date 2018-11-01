@@ -35,7 +35,6 @@ import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
-import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel;
 
 import java.util.ArrayList;
@@ -67,45 +66,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-    @NonNull
-    public synchronized ShowTaskInstancesViewModel.Data getShowTaskInstancesData(@NonNull TaskKey taskKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskInstancesData");
-
-        Task task = kotlinDomainFactory.getTaskForce(taskKey);
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        List<GroupListFragment.CustomTimeData> customTimeDatas = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .map(customTime -> new GroupListFragment.CustomTimeData(customTime.getName(), customTime.getHourMinutes()))
-                .collect(Collectors.toList());
-
-        Boolean isRootTask = (task.current(now) ? task.isRootTask(now) : null);
-
-        Collection<Instance> existingInstances = task.getExistingInstances().values();
-        List<Instance> pastInstances = task.getInstances(null, now, now);
-
-        Set<Instance> allInstances = new HashSet<>(existingInstances);
-        allInstances.addAll(pastInstances);
-
-        HashMap<InstanceKey, GroupListFragment.InstanceData> instanceDatas = Stream.of(allInstances)
-                .collect(Collectors.toMap(Instance::getInstanceKey, instance -> {
-                    Map<InstanceKey, GroupListFragment.InstanceData> children = kotlinDomainFactory.getChildInstanceDatas(instance, now);
-
-                    HierarchyData hierarchyData;
-                    if (task.isRootTask(now)) {
-                        hierarchyData = null;
-                    } else {
-                        TaskHierarchy taskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(task, now);
-                        check(taskHierarchy != null);
-
-                        hierarchyData = new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal());
-                    }
-
-                    return new GroupListFragment.InstanceData(instance.getDone(), instance.getInstanceKey(), instance.getDisplayText(now), instance.getName(), instance.getInstanceDateTime().getTimeStamp(), task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.getInstanceDateTime().getTime().getTimePair(), task.getNote(), children, hierarchyData, instance.getOrdinal());
-                }, HashMap::new));
-
-        return new ShowTaskInstancesViewModel.Data(new GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas));
-    }
 
     @NonNull
     public synchronized ShowNotificationGroupViewModel.Data getShowNotificationGroupData(@NonNull Set<InstanceKey> instanceKeys) {

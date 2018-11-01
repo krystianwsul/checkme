@@ -37,7 +37,6 @@ import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.utils.time.TimeStamp;
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
 import com.krystianwsul.checkme.viewmodels.DayViewModel;
-import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel;
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
@@ -79,44 +78,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-
-
-    @NonNull
-    public synchronized EditInstancesViewModel.Data getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstancesData");
-
-        check(instanceKeys.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Map<CustomTimeKey, CustomTime> currentCustomTimes = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
-
-        HashMap<InstanceKey, EditInstancesViewModel.InstanceData> instanceDatas = new HashMap<>();
-
-        for (InstanceKey instanceKey : instanceKeys) {
-            Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-            check(instance.isRootInstance(now));
-            check(instance.getDone() == null);
-
-            instanceDatas.put(instanceKey, new EditInstancesViewModel.InstanceData(instance.getInstanceDateTime(), instance.getName()));
-
-            if (instance.getInstanceTimePair().getCustomTimeKey() != null) {
-                CustomTime customTime = kotlinDomainFactory.getCustomTime(instance.getInstanceTimePair().getCustomTimeKey());
-
-                currentCustomTimes.put(customTime.getCustomTimeKey(), customTime);
-            }
-        }
-
-        Map<CustomTimeKey, EditInstancesViewModel.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : currentCustomTimes.values())
-            customTimeDatas.put(customTime.getCustomTimeKey(), new EditInstancesViewModel.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
-
-        Boolean showHour = Stream.of(instanceDatas.values()).allMatch(instanceData -> instanceData.getInstanceDateTime().getTimeStamp().toExactTimeStamp().compareTo(now) < 0);
-
-        return new EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour);
-    }
 
     @NonNull
     public synchronized ShowCustomTimeViewModel.Data getShowCustomTimeData(int localCustomTimeId) {

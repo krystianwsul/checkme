@@ -36,6 +36,7 @@ import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.checkme.viewmodels.EditInstanceViewModel
+import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import java.util.*
 
 open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
@@ -387,6 +388,41 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstanceViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
 
             return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp().compareTo(now) <= 0)
+        }
+    }
+
+    //@Synchronized
+    fun getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getEditInstancesData")
+
+            check(instanceKeys.size > 1)
+
+            val now = ExactTimeStamp.now
+
+            val currentCustomTimes = getCurrentCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
+
+            val instanceDatas = mutableMapOf<InstanceKey, EditInstancesViewModel.InstanceData>()
+
+            for (instanceKey in instanceKeys) {
+                val instance = getInstance(instanceKey)
+                check(instance.isRootInstance(now))
+                check(instance.done == null)
+
+                instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(instance.instanceDateTime, instance.name)
+
+                if (instance.instanceTimePair.customTimeKey != null) {
+                    val customTime = getCustomTime(instance.instanceTimePair.customTimeKey!!)
+
+                    currentCustomTimes[customTime.customTimeKey] = customTime
+                }
+            }
+
+            val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstancesViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
+
+            val showHour = instanceDatas.values.all { it.instanceDateTime.timeStamp.toExactTimeStamp() < now }
+
+            return EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
         }
     }
 

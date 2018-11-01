@@ -23,10 +23,11 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private var observer: Observer? = null
 
-    private val domainFactory = KotlinDomainFactory.getKotlinDomainFactory().domainFactory
+    private val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+    private val domainFactory = kotlinDomainFactory.domainFactory
 
-    private val firebaseListener = { domainFactory: DomainFactory ->
-        check(domainFactory.isConnected)
+    private val firebaseListener = { _: DomainFactory ->
+        check(kotlinDomainFactory.isConnected)
 
         load()
     }
@@ -47,33 +48,32 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                 load()
 
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
-                if (firebaseUser != null && !domainFactory.isConnected) {
+                if (firebaseUser != null && !kotlinDomainFactory.isConnected) {
                     val userInfo = UserInfo(firebaseUser)
 
-                    domainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
-                    domainFactory.addFirebaseListener(firebaseListener)
+                    kotlinDomainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
+                    kotlinDomainFactory.addFirebaseListener(firebaseListener)
                 }
             }
             FirebaseLevel.NEED -> {
-                if (domainFactory.isConnected) {
+                if (kotlinDomainFactory.isConnected) {
                     load()
                 } else {
                     val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
-
                     val userInfo = UserInfo(firebaseUser)
 
-                    domainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
-                    domainFactory.addFirebaseListener(firebaseListener)
+                    kotlinDomainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
+                    kotlinDomainFactory.addFirebaseListener(firebaseListener)
                 }
             }
             FirebaseLevel.FRIEND -> {
-                if (domainFactory.isConnected && RemoteFriendFactory.hasFriends()) {
+                if (kotlinDomainFactory.isConnected && RemoteFriendFactory.hasFriends()) {
                     load()
                 } else {
                     FirebaseAuth.getInstance().currentUser?.let {
                         val userInfo = UserInfo(it)
 
-                        domainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
+                        kotlinDomainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
                         RemoteFriendFactory.addFriendListener { firebaseListener(domainFactory) }
                     }
                 }
@@ -82,16 +82,16 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
     }
 
     fun stop() {
-        domainFactory.removeFirebaseListener(firebaseListener)
+        kotlinDomainFactory.removeFirebaseListener(firebaseListener)
         observer = null
         compositeDisposable.clear()
     }
 
     private fun load() {
-        if (firebaseLevel == FirebaseLevel.NEED && !domainFactory.isConnected)
+        if (firebaseLevel == FirebaseLevel.NEED && !kotlinDomainFactory.isConnected)
             return
 
-        if (firebaseLevel == FirebaseLevel.FRIEND && !(domainFactory.isConnected && RemoteFriendFactory.hasFriends()))
+        if (firebaseLevel == FirebaseLevel.FRIEND && !(kotlinDomainFactory.isConnected && RemoteFriendFactory.hasFriends()))
             return
 
         Single.fromCallable { getData(domainFactory) }

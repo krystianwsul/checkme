@@ -26,34 +26,35 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         }
 
         fun throttleFirebase(needsFirebase: Boolean, firebaseListener: (DomainFactory) -> Unit) {
-            val domainFactory = KotlinDomainFactory.getKotlinDomainFactory().domainFactory
+            val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+            val domainFactory = kotlinDomainFactory.domainFactory
 
-            if (domainFactory.isConnected) {
-                if (domainFactory.isConnectedAndSaved) {
-                    queueFirebase(domainFactory, firebaseListener)
+            if (kotlinDomainFactory.isConnected) {
+                if (kotlinDomainFactory.isConnectedAndSaved) {
+                    queueFirebase(kotlinDomainFactory, firebaseListener)
                 } else {
                     firebaseListener(domainFactory)
                 }
             } else {
                 if (needsFirebase) {
-                    queueFirebase(domainFactory, firebaseListener)
+                    queueFirebase(kotlinDomainFactory, firebaseListener)
                 } else {
                     firebaseListener(domainFactory)
                 }
             }
         }
 
-        private fun queueFirebase(domainFactory: DomainFactory, firebaseListener: (DomainFactory) -> Unit) {
-            check(!domainFactory.isConnected || domainFactory.isConnectedAndSaved)
+        private fun queueFirebase(kotlinDomainFactory: KotlinDomainFactory, firebaseListener: (DomainFactory) -> Unit) {
+            check(!kotlinDomainFactory.isConnected || kotlinDomainFactory.isConnectedAndSaved)
 
-            if (!domainFactory.isConnected) {
+            if (!kotlinDomainFactory.isConnected) {
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                         ?: throw NeedsFirebaseException()
 
-                domainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
+                kotlinDomainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
             }
 
-            domainFactory.addFirebaseListener(firebaseListener)
+            kotlinDomainFactory.addFirebaseListener(firebaseListener)
         }
     }
 

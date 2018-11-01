@@ -7,15 +7,21 @@ import android.text.TextUtils
 import android.util.Log
 import com.annimon.stream.Collectors
 import com.annimon.stream.Stream
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
+import com.krystianwsul.checkme.firebase.json.UserWrapper
+import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
@@ -42,6 +48,19 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             if (_kotlinDomainFactory == null)
                 _kotlinDomainFactory = KotlinDomainFactory(persistenceManager)
             return _kotlinDomainFactory!!
+        }
+
+        fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
+            val silent = oldTickData.silent && newTickData.silent
+
+            val source = "merged ($oldTickData, $newTickData)"
+
+            oldTickData.releaseWakelock()
+            newTickData.releaseWakelock()
+
+            val listeners = oldTickData.listeners + newTickData.listeners
+
+            return TickData(silent, source, listeners)
         }
     }
 
@@ -112,6 +131,237 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
         ObserverHolder.notifyDomainObservers(dataIds)
     }
+
+    fun reset(source: SaveService.Source) {
+        synchronized(domainFactory) {
+            val userInfo = userInfo
+            clearUserInfo()
+
+            _kotlinDomainFactory = null
+            localFactory.reset()
+
+            userInfo?.let { setUserInfo(source, it) }
+
+            ObserverHolder.notifyDomainObservers(ArrayList())
+
+            ObserverHolder.clear()
+        }
+    }
+
+    // firebase
+
+    fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
+        synchronized(domainFactory) {
+            if (userInfo != null) {
+                checkNotNull(recordQuery)
+                checkNotNull(userQuery)
+
+                if (userInfo == newUserInfo)
+                    return
+
+                clearUserInfo()
+            }
+
+            check(userInfo == null)
+
+            check(recordQuery == null)
+            check(recordListener == null)
+
+            check(userQuery == null)
+            check(userListener == null)
+
+            userInfo = newUserInfo
+
+            DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
+
+            recordQuery = DatabaseWrapper.getTaskRecordsQuery(newUserInfo)
+            recordListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                    Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: " + dataSnapshot!!)
+
+                    setRemoteTaskRecords(dataSnapshot, source)
+                }
+
+                override fun onCancelled(databaseError: DatabaseError?) {
+                    check(databaseError != null)
+                    Log.e("asdf", "DomainFactory.getMRecordListener().onCancelled", databaseError.toException())
+
+                    MyCrashlytics.logException(databaseError.toException())
+
+                    if (tickData != null) {
+                        tickData!!.release()
+                        tickData = null
+                    }
+
+                    notTickFirebaseListeners.clear()
+                    RemoteFriendFactory.clearFriendListeners()
+                }
+            }
+            recordQuery!!.addValueEventListener(recordListener)
+
+            RemoteFriendFactory.setListener(userInfo!!)
+
+            userQuery = DatabaseWrapper.getUserQuery(newUserInfo)
+            userListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                    Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: " + dataSnapshot!!)
+
+                    setUserRecord(dataSnapshot)
+                }
+
+                override fun onCancelled(databaseError: DatabaseError?) {
+                    check(databaseError != null)
+                    Log.e("asdf", "DomainFactory.getMUserListener().onCancelled", databaseError.toException())
+
+                    MyCrashlytics.logException(databaseError.toException())
+                }
+            }
+
+            userQuery!!.addValueEventListener(userListener)
+        }
+    }
+
+    fun clearUserInfo() {
+        synchronized(domainFactory) {
+            val now = ExactTimeStamp.now
+
+            if (userInfo == null) {
+                check(recordQuery == null)
+                check(recordListener == null)
+                check(userQuery == null)
+                check(userListener == null)
+            } else {
+                check(recordQuery != null)
+                check(recordListener != null)
+                check(userQuery != null)
+                check(userListener != null)
+
+                localFactory.clearRemoteCustomTimeRecords()
+                Log.e("asdf", "clearing getMRemoteProjectFactory()", Exception())
+
+                remoteProjectFactory = null
+                RemoteFriendFactory.setInstance(null)
+
+                userInfo = null
+
+                recordQuery!!.removeEventListener(recordListener!!)
+                recordQuery = null
+                recordListener = null
+
+                RemoteFriendFactory.clearListener()
+
+                userQuery!!.removeEventListener(userListener!!)
+                userQuery = null
+                userListener = null
+
+                updateNotifications(now)
+
+                ObserverHolder.notifyDomainObservers(ArrayList())
+            }
+        }
+    }
+
+    fun setRemoteTaskRecords(dataSnapshot: DataSnapshot, source: SaveService.Source) {
+        synchronized(domainFactory) {
+            check(userInfo != null)
+
+            val now = ExactTimeStamp.now
+
+            localFactory.clearRemoteCustomTimeRecords()
+
+            val firstThereforeSilent = remoteProjectFactory == null
+            remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo!!, localFactory.uuid, now)
+
+            RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
+
+            if (tickData == null && notTickFirebaseListeners.isEmpty()) {
+                updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf())
+
+                save(0, source)
+            } else {
+                skipSave = true
+
+                if (tickData == null) {
+                    updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf())
+                } else {
+                    domainFactory.updateNotificationsTick(source, tickData!!.silent, tickData!!.source)
+
+                    if (!firstThereforeSilent) {
+                        Log.e("asdf", "not first, clearing getMTickData()")
+
+                        tickData!!.release()
+                        tickData = null
+                    } else {
+                        Log.e("asdf", "first, keeping getMTickData()")
+                    }
+                }
+
+                notTickFirebaseListeners.forEach { it.invoke(domainFactory) }
+                notTickFirebaseListeners.clear()
+
+                skipSave = false
+
+                save(0, source)
+            }
+        }
+    }
+
+    fun setUserRecord(dataSnapshot: DataSnapshot) {
+        synchronized(domainFactory) {
+            val userWrapper = dataSnapshot.getValue(UserWrapper::class.java)!!
+
+            val remoteRootUserRecord = RemoteRootUserRecord(false, userWrapper)
+            remoteRootUser = RemoteRootUser(remoteRootUserRecord)
+        }
+    }
+
+    fun addFirebaseListener(firebaseListener: Function1<DomainFactory, Unit>) {
+        synchronized(domainFactory) {
+            check(remoteProjectFactory?.isSaved != false)
+
+            notTickFirebaseListeners.add(firebaseListener)
+        }
+    }
+
+    fun removeFirebaseListener(firebaseListener: Function1<DomainFactory, Unit>) {
+        synchronized(domainFactory) {
+            notTickFirebaseListeners.remove(firebaseListener)
+        }
+    }
+
+    fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
+        synchronized(domainFactory) {
+            check(FirebaseAuth.getInstance().currentUser != null)
+
+            if (remoteProjectFactory != null && !remoteProjectFactory!!.isSaved && tickData == null) {
+                domainFactory.updateNotificationsTick(source, newTickData.silent, newTickData.source)
+
+                newTickData.release()
+            } else {
+                tickData = if (tickData != null) {
+                    mergeTickDatas(tickData!!, newTickData)
+                } else {
+                    newTickData
+                }
+            }
+        }
+    }
+
+    val isConnected: Boolean
+        get() {
+            synchronized(domainFactory) {
+                return remoteProjectFactory != null
+            }
+        }
+
+    val isConnectedAndSaved: Boolean
+        get() {
+            synchronized(domainFactory) {
+                check(remoteProjectFactory != null)
+
+                return remoteProjectFactory!!.isSaved
+            }
+        }
 
     // internal
 

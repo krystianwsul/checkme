@@ -113,13 +113,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         if (firebaseUser != null) {
             userInfo = UserInfo(firebaseUser)
 
-            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setUserInfo(SaveService.Source.GUI, userInfo!!)
+            KotlinDomainFactory.getKotlinDomainFactory().setUserInfo(SaveService.Source.GUI, userInfo!!)
 
             Log.e("asdf", "firebase logged in")
         } else {
             userInfo = null
 
-            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.clearUserInfo()
+            KotlinDomainFactory.getKotlinDomainFactory().clearUserInfo()
 
             Log.e("asdf", "firebase logged out")
         }

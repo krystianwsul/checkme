@@ -61,13 +61,14 @@ class TickJobIntentService : JobIntentService() {
 
         // still running?
         fun tick(silent: Boolean, sourceName: String, listener: (() -> Unit)? = null): Boolean {
-            val domainFactory = KotlinDomainFactory.getKotlinDomainFactory().domainFactory
+            val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+            val domainFactory = kotlinDomainFactory.domainFactory
 
             val listeners = listOfNotNull(listener)
 
-            if (domainFactory.isConnected) {
-                return if (domainFactory.isConnectedAndSaved) {
-                    domainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
+            if (kotlinDomainFactory.isConnected) {
+                return if (kotlinDomainFactory.isConnectedAndSaved) {
+                    kotlinDomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
                     true
                 } else {
                     domainFactory.updateNotificationsTick(SaveService.Source.SERVICE, silent, sourceName)
@@ -78,9 +79,9 @@ class TickJobIntentService : JobIntentService() {
 
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 return if (firebaseUser != null) {
-                    domainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
+                    kotlinDomainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
 
-                    domainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
+                    kotlinDomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
 
                     true
                 } else {

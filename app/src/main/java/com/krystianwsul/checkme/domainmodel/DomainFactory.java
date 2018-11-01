@@ -8,22 +8,14 @@ import android.util.Log;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
-import com.krystianwsul.checkme.firebase.RemoteRootUser;
 import com.krystianwsul.checkme.firebase.RemoteTask;
-import com.krystianwsul.checkme.firebase.json.UserWrapper;
-import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord;
 import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.MainActivity;
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment;
@@ -70,10 +62,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-import kotlin.jvm.functions.Function1;
-
 @SuppressLint("UseSparseArrays")
 public class DomainFactory {
 
@@ -89,235 +77,7 @@ public class DomainFactory {
 
     // misc
 
-    public synchronized void reset(@NonNull SaveService.Source source) {
-        UserInfo userInfo = kotlinDomainFactory.getUserInfo();
-        clearUserInfo();
-
-        KotlinDomainFactory.Companion.set_kotlinDomainFactory(null);
-        kotlinDomainFactory.localFactory.reset();
-
-        if (userInfo != null) setUserInfo(source, userInfo);
-
-        ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
-
-        ObserverHolder.INSTANCE.clear();
-    }
-
     // firebase
-
-    public synchronized void setUserInfo(@NonNull SaveService.Source source, @NonNull UserInfo userInfo) {
-        if (kotlinDomainFactory.getUserInfo() != null) {
-            check(kotlinDomainFactory.getRecordQuery() != null);
-            check(kotlinDomainFactory.getUserQuery() != null);
-
-            if (kotlinDomainFactory.getUserInfo().equals(userInfo))
-                return;
-
-            clearUserInfo();
-        }
-
-        check(kotlinDomainFactory.getUserInfo() == null);
-
-        check(kotlinDomainFactory.getRecordQuery() == null);
-        check(kotlinDomainFactory.getRecordListener() == null);
-
-        check(kotlinDomainFactory.getUserQuery() == null);
-        check(kotlinDomainFactory.getUserListener() == null);
-
-        kotlinDomainFactory.setUserInfo(userInfo);
-
-        DatabaseWrapper.INSTANCE.setUserInfo(userInfo, kotlinDomainFactory.localFactory.getUuid());
-
-        kotlinDomainFactory.setRecordQuery(DatabaseWrapper.INSTANCE.getTaskRecordsQuery(userInfo));
-        kotlinDomainFactory.setRecordListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.e("asdf", "DomainFactory.kotlinDomainFactory.getMRecordListener().onDataChange, dataSnapshot: " + dataSnapshot);
-                check(dataSnapshot != null);
-
-                setRemoteTaskRecords(dataSnapshot, source);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                check(databaseError != null);
-                Log.e("asdf", "DomainFactory.kotlinDomainFactory.getMRecordListener().onCancelled", databaseError.toException());
-
-                MyCrashlytics.INSTANCE.logException(databaseError.toException());
-
-                if (kotlinDomainFactory.getTickData() != null) {
-                    kotlinDomainFactory.getTickData().release();
-                    kotlinDomainFactory.setTickData(null);
-                }
-
-                kotlinDomainFactory.getNotTickFirebaseListeners().clear();
-                RemoteFriendFactory.Companion.clearFriendListeners();
-            }
-        });
-        kotlinDomainFactory.getRecordQuery().addValueEventListener(kotlinDomainFactory.getRecordListener());
-
-        RemoteFriendFactory.Companion.setListener(kotlinDomainFactory.getUserInfo());
-
-        kotlinDomainFactory.setUserQuery(DatabaseWrapper.INSTANCE.getUserQuery(userInfo));
-        kotlinDomainFactory.setUserListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.e("asdf", "DomainFactory.kotlinDomainFactory.getMUserListener().onDataChange, dataSnapshot: " + dataSnapshot);
-                check(dataSnapshot != null);
-
-                setUserRecord(dataSnapshot);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                check(databaseError != null);
-                Log.e("asdf", "DomainFactory.kotlinDomainFactory.getMUserListener().onCancelled", databaseError.toException());
-
-                MyCrashlytics.INSTANCE.logException(databaseError.toException());
-            }
-        });
-        kotlinDomainFactory.getUserQuery().addValueEventListener(kotlinDomainFactory.getUserListener());
-    }
-
-    public synchronized void clearUserInfo() {
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        if (kotlinDomainFactory.getUserInfo() == null) {
-            check(kotlinDomainFactory.getRecordQuery() == null);
-            check(kotlinDomainFactory.getRecordListener() == null);
-            check(kotlinDomainFactory.getUserQuery() == null);
-            check(kotlinDomainFactory.getUserListener() == null);
-        } else {
-            check(kotlinDomainFactory.getRecordQuery() != null);
-            check(kotlinDomainFactory.getRecordListener() != null);
-            check(kotlinDomainFactory.getUserQuery() != null);
-            check(kotlinDomainFactory.getUserListener() != null);
-
-            kotlinDomainFactory.localFactory.clearRemoteCustomTimeRecords();
-            Log.e("asdf", "clearing kotlinDomainFactory.getMRemoteProjectFactory()", new Exception());
-
-            kotlinDomainFactory.setRemoteProjectFactory(null);
-            RemoteFriendFactory.Companion.setInstance(null);
-
-            kotlinDomainFactory.setUserInfo(null);
-
-            kotlinDomainFactory.getRecordQuery().removeEventListener(kotlinDomainFactory.getRecordListener());
-            kotlinDomainFactory.setRecordQuery(null);
-            kotlinDomainFactory.setRecordListener(null);
-
-            RemoteFriendFactory.Companion.clearListener();
-
-            kotlinDomainFactory.getUserQuery().removeEventListener(kotlinDomainFactory.getUserListener());
-            kotlinDomainFactory.setUserQuery(null);
-            kotlinDomainFactory.setUserListener(null);
-
-            kotlinDomainFactory.updateNotifications(now);
-
-            ObserverHolder.INSTANCE.notifyDomainObservers(new ArrayList<>());
-        }
-    }
-
-    private synchronized void setRemoteTaskRecords(@NonNull DataSnapshot dataSnapshot, @NonNull SaveService.Source source) {
-        check(kotlinDomainFactory.getUserInfo() != null);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        kotlinDomainFactory.localFactory.clearRemoteCustomTimeRecords();
-
-        boolean firstThereforeSilent = (kotlinDomainFactory.getRemoteProjectFactory() == null);
-        kotlinDomainFactory.setRemoteProjectFactory(new RemoteProjectFactory(kotlinDomainFactory, dataSnapshot.getChildren(), kotlinDomainFactory.getUserInfo(), kotlinDomainFactory.localFactory.getUuid(), now));
-
-        RemoteFriendFactory.Companion.tryNotifyFriendListeners(); // assuming they're all getters
-
-        if (kotlinDomainFactory.getTickData() == null && kotlinDomainFactory.getNotTickFirebaseListeners().isEmpty()) {
-            kotlinDomainFactory.updateNotifications(firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
-
-            kotlinDomainFactory.save(0, source);
-        } else {
-            kotlinDomainFactory.setSkipSave(true);
-
-            if (kotlinDomainFactory.getTickData() == null) {
-                kotlinDomainFactory.updateNotifications(firstThereforeSilent, ExactTimeStamp.Companion.getNow(), new ArrayList<>());
-            } else {
-                updateNotificationsTick(source, kotlinDomainFactory.getTickData().getSilent(), kotlinDomainFactory.getTickData().getSource());
-
-                if (!firstThereforeSilent) {
-                    Log.e("asdf", "not first, clearing kotlinDomainFactory.getMTickData()");
-
-                    kotlinDomainFactory.getTickData().release();
-                    kotlinDomainFactory.setTickData(null);
-                } else {
-                    Log.e("asdf", "first, keeping kotlinDomainFactory.getMTickData()");
-                }
-            }
-
-            Stream.of(kotlinDomainFactory.getNotTickFirebaseListeners()).forEach(firebaseListener -> firebaseListener.invoke(this));
-            kotlinDomainFactory.getNotTickFirebaseListeners().clear();
-
-            kotlinDomainFactory.setSkipSave(false);
-
-            kotlinDomainFactory.save(0, source);
-        }
-    }
-
-    private synchronized void setUserRecord(@NonNull DataSnapshot dataSnapshot) {
-        UserWrapper userWrapper = dataSnapshot.getValue(UserWrapper.class);
-        check(userWrapper != null);
-
-        RemoteRootUserRecord remoteRootUserRecord = new RemoteRootUserRecord(false, userWrapper);
-        kotlinDomainFactory.setRemoteRootUser(new RemoteRootUser(remoteRootUserRecord));
-    }
-
-    public synchronized void addFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        kotlinDomainFactory.getNotTickFirebaseListeners().add(firebaseListener);
-    }
-
-    public synchronized void removeFirebaseListener(@NonNull Function1<DomainFactory, Unit> firebaseListener) {
-        kotlinDomainFactory.getNotTickFirebaseListeners().remove(firebaseListener);
-    }
-
-    public synchronized void setFirebaseTickListener(@NonNull SaveService.Source source, @NonNull TickData tickData) {
-        check(FirebaseAuth.getInstance().getCurrentUser() != null);
-
-        if ((kotlinDomainFactory.getRemoteProjectFactory() != null) && !kotlinDomainFactory.getRemoteProjectFactory().isSaved() && (kotlinDomainFactory.getTickData() == null)) {
-            updateNotificationsTick(source, tickData.getSilent(), tickData.getSource());
-
-            tickData.release();
-        } else {
-            if (kotlinDomainFactory.getTickData() != null) {
-                kotlinDomainFactory.setTickData(mergeTickDatas(kotlinDomainFactory.getTickData(), tickData));
-            } else {
-                kotlinDomainFactory.setTickData(tickData);
-            }
-        }
-    }
-
-    @NonNull
-    private static TickData mergeTickDatas(@NonNull TickData oldTickData, @NonNull TickData newTickData) {
-        boolean silent = (oldTickData.getSilent() && newTickData.getSilent());
-
-        String source = "merged (" + oldTickData + ", " + newTickData + ")";
-
-        oldTickData.releaseWakelock();
-        newTickData.releaseWakelock();
-
-        List<Function0<kotlin.Unit>> listeners = new ArrayList<>(oldTickData.getListeners());
-        listeners.addAll(newTickData.getListeners());
-
-        return new TickData(silent, source, listeners);
-    }
-
-    public synchronized boolean isConnected() {
-        return (kotlinDomainFactory.getRemoteProjectFactory() != null);
-    }
-
-    public synchronized boolean isConnectedAndSaved() {
-        check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-        return kotlinDomainFactory.getRemoteProjectFactory().isSaved();
-    }
 
     // gets
 

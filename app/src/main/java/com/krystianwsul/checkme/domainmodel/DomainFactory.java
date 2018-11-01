@@ -81,21 +81,8 @@ public class DomainFactory {
 
     // gets
 
-    @SuppressWarnings("EmptyMethod")
-    private void fakeDelay() {
-        /*
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-
-        }
-        */
-    }
-
     @NonNull
     public synchronized EditInstanceViewModel.Data getEditInstanceData(@NonNull InstanceKey instanceKey) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstanceData");
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
@@ -121,8 +108,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized EditInstancesViewModel.Data getEditInstancesData(@NonNull List<InstanceKey> instanceKeys) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getEditInstancesData");
 
         check(instanceKeys.size() > 1);
@@ -159,8 +144,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ShowCustomTimeViewModel.Data getShowCustomTimeData(int localCustomTimeId) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimeData");
 
         LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(localCustomTimeId);
@@ -174,8 +157,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ShowCustomTimesViewModel.Data getShowCustomTimesData() {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowCustomTimesData");
 
         List<LocalCustomTime> currentCustomTimes = kotlinDomainFactory.getCurrentCustomTimes();
@@ -192,8 +173,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized DayViewModel.DayData getGroupListData(@NonNull ExactTimeStamp now, int position, @NonNull MainActivity.TimeRange timeRange) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
 
         check(position >= 0);
@@ -281,8 +260,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ShowGroupViewModel.Data getShowGroupData(@NonNull TimeStamp timeStamp) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowGroupData");
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
@@ -305,8 +282,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ShowTaskInstancesViewModel.Data getShowTaskInstancesData(@NonNull TaskKey taskKey) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskInstancesData");
 
         Task task = kotlinDomainFactory.getTaskForce(taskKey);
@@ -346,8 +321,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ShowNotificationGroupViewModel.Data getShowNotificationGroupData(@NonNull Set<InstanceKey> instanceKeys) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowNotificationGroupData");
 
         check(!instanceKeys.isEmpty());
@@ -389,8 +362,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ShowInstanceViewModel.Data getShowInstanceData(@NonNull InstanceKey instanceKey) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowInstanceData");
 
         Task task = kotlinDomainFactory.getTaskIfPresent(instanceKey.getTaskKey());
@@ -486,8 +457,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized CreateTaskViewModel.Data getCreateTaskData(@Nullable TaskKey taskKey, @Nullable List<TaskKey> joinTaskKeys) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getCreateTaskData");
 
         check(taskKey == null || joinTaskKeys == null);
@@ -578,8 +547,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ShowTaskViewModel.Data getShowTaskData(@NonNull TaskKey taskKey) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskData");
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
@@ -601,8 +568,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized MainViewModel.Data getMainData() {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getMainData");
 
         ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
@@ -612,8 +577,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ProjectListViewModel.Data getProjectListData() {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getProjectListData");
 
         check(kotlinDomainFactory.getRemoteProjectFactory() != null);
@@ -635,8 +598,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized FriendListViewModel.Data getFriendListData() {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getFriendListData");
 
         check(RemoteFriendFactory.Companion.hasFriends());
@@ -649,8 +610,6 @@ public class DomainFactory {
 
     @NonNull
     public synchronized ShowProjectViewModel.Data getShowProjectData(@Nullable String projectId) {
-        fakeDelay();
-
         MyCrashlytics.INSTANCE.log("DomainFactory.getShowProjectData");
 
         check(kotlinDomainFactory.getRemoteProjectFactory() != null);

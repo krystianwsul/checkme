@@ -1259,6 +1259,43 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             notifyCloud(childTask.remoteNullableProject)
         }
     }
+
+    //@Synchronized
+    fun updateChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, parentTaskKey: TaskKey, note: String?): TaskKey {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.updateChildTask")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!TextUtils.isEmpty(name))
+
+            val task = getTaskForce(taskKey)
+            check(task.current(now))
+
+            val newParentTask = getTaskForce(parentTaskKey)
+            check(task.current(now))
+
+            task.setName(name, note)
+
+            val oldParentTask = task.getParentTask(now)
+            if (oldParentTask == null) {
+                task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+
+                newParentTask.addChild(task, now)
+            } else if (oldParentTask !== newParentTask) {
+                getParentTaskHierarchy(task, now)!!.setEndExactTimeStamp(now)
+
+                newParentTask.addChild(task, now)
+            }
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(task.remoteNullableProject)
+
+            return task.taskKey
+        }
+    }
     
     // internal
 

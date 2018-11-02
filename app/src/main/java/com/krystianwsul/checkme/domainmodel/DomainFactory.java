@@ -48,45 +48,6 @@ public class DomainFactory {
 
     // sets
 
-    @NonNull
-    public synchronized TaskKey updateChildTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.updateChildTask");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!TextUtils.isEmpty(name));
-
-        Task task = kotlinDomainFactory.getTaskForce(taskKey);
-        check(task.current(now));
-
-        Task newParentTask = kotlinDomainFactory.getTaskForce(parentTaskKey);
-        check(task.current(now));
-
-        task.setName(name, note);
-
-        Task oldParentTask = task.getParentTask(now);
-        if (oldParentTask == null) {
-            Stream.of(task.getCurrentSchedules(now))
-                    .forEach(schedule -> schedule.setEndExactTimeStamp(now));
-
-            newParentTask.addChild(task, now);
-        } else if (oldParentTask != newParentTask) {
-            TaskHierarchy oldTaskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(task, now);
-            check(oldTaskHierarchy != null);
-
-            oldTaskHierarchy.setEndExactTimeStamp(now);
-
-            newParentTask.addChild(task, now);
-        }
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
-
-        return task.getTaskKey();
-    }
-
     public synchronized void setTaskEndTimeStamp(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setTaskEndTimeStamp");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());

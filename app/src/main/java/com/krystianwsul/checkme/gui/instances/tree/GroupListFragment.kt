@@ -189,7 +189,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskEndTimeStamps((mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                    KotlinDomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }

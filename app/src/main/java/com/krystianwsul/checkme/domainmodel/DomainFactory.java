@@ -12,10 +12,7 @@ import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
-import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
-import com.krystianwsul.checkme.utils.InstanceKey;
-import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
@@ -47,103 +44,6 @@ public class DomainFactory {
     // gets
 
     // sets
-
-    public synchronized void setTaskEndTimeStamp(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setTaskEndTimeStamp");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Task task = kotlinDomainFactory.getTaskForce(taskKey);
-        check(task.current(now));
-
-        task.setEndExactTimeStamp(now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
-    }
-
-    public synchronized void setInstanceOrdinal(int dataId, @NonNull InstanceKey instanceKey, double ordinal) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceOrdinal");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-
-        instance.setOrdinal(ordinal, now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, SaveService.Source.GUI);
-
-        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
-    }
-
-    public synchronized void setTaskHierarchyOrdinal(int dataId, @NonNull HierarchyData hierarchyData) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setTaskHierarchyOrdinal");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        RemoteProject remoteProject;
-        TaskHierarchy taskHierarchy;
-        if (hierarchyData.getTaskHierarchyKey() instanceof TaskHierarchyKey.LocalTaskHierarchyKey) {
-            TaskHierarchyKey.LocalTaskHierarchyKey localTaskHierarchyKey = (TaskHierarchyKey.LocalTaskHierarchyKey) hierarchyData.getTaskHierarchyKey();
-
-            remoteProject = null;
-            taskHierarchy = kotlinDomainFactory.localFactory.getTaskHierarchy(localTaskHierarchyKey);
-        } else {
-            check(hierarchyData.getTaskHierarchyKey() instanceof TaskHierarchyKey.RemoteTaskHierarchyKey);
-
-            TaskHierarchyKey.RemoteTaskHierarchyKey remoteTaskHierarchyKey = (TaskHierarchyKey.RemoteTaskHierarchyKey) hierarchyData.getTaskHierarchyKey();
-
-            remoteProject = kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjectForce(remoteTaskHierarchyKey.getProjectId());
-            taskHierarchy = remoteProject.getTaskHierarchy(remoteTaskHierarchyKey.getTaskHierarchyId());
-        }
-
-        check(taskHierarchy.current(now));
-
-        taskHierarchy.setOrdinal(hierarchyData.getOrdinal());
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, SaveService.Source.GUI);
-
-        if (remoteProject != null) kotlinDomainFactory.notifyCloud(remoteProject);
-    }
-
-    public synchronized void setTaskEndTimeStamps(int dataId, @NonNull SaveService.Source source, @NonNull ArrayList<TaskKey> taskKeys) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setTaskEndTimeStamps");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!taskKeys.isEmpty());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        List<Task> tasks = Stream.of(taskKeys).map(kotlinDomainFactory::getTaskForce)
-                .collect(Collectors.toList());
-
-        check(Stream.of(tasks)
-                .allMatch(task -> task.current(now)));
-
-        Stream.of(tasks)
-                .forEach(task -> task.setEndExactTimeStamp(now));
-
-        Set<RemoteProject> remoteProjects = Stream.of(tasks)
-                .filter(Task::belongsToRemoteProject)
-                .map(Task::getRemoteNonNullProject)
-                .collect(Collectors.toSet());
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(remoteProjects);
-    }
 
     public synchronized int createCustomTime(@NonNull SaveService.Source source, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createCustomTime");

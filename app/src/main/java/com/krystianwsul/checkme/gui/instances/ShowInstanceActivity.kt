@@ -126,7 +126,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     if (!it.exists)
                         showInstanceViewModel.stop()
 
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskEndTimeStamp(dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                    KotlinDomainFactory.getKotlinDomainFactory().setTaskEndTimeStamp(dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
                     if (!it.exists)
                         finish()

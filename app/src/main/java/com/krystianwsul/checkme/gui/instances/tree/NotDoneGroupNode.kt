@@ -362,12 +362,12 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             if (it.hierarchyData != null) {
                 it.hierarchyData.ordinal = ordinal
 
-                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setTaskHierarchyOrdinal(groupListFragment.mDataId!!, it.hierarchyData)
+                KotlinDomainFactory.getKotlinDomainFactory().setTaskHierarchyOrdinal(groupListFragment.mDataId!!, it.hierarchyData)
             } else {
                 it.ordinal = ordinal
 
 
-                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceOrdinal(groupListFragment.mDataId!!, it.InstanceKey, ordinal)
+                KotlinDomainFactory.getKotlinDomainFactory().setInstanceOrdinal(groupListFragment.mDataId!!, it.InstanceKey, ordinal)
             }
         }
     }

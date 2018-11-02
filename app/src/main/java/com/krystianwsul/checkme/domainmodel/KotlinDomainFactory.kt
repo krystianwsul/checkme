@@ -32,6 +32,7 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManger
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
@@ -1294,6 +1295,108 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             notifyCloud(task.remoteNullableProject)
 
             return task.taskKey
+        }
+    }
+
+    //@Synchronized
+    fun setTaskEndTimeStamp(dataId: Int, source: SaveService.Source, taskKey: TaskKey) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+
+            val task = getTaskForce(taskKey)
+            check(task.current(now))
+
+            task.setEndExactTimeStamp(now)
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(task.remoteNullableProject)
+        }
+    }
+
+    //@Synchronized
+    fun setInstanceOrdinal(dataId: Int, instanceKey: InstanceKey, ordinal: Double) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstanceOrdinal")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+
+            val instance = getInstance(instanceKey)
+
+            instance.setOrdinal(ordinal, now)
+
+            updateNotifications(now)
+
+            save(dataId, SaveService.Source.GUI)
+
+            notifyCloud(instance.remoteNullableProject)
+        }
+    }
+
+    //@Synchronized
+    fun setTaskHierarchyOrdinal(dataId: Int, hierarchyData: HierarchyData) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setTaskHierarchyOrdinal")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+
+            val remoteProject: RemoteProject?
+            val taskHierarchy: TaskHierarchy
+            if (hierarchyData.taskHierarchyKey is TaskHierarchyKey.LocalTaskHierarchyKey) {
+
+                remoteProject = null
+                taskHierarchy = localFactory.getTaskHierarchy(hierarchyData.taskHierarchyKey)
+            } else {
+                check(hierarchyData.taskHierarchyKey is TaskHierarchyKey.RemoteTaskHierarchyKey)
+
+                val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey
+
+                remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
+                taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
+            }
+
+            check(taskHierarchy.current(now))
+
+            taskHierarchy.ordinal = hierarchyData.ordinal
+
+            updateNotifications(now)
+
+            save(dataId, SaveService.Source.GUI)
+
+            if (remoteProject != null)
+                notifyCloud(remoteProject)
+        }
+    }
+
+    //@Synchronized
+    fun setTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskKeys: ArrayList<TaskKey>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!taskKeys.isEmpty())
+
+            val now = ExactTimeStamp.now
+
+            val tasks = taskKeys.map { getTaskForce(it) }
+            check(tasks.all { it.current(now) })
+
+            tasks.forEach { it.setEndExactTimeStamp(now) }
+
+            val remoteProjects = tasks.mapNotNull { it.remoteNullableProject }.toSet()
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(remoteProjects)
         }
     }
     

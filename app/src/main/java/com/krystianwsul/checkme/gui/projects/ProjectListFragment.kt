@@ -221,7 +221,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         private lateinit var treeViewAdapter: TreeViewAdapter
         private lateinit var treeNodeCollection: TreeNodeCollection
 
-        fun initialize(projectDatas: TreeMap<String, ProjectListViewModel.ProjectData>): TreeViewAdapter {
+        fun initialize(projectDatas: SortedMap<String, ProjectListViewModel.ProjectData>): TreeViewAdapter {
             projectNodes = projectDatas.values
                     .map { ProjectNode(this, it) }
                     .toMutableList()

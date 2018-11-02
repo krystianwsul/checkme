@@ -780,6 +780,55 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    //@Synchronized
+    fun getMainData(): MainViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getMainData")
+
+            val now = ExactTimeStamp.now
+
+            return MainViewModel.Data(getMainData(now))
+        }
+    }
+
+    //@Synchronized
+    fun getProjectListData(): ProjectListViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getProjectListData")
+
+            check(remoteProjectFactory != null)
+
+            val now = ExactTimeStamp.now
+
+            val projectDatas = remoteProjectFactory!!.remoteProjects
+                    .values
+                    .filter { it.current(now) }
+                    .associate {
+                        val users = it.users.joinToString(", ") { it.name }
+
+                        it.id to ProjectListViewModel.ProjectData(it.id, it.name, users)
+                    }
+                    .toSortedMap()
+
+            return ProjectListViewModel.Data(projectDatas)
+        }
+    }
+
+    //@Synchronized
+    fun getFriendListData(): FriendListViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getFriendListData")
+
+            check(RemoteFriendFactory.hasFriends())
+
+            val userListDatas = RemoteFriendFactory.getFriends()
+                    .map { FriendListViewModel.UserListData(it.name, it.email, it.id) }
+                    .toSet()
+
+            return FriendListViewModel.Data(userListDatas)
+        }
+    }
+
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {

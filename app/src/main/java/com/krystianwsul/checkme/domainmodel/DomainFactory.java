@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
-import com.krystianwsul.checkme.firebase.RemoteProjectUser;
 import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
@@ -24,9 +23,6 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
-import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
-import com.krystianwsul.checkme.viewmodels.MainViewModel;
-import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
 
 import java.util.ArrayList;
@@ -36,7 +32,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 @SuppressLint("UseSparseArrays")
 public class DomainFactory {
@@ -56,48 +51,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-    @NonNull
-    public synchronized MainViewModel.Data getMainData() {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getMainData");
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        return new MainViewModel.Data(kotlinDomainFactory.getMainData(now));
-    }
-
-    @NonNull
-    public synchronized ProjectListViewModel.Data getProjectListData() {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getProjectListData");
-
-        check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        TreeMap<String, ProjectListViewModel.ProjectData> projectDatas = Stream.of(kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjects().values())
-                .filter(remoteProject -> remoteProject.current(now))
-                .collect(Collectors.toMap(RemoteProject::getId, remoteProject -> {
-                    String users = Stream.of(remoteProject.getUsers())
-                            .map(RemoteProjectUser::getName)
-                            .collect(Collectors.joining(", "));
-
-                    return new ProjectListViewModel.ProjectData(remoteProject.getId(), remoteProject.getName(), users);
-                }, TreeMap::new));
-
-        return new ProjectListViewModel.Data(projectDatas);
-    }
-
-    @NonNull
-    public synchronized FriendListViewModel.Data getFriendListData() {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getFriendListData");
-
-        check(RemoteFriendFactory.Companion.hasFriends());
-
-        Set<FriendListViewModel.UserListData> userListDatas = Stream.of(RemoteFriendFactory.Companion.getFriends()).map(remoteRootUser -> new FriendListViewModel.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId()))
-                .collect(Collectors.toSet());
-
-        return new FriendListViewModel.Data(userListDatas);
-    }
 
     @NonNull
     public synchronized ShowProjectViewModel.Data getShowProjectData(@Nullable String projectId) {

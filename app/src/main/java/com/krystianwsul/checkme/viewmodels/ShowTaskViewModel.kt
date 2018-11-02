@@ -13,7 +13,7 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
         internalStart(if (taskKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING)
     }
 
-    override fun getData() = domainFactory.getShowTaskData(taskKey)
+    override fun getData() = kotlinDomainFactory.getShowTaskData(taskKey)
 
     data class Data(
             val name: String,

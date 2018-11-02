@@ -758,6 +758,28 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    //@Synchronized
+    fun getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.getShowTaskData")
+
+            val now = ExactTimeStamp.now
+
+            val task = getTaskForce(taskKey)
+            check(task.current(now))
+
+            val childTaskDatas = task.getChildTaskHierarchies(now)
+                    .map {
+                        val childTask = it.childTask
+
+                        TaskListFragment.ChildTaskData(childTask.name, childTask.getScheduleText(now), getTaskListChildTaskDatas(childTask, now), childTask.note, childTask.startExactTimeStamp, childTask.taskKey, HierarchyData(it.taskHierarchyKey, it.ordinal))
+                    }
+                    .sorted()
+
+            return ShowTaskViewModel.Data(task.name, task.getScheduleText(now), TaskListFragment.TaskData(childTaskDatas, task.note), !task.existingInstances.isEmpty())
+        }
+    }
+
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
@@ -1161,7 +1183,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 .toList()
     }
 
-    fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<TaskListFragment.ChildTaskData> {
+    private fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(now)
                 .asSequence()
                 .sortedBy { it.ordinal }

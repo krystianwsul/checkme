@@ -14,7 +14,6 @@ import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
 import com.krystianwsul.checkme.gui.HierarchyData;
-import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyKey;
@@ -29,12 +28,10 @@ import com.krystianwsul.checkme.viewmodels.FriendListViewModel;
 import com.krystianwsul.checkme.viewmodels.MainViewModel;
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel;
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
-import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,27 +56,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-    @NonNull
-    public synchronized ShowTaskViewModel.Data getShowTaskData(@NonNull TaskKey taskKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowTaskData");
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Task task = kotlinDomainFactory.getTaskForce(taskKey);
-        check(task.current(now));
-
-        List<TaskListFragment.ChildTaskData> childTaskDatas = Stream.of(task.getChildTaskHierarchies(now))
-                .map(taskHierarchy -> {
-                    Task childTask = taskHierarchy.getChildTask();
-
-                    return new TaskListFragment.ChildTaskData(childTask.getName(), childTask.getScheduleText(now), kotlinDomainFactory.getTaskListChildTaskDatas(childTask, now), childTask.getNote(), childTask.getStartExactTimeStamp(), childTask.getTaskKey(), new HierarchyData(taskHierarchy.getTaskHierarchyKey(), taskHierarchy.getOrdinal()));
-                })
-                .collect(Collectors.toList());
-        Collections.sort(childTaskDatas, TaskListFragment.ChildTaskData::compareTo);
-
-        return new ShowTaskViewModel.Data(task.getName(), task.getScheduleText(now), new TaskListFragment.TaskData(childTaskDatas, task.getNote()), !task.getExistingInstances().isEmpty());
-    }
 
     @NonNull
     public synchronized MainViewModel.Data getMainData() {

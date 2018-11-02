@@ -9,16 +9,13 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
-import com.krystianwsul.checkme.domainmodel.local.LocalTask;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.firebase.RemoteProjectUser;
-import com.krystianwsul.checkme.firebase.RemoteTask;
 import com.krystianwsul.checkme.gui.HierarchyData;
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
-import com.krystianwsul.checkme.utils.CustomTimeKey;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
@@ -38,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -63,96 +59,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-    @NonNull
-    public synchronized CreateTaskViewModel.Data getCreateTaskData(@Nullable TaskKey taskKey, @Nullable List<TaskKey> joinTaskKeys) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getCreateTaskData");
-
-        check(taskKey == null || joinTaskKeys == null);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Map<CustomTimeKey, CustomTime> customTimes = Stream.of(kotlinDomainFactory.getCurrentCustomTimes())
-                .collect(Collectors.toMap(CustomTime::getCustomTimeKey, customTime -> customTime));
-
-        List<TaskKey> excludedTaskKeys = new ArrayList<>();
-        if (taskKey != null)
-            excludedTaskKeys.add(taskKey);
-        else if (joinTaskKeys != null)
-            excludedTaskKeys.addAll(joinTaskKeys);
-
-        CreateTaskViewModel.TaskData taskData = null;
-        Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> parentTreeDatas;
-        if (taskKey != null) {
-            Task task = kotlinDomainFactory.getTaskForce(taskKey);
-
-            CreateTaskViewModel.ParentKey.TaskParentKey taskParentKey;
-            List<CreateTaskViewModel.ScheduleData> scheduleDatas = null;
-
-            if (task.isRootTask(now)) {
-                List<Schedule> schedules = task.getCurrentSchedules(now);
-
-                taskParentKey = null;
-
-                if (!schedules.isEmpty()) {
-                    kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> pair = kotlinDomainFactory.getScheduleDatas(schedules, now);
-                    customTimes.putAll(pair.getFirst());
-                    scheduleDatas = new ArrayList<>(pair.getSecond().keySet());
-                }
-            } else {
-                Task parentTask = task.getParentTask(now);
-                check(parentTask != null);
-
-                taskParentKey = new CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.getTaskKey());
-            }
-
-            RemoteProject remoteProject = task.getRemoteNullableProject();
-            String projectName = null;
-            if (remoteProject != null)
-                projectName = remoteProject.getName();
-
-            taskData = new CreateTaskViewModel.TaskData(task.getName(), taskParentKey, scheduleDatas, task.getNote(), projectName);
-
-            if (task instanceof RemoteTask) {
-                RemoteTask remoteTask = (RemoteTask) task;
-
-                parentTreeDatas = kotlinDomainFactory.getProjectTaskTreeDatas(now, remoteTask.getRemoteProject(), excludedTaskKeys);
-            } else {
-                check(task instanceof LocalTask);
-
-                parentTreeDatas = kotlinDomainFactory.getParentTreeDatas(now, excludedTaskKeys);
-            }
-        } else {
-            String projectId = null;
-            if (joinTaskKeys != null) {
-                check(joinTaskKeys.size() > 1);
-
-                List<String> projectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
-                        .distinct()
-                        .collect(Collectors.toList());
-
-                check(projectIds.size() == 1);
-
-                projectId = projectIds.get(0);
-            }
-
-            if (!TextUtils.isEmpty(projectId)) {
-                check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-                RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjectForce(projectId);
-
-                parentTreeDatas = kotlinDomainFactory.getProjectTaskTreeDatas(now, remoteProject, excludedTaskKeys);
-            } else {
-                parentTreeDatas = kotlinDomainFactory.getParentTreeDatas(now, excludedTaskKeys);
-            }
-        }
-
-        @SuppressLint("UseSparseArrays") HashMap<CustomTimeKey, CreateTaskViewModel.CustomTimeData> customTimeDatas = new HashMap<>();
-        for (CustomTime customTime : customTimes.values())
-            customTimeDatas.put(customTime.getCustomTimeKey(), new CreateTaskViewModel.CustomTimeData(customTime.getCustomTimeKey(), customTime.getName(), customTime.getHourMinutes()));
-
-        return new CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas);
-    }
 
     @NonNull
     public synchronized ShowTaskViewModel.Data getShowTaskData(@NonNull TaskKey taskKey) {

@@ -28,7 +28,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         internalStart(firebaseLevel)
     }
 
-    override fun getData() = domainFactory.getCreateTaskData(taskKey, joinTaskKeys)
+    override fun getData() = kotlinDomainFactory.getCreateTaskData(taskKey, joinTaskKeys)
 
     sealed class ScheduleData {
 

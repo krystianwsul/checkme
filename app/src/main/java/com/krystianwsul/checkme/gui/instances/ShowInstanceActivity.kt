@@ -186,7 +186,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                 KotlinDomainFactory.getKotlinDomainFactory().let {
                     val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
-                    it.domainFactory.setInstanceNotified(data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
+                    it.setInstanceNotified(data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
                 }
             }
 

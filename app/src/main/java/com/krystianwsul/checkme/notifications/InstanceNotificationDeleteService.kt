@@ -26,6 +26,6 @@ class InstanceNotificationDeleteService : IntentService("InstanceNotificationDel
     override fun onHandleIntent(intent: Intent?) {
         val instanceKey = intent!!.getParcelableExtra<InstanceKey>(INSTANCE_KEY)!!
 
-        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey)
+        KotlinDomainFactory.getKotlinDomainFactory().setInstanceNotified(0, SaveService.Source.SERVICE, instanceKey)
     }
 }

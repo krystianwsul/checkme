@@ -31,6 +31,6 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!
         check(!instanceKeys.isEmpty())
 
-        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesNotified(SaveService.Source.SERVICE, instanceKeys)
+        KotlinDomainFactory.getKotlinDomainFactory().setInstancesNotified(SaveService.Source.SERVICE, instanceKeys)
     }
 }

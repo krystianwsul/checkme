@@ -1050,6 +1050,35 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             return instance.done
         }
     }
+
+    //@Synchronized
+    fun setInstancesNotified(source: SaveService.Source, instanceKeys: List<InstanceKey>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstancesNotified")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!instanceKeys.isEmpty())
+
+            val now = ExactTimeStamp.now
+
+            for (instanceKey in instanceKeys)
+                setInstanceNotified(instanceKey, now)
+
+            save(0, source)
+        }
+    }
+
+    //@Synchronized
+    fun setInstanceNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstanceNotified")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            setInstanceNotified(instanceKey, ExactTimeStamp.now)
+
+            save(dataId, source)
+        }
+    }
     
     // internal
 

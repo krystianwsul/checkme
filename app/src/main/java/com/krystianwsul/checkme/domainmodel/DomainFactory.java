@@ -49,29 +49,6 @@ public class DomainFactory {
 
     // sets
 
-    public synchronized void setInstancesNotified(@NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesNotified");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!instanceKeys.isEmpty());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        for (InstanceKey instanceKey : instanceKeys)
-            kotlinDomainFactory.setInstanceNotified(instanceKey, now);
-
-        kotlinDomainFactory.save(0, source);
-    }
-
-    public synchronized void setInstanceNotified(int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotified");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        kotlinDomainFactory.setInstanceNotified(instanceKey, ExactTimeStamp.Companion.getNow());
-
-        kotlinDomainFactory.save(dataId, source);
-    }
-
     @NonNull
     Task createScheduleRootTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         check(!TextUtils.isEmpty(name));

@@ -134,7 +134,7 @@ class EditInstanceActivity : AbstractActivity() {
                 if (isValidDateTime) {
                     editInstanceViewModel.stop()
 
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceKey, date!!, timePairPersist!!.timePair)
+                    KotlinDomainFactory.getKotlinDomainFactory().setInstanceDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceKey, date!!, timePairPersist!!.timePair)
                     finish()
                 }
             }

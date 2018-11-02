@@ -53,49 +53,6 @@ public class DomainFactory {
 
     // sets
 
-    public synchronized void setInstanceDateTime(int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceDateTime");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        instance.setInstanceDateTime(instanceDate, instanceTimePair, now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
-    }
-
-    public synchronized void setInstancesDateTime(int dataId, @NonNull SaveService.Source source, @NonNull Set<InstanceKey> instanceKeys, @NonNull Date instanceDate, @NonNull TimePair instanceTimePair) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesDateTime");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(instanceKeys.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        List<Instance> instances = Stream.of(instanceKeys).map(kotlinDomainFactory::getInstance)
-                .collect(Collectors.toList());
-
-        Stream.of(instances)
-                .forEach(instance -> instance.setInstanceDateTime(instanceDate, instanceTimePair, now));
-
-        Set<RemoteProject> remoteProjects = Stream.of(instances)
-                .filter(Instance::belongsToRemoteProject)
-                .map(Instance::getRemoteNonNullProject)
-                .collect(Collectors.toSet());
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(remoteProjects);
-    }
-
     public synchronized void setInstanceAddHourService(@NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourService");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());

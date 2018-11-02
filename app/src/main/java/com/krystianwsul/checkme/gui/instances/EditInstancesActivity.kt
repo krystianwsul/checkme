@@ -137,7 +137,7 @@ class EditInstancesActivity : AbstractActivity() {
                 checkNotNull(mData)
 
                 if (isValidDateTime) {
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesDateTime(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
+                    KotlinDomainFactory.getKotlinDomainFactory().setInstancesDateTime(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
 
                     finish()
                 }

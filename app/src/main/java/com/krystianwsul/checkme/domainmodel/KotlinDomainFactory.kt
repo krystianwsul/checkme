@@ -862,6 +862,53 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    // sets
+
+    //@Synchronized
+    fun setInstanceDateTime(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, instanceDate: Date, instanceTimePair: TimePair) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstanceDateTime")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val instance = getInstance(instanceKey)
+
+            val now = ExactTimeStamp.now
+
+            instance.setInstanceDateTime(instanceDate, instanceTimePair, now)
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(instance.remoteNullableProject)
+        }
+    }
+
+    //@Synchronized
+    fun setInstancesDateTime(dataId: Int, source: SaveService.Source, instanceKeys: Set<InstanceKey>, instanceDate: Date, instanceTimePair: TimePair) {
+        MyCrashlytics.log("DomainFactory.setInstancesDateTime")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+        check(instanceKeys.size > 1)
+
+        val now = ExactTimeStamp.now
+
+        val instances = instanceKeys.map(this::getInstance)
+
+        instances.forEach { it.setInstanceDateTime(instanceDate, instanceTimePair, now) }
+
+        val remoteProjects = instances
+                .filter { it.belongsToRemoteProject() }
+                .map { it.remoteNonNullProject }
+                .toSet()
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(remoteProjects)
+    }
+    
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {

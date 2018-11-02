@@ -286,7 +286,7 @@ class CreateTaskActivity : AbstractActivity() {
                         } else {
                             check(mData!!.taskData == null)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.createChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mNote)
+                            KotlinDomainFactory.getKotlinDomainFactory().createChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mNote)
 
                             finish()
                         }

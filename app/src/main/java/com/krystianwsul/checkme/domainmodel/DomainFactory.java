@@ -48,32 +48,6 @@ public class DomainFactory {
 
     // sets
 
-    Task createChildTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
-        check(!TextUtils.isEmpty(name));
-
-        Task parentTask = kotlinDomainFactory.getTaskForce(parentTaskKey);
-        check(parentTask.current(now));
-
-        Task childTask = parentTask.createChildTask(now, name, note);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(childTask.getRemoteNullableProject());
-
-        return childTask;
-    }
-
-    public synchronized void createChildTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.createChildTask");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        createChildTask(now, dataId, source, parentTaskKey, name, note);
-    }
-
     public synchronized void createJoinChildTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createJoinChildTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());

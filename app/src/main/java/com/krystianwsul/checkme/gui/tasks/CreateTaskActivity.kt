@@ -280,7 +280,7 @@ class CreateTaskActivity : AbstractActivity() {
                             check(mData!!.taskData == null)
                             check(mTaskKeys!!.size > 1)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.createJoinChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys!!, mNote)
+                            KotlinDomainFactory.getKotlinDomainFactory().createJoinChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys!!, mNote)
 
                             finish()
                         } else {

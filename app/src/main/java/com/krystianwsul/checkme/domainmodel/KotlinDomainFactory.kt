@@ -1200,7 +1200,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun createChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, note: String?): Task {
+    private fun createChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, note: String?): Task {
         check(!TextUtils.isEmpty(name))
 
         val parentTask = getTaskForce(parentTaskKey)
@@ -1226,6 +1226,37 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             val now = ExactTimeStamp.now
 
             createChildTask(now, dataId, source, parentTaskKey, name, note)
+        }
+    }
+
+    //@Synchronized
+    fun createJoinChildTask(dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, joinTaskKeys: List<TaskKey>, note: String?) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.createJoinChildTask")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!TextUtils.isEmpty(name))
+            check(joinTaskKeys.size > 1)
+
+            val now = ExactTimeStamp.now
+
+            val parentTask = getTaskForce(parentTaskKey)
+            check(parentTask.current(now))
+
+            val joinProjectIds = joinTaskKeys.map { it.remoteProjectId }.distinct()
+            check(joinProjectIds.size == 1)
+
+            val joinTasks = joinTaskKeys.map { getTaskForce(it) }
+
+            val childTask = parentTask.createChildTask(now, name, note)
+
+            joinTasks(childTask, joinTasks, now)
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(childTask.remoteNullableProject)
         }
     }
     

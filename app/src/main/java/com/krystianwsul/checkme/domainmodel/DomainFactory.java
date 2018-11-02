@@ -48,37 +48,6 @@ public class DomainFactory {
 
     // sets
 
-    public synchronized void createJoinChildTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.createJoinChildTask");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!TextUtils.isEmpty(name));
-        check(joinTaskKeys.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Task parentTask = kotlinDomainFactory.getTaskForce(parentTaskKey);
-        check(parentTask.current(now));
-
-        List<String> joinProjectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
-                .distinct()
-                .collect(Collectors.toList());
-        check(joinProjectIds.size() == 1);
-
-        List<Task> joinTasks = Stream.of(joinTaskKeys).map(kotlinDomainFactory::getTaskForce)
-                .collect(Collectors.toList());
-
-        Task childTask = parentTask.createChildTask(now, name, note);
-
-        kotlinDomainFactory.joinTasks(childTask, joinTasks, now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(childTask.getRemoteNullableProject());
-    }
-
     @NonNull
     public synchronized TaskKey updateChildTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull TaskKey parentTaskKey, @Nullable String note) {
         MyCrashlytics.INSTANCE.log("DomainFactory.updateChildTask");

@@ -8,7 +8,6 @@ import android.text.TextUtils;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.krystianwsul.checkme.MyCrashlytics;
-import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime;
 import com.krystianwsul.checkme.firebase.DatabaseWrapper;
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
@@ -18,7 +17,6 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @SuppressLint("UseSparseArrays")
@@ -41,104 +39,6 @@ public class DomainFactory {
     // gets
 
     // sets
-
-    public synchronized void setCustomTimeCurrent(int dataId, @NonNull SaveService.Source source, @NonNull List<Integer> localCustomTimeIds) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setCustomTimeCurrent");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!localCustomTimeIds.isEmpty());
-
-        for (int localCustomTimeId : localCustomTimeIds) {
-            LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(localCustomTimeId);
-
-            localCustomTime.setCurrent();
-        }
-
-        kotlinDomainFactory.save(dataId, source);
-    }
-
-    @NonNull
-    Task createRootTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
-        check(!TextUtils.isEmpty(name));
-
-        Task task;
-        if (TextUtils.isEmpty(projectId)) {
-            task = kotlinDomainFactory.localFactory.createLocalTaskHelper(kotlinDomainFactory, name, now, note);
-        } else {
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-            task = kotlinDomainFactory.getRemoteProjectFactory().createRemoteTaskHelper(now, name, note, projectId);
-        }
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
-
-        return task;
-    }
-
-    public synchronized void createRootTask(int dataId, @NonNull SaveService.Source source, @NonNull String name, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.createRootTask");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        createRootTask(now, dataId, source, name, note, projectId);
-    }
-
-    public synchronized void createJoinRootTask(int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.createJoinRootTask");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!TextUtils.isEmpty(name));
-        check(joinTaskKeys.size() > 1);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        List<String> joinProjectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
-                .distinct()
-                .collect(Collectors.toList());
-        check(joinProjectIds.size() == 1);
-
-        String joinProjectId = joinProjectIds.get(0);
-
-        final String finalProjectId;
-        if (!TextUtils.isEmpty(joinProjectId)) {
-            check(TextUtils.isEmpty(projectId));
-
-            finalProjectId = joinProjectId;
-        } else if (!TextUtils.isEmpty(projectId)) {
-            finalProjectId = projectId;
-        } else {
-            finalProjectId = null;
-        }
-
-        List<Task> joinTasks = Stream.of(joinTaskKeys).map(kotlinDomainFactory::getTaskForce)
-                .collect(Collectors.toList());
-
-        Task newParentTask;
-        if (!TextUtils.isEmpty(finalProjectId)) {
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-            check(kotlinDomainFactory.getUserInfo() != null);
-
-            newParentTask = kotlinDomainFactory.getRemoteProjectFactory().createRemoteTaskHelper(now, name, note, finalProjectId);
-        } else {
-            newParentTask = kotlinDomainFactory.localFactory.createLocalTaskHelper(kotlinDomainFactory, name, now, note);
-        }
-
-        joinTasks = Stream.of(joinTasks).map(joinTask -> joinTask.updateProject(now, projectId))
-                .collect(Collectors.toList());
-
-        kotlinDomainFactory.joinTasks(newParentTask, joinTasks, now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(newParentTask.getRemoteNullableProject());
-    }
 
     @NonNull
     public synchronized TaskKey updateRootTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @Nullable String note, @Nullable String projectId) {

@@ -305,13 +305,13 @@ class CreateTaskActivity : AbstractActivity() {
                         } else if (mTaskKeys != null) {
                             check(mData!!.taskData == null)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.createJoinRootTask(mData!!.dataId, SaveService.Source.GUI, name, mTaskKeys!!, mNote, projectId)
+                            KotlinDomainFactory.getKotlinDomainFactory().createJoinRootTask(mData!!.dataId, SaveService.Source.GUI, name, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {
                             check(mData!!.taskData == null)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.createRootTask(mData!!.dataId, SaveService.Source.GUI, name, mNote, projectId)
+                            KotlinDomainFactory.getKotlinDomainFactory().createRootTask(mData!!.dataId, SaveService.Source.GUI, name, mNote, projectId)
 
                             finish()
                         }

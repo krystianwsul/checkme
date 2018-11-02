@@ -1440,6 +1440,101 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             save(dataId, source)
         }
     }
+
+    //@Synchronized
+    fun setCustomTimeCurrent(dataId: Int, source: SaveService.Source, localCustomTimeIds: List<Int>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setCustomTimeCurrent")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!localCustomTimeIds.isEmpty())
+
+            for (localCustomTimeId in localCustomTimeIds)
+                localFactory.getLocalCustomTime(localCustomTimeId).setCurrent()
+
+            save(dataId, source)
+        }
+    }
+
+    private fun createRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?): Task {
+        check(!TextUtils.isEmpty(name))
+
+        val task = if (TextUtils.isEmpty(projectId)) {
+            localFactory.createLocalTaskHelper(this, name, now, note)
+        } else {
+            check(remoteProjectFactory != null)
+
+            remoteProjectFactory!!.createRemoteTaskHelper(now, name, note, projectId!!)
+        }
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(task.remoteNullableProject)
+
+        return task
+    }
+
+    //@Synchronized
+    fun createRootTask(dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.createRootTask")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+
+            createRootTask(now, dataId, source, name, note, projectId)
+        }
+    }
+
+    //@Synchronized
+    fun createJoinRootTask(dataId: Int, source: SaveService.Source, name: String, joinTaskKeys: List<TaskKey>, note: String?, projectId: String?) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.createJoinRootTask")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!TextUtils.isEmpty(name))
+            check(joinTaskKeys.size > 1)
+
+            val now = ExactTimeStamp.now
+
+            val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
+                    .distinct()
+                    .single()
+
+            val finalProjectId = if (!TextUtils.isEmpty(joinProjectId)) {
+                check(TextUtils.isEmpty(projectId))
+
+                joinProjectId
+            } else if (!TextUtils.isEmpty(projectId)) {
+                projectId
+            } else {
+                null
+            }
+
+            var joinTasks = joinTaskKeys.map { getTaskForce(it) }
+
+            val newParentTask = if (!TextUtils.isEmpty(finalProjectId)) {
+                check(remoteProjectFactory != null)
+                check(userInfo != null)
+
+                remoteProjectFactory!!.createRemoteTaskHelper(now, name, note, finalProjectId!!)
+            } else {
+                localFactory.createLocalTaskHelper(this, name, now, note)
+            }
+
+            joinTasks = joinTasks.map { it.updateProject(now, projectId) }
+
+            joinTasks(newParentTask, joinTasks, now)
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(newParentTask.remoteNullableProject)
+        }
+    }
     
     // internal
 
@@ -1749,7 +1844,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return localToRemoteConversion.remoteTasks[startingLocalTask.id]!!
     }
 
-    fun joinTasks(newParentTask: Task, joinTasks: List<Task>, now: ExactTimeStamp) {
+    private fun joinTasks(newParentTask: Task, joinTasks: List<Task>, now: ExactTimeStamp) {
         check(newParentTask.current(now))
         check(joinTasks.size > 1)
 

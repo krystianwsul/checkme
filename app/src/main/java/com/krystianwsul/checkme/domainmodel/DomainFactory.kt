@@ -471,8 +471,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         var taskDatas: List<GroupListFragment.TaskData>? = null
         if (position == 0) {
-            taskDatas = getTasks().asSequence()
-                    .filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
+            taskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
                     .map { GroupListFragment.TaskData(it.taskKey, it.name, getGroupListChildTaskDatas(it, now), it.startExactTimeStamp, it.note) }
                     .toList()
         }
@@ -1937,7 +1936,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    private fun getTasks() = (localFactory.tasks + (remoteProjectFactory?.tasks ?: listOf()))
+    private fun getTasks() = (localFactory.tasks.asSequence() + (remoteProjectFactory?.tasks?.asSequence()
+            ?: emptySequence()))
 
     private val customTimes
         get() = localFactory.localCustomTimes.toMutableList<CustomTime>().apply {
@@ -2002,8 +2002,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             }
 
     fun getMainData(now: ExactTimeStamp): TaskListFragment.TaskData {
-        val childTaskDatas = getTasks().asSequence()
-                .filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) }
+        val childTaskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) }
                 .map { TaskListFragment.ChildTaskData(it.name, it.getScheduleText(now), getTaskListChildTaskDatas(it, now), it.note, it.startExactTimeStamp, it.taskKey, null) }
                 .sortedDescending()
                 .toMutableList()
@@ -2067,7 +2066,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .filter { it.relevant }
                 .map { it.task }
 
-        val irrelevantTasks = ArrayList<Task>(tasks)
+        val irrelevantTasks = tasks.toMutableList()
         irrelevantTasks.removeAll(relevantTasks)
 
         check(irrelevantTasks.none { it.isVisible(now) })
@@ -2316,6 +2315,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .min()
 
         val minSchedulesTimeStamp = getTasks().filter { it.current(now) && it.isRootTask(now) }
+                .toList()
                 .flatMap { it.getCurrentSchedules(now) }
                 .mapNotNull { it.getNextAlarm(now) }
                 .min()

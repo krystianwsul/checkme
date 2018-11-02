@@ -1152,6 +1152,53 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId)
         }
     }
+
+    //@Synchronized
+    fun createScheduleJoinRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, joinTaskKeys: List<TaskKey>, note: String?, projectId: String?) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!TextUtils.isEmpty(name))
+            check(!scheduleDatas.isEmpty())
+            check(joinTaskKeys.size > 1)
+
+            val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
+                    .distinct()
+                    .single()
+
+            val finalProjectId = if (!TextUtils.isEmpty(joinProjectId)) {
+                check(TextUtils.isEmpty(projectId))
+
+                joinProjectId
+            } else if (!TextUtils.isEmpty(projectId)) {
+                projectId
+            } else {
+                null
+            }
+
+            var joinTasks = joinTaskKeys.map { getTaskForce(it) }
+
+            val newParentTask = if (!TextUtils.isEmpty(finalProjectId)) {
+                check(remoteProjectFactory != null)
+                check(userInfo != null)
+
+                remoteProjectFactory!!.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId!!)
+            } else {
+                localFactory.createScheduleRootTask(this, now, name, scheduleDatas, note)
+            }
+
+            joinTasks = joinTasks.map { it.updateProject(now, projectId) }
+
+            joinTasks(newParentTask, joinTasks, now)
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(newParentTask.remoteNullableProject)
+        }
+    }
     
     // internal
 

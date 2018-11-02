@@ -252,7 +252,7 @@ class CreateTaskActivity : AbstractActivity() {
                             check(mData!!.taskData == null)
                             check(mTaskKeys!!.size > 1)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.createScheduleJoinRootTask(ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
+                            KotlinDomainFactory.getKotlinDomainFactory().createScheduleJoinRootTask(ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {

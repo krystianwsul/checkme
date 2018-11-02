@@ -20,7 +20,6 @@ import com.krystianwsul.checkme.utils.TaskKey;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -48,57 +47,6 @@ public class DomainFactory {
     // gets
 
     // sets
-
-    public synchronized void createScheduleJoinRootTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleJoinRootTask");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!TextUtils.isEmpty(name));
-        check(!scheduleDatas.isEmpty());
-        check(joinTaskKeys.size() > 1);
-
-        List<String> joinProjectIds = Stream.of(joinTaskKeys).map(TaskKey::getRemoteProjectId)
-                .distinct()
-                .collect(Collectors.toList());
-        check(joinProjectIds.size() == 1);
-
-        String joinProjectId = joinProjectIds.get(0);
-
-        final String finalProjectId;
-        if (!TextUtils.isEmpty(joinProjectId)) {
-            check(TextUtils.isEmpty(projectId));
-
-            finalProjectId = joinProjectId;
-        } else if (!TextUtils.isEmpty(projectId)) {
-            finalProjectId = projectId;
-        } else {
-            finalProjectId = null;
-        }
-
-        List<Task> joinTasks = Stream.of(joinTaskKeys).map(kotlinDomainFactory::getTaskForce)
-                .collect(Collectors.toList());
-
-        Task newParentTask;
-        if (!TextUtils.isEmpty(finalProjectId)) {
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-            check(kotlinDomainFactory.getUserInfo() != null);
-
-            newParentTask = kotlinDomainFactory.getRemoteProjectFactory().createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId);
-        } else {
-            newParentTask = kotlinDomainFactory.localFactory.createScheduleRootTask(kotlinDomainFactory, now, name, scheduleDatas, note);
-        }
-
-        joinTasks = Stream.of(joinTasks).map(joinTask -> joinTask.updateProject(now, projectId))
-                .collect(Collectors.toList());
-
-        kotlinDomainFactory.joinTasks(newParentTask, joinTasks, now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(newParentTask.getRemoteNullableProject());
-    }
 
     Task createChildTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey parentTaskKey, @NonNull String name, @Nullable String note) {
         check(!TextUtils.isEmpty(name));

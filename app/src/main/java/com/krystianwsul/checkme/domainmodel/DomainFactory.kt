@@ -5,8 +5,6 @@ import android.os.Build
 import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Log
-import com.annimon.stream.Collectors
-import com.annimon.stream.Stream
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -473,9 +471,10 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         var taskDatas: List<GroupListFragment.TaskData>? = null
         if (position == 0) {
-            taskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
+            taskDatas = getTasks().asSequence()
+                    .filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
                     .map { GroupListFragment.TaskData(it.taskKey, it.name, getGroupListChildTaskDatas(it, now), it.startExactTimeStamp, it.note) }
-                    .collect(Collectors.toList())
+                    .toList()
         }
 
         val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
@@ -1938,13 +1937,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    private fun getTasks(): Stream<Task> {
-        return if (remoteProjectFactory != null) {
-            Stream.concat<Task>(Stream.of<LocalTask>(localFactory.tasks), Stream.of<RemoteTask>(remoteProjectFactory!!.tasks))
-        } else {
-            Stream.of<Task>(localFactory.tasks)
-        }
-    }
+    private fun getTasks() = (localFactory.tasks + (remoteProjectFactory?.tasks ?: listOf()))
 
     private val customTimes
         get() = localFactory.localCustomTimes.toMutableList<CustomTime>().apply {
@@ -2009,11 +2002,11 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             }
 
     fun getMainData(now: ExactTimeStamp): TaskListFragment.TaskData {
-        val childTaskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) }
+        val childTaskDatas = getTasks().asSequence()
+                .filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) }
                 .map { TaskListFragment.ChildTaskData(it.name, it.getScheduleText(now), getTaskListChildTaskDatas(it, now), it.note, it.startExactTimeStamp, it.taskKey, null) }
-                .collect(Collectors.toList())
+                .sortedDescending()
                 .toMutableList()
-                .apply { sortDescending() }
 
         return TaskListFragment.TaskData(childTaskDatas, null)
     }
@@ -2033,7 +2026,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     fun setIrrelevant(now: ExactTimeStamp): Irrelevant {
-        val tasks = getTasks().collect(Collectors.toList<Task>())
+        val tasks = getTasks()
 
         for (task in tasks)
             task.updateOldestVisible(now)
@@ -2323,13 +2316,12 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .min()
 
         val minSchedulesTimeStamp = getTasks().filter { it.current(now) && it.isRootTask(now) }
-                .flatMap { Stream.of<Schedule>(it.getCurrentSchedules(now)) }
-                .map { it.getNextAlarm(now) }
-                .filter { timeStamp -> timeStamp != null }
-                .min { obj, other -> obj!!.compareTo(other!!) }
+                .flatMap { it.getCurrentSchedules(now) }
+                .mapNotNull { it.getNextAlarm(now) }
+                .min()
 
-        if (minSchedulesTimeStamp.isPresent && (nextAlarm == null || nextAlarm > minSchedulesTimeStamp.get()!!))
-            nextAlarm = minSchedulesTimeStamp.get()
+        if (minSchedulesTimeStamp != null && (nextAlarm == null || nextAlarm > minSchedulesTimeStamp))
+            nextAlarm = minSchedulesTimeStamp
 
         NotificationWrapper.instance.updateAlarm(nextAlarm)
 

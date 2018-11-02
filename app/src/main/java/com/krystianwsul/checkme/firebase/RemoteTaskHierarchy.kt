@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.firebase.records.RemoteTaskHierarchyRecord
 import com.krystianwsul.checkme.utils.TaskHierarchyKey
@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 
-class RemoteTaskHierarchy(kotlinDomainFactory: KotlinDomainFactory, private val remoteProject: RemoteProject, private val remoteTaskHierarchyRecord: RemoteTaskHierarchyRecord) : TaskHierarchy(kotlinDomainFactory) {
+class RemoteTaskHierarchy(domainFactory: DomainFactory, private val remoteProject: RemoteProject, private val remoteTaskHierarchyRecord: RemoteTaskHierarchyRecord) : TaskHierarchy(domainFactory) {
 
     override val startExactTimeStamp get() = ExactTimeStamp(remoteTaskHierarchyRecord.startTime)
 

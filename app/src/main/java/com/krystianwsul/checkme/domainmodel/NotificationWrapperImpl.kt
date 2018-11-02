@@ -28,7 +28,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     companion object {
 
-        fun getRemoteCustomTimeFixInstanceKey(kotlinDomainFactory: KotlinDomainFactory, instanceKey: InstanceKey): InstanceKey { // remote custom time key hack
+        fun getRemoteCustomTimeFixInstanceKey(domainFactory: DomainFactory, instanceKey: InstanceKey): InstanceKey { // remote custom time key hack
             if (instanceKey.type == TaskKey.Type.LOCAL)
                 return instanceKey
 
@@ -40,7 +40,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
             val projectId = instanceKey.taskKey.remoteProjectId!!
 
-            val customTimeId = kotlinDomainFactory.getRemoteCustomTimeId(projectId, instanceKey.scheduleKey.scheduleTimePair.customTimeKey)
+            val customTimeId = domainFactory.getRemoteCustomTimeId(projectId, instanceKey.scheduleKey.scheduleTimePair.customTimeKey)
 
             val customTimeKey = CustomTimeKey(projectId, customTimeId)
             val scheduleKey = ScheduleKey(instanceKey.scheduleKey.scheduleDate, TimePair(customTimeKey))
@@ -55,12 +55,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.cancel(id)
     }
 
-    override fun notifyInstance(kotlinDomainFactory: KotlinDomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
+    override fun notifyInstance(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
         val task = instance.task
         val notificationId = instance.notificationId
 
         val instanceKey = instance.instanceKey
-        val remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(kotlinDomainFactory, instanceKey)
+        val remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(domainFactory, instanceKey)
 
         val deleteIntent = InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey)
         val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
@@ -178,14 +178,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.notify(notificationId, notification)
     }
 
-    override fun notifyGroup(kotlinDomainFactory: KotlinDomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) {
+    override fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) {
         val names = ArrayList<String>()
         val instanceKeys = ArrayList<InstanceKey>()
         val remoteCustomTimeFixInstanceKeys = ArrayList<InstanceKey>()
         instances.forEach {
             names.add(it.name)
             instanceKeys.add(it.instanceKey)
-            remoteCustomTimeFixInstanceKeys.add(getRemoteCustomTimeFixInstanceKey(kotlinDomainFactory, it.instanceKey))
+            remoteCustomTimeFixInstanceKeys.add(getRemoteCustomTimeFixInstanceKey(domainFactory, it.instanceKey))
         }
 
         val deleteIntent = GroupNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKeys)

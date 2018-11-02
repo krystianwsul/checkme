@@ -17,7 +17,7 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
@@ -212,9 +212,9 @@ class UserListFragment : AbstractFragment(), FabUser {
         if (projectId.isNullOrEmpty()) {
             check(saveState.removedIds.isEmpty())
 
-            KotlinDomainFactory.getKotlinDomainFactory().createProject(data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
+            DomainFactory.getKotlinDomainFactory().createProject(data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
         } else {
-            KotlinDomainFactory.getKotlinDomainFactory().updateProject(data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
+            DomainFactory.getKotlinDomainFactory().updateProject(data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
         }
     }
 

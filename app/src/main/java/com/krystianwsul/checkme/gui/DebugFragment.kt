@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import kotlinx.android.synthetic.main.fragment_debug.*
@@ -43,7 +43,7 @@ class DebugFragment : AbstractFragment() {
 
                 val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
 
-                val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+                val kotlinDomainFactory = DomainFactory.getKotlinDomainFactory()
 
                 append("last beeping tick: ")
                 append(lastTickExactTimeStamp.toString())
@@ -66,7 +66,7 @@ class DebugFragment : AbstractFragment() {
                 append(kotlinDomainFactory.customTimeCount)
 
                 val t1 = ExactTimeStamp.now
-                KotlinDomainFactory.getKotlinDomainFactory().getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
+                DomainFactory.getKotlinDomainFactory().getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
                 val t2 = ExactTimeStamp.now
 
                 append("\ntoday: ")

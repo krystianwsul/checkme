@@ -10,7 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
@@ -103,9 +103,9 @@ class ShowCustomTimeActivity : AbstractActivity() {
                     showCustomTimeViewModel?.stop()
 
                     if (data != null) {
-                        KotlinDomainFactory.getKotlinDomainFactory().updateCustomTime(data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
+                        DomainFactory.getKotlinDomainFactory().updateCustomTime(data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
                     } else {
-                        val customTimeId = KotlinDomainFactory.getKotlinDomainFactory().createCustomTime(SaveService.Source.GUI, name, hourMinutes)
+                        val customTimeId = DomainFactory.getKotlinDomainFactory().createCustomTime(SaveService.Source.GUI, name, hourMinutes)
                         check(customTimeId > 0)
 
                         setResult(customTimeId)

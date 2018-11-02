@@ -2,12 +2,12 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import java.util.*
 
-class RemoteProjectManager(kotlinDomainFactory: KotlinDomainFactory, children: Iterable<DataSnapshot>) {
+class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
     var isSaved = false
         private set
@@ -19,7 +19,7 @@ class RemoteProjectManager(kotlinDomainFactory: KotlinDomainFactory, children: I
             child.key.let {
                 check(it.isNotEmpty())
 
-                remoteProjectRecords[it] = RemoteProjectRecord(kotlinDomainFactory, it, child.getValue(JsonWrapper::class.java)!!)
+                remoteProjectRecords[it] = RemoteProjectRecord(domainFactory, it, child.getValue(JsonWrapper::class.java)!!)
             }
         }
     }
@@ -37,7 +37,7 @@ class RemoteProjectManager(kotlinDomainFactory: KotlinDomainFactory, children: I
         }
     }
 
-    fun newRemoteProjectRecord(kotlinDomainFactory: KotlinDomainFactory, jsonWrapper: JsonWrapper) = RemoteProjectRecord(kotlinDomainFactory, jsonWrapper).also {
+    fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteProjectRecord(domainFactory, jsonWrapper).also {
         check(!remoteProjectRecords.containsKey(it.id))
 
         remoteProjectRecords[it.id] = it

@@ -9,7 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -122,7 +122,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
             R.id.task_menu_delete -> {
                 showTaskViewModel.stop()
 
-                KotlinDomainFactory.getKotlinDomainFactory().setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
+                DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
 
                 finish()
             }

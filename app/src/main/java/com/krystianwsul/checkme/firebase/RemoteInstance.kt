@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.time.*
@@ -116,7 +116,7 @@ class RemoteInstance : Instance {
 
     override val name get() = task.name
 
-    private val remoteFactory get() = kotlinDomainFactory.remoteProjectFactory!!
+    private val remoteFactory get() = domainFactory.remoteProjectFactory!!
 
     override val notified get() = instanceShownRecord?.notified == true
 
@@ -129,7 +129,7 @@ class RemoteInstance : Instance {
 
             val customTimeId = remoteInstanceRecord!!.scheduleCustomTimeId
 
-            customTimeId?.let { kotlinDomainFactory.getCustomTimeKey(remoteProject.id, it) }
+            customTimeId?.let { domainFactory.getCustomTimeKey(remoteProject.id, it) }
         } else {
             check(!TextUtils.isEmpty(_taskId))
             checkNotNull(_scheduleDateTime)
@@ -141,7 +141,7 @@ class RemoteInstance : Instance {
                 if (!TextUtils.isEmpty(customTimeKey.remoteCustomTimeId)) {
                     check(!TextUtils.isEmpty(customTimeKey.remoteProjectId))
 
-                    kotlinDomainFactory.getCustomTimeKey(customTimeKey.remoteProjectId!!, customTimeKey.remoteCustomTimeId!!)
+                    domainFactory.getCustomTimeKey(customTimeKey.remoteProjectId!!, customTimeKey.remoteCustomTimeId!!)
                 } else {
                     customTimeKey
                 }
@@ -182,11 +182,11 @@ class RemoteInstance : Instance {
         get() = remoteInstanceRecord?.instanceCustomTimeId?.let { Pair(remoteProject.id, it) }
 
     constructor(
-            kotlinDomainFactory: KotlinDomainFactory,
+            domainFactory: DomainFactory,
             remoteProject: RemoteProject,
             remoteInstanceRecord: RemoteInstanceRecord,
             instanceShownRecord: InstanceShownRecord?,
-            now: ExactTimeStamp) : super(kotlinDomainFactory) {
+            now: ExactTimeStamp) : super(domainFactory) {
         this.remoteProject = remoteProject
         this.remoteInstanceRecord = remoteInstanceRecord
         _taskId = null
@@ -200,11 +200,11 @@ class RemoteInstance : Instance {
     }
 
     constructor(
-            kotlinDomainFactory: KotlinDomainFactory,
+            domainFactory: DomainFactory,
             remoteProject: RemoteProject,
             taskId: String,
             scheduleDateTime: DateTime,
-            instanceShownRecord: InstanceShownRecord?) : super(kotlinDomainFactory) {
+            instanceShownRecord: InstanceShownRecord?) : super(domainFactory) {
         check(!TextUtils.isEmpty(taskId))
 
         this.remoteProject = remoteProject
@@ -255,7 +255,7 @@ class RemoteInstance : Instance {
     private fun createInstanceShownRecord() {
         check(instanceShownRecord == null)
 
-        instanceShownRecord = kotlinDomainFactory.localFactory.createInstanceShownRecord(kotlinDomainFactory, taskId, scheduleDateTime, task.remoteProject.id)
+        instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(domainFactory, taskId, scheduleDateTime, task.remoteProject.id)
     }
 
     override fun createInstanceHierarchy(now: ExactTimeStamp) {

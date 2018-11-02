@@ -14,7 +14,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
@@ -91,7 +91,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         selected = treeViewAdapter!!.selectedNodes
                     } while (selected.isNotEmpty())
 
-                    KotlinDomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -694,7 +694,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun setOrdinal(ordinal: Double) {
                 childTaskData.hierarchyData!!.ordinal = ordinal
 
-                KotlinDomainFactory.getKotlinDomainFactory().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
+                DomainFactory.getKotlinDomainFactory().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
             }
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)

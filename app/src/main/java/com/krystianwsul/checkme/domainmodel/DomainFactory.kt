@@ -40,17 +40,17 @@ import com.krystianwsul.checkme.viewmodels.*
 import java.util.*
 
 @Suppress("LeakingThis")
-open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
+open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     companion object {
 
-        var _kotlinDomainFactory: KotlinDomainFactory? = null
+        var _DomainFactory: DomainFactory? = null
 
         @Synchronized
-        fun getKotlinDomainFactory(persistenceManager: PersistenceManger? = null): KotlinDomainFactory {
-            if (_kotlinDomainFactory == null)
-                _kotlinDomainFactory = KotlinDomainFactory(persistenceManager)
-            return _kotlinDomainFactory!!
+        fun getKotlinDomainFactory(persistenceManager: PersistenceManger? = null): DomainFactory {
+            if (_DomainFactory == null)
+                _DomainFactory = DomainFactory(persistenceManager)
+            return _DomainFactory!!
         }
 
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
@@ -89,7 +89,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     var remoteRootUser: RemoteRootUser? = null
 
-    val notTickFirebaseListeners = mutableListOf<(KotlinDomainFactory) -> Unit>()
+    val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
     var tickData: TickData? = null
 
@@ -137,7 +137,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         val userInfo = userInfo
         clearUserInfo()
 
-        _kotlinDomainFactory = null
+        _DomainFactory = null
         localFactory.reset()
 
         userInfo?.let { setUserInfo(source, it) }
@@ -311,14 +311,14 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
-    fun addFirebaseListener(firebaseListener: (KotlinDomainFactory) -> Unit) {
+    fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
         check(remoteProjectFactory?.isSaved != false)
 
         notTickFirebaseListeners.add(firebaseListener)
     }
 
     @Synchronized
-    fun removeFirebaseListener(firebaseListener: (KotlinDomainFactory) -> Unit) {
+    fun removeFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
         notTickFirebaseListeners.remove(firebaseListener)
     }
 
@@ -1004,7 +1004,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         save(dataId, source)
     }
 
-    private fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
+    fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
         check(!TextUtils.isEmpty(name))
         check(!scheduleDatas.isEmpty())
 
@@ -1035,7 +1035,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId)
     }
 
-    private fun updateScheduleTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
+    fun updateScheduleTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
         check(!TextUtils.isEmpty(name))
         check(!scheduleDatas.isEmpty())
 
@@ -1118,7 +1118,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         notifyCloud(newParentTask.remoteNullableProject)
     }
 
-    private fun createChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, note: String?): Task {
+    fun createChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, note: String?): Task {
         check(!TextUtils.isEmpty(name))
 
         val parentTask = getTaskForce(parentTaskKey)
@@ -1353,7 +1353,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         save(dataId, source)
     }
 
-    private fun createRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?): Task {
+    fun createRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?): Task {
         check(!TextUtils.isEmpty(name))
 
         val task = if (TextUtils.isEmpty(projectId)) {
@@ -1458,7 +1458,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return task.taskKey
     }
 
-    private fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean): Irrelevant {
+    fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean): Irrelevant {
         updateNotifications(silent, now, listOf())
 
         val irrelevant = setIrrelevant(now)

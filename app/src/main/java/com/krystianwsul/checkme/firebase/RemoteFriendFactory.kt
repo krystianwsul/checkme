@@ -7,7 +7,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.UserJson
@@ -85,7 +85,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
         @Synchronized
         fun tryNotifyFriendListeners() {
-            if (!KotlinDomainFactory.getKotlinDomainFactory().getIsConnected())
+            if (!DomainFactory.getKotlinDomainFactory().getIsConnected())
                 return
 
             if (!hasFriends())

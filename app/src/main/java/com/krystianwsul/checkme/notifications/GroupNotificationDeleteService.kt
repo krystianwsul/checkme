@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.notifications
 import android.app.IntentService
 import android.content.Context
 import android.content.Intent
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
@@ -31,6 +31,6 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!
         check(!instanceKeys.isEmpty())
 
-        KotlinDomainFactory.getKotlinDomainFactory().setInstancesNotified(SaveService.Source.SERVICE, instanceKeys)
+        DomainFactory.getKotlinDomainFactory().setInstancesNotified(SaveService.Source.SERVICE, instanceKeys)
     }
 }

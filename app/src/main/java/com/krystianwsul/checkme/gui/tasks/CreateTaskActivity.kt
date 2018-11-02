@@ -14,7 +14,7 @@ import android.view.*
 import com.google.common.collect.HashMultiset
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -243,7 +243,7 @@ class CreateTaskActivity : AbstractActivity() {
                             checkNotNull(mData!!.taskData)
                             check(mTaskKeys == null)
 
-                            val taskKey = KotlinDomainFactory.getKotlinDomainFactory().updateScheduleTask(mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, scheduleDatas, mNote, projectId)
+                            val taskKey = DomainFactory.getKotlinDomainFactory().updateScheduleTask(mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, scheduleDatas, mNote, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -252,13 +252,13 @@ class CreateTaskActivity : AbstractActivity() {
                             check(mData!!.taskData == null)
                             check(mTaskKeys!!.size > 1)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().createScheduleJoinRootTask(ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
+                            DomainFactory.getKotlinDomainFactory().createScheduleJoinRootTask(ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {
                             check(mData!!.taskData == null)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().createScheduleRootTask(mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mNote, projectId)
+                            DomainFactory.getKotlinDomainFactory().createScheduleRootTask(mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mNote, projectId)
 
                             finish()
                         }
@@ -271,7 +271,7 @@ class CreateTaskActivity : AbstractActivity() {
                             checkNotNull(mData!!.taskData)
                             check(mTaskKeys == null)
 
-                            val taskKey = KotlinDomainFactory.getKotlinDomainFactory().updateChildTask(ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, parentTaskKey, mNote)
+                            val taskKey = DomainFactory.getKotlinDomainFactory().updateChildTask(ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, parentTaskKey, mNote)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -280,13 +280,13 @@ class CreateTaskActivity : AbstractActivity() {
                             check(mData!!.taskData == null)
                             check(mTaskKeys!!.size > 1)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().createJoinChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys!!, mNote)
+                            DomainFactory.getKotlinDomainFactory().createJoinChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys!!, mNote)
 
                             finish()
                         } else {
                             check(mData!!.taskData == null)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().createChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mNote)
+                            DomainFactory.getKotlinDomainFactory().createChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mNote)
 
                             finish()
                         }
@@ -297,7 +297,7 @@ class CreateTaskActivity : AbstractActivity() {
                             checkNotNull(mData!!.taskData)
                             check(mTaskKeys == null)
 
-                            val taskKey = KotlinDomainFactory.getKotlinDomainFactory().updateRootTask(mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, mNote, projectId)
+                            val taskKey = DomainFactory.getKotlinDomainFactory().updateRootTask(mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, mNote, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -305,13 +305,13 @@ class CreateTaskActivity : AbstractActivity() {
                         } else if (mTaskKeys != null) {
                             check(mData!!.taskData == null)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().createJoinRootTask(mData!!.dataId, SaveService.Source.GUI, name, mTaskKeys!!, mNote, projectId)
+                            DomainFactory.getKotlinDomainFactory().createJoinRootTask(mData!!.dataId, SaveService.Source.GUI, name, mTaskKeys!!, mNote, projectId)
 
                             finish()
                         } else {
                             check(mData!!.taskData == null)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().createRootTask(mData!!.dataId, SaveService.Source.GUI, name, mNote, projectId)
+                            DomainFactory.getKotlinDomainFactory().createRootTask(mData!!.dataId, SaveService.Source.GUI, name, mNote, projectId)
 
                             finish()
                         }

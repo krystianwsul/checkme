@@ -4,7 +4,7 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
@@ -39,5 +39,5 @@ class InstanceHourService : IntentService("InstanceHourService") {
         InstanceDoneService.throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceAddHour(it, instanceKey) }
     }
 
-    private fun setInstanceAddHour(kotlinDomainFactory: KotlinDomainFactory, instanceKey: InstanceKey) = kotlinDomainFactory.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)
+    private fun setInstanceAddHour(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)
 }

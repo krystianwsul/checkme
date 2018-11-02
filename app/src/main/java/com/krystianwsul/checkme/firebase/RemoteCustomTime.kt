@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.CustomTime
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
@@ -10,7 +10,7 @@ import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.*
 
 class RemoteCustomTime(
-        private val kotlinDomainFactory: KotlinDomainFactory,
+        private val domainFactory: DomainFactory,
         private val remoteProject: RemoteProject,
         val remoteCustomTimeRecord: RemoteCustomTimeRecord) : CustomTime {
 
@@ -26,7 +26,7 @@ class RemoteCustomTime(
     override val timePair // possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
         get() = TimePair(CustomTimeKey(remoteProject.id, remoteCustomTimeRecord.id), null)
 
-    override val customTimeKey by lazy { kotlinDomainFactory.getCustomTimeKey(remoteProject.id, id) }
+    override val customTimeKey by lazy { domainFactory.getCustomTimeKey(remoteProject.id, id) }
 
     val projectId by lazy { remoteProject.id }
 

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
 import com.google.firebase.database.DataSnapshot
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
@@ -18,16 +18,16 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
 class RemoteProjectFactory(
-        private val kotlinDomainFactory: KotlinDomainFactory,
+        private val domainFactory: DomainFactory,
         children: Iterable<DataSnapshot>,
         private val userInfo: UserInfo,
         private val uuid: String, now: ExactTimeStamp) {
 
-    private val remoteProjectManager = RemoteProjectManager(kotlinDomainFactory, children)
+    private val remoteProjectManager = RemoteProjectManager(domainFactory, children)
 
     val remoteProjects = remoteProjectManager.remoteProjectRecords
             .values
-            .map { RemoteProject(kotlinDomainFactory, it, userInfo, uuid, now) }
+            .map { RemoteProject(domainFactory, it, userInfo, uuid, now) }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -84,9 +84,9 @@ class RemoteProjectFactory(
 
         val projectJson = ProjectJson(name, now.long, users = userJsons)
 
-        val remoteProjectRecord = remoteProjectManager.newRemoteProjectRecord(kotlinDomainFactory, JsonWrapper(recordOf, projectJson))
+        val remoteProjectRecord = remoteProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteProject(kotlinDomainFactory, remoteProjectRecord, userInfo, uuid, now)
+        val remoteProject = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
 
         check(!this.remoteProjects.containsKey(remoteProject.id))
 
@@ -107,10 +107,10 @@ class RemoteProjectFactory(
 
         val localCustomTimeId = customTimeKey.localCustomTimeId
 
-        val localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
+        val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
 
         if (!localCustomTime.hasRemoteRecord(remoteProject.id)) {
-            val customTimeJson = CustomTimeJson(kotlinDomainFactory.localFactory.uuid, localCustomTime.id, localCustomTime.name, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, localCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, localCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute)
+            val customTimeJson = CustomTimeJson(domainFactory.localFactory.uuid, localCustomTime.id, localCustomTime.name, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, localCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, localCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute)
 
             val remoteCustomTime = remoteProject.newRemoteCustomTime(customTimeJson)
 

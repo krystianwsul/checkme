@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
@@ -18,7 +18,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import java.util.*
 
 class RemoteProject(
-        private val kotlinDomainFactory: KotlinDomainFactory,
+        private val domainFactory: DomainFactory,
         private val remoteProjectRecord: RemoteProjectRecord,
         userInfo: UserInfo,
         uuid: String,
@@ -43,7 +43,7 @@ class RemoteProject(
 
     private val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
 
-    private val remoteFactory get() = kotlinDomainFactory.remoteProjectFactory!!
+    private val remoteFactory get() = domainFactory.remoteProjectFactory!!
 
     val tasks get() = remoteTasks.values
 
@@ -55,15 +55,15 @@ class RemoteProject(
 
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
-            val remoteCustomTime = RemoteCustomTime(kotlinDomainFactory, this, remoteCustomTimeRecord)
+            val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
 
             check(!TextUtils.isEmpty(remoteCustomTime.customTimeKey.remoteCustomTimeId))
             check(!remoteCustomTimes.containsKey(remoteCustomTime.customTimeKey.remoteCustomTimeId))
 
             remoteCustomTimes[remoteCustomTime.customTimeKey.remoteCustomTimeId!!] = remoteCustomTime
 
-            if (remoteCustomTimeRecord.ownerId == kotlinDomainFactory.localFactory.uuid && kotlinDomainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
-                val localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
+            if (remoteCustomTimeRecord.ownerId == domainFactory.localFactory.uuid && domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
+                val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
 
                 localCustomTime.addRemoteCustomTimeRecord(remoteCustomTimeRecord)
             }
@@ -71,13 +71,13 @@ class RemoteProject(
 
         remoteTasks = remoteProjectRecord.remoteTaskRecords
                 .values
-                .map { RemoteTask(kotlinDomainFactory, this, it, now) }
+                .map { RemoteTask(domainFactory, this, it, now) }
                 .associateBy { it.id }
                 .toMutableMap()
 
         remoteProjectRecord.remoteTaskHierarchyRecords
                 .values
-                .map { RemoteTaskHierarchy(kotlinDomainFactory, this, it) }
+                .map { RemoteTaskHierarchy(domainFactory, this, it) }
                 .forEach { remoteTaskHierarchies.add(it.id, it) }
 
         remoteUsers = remoteProjectRecord.remoteUserRecords
@@ -90,9 +90,9 @@ class RemoteProject(
     }
 
     fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask {
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(kotlinDomainFactory, taskJson)
+        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
 
-        val remoteTask = RemoteTask(kotlinDomainFactory, this, remoteTaskRecord, now)
+        val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))
         remoteTasks[remoteTask.id] = remoteTask
 
@@ -103,7 +103,7 @@ class RemoteProject(
         val taskHierarchyJson = TaskHierarchyJson(parentRemoteTask.id, childRemoteTask.id, now.long, null, null)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
-        val remoteTaskHierarchy = RemoteTaskHierarchy(kotlinDomainFactory, this, remoteTaskHierarchyRecord)
+        val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
 
         remoteTaskHierarchies.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
     }
@@ -135,13 +135,13 @@ class RemoteProject(
             if (scheduleKey.scheduleTimePair.customTimeKey != null)
                 remoteFactory.getRemoteCustomTimeId(scheduleKey.scheduleTimePair.customTimeKey, this)
 
-            instanceJsons[RemoteInstanceRecord.scheduleKeyToString(kotlinDomainFactory, remoteProjectRecord.id, scheduleKey)] = instanceJson
+            instanceJsons[RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey)] = instanceJson
         }
 
         val taskJson = TaskJson(localTask.name, localTask.startExactTimeStamp.long, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.note, instanceJsons)
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(kotlinDomainFactory, taskJson)
+        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
 
-        val remoteTask = RemoteTask(kotlinDomainFactory, this, remoteTaskRecord, now)
+        val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))
 
         remoteTasks[remoteTask.id] = remoteTask
@@ -188,7 +188,7 @@ class RemoteProject(
         val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, localTaskHierarchy.startExactTimeStamp.long, endTime, localTaskHierarchy.ordinal)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
-        val remoteTaskHierarchy = RemoteTaskHierarchy(kotlinDomainFactory, this, remoteTaskHierarchyRecord)
+        val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
 
         remoteTaskHierarchies.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
 
@@ -252,7 +252,7 @@ class RemoteProject(
     fun newRemoteCustomTime(customTimeJson: CustomTimeJson): RemoteCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
-        val remoteCustomTime = RemoteCustomTime(kotlinDomainFactory, this, remoteCustomTimeRecord)
+        val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
 
         check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
 

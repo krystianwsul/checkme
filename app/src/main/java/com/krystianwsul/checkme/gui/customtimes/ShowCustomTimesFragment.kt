@@ -16,7 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
@@ -268,7 +268,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             val selectedCustomTimeIds = selectedCustomTimeWrappers.map { it.customTimeData.id }
 
-            KotlinDomainFactory.getKotlinDomainFactory().setCustomTimeCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds)
+            DomainFactory.getKotlinDomainFactory().setCustomTimeCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds)
         }
 
         private inner class CustomTimeHolder(val showCustomTimeRow: View, val timesRowName: TextView) : RecyclerView.ViewHolder(showCustomTimeRow) {

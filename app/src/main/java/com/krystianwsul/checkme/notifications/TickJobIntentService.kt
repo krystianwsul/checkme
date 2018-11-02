@@ -6,7 +6,7 @@ import android.support.v4.app.JobIntentService
 import android.text.TextUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -61,7 +61,7 @@ class TickJobIntentService : JobIntentService() {
 
         // still running?
         fun tick(silent: Boolean, sourceName: String, listener: (() -> Unit)? = null): Boolean {
-            val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+            val kotlinDomainFactory = DomainFactory.getKotlinDomainFactory()
 
             val listeners = listOfNotNull(listener)
 

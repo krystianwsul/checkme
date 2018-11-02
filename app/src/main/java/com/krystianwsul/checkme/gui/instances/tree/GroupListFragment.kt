@@ -18,7 +18,7 @@ import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.EditInstanceActivity
 import com.krystianwsul.checkme.gui.instances.EditInstancesActivity
@@ -189,7 +189,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
-                    KotlinDomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -223,7 +223,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = KotlinDomainFactory.getKotlinDomainFactory().setInstancesDone(mDataId!!, SaveService.Source.GUI, instanceKeys)
+                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(mDataId!!, SaveService.Source.GUI, instanceKeys)
 
                     var selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())

@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import com.google.firebase.auth.FirebaseAuth
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -24,8 +24,8 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
             putExtra(NOTIFICATION_ID_KEY, notificationId)
         }
 
-        fun throttleFirebase(needsFirebase: Boolean, firebaseListener: (KotlinDomainFactory) -> Unit) {
-            val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+        fun throttleFirebase(needsFirebase: Boolean, firebaseListener: (DomainFactory) -> Unit) {
+            val kotlinDomainFactory = DomainFactory.getKotlinDomainFactory()
 
             if (kotlinDomainFactory.getIsConnected()) {
                 if (kotlinDomainFactory.getIsConnectedAndSaved()) {
@@ -42,17 +42,17 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
             }
         }
 
-        private fun queueFirebase(kotlinDomainFactory: KotlinDomainFactory, firebaseListener: (KotlinDomainFactory) -> Unit) {
-            check(!kotlinDomainFactory.getIsConnected() || kotlinDomainFactory.getIsConnectedAndSaved())
+        private fun queueFirebase(domainFactory: DomainFactory, firebaseListener: (DomainFactory) -> Unit) {
+            check(!domainFactory.getIsConnected() || domainFactory.getIsConnectedAndSaved())
 
-            if (!kotlinDomainFactory.getIsConnected()) {
+            if (!domainFactory.getIsConnected()) {
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                         ?: throw NeedsFirebaseException()
 
-                kotlinDomainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
+                domainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
             }
 
-            kotlinDomainFactory.addFirebaseListener(firebaseListener)
+            domainFactory.addFirebaseListener(firebaseListener)
         }
     }
 
@@ -71,7 +71,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceNotificationDone(it, instanceKey) }
     }
 
-    private fun setInstanceNotificationDone(kotlinDomainFactory: KotlinDomainFactory, instanceKey: InstanceKey) = kotlinDomainFactory.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
+    private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
 
     private class NeedsFirebaseException : RuntimeException()
 }

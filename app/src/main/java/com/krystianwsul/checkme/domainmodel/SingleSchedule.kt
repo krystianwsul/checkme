@@ -7,8 +7,8 @@ import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
 
 class SingleSchedule(
-        kotlinDomainFactory: KotlinDomainFactory,
-        private val singleScheduleBridge: SingleScheduleBridge) : Schedule(kotlinDomainFactory) {
+        domainFactory: DomainFactory,
+        private val singleScheduleBridge: SingleScheduleBridge) : Schedule(domainFactory) {
 
     override val scheduleBridge get() = singleScheduleBridge
 
@@ -16,7 +16,7 @@ class SingleSchedule(
         get() {
             val customTimeKey = singleScheduleBridge.customTimeKey
             return if (customTimeKey != null) {
-                kotlinDomainFactory.getCustomTime(customTimeKey)
+                domainFactory.getCustomTime(customTimeKey)
             } else {
                 val hour = singleScheduleBridge.hour!!
                 val minute = singleScheduleBridge.minute!!
@@ -50,7 +50,7 @@ class SingleSchedule(
 
     override fun getScheduleText() = dateTime.getDisplayText()
 
-    private fun getInstance(task: Task) = kotlinDomainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
+    private fun getInstance(task: Task) = domainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 

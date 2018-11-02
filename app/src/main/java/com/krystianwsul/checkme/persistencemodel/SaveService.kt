@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.persistencemodel
 
 import android.util.Log
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
@@ -30,7 +30,7 @@ object SaveService {
                 sqLiteDatabase.endTransaction()
             }
         } catch (e: Exception) {
-            KotlinDomainFactory.getKotlinDomainFactory().reset(source)
+            DomainFactory.getKotlinDomainFactory().reset(source)
             throw e
         }
     }

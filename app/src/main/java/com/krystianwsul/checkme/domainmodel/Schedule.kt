@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
 
 
-abstract class Schedule(protected val kotlinDomainFactory: KotlinDomainFactory) {
+abstract class Schedule(protected val domainFactory: DomainFactory) {
 
     protected abstract val scheduleBridge: ScheduleBridge
 
@@ -46,7 +46,7 @@ abstract class Schedule(protected val kotlinDomainFactory: KotlinDomainFactory) 
     abstract fun getNextAlarm(now: ExactTimeStamp): TimeStamp?
 
     fun delete() {
-        kotlinDomainFactory.getTaskForce(scheduleBridge.rootTaskKey).deleteSchedule(this)
+        domainFactory.getTaskForce(scheduleBridge.rootTaskKey).deleteSchedule(this)
         scheduleBridge.delete()
     }
 }

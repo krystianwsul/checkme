@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import android.text.TextUtils
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.persistencemodel.InstanceRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
@@ -64,7 +64,7 @@ class LocalInstance : Instance {
                 check(hour == null == (minute == null))
                 check(customTimeId == null != (hour == null))
 
-                return customTimeId?.let { kotlinDomainFactory.getCustomTime(CustomTimeKey(it)) }
+                return customTimeId?.let { domainFactory.getCustomTime(CustomTimeKey(it)) }
                         ?: NormalTime(hour!!, minute!!)
             } else {
                 checkNotNull(mTaskId)
@@ -104,7 +104,7 @@ class LocalInstance : Instance {
                 check(mInstanceRecord!!.instanceHour == null || mInstanceRecord!!.instanceCustomTimeId == null)
 
                 return when {
-                    mInstanceRecord!!.instanceCustomTimeId != null -> kotlinDomainFactory.getCustomTime(CustomTimeKey(mInstanceRecord!!.instanceCustomTimeId!!))
+                    mInstanceRecord!!.instanceCustomTimeId != null -> domainFactory.getCustomTime(CustomTimeKey(mInstanceRecord!!.instanceCustomTimeId!!))
                     mInstanceRecord!!.instanceHour != null -> NormalTime(mInstanceRecord!!.instanceHour!!, mInstanceRecord!!.instanceMinute!!)
                     else -> scheduleTime
                 }
@@ -164,7 +164,7 @@ class LocalInstance : Instance {
             }
         }
 
-    override val task get() = kotlinDomainFactory.localFactory.getTaskForce(taskId)
+    override val task get() = domainFactory.localFactory.getTaskForce(taskId)
 
     override val remoteNullableProject: RemoteProject? = null
 
@@ -172,14 +172,14 @@ class LocalInstance : Instance {
 
     override val remoteCustomTimeKey: Pair<String, String>? = null
 
-    constructor(kotlinDomainFactory: KotlinDomainFactory, instanceRecord: InstanceRecord) : super(kotlinDomainFactory) {
+    constructor(domainFactory: DomainFactory, instanceRecord: InstanceRecord) : super(domainFactory) {
         mInstanceRecord = instanceRecord
 
         mTaskId = null
         mScheduleDateTime = null
     }
 
-    constructor(kotlinDomainFactory: KotlinDomainFactory, taskId: Int, scheduleDateTime: DateTime) : super(kotlinDomainFactory) {
+    constructor(domainFactory: DomainFactory, taskId: Int, scheduleDateTime: DateTime) : super(domainFactory) {
         mInstanceRecord = null
 
         mTaskId = taskId
@@ -242,7 +242,7 @@ class LocalInstance : Instance {
     private fun createInstanceRecord(now: ExactTimeStamp) {
         val localTask = task
 
-        mInstanceRecord = kotlinDomainFactory.localFactory.createInstanceRecord(localTask, this, scheduleDate, scheduleTimePair, now)
+        mInstanceRecord = domainFactory.localFactory.createInstanceRecord(localTask, this, scheduleDate, scheduleTimePair, now)
 
         mTaskId = null
         mScheduleDateTime = null
@@ -272,7 +272,7 @@ class LocalInstance : Instance {
     override fun delete() {
         checkNotNull(mInstanceRecord)
 
-        kotlinDomainFactory.localFactory.deleteInstance(this)
+        domainFactory.localFactory.deleteInstance(this)
 
         mInstanceRecord!!.delete()
     }

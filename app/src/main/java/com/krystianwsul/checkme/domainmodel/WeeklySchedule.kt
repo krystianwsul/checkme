@@ -6,12 +6,12 @@ import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
 
 class WeeklySchedule(
-        kotlinDomainFactory: KotlinDomainFactory,
-        private val mWeeklyScheduleBridge: WeeklyScheduleBridge) : RepeatingSchedule(kotlinDomainFactory) {
+        domainFactory: DomainFactory,
+        private val mWeeklyScheduleBridge: WeeklyScheduleBridge) : RepeatingSchedule(domainFactory) {
 
     private val time
         get() = mWeeklyScheduleBridge.run {
-            customTimeKey?.let { kotlinDomainFactory.getCustomTime(it) }
+            customTimeKey?.let { domainFactory.getCustomTime(it) }
                     ?: NormalTime(hour!!, minute!!)
         }
 
@@ -45,7 +45,7 @@ class WeeklySchedule(
         val scheduleDateTime = DateTime(date, time)
         check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
-        return kotlinDomainFactory.getInstance(task.taskKey, scheduleDateTime)
+        return domainFactory.getInstance(task.taskKey, scheduleDateTime)
     }
 
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp {

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import android.util.Log
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
@@ -17,7 +17,7 @@ class RemoteTaskRecord : RemoteRecord {
         const val TASKS = "tasks"
     }
 
-    private val kotlinDomainFactory: KotlinDomainFactory
+    private val domainFactory: DomainFactory
 
     val id: String
 
@@ -41,7 +41,7 @@ class RemoteTaskRecord : RemoteRecord {
         get() {
             if (!create)
                 taskJson.instances = _remoteInstanceRecords.entries
-                        .associateBy({ RemoteInstanceRecord.scheduleKeyToString(kotlinDomainFactory, remoteProjectRecord.id, it.key) }, { it.value.createObject })
+                        .associateBy({ RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, it.key) }, { it.value.createObject })
                         .toMutableMap()
 
             val scheduleWrappers = HashMap<String, ScheduleWrapper>()
@@ -104,8 +104,8 @@ class RemoteTaskRecord : RemoteRecord {
 
     val remoteInstanceRecords: Map<ScheduleKey, RemoteInstanceRecord> get() = _remoteInstanceRecords
 
-    constructor(kotlinDomainFactory: KotlinDomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : super(false) {
-        this.kotlinDomainFactory = kotlinDomainFactory
+    constructor(domainFactory: DomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : super(false) {
+        this.domainFactory = domainFactory
         this.id = id
         this.remoteProjectRecord = remoteProjectRecord
         this.taskJson = taskJson
@@ -113,8 +113,8 @@ class RemoteTaskRecord : RemoteRecord {
         initialize()
     }
 
-    constructor(kotlinDomainFactory: KotlinDomainFactory, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : super(true) {
-        this.kotlinDomainFactory = kotlinDomainFactory
+    constructor(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : super(true) {
+        this.domainFactory = domainFactory
         id = DatabaseWrapper.getTaskRecordId(remoteProjectRecord.id)
         this.remoteProjectRecord = remoteProjectRecord
         this.taskJson = taskJson
@@ -126,9 +126,9 @@ class RemoteTaskRecord : RemoteRecord {
         for ((key, instanceJson) in taskJson.instances) {
             check(!TextUtils.isEmpty(key))
 
-            val scheduleKey = RemoteInstanceRecord.stringToScheduleKey(kotlinDomainFactory, remoteProjectRecord.id, key)
+            val scheduleKey = RemoteInstanceRecord.stringToScheduleKey(domainFactory, remoteProjectRecord.id, key)
 
-            val remoteInstanceRecord = RemoteInstanceRecord(false, kotlinDomainFactory, this, instanceJson, scheduleKey)
+            val remoteInstanceRecord = RemoteInstanceRecord(false, domainFactory, this, instanceJson, scheduleKey)
 
             _remoteInstanceRecords[scheduleKey] = remoteInstanceRecord
         }
@@ -260,7 +260,7 @@ class RemoteTaskRecord : RemoteRecord {
     }
 
     fun newRemoteInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): RemoteInstanceRecord {
-        val remoteInstanceRecord = RemoteInstanceRecord(true, kotlinDomainFactory, this, instanceJson, scheduleKey)
+        val remoteInstanceRecord = RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey)
         check(!_remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 
         _remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.domainmodel.local
 
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.checkme.persistencemodel.LocalCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.*
 
 class LocalCustomTime(
-        private val kotlinDomainFactory: KotlinDomainFactory,
+        private val domainFactory: DomainFactory,
         private val localCustomTimeRecord: LocalCustomTimeRecord) : CustomTime {
 
     private val remoteCustomTimeRecords = HashMap<String, RemoteCustomTimeRecord>()
@@ -103,7 +103,7 @@ class LocalCustomTime(
     override val timePair by lazy { TimePair(CustomTimeKey(localCustomTimeRecord.id), null) }
 
     fun delete() {
-        kotlinDomainFactory.localFactory.deleteCustomTime(this)
+        domainFactory.localFactory.deleteCustomTime(this)
 
         localCustomTimeRecord.delete()
     }

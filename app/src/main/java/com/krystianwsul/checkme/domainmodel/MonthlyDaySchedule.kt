@@ -9,8 +9,8 @@ import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
 
 class MonthlyDaySchedule(
-        kotlinDomainFactory: KotlinDomainFactory,
-        private val monthlyDayScheduleBridge: MonthlyDayScheduleBridge) : RepeatingSchedule(kotlinDomainFactory) {
+        domainFactory: DomainFactory,
+        private val monthlyDayScheduleBridge: MonthlyDayScheduleBridge) : RepeatingSchedule(domainFactory) {
 
     override val scheduleBridge get() = monthlyDayScheduleBridge
 
@@ -22,7 +22,7 @@ class MonthlyDaySchedule(
         get() {
             val customTimeKey = monthlyDayScheduleBridge.customTimeKey
             return if (customTimeKey != null) {
-                kotlinDomainFactory.getCustomTime(customTimeKey)
+                domainFactory.getCustomTime(customTimeKey)
             } else {
                 val hour = monthlyDayScheduleBridge.hour!!
                 val minute = monthlyDayScheduleBridge.minute!!
@@ -74,7 +74,7 @@ class MonthlyDaySchedule(
         val scheduleDateTime = DateTime(date, time)
         check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
-        return kotlinDomainFactory.getInstance(task.taskKey, scheduleDateTime)
+        return domainFactory.getInstance(task.taskKey, scheduleDateTime)
     }
 
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {

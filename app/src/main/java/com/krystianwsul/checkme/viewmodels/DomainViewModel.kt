@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import android.arch.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
@@ -22,9 +22,9 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private var observer: Observer? = null
 
-    protected val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
+    protected val kotlinDomainFactory = DomainFactory.getKotlinDomainFactory()
 
-    private val firebaseListener = { _: KotlinDomainFactory ->
+    private val firebaseListener = { _: DomainFactory ->
         check(kotlinDomainFactory.getIsConnected())
 
         load()

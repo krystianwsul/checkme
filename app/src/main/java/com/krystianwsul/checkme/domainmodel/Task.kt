@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.utils.time.HourMilli
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
-abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
+abstract class Task(protected val domainFactory: DomainFactory) {
 
     abstract val startExactTimeStamp: ExactTimeStamp
 
@@ -61,7 +61,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
         check(current(exactTimeStamp))
 
-        return kotlinDomainFactory.getChildTaskHierarchies(this, exactTimeStamp)
+        return domainFactory.getChildTaskHierarchies(this, exactTimeStamp)
     }
 
     fun notDeleted(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -117,7 +117,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
         getChildTaskHierarchies(now).forEach { it.setEndExactTimeStamp(now) }
 
-        kotlinDomainFactory.getParentTaskHierarchy(this, now)?.let {
+        domainFactory.getParentTaskHierarchy(this, now)?.let {
             check(it.current(now))
 
             it.setEndExactTimeStamp(now)
@@ -131,12 +131,12 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         check(notDeleted(exactTimeStamp))
 
-        return kotlinDomainFactory.getParentTask(this, exactTimeStamp)
+        return domainFactory.getParentTask(this, exactTimeStamp)
     }
 
     fun updateOldestVisible(now: ExactTimeStamp) {
         // 24 hack
-        val instances = kotlinDomainFactory.getPastInstances(this, now)
+        val instances = domainFactory.getPastInstances(this, now)
 
         val optional = instances.asSequence()
                 .filter { it.isVisible(now) }
@@ -235,7 +235,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
         val addScheduleDatas = ArrayList(newScheduleDatas)
 
         val oldSchedules = getCurrentSchedules(now)
-        val scheduleDatas = kotlinDomainFactory.getScheduleDatas(oldSchedules, now).second
+        val scheduleDatas = domainFactory.getScheduleDatas(oldSchedules, now).second
         for ((key, value) in scheduleDatas) {
             if (addScheduleDatas.contains(key)) {
                 addScheduleDatas.remove(key)

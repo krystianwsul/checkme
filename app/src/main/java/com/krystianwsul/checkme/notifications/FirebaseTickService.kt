@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.notifications
 
 import com.firebase.jobdispatcher.JobParameters
 import com.firebase.jobdispatcher.JobService
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 
 class FirebaseTickService : JobService() {
 
@@ -15,7 +15,7 @@ class FirebaseTickService : JobService() {
     }
 
     override fun onStopJob(job: JobParameters): Boolean {
-        if (!KotlinDomainFactory.getKotlinDomainFactory().isHoldingWakeLock)
+        if (!DomainFactory.getKotlinDomainFactory().isHoldingWakeLock)
             return false
 
         return running

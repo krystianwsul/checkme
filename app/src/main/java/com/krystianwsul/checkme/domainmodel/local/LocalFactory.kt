@@ -70,71 +70,71 @@ class LocalFactory {
         persistenceManager.reset()
     }
 
-    fun initialize(kotlinDomainFactory: KotlinDomainFactory) {
+    fun initialize(domainFactory: DomainFactory) {
         _localCustomTimes.putAll(persistenceManager.customTimeRecords
-                .map { LocalCustomTime(kotlinDomainFactory, it) }
+                .map { LocalCustomTime(domainFactory, it) }
                 .map { it.id to it })
 
         persistenceManager.taskRecords.forEach { taskRecord ->
-            LocalTask(kotlinDomainFactory, taskRecord).let {
-                it.addSchedules(loadSchedules(kotlinDomainFactory, taskRecord.id))
+            LocalTask(domainFactory, taskRecord).let {
+                it.addSchedules(loadSchedules(domainFactory, taskRecord.id))
 
                 localTasks[it.id] = it
             }
         }
 
         persistenceManager.taskHierarchyRecords
-                .map { LocalTaskHierarchy(kotlinDomainFactory, it) }
+                .map { LocalTaskHierarchy(domainFactory, it) }
                 .forEach { localTaskHierarchies.add(it.id, it) }
 
         persistenceManager.instanceRecords
-                .map { LocalInstance(kotlinDomainFactory, it) }
+                .map { LocalInstance(domainFactory, it) }
                 .forEach { existingLocalInstances.add(it) }
     }
 
-    private fun loadSchedules(kotlinDomainFactory: KotlinDomainFactory, localTaskId: Int) = persistenceManager.getScheduleRecords(localTaskId).map {
+    private fun loadSchedules(domainFactory: DomainFactory, localTaskId: Int) = persistenceManager.getScheduleRecords(localTaskId).map {
         check(it.type >= 0)
         check(it.type < ScheduleType.values().size)
 
         val scheduleType = ScheduleType.values()[it.type]
 
         when (scheduleType) {
-            ScheduleType.SINGLE -> loadSingleSchedule(kotlinDomainFactory, it)
-            ScheduleType.DAILY -> loadDailySchedule(kotlinDomainFactory, it)
-            ScheduleType.WEEKLY -> loadWeeklySchedule(kotlinDomainFactory, it)
-            ScheduleType.MONTHLY_DAY -> loadMonthlyDaySchedule(kotlinDomainFactory, it)
-            ScheduleType.MONTHLY_WEEK -> loadMonthlyWeekSchedule(kotlinDomainFactory, it)
+            ScheduleType.SINGLE -> loadSingleSchedule(domainFactory, it)
+            ScheduleType.DAILY -> loadDailySchedule(domainFactory, it)
+            ScheduleType.WEEKLY -> loadWeeklySchedule(domainFactory, it)
+            ScheduleType.MONTHLY_DAY -> loadMonthlyDaySchedule(domainFactory, it)
+            ScheduleType.MONTHLY_WEEK -> loadMonthlyWeekSchedule(domainFactory, it)
         }
     }
 
-    private fun loadSingleSchedule(kotlinDomainFactory: KotlinDomainFactory, scheduleRecord: ScheduleRecord): Schedule {
+    private fun loadSingleSchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): Schedule {
         val singleScheduleRecord = persistenceManager.getSingleScheduleRecord(scheduleRecord.id)
 
-        return SingleSchedule(kotlinDomainFactory, LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord))
+        return SingleSchedule(domainFactory, LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord))
     }
 
-    private fun loadDailySchedule(kotlinDomainFactory: KotlinDomainFactory, scheduleRecord: ScheduleRecord): WeeklySchedule {
+    private fun loadDailySchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): WeeklySchedule {
         val dailyScheduleRecord = persistenceManager.getDailyScheduleRecord(scheduleRecord.id)
 
-        return WeeklySchedule(kotlinDomainFactory, LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord))
+        return WeeklySchedule(domainFactory, LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord))
     }
 
-    private fun loadWeeklySchedule(kotlinDomainFactory: KotlinDomainFactory, scheduleRecord: ScheduleRecord): WeeklySchedule {
+    private fun loadWeeklySchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): WeeklySchedule {
         val weeklyScheduleRecord = persistenceManager.getWeeklyScheduleRecord(scheduleRecord.id)
 
-        return WeeklySchedule(kotlinDomainFactory, LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord))
+        return WeeklySchedule(domainFactory, LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord))
     }
 
-    private fun loadMonthlyDaySchedule(kotlinDomainFactory: KotlinDomainFactory, scheduleRecord: ScheduleRecord): MonthlyDaySchedule {
+    private fun loadMonthlyDaySchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): MonthlyDaySchedule {
         val monthlyDayScheduleRecord = persistenceManager.getMonthlyDayScheduleRecord(scheduleRecord.id)
 
-        return MonthlyDaySchedule(kotlinDomainFactory, LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord))
+        return MonthlyDaySchedule(domainFactory, LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord))
     }
 
-    private fun loadMonthlyWeekSchedule(kotlinDomainFactory: KotlinDomainFactory, scheduleRecord: ScheduleRecord): MonthlyWeekSchedule {
+    private fun loadMonthlyWeekSchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): MonthlyWeekSchedule {
         val monthlyWeekScheduleRecord = persistenceManager.getMonthlyWeekScheduleRecord(scheduleRecord.id)
 
-        return MonthlyWeekSchedule(kotlinDomainFactory, LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord))
+        return MonthlyWeekSchedule(domainFactory, LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord))
     }
 
     fun save(source: SaveService.Source) = persistenceManager.save(source)
@@ -169,7 +169,7 @@ class LocalFactory {
         return matches.singleOrNull()
     }
 
-    fun createInstanceShownRecord(kotlinDomainFactory: KotlinDomainFactory, remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
+    fun createInstanceShownRecord(domainFactory: DomainFactory, remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
         val timePair = scheduleDateTime.time.timePair
 
         val remoteCustomTimeId: String?
@@ -183,7 +183,7 @@ class LocalFactory {
             hour = timePair.hourMinute.hour
             minute = timePair.hourMinute.minute
         } else {
-            remoteCustomTimeId = kotlinDomainFactory.getRemoteCustomTimeId(projectId, timePair.customTimeKey!!)
+            remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(projectId, timePair.customTimeKey!!)
 
             hour = null
             minute = null
@@ -217,13 +217,13 @@ class LocalFactory {
     }
 
     // todo dont pass domainfactory
-    fun createScheduleRootTask(kotlinDomainFactory: KotlinDomainFactory, now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?): LocalTask {
+    fun createScheduleRootTask(domainFactory: DomainFactory, now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?): LocalTask {
         check(name.isNotEmpty())
         check(!scheduleDatas.isEmpty())
 
-        val rootLocalTask = createLocalTaskHelper(kotlinDomainFactory, name, now, note)
+        val rootLocalTask = createLocalTaskHelper(domainFactory, name, now, note)
 
-        val schedules = createSchedules(kotlinDomainFactory, rootLocalTask, scheduleDatas, now)
+        val schedules = createSchedules(domainFactory, rootLocalTask, scheduleDatas, now)
         check(!schedules.isEmpty())
 
         rootLocalTask.addSchedules(schedules)
@@ -231,12 +231,12 @@ class LocalFactory {
         return rootLocalTask
     }
 
-    fun createLocalTaskHelper(kotlinDomainFactory: KotlinDomainFactory, name: String, now: ExactTimeStamp, note: String?): LocalTask {
+    fun createLocalTaskHelper(domainFactory: DomainFactory, name: String, now: ExactTimeStamp, note: String?): LocalTask {
         check(name.isNotEmpty())
 
         val taskRecord = persistenceManager.createTaskRecord(name, now, note)
 
-        val rootLocalTask = LocalTask(kotlinDomainFactory, taskRecord)
+        val rootLocalTask = LocalTask(domainFactory, taskRecord)
 
         check(!localTasks.containsKey(rootLocalTask.id))
         localTasks[rootLocalTask.id] = rootLocalTask
@@ -244,7 +244,7 @@ class LocalFactory {
         return rootLocalTask
     }
 
-    fun createSchedules(kotlinDomainFactory: KotlinDomainFactory, rootLocalTask: LocalTask, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, startExactTimeStamp: ExactTimeStamp): List<Schedule> {
+    fun createSchedules(domainFactory: DomainFactory, rootLocalTask: LocalTask, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, startExactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(!scheduleDatas.isEmpty())
         check(rootLocalTask.current(startExactTimeStamp))
 
@@ -253,26 +253,26 @@ class LocalFactory {
                 ScheduleType.SINGLE -> {
                     val (date, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.SingleScheduleData
 
-                    val time = kotlinDomainFactory.getTime(timePair)
+                    val time = domainFactory.getTime(timePair)
 
                     val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp)
 
                     val singleScheduleRecord = persistenceManager.createSingleScheduleRecord(scheduleRecord.id, date, time)
 
-                    listOf(SingleSchedule(kotlinDomainFactory, LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord)))
+                    listOf(SingleSchedule(domainFactory, LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord)))
                 }
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> {
                     val (daysOfWeek, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.WeeklyScheduleData
 
-                    val time = kotlinDomainFactory.getTime(timePair)
+                    val time = domainFactory.getTime(timePair)
 
                     daysOfWeek.map { dayOfWeek ->
                         val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp)
 
                         val weeklyScheduleRecord = persistenceManager.createWeeklyScheduleRecord(scheduleRecord.id, dayOfWeek, time)
 
-                        WeeklySchedule(kotlinDomainFactory, LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord))
+                        WeeklySchedule(domainFactory, LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord))
                     }
                 }
                 ScheduleType.MONTHLY_DAY -> {
@@ -280,39 +280,39 @@ class LocalFactory {
 
                     val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp)
 
-                    val monthlyDayScheduleRecord = persistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.id, dayOfMonth, beginningOfMonth, kotlinDomainFactory.getTime(timePair))
+                    val monthlyDayScheduleRecord = persistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.id, dayOfMonth, beginningOfMonth, domainFactory.getTime(timePair))
 
-                    listOf(MonthlyDaySchedule(kotlinDomainFactory, LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)))
+                    listOf(MonthlyDaySchedule(domainFactory, LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)))
                 }
                 ScheduleType.MONTHLY_WEEK -> {
                     val (dayOfMonth, dayOfWeek, beginningOfMonth, TimePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData
 
                     val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp)
 
-                    val monthlyWeekScheduleRecord = persistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.id, dayOfMonth, dayOfWeek, beginningOfMonth, kotlinDomainFactory.getTime(TimePair))
+                    val monthlyWeekScheduleRecord = persistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.id, dayOfMonth, dayOfWeek, beginningOfMonth, domainFactory.getTime(TimePair))
 
-                    listOf(MonthlyWeekSchedule(kotlinDomainFactory, LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)))
+                    listOf(MonthlyWeekSchedule(domainFactory, LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)))
                 }
             }
         }.flatten()
     }
 
-    fun createTaskHierarchy(kotlinDomainFactory: KotlinDomainFactory, parentLocalTask: LocalTask, childLocalTask: LocalTask, startExactTimeStamp: ExactTimeStamp) {
+    fun createTaskHierarchy(domainFactory: DomainFactory, parentLocalTask: LocalTask, childLocalTask: LocalTask, startExactTimeStamp: ExactTimeStamp) {
         check(parentLocalTask.current(startExactTimeStamp))
         check(childLocalTask.current(startExactTimeStamp))
 
         val taskHierarchyRecord = persistenceManager.createTaskHierarchyRecord(parentLocalTask, childLocalTask, startExactTimeStamp)
 
-        val localTaskHierarchy = LocalTaskHierarchy(kotlinDomainFactory, taskHierarchyRecord)
+        val localTaskHierarchy = LocalTaskHierarchy(domainFactory, taskHierarchyRecord)
         localTaskHierarchies.add(localTaskHierarchy.id, localTaskHierarchy)
     }
 
-    fun createChildTask(kotlinDomainFactory: KotlinDomainFactory, now: ExactTimeStamp, parentTask: LocalTask, name: String, note: String?): LocalTask {
+    fun createChildTask(domainFactory: DomainFactory, now: ExactTimeStamp, parentTask: LocalTask, name: String, note: String?): LocalTask {
         check(name.isNotEmpty())
         check(parentTask.current(now))
 
-        return createLocalTaskHelper(kotlinDomainFactory, name, now, note).also {
-            createTaskHierarchy(kotlinDomainFactory, parentTask, it, now)
+        return createLocalTaskHelper(domainFactory, name, now, note).also {
+            createTaskHierarchy(domainFactory, parentTask, it, now)
         }
     }
 
@@ -341,7 +341,7 @@ class LocalFactory {
         parentLocalTaskHierarchies.map { it.parentTask }.forEach { convertLocalToRemoteHelper(localToRemoteConversion, it) }
     }
 
-    fun createLocalCustomTime(kotlinDomainFactory: KotlinDomainFactory, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTime {
+    fun createLocalCustomTime(domainFactory: DomainFactory, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTime {
         check(name.isNotEmpty())
 
         checkNotNull(hourMinutes[DayOfWeek.SUNDAY])
@@ -354,7 +354,7 @@ class LocalFactory {
 
         val localCustomTimeRecord = persistenceManager.createCustomTimeRecord(name, hourMinutes)
 
-        val localCustomTime = LocalCustomTime(kotlinDomainFactory, localCustomTimeRecord)
+        val localCustomTime = LocalCustomTime(domainFactory, localCustomTimeRecord)
         check(!_localCustomTimes.containsKey(localCustomTime.id))
 
         _localCustomTimes[localCustomTime.id] = localCustomTime

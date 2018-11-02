@@ -12,7 +12,7 @@ import io.reactivex.annotations.Nullable
 import java.util.*
 import kotlin.collections.HashMap
 
-abstract class Instance(protected val kotlinDomainFactory: KotlinDomainFactory) {
+abstract class Instance(protected val domainFactory: DomainFactory) {
 
     companion object {
 
@@ -110,7 +110,7 @@ abstract class Instance(protected val kotlinDomainFactory: KotlinDomainFactory) 
             val childTaskKey = taskHierarchy.childTaskKey
 
             if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {
-                val childInstance = kotlinDomainFactory.getInstance(childTaskKey, scheduleDateTime)
+                val childInstance = domainFactory.getInstance(childTaskKey, scheduleDateTime)
 
                 val parentInstance = childInstance.getParentInstance(now)
                 if (parentInstance?.instanceKey == instanceKey)
@@ -191,7 +191,7 @@ abstract class Instance(protected val kotlinDomainFactory: KotlinDomainFactory) 
             return null
         }
 
-        return kotlinDomainFactory.getInstance(parentTask.taskKey, scheduleDateTime)
+        return domainFactory.getInstance(parentTask.taskKey, scheduleDateTime)
     }
 
     abstract fun delete()

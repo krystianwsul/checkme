@@ -15,7 +15,7 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
@@ -241,7 +241,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                 notifyItemRemoved(it)
             }
 
-            KotlinDomainFactory.getKotlinDomainFactory().removeFriends(selectedUserDataWrappers.asSequence()
+            DomainFactory.getKotlinDomainFactory().removeFriends(selectedUserDataWrappers.asSequence()
                     .map { it.userListData.id }
                     .toSet())
         }

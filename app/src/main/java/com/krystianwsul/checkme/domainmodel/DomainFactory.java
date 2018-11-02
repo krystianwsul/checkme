@@ -49,24 +49,6 @@ public class DomainFactory {
 
     // sets
 
-    public synchronized void setInstanceNotificationDone(@NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotificationDone");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        instance.setDone(true, now);
-        instance.setNotificationShown(false, now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(0, source);
-
-        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
-    }
-
     @NonNull
     public synchronized ExactTimeStamp setInstancesDone(int dataId, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesDone");

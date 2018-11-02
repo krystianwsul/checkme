@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import com.google.firebase.auth.FirebaseAuth
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.KotlinDomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.UserInfo
@@ -69,10 +68,10 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId) // todo uodpornić na podwójne kliknięcie
 
-        throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceNotificationDone(it.domainFactory, instanceKey) }
+        throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceNotificationDone(it, instanceKey) }
     }
 
-    private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
+    private fun setInstanceNotificationDone(kotlinDomainFactory: KotlinDomainFactory, instanceKey: InstanceKey) = kotlinDomainFactory.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
 
     private class NeedsFirebaseException : RuntimeException()
 }

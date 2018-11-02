@@ -991,6 +991,27 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             notifyCloud(remoteProjects)
         }
     }
+
+    //@Synchronized
+    fun setInstanceNotificationDone(source: SaveService.Source, instanceKey: InstanceKey) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val instance = getInstance(instanceKey)
+
+            val now = ExactTimeStamp.now
+
+            instance.setDone(true, now)
+            instance.setNotificationShown(false, now)
+
+            updateNotifications(now)
+
+            save(0, source)
+
+            notifyCloud(instance.remoteNullableProject)
+        }
+    }
     
     // internal
 

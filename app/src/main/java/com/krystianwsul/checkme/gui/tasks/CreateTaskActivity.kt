@@ -258,7 +258,7 @@ class CreateTaskActivity : AbstractActivity() {
                         } else {
                             check(mData!!.taskData == null)
 
-                            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.createScheduleRootTask(mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mNote, projectId)
+                            KotlinDomainFactory.getKotlinDomainFactory().createScheduleRootTask(mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mNote, projectId)
 
                             finish()
                         }

@@ -50,38 +50,6 @@ public class DomainFactory {
     // sets
 
     @NonNull
-    Task createScheduleRootTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
-        check(!TextUtils.isEmpty(name));
-        check(!scheduleDatas.isEmpty());
-
-        Task task;
-        if (TextUtils.isEmpty(projectId)) {
-            task = kotlinDomainFactory.localFactory.createScheduleRootTask(kotlinDomainFactory, now, name, scheduleDatas, note);
-        } else {
-            check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-
-            task = kotlinDomainFactory.getRemoteProjectFactory().createScheduleRootTask(now, name, scheduleDatas, note, projectId);
-        }
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
-
-        return task;
-    }
-
-    public synchronized void createScheduleRootTask(int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleRootTask");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId);
-    }
-
-    @NonNull
     TaskKey updateScheduleTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
         check(!TextUtils.isEmpty(name));
         check(!scheduleDatas.isEmpty());

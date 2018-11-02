@@ -1079,6 +1079,39 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             save(dataId, source)
         }
     }
+
+    private fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
+        check(!TextUtils.isEmpty(name))
+        check(!scheduleDatas.isEmpty())
+
+        val task = if (TextUtils.isEmpty(projectId)) {
+            localFactory.createScheduleRootTask(this, now, name, scheduleDatas, note)
+        } else {
+            check(remoteProjectFactory != null)
+
+            remoteProjectFactory!!.createScheduleRootTask(now, name, scheduleDatas, note, projectId!!)
+        }
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(task.remoteNullableProject)
+
+        return task
+    }
+
+    //@Synchronized
+    fun createScheduleRootTask(dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.createScheduleRootTask")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+
+            createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId)
+        }
+    }
     
     // internal
 
@@ -1877,7 +1910,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         NotificationWrapper.instance.notifyInstance(this, instance, true, now)
     }
 
-    fun setInstanceNotified(instanceKey: InstanceKey, now: ExactTimeStamp) {
+    private fun setInstanceNotified(instanceKey: InstanceKey, now: ExactTimeStamp) {
         if (instanceKey.type === TaskKey.Type.LOCAL) {
             val instance = getInstance(instanceKey)
 

@@ -216,6 +216,7 @@ class LocalFactory {
         persistenceManager.deleteInstanceShownRecords(taskKeys)
     }
 
+    // todo dont pass domainfactory
     fun createScheduleRootTask(kotlinDomainFactory: KotlinDomainFactory, now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?): LocalTask {
         check(name.isNotEmpty())
         check(!scheduleDatas.isEmpty())

@@ -49,49 +49,6 @@ public class DomainFactory {
 
     // sets
 
-    @NonNull
-    TaskKey updateScheduleTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
-        check(!TextUtils.isEmpty(name));
-        check(!scheduleDatas.isEmpty());
-
-        Task task = kotlinDomainFactory.getTaskForce(taskKey);
-        check(task.current(now));
-
-        task = task.updateProject(now, projectId);
-
-        task.setName(name, note);
-
-        if (!task.isRootTask(now)) {
-            TaskHierarchy taskHierarchy = kotlinDomainFactory.getParentTaskHierarchy(task, now);
-            check(taskHierarchy != null);
-
-            taskHierarchy.setEndExactTimeStamp(now);
-        }
-
-        task.updateSchedules(scheduleDatas, now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(task.getRemoteNullableProject());
-
-        return task.getTaskKey();
-    }
-
-    @NonNull
-    public synchronized TaskKey updateScheduleTask(int dataId, @NonNull SaveService.Source source, @NonNull TaskKey taskKey, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @Nullable String note, @Nullable String projectId) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.updateScheduleTask");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!TextUtils.isEmpty(name));
-        check(!scheduleDatas.isEmpty());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId);
-    }
-
     public synchronized void createScheduleJoinRootTask(@NonNull ExactTimeStamp now, int dataId, @NonNull SaveService.Source source, @NonNull String name, @NonNull List<CreateTaskViewModel.ScheduleData> scheduleDatas, @NonNull List<TaskKey> joinTaskKeys, @Nullable String note, @Nullable String projectId) {
         MyCrashlytics.INSTANCE.log("DomainFactory.createScheduleJoinRootTask");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());

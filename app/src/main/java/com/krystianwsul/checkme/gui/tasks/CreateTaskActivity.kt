@@ -243,7 +243,7 @@ class CreateTaskActivity : AbstractActivity() {
                             checkNotNull(mData!!.taskData)
                             check(mTaskKeys == null)
 
-                            val taskKey = KotlinDomainFactory.getKotlinDomainFactory().domainFactory.updateScheduleTask(mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, scheduleDatas, mNote, projectId)
+                            val taskKey = KotlinDomainFactory.getKotlinDomainFactory().updateScheduleTask(mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, scheduleDatas, mNote, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 

@@ -232,7 +232,7 @@ abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
     abstract fun setName(name: String, note: String?)
 
-    protected fun updateSchedules(newScheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) {
+    fun updateSchedules(newScheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) {
         val removeSchedules = ArrayList<Schedule>()
         val addScheduleDatas = ArrayList(newScheduleDatas)
 

@@ -1112,6 +1112,46 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId)
         }
     }
+
+    private fun updateScheduleTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
+        check(!TextUtils.isEmpty(name))
+        check(!scheduleDatas.isEmpty())
+
+        var task = getTaskForce(taskKey)
+        check(task.current(now))
+
+        task = task.updateProject(now, projectId)
+
+        task.setName(name, note)
+
+        if (!task.isRootTask(now))
+            getParentTaskHierarchy(task, now)!!.setEndExactTimeStamp(now)
+
+        task.updateSchedules(scheduleDatas, now)
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(task.remoteNullableProject)
+
+        return task.taskKey
+    }
+
+    //@Synchronized
+    fun updateScheduleTask(dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.updateScheduleTask")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!TextUtils.isEmpty(name))
+            check(!scheduleDatas.isEmpty())
+
+            val now = ExactTimeStamp.now
+
+            return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId)
+        }
+    }
     
     // internal
 

@@ -37,8 +37,6 @@ abstract class Instance(protected val kotlinDomainFactory: KotlinDomainFactory) 
         }
     }
 
-    protected val domainFactory = kotlinDomainFactory.domainFactory
-
     val instanceKey get() = InstanceKey(taskKey, scheduleKey)
 
     val scheduleKey get() = ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, scheduleHourMinute))

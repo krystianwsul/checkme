@@ -8,8 +8,6 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 
 abstract class Schedule(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
-    protected val domainFactory = kotlinDomainFactory.domainFactory
-
     protected abstract val scheduleBridge: ScheduleBridge
 
     protected val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }

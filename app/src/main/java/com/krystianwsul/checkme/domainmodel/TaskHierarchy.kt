@@ -6,8 +6,6 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 abstract class TaskHierarchy(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
-    protected val domainFactory = kotlinDomainFactory.domainFactory
-
     abstract val startExactTimeStamp: ExactTimeStamp
 
     protected abstract fun getEndExactTimeStamp(): ExactTimeStamp?

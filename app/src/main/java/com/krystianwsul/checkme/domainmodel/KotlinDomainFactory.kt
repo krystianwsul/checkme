@@ -67,8 +67,6 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    val domainFactory: DomainFactory
-
     private var start: ExactTimeStamp
     private var read: ExactTimeStamp
     private var stop: ExactTimeStamp
@@ -102,7 +100,6 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
     init {
         start = ExactTimeStamp.now
 
-        domainFactory = DomainFactory(this)
         localFactory = persistenceManager?.let { LocalFactory(it) } ?: LocalFactory.instance
 
         read = ExactTimeStamp.now
@@ -135,512 +132,468 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         ObserverHolder.notifyDomainObservers(dataIds)
     }
 
-    //@Synchronized
+    @Synchronized
     fun reset(source: SaveService.Source) {
-        synchronized(domainFactory) {
-            val userInfo = userInfo
-            clearUserInfo()
+        val userInfo = userInfo
+        clearUserInfo()
 
-            _kotlinDomainFactory = null
-            localFactory.reset()
+        _kotlinDomainFactory = null
+        localFactory.reset()
 
-            userInfo?.let { setUserInfo(source, it) }
+        userInfo?.let { setUserInfo(source, it) }
 
-            ObserverHolder.notifyDomainObservers(ArrayList())
+        ObserverHolder.notifyDomainObservers(ArrayList())
 
-            ObserverHolder.clear()
-        }
+        ObserverHolder.clear()
     }
 
     // firebase
 
-    //@Synchronized
+    @Synchronized
     fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
-        synchronized(domainFactory) {
-            if (userInfo != null) {
-                checkNotNull(recordQuery)
-                checkNotNull(userQuery)
+        if (userInfo != null) {
+            checkNotNull(recordQuery)
+            checkNotNull(userQuery)
 
-                if (userInfo == newUserInfo)
-                    return
+            if (userInfo == newUserInfo)
+                return
 
-                clearUserInfo()
+            clearUserInfo()
+        }
+
+        check(userInfo == null)
+
+        check(recordQuery == null)
+        check(recordListener == null)
+
+        check(userQuery == null)
+        check(userListener == null)
+
+        userInfo = newUserInfo
+
+        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
+
+        recordQuery = DatabaseWrapper.getTaskRecordsQuery(newUserInfo)
+        recordListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: " + dataSnapshot!!)
+
+                setRemoteTaskRecords(dataSnapshot, source)
             }
 
-            check(userInfo == null)
+            override fun onCancelled(databaseError: DatabaseError?) {
+                check(databaseError != null)
+                Log.e("asdf", "DomainFactory.getMRecordListener().onCancelled", databaseError.toException())
 
+                MyCrashlytics.logException(databaseError.toException())
+
+                if (tickData != null) {
+                    tickData!!.release()
+                    tickData = null
+                }
+
+                notTickFirebaseListeners.clear()
+                RemoteFriendFactory.clearFriendListeners()
+            }
+        }
+        recordQuery!!.addValueEventListener(recordListener)
+
+        RemoteFriendFactory.setListener(userInfo!!)
+
+        userQuery = DatabaseWrapper.getUserQuery(newUserInfo)
+        userListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot?) {
+                Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: " + dataSnapshot!!)
+
+                setUserRecord(dataSnapshot)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError?) {
+                check(databaseError != null)
+                Log.e("asdf", "DomainFactory.getMUserListener().onCancelled", databaseError.toException())
+
+                MyCrashlytics.logException(databaseError.toException())
+            }
+        }
+
+        userQuery!!.addValueEventListener(userListener)
+    }
+
+    @Synchronized
+    fun clearUserInfo() {
+        val now = ExactTimeStamp.now
+
+        if (userInfo == null) {
             check(recordQuery == null)
             check(recordListener == null)
-
             check(userQuery == null)
             check(userListener == null)
-
-            userInfo = newUserInfo
-
-            DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
-
-            recordQuery = DatabaseWrapper.getTaskRecordsQuery(newUserInfo)
-            recordListener = object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot?) {
-                    Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: " + dataSnapshot!!)
-
-                    setRemoteTaskRecords(dataSnapshot, source)
-                }
-
-                override fun onCancelled(databaseError: DatabaseError?) {
-                    check(databaseError != null)
-                    Log.e("asdf", "DomainFactory.getMRecordListener().onCancelled", databaseError.toException())
-
-                    MyCrashlytics.logException(databaseError.toException())
-
-                    if (tickData != null) {
-                        tickData!!.release()
-                        tickData = null
-                    }
-
-                    notTickFirebaseListeners.clear()
-                    RemoteFriendFactory.clearFriendListeners()
-                }
-            }
-            recordQuery!!.addValueEventListener(recordListener)
-
-            RemoteFriendFactory.setListener(userInfo!!)
-
-            userQuery = DatabaseWrapper.getUserQuery(newUserInfo)
-            userListener = object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot?) {
-                    Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: " + dataSnapshot!!)
-
-                    setUserRecord(dataSnapshot)
-                }
-
-                override fun onCancelled(databaseError: DatabaseError?) {
-                    check(databaseError != null)
-                    Log.e("asdf", "DomainFactory.getMUserListener().onCancelled", databaseError.toException())
-
-                    MyCrashlytics.logException(databaseError.toException())
-                }
-            }
-
-            userQuery!!.addValueEventListener(userListener)
-        }
-    }
-
-    //@Synchronized
-    fun clearUserInfo() {
-        synchronized(domainFactory) {
-            val now = ExactTimeStamp.now
-
-            if (userInfo == null) {
-                check(recordQuery == null)
-                check(recordListener == null)
-                check(userQuery == null)
-                check(userListener == null)
-            } else {
-                check(recordQuery != null)
-                check(recordListener != null)
-                check(userQuery != null)
-                check(userListener != null)
-
-                localFactory.clearRemoteCustomTimeRecords()
-                Log.e("asdf", "clearing getMRemoteProjectFactory()", Exception())
-
-                remoteProjectFactory = null
-                RemoteFriendFactory.setInstance(null)
-
-                userInfo = null
-
-                recordQuery!!.removeEventListener(recordListener!!)
-                recordQuery = null
-                recordListener = null
-
-                RemoteFriendFactory.clearListener()
-
-                userQuery!!.removeEventListener(userListener!!)
-                userQuery = null
-                userListener = null
-
-                updateNotifications(now)
-
-                ObserverHolder.notifyDomainObservers(ArrayList())
-            }
-        }
-    }
-
-    //@Synchronized
-    fun setRemoteTaskRecords(dataSnapshot: DataSnapshot, source: SaveService.Source) {
-        synchronized(domainFactory) {
-            check(userInfo != null)
-
-            val now = ExactTimeStamp.now
+        } else {
+            check(recordQuery != null)
+            check(recordListener != null)
+            check(userQuery != null)
+            check(userListener != null)
 
             localFactory.clearRemoteCustomTimeRecords()
+            Log.e("asdf", "clearing getMRemoteProjectFactory()", Exception())
 
-            val firstThereforeSilent = remoteProjectFactory == null
-            remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo!!, localFactory.uuid, now)
+            remoteProjectFactory = null
+            RemoteFriendFactory.setInstance(null)
 
-            RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
+            userInfo = null
 
-            if (tickData == null && notTickFirebaseListeners.isEmpty()) {
+            recordQuery!!.removeEventListener(recordListener!!)
+            recordQuery = null
+            recordListener = null
+
+            RemoteFriendFactory.clearListener()
+
+            userQuery!!.removeEventListener(userListener!!)
+            userQuery = null
+            userListener = null
+
+            updateNotifications(now)
+
+            ObserverHolder.notifyDomainObservers(ArrayList())
+        }
+    }
+
+    @Synchronized
+    fun setRemoteTaskRecords(dataSnapshot: DataSnapshot, source: SaveService.Source) {
+        check(userInfo != null)
+
+        val now = ExactTimeStamp.now
+
+        localFactory.clearRemoteCustomTimeRecords()
+
+        val firstThereforeSilent = remoteProjectFactory == null
+        remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo!!, localFactory.uuid, now)
+
+        RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
+
+        if (tickData == null && notTickFirebaseListeners.isEmpty()) {
+            updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf())
+
+            save(0, source)
+        } else {
+            skipSave = true
+
+            if (tickData == null) {
                 updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf())
-
-                save(0, source)
             } else {
-                skipSave = true
+                updateNotificationsTick(source, tickData!!.silent, tickData!!.source)
 
-                if (tickData == null) {
-                    updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf())
+                if (!firstThereforeSilent) {
+                    Log.e("asdf", "not first, clearing getMTickData()")
+
+                    tickData!!.release()
+                    tickData = null
                 } else {
-                    updateNotificationsTick(source, tickData!!.silent, tickData!!.source)
-
-                    if (!firstThereforeSilent) {
-                        Log.e("asdf", "not first, clearing getMTickData()")
-
-                        tickData!!.release()
-                        tickData = null
-                    } else {
-                        Log.e("asdf", "first, keeping getMTickData()")
-                    }
+                    Log.e("asdf", "first, keeping getMTickData()")
                 }
-
-                notTickFirebaseListeners.forEach { it.invoke(this) }
-                notTickFirebaseListeners.clear()
-
-                skipSave = false
-
-                save(0, source)
             }
+
+            notTickFirebaseListeners.forEach { it.invoke(this) }
+            notTickFirebaseListeners.clear()
+
+            skipSave = false
+
+            save(0, source)
         }
     }
 
-    //@Synchronized
+    @Synchronized
     fun setUserRecord(dataSnapshot: DataSnapshot) {
-        synchronized(domainFactory) {
-            val userWrapper = dataSnapshot.getValue(UserWrapper::class.java)!!
+        val userWrapper = dataSnapshot.getValue(UserWrapper::class.java)!!
 
-            val remoteRootUserRecord = RemoteRootUserRecord(false, userWrapper)
-            remoteRootUser = RemoteRootUser(remoteRootUserRecord)
-        }
+        val remoteRootUserRecord = RemoteRootUserRecord(false, userWrapper)
+        remoteRootUser = RemoteRootUser(remoteRootUserRecord)
     }
 
-    //@Synchronized
+    @Synchronized
     fun addFirebaseListener(firebaseListener: (KotlinDomainFactory) -> Unit) {
-        synchronized(domainFactory) {
-            check(remoteProjectFactory?.isSaved != false)
+        check(remoteProjectFactory?.isSaved != false)
 
-            notTickFirebaseListeners.add(firebaseListener)
-        }
+        notTickFirebaseListeners.add(firebaseListener)
     }
 
-    //@Synchronized
+    @Synchronized
     fun removeFirebaseListener(firebaseListener: (KotlinDomainFactory) -> Unit) {
-        synchronized(domainFactory) {
-            notTickFirebaseListeners.remove(firebaseListener)
-        }
+        notTickFirebaseListeners.remove(firebaseListener)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
-        synchronized(domainFactory) {
-            check(FirebaseAuth.getInstance().currentUser != null)
+        check(FirebaseAuth.getInstance().currentUser != null)
 
-            if (remoteProjectFactory != null && !remoteProjectFactory!!.isSaved && tickData == null) {
-                updateNotificationsTick(source, newTickData.silent, newTickData.source)
+        if (remoteProjectFactory != null && !remoteProjectFactory!!.isSaved && tickData == null) {
+            updateNotificationsTick(source, newTickData.silent, newTickData.source)
 
-                newTickData.release()
+            newTickData.release()
+        } else {
+            tickData = if (tickData != null) {
+                mergeTickDatas(tickData!!, newTickData)
             } else {
-                tickData = if (tickData != null) {
-                    mergeTickDatas(tickData!!, newTickData)
-                } else {
-                    newTickData
-                }
+                newTickData
             }
         }
     }
 
-    //@Synchronized
-    fun getIsConnected(): Boolean {
-            synchronized(domainFactory) {
-                return remoteProjectFactory != null
-            }
-        }
+    @Synchronized
+    fun getIsConnected(): Boolean = remoteProjectFactory != null
 
-    //@Synchronized
-    fun getIsConnectedAndSaved(): Boolean {
-            synchronized(domainFactory) {
-                check(remoteProjectFactory != null)
-
-                return remoteProjectFactory!!.isSaved
-            }
-        }
+    @Synchronized
+    fun getIsConnectedAndSaved() = remoteProjectFactory!!.isSaved
 
     // gets
 
-    //@Synchronized
+    @Synchronized
     fun getEditInstanceData(instanceKey: InstanceKey): EditInstanceViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getEditInstanceData")
+        MyCrashlytics.log("DomainFactory.getEditInstanceData")
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val currentCustomTimes = getCurrentCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
+        val currentCustomTimes = getCurrentCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
 
+        val instance = getInstance(instanceKey)
+        check(instance.isRootInstance(now))
+
+        if (instance.instanceTimePair.customTimeKey != null) {
+            val customTime = getCustomTime(instance.instanceTimePair.customTimeKey!!)
+
+            currentCustomTimes[customTime.customTimeKey] = customTime
+        }
+
+        val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstanceViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
+
+        return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
+    }
+
+    @Synchronized
+    fun getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getEditInstancesData")
+
+        check(instanceKeys.size > 1)
+
+        val now = ExactTimeStamp.now
+
+        val currentCustomTimes = getCurrentCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
+
+        val instanceDatas = mutableMapOf<InstanceKey, EditInstancesViewModel.InstanceData>()
+
+        for (instanceKey in instanceKeys) {
             val instance = getInstance(instanceKey)
             check(instance.isRootInstance(now))
+            check(instance.done == null)
+
+            instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(instance.instanceDateTime, instance.name)
 
             if (instance.instanceTimePair.customTimeKey != null) {
                 val customTime = getCustomTime(instance.instanceTimePair.customTimeKey!!)
 
                 currentCustomTimes[customTime.customTimeKey] = customTime
             }
-
-            val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstanceViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
-
-            return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
         }
+
+        val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstancesViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
+
+        val showHour = instanceDatas.values.all { it.instanceDateTime.timeStamp.toExactTimeStamp() < now }
+
+        return EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
     }
 
-    //@Synchronized
-    fun getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getEditInstancesData")
-
-            check(instanceKeys.size > 1)
-
-            val now = ExactTimeStamp.now
-
-            val currentCustomTimes = getCurrentCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
-
-            val instanceDatas = mutableMapOf<InstanceKey, EditInstancesViewModel.InstanceData>()
-
-            for (instanceKey in instanceKeys) {
-                val instance = getInstance(instanceKey)
-                check(instance.isRootInstance(now))
-                check(instance.done == null)
-
-                instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(instance.instanceDateTime, instance.name)
-
-                if (instance.instanceTimePair.customTimeKey != null) {
-                    val customTime = getCustomTime(instance.instanceTimePair.customTimeKey!!)
-
-                    currentCustomTimes[customTime.customTimeKey] = customTime
-                }
-            }
-
-            val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstancesViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
-
-            val showHour = instanceDatas.values.all { it.instanceDateTime.timeStamp.toExactTimeStamp() < now }
-
-            return EditInstancesViewModel.Data(instanceDatas, customTimeDatas, showHour)
-        }
-    }
-
-    //@Synchronized
+    @Synchronized
     fun getShowCustomTimeData(localCustomTimeId: Int): ShowCustomTimeViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
+        MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
 
-            val localCustomTime = localFactory.getLocalCustomTime(localCustomTimeId)
+        val localCustomTime = localFactory.getLocalCustomTime(localCustomTimeId)
 
-            val hourMinutes = DayOfWeek.values().associate { it to localCustomTime.getHourMinute(it) }
+        val hourMinutes = DayOfWeek.values().associate { it to localCustomTime.getHourMinute(it) }
 
-            return ShowCustomTimeViewModel.Data(localCustomTime.id, localCustomTime.name, hourMinutes)
-        }
+        return ShowCustomTimeViewModel.Data(localCustomTime.id, localCustomTime.name, hourMinutes)
     }
 
-    //@Synchronized
+    @Synchronized
     fun getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowCustomTimesData")
+        MyCrashlytics.log("DomainFactory.getShowCustomTimesData")
 
-            val entries = getCurrentCustomTimes().map { ShowCustomTimesViewModel.CustomTimeData(it.id, it.name) }
+        val entries = getCurrentCustomTimes().map { ShowCustomTimesViewModel.CustomTimeData(it.id, it.name) }
 
-            return ShowCustomTimesViewModel.Data(entries)
-        }
+        return ShowCustomTimesViewModel.Data(entries)
     }
 
-    //@Synchronized
+    @Synchronized
     fun getGroupListData(now: ExactTimeStamp, position: Int, timeRange: MainActivity.TimeRange): DayViewModel.DayData {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
+        MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
 
-            check(position >= 0)
+        check(position >= 0)
 
-            val startExactTimeStamp: ExactTimeStamp?
-            val endExactTimeStamp: ExactTimeStamp
+        val startExactTimeStamp: ExactTimeStamp?
+        val endExactTimeStamp: ExactTimeStamp
 
-            if (position == 0) {
-                startExactTimeStamp = null
-            } else {
-                val startCalendar = now.calendar
-
-                when (timeRange) {
-                    MainActivity.TimeRange.DAY -> startCalendar.add(Calendar.DATE, position)
-                    MainActivity.TimeRange.WEEK -> {
-                        startCalendar.add(Calendar.WEEK_OF_YEAR, position)
-                        startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.firstDayOfWeek)
-                    }
-                    MainActivity.TimeRange.MONTH -> {
-                        startCalendar.add(Calendar.MONTH, position)
-                        startCalendar.set(Calendar.DAY_OF_MONTH, 1)
-                    }
-                }
-
-                startExactTimeStamp = ExactTimeStamp(Date(startCalendar), HourMilli(0, 0, 0, 0))
-            }
-
-            val endCalendar = now.calendar
+        if (position == 0) {
+            startExactTimeStamp = null
+        } else {
+            val startCalendar = now.calendar
 
             when (timeRange) {
-                MainActivity.TimeRange.DAY -> endCalendar.add(Calendar.DATE, position + 1)
+                MainActivity.TimeRange.DAY -> startCalendar.add(Calendar.DATE, position)
                 MainActivity.TimeRange.WEEK -> {
-                    endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1)
-                    endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.firstDayOfWeek)
+                    startCalendar.add(Calendar.WEEK_OF_YEAR, position)
+                    startCalendar.set(Calendar.DAY_OF_WEEK, startCalendar.firstDayOfWeek)
                 }
                 MainActivity.TimeRange.MONTH -> {
-                    endCalendar.add(Calendar.MONTH, position + 1)
-                    endCalendar.set(Calendar.DAY_OF_MONTH, 1)
+                    startCalendar.add(Calendar.MONTH, position)
+                    startCalendar.set(Calendar.DAY_OF_MONTH, 1)
                 }
             }
 
-            endExactTimeStamp = ExactTimeStamp(Date(endCalendar), HourMilli(0, 0, 0, 0))
-
-            val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
-
-            val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
-
-            var taskDatas: List<GroupListFragment.TaskData>? = null
-            if (position == 0) {
-                taskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
-                        .map { GroupListFragment.TaskData(it.taskKey, it.name, getGroupListChildTaskDatas(it, now), it.startExactTimeStamp, it.note) }
-                        .collect(Collectors.toList())
-            }
-
-            val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
-            for (instance in currentInstances) {
-                val task = instance.task
-
-                val isRootTask = if (task.current(now)) task.isRootTask(now) else null
-
-                val children = getChildInstanceDatas(instance, now)
-                val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
-                children.values.forEach { it.instanceDataParent = instanceData }
-                instanceDatas[instanceData.InstanceKey] = instanceData
-            }
-
-            val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas)
-            val data = DayViewModel.DayData(dataWrapper)
-
-            instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
-
-            Log.e("asdf", "getShowNotificationGroupData returning $data")
-            return data
+            startExactTimeStamp = ExactTimeStamp(Date(startCalendar), HourMilli(0, 0, 0, 0))
         }
-    }
 
-    //@Synchronized
-    fun getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowGroupData")
+        val endCalendar = now.calendar
 
-            val now = ExactTimeStamp.now
-
-            val date = timeStamp.date
-            val dayOfWeek = date.dayOfWeek
-            val hourMinute = timeStamp.hourMinute
-
-            val time = getCurrentCustomTimes().firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
-                    ?: NormalTime(hourMinute)
-
-            val displayText = DateTime(date, time).getDisplayText()
-
-            return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
+        when (timeRange) {
+            MainActivity.TimeRange.DAY -> endCalendar.add(Calendar.DATE, position + 1)
+            MainActivity.TimeRange.WEEK -> {
+                endCalendar.add(Calendar.WEEK_OF_YEAR, position + 1)
+                endCalendar.set(Calendar.DAY_OF_WEEK, endCalendar.firstDayOfWeek)
+            }
+            MainActivity.TimeRange.MONTH -> {
+                endCalendar.add(Calendar.MONTH, position + 1)
+                endCalendar.set(Calendar.DAY_OF_MONTH, 1)
+            }
         }
-    }
 
-    //@Synchronized
-    fun getShowTaskInstancesData(taskKey: TaskKey): ShowTaskInstancesViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
+        endExactTimeStamp = ExactTimeStamp(Date(endCalendar), HourMilli(0, 0, 0, 0))
 
-            val task = getTaskForce(taskKey)
-            val now = ExactTimeStamp.now
+        val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
 
-            val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+        val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+
+        var taskDatas: List<GroupListFragment.TaskData>? = null
+        if (position == 0) {
+            taskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
+                    .map { GroupListFragment.TaskData(it.taskKey, it.name, getGroupListChildTaskDatas(it, now), it.startExactTimeStamp, it.note) }
+                    .collect(Collectors.toList())
+        }
+
+        val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
+        for (instance in currentInstances) {
+            val task = instance.task
 
             val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-            val existingInstances = task.existingInstances.values
-            val pastInstances = task.getInstances(null, now, now)
-
-            val allInstances = existingInstances.toMutableSet()
-            allInstances.addAll(pastInstances)
-
-            val instanceDatas = allInstances.associate {
-                val children = getChildInstanceDatas(it, now)
-
-                val hierarchyData = if (task.isRootTask(now)) {
-                    null
-                } else {
-                    val taskHierarchy = getParentTaskHierarchy(task, now)!!
-
-                    HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal)
-                }
-
-                it.instanceKey to GroupListFragment.InstanceData(it.done, it.instanceKey, it.getDisplayText(now), it.name, it.instanceDateTime.timeStamp, task.current(now), it.isRootInstance(now), isRootTask, it.exists(), it.instanceDateTime.time.timePair, task.note, children, hierarchyData, it.ordinal)
-            }.toMutableMap()
-
-            return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas))
+            val children = getChildInstanceDatas(instance, now)
+            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
+            children.values.forEach { it.instanceDataParent = instanceData }
+            instanceDatas[instanceData.InstanceKey] = instanceData
         }
+
+        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas)
+        val data = DayViewModel.DayData(dataWrapper)
+
+        instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+
+        Log.e("asdf", "getShowNotificationGroupData returning $data")
+        return data
     }
 
-    //@Synchronized
+    @Synchronized
+    fun getShowGroupData(timeStamp: TimeStamp): ShowGroupViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getShowGroupData")
+
+        val now = ExactTimeStamp.now
+
+        val date = timeStamp.date
+        val dayOfWeek = date.dayOfWeek
+        val hourMinute = timeStamp.hourMinute
+
+        val time = getCurrentCustomTimes().firstOrNull { it.getHourMinute(dayOfWeek) == hourMinute }
+                ?: NormalTime(hourMinute)
+
+        val displayText = DateTime(date, time).getDisplayText()
+
+        return ShowGroupViewModel.Data(displayText, getGroupListData(timeStamp, now))
+    }
+
+    @Synchronized
+    fun getShowTaskInstancesData(taskKey: TaskKey): ShowTaskInstancesViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getShowTaskInstancesData")
+
+        val task = getTaskForce(taskKey)
+        val now = ExactTimeStamp.now
+
+        val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+
+        val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+
+        val existingInstances = task.existingInstances.values
+        val pastInstances = task.getInstances(null, now, now)
+
+        val allInstances = existingInstances.toMutableSet()
+        allInstances.addAll(pastInstances)
+
+        val instanceDatas = allInstances.associate {
+            val children = getChildInstanceDatas(it, now)
+
+            val hierarchyData = if (task.isRootTask(now)) {
+                null
+            } else {
+                val taskHierarchy = getParentTaskHierarchy(task, now)!!
+
+                HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal)
+            }
+
+            it.instanceKey to GroupListFragment.InstanceData(it.done, it.instanceKey, it.getDisplayText(now), it.name, it.instanceDateTime.timeStamp, task.current(now), it.isRootInstance(now), isRootTask, it.exists(), it.instanceDateTime.time.timePair, task.note, children, hierarchyData, it.ordinal)
+        }.toMutableMap()
+
+        return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas))
+    }
+
+    @Synchronized
     fun getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
+        MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
 
-            check(!instanceKeys.isEmpty())
+        check(!instanceKeys.isEmpty())
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val instances = instanceKeys.map { getInstance(it) }
-                    .filter { it.isRootInstance(now) }
-                    .sortedBy { it.instanceDateTime }
+        val instances = instanceKeys.map { getInstance(it) }
+                .filter { it.isRootInstance(now) }
+                .sortedBy { it.instanceDateTime }
 
-            val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+        val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
 
-            val instanceDatas = instances.associate { instance ->
-                val task = instance.task
+        val instanceDatas = instances.associate { instance ->
+            val task = instance.task
 
-                val isRootTask = if (task.current(now)) task.isRootTask(now) else null
+            val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-                val children = getChildInstanceDatas(instance, now)
-                val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
-                children.values.forEach { it.instanceDataParent = instanceData }
-                instance.instanceKey to instanceData
-            }.toMutableMap()
+            val children = getChildInstanceDatas(instance, now)
+            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
+            children.values.forEach { it.instanceDataParent = instanceData }
+            instance.instanceKey to instanceData
+        }.toMutableMap()
 
-            val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, null, null, instanceDatas)
+        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, null, null, instanceDatas)
 
-            instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+        instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 
-            return ShowNotificationGroupViewModel.Data(dataWrapper)
-        }
+        return ShowNotificationGroupViewModel.Data(dataWrapper)
     }
 
-    //@Synchronized
+    @Synchronized
     fun getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowInstanceData")
+        MyCrashlytics.log("DomainFactory.getShowInstanceData")
 
-            val task = getTaskIfPresent(instanceKey.taskKey)
-                    ?: return ShowInstanceViewModel.Data(null)
+        val task = getTaskIfPresent(instanceKey.taskKey)
+                ?: return ShowInstanceViewModel.Data(null)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val instance = getInstance(instanceKey)
-            return if (!task.current(now) && !instance.exists()) ShowInstanceViewModel.Data(null) else ShowInstanceViewModel.Data(ShowInstanceViewModel.InstanceData(instance.name, instance.getDisplayText(now), instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)))
-        }
+        val instance = getInstance(instanceKey)
+        return if (!task.current(now) && !instance.exists()) ShowInstanceViewModel.Data(null) else ShowInstanceViewModel.Data(ShowInstanceViewModel.InstanceData(instance.name, instance.getDisplayText(now), instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)))
     }
 
     fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {
@@ -689,211 +642,197 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>>(customTimes, scheduleDatas)
     }
 
-    //@Synchronized
+    @Synchronized
     fun getCreateTaskData(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?): CreateTaskViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getCreateTaskData")
+        MyCrashlytics.log("DomainFactory.getCreateTaskData")
 
-            check(taskKey == null || joinTaskKeys == null)
+        check(taskKey == null || joinTaskKeys == null)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val customTimes = getCurrentCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
+        val customTimes = getCurrentCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
 
-            val excludedTaskKeys = when {
-                taskKey != null -> listOf(taskKey)
-                joinTaskKeys != null -> joinTaskKeys
-                else -> listOf()
-            }
+        val excludedTaskKeys = when {
+            taskKey != null -> listOf(taskKey)
+            joinTaskKeys != null -> joinTaskKeys
+            else -> listOf()
+        }
 
-            var taskData: CreateTaskViewModel.TaskData? = null
-            val parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>
-            if (taskKey != null) {
-                val task = getTaskForce(taskKey)
+        var taskData: CreateTaskViewModel.TaskData? = null
+        val parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>
+        if (taskKey != null) {
+            val task = getTaskForce(taskKey)
 
-                val taskParentKey: CreateTaskViewModel.ParentKey.TaskParentKey?
-                var scheduleDatas: List<CreateTaskViewModel.ScheduleData>? = null
+            val taskParentKey: CreateTaskViewModel.ParentKey.TaskParentKey?
+            var scheduleDatas: List<CreateTaskViewModel.ScheduleData>? = null
 
-                if (task.isRootTask(now)) {
-                    val schedules = task.getCurrentSchedules(now)
+            if (task.isRootTask(now)) {
+                val schedules = task.getCurrentSchedules(now)
 
-                    taskParentKey = null
+                taskParentKey = null
 
-                    if (!schedules.isEmpty()) {
-                        val pair = getScheduleDatas(schedules, now)
-                        customTimes.putAll(pair.first)
-                        scheduleDatas = pair.second.keys.toList()
-                    }
-                } else {
-                    val parentTask = task.getParentTask(now)!!
-                    taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.taskKey)
-                }
-
-                val projectName = task.remoteNullableProject?.name
-
-                taskData = CreateTaskViewModel.TaskData(task.name, taskParentKey, scheduleDatas, task.note, projectName)
-
-                parentTreeDatas = if (task is RemoteTask) {
-                    getProjectTaskTreeDatas(now, task.remoteProject, excludedTaskKeys)
-                } else {
-                    check(task is LocalTask)
-
-                    getParentTreeDatas(now, excludedTaskKeys)
+                if (!schedules.isEmpty()) {
+                    val pair = getScheduleDatas(schedules, now)
+                    customTimes.putAll(pair.first)
+                    scheduleDatas = pair.second.keys.toList()
                 }
             } else {
-                var projectId: String? = null
-                if (joinTaskKeys != null) {
-                    check(joinTaskKeys.size > 1)
-
-                    val projectIds = joinTaskKeys.map { it.remoteProjectId }.distinct()
-
-                    projectId = projectIds.single()
-                }
-
-                parentTreeDatas = if (!TextUtils.isEmpty(projectId)) {
-                    check(remoteProjectFactory != null)
-
-                    val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId!!)
-
-                    getProjectTaskTreeDatas(now, remoteProject, excludedTaskKeys)
-                } else {
-                    getParentTreeDatas(now, excludedTaskKeys)
-                }
+                val parentTask = task.getParentTask(now)!!
+                taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.taskKey)
             }
 
-            val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) }
+            val projectName = task.remoteNullableProject?.name
 
-            return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas)
-        }
-    }
+            taskData = CreateTaskViewModel.TaskData(task.name, taskParentKey, scheduleDatas, task.note, projectName)
 
-    //@Synchronized
-    fun getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowTaskData")
+            parentTreeDatas = if (task is RemoteTask) {
+                getProjectTaskTreeDatas(now, task.remoteProject, excludedTaskKeys)
+            } else {
+                check(task is LocalTask)
 
-            val now = ExactTimeStamp.now
+                getParentTreeDatas(now, excludedTaskKeys)
+            }
+        } else {
+            var projectId: String? = null
+            if (joinTaskKeys != null) {
+                check(joinTaskKeys.size > 1)
 
-            val task = getTaskForce(taskKey)
-            check(task.current(now))
+                val projectIds = joinTaskKeys.map { it.remoteProjectId }.distinct()
 
-            val childTaskDatas = task.getChildTaskHierarchies(now)
-                    .map {
-                        val childTask = it.childTask
+                projectId = projectIds.single()
+            }
 
-                        TaskListFragment.ChildTaskData(childTask.name, childTask.getScheduleText(now), getTaskListChildTaskDatas(childTask, now), childTask.note, childTask.startExactTimeStamp, childTask.taskKey, HierarchyData(it.taskHierarchyKey, it.ordinal))
-                    }
-                    .sorted()
+            parentTreeDatas = if (!TextUtils.isEmpty(projectId)) {
+                check(remoteProjectFactory != null)
 
-            return ShowTaskViewModel.Data(task.name, task.getScheduleText(now), TaskListFragment.TaskData(childTaskDatas, task.note), !task.existingInstances.isEmpty())
-        }
-    }
-
-    //@Synchronized
-    fun getMainData(): MainViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getMainData")
-
-            val now = ExactTimeStamp.now
-
-            return MainViewModel.Data(getMainData(now))
-        }
-    }
-
-    //@Synchronized
-    fun getProjectListData(): ProjectListViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getProjectListData")
-
-            check(remoteProjectFactory != null)
-
-            val now = ExactTimeStamp.now
-
-            val projectDatas = remoteProjectFactory!!.remoteProjects
-                    .values
-                    .filter { it.current(now) }
-                    .associate {
-                        val users = it.users.joinToString(", ") { it.name }
-
-                        it.id to ProjectListViewModel.ProjectData(it.id, it.name, users)
-                    }
-                    .toSortedMap()
-
-            return ProjectListViewModel.Data(projectDatas)
-        }
-    }
-
-    //@Synchronized
-    fun getFriendListData(): FriendListViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getFriendListData")
-
-            check(RemoteFriendFactory.hasFriends())
-
-            val userListDatas = RemoteFriendFactory.getFriends()
-                    .map { FriendListViewModel.UserListData(it.name, it.email, it.id) }
-                    .toSet()
-
-            return FriendListViewModel.Data(userListDatas)
-        }
-    }
-
-    //@Synchronized
-    fun getShowProjectData(projectId: String?): ShowProjectViewModel.Data {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.getShowProjectData")
-
-            check(remoteProjectFactory != null)
-            check(userInfo != null)
-            check(RemoteFriendFactory.hasFriends())
-
-            val friendDatas = RemoteFriendFactory.getFriends()
-                    .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
-                    .associateBy { it.id }
-
-            val name: String?
-            val userListDatas: Set<ShowProjectViewModel.UserListData>
-            if (!TextUtils.isEmpty(projectId)) {
                 val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId!!)
 
-                name = remoteProject.name
-
-                userListDatas = remoteProject.users
-                        .filterNot { it.id == userInfo!!.key }
-                        .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
-                        .toSet()
+                getProjectTaskTreeDatas(now, remoteProject, excludedTaskKeys)
             } else {
-                name = null
-                userListDatas = setOf()
+                getParentTreeDatas(now, excludedTaskKeys)
             }
-
-            return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
         }
+
+        val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) }
+
+        return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas)
+    }
+
+    @Synchronized
+    fun getShowTaskData(taskKey: TaskKey): ShowTaskViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getShowTaskData")
+
+        val now = ExactTimeStamp.now
+
+        val task = getTaskForce(taskKey)
+        check(task.current(now))
+
+        val childTaskDatas = task.getChildTaskHierarchies(now)
+                .map {
+                    val childTask = it.childTask
+
+                    TaskListFragment.ChildTaskData(childTask.name, childTask.getScheduleText(now), getTaskListChildTaskDatas(childTask, now), childTask.note, childTask.startExactTimeStamp, childTask.taskKey, HierarchyData(it.taskHierarchyKey, it.ordinal))
+                }
+                .sorted()
+
+        return ShowTaskViewModel.Data(task.name, task.getScheduleText(now), TaskListFragment.TaskData(childTaskDatas, task.note), !task.existingInstances.isEmpty())
+    }
+
+    @Synchronized
+    fun getMainData(): MainViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getMainData")
+
+        val now = ExactTimeStamp.now
+
+        return MainViewModel.Data(getMainData(now))
+    }
+
+    @Synchronized
+    fun getProjectListData(): ProjectListViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getProjectListData")
+
+        check(remoteProjectFactory != null)
+
+        val now = ExactTimeStamp.now
+
+        val projectDatas = remoteProjectFactory!!.remoteProjects
+                .values
+                .filter { it.current(now) }
+                .associate {
+                    val users = it.users.joinToString(", ") { it.name }
+
+                    it.id to ProjectListViewModel.ProjectData(it.id, it.name, users)
+                }
+                .toSortedMap()
+
+        return ProjectListViewModel.Data(projectDatas)
+    }
+
+    @Synchronized
+    fun getFriendListData(): FriendListViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getFriendListData")
+
+        check(RemoteFriendFactory.hasFriends())
+
+        val userListDatas = RemoteFriendFactory.getFriends()
+                .map { FriendListViewModel.UserListData(it.name, it.email, it.id) }
+                .toSet()
+
+        return FriendListViewModel.Data(userListDatas)
+    }
+
+    @Synchronized
+    fun getShowProjectData(projectId: String?): ShowProjectViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getShowProjectData")
+
+        check(remoteProjectFactory != null)
+        check(userInfo != null)
+        check(RemoteFriendFactory.hasFriends())
+
+        val friendDatas = RemoteFriendFactory.getFriends()
+                .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
+                .associateBy { it.id }
+
+        val name: String?
+        val userListDatas: Set<ShowProjectViewModel.UserListData>
+        if (!TextUtils.isEmpty(projectId)) {
+            val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId!!)
+
+            name = remoteProject.name
+
+            userListDatas = remoteProject.users
+                    .filterNot { it.id == userInfo!!.key }
+                    .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
+                    .toSet()
+        } else {
+            name = null
+            userListDatas = setOf()
+        }
+
+        return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
     }
 
     // sets
 
-    //@Synchronized
+    @Synchronized
     fun setInstanceDateTime(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, instanceDate: Date, instanceTimePair: TimePair) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstanceDateTime")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstanceDateTime")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val instance = getInstance(instanceKey)
+        val instance = getInstance(instanceKey)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            instance.setInstanceDateTime(instanceDate, instanceTimePair, now)
+        instance.setInstanceDateTime(instanceDate, instanceTimePair, now)
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(instance.remoteNullableProject)
-        }
+        notifyCloud(instance.remoteNullableProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstancesDateTime(dataId: Int, source: SaveService.Source, instanceKeys: Set<InstanceKey>, instanceDate: Date, instanceTimePair: TimePair) {
         MyCrashlytics.log("DomainFactory.setInstancesDateTime")
         check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
@@ -918,167 +857,151 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         notifyCloud(remoteProjects)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val instance = getInstance(instanceKey)
+        val instance = getInstance(instanceKey)
 
-            val now = ExactTimeStamp.now
-            val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
+        val now = ExactTimeStamp.now
+        val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
-            val date = Date(calendar)
-            val hourMinute = HourMinute(calendar)
+        val date = Date(calendar)
+        val hourMinute = HourMinute(calendar)
 
-            instance.setInstanceDateTime(date, TimePair(hourMinute), now)
-            instance.setNotificationShown(false, now)
+        instance.setInstanceDateTime(date, TimePair(hourMinute), now)
+        instance.setNotificationShown(false, now)
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(0, source)
+        save(0, source)
 
-            notifyCloud(instance.remoteNullableProject)
-        }
+        notifyCloud(instance.remoteNullableProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstanceAddHourActivity(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val instance = getInstance(instanceKey)
+        val instance = getInstance(instanceKey)
 
-            val now = ExactTimeStamp.now
-            val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
+        val now = ExactTimeStamp.now
+        val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
-            val date = Date(calendar)
-            val hourMinute = HourMinute(calendar)
+        val date = Date(calendar)
+        val hourMinute = HourMinute(calendar)
 
-            instance.setInstanceDateTime(date, TimePair(hourMinute), now)
+        instance.setInstanceDateTime(date, TimePair(hourMinute), now)
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(instance.remoteNullableProject)
-        }
+        notifyCloud(instance.remoteNullableProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstancesAddHourActivity(dataId: Int, source: SaveService.Source, instanceKeys: Collection<InstanceKey>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
-            val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
+        val now = ExactTimeStamp.now
+        val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
-            val date = Date(calendar)
-            val hourMinute = HourMinute(calendar)
+        val date = Date(calendar)
+        val hourMinute = HourMinute(calendar)
 
-            val instances = instanceKeys.map(this::getInstance)
+        val instances = instanceKeys.map(this::getInstance)
 
-            instances.forEach { it.setInstanceDateTime(date, TimePair(hourMinute), now) }
+        instances.forEach { it.setInstanceDateTime(date, TimePair(hourMinute), now) }
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            val remoteProjects = instances.mapNotNull { it.remoteNullableProject }.toSet()
+        val remoteProjects = instances.mapNotNull { it.remoteNullableProject }.toSet()
 
-            notifyCloud(remoteProjects)
-        }
+        notifyCloud(remoteProjects)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstanceNotificationDone(source: SaveService.Source, instanceKey: InstanceKey) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstanceNotificationDone")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val instance = getInstance(instanceKey)
+        val instance = getInstance(instanceKey)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            instance.setDone(true, now)
-            instance.setNotificationShown(false, now)
+        instance.setDone(true, now)
+        instance.setNotificationShown(false, now)
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(0, source)
+        save(0, source)
 
-            notifyCloud(instance.remoteNullableProject)
-        }
+        notifyCloud(instance.remoteNullableProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstancesDone(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>): ExactTimeStamp {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstancesDone")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstancesDone")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val instances = instanceKeys.map(this::getInstance)
+        val instances = instanceKeys.map(this::getInstance)
 
-            instances.forEach { it.setDone(true, now) }
+        instances.forEach { it.setDone(true, now) }
 
-            val remoteProjects = instances.mapNotNull(Instance::remoteNullableProject).toSet()
+        val remoteProjects = instances.mapNotNull(Instance::remoteNullableProject).toSet()
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(remoteProjects)
+        notifyCloud(remoteProjects)
 
-            return now
-        }
+        return now
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstanceDone(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): ExactTimeStamp? {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstanceDone")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstanceDone")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val instance = setInstanceDone(now, dataId, source, instanceKey, done)
+        val instance = setInstanceDone(now, dataId, source, instanceKey, done)
 
-            return instance.done
-        }
+        return instance.done
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstancesNotified(source: SaveService.Source, instanceKeys: List<InstanceKey>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstancesNotified")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstancesNotified")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!instanceKeys.isEmpty())
+        check(!instanceKeys.isEmpty())
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            for (instanceKey in instanceKeys)
-                setInstanceNotified(instanceKey, now)
+        for (instanceKey in instanceKeys)
+            setInstanceNotified(instanceKey, now)
 
-            save(0, source)
-        }
+        save(0, source)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstanceNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstanceNotified")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstanceNotified")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            setInstanceNotified(instanceKey, ExactTimeStamp.now)
+        setInstanceNotified(instanceKey, ExactTimeStamp.now)
 
-            save(dataId, source)
-        }
+        save(dataId, source)
     }
 
     private fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
@@ -1102,16 +1025,14 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return task
     }
 
-    //@Synchronized
+    @Synchronized
     fun createScheduleRootTask(dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.createScheduleRootTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.createScheduleRootTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId)
-        }
+        createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId)
     }
 
     private fun updateScheduleTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
@@ -1139,66 +1060,62 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return task.taskKey
     }
 
-    //@Synchronized
+    @Synchronized
     fun updateScheduleTask(dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.updateScheduleTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.updateScheduleTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!TextUtils.isEmpty(name))
-            check(!scheduleDatas.isEmpty())
+        check(!TextUtils.isEmpty(name))
+        check(!scheduleDatas.isEmpty())
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId)
-        }
+        return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId)
     }
 
-    //@Synchronized
+    @Synchronized
     fun createScheduleJoinRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, joinTaskKeys: List<TaskKey>, note: String?, projectId: String?) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!TextUtils.isEmpty(name))
-            check(!scheduleDatas.isEmpty())
-            check(joinTaskKeys.size > 1)
+        check(!TextUtils.isEmpty(name))
+        check(!scheduleDatas.isEmpty())
+        check(joinTaskKeys.size > 1)
 
-            val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
-                    .distinct()
-                    .single()
+        val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
+                .distinct()
+                .single()
 
-            val finalProjectId = if (!TextUtils.isEmpty(joinProjectId)) {
-                check(TextUtils.isEmpty(projectId))
+        val finalProjectId = if (!TextUtils.isEmpty(joinProjectId)) {
+            check(TextUtils.isEmpty(projectId))
 
-                joinProjectId
-            } else if (!TextUtils.isEmpty(projectId)) {
-                projectId
-            } else {
-                null
-            }
-
-            var joinTasks = joinTaskKeys.map { getTaskForce(it) }
-
-            val newParentTask = if (!TextUtils.isEmpty(finalProjectId)) {
-                check(remoteProjectFactory != null)
-                check(userInfo != null)
-
-                remoteProjectFactory!!.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId!!)
-            } else {
-                localFactory.createScheduleRootTask(this, now, name, scheduleDatas, note)
-            }
-
-            joinTasks = joinTasks.map { it.updateProject(now, projectId) }
-
-            joinTasks(newParentTask, joinTasks, now)
-
-            updateNotifications(now)
-
-            save(dataId, source)
-
-            notifyCloud(newParentTask.remoteNullableProject)
+            joinProjectId
+        } else if (!TextUtils.isEmpty(projectId)) {
+            projectId
+        } else {
+            null
         }
+
+        var joinTasks = joinTaskKeys.map { getTaskForce(it) }
+
+        val newParentTask = if (!TextUtils.isEmpty(finalProjectId)) {
+            check(remoteProjectFactory != null)
+            check(userInfo != null)
+
+            remoteProjectFactory!!.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId!!)
+        } else {
+            localFactory.createScheduleRootTask(this, now, name, scheduleDatas, note)
+        }
+
+        joinTasks = joinTasks.map { it.updateProject(now, projectId) }
+
+        joinTasks(newParentTask, joinTasks, now)
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(newParentTask.remoteNullableProject)
     }
 
     private fun createChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, note: String?): Task {
@@ -1218,242 +1135,222 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return childTask
     }
 
-    //@Synchronized
+    @Synchronized
     fun createChildTask(dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, note: String?) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.createChildTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.createChildTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            createChildTask(now, dataId, source, parentTaskKey, name, note)
-        }
+        createChildTask(now, dataId, source, parentTaskKey, name, note)
     }
 
-    //@Synchronized
+    @Synchronized
     fun createJoinChildTask(dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, joinTaskKeys: List<TaskKey>, note: String?) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.createJoinChildTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.createJoinChildTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!TextUtils.isEmpty(name))
-            check(joinTaskKeys.size > 1)
+        check(!TextUtils.isEmpty(name))
+        check(joinTaskKeys.size > 1)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val parentTask = getTaskForce(parentTaskKey)
-            check(parentTask.current(now))
+        val parentTask = getTaskForce(parentTaskKey)
+        check(parentTask.current(now))
 
-            val joinProjectIds = joinTaskKeys.map { it.remoteProjectId }.distinct()
-            check(joinProjectIds.size == 1)
+        val joinProjectIds = joinTaskKeys.map { it.remoteProjectId }.distinct()
+        check(joinProjectIds.size == 1)
 
-            val joinTasks = joinTaskKeys.map { getTaskForce(it) }
+        val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-            val childTask = parentTask.createChildTask(now, name, note)
+        val childTask = parentTask.createChildTask(now, name, note)
 
-            joinTasks(childTask, joinTasks, now)
+        joinTasks(childTask, joinTasks, now)
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(childTask.remoteNullableProject)
-        }
+        notifyCloud(childTask.remoteNullableProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun updateChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, parentTaskKey: TaskKey, note: String?): TaskKey {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.updateChildTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.updateChildTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!TextUtils.isEmpty(name))
+        check(!TextUtils.isEmpty(name))
 
-            val task = getTaskForce(taskKey)
-            check(task.current(now))
+        val task = getTaskForce(taskKey)
+        check(task.current(now))
 
-            val newParentTask = getTaskForce(parentTaskKey)
-            check(task.current(now))
+        val newParentTask = getTaskForce(parentTaskKey)
+        check(task.current(now))
 
-            task.setName(name, note)
+        task.setName(name, note)
 
-            val oldParentTask = task.getParentTask(now)
-            if (oldParentTask == null) {
-                task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+        val oldParentTask = task.getParentTask(now)
+        if (oldParentTask == null) {
+            task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
 
-                newParentTask.addChild(task, now)
-            } else if (oldParentTask !== newParentTask) {
-                getParentTaskHierarchy(task, now)!!.setEndExactTimeStamp(now)
+            newParentTask.addChild(task, now)
+        } else if (oldParentTask !== newParentTask) {
+            getParentTaskHierarchy(task, now)!!.setEndExactTimeStamp(now)
 
-                newParentTask.addChild(task, now)
-            }
-
-            updateNotifications(now)
-
-            save(dataId, source)
-
-            notifyCloud(task.remoteNullableProject)
-
-            return task.taskKey
+            newParentTask.addChild(task, now)
         }
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(task.remoteNullableProject)
+
+        return task.taskKey
     }
 
-    //@Synchronized
+    @Synchronized
     fun setTaskEndTimeStamp(dataId: Int, source: SaveService.Source, taskKey: TaskKey) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val task = getTaskForce(taskKey)
-            check(task.current(now))
+        val task = getTaskForce(taskKey)
+        check(task.current(now))
 
-            task.setEndExactTimeStamp(now)
+        task.setEndExactTimeStamp(now)
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(task.remoteNullableProject)
-        }
+        notifyCloud(task.remoteNullableProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setInstanceOrdinal(dataId: Int, instanceKey: InstanceKey, ordinal: Double) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setInstanceOrdinal")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setInstanceOrdinal")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val instance = getInstance(instanceKey)
+        val instance = getInstance(instanceKey)
 
-            instance.setOrdinal(ordinal, now)
+        instance.setOrdinal(ordinal, now)
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, SaveService.Source.GUI)
+        save(dataId, SaveService.Source.GUI)
 
-            notifyCloud(instance.remoteNullableProject)
-        }
+        notifyCloud(instance.remoteNullableProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setTaskHierarchyOrdinal(dataId: Int, hierarchyData: HierarchyData) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setTaskHierarchyOrdinal")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setTaskHierarchyOrdinal")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val remoteProject: RemoteProject?
-            val taskHierarchy: TaskHierarchy
-            if (hierarchyData.taskHierarchyKey is TaskHierarchyKey.LocalTaskHierarchyKey) {
+        val remoteProject: RemoteProject?
+        val taskHierarchy: TaskHierarchy
+        if (hierarchyData.taskHierarchyKey is TaskHierarchyKey.LocalTaskHierarchyKey) {
 
-                remoteProject = null
-                taskHierarchy = localFactory.getTaskHierarchy(hierarchyData.taskHierarchyKey)
-            } else {
-                check(hierarchyData.taskHierarchyKey is TaskHierarchyKey.RemoteTaskHierarchyKey)
+            remoteProject = null
+            taskHierarchy = localFactory.getTaskHierarchy(hierarchyData.taskHierarchyKey)
+        } else {
+            check(hierarchyData.taskHierarchyKey is TaskHierarchyKey.RemoteTaskHierarchyKey)
 
-                val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey
+            val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey
 
-                remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
-                taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
-            }
-
-            check(taskHierarchy.current(now))
-
-            taskHierarchy.ordinal = hierarchyData.ordinal
-
-            updateNotifications(now)
-
-            save(dataId, SaveService.Source.GUI)
-
-            if (remoteProject != null)
-                notifyCloud(remoteProject)
+            remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
+            taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
         }
+
+        check(taskHierarchy.current(now))
+
+        taskHierarchy.ordinal = hierarchyData.ordinal
+
+        updateNotifications(now)
+
+        save(dataId, SaveService.Source.GUI)
+
+        if (remoteProject != null)
+            notifyCloud(remoteProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskKeys: ArrayList<TaskKey>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!taskKeys.isEmpty())
+        check(!taskKeys.isEmpty())
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val tasks = taskKeys.map { getTaskForce(it) }
-            check(tasks.all { it.current(now) })
+        val tasks = taskKeys.map { getTaskForce(it) }
+        check(tasks.all { it.current(now) })
 
-            tasks.forEach { it.setEndExactTimeStamp(now) }
+        tasks.forEach { it.setEndExactTimeStamp(now) }
 
-            val remoteProjects = tasks.mapNotNull { it.remoteNullableProject }.toSet()
+        val remoteProjects = tasks.mapNotNull { it.remoteNullableProject }.toSet()
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(remoteProjects)
-        }
+        notifyCloud(remoteProjects)
     }
 
-    //@Synchronized
+    @Synchronized
     fun createCustomTime(source: SaveService.Source, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): Int {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.createCustomTime")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.createCustomTime")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!TextUtils.isEmpty(name))
+        check(!TextUtils.isEmpty(name))
 
-            check(DayOfWeek.values().all { hourMinutes[it] != null })
+        check(DayOfWeek.values().all { hourMinutes[it] != null })
 
-            val localCustomTime = localFactory.createLocalCustomTime(this, name, hourMinutes)
+        val localCustomTime = localFactory.createLocalCustomTime(this, name, hourMinutes)
 
-            save(0, source)
+        save(0, source)
 
-            return localCustomTime.id
-        }
+        return localCustomTime.id
     }
 
-    //@Synchronized
+    @Synchronized
     fun updateCustomTime(dataId: Int, source: SaveService.Source, localCustomTimeId: Int, name: String, hourMinutes: Map<DayOfWeek, HourMinute>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.updateCustomTime")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.updateCustomTime")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!TextUtils.isEmpty(name))
+        check(!TextUtils.isEmpty(name))
 
-            val localCustomTime = localFactory.getLocalCustomTime(localCustomTimeId)
+        val localCustomTime = localFactory.getLocalCustomTime(localCustomTimeId)
 
-            localCustomTime.setName(name)
+        localCustomTime.setName(name)
 
-            for (dayOfWeek in DayOfWeek.values()) {
-                val hourMinute = hourMinutes[dayOfWeek]!!
+        for (dayOfWeek in DayOfWeek.values()) {
+            val hourMinute = hourMinutes[dayOfWeek]!!
 
-                if (hourMinute != localCustomTime.getHourMinute(dayOfWeek))
-                    localCustomTime.setHourMinute(dayOfWeek, hourMinute)
-            }
-
-            save(dataId, source)
+            if (hourMinute != localCustomTime.getHourMinute(dayOfWeek))
+                localCustomTime.setHourMinute(dayOfWeek, hourMinute)
         }
+
+        save(dataId, source)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setCustomTimeCurrent(dataId: Int, source: SaveService.Source, localCustomTimeIds: List<Int>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setCustomTimeCurrent")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.setCustomTimeCurrent")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!localCustomTimeIds.isEmpty())
+        check(!localCustomTimeIds.isEmpty())
 
-            for (localCustomTimeId in localCustomTimeIds)
-                localFactory.getLocalCustomTime(localCustomTimeId).setCurrent()
+        for (localCustomTimeId in localCustomTimeIds)
+            localFactory.getLocalCustomTime(localCustomTimeId).setCurrent()
 
-            save(dataId, source)
-        }
+        save(dataId, source)
     }
 
     private fun createRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?): Task {
@@ -1476,95 +1373,89 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return task
     }
 
-    //@Synchronized
+    @Synchronized
     fun createRootTask(dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.createRootTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.createRootTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            createRootTask(now, dataId, source, name, note, projectId)
-        }
+        createRootTask(now, dataId, source, name, note, projectId)
     }
 
-    //@Synchronized
+    @Synchronized
     fun createJoinRootTask(dataId: Int, source: SaveService.Source, name: String, joinTaskKeys: List<TaskKey>, note: String?, projectId: String?) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.createJoinRootTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.createJoinRootTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!TextUtils.isEmpty(name))
-            check(joinTaskKeys.size > 1)
+        check(!TextUtils.isEmpty(name))
+        check(joinTaskKeys.size > 1)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
-                    .distinct()
-                    .single()
+        val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
+                .distinct()
+                .single()
 
-            val finalProjectId = if (!TextUtils.isEmpty(joinProjectId)) {
-                check(TextUtils.isEmpty(projectId))
+        val finalProjectId = if (!TextUtils.isEmpty(joinProjectId)) {
+            check(TextUtils.isEmpty(projectId))
 
-                joinProjectId
-            } else if (!TextUtils.isEmpty(projectId)) {
-                projectId
-            } else {
-                null
-            }
-
-            var joinTasks = joinTaskKeys.map { getTaskForce(it) }
-
-            val newParentTask = if (!TextUtils.isEmpty(finalProjectId)) {
-                check(remoteProjectFactory != null)
-                check(userInfo != null)
-
-                remoteProjectFactory!!.createRemoteTaskHelper(now, name, note, finalProjectId!!)
-            } else {
-                localFactory.createLocalTaskHelper(this, name, now, note)
-            }
-
-            joinTasks = joinTasks.map { it.updateProject(now, projectId) }
-
-            joinTasks(newParentTask, joinTasks, now)
-
-            updateNotifications(now)
-
-            save(dataId, source)
-
-            notifyCloud(newParentTask.remoteNullableProject)
+            joinProjectId
+        } else if (!TextUtils.isEmpty(projectId)) {
+            projectId
+        } else {
+            null
         }
+
+        var joinTasks = joinTaskKeys.map { getTaskForce(it) }
+
+        val newParentTask = if (!TextUtils.isEmpty(finalProjectId)) {
+            check(remoteProjectFactory != null)
+            check(userInfo != null)
+
+            remoteProjectFactory!!.createRemoteTaskHelper(now, name, note, finalProjectId!!)
+        } else {
+            localFactory.createLocalTaskHelper(this, name, now, note)
+        }
+
+        joinTasks = joinTasks.map { it.updateProject(now, projectId) }
+
+        joinTasks(newParentTask, joinTasks, now)
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(newParentTask.remoteNullableProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun updateRootTask(dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, note: String?, projectId: String?): TaskKey {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.updateRootTask")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.updateRootTask")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            check(!TextUtils.isEmpty(name))
+        check(!TextUtils.isEmpty(name))
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            var task = getTaskForce(taskKey)
-            check(task.current(now))
+        var task = getTaskForce(taskKey)
+        check(task.current(now))
 
-            task = task.updateProject(now, projectId)
+        task = task.updateProject(now, projectId)
 
-            task.setName(name, note)
+        task.setName(name, note)
 
-            getParentTaskHierarchy(task, now)?.setEndExactTimeStamp(now)
+        getParentTaskHierarchy(task, now)?.setEndExactTimeStamp(now)
 
-            task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+        task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(task.remoteNullableProject)
+        notifyCloud(task.remoteNullableProject)
 
-            return task.taskKey
-        }
+        return task.taskKey
     }
 
     private fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean): Irrelevant {
@@ -1579,128 +1470,116 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return irrelevant
     }
 
-    //@Synchronized
+    @Synchronized
     fun updateNotificationsTick(source: SaveService.Source, silent: Boolean, sourceName: String) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
-            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+        MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            updateNotificationsTick(now, source, silent)
-        }
+        updateNotificationsTick(now, source, silent)
     }
 
-    //@Synchronized
+    @Synchronized
     fun removeFriends(keys: Set<String>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.removeFriends")
+        MyCrashlytics.log("DomainFactory.removeFriends")
 
-            check(userInfo != null)
-            check(remoteProjectFactory != null)
-            check(RemoteFriendFactory.hasFriends())
-            check(!RemoteFriendFactory.isSaved())
+        check(userInfo != null)
+        check(remoteProjectFactory != null)
+        check(RemoteFriendFactory.hasFriends())
+        check(!RemoteFriendFactory.isSaved())
 
-            keys.forEach { RemoteFriendFactory.removeFriend(userInfo!!.key, it) }
+        keys.forEach { RemoteFriendFactory.removeFriend(userInfo!!.key, it) }
 
-            RemoteFriendFactory.save()
-        }
+        RemoteFriendFactory.save()
     }
 
-    //@Synchronized
+    @Synchronized
     fun updateUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.updateUserInfo")
-            check(userInfo != null)
-            check(remoteProjectFactory != null)
+        MyCrashlytics.log("DomainFactory.updateUserInfo")
+        check(userInfo != null)
+        check(remoteProjectFactory != null)
 
-            if (userInfo == newUserInfo)
-                return
+        if (userInfo == newUserInfo)
+            return
 
-            userInfo = newUserInfo
-            DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
+        userInfo = newUserInfo
+        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
 
-            remoteProjectFactory!!.updateUserInfo(newUserInfo)
+        remoteProjectFactory!!.updateUserInfo(newUserInfo)
 
-            save(0, source)
-        }
+        save(0, source)
     }
 
-    //@Synchronized
+    @Synchronized
     fun updateProject(dataId: Int, source: SaveService.Source, projectId: String, name: String, addedFriends: Set<String>, removedFriends: Set<String>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.updateProject")
+        MyCrashlytics.log("DomainFactory.updateProject")
 
-            check(!TextUtils.isEmpty(projectId))
-            check(!TextUtils.isEmpty(name))
-            check(remoteProjectFactory != null)
-            check(RemoteFriendFactory.hasFriends())
+        check(!TextUtils.isEmpty(projectId))
+        check(!TextUtils.isEmpty(name))
+        check(remoteProjectFactory != null)
+        check(RemoteFriendFactory.hasFriends())
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
+        val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
 
-            remoteProject.name = name
-            remoteProject.updateRecordOf(addedFriends.map { RemoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
+        remoteProject.name = name
+        remoteProject.updateRecordOf(addedFriends.map { RemoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(remoteProject, removedFriends)
-        }
+        notifyCloud(remoteProject, removedFriends)
     }
 
-    //@Synchronized
+    @Synchronized
     fun createProject(dataId: Int, source: SaveService.Source, name: String, friends: Set<String>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.createProject")
+        MyCrashlytics.log("DomainFactory.createProject")
 
-            check(!TextUtils.isEmpty(name))
-            check(remoteProjectFactory != null)
-            check(userInfo != null)
-            check(remoteRootUser != null)
+        check(!TextUtils.isEmpty(name))
+        check(remoteProjectFactory != null)
+        check(userInfo != null)
+        check(remoteRootUser != null)
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val recordOf = HashSet(friends)
+        val recordOf = HashSet(friends)
 
-            val key = userInfo!!.key
-            check(!recordOf.contains(key))
-            recordOf.add(key)
+        val key = userInfo!!.key
+        check(!recordOf.contains(key))
+        recordOf.add(key)
 
-            val remoteProject = remoteProjectFactory!!.createRemoteProject(name, now, recordOf, remoteRootUser!!)
+        val remoteProject = remoteProjectFactory!!.createRemoteProject(name, now, recordOf, remoteRootUser!!)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(remoteProject)
-        }
+        notifyCloud(remoteProject)
     }
 
-    //@Synchronized
+    @Synchronized
     fun setProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectIds: Set<String>) {
-        synchronized(domainFactory) {
-            MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
+        MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
-            check(remoteProjectFactory != null)
-            check(userInfo != null)
-            check(!projectIds.isEmpty())
+        check(remoteProjectFactory != null)
+        check(userInfo != null)
+        check(!projectIds.isEmpty())
 
-            val now = ExactTimeStamp.now
+        val now = ExactTimeStamp.now
 
-            val remoteProjects = projectIds.map { remoteProjectFactory!!.getRemoteProjectForce(it) }.toSet()
-            check(remoteProjects.all { it.current(now) })
+        val remoteProjects = projectIds.map { remoteProjectFactory!!.getRemoteProjectForce(it) }.toSet()
+        check(remoteProjects.all { it.current(now) })
 
-            remoteProjects.forEach { it.setEndExactTimeStamp(now) }
+        remoteProjects.forEach { it.setEndExactTimeStamp(now) }
 
-            updateNotifications(now)
+        updateNotifications(now)
 
-            save(dataId, source)
+        save(dataId, source)
 
-            notifyCloud(remoteProjects)
-        }
+        notifyCloud(remoteProjects)
     }
-    
+
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
@@ -2267,7 +2146,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         return Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
     }
 
-    fun notifyCloud(remoteProject: RemoteProject?) { // todo check all functions for possible overloads
+    private fun notifyCloud(remoteProject: RemoteProject?) { // todo check all functions for possible overloads
         val remoteProjects = setOf(remoteProject)
                 .filterNotNull()
                 .toSet()
@@ -2275,7 +2154,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         notifyCloud(remoteProjects)
     }
 
-    fun notifyCloud(remoteProjects: Set<RemoteProject>) {
+    private fun notifyCloud(remoteProjects: Set<RemoteProject>) {
         if (!remoteProjects.isEmpty()) {
             checkNotNull(userInfo)
 
@@ -2283,9 +2162,9 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(setOf(remoteProject), userInfo!!, userKeys)
+    private fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(setOf(remoteProject), userInfo!!, userKeys)
 
-    fun updateNotifications(now: ExactTimeStamp) = updateNotifications(true, now, mutableListOf())
+    private fun updateNotifications(now: ExactTimeStamp) = updateNotifications(true, now, mutableListOf())
 
     private val taskKeys
         get() = localFactory.taskIds

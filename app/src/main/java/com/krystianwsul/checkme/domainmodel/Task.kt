@@ -13,8 +13,6 @@ import java.util.*
 
 abstract class Task(protected val kotlinDomainFactory: KotlinDomainFactory) {
 
-    protected val domainFactory = kotlinDomainFactory.domainFactory
-
     abstract val startExactTimeStamp: ExactTimeStamp
 
     abstract val name: String

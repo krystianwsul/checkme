@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
 import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
-import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,33 +50,6 @@ public class DomainFactory {
     // firebase
 
     // gets
-
-    @NonNull
-    public synchronized ShowProjectViewModel.Data getShowProjectData(@Nullable String projectId) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.getShowProjectData");
-
-        check(kotlinDomainFactory.getRemoteProjectFactory() != null);
-        check(kotlinDomainFactory.getUserInfo() != null);
-        check(RemoteFriendFactory.Companion.hasFriends());
-
-        Map<String, ShowProjectViewModel.UserListData> friendDatas = Stream.of(RemoteFriendFactory.Companion.getFriends()).map(remoteRootUser -> new ShowProjectViewModel.UserListData(remoteRootUser.getName(), remoteRootUser.getEmail(), remoteRootUser.getId())).collect(Collectors.toMap(ShowProjectViewModel.UserListData::getId, userData -> userData));
-
-        String name;
-        Set<ShowProjectViewModel.UserListData> userListDatas;
-        if (!TextUtils.isEmpty(projectId)) {
-            RemoteProject remoteProject = kotlinDomainFactory.getRemoteProjectFactory().getRemoteProjectForce(projectId);
-
-            name = remoteProject.getName();
-
-            userListDatas = Stream.of(remoteProject.getUsers()).filterNot(remoteUser -> remoteUser.getId().equals(kotlinDomainFactory.getUserInfo().getKey())).map(remoteUser -> new ShowProjectViewModel.UserListData(remoteUser.getName(), remoteUser.getEmail(), remoteUser.getId()))
-                    .collect(Collectors.toSet());
-        } else {
-            name = null;
-            userListDatas = new HashSet<>();
-        }
-
-        return new ShowProjectViewModel.Data(name, userListDatas, friendDatas);
-    }
 
     // sets
 

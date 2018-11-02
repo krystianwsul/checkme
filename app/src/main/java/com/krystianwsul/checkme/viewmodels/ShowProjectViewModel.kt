@@ -10,7 +10,7 @@ class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
         internalStart(FirebaseLevel.FRIEND)
     }
 
-    override fun getData() = domainFactory.getShowProjectData(projectId)
+    override fun getData() = kotlinDomainFactory.getShowProjectData(projectId)
 
     data class Data(
             val name: String?,

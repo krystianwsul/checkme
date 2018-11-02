@@ -1399,6 +1399,47 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             notifyCloud(remoteProjects)
         }
     }
+
+    //@Synchronized
+    fun createCustomTime(source: SaveService.Source, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): Int {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.createCustomTime")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!TextUtils.isEmpty(name))
+
+            check(DayOfWeek.values().all { hourMinutes[it] != null })
+
+            val localCustomTime = localFactory.createLocalCustomTime(this, name, hourMinutes)
+
+            save(0, source)
+
+            return localCustomTime.id
+        }
+    }
+
+    //@Synchronized
+    fun updateCustomTime(dataId: Int, source: SaveService.Source, localCustomTimeId: Int, name: String, hourMinutes: Map<DayOfWeek, HourMinute>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.updateCustomTime")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!TextUtils.isEmpty(name))
+
+            val localCustomTime = localFactory.getLocalCustomTime(localCustomTimeId)
+
+            localCustomTime.setName(name)
+
+            for (dayOfWeek in DayOfWeek.values()) {
+                val hourMinute = hourMinutes[dayOfWeek]!!
+
+                if (hourMinute != localCustomTime.getHourMinute(dayOfWeek))
+                    localCustomTime.setHourMinute(dayOfWeek, hourMinute)
+            }
+
+            save(dataId, source)
+        }
+    }
     
     // internal
 

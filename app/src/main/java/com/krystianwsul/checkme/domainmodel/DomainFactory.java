@@ -14,14 +14,11 @@ import com.krystianwsul.checkme.firebase.RemoteFriendFactory;
 import com.krystianwsul.checkme.firebase.RemoteProject;
 import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.TaskKey;
-import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
-import com.krystianwsul.checkme.utils.time.HourMinute;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @SuppressLint("UseSparseArrays")
@@ -44,48 +41,6 @@ public class DomainFactory {
     // gets
 
     // sets
-
-    public synchronized int createCustomTime(@NonNull SaveService.Source source, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.createCustomTime");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!TextUtils.isEmpty(name));
-
-        check(hourMinutes.get(DayOfWeek.SUNDAY) != null);
-        check(hourMinutes.get(DayOfWeek.MONDAY) != null);
-        check(hourMinutes.get(DayOfWeek.TUESDAY) != null);
-        check(hourMinutes.get(DayOfWeek.WEDNESDAY) != null);
-        check(hourMinutes.get(DayOfWeek.THURSDAY) != null);
-        check(hourMinutes.get(DayOfWeek.FRIDAY) != null);
-        check(hourMinutes.get(DayOfWeek.SATURDAY) != null);
-
-        LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.createLocalCustomTime(kotlinDomainFactory, name, hourMinutes);
-
-        kotlinDomainFactory.save(0, source);
-
-        return localCustomTime.getId();
-    }
-
-    public synchronized void updateCustomTime(int dataId, @NonNull SaveService.Source source, int localCustomTimeId, @NonNull String name, @NonNull Map<DayOfWeek, HourMinute> hourMinutes) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.updateCustomTime");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        check(!TextUtils.isEmpty(name));
-
-        LocalCustomTime localCustomTime = kotlinDomainFactory.localFactory.getLocalCustomTime(localCustomTimeId);
-
-        localCustomTime.setName(name);
-
-        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
-            HourMinute hourMinute = hourMinutes.get(dayOfWeek);
-            check(hourMinute != null);
-
-            if (hourMinute.compareTo(localCustomTime.getHourMinute(dayOfWeek)) != 0)
-                localCustomTime.setHourMinute(dayOfWeek, hourMinute);
-        }
-
-        kotlinDomainFactory.save(dataId, source);
-    }
 
     public synchronized void setCustomTimeCurrent(int dataId, @NonNull SaveService.Source source, @NonNull List<Integer> localCustomTimeIds) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setCustomTimeCurrent");

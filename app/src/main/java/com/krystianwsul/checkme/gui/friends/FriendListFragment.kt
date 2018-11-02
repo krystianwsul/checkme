@@ -241,7 +241,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                 notifyItemRemoved(it)
             }
 
-            KotlinDomainFactory.getKotlinDomainFactory().domainFactory.removeFriends(selectedUserDataWrappers.asSequence()
+            KotlinDomainFactory.getKotlinDomainFactory().removeFriends(selectedUserDataWrappers.asSequence()
                     .map { it.userListData.id }
                     .toSet())
         }

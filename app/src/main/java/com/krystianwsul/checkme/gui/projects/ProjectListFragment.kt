@@ -76,7 +76,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                         decrementSelected()
                     }
 
-                    KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
+                    KotlinDomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                 }
                 else -> throw UnsupportedOperationException()
             }

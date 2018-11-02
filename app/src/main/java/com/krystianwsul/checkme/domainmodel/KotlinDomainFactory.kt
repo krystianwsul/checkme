@@ -291,7 +291,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 if (tickData == null) {
                     updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf())
                 } else {
-                    domainFactory.updateNotificationsTick(source, tickData!!.silent, tickData!!.source)
+                    updateNotificationsTick(source, tickData!!.silent, tickData!!.source)
 
                     if (!firstThereforeSilent) {
                         Log.e("asdf", "not first, clearing getMTickData()")
@@ -345,7 +345,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             check(FirebaseAuth.getInstance().currentUser != null)
 
             if (remoteProjectFactory != null && !remoteProjectFactory!!.isSaved && tickData == null) {
-                domainFactory.updateNotificationsTick(source, newTickData.silent, newTickData.source)
+                updateNotificationsTick(source, newTickData.silent, newTickData.source)
 
                 newTickData.release()
             } else {
@@ -1535,6 +1535,171 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             notifyCloud(newParentTask.remoteNullableProject)
         }
     }
+
+    //@Synchronized
+    fun updateRootTask(dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, note: String?, projectId: String?): TaskKey {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.updateRootTask")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            check(!TextUtils.isEmpty(name))
+
+            val now = ExactTimeStamp.now
+
+            var task = getTaskForce(taskKey)
+            check(task.current(now))
+
+            task = task.updateProject(now, projectId)
+
+            task.setName(name, note)
+
+            getParentTaskHierarchy(task, now)?.setEndExactTimeStamp(now)
+
+            task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(task.remoteNullableProject)
+
+            return task.taskKey
+        }
+    }
+
+    private fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean): Irrelevant {
+        updateNotifications(silent, now, listOf())
+
+        val irrelevant = setIrrelevant(now)
+
+        remoteProjectFactory?.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
+
+        save(0, source)
+
+        return irrelevant
+    }
+
+    //@Synchronized
+    fun updateNotificationsTick(source: SaveService.Source, silent: Boolean, sourceName: String) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+
+            updateNotificationsTick(now, source, silent)
+        }
+    }
+
+    //@Synchronized
+    fun removeFriends(keys: Set<String>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.removeFriends")
+
+            check(userInfo != null)
+            check(remoteProjectFactory != null)
+            check(RemoteFriendFactory.hasFriends())
+            check(!RemoteFriendFactory.isSaved())
+
+            keys.forEach { RemoteFriendFactory.removeFriend(userInfo!!.key, it) }
+
+            RemoteFriendFactory.save()
+        }
+    }
+
+    //@Synchronized
+    fun updateUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.updateUserInfo")
+            check(userInfo != null)
+            check(remoteProjectFactory != null)
+
+            if (userInfo == newUserInfo)
+                return
+
+            userInfo = newUserInfo
+            DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
+
+            remoteProjectFactory!!.updateUserInfo(newUserInfo)
+
+            save(0, source)
+        }
+    }
+
+    //@Synchronized
+    fun updateProject(dataId: Int, source: SaveService.Source, projectId: String, name: String, addedFriends: Set<String>, removedFriends: Set<String>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.updateProject")
+
+            check(!TextUtils.isEmpty(projectId))
+            check(!TextUtils.isEmpty(name))
+            check(remoteProjectFactory != null)
+            check(RemoteFriendFactory.hasFriends())
+
+            val now = ExactTimeStamp.now
+
+            val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
+
+            remoteProject.name = name
+            remoteProject.updateRecordOf(addedFriends.map { RemoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(remoteProject, removedFriends)
+        }
+    }
+
+    //@Synchronized
+    fun createProject(dataId: Int, source: SaveService.Source, name: String, friends: Set<String>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.createProject")
+
+            check(!TextUtils.isEmpty(name))
+            check(remoteProjectFactory != null)
+            check(userInfo != null)
+            check(remoteRootUser != null)
+
+            val now = ExactTimeStamp.now
+
+            val recordOf = HashSet(friends)
+
+            val key = userInfo!!.key
+            check(!recordOf.contains(key))
+            recordOf.add(key)
+
+            val remoteProject = remoteProjectFactory!!.createRemoteProject(name, now, recordOf, remoteRootUser!!)
+
+            save(dataId, source)
+
+            notifyCloud(remoteProject)
+        }
+    }
+
+    //@Synchronized
+    fun setProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectIds: Set<String>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
+
+            check(remoteProjectFactory != null)
+            check(userInfo != null)
+            check(!projectIds.isEmpty())
+
+            val now = ExactTimeStamp.now
+
+            val remoteProjects = projectIds.map { remoteProjectFactory!!.getRemoteProjectForce(it) }.toSet()
+            check(remoteProjects.all { it.current(now) })
+
+            remoteProjects.forEach { it.setEndExactTimeStamp(now) }
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(remoteProjects)
+        }
+    }
     
     // internal
 
@@ -2128,7 +2293,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                 .toMutableSet()
                 .apply { remoteProjectFactory?.let { addAll(it.taskKeys) } }
 
-    fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>) {
+    private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>) {
         val rootInstances = getRootInstances(null, now.plusOne(), now) // 24 hack
 
         val notificationInstances = rootInstances.filter { it.done == null && !it.notified && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !removedTaskKeys.contains(it.taskKey) }.associateBy { it.instanceKey }

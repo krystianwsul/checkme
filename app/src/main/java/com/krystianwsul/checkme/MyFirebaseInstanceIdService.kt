@@ -22,6 +22,6 @@ class MyFirebaseInstanceIdService : FirebaseInstanceIdService() {
 
         val userInfo = UserInfo(firebaseUser)
 
-        InstanceDoneService.throttleFirebase(true) { it.domainFactory.updateUserInfo(SaveService.Source.SERVICE, userInfo) }
+        InstanceDoneService.throttleFirebase(true) { it.updateUserInfo(SaveService.Source.SERVICE, userInfo) }
     }
 }

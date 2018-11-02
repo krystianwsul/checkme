@@ -49,44 +49,6 @@ public class DomainFactory {
 
     // sets
 
-    @NonNull
-    public synchronized ExactTimeStamp setInstancesDone(int dataId, @NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesDone");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        List<Instance> instances = Stream.of(instanceKeys).map(kotlinDomainFactory::getInstance)
-                .collect(Collectors.toList());
-
-        Stream.of(instances)
-                .forEach(instance -> instance.setDone(true, now));
-
-        Set<RemoteProject> remoteProjects = Stream.of(instances)
-                .filter(Instance::belongsToRemoteProject)
-                .map(Instance::getRemoteNonNullProject)
-                .collect(Collectors.toSet());
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(remoteProjects);
-
-        return now;
-    }
-
-    public synchronized ExactTimeStamp setInstanceDone(int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey, boolean done) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceDone");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-
-        Instance instance = kotlinDomainFactory.setInstanceDone(now, dataId, source, instanceKey, done);
-
-        return instance.getDone();
-    }
-
     public synchronized void setInstancesNotified(@NonNull SaveService.Source source, @NonNull List<InstanceKey> instanceKeys) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstancesNotified");
         check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());

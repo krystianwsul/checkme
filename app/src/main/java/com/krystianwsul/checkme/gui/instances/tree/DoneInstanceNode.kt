@@ -88,7 +88,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
         return View.OnClickListener { v ->
             v.setOnClickListener(null)
 
-            instanceData.Done = KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
+            instanceData.Done = KotlinDomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
             check(instanceData.Done == null)
 
             dividerNode.remove(this)

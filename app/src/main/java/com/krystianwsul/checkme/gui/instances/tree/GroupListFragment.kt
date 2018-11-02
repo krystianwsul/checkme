@@ -223,7 +223,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesDone(mDataId!!, SaveService.Source.GUI, instanceKeys)
+                    val done = KotlinDomainFactory.getKotlinDomainFactory().setInstancesDone(mDataId!!, SaveService.Source.GUI, instanceKeys)
 
                     var selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())

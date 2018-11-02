@@ -202,7 +202,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     }
 
     private fun setDone(done: Boolean) {
-        KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstanceDone(dataId, SaveService.Source.GUI, instanceKey, done)
+        KotlinDomainFactory.getKotlinDomainFactory().setInstanceDone(dataId, SaveService.Source.GUI, instanceKey, done)
         instanceData!!.done = done
 
         invalidateOptionsMenu()

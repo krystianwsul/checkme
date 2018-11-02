@@ -1012,6 +1012,44 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
             notifyCloud(instance.remoteNullableProject)
         }
     }
+
+    //@Synchronized
+    fun setInstancesDone(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>): ExactTimeStamp {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstancesDone")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+
+            val instances = instanceKeys.map(this::getInstance)
+
+            instances.forEach { it.setDone(true, now) }
+
+            val remoteProjects = instances.mapNotNull(Instance::remoteNullableProject).toSet()
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(remoteProjects)
+
+            return now
+        }
+    }
+
+    //@Synchronized
+    fun setInstanceDone(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): ExactTimeStamp? {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstanceDone")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+
+            val instance = setInstanceDone(now, dataId, source, instanceKey, done)
+
+            return instance.done
+        }
+    }
     
     // internal
 

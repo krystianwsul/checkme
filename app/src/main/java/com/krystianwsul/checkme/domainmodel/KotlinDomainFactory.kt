@@ -90,7 +90,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     var remoteRootUser: RemoteRootUser? = null
 
-    val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
+    val notTickFirebaseListeners = mutableListOf<(KotlinDomainFactory) -> Unit>()
 
     var tickData: TickData? = null
 
@@ -134,6 +134,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         ObserverHolder.notifyDomainObservers(dataIds)
     }
 
+    //@Synchronized
     fun reset(source: SaveService.Source) {
         synchronized(domainFactory) {
             val userInfo = userInfo
@@ -152,6 +153,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
 
     // firebase
 
+    //@Synchronized
     fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
         synchronized(domainFactory) {
             if (userInfo != null) {
@@ -223,6 +225,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    //@Synchronized
     fun clearUserInfo() {
         synchronized(domainFactory) {
             val now = ExactTimeStamp.now
@@ -263,6 +266,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    //@Synchronized
     fun setRemoteTaskRecords(dataSnapshot: DataSnapshot, source: SaveService.Source) {
         synchronized(domainFactory) {
             check(userInfo != null)
@@ -298,7 +302,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
                     }
                 }
 
-                notTickFirebaseListeners.forEach { it.invoke(domainFactory) }
+                notTickFirebaseListeners.forEach { it.invoke(this) }
                 notTickFirebaseListeners.clear()
 
                 skipSave = false
@@ -308,6 +312,7 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
+    //@Synchronized
     fun setUserRecord(dataSnapshot: DataSnapshot) {
         synchronized(domainFactory) {
             val userWrapper = dataSnapshot.getValue(UserWrapper::class.java)!!
@@ -317,7 +322,8 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun addFirebaseListener(firebaseListener: Function1<DomainFactory, Unit>) {
+    //@Synchronized
+    fun addFirebaseListener(firebaseListener: (KotlinDomainFactory) -> Unit) {
         synchronized(domainFactory) {
             check(remoteProjectFactory?.isSaved != false)
 
@@ -325,12 +331,14 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun removeFirebaseListener(firebaseListener: Function1<DomainFactory, Unit>) {
+    //@Synchronized
+    fun removeFirebaseListener(firebaseListener: (KotlinDomainFactory) -> Unit) {
         synchronized(domainFactory) {
             notTickFirebaseListeners.remove(firebaseListener)
         }
     }
 
+    //@Synchronized
     fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
         synchronized(domainFactory) {
             check(FirebaseAuth.getInstance().currentUser != null)
@@ -349,15 +357,15 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    val isConnected: Boolean
-        get() {
+    //@Synchronized
+    fun getIsConnected(): Boolean {
             synchronized(domainFactory) {
                 return remoteProjectFactory != null
             }
         }
 
-    val isConnectedAndSaved: Boolean
-        get() {
+    //@Synchronized
+    fun getIsConnectedAndSaved(): Boolean {
             synchronized(domainFactory) {
                 check(remoteProjectFactory != null)
 
@@ -907,6 +915,81 @@ open class KotlinDomainFactory(persistenceManager: PersistenceManger?) {
         save(dataId, source)
 
         notifyCloud(remoteProjects)
+    }
+
+    //@Synchronized
+    fun setInstanceAddHourService(source: SaveService.Source, instanceKey: InstanceKey) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstanceAddHourService")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val instance = getInstance(instanceKey)
+
+            val now = ExactTimeStamp.now
+            val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
+
+            val date = Date(calendar)
+            val hourMinute = HourMinute(calendar)
+
+            instance.setInstanceDateTime(date, TimePair(hourMinute), now)
+            instance.setNotificationShown(false, now)
+
+            updateNotifications(now)
+
+            save(0, source)
+
+            notifyCloud(instance.remoteNullableProject)
+        }
+    }
+
+    //@Synchronized
+    fun setInstanceAddHourActivity(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val instance = getInstance(instanceKey)
+
+            val now = ExactTimeStamp.now
+            val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
+
+            val date = Date(calendar)
+            val hourMinute = HourMinute(calendar)
+
+            instance.setInstanceDateTime(date, TimePair(hourMinute), now)
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            notifyCloud(instance.remoteNullableProject)
+        }
+    }
+
+    //@Synchronized
+    fun setInstancesAddHourActivity(dataId: Int, source: SaveService.Source, instanceKeys: Collection<InstanceKey>) {
+        synchronized(domainFactory) {
+            MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
+            check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+            val now = ExactTimeStamp.now
+            val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
+
+            val date = Date(calendar)
+            val hourMinute = HourMinute(calendar)
+
+            val instances = instanceKeys.map(this::getInstance)
+
+            instances.forEach { it.setInstanceDateTime(date, TimePair(hourMinute), now) }
+
+            updateNotifications(now)
+
+            save(dataId, source)
+
+            val remoteProjects = instances.mapNotNull { it.remoteNullableProject }.toSet()
+
+            notifyCloud(remoteProjects)
+        }
     }
     
     // internal

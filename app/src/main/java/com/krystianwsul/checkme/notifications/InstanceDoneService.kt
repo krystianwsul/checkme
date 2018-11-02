@@ -25,29 +25,28 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
             putExtra(NOTIFICATION_ID_KEY, notificationId)
         }
 
-        fun throttleFirebase(needsFirebase: Boolean, firebaseListener: (DomainFactory) -> Unit) {
+        fun throttleFirebase(needsFirebase: Boolean, firebaseListener: (KotlinDomainFactory) -> Unit) {
             val kotlinDomainFactory = KotlinDomainFactory.getKotlinDomainFactory()
-            val domainFactory = kotlinDomainFactory.domainFactory
 
-            if (kotlinDomainFactory.isConnected) {
-                if (kotlinDomainFactory.isConnectedAndSaved) {
+            if (kotlinDomainFactory.getIsConnected()) {
+                if (kotlinDomainFactory.getIsConnectedAndSaved()) {
                     queueFirebase(kotlinDomainFactory, firebaseListener)
                 } else {
-                    firebaseListener(domainFactory)
+                    firebaseListener(kotlinDomainFactory)
                 }
             } else {
                 if (needsFirebase) {
                     queueFirebase(kotlinDomainFactory, firebaseListener)
                 } else {
-                    firebaseListener(domainFactory)
+                    firebaseListener(kotlinDomainFactory)
                 }
             }
         }
 
-        private fun queueFirebase(kotlinDomainFactory: KotlinDomainFactory, firebaseListener: (DomainFactory) -> Unit) {
-            check(!kotlinDomainFactory.isConnected || kotlinDomainFactory.isConnectedAndSaved)
+        private fun queueFirebase(kotlinDomainFactory: KotlinDomainFactory, firebaseListener: (KotlinDomainFactory) -> Unit) {
+            check(!kotlinDomainFactory.getIsConnected() || kotlinDomainFactory.getIsConnectedAndSaved())
 
-            if (!kotlinDomainFactory.isConnected) {
+            if (!kotlinDomainFactory.getIsConnected()) {
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                         ?: throw NeedsFirebaseException()
 
@@ -70,7 +69,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId) // todo uodpornić na podwójne kliknięcie
 
-        throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceNotificationDone(it, instanceKey) }
+        throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceNotificationDone(it.domainFactory, instanceKey) }
     }
 
     private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)

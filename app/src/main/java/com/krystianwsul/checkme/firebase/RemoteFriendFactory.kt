@@ -85,7 +85,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
         @Synchronized
         fun tryNotifyFriendListeners() {
-            if (!KotlinDomainFactory.getKotlinDomainFactory().isConnected)
+            if (!KotlinDomainFactory.getKotlinDomainFactory().getIsConnected())
                 return
 
             if (!hasFriends())

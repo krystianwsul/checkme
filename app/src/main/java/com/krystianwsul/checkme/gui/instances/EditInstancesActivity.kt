@@ -128,7 +128,7 @@ class EditInstancesActivity : AbstractActivity() {
 
                 editInstancesViewModel.stop()
 
-                KotlinDomainFactory.getKotlinDomainFactory().domainFactory.setInstancesAddHourActivity(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
+                KotlinDomainFactory.getKotlinDomainFactory().setInstancesAddHourActivity(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
 
                 finish()
             }

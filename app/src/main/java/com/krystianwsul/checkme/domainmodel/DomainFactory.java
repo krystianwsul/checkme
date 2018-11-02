@@ -17,16 +17,12 @@ import com.krystianwsul.checkme.persistencemodel.SaveService;
 import com.krystianwsul.checkme.utils.InstanceKey;
 import com.krystianwsul.checkme.utils.TaskHierarchyKey;
 import com.krystianwsul.checkme.utils.TaskKey;
-import com.krystianwsul.checkme.utils.time.Date;
 import com.krystianwsul.checkme.utils.time.DayOfWeek;
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp;
 import com.krystianwsul.checkme.utils.time.HourMinute;
-import com.krystianwsul.checkme.utils.time.TimePair;
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,78 +48,6 @@ public class DomainFactory {
     // gets
 
     // sets
-
-    public synchronized void setInstanceAddHourService(@NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourService");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-        Calendar calendar = now.getCalendar();
-        calendar.add(Calendar.HOUR_OF_DAY, 1);
-
-        Date date = new Date(calendar);
-        HourMinute hourMinute = new HourMinute(calendar);
-
-        instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
-        instance.setNotificationShown(false, now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(0, source);
-
-        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
-    }
-
-    public synchronized void setInstanceAddHourActivity(int dataId, @NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourActivity");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        Instance instance = kotlinDomainFactory.getInstance(instanceKey);
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-        Calendar calendar = now.getCalendar();
-        calendar.add(Calendar.HOUR_OF_DAY, 1);
-
-        Date date = new Date(calendar);
-        HourMinute hourMinute = new HourMinute(calendar);
-
-        instance.setInstanceDateTime(date, new TimePair(hourMinute), now);
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        kotlinDomainFactory.notifyCloud(instance.getRemoteNullableProject());
-    }
-
-    public synchronized void setInstancesAddHourActivity(int dataId, @NonNull SaveService.Source source, @NonNull Collection<InstanceKey> instanceKeys) {
-        MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceAddHourActivity");
-        check(kotlinDomainFactory.getRemoteProjectFactory() == null || !kotlinDomainFactory.getRemoteProjectFactory().isSaved());
-
-        ExactTimeStamp now = ExactTimeStamp.Companion.getNow();
-        Calendar calendar = now.getCalendar();
-        calendar.add(Calendar.HOUR_OF_DAY, 1);
-
-        Date date = new Date(calendar);
-        HourMinute hourMinute = new HourMinute(calendar);
-
-        List<Instance> instances = Stream.of(instanceKeys).map(kotlinDomainFactory::getInstance)
-                .collect(Collectors.toList());
-
-        Stream.of(instances).forEach(instance -> instance.setInstanceDateTime(date, new TimePair(hourMinute), now));
-
-        kotlinDomainFactory.updateNotifications(now);
-
-        kotlinDomainFactory.save(dataId, source);
-
-        @SuppressWarnings("Convert2MethodRef") Set<RemoteProject> remoteProjects = Stream.of(instances).map(Instance::getRemoteNullableProject)
-                .filter(remoteProject -> remoteProject != null)
-                .collect(Collectors.toSet());
-
-        kotlinDomainFactory.notifyCloud(remoteProjects);
-    }
 
     public synchronized void setInstanceNotificationDone(@NonNull SaveService.Source source, @NonNull InstanceKey instanceKey) {
         MyCrashlytics.INSTANCE.log("DomainFactory.setInstanceNotificationDone");

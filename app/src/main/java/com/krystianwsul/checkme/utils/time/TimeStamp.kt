@@ -5,18 +5,16 @@ import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 @Parcelize
-class TimeStamp internal constructor(val long: Long) : Comparable<TimeStamp>, Parcelable {
+data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
 
     companion object {
 
         val now get() = TimeStamp(Calendar.getInstance())
 
-        fun fromMillis(millis: Long): TimeStamp {
-            val calendar = Calendar.getInstance()
-            calendar.timeInMillis = millis
-            calendar.set(Calendar.MILLISECOND, 0)
-            return TimeStamp(calendar.timeInMillis)
-        }
+        fun fromMillis(millis: Long) = TimeStamp(Calendar.getInstance().apply {
+            timeInMillis = millis
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis)
 
         private fun calendarToMillis(calendar: Calendar): Long {
             val (year, month, day) = Date(calendar)
@@ -41,22 +39,7 @@ class TimeStamp internal constructor(val long: Long) : Comparable<TimeStamp>, Pa
 
     override fun compareTo(other: TimeStamp) = long.compareTo(other.long)
 
-    override fun toString() = date.toString() + " " + hourMinute.toString()
-
-    override fun hashCode() = long.hashCode()
-
-    override fun equals(other: Any?): Boolean {
-        if (other == null)
-            return false
-
-        if (other !is TimeStamp)
-            return false
-
-        if (other === this)
-            return true
-
-        return long == other.long
-    }
+    override fun toString() = date.toString() + " " + hourMinute
 
     fun toExactTimeStamp() = ExactTimeStamp(long)
 }

@@ -13,7 +13,7 @@ class LocalSingleScheduleBridge(scheduleRecord: ScheduleRecord, private val sing
 
     override val day get() = singleScheduleRecord.day
 
-    override val customTimeKey get() = singleScheduleRecord.customTimeId?.let { CustomTimeKey(it) }
+    override val customTimeKey get() = singleScheduleRecord.customTimeId?.let { CustomTimeKey.LocalCustomTimeKey(it) }
 
     override val hour get() = singleScheduleRecord.hour
 

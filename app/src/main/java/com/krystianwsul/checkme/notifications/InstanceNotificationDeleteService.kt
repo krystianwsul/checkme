@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 
@@ -17,7 +18,7 @@ class InstanceNotificationDeleteService : IntentService("InstanceNotificationDel
 
         fun getIntent(context: Context, instanceKey: InstanceKey) = Intent(context, InstanceNotificationDeleteService::class.java).apply {
             if (instanceKey.type == TaskKey.Type.REMOTE && instanceKey.scheduleKey.scheduleTimePair.customTimeKey != null)
-                check(instanceKey.scheduleKey.scheduleTimePair.customTimeKey.type == TaskKey.Type.REMOTE)
+                check(instanceKey.scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey)
 
             putExtra(INSTANCE_KEY, instanceKey as Parcelable)
         }

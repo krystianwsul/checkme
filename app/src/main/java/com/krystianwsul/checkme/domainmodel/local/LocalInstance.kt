@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.local
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.RemoteProject
@@ -64,7 +63,7 @@ class LocalInstance : Instance {
                 check(hour == null == (minute == null))
                 check(customTimeId == null != (hour == null))
 
-                return customTimeId?.let { domainFactory.getCustomTime(CustomTimeKey(it)) }
+                return customTimeId?.let { domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(it)) }
                         ?: NormalTime(hour!!, minute!!)
             } else {
                 checkNotNull(mTaskId)
@@ -104,7 +103,7 @@ class LocalInstance : Instance {
                 check(localInstanceRecord!!.instanceHour == null || localInstanceRecord!!.instanceCustomTimeId == null)
 
                 return when {
-                    localInstanceRecord!!.instanceCustomTimeId != null -> domainFactory.getCustomTime(CustomTimeKey(localInstanceRecord!!.instanceCustomTimeId!!))
+                    localInstanceRecord!!.instanceCustomTimeId != null -> domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(localInstanceRecord!!.instanceCustomTimeId!!))
                     localInstanceRecord!!.instanceHour != null -> NormalTime(localInstanceRecord!!.instanceHour!!, localInstanceRecord!!.instanceMinute!!)
                     else -> scheduleTime
                 }
@@ -130,7 +129,7 @@ class LocalInstance : Instance {
                 check(mTaskId == null)
                 check(mScheduleDateTime == null)
 
-                localInstanceRecord!!.scheduleCustomTimeId?.let { CustomTimeKey(it) }
+                localInstanceRecord!!.scheduleCustomTimeId?.let { CustomTimeKey.LocalCustomTimeKey(it) }
             } else {
                 checkNotNull(mTaskId)
 
@@ -198,10 +197,8 @@ class LocalInstance : Instance {
 
             if (timePair.customTimeKey != null) {
                 check(timePair.hourMinute == null)
-                checkNotNull(timePair.customTimeKey.localCustomTimeId)
-                check(TextUtils.isEmpty(timePair.customTimeKey.remoteCustomTimeId))
 
-                it.instanceCustomTimeId = timePair.customTimeKey.localCustomTimeId
+                it.instanceCustomTimeId = (timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey).localCustomTimeId
                 it.instanceHour = null
                 it.instanceMinute = null
             } else {

@@ -24,9 +24,9 @@ class RemoteCustomTime(
                 .toMap(TreeMap())
 
     override val timePair // possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
-        get() = TimePair(CustomTimeKey(remoteProject.id, remoteCustomTimeRecord.id), null)
+        get() = TimePair(CustomTimeKey.RemoteCustomTimeKey(remoteProject.id, remoteCustomTimeRecord.id), null)
 
-    override val customTimeKey by lazy { domainFactory.getCustomTimeKey(remoteProject.id, id) }
+    override val customTimeKey by lazy { domainFactory.getCustomTimeKey(remoteProject.id, id) as CustomTimeKey.RemoteCustomTimeKey }
 
     val projectId by lazy { remoteProject.id }
 

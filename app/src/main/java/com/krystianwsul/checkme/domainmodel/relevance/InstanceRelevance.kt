@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
 import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -45,12 +46,12 @@ class InstanceRelevance(val instance: Instance) {
 
         // set custom time relevant
         val scheduleCustomTimeKey = instance.scheduleCustomTimeKey
-        if (scheduleCustomTimeKey?.localCustomTimeId != null)
+        if (scheduleCustomTimeKey is CustomTimeKey.LocalCustomTimeKey)
             customTimeRelevances[scheduleCustomTimeKey.localCustomTimeId]!!.setRelevant()
 
         // set custom time relevant
         val instanceCustomTimeId = instance.instanceCustomTimeKey
-        if (instanceCustomTimeId?.localCustomTimeId != null)
+        if (instanceCustomTimeId is CustomTimeKey.LocalCustomTimeKey)
             customTimeRelevances[instanceCustomTimeId.localCustomTimeId]!!.setRelevant()
     }
 

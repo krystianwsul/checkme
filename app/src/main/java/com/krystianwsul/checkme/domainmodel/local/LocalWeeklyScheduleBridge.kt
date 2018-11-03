@@ -9,7 +9,7 @@ internal class LocalWeeklyScheduleBridge(scheduleRecord: ScheduleRecord, private
 
     override val daysOfWeek get() = setOf(mWeeklyScheduleRecord.dayOfWeek)
 
-    override val customTimeKey get() = mWeeklyScheduleRecord.customTimeId?.let { CustomTimeKey(it) }
+    override val customTimeKey get() = mWeeklyScheduleRecord.customTimeId?.let { CustomTimeKey.LocalCustomTimeKey(it) }
 
     override val hour get() = mWeeklyScheduleRecord.hour
 

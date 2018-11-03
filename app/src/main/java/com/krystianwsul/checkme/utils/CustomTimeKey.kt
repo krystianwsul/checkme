@@ -1,37 +1,16 @@
 package com.krystianwsul.checkme.utils
 
-import android.os.Parcelable
-import android.text.TextUtils
-
-import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 
-@Parcelize
-data class CustomTimeKey(val localCustomTimeId: Int?, val remoteProjectId: String?, val remoteCustomTimeId: String?) : Parcelable, Serializable {
+sealed class CustomTimeKey : Serializable {
 
-    val type: TaskKey.Type
-        get() {
-            return if (localCustomTimeId != null) {
-                check(TextUtils.isEmpty(remoteProjectId))
-                check(TextUtils.isEmpty(remoteCustomTimeId))
+    data class LocalCustomTimeKey(val localCustomTimeId: Int) : CustomTimeKey() {
 
-                TaskKey.Type.LOCAL
-            } else {
-                check(!TextUtils.isEmpty(remoteProjectId))
-                check(!TextUtils.isEmpty(remoteCustomTimeId))
-
-                TaskKey.Type.REMOTE
-            }
-        }
-
-    init {
-        check(remoteProjectId.isNullOrEmpty() == remoteCustomTimeId.isNullOrEmpty())
-        check((localCustomTimeId == null) != remoteProjectId.isNullOrEmpty())
+        override fun toString() = "LocalCustomTimeKey $localCustomTimeId"
     }
 
-    constructor(localCustomTimeId: Int) : this(localCustomTimeId, null, null)
+    data class RemoteCustomTimeKey(val remoteProjectId: String, val remoteCustomTimeId: String) : CustomTimeKey() {
 
-    constructor(remoteProjectId: String, remoteCustomTimeId: String) : this(null, remoteProjectId, remoteCustomTimeId) // only if local custom time doesn't exist
-
-    override fun toString() = "CustomTimeKey $localCustomTimeId - $remoteProjectId/$remoteCustomTimeId"
+        override fun toString() = "LocalCustomTimeKey $remoteProjectId/$remoteCustomTimeId"
+    }
 }

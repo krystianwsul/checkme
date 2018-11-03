@@ -13,7 +13,7 @@ class LocalMonthlyWeekScheduleBridge(scheduleRecord: ScheduleRecord, private val
 
     override val beginningOfMonth get() = monthlyWeekScheduleRecord.beginningOfMonth
 
-    override val customTimeKey get() = monthlyWeekScheduleRecord.customTimeId?.let { CustomTimeKey(it) }
+    override val customTimeKey get() = monthlyWeekScheduleRecord.customTimeId?.let { CustomTimeKey.LocalCustomTimeKey(it) }
 
     override val hour get() = monthlyWeekScheduleRecord.hour
 

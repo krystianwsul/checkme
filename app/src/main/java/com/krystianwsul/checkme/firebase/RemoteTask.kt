@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
@@ -169,7 +170,7 @@ class RemoteTask(
                     if (timePair.customTimeKey != null) {
                         check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
@@ -192,7 +193,7 @@ class RemoteTask(
                     if (timePair.customTimeKey != null) {
                         check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
@@ -216,7 +217,7 @@ class RemoteTask(
                     if (timePair.customTimeKey != null) {
                         check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
@@ -238,7 +239,7 @@ class RemoteTask(
                     if (TimePair.customTimeKey != null) {
                         check(TimePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(TimePair.customTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(TimePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
@@ -271,7 +272,7 @@ class RemoteTask(
                     if (timePair.customTimeKey != null) {
                         check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
@@ -296,7 +297,7 @@ class RemoteTask(
                     if (timePair.customTimeKey != null) {
                         check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
@@ -322,7 +323,7 @@ class RemoteTask(
                     if (timePair.customTimeKey != null) {
                         check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {
@@ -346,7 +347,7 @@ class RemoteTask(
                     if (timePair.customTimeKey != null) {
                         check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
+                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
                         hour = null
                         minute = null
                     } else {

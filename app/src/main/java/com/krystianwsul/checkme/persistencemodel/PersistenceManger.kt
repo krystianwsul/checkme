@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.persistencemodel
 
 import android.annotation.SuppressLint
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
@@ -206,7 +207,7 @@ class PersistenceManger(
         if (time.timePair.customTimeKey != null) {
             check(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
+            customTimeId = (time.timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey).localCustomTimeId
 
             hour = null
             minute = null
@@ -238,7 +239,7 @@ class PersistenceManger(
         if (time.timePair.customTimeKey != null) {
             check(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
+            customTimeId = (time.timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey).localCustomTimeId
 
             hour = null
             minute = null
@@ -270,7 +271,7 @@ class PersistenceManger(
         if (time.timePair.customTimeKey != null) {
             check(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
+            customTimeId = (time.timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey).localCustomTimeId
 
             hour = null
             minute = null
@@ -302,7 +303,7 @@ class PersistenceManger(
         if (time.timePair.customTimeKey != null) {
             check(time.timePair.hourMinute == null)
 
-            customTimeId = time.timePair.customTimeKey!!.localCustomTimeId!!
+            customTimeId = (time.timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey).localCustomTimeId
 
             hour = null
             minute = null
@@ -328,7 +329,7 @@ class PersistenceManger(
         if (scheduleTimePair.customTimeKey != null) {
             check(scheduleTimePair.hourMinute == null)
 
-            scheduleCustomTimeId = scheduleTimePair.customTimeKey.localCustomTimeId!!
+            scheduleCustomTimeId = (scheduleTimePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey).localCustomTimeId
 
             scheduleHour = null
             scheduleMinute = null

@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.time.*
 
 
@@ -135,16 +136,10 @@ class RemoteInstance : Instance {
             checkNotNull(_scheduleDateTime)
 
             val customTimeKey = _scheduleDateTime!!.time.timePair.customTimeKey
-            if (customTimeKey == null) {
-                null
+            if (customTimeKey is CustomTimeKey.RemoteCustomTimeKey) {
+                domainFactory.getCustomTimeKey(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
             } else {
-                if (!TextUtils.isEmpty(customTimeKey.remoteCustomTimeId)) {
-                    check(!TextUtils.isEmpty(customTimeKey.remoteProjectId))
-
-                    domainFactory.getCustomTimeKey(customTimeKey.remoteProjectId!!, customTimeKey.remoteCustomTimeId!!)
-                } else {
-                    customTimeKey
-                }
+                customTimeKey
             }
         }
 
@@ -232,7 +227,7 @@ class RemoteInstance : Instance {
 
         if (timePair.customTimeKey != null) {
             check(timePair.hourMinute == null)
-            remoteInstanceRecord!!.instanceCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey, remoteProject)
+            remoteInstanceRecord!!.instanceCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
             remoteInstanceRecord!!.instanceHour = null
             remoteInstanceRecord!!.instanceMinute = null
         } else {

@@ -11,7 +11,7 @@ class LocalMonthlyDayScheduleBridge(scheduleRecord: ScheduleRecord, private val 
 
     override val beginningOfMonth get() = monthlyDayScheduleRecord.beginningOfMonth
 
-    override val customTimeKey get() = monthlyDayScheduleRecord.customTimeId?.let { CustomTimeKey(it) }
+    override val customTimeKey get() = monthlyDayScheduleRecord.customTimeId?.let { CustomTimeKey.LocalCustomTimeKey(it) }
 
     override val hour get() = monthlyDayScheduleRecord.hour
 

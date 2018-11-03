@@ -101,11 +101,8 @@ class RemoteProjectFactory(
         remoteProjectManager.save()
     }
 
-    fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey, remoteProject: RemoteProject): String {
-        check(customTimeKey.localCustomTimeId != null)
-        check(TextUtils.isEmpty(customTimeKey.remoteCustomTimeId))
-
-        val localCustomTimeId = customTimeKey.localCustomTimeId
+    fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey, remoteProject: RemoteProject): String {
+        val localCustomTimeId = localCustomTimeKey.localCustomTimeId
 
         val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
 

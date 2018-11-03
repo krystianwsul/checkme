@@ -15,7 +15,7 @@ class TimePairPersist private constructor(var customTimeKey: CustomTimeKey?, _ho
                 val hourMinute = source.readParcelable<HourMinute>(HourMinute::class.java.classLoader)!!
 
                 val customTimeKey: CustomTimeKey? = if (source.readInt() == 1) {
-                    source.readParcelable(CustomTimeKey::class.java.classLoader)!!
+                    source.readSerializable() as CustomTimeKey
                 } else {
                     null
                 }
@@ -41,7 +41,7 @@ class TimePairPersist private constructor(var customTimeKey: CustomTimeKey?, _ho
             writeParcelable(hourMinute, 0)
             if (customTimeKey != null) {
                 writeInt(1)
-                writeParcelable(customTimeKey, 0)
+                writeSerializable(customTimeKey)
             } else {
                 writeInt(0)
             }

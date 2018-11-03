@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -57,10 +58,7 @@ class RemoteProject(
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
             val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
 
-            check(!TextUtils.isEmpty(remoteCustomTime.customTimeKey.remoteCustomTimeId))
-            check(!remoteCustomTimes.containsKey(remoteCustomTime.customTimeKey.remoteCustomTimeId))
-
-            remoteCustomTimes[remoteCustomTime.customTimeKey.remoteCustomTimeId!!] = remoteCustomTime
+            remoteCustomTimes[remoteCustomTime.customTimeKey.remoteCustomTimeId] = remoteCustomTime
 
             if (remoteCustomTimeRecord.ownerId == domainFactory.localFactory.uuid && domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
                 val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
@@ -133,7 +131,7 @@ class RemoteProject(
             val scheduleKey = localInstance.scheduleKey
 
             if (scheduleKey.scheduleTimePair.customTimeKey != null)
-                remoteFactory.getRemoteCustomTimeId(scheduleKey.scheduleTimePair.customTimeKey, this)
+                remoteFactory.getRemoteCustomTimeId(scheduleKey.scheduleTimePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, this)
 
             instanceJsons[RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey)] = instanceJson
         }
@@ -170,7 +168,7 @@ class RemoteProject(
         } else {
             checkNotNull(instanceTimePair.customTimeKey)
 
-            instanceRemoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(instanceTimePair.customTimeKey, this)
+            instanceRemoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(instanceTimePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, this)
 
             instanceHour = null
             instanceMinute = null

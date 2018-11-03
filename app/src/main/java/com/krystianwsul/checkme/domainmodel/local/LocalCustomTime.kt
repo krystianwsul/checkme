@@ -100,7 +100,7 @@ class LocalCustomTime(
         localCustomTimeRecord.current = false
     }
 
-    override val timePair by lazy { TimePair(CustomTimeKey(localCustomTimeRecord.id), null) }
+    override val timePair by lazy { TimePair(CustomTimeKey.LocalCustomTimeKey(localCustomTimeRecord.id), null) }
 
     fun delete() {
         domainFactory.localFactory.deleteCustomTime(this)
@@ -108,7 +108,7 @@ class LocalCustomTime(
         localCustomTimeRecord.delete()
     }
 
-    override val customTimeKey get() = CustomTimeKey(id)
+    override val customTimeKey get() = CustomTimeKey.LocalCustomTimeKey(id)
 
     fun addRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord) {
         check(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)

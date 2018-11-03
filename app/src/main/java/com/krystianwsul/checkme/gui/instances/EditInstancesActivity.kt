@@ -284,7 +284,7 @@ class EditInstancesActivity : AbstractActivity() {
         editInstanceTime.setOnClickListener {
             checkNotNull(mData)
             val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(mData!!.customTimeDatas.values
-                    .filter { it.customTimeKey.localCustomTimeId != null }
+                    .filter { it.customTimeKey is CustomTimeKey.LocalCustomTimeKey }
                     .sortedBy { it.hourMinutes[mDate!!.dayOfWeek] }
                     .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[mDate!!.dayOfWeek] + ")") })
 
@@ -397,6 +397,6 @@ class EditInstancesActivity : AbstractActivity() {
         checkNotNull(mTimePairPersist)
 
         if (resultCode > 0)
-            mTimePairPersist!!.customTimeKey = CustomTimeKey(resultCode)
+            mTimePairPersist!!.customTimeKey = CustomTimeKey.LocalCustomTimeKey(resultCode)
     }
 }

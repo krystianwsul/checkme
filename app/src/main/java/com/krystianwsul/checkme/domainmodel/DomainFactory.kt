@@ -1600,23 +1600,14 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun getRemoteCustomTimeId(projectId: String, customTimeKey: CustomTimeKey): String {
-        if (!customTimeKey.remoteProjectId.isNullOrEmpty()) {
-            check(!customTimeKey.remoteCustomTimeId.isNullOrEmpty())
-            check(customTimeKey.localCustomTimeId == null)
-
-            check(customTimeKey.remoteProjectId == projectId)
-
-            return customTimeKey.remoteCustomTimeId
-        } else {
-            check(customTimeKey.remoteCustomTimeId.isNullOrEmpty())
-            checkNotNull(customTimeKey.localCustomTimeId)
-
+    fun getRemoteCustomTimeId(projectId: String, customTimeKey: CustomTimeKey) = when (customTimeKey) {
+        is CustomTimeKey.RemoteCustomTimeKey -> customTimeKey.remoteCustomTimeId
+        is CustomTimeKey.LocalCustomTimeKey -> {
             val localCustomTime = localFactory.getLocalCustomTime(customTimeKey.localCustomTimeId)
 
             check(localCustomTime.hasRemoteRecord(projectId))
 
-            return localCustomTime.getRemoteId(projectId)
+            localCustomTime.getRemoteId(projectId)
         }
     }
 
@@ -1755,17 +1746,9 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    fun getCustomTime(customTimeKey: CustomTimeKey) = if (customTimeKey.localCustomTimeId != null) {
-        check(customTimeKey.remoteProjectId.isNullOrEmpty())
-        check(customTimeKey.remoteCustomTimeId.isNullOrEmpty())
-
-        localFactory.getLocalCustomTime(customTimeKey.localCustomTimeId)
-    } else {
-        check(!customTimeKey.remoteProjectId.isNullOrEmpty())
-        check(!customTimeKey.remoteCustomTimeId.isNullOrEmpty())
-        checkNotNull(remoteProjectFactory)
-
-        remoteProjectFactory!!.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
+    fun getCustomTime(customTimeKey: CustomTimeKey) = when (customTimeKey) {
+        is CustomTimeKey.LocalCustomTimeKey -> localFactory.getLocalCustomTime(customTimeKey.localCustomTimeId)
+        is CustomTimeKey.RemoteCustomTimeKey -> remoteProjectFactory!!.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
     }
 
     private fun getCurrentCustomTimes() = localFactory.currentCustomTimes
@@ -2394,12 +2377,10 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             if (scheduleKey.scheduleTimePair.customTimeKey != null) {
                 check(scheduleKey.scheduleTimePair.hourMinute == null)
 
-                check(scheduleKey.scheduleTimePair.customTimeKey.type === TaskKey.Type.REMOTE) // remote custom time key hack
-                check(scheduleKey.scheduleTimePair.customTimeKey.localCustomTimeId == null)
+                check(scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey) // remote custom time key hack
                 check(projectId == scheduleKey.scheduleTimePair.customTimeKey.remoteProjectId)
 
                 val customTimeId = scheduleKey.scheduleTimePair.customTimeKey.remoteCustomTimeId
-                check(!customTimeId.isNullOrEmpty())
 
                 matches = stream.filter { customTimeId == it.scheduleCustomTimeId }
             } else {
@@ -2471,5 +2452,5 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String) = localFactory.getLocalCustomTime(remoteProjectId, remoteCustomTimeId)?.customTimeKey
-            ?: CustomTimeKey(remoteProjectId, remoteCustomTimeId)
+            ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)
 }

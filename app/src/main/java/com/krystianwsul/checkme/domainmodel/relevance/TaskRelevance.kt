@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.relevance
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Task
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -54,8 +55,10 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
 
         // mark custom times relevant
         task.schedules
-                .mapNotNull { it.customTimeKey?.localCustomTimeId }
-                .map { customTimeRelevances[it]!! }
+                .asSequence()
+                .map { it.customTimeKey }
+                .filterIsInstance<CustomTimeKey.LocalCustomTimeKey>()
+                .map { customTimeRelevances[it.localCustomTimeId]!! }
                 .forEach { it.setRelevant() }
     }
 

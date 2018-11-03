@@ -223,7 +223,7 @@ class RemoteProject(
         remoteTasks.remove(remoteTask.id)
     }
 
-    fun deleteTaskHierarchy(remoteTasHierarchy: RemoteTaskHierarchy) = remoteTaskHierarchies.removeForce(remoteTasHierarchy.id)
+    fun deleteTaskHierarchy(remoteTaskHierarchy: RemoteTaskHierarchy) = remoteTaskHierarchies.removeForce(remoteTaskHierarchy.id)
 
     fun getRemoteTaskIfPresent(taskId: String) = remoteTasks[taskId]
 

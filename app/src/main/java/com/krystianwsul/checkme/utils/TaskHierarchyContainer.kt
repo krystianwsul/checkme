@@ -43,9 +43,5 @@ class TaskHierarchyContainer<T, U : TaskHierarchy> {
 
     fun getByParentTaskKey(parentTaskKey: TaskKey): Set<U> = taskHierarchiesByParent.get(parentTaskKey)!!
 
-    fun getById(id: T): U {
-        check(taskHierarchiesById.containsKey(id))
-
-        return taskHierarchiesById[id]!!
-    }
+    fun getById(id: T) = taskHierarchiesById[id]!!
 }

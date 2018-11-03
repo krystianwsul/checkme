@@ -224,8 +224,7 @@ class RemoteInstance : Instance {
     override fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp) {
         check(isRootInstance(now))
 
-        if (remoteInstanceRecord == null)
-            createInstanceHierarchy(now)
+        createInstanceHierarchy(now)
 
         remoteInstanceRecord!!.setInstanceYear(date.year)
         remoteInstanceRecord!!.setInstanceMonth(date.month)
@@ -244,8 +243,7 @@ class RemoteInstance : Instance {
             remoteInstanceRecord!!.instanceMinute = timePair.hourMinute.minute
         }
 
-        if (instanceShownRecord == null)
-            createInstanceShownRecord()
+        createInstanceShownRecord()
 
         checkNotNull(instanceShownRecord)
 
@@ -253,7 +251,8 @@ class RemoteInstance : Instance {
     }
 
     private fun createInstanceShownRecord() {
-        check(instanceShownRecord == null)
+        if (instanceShownRecord != null)
+            return
 
         instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
     }
@@ -262,10 +261,12 @@ class RemoteInstance : Instance {
         check(remoteInstanceRecord == null != (_scheduleDateTime == null))
         check(_taskId == null == (_scheduleDateTime == null))
 
+        if (remoteInstanceRecord != null)
+            return
+
         getParentInstance(now)?.createInstanceHierarchy(now)
 
-        if (remoteInstanceRecord == null)
-            createInstanceRecord()
+        createInstanceRecord()
     }
 
     private fun createInstanceRecord() {
@@ -280,8 +281,7 @@ class RemoteInstance : Instance {
     }
 
     override fun setNotificationShown(notificationShown: Boolean, now: ExactTimeStamp) {
-        if (instanceShownRecord == null)
-            createInstanceShownRecord()
+        createInstanceShownRecord()
 
         checkNotNull(instanceShownRecord)
 
@@ -290,8 +290,7 @@ class RemoteInstance : Instance {
 
     override fun setDone(done: Boolean, now: ExactTimeStamp) {
         if (done) {
-            if (remoteInstanceRecord == null)
-                createInstanceHierarchy(now)
+            createInstanceHierarchy(now)
 
             checkNotNull(remoteInstanceRecord)
 
@@ -306,8 +305,7 @@ class RemoteInstance : Instance {
     }
 
     override fun setNotified(now: ExactTimeStamp) {
-        if (instanceShownRecord == null)
-            createInstanceShownRecord()
+        createInstanceShownRecord()
 
         check(instanceShownRecord != null)
 
@@ -327,8 +325,7 @@ class RemoteInstance : Instance {
     override fun getNullableOrdinal() = remoteInstanceRecord?.ordinal
 
     override fun setOrdinal(ordinal: Double, now: ExactTimeStamp) {
-        if (remoteInstanceRecord == null)
-            createInstanceHierarchy(now)
+        createInstanceHierarchy(now)
 
         remoteInstanceRecord!!.setOrdinal(ordinal)
     }

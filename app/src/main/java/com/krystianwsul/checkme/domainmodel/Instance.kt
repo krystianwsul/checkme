@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import io.reactivex.annotations.Nullable
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -202,7 +201,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     private class ParentInstanceException(message: String) : Exception(message)
 
-    @Nullable
     protected abstract fun getNullableOrdinal(): Double?
 
     val ordinal get() = getNullableOrdinal() ?: task.startExactTimeStamp.long.toDouble()

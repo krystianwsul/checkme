@@ -10,24 +10,18 @@ import com.krystianwsul.checkme.utils.time.*
 
 
 class LocalInstance : Instance {
+
     private var localInstanceRecord: InstanceRecord? = null
-
-    private var mTaskId: Int? = null
-
-    private var mScheduleDateTime: DateTime? = null
+    private var virtualData: VirtualData? = null
 
     val taskId: Int
         get() {
             return if (localInstanceRecord != null) {
-                check(mTaskId == null)
-                check(mScheduleDateTime == null)
+                check(virtualData == null)
 
                 localInstanceRecord!!.taskId
             } else {
-                check(mTaskId != null)
-                check(mScheduleDateTime != null)
-
-                mTaskId!!
+                virtualData!!.taskId
             }
         }
 
@@ -38,23 +32,18 @@ class LocalInstance : Instance {
     override val scheduleDate: Date
         get() {
             return if (localInstanceRecord != null) {
-                check(mTaskId == null)
-                check(mScheduleDateTime == null)
+                check(virtualData == null)
 
                 Date(localInstanceRecord!!.scheduleYear, localInstanceRecord!!.scheduleMonth, localInstanceRecord!!.scheduleDay)
             } else {
-                check(mTaskId != null)
-                check(mScheduleDateTime != null)
-
-                mScheduleDateTime!!.date
+                virtualData!!.scheduleDateTime.date
             }
         }
 
     override val scheduleTime: Time
         get() {
-            if (localInstanceRecord != null) {
-                check(mTaskId == null)
-                check(mScheduleDateTime == null)
+            return if (localInstanceRecord != null) {
+                check(virtualData == null)
 
                 val customTimeId = localInstanceRecord!!.scheduleCustomTimeId
                 val hour = localInstanceRecord!!.scheduleHour
@@ -63,61 +52,48 @@ class LocalInstance : Instance {
                 check(hour == null == (minute == null))
                 check(customTimeId == null != (hour == null))
 
-                return customTimeId?.let { domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(it)) }
+                customTimeId?.let { domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(it)) }
                         ?: NormalTime(hour!!, minute!!)
             } else {
-                checkNotNull(mTaskId)
-                checkNotNull(mScheduleDateTime)
-
-                return mScheduleDateTime!!.time
+                virtualData!!.scheduleDateTime.time
             }
         }
 
     override val instanceDate: Date
         get() {
-            if (localInstanceRecord != null) {
-                check(mTaskId == null)
-                check(mScheduleDateTime == null)
+            return if (localInstanceRecord != null) {
+                check(virtualData == null)
 
                 check(localInstanceRecord!!.instanceYear == null == (localInstanceRecord!!.instanceMonth == null))
                 check(localInstanceRecord!!.instanceYear == null == (localInstanceRecord!!.instanceDay == null))
-                return if (localInstanceRecord!!.instanceYear != null)
+                if (localInstanceRecord!!.instanceYear != null)
                     Date(localInstanceRecord!!.instanceYear!!, localInstanceRecord!!.instanceMonth!!, localInstanceRecord!!.instanceDay!!)
                 else
                     scheduleDate
             } else {
-                check(mTaskId != null)
-                check(mScheduleDateTime != null)
-
-                return mScheduleDateTime!!.date
+                virtualData!!.scheduleDateTime.date
             }
         }
 
     override val instanceTime: Time
         get() {
-            if (localInstanceRecord != null) {
-                check(mTaskId == null)
-                check(mScheduleDateTime == null)
+            return if (localInstanceRecord != null) {
+                check(virtualData == null)
 
                 check(localInstanceRecord!!.instanceHour == null == (localInstanceRecord!!.instanceMinute == null))
                 check(localInstanceRecord!!.instanceHour == null || localInstanceRecord!!.instanceCustomTimeId == null)
 
-                return when {
+                when {
                     localInstanceRecord!!.instanceCustomTimeId != null -> domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(localInstanceRecord!!.instanceCustomTimeId!!))
                     localInstanceRecord!!.instanceHour != null -> NormalTime(localInstanceRecord!!.instanceHour!!, localInstanceRecord!!.instanceMinute!!)
                     else -> scheduleTime
                 }
             } else {
-                checkNotNull(mTaskId)
-                checkNotNull(mScheduleDateTime)
-
-                return mScheduleDateTime!!.time
+                virtualData!!.scheduleDateTime.time
             }
         }
 
     override val done get() = localInstanceRecord?.done?.let { ExactTimeStamp(it) }
-
-    val hierarchyTime get() = localInstanceRecord!!.hierarchyTime
 
     override val notified get() = localInstanceRecord?.notified == true
 
@@ -126,22 +102,21 @@ class LocalInstance : Instance {
     override val scheduleCustomTimeKey: CustomTimeKey?
         get() {
             return if (localInstanceRecord != null) {
-                check(mTaskId == null)
-                check(mScheduleDateTime == null)
+                check(virtualData == null)
 
                 localInstanceRecord!!.scheduleCustomTimeId?.let { CustomTimeKey.LocalCustomTimeKey(it) }
             } else {
-                checkNotNull(mTaskId)
-
-                mScheduleDateTime!!.time.timePair.customTimeKey
+                virtualData!!.scheduleDateTime
+                        .time
+                        .timePair
+                        .customTimeKey
             }
         }
 
     override val scheduleHourMinute: HourMinute?
         get() {
             if (localInstanceRecord != null) {
-                check(mTaskId == null)
-                check(mScheduleDateTime == null)
+                check(virtualData == null)
 
                 val hour = localInstanceRecord!!.scheduleHour
                 val minute = localInstanceRecord!!.scheduleMinute
@@ -151,15 +126,13 @@ class LocalInstance : Instance {
 
                     null
                 } else {
-                    checkNotNull(minute)
-
-                    HourMinute(hour, minute)
+                    HourMinute(hour, minute!!)
                 }
             } else {
-                check(mTaskId != null)
-                check(mScheduleDateTime != null)
-
-                return mScheduleDateTime!!.time.timePair.hourMinute
+                return virtualData!!.scheduleDateTime
+                        .time
+                        .timePair
+                        .hourMinute
             }
         }
 
@@ -173,16 +146,12 @@ class LocalInstance : Instance {
 
     constructor(domainFactory: DomainFactory, instanceRecord: InstanceRecord) : super(domainFactory) {
         localInstanceRecord = instanceRecord
-
-        mTaskId = null
-        mScheduleDateTime = null
+        virtualData = null
     }
 
     constructor(domainFactory: DomainFactory, taskId: Int, scheduleDateTime: DateTime) : super(domainFactory) {
         localInstanceRecord = null
-
-        mTaskId = taskId
-        mScheduleDateTime = scheduleDateTime
+        virtualData = VirtualData(taskId, scheduleDateTime)
     }
 
     override fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp) {
@@ -225,8 +194,7 @@ class LocalInstance : Instance {
     }
 
     override fun createInstanceHierarchy(now: ExactTimeStamp) {
-        check(localInstanceRecord == null != (mScheduleDateTime == null))
-        check(mTaskId == null == (mScheduleDateTime == null))
+        check(localInstanceRecord == null != (virtualData == null))
 
         if (localInstanceRecord != null)
             return
@@ -242,8 +210,7 @@ class LocalInstance : Instance {
 
         localInstanceRecord = domainFactory.localFactory.createInstanceRecord(localTask, this, scheduleDate, scheduleTimePair, now)
 
-        mTaskId = null
-        mScheduleDateTime = null
+        virtualData = null
     }
 
     override fun setNotified(now: ExactTimeStamp) {
@@ -259,8 +226,7 @@ class LocalInstance : Instance {
     }
 
     override fun exists(): Boolean {
-        check(localInstanceRecord == null != (mScheduleDateTime == null))
-        check(mTaskId == null == (mScheduleDateTime == null))
+        check(localInstanceRecord == null != (virtualData == null))
 
         return localInstanceRecord != null
     }
@@ -282,4 +248,6 @@ class LocalInstance : Instance {
 
         localInstanceRecord!!.ordinal = ordinal
     }
+
+    private class VirtualData(val taskId: Int, val scheduleDateTime: DateTime)
 }

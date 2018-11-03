@@ -944,6 +944,18 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
+    fun setInstanceDone(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): ExactTimeStamp? {
+        MyCrashlytics.log("DomainFactory.setInstanceDone")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+        val now = ExactTimeStamp.now
+
+        val instance = setInstanceDone(now, dataId, source, instanceKey, done)
+
+        return instance.done
+    }
+
+    @Synchronized
     fun setInstancesDone(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>): ExactTimeStamp {
         MyCrashlytics.log("DomainFactory.setInstancesDone")
         check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
@@ -966,15 +978,13 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
-    fun setInstanceDone(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): ExactTimeStamp? {
-        MyCrashlytics.log("DomainFactory.setInstanceDone")
+    fun setInstanceNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
+        MyCrashlytics.log("DomainFactory.setInstanceNotified")
         check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
-        val now = ExactTimeStamp.now
+        setInstanceNotified(instanceKey, ExactTimeStamp.now)
 
-        val instance = setInstanceDone(now, dataId, source, instanceKey, done)
-
-        return instance.done
+        save(dataId, source)
     }
 
     @Synchronized
@@ -990,16 +1000,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             setInstanceNotified(instanceKey, now)
 
         save(0, source)
-    }
-
-    @Synchronized
-    fun setInstanceNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceNotified")
-        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
-
-        setInstanceNotified(instanceKey, ExactTimeStamp.now)
-
-        save(dataId, source)
     }
 
     fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
@@ -2138,7 +2138,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         return Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject?) { // todo check all functions for possible overloads
+    private fun notifyCloud(remoteProject: RemoteProject?) {
         val remoteProjects = setOf(remoteProject)
                 .filterNotNull()
                 .toSet()

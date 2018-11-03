@@ -56,6 +56,8 @@ class LocalFactory {
 
     val uuid get() = persistenceManager.uuid
 
+    private lateinit var domainFactory: DomainFactory
+
     private constructor() {
         persistenceManager = PersistenceManger.instance
     }
@@ -71,13 +73,15 @@ class LocalFactory {
     }
 
     fun initialize(domainFactory: DomainFactory) {
+        this.domainFactory = domainFactory
+        
         _localCustomTimes.putAll(persistenceManager.customTimeRecords
                 .map { LocalCustomTime(domainFactory, it) }
                 .map { it.id to it })
 
         persistenceManager.taskRecords.forEach { taskRecord ->
             LocalTask(domainFactory, taskRecord).let {
-                it.addSchedules(loadSchedules(domainFactory, taskRecord.id))
+                it.addSchedules(loadSchedules(taskRecord.id))
 
                 localTasks[it.id] = it
             }
@@ -92,46 +96,46 @@ class LocalFactory {
                 .forEach { existingLocalInstances.add(it) }
     }
 
-    private fun loadSchedules(domainFactory: DomainFactory, localTaskId: Int) = persistenceManager.getScheduleRecords(localTaskId).map {
+    private fun loadSchedules(localTaskId: Int) = persistenceManager.getScheduleRecords(localTaskId).map {
         check(it.type >= 0)
         check(it.type < ScheduleType.values().size)
 
         val scheduleType = ScheduleType.values()[it.type]
 
         when (scheduleType) {
-            ScheduleType.SINGLE -> loadSingleSchedule(domainFactory, it)
-            ScheduleType.DAILY -> loadDailySchedule(domainFactory, it)
-            ScheduleType.WEEKLY -> loadWeeklySchedule(domainFactory, it)
-            ScheduleType.MONTHLY_DAY -> loadMonthlyDaySchedule(domainFactory, it)
-            ScheduleType.MONTHLY_WEEK -> loadMonthlyWeekSchedule(domainFactory, it)
+            ScheduleType.SINGLE -> loadSingleSchedule(it)
+            ScheduleType.DAILY -> loadDailySchedule(it)
+            ScheduleType.WEEKLY -> loadWeeklySchedule(it)
+            ScheduleType.MONTHLY_DAY -> loadMonthlyDaySchedule(it)
+            ScheduleType.MONTHLY_WEEK -> loadMonthlyWeekSchedule(it)
         }
     }
 
-    private fun loadSingleSchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): Schedule {
+    private fun loadSingleSchedule(scheduleRecord: ScheduleRecord): Schedule {
         val singleScheduleRecord = persistenceManager.getSingleScheduleRecord(scheduleRecord.id)
 
         return SingleSchedule(domainFactory, LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord))
     }
 
-    private fun loadDailySchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): WeeklySchedule {
+    private fun loadDailySchedule(scheduleRecord: ScheduleRecord): WeeklySchedule {
         val dailyScheduleRecord = persistenceManager.getDailyScheduleRecord(scheduleRecord.id)
 
         return WeeklySchedule(domainFactory, LocalDailyScheduleBridge(scheduleRecord, dailyScheduleRecord))
     }
 
-    private fun loadWeeklySchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): WeeklySchedule {
+    private fun loadWeeklySchedule(scheduleRecord: ScheduleRecord): WeeklySchedule {
         val weeklyScheduleRecord = persistenceManager.getWeeklyScheduleRecord(scheduleRecord.id)
 
         return WeeklySchedule(domainFactory, LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord))
     }
 
-    private fun loadMonthlyDaySchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): MonthlyDaySchedule {
+    private fun loadMonthlyDaySchedule(scheduleRecord: ScheduleRecord): MonthlyDaySchedule {
         val monthlyDayScheduleRecord = persistenceManager.getMonthlyDayScheduleRecord(scheduleRecord.id)
 
         return MonthlyDaySchedule(domainFactory, LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord))
     }
 
-    private fun loadMonthlyWeekSchedule(domainFactory: DomainFactory, scheduleRecord: ScheduleRecord): MonthlyWeekSchedule {
+    private fun loadMonthlyWeekSchedule(scheduleRecord: ScheduleRecord): MonthlyWeekSchedule {
         val monthlyWeekScheduleRecord = persistenceManager.getMonthlyWeekScheduleRecord(scheduleRecord.id)
 
         return MonthlyWeekSchedule(domainFactory, LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord))
@@ -169,7 +173,7 @@ class LocalFactory {
         return matches.singleOrNull()
     }
 
-    fun createInstanceShownRecord(domainFactory: DomainFactory, remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
+    fun createInstanceShownRecord(remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
         val timePair = scheduleDateTime.time.timePair
 
         val remoteCustomTimeId: String?
@@ -216,14 +220,13 @@ class LocalFactory {
         persistenceManager.deleteInstanceShownRecords(taskKeys)
     }
 
-    // todo dont pass domainfactory
-    fun createScheduleRootTask(domainFactory: DomainFactory, now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?): LocalTask {
+    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?): LocalTask {
         check(name.isNotEmpty())
         check(!scheduleDatas.isEmpty())
 
-        val rootLocalTask = createLocalTaskHelper(domainFactory, name, now, note)
+        val rootLocalTask = createLocalTaskHelper(name, now, note)
 
-        val schedules = createSchedules(domainFactory, rootLocalTask, scheduleDatas, now)
+        val schedules = createSchedules(rootLocalTask, scheduleDatas, now)
         check(!schedules.isEmpty())
 
         rootLocalTask.addSchedules(schedules)
@@ -231,7 +234,7 @@ class LocalFactory {
         return rootLocalTask
     }
 
-    fun createLocalTaskHelper(domainFactory: DomainFactory, name: String, now: ExactTimeStamp, note: String?): LocalTask {
+    fun createLocalTaskHelper(name: String, now: ExactTimeStamp, note: String?): LocalTask {
         check(name.isNotEmpty())
 
         val taskRecord = persistenceManager.createTaskRecord(name, now, note)
@@ -244,7 +247,7 @@ class LocalFactory {
         return rootLocalTask
     }
 
-    fun createSchedules(domainFactory: DomainFactory, rootLocalTask: LocalTask, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, startExactTimeStamp: ExactTimeStamp): List<Schedule> {
+    fun createSchedules(rootLocalTask: LocalTask, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, startExactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(!scheduleDatas.isEmpty())
         check(rootLocalTask.current(startExactTimeStamp))
 
@@ -297,7 +300,7 @@ class LocalFactory {
         }.flatten()
     }
 
-    fun createTaskHierarchy(domainFactory: DomainFactory, parentLocalTask: LocalTask, childLocalTask: LocalTask, startExactTimeStamp: ExactTimeStamp) {
+    fun createTaskHierarchy(parentLocalTask: LocalTask, childLocalTask: LocalTask, startExactTimeStamp: ExactTimeStamp) {
         check(parentLocalTask.current(startExactTimeStamp))
         check(childLocalTask.current(startExactTimeStamp))
 
@@ -307,12 +310,12 @@ class LocalFactory {
         localTaskHierarchies.add(localTaskHierarchy.id, localTaskHierarchy)
     }
 
-    fun createChildTask(domainFactory: DomainFactory, now: ExactTimeStamp, parentTask: LocalTask, name: String, note: String?): LocalTask {
+    fun createChildTask(now: ExactTimeStamp, parentTask: LocalTask, name: String, note: String?): LocalTask {
         check(name.isNotEmpty())
         check(parentTask.current(now))
 
-        return createLocalTaskHelper(domainFactory, name, now, note).also {
-            createTaskHierarchy(domainFactory, parentTask, it, now)
+        return createLocalTaskHelper(name, now, note).also {
+            createTaskHierarchy(parentTask, it, now)
         }
     }
 
@@ -341,7 +344,7 @@ class LocalFactory {
         parentLocalTaskHierarchies.map { it.parentTask }.forEach { convertLocalToRemoteHelper(localToRemoteConversion, it) }
     }
 
-    fun createLocalCustomTime(domainFactory: DomainFactory, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTime {
+    fun createLocalCustomTime(name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTime {
         check(name.isNotEmpty())
 
         checkNotNull(hourMinutes[DayOfWeek.SUNDAY])

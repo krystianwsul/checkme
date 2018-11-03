@@ -42,13 +42,13 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     companion object {
 
-        var _DomainFactory: DomainFactory? = null
+        var _domainFactory: DomainFactory? = null
 
         @Synchronized
         fun getKotlinDomainFactory(persistenceManager: PersistenceManger? = null): DomainFactory {
-            if (_DomainFactory == null)
-                _DomainFactory = DomainFactory(persistenceManager)
-            return _DomainFactory!!
+            if (_domainFactory == null)
+                _domainFactory = DomainFactory(persistenceManager)
+            return _domainFactory!!
         }
 
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
@@ -135,7 +135,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val userInfo = userInfo
         clearUserInfo()
 
-        _DomainFactory = null
+        _domainFactory = null
         localFactory.reset()
 
         userInfo?.let { setUserInfo(source, it) }
@@ -1007,7 +1007,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         check(!scheduleDatas.isEmpty())
 
         val task = if (TextUtils.isEmpty(projectId)) {
-            localFactory.createScheduleRootTask(this, now, name, scheduleDatas, note)
+            localFactory.createScheduleRootTask(now, name, scheduleDatas, note)
         } else {
             check(remoteProjectFactory != null)
 
@@ -1102,7 +1102,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
             remoteProjectFactory!!.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId!!)
         } else {
-            localFactory.createScheduleRootTask(this, now, name, scheduleDatas, note)
+            localFactory.createScheduleRootTask(now, name, scheduleDatas, note)
         }
 
         joinTasks = joinTasks.map { it.updateProject(now, projectId) }
@@ -1310,7 +1310,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         check(DayOfWeek.values().all { hourMinutes[it] != null })
 
-        val localCustomTime = localFactory.createLocalCustomTime(this, name, hourMinutes)
+        val localCustomTime = localFactory.createLocalCustomTime(name, hourMinutes)
 
         save(0, source)
 
@@ -1355,7 +1355,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         check(!TextUtils.isEmpty(name))
 
         val task = if (TextUtils.isEmpty(projectId)) {
-            localFactory.createLocalTaskHelper(this, name, now, note)
+            localFactory.createLocalTaskHelper(name, now, note)
         } else {
             check(remoteProjectFactory != null)
 
@@ -1413,7 +1413,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
             remoteProjectFactory!!.createRemoteTaskHelper(now, name, note, finalProjectId!!)
         } else {
-            localFactory.createLocalTaskHelper(this, name, now, note)
+            localFactory.createLocalTaskHelper(name, now, note)
         }
 
         joinTasks = joinTasks.map { it.updateProject(now, projectId) }

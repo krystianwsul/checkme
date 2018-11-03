@@ -79,12 +79,12 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
         taskRecord.delete()
     }
 
-    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?) = domainFactory.localFactory.createChildTask(domainFactory, now, this, name, note)
+    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?) = domainFactory.localFactory.createChildTask(now, this, name, note)
 
     override fun addSchedules(scheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) {
         check(!scheduleDatas.isEmpty())
 
-        val schedules = domainFactory.localFactory.createSchedules(domainFactory, this, scheduleDatas, now)
+        val schedules = domainFactory.localFactory.createSchedules(this, scheduleDatas, now)
         check(!schedules.isEmpty())
 
         addSchedules(schedules)
@@ -93,7 +93,7 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is LocalTask)
 
-        domainFactory.localFactory.createTaskHierarchy(domainFactory, this, childTask, now)
+        domainFactory.localFactory.createTaskHierarchy(this, childTask, now)
     }
 
     override fun deleteSchedule(schedule: Schedule) {

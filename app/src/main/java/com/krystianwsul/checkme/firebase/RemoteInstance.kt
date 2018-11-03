@@ -255,7 +255,7 @@ class RemoteInstance : Instance {
     private fun createInstanceShownRecord() {
         check(instanceShownRecord == null)
 
-        instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(domainFactory, taskId, scheduleDateTime, task.remoteProject.id)
+        instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
     }
 
     override fun createInstanceHierarchy(now: ExactTimeStamp) {

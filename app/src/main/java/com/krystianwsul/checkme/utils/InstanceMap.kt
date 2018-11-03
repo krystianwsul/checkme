@@ -2,23 +2,22 @@ package com.krystianwsul.checkme.utils
 
 import com.krystianwsul.checkme.domainmodel.Instance
 
-import java.util.*
-
 class InstanceMap<T : Instance> {
 
     private val instances = HashMap<TaskKey, HashMap<ScheduleKey, T>>()
 
+    private fun init(taskKey: TaskKey): HashMap<ScheduleKey, T> {
+        if (instances[taskKey] == null)
+            instances[taskKey] = HashMap()
+        return instances[taskKey]!!
+    }
+
     fun add(instance: T) {
         val taskKey = instance.taskKey
 
-        var innerMap: HashMap<ScheduleKey, T>? = instances[taskKey]
-        if (innerMap == null) {
-            innerMap = HashMap()
-            instances[taskKey] = innerMap
-        }
+        val innerMap = init(taskKey)
 
         val instanceKey = instance.instanceKey
-
         check(!innerMap.containsKey(instanceKey.scheduleKey))
 
         innerMap[instanceKey.scheduleKey] = instance
@@ -37,16 +36,9 @@ class InstanceMap<T : Instance> {
         innerMap.remove(instanceKey.scheduleKey)
     }
 
-    operator fun get(taskKey: TaskKey): Map<ScheduleKey, T> {
-        val innerMap = instances[taskKey]
-        return innerMap ?: mapOf()
-    }
+    operator fun get(taskKey: TaskKey) = init(taskKey)
 
-    fun getIfPresent(instanceKey: InstanceKey): T? {
-        val innerMap = instances[instanceKey.taskKey] ?: return null
-
-        return innerMap[instanceKey.scheduleKey]
-    }
+    fun getIfPresent(instanceKey: InstanceKey) = instances[instanceKey.taskKey]?.get(instanceKey.scheduleKey)
 
     fun size() = instances.values
             .map { it.size }

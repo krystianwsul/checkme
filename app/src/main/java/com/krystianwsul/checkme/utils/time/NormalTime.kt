@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.utils.time
 
 data class NormalTime(val hourMinute: HourMinute) : Time {
 
-    override val timePair by lazy { TimePair(null, hourMinute) }
+    override val timePair get() = TimePair(null, hourMinute)
 
     constructor(hour: Int, minute: Int) : this(HourMinute(hour, minute))
 

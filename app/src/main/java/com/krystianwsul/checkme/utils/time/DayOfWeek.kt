@@ -24,7 +24,7 @@ enum class DayOfWeek {
     }
 
     override fun toString(): String {
-        val weekDay = DateFormatSymbols.getInstance().weekdays[this.ordinal + 1]
+        val weekDay = DateFormatSymbols.getInstance().weekdays[ordinal + 1]
         check(!TextUtils.isEmpty(weekDay))
 
         return weekDay

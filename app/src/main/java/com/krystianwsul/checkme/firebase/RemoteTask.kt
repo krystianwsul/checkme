@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
@@ -158,26 +159,32 @@ class RemoteTask(
 
     fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = existingRemoteInstances[scheduleKey]
 
+    private fun getTime(timePair: TimePair): Triple<String?, Int?, Int?> {
+        val remoteCustomTimeId: String?
+        val hour: Int?
+        val minute: Int?
+        if (timePair.customTimeKey != null) {
+            check(timePair.hourMinute == null)
+
+            remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
+            hour = null
+            minute = null
+        } else {
+            remoteCustomTimeId = null
+            hour = timePair.hourMinute!!.hour
+            minute = timePair.hourMinute.minute
+        }
+
+        return Triple(remoteCustomTimeId, hour, minute)
+    }
+
     fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<CreateTaskViewModel.ScheduleData>) {
         for (scheduleData in scheduleDatas) {
             when (scheduleData.scheduleType) {
                 ScheduleType.SINGLE -> {
                     val (date, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.SingleScheduleData
 
-                    val remoteCustomTimeId: String?
-                    val hour: Int?
-                    val minute: Int?
-                    if (timePair.customTimeKey != null) {
-                        check(timePair.hourMinute == null)
-
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-                        hour = null
-                        minute = null
-                    } else {
-                        remoteCustomTimeId = null
-                        hour = timePair.hourMinute!!.hour
-                        minute = timePair.hourMinute.minute
-                    }
+                    val (remoteCustomTimeId, hour, minute) = getTime(timePair)
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, remoteCustomTimeId, hour, minute)))
 
@@ -187,20 +194,7 @@ class RemoteTask(
                 ScheduleType.WEEKLY -> {
                     val (daysOfWeek, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.WeeklyScheduleData
 
-                    val remoteCustomTimeId: String?
-                    val hour: Int?
-                    val minute: Int?
-                    if (timePair.customTimeKey != null) {
-                        check(timePair.hourMinute == null)
-
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-                        hour = null
-                        minute = null
-                    } else {
-                        remoteCustomTimeId = null
-                        hour = timePair.hourMinute!!.hour
-                        minute = timePair.hourMinute.minute
-                    }
+                    val (remoteCustomTimeId, hour, minute) = getTime(timePair)
 
                     for (dayOfWeek in daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(now.long, null, dayOfWeek.ordinal, remoteCustomTimeId, hour, minute)))
@@ -211,42 +205,16 @@ class RemoteTask(
                 ScheduleType.MONTHLY_DAY -> {
                     val (dayOfMonth, beginningOfMonth, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData
 
-                    val remoteCustomTimeId: String?
-                    val hour: Int?
-                    val minute: Int?
-                    if (timePair.customTimeKey != null) {
-                        check(timePair.hourMinute == null)
-
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-                        hour = null
-                        minute = null
-                    } else {
-                        remoteCustomTimeId = null
-                        hour = timePair.hourMinute!!.hour
-                        minute = timePair.hourMinute.minute
-                    }
+                    val (remoteCustomTimeId, hour, minute) = getTime(timePair)
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(now.long, null, dayOfMonth, beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
                     remoteSchedules.add(MonthlyDaySchedule(domainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)))
                 }
                 ScheduleType.MONTHLY_WEEK -> {
-                    val (dayOfMonth, dayOfWeek, beginningOfMonth, TimePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData
+                    val (dayOfMonth, dayOfWeek, beginningOfMonth, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData
 
-                    val remoteCustomTimeId: String?
-                    val hour: Int?
-                    val minute: Int?
-                    if (TimePair.customTimeKey != null) {
-                        check(TimePair.hourMinute == null)
-
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(TimePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-                        hour = null
-                        minute = null
-                    } else {
-                        remoteCustomTimeId = null
-                        hour = TimePair.hourMinute!!.hour
-                        minute = TimePair.hourMinute.minute
-                    }
+                    val (remoteCustomTimeId, hour, minute) = getTime(timePair)
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(now.long, null, dayOfMonth, dayOfWeek.ordinal, beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
@@ -261,25 +229,11 @@ class RemoteTask(
             when (schedule.scheduleType) {
                 ScheduleType.SINGLE -> {
                     val singleSchedule = schedule as SingleSchedule
+                    val timePair = singleSchedule.timePair
 
                     val date = singleSchedule.date
 
-                    val remoteCustomTimeId: String?
-                    val hour: Int?
-                    val minute: Int?
-
-                    val timePair = singleSchedule.timePair
-                    if (timePair.customTimeKey != null) {
-                        check(timePair.hourMinute == null)
-
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-                        hour = null
-                        minute = null
-                    } else {
-                        remoteCustomTimeId = null
-                        hour = timePair.hourMinute!!.hour
-                        minute = timePair.hourMinute.minute
-                    }
+                    val (remoteCustomTimeId, hour, minute) = getTime(timePair)
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(singleSchedule.startTime, singleSchedule.endTime, date.year, date.month, date.day, remoteCustomTimeId, hour, minute)))
 
@@ -289,22 +243,9 @@ class RemoteTask(
                 ScheduleType.WEEKLY -> {
                     val weeklySchedule = schedule as WeeklySchedule
 
-                    val remoteCustomTimeId: String?
-                    val hour: Int?
-                    val minute: Int?
-
                     val timePair = weeklySchedule.timePair
-                    if (timePair.customTimeKey != null) {
-                        check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-                        hour = null
-                        minute = null
-                    } else {
-                        remoteCustomTimeId = null
-                        hour = timePair.hourMinute!!.hour
-                        minute = timePair.hourMinute.minute
-                    }
+                    val (remoteCustomTimeId, hour, minute) = getTime(timePair)
 
                     for (dayOfWeek in weeklySchedule.daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(schedule.startTime, schedule.endTime, dayOfWeek.ordinal, remoteCustomTimeId, hour, minute)))
@@ -315,22 +256,9 @@ class RemoteTask(
                 ScheduleType.MONTHLY_DAY -> {
                     val monthlyDaySchedule = schedule as MonthlyDaySchedule
 
-                    val remoteCustomTimeId: String?
-                    val hour: Int?
-                    val minute: Int?
-
                     val timePair = monthlyDaySchedule.timePair
-                    if (timePair.customTimeKey != null) {
-                        check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-                        hour = null
-                        minute = null
-                    } else {
-                        remoteCustomTimeId = null
-                        hour = timePair.hourMinute!!.hour
-                        minute = timePair.hourMinute.minute
-                    }
+                    val (remoteCustomTimeId, hour, minute) = getTime(timePair)
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(schedule.startTime, schedule.endTime, monthlyDaySchedule.dayOfMonth, monthlyDaySchedule.beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
@@ -339,22 +267,9 @@ class RemoteTask(
                 ScheduleType.MONTHLY_WEEK -> {
                     val monthlyWeekScheduleData = schedule as MonthlyWeekSchedule
 
-                    val remoteCustomTimeId: String?
-                    val hour: Int?
-                    val minute: Int?
-
                     val timePair = monthlyWeekScheduleData.timePair
-                    if (timePair.customTimeKey != null) {
-                        check(timePair.hourMinute == null)
 
-                        remoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-                        hour = null
-                        minute = null
-                    } else {
-                        remoteCustomTimeId = null
-                        hour = timePair.hourMinute!!.hour
-                        minute = timePair.hourMinute.minute
-                    }
+                    val (remoteCustomTimeId, hour, minute) = getTime(timePair)
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(schedule.startTime, schedule.endTime, monthlyWeekScheduleData.dayOfMonth, monthlyWeekScheduleData.dayOfWeek.ordinal, monthlyWeekScheduleData.beginningOfMonth, remoteCustomTimeId, hour, minute)))
 

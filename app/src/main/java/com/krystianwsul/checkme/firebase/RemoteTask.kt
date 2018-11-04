@@ -163,7 +163,7 @@ class RemoteTask(
                 ScheduleType.SINGLE -> {
                     val (date, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.SingleScheduleData
 
-                    val (remoteCustomTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+                    val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, remoteCustomTimeId, hour, minute)))
 
@@ -173,7 +173,7 @@ class RemoteTask(
                 ScheduleType.WEEKLY -> {
                     val (daysOfWeek, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.WeeklyScheduleData
 
-                    val (remoteCustomTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+                    val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
                     for (dayOfWeek in daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(now.long, null, dayOfWeek.ordinal, remoteCustomTimeId, hour, minute)))
@@ -184,7 +184,7 @@ class RemoteTask(
                 ScheduleType.MONTHLY_DAY -> {
                     val (dayOfMonth, beginningOfMonth, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData
 
-                    val (remoteCustomTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+                    val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(now.long, null, dayOfMonth, beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
@@ -193,7 +193,7 @@ class RemoteTask(
                 ScheduleType.MONTHLY_WEEK -> {
                     val (dayOfMonth, dayOfWeek, beginningOfMonth, timePair) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData
 
-                    val (remoteCustomTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+                    val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(now.long, null, dayOfMonth, dayOfWeek.ordinal, beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
@@ -210,7 +210,7 @@ class RemoteTask(
                     val timePair = schedule.timePair
                     val date = schedule.date
 
-                    val (remoteCustomTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+                    val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(schedule.startTime, schedule.endTime, date.year, date.month, date.day, remoteCustomTimeId, hour, minute)))
 
@@ -219,7 +219,7 @@ class RemoteTask(
                 is WeeklySchedule -> {
                     val timePair = schedule.timePair
 
-                    val (remoteCustomTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+                    val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
                     for (dayOfWeek in schedule.daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(schedule.startTime, schedule.endTime, dayOfWeek.ordinal, remoteCustomTimeId, hour, minute)))
@@ -230,7 +230,7 @@ class RemoteTask(
                 is MonthlyDaySchedule -> {
                     val timePair = schedule.timePair
 
-                    val (remoteCustomTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+                    val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(schedule.startTime, schedule.endTime, schedule.dayOfMonth, schedule.beginningOfMonth, remoteCustomTimeId, hour, minute)))
 
@@ -239,7 +239,7 @@ class RemoteTask(
                 is MonthlyWeekSchedule -> {
                     val timePair = schedule.timePair
 
-                    val (remoteCustomTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+                    val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(schedule.startTime, schedule.endTime, schedule.dayOfMonth, schedule.dayOfWeek.ordinal, schedule.beginningOfMonth, remoteCustomTimeId, hour, minute)))
 

@@ -142,7 +142,7 @@ class RemoteProject(
         val instanceDate = instance.instanceDate
         val instanceTimePair = instance.instanceTimePair
 
-        val (instanceRemoteCustomTimeId, instanceHour, instanceMinute) = instanceTimePair.destructure(remoteFactory, this)
+        val (instanceRemoteCustomTimeId, instanceHour, instanceMinute) = instanceTimePair.destructureRemote(remoteFactory, this)
 
         return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId, instanceHour, instanceMinute, instance.ordinal)
     }

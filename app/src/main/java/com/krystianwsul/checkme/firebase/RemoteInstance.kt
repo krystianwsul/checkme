@@ -225,7 +225,7 @@ class RemoteInstance : Instance {
         remoteInstanceRecord!!.setInstanceMonth(date.month)
         remoteInstanceRecord!!.setInstanceDay(date.day)
 
-        val (customTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
+        val (customTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
         remoteInstanceRecord!!.instanceCustomTimeId = customTimeId
         remoteInstanceRecord!!.instanceHour = hour

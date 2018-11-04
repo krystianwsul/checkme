@@ -29,7 +29,7 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
         }
     }
 
-    fun destructure(remoteProjectFactory: RemoteProjectFactory, remoteProject: RemoteProject): Triple<String?, Int?, Int?> {
+    fun destructureRemote(remoteProjectFactory: RemoteProjectFactory, remoteProject: RemoteProject): Triple<String?, Int?, Int?> {
         val remoteCustomTimeId: String?
         val hour: Int?
         val minute: Int?
@@ -48,7 +48,7 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
         return Triple(remoteCustomTimeId, hour, minute)
     }
 
-    fun destructure(domainFactory: DomainFactory, remoteProjectId: String): Triple<String?, Int?, Int?> {
+    fun destructureRemote(domainFactory: DomainFactory, remoteProjectId: String): Triple<String?, Int?, Int?> {
         val remoteCustomTimeId: String?
         val hour: Int?
         val minute: Int?
@@ -66,5 +66,11 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
         }
 
         return Triple(remoteCustomTimeId, hour, minute)
+    }
+
+    fun destructureLocal() = if (customTimeKey != null) {
+        Triple((customTimeKey as CustomTimeKey.LocalCustomTimeKey).localCustomTimeId, null, null)
+    } else {
+        Triple(null, hourMinute!!.hour, hourMinute.minute)
     }
 }

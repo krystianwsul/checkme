@@ -1624,7 +1624,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
             val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
                     .timePair
-                    .destructure(this, taskKey.remoteProjectId)
+                    .destructureRemote(this, taskKey.remoteProjectId)
 
             val instanceShownRecord = localFactory.getInstanceShownRecord(taskKey.remoteProjectId, taskKey.remoteTaskId, scheduleDateTime.date.year, scheduleDateTime.date.month, scheduleDateTime.date.day, remoteCustomTimeId, hour, minute)
 

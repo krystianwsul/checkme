@@ -164,19 +164,10 @@ class LocalInstance : Instance {
             it.instanceMonth = date.month
             it.instanceDay = date.day
 
-            if (timePair.customTimeKey != null) {
-                check(timePair.hourMinute == null)
-
-                it.instanceCustomTimeId = (timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey).localCustomTimeId
-                it.instanceHour = null
-                it.instanceMinute = null
-            } else {
-                checkNotNull(timePair.hourMinute)
-
-                it.instanceCustomTimeId = null
-                it.instanceHour = timePair.hourMinute.hour
-                it.instanceMinute = timePair.hourMinute.minute
-            }
+            val (customTimeId, hour, minute) = timePair.destructureLocal()
+            it.instanceCustomTimeId = customTimeId
+            it.instanceHour = hour
+            it.instanceMinute = minute
 
             it.notified = false
         }

@@ -15,7 +15,7 @@ fun Set<DayOfWeek>.prettyPrint(): String {
     if (size == 1)
         return single().toString() + ", "
 
-    val ranges = KotlinUtils.getRanges(this.toList())
+    val ranges = getRanges(this.toList())
 
     return ranges.joinToString(", ") {
         check(it.isNotEmpty())
@@ -39,46 +39,42 @@ fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.a
     }
 })
 
+fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
+    check(x.ordinal < y.ordinal)
 
-object KotlinUtils {
+    x.ordinal + 1 < y.ordinal
+}
 
-    fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
-        check(x.ordinal < y.ordinal)
+private fun <T> getRanges(list: List<T>, shouldSplit: (T, T) -> Boolean): List<List<T>> {
+    val copy = ArrayList(list)
 
-        x.ordinal + 1 < y.ordinal
+    val ranges = mutableListOf<List<T>>()
+    while (copy.isNotEmpty()) {
+        val nextRange = getNextRange(copy, shouldSplit)
+        copy.removeAll(nextRange)
+        ranges.add(nextRange)
     }
 
-    private fun <T> getRanges(list: List<T>, shouldSplit: (T, T) -> Boolean): List<List<T>> {
-        val copy = ArrayList(list)
+    return ranges
+}
 
-        val ranges = mutableListOf<List<T>>()
-        while (copy.isNotEmpty()) {
-            val nextRange = getNextRange(copy, shouldSplit)
-            copy.removeAll(nextRange)
-            ranges.add(nextRange)
-        }
+private fun <T> getNextRange(list: List<T>, shouldSplit: (T, T) -> Boolean): List<T> {
+    if (list.size < 2)
+        return ArrayList(list)
 
-        return ranges
+    var previous = list.first()
+
+    var i = 1
+    while (i < list.size) {
+        val next = list[i]
+
+        if (shouldSplit(previous, next))
+            break
+
+        previous = next
+
+        i++
     }
 
-    private fun <T> getNextRange(list: List<T>, shouldSplit: (T, T) -> Boolean): List<T> {
-        if (list.size < 2)
-            return ArrayList(list)
-
-        var previous = list.first()
-
-        var i = 1
-        while (i < list.size) {
-            val next = list[i]
-
-            if (shouldSplit(previous, next))
-                break
-
-            previous = next
-
-            i++
-        }
-
-        return ArrayList(list.subList(0, i))
-    }
+    return ArrayList(list.subList(0, i))
 }

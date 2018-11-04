@@ -142,24 +142,7 @@ class RemoteProject(
         val instanceDate = instance.instanceDate
         val instanceTimePair = instance.instanceTimePair
 
-        val instanceRemoteCustomTimeId: String?
-        val instanceHour: Int?
-        val instanceMinute: Int?
-        if (instanceTimePair.hourMinute != null) {
-            check(instanceTimePair.customTimeKey == null)
-
-            instanceRemoteCustomTimeId = null
-
-            instanceHour = instanceTimePair.hourMinute.hour
-            instanceMinute = instanceTimePair.hourMinute.minute
-        } else {
-            checkNotNull(instanceTimePair.customTimeKey)
-
-            instanceRemoteCustomTimeId = remoteFactory.getRemoteCustomTimeId(instanceTimePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, this)
-
-            instanceHour = null
-            instanceMinute = null
-        }
+        val (instanceRemoteCustomTimeId, instanceHour, instanceMinute) = instanceTimePair.destructure(remoteFactory, this)
 
         return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId, instanceHour, instanceMinute, instance.ordinal)
     }

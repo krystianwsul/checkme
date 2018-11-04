@@ -225,18 +225,11 @@ class RemoteInstance : Instance {
         remoteInstanceRecord!!.setInstanceMonth(date.month)
         remoteInstanceRecord!!.setInstanceDay(date.day)
 
-        if (timePair.customTimeKey != null) {
-            check(timePair.hourMinute == null)
-            remoteInstanceRecord!!.instanceCustomTimeId = remoteFactory.getRemoteCustomTimeId(timePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, remoteProject)
-            remoteInstanceRecord!!.instanceHour = null
-            remoteInstanceRecord!!.instanceMinute = null
-        } else {
-            checkNotNull(timePair.hourMinute)
+        val (customTimeId, hour, minute) = timePair.destructure(remoteFactory, remoteProject)
 
-            remoteInstanceRecord!!.instanceCustomTimeId = null
-            remoteInstanceRecord!!.instanceHour = timePair.hourMinute.hour
-            remoteInstanceRecord!!.instanceMinute = timePair.hourMinute.minute
-        }
+        remoteInstanceRecord!!.instanceCustomTimeId = customTimeId
+        remoteInstanceRecord!!.instanceHour = hour
+        remoteInstanceRecord!!.instanceMinute = minute
 
         createInstanceShownRecord()
 

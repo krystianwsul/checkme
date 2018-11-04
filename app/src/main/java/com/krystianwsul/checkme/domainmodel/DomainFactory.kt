@@ -1622,28 +1622,9 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             check(!taskKey.remoteProjectId.isNullOrEmpty())
             check(!taskKey.remoteTaskId.isNullOrEmpty())
 
-            val remoteCustomTimeId: String?
-            val hour: Int?
-            val minute: Int?
-
-            val customTimeKey = scheduleDateTime.time.timePair.customTimeKey
-            val hourMinute = scheduleDateTime.time.timePair.hourMinute
-
-            if (customTimeKey != null) {
-                check(hourMinute == null)
-
-                remoteCustomTimeId = getRemoteCustomTimeId(taskKey.remoteProjectId, customTimeKey)
-
-                hour = null
-                minute = null
-            } else {
-                checkNotNull(hourMinute)
-
-                remoteCustomTimeId = null
-
-                hour = hourMinute.hour
-                minute = hourMinute.minute
-            }
+            val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
+                    .timePair
+                    .destructure(this, taskKey.remoteProjectId)
 
             val instanceShownRecord = localFactory.getInstanceShownRecord(taskKey.remoteProjectId, taskKey.remoteTaskId, scheduleDateTime.date.year, scheduleDateTime.date.month, scheduleDateTime.date.day, remoteCustomTimeId, hour, minute)
 

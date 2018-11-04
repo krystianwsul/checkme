@@ -174,24 +174,9 @@ class LocalFactory {
     }
 
     fun createInstanceShownRecord(remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
-        val timePair = scheduleDateTime.time.timePair
-
-        val remoteCustomTimeId: String?
-        val hour: Int?
-        val minute: Int?
-        if (timePair.hourMinute != null) {
-            check(timePair.customTimeKey == null)
-
-            remoteCustomTimeId = null
-
-            hour = timePair.hourMinute.hour
-            minute = timePair.hourMinute.minute
-        } else {
-            remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(projectId, timePair.customTimeKey!!)
-
-            hour = null
-            minute = null
-        }
+        val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
+                .timePair
+                .destructure(domainFactory, projectId)
 
         return persistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime.date, remoteCustomTimeId, hour, minute, projectId)
     }

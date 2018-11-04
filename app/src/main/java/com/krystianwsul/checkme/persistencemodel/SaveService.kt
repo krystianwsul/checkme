@@ -57,7 +57,7 @@ object SaveService {
                         persistenceManger.weeklyScheduleRecords,
                         persistenceManger.monthlyDayScheduleRecords,
                         persistenceManger.monthlyWeekScheduleRecords,
-                        persistenceManger.instanceRecords,
+                        persistenceManger.localInstanceRecords,
                         persistenceManger.instanceShownRecords)
 
                 val insertCommands = collections.flatten()

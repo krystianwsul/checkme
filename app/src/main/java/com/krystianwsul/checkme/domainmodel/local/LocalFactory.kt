@@ -91,7 +91,7 @@ class LocalFactory {
                 .map { LocalTaskHierarchy(domainFactory, it) }
                 .forEach { localTaskHierarchies.add(it.id, it) }
 
-        persistenceManager.instanceRecords
+        persistenceManager.localInstanceRecords
                 .map { LocalInstance(domainFactory, it) }
                 .forEach { existingLocalInstances.add(it) }
     }
@@ -304,7 +304,7 @@ class LocalFactory {
         }
     }
 
-    fun createInstanceRecord(localTask: LocalTask, localInstance: LocalInstance, scheduleDate: Date, scheduleTimePair: TimePair, now: ExactTimeStamp): InstanceRecord {
+    fun createInstanceRecord(localTask: LocalTask, localInstance: LocalInstance, scheduleDate: Date, scheduleTimePair: TimePair, now: ExactTimeStamp): LocalInstanceRecord {
         existingLocalInstances.add(localInstance)
 
         return persistenceManager.createInstanceRecord(localTask, scheduleDate, scheduleTimePair, now)

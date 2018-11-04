@@ -27,7 +27,7 @@ class MySQLiteHelper private constructor() : SQLiteOpenHelper(MyApplication.inst
         MonthlyDayScheduleRecord.onCreate(sqLiteDatabase)
         MonthlyWeekScheduleRecord.onCreate(sqLiteDatabase)
 
-        InstanceRecord.onCreate(sqLiteDatabase)
+        LocalInstanceRecord.onCreate(sqLiteDatabase)
 
         InstanceShownRecord.onCreate(sqLiteDatabase)
 
@@ -41,7 +41,7 @@ class MySQLiteHelper private constructor() : SQLiteOpenHelper(MyApplication.inst
             if (oldVersion < 19) {
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + LocalCustomTimeRecord.TABLE_CUSTOM_TIMES)
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DailyScheduleRecord.TABLE_DAILY_SCHEDULES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceRecord.TABLE_INSTANCES)
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + LocalInstanceRecord.TABLE_INSTANCES)
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceShownRecord.TABLE_INSTANCES_SHOWN)
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyDayScheduleRecord.TABLE_MONTHLY_DAY_SCHEDULES)
                 sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyWeekScheduleRecord.TABLE_MONTHLY_WEEK_SCHEDULES)
@@ -82,7 +82,7 @@ class MySQLiteHelper private constructor() : SQLiteOpenHelper(MyApplication.inst
                 }
 
                 if (oldVersion < 22) {
-                    sqLiteDatabase.execSQL("ALTER TABLE ${InstanceRecord.TABLE_INSTANCES} ADD COLUMN ${InstanceRecord.COLUMN_ORDINAL} REAL")
+                    sqLiteDatabase.execSQL("ALTER TABLE ${LocalInstanceRecord.TABLE_INSTANCES} ADD COLUMN ${LocalInstanceRecord.COLUMN_ORDINAL} REAL")
                 }
             }
 

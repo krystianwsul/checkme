@@ -5,7 +5,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import kotlin.properties.Delegates.observable
 
-class InstanceRecord(
+class LocalInstanceRecord(
         created: Boolean,
         val id: Int,
         val taskId: Int,
@@ -130,7 +130,7 @@ class InstanceRecord(
             val hasInstanceTime = instanceHour != null || instanceCustomTimeId != null
             check(hasInstanceDate == hasInstanceTime)
 
-            InstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown, ordinal)
+            LocalInstanceRecord(true, id, taskId, done, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, instanceYear, instanceMonth, instanceDay, instanceCustomTimeId, instanceHour, instanceMinute, hierarchyTime, notified, notificationShown, ordinal)
         }
 
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = Record.getMaxId(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID)

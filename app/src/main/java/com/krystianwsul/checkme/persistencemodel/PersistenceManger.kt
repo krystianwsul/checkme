@@ -21,7 +21,7 @@ class PersistenceManger(
         private val _weeklyScheduleRecords: MutableMap<Int, WeeklyScheduleRecord>,
         private val _monthlyDayScheduleRecords: MutableMap<Int, MonthlyDayScheduleRecord>,
         private val _monthlyWeekScheduleRecords: MutableMap<Int, MonthlyWeekScheduleRecord>,
-        private val _instanceRecords: MutableList<InstanceRecord>,
+        private val _localInstanceRecords: MutableList<LocalInstanceRecord>,
         private var instanceMaxId: Int,
         private val _instanceShownRecords: MutableList<InstanceShownRecord>,
         private var instanceShownMaxId: Int,
@@ -73,8 +73,8 @@ class PersistenceManger(
                             .associateBy { it.scheduleId }
                             .toMutableMap()
 
-                    val instanceRecords = InstanceRecord.getInstanceRecords(sqLiteDatabase)
-                    val instanceMaxId = InstanceRecord.getMaxId(sqLiteDatabase)
+                    val instanceRecords = LocalInstanceRecord.getInstanceRecords(sqLiteDatabase)
+                    val instanceMaxId = LocalInstanceRecord.getMaxId(sqLiteDatabase)
 
                     val instanceShownRecords = InstanceShownRecord.getInstancesShownRecords(sqLiteDatabase)
                     val instanceShownMaxId = InstanceShownRecord.getMaxId(sqLiteDatabase)
@@ -115,8 +115,8 @@ class PersistenceManger(
     val monthlyWeekScheduleRecords: MutableCollection<MonthlyWeekScheduleRecord>
         get() = _monthlyWeekScheduleRecords.values
 
-    val instanceRecords: MutableCollection<InstanceRecord>
-        get() = _instanceRecords
+    val localInstanceRecords: MutableCollection<LocalInstanceRecord>
+        get() = _localInstanceRecords
 
     val instanceShownRecords: MutableCollection<InstanceShownRecord>
         get() = _instanceShownRecords
@@ -248,13 +248,13 @@ class PersistenceManger(
         }
     }
 
-    fun createInstanceRecord(localTask: LocalTask, scheduleDate: Date, scheduleTimePair: TimePair, now: ExactTimeStamp): InstanceRecord {
+    fun createInstanceRecord(localTask: LocalTask, scheduleDate: Date, scheduleTimePair: TimePair, now: ExactTimeStamp): LocalInstanceRecord {
         val (customTimeId, hour, minute) = scheduleTimePair.destructureLocal()
 
         val id = ++instanceMaxId
 
-        return InstanceRecord(false, id, localTask.id, null, scheduleDate.year, scheduleDate.month, scheduleDate.day, customTimeId, hour, minute, null, null, null, null, null, null, now.long, false, false, null).also {
-            _instanceRecords.add(it)
+        return LocalInstanceRecord(false, id, localTask.id, null, scheduleDate.year, scheduleDate.month, scheduleDate.day, customTimeId, hour, minute, null, null, null, null, null, null, now.long, false, false, null).also {
+            _localInstanceRecords.add(it)
         }
     }
 

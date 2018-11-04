@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.domainmodel.local
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.persistencemodel.InstanceRecord
+import com.krystianwsul.checkme.persistencemodel.LocalInstanceRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.VirtualInstanceData
@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.utils.time.*
 
 class LocalInstance : Instance {
 
-    private var localInstanceRecord: InstanceRecord? = null
+    private var localInstanceRecord: LocalInstanceRecord? = null
     private var virtualInstanceData: VirtualInstanceData<Int>? = null
 
     val taskId: Int
@@ -145,8 +145,8 @@ class LocalInstance : Instance {
 
     override val remoteCustomTimeKey: Pair<String, String>? = null
 
-    constructor(domainFactory: DomainFactory, instanceRecord: InstanceRecord) : super(domainFactory) {
-        localInstanceRecord = instanceRecord
+    constructor(domainFactory: DomainFactory, localInstanceRecord: LocalInstanceRecord) : super(domainFactory) {
+        this.localInstanceRecord = localInstanceRecord
         virtualInstanceData = null
     }
 

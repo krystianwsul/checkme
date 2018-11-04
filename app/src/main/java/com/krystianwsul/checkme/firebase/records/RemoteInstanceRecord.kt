@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
@@ -15,7 +16,7 @@ class RemoteInstanceRecord(
         private val domainFactory: DomainFactory,
         private val remoteTaskRecord: RemoteTaskRecord,
         override val createObject: InstanceJson,
-        val scheduleKey: ScheduleKey) : RemoteRecord(create) {
+        val scheduleKey: ScheduleKey) : RemoteRecord(create), InstanceRecord<String> {
 
     companion object {
 

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import kotlin.properties.Delegates.observable
 
 class LocalInstanceRecord(
@@ -25,7 +26,7 @@ class LocalInstanceRecord(
         val hierarchyTime: Long,
         mNotified: Boolean,
         mNotificationShown: Boolean,
-        mOrdinal: Double?) : Record(created) {
+        mOrdinal: Double?) : Record(created), InstanceRecord<Int> {
 
     companion object {
 

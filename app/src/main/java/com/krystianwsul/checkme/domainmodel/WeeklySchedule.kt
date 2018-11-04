@@ -9,14 +9,6 @@ class WeeklySchedule(
         domainFactory: DomainFactory,
         private val mWeeklyScheduleBridge: WeeklyScheduleBridge) : RepeatingSchedule(domainFactory) {
 
-    private val time
-        get() = mWeeklyScheduleBridge.run {
-            customTimeKey?.let { domainFactory.getCustomTime(it) }
-                    ?: NormalTime(hour!!, minute!!)
-        }
-
-    val timePair get() = mWeeklyScheduleBridge.run { customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!)) }
-
     val daysOfWeek
         get() = mWeeklyScheduleBridge.daysOfWeek
                 .asSequence()
@@ -72,8 +64,6 @@ class WeeklySchedule(
 
         return DateTime(thisDate, time).timeStamp
     }
-
-    override val customTimeKey get() = mWeeklyScheduleBridge.customTimeKey
 
     override val scheduleType = ScheduleType.WEEKLY
 }

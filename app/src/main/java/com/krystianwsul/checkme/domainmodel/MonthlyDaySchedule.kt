@@ -18,36 +18,6 @@ class MonthlyDaySchedule(
 
     val beginningOfMonth get() = monthlyDayScheduleBridge.beginningOfMonth
 
-    private val time: Time
-        get() {
-            val customTimeKey = monthlyDayScheduleBridge.customTimeKey
-            return if (customTimeKey != null) {
-                domainFactory.getCustomTime(customTimeKey)
-            } else {
-                val hour = monthlyDayScheduleBridge.hour!!
-                val minute = monthlyDayScheduleBridge.minute!!
-                NormalTime(hour, minute)
-            }
-        }
-
-    val timePair: TimePair
-        get() {
-            val customTimeKey = monthlyDayScheduleBridge.customTimeKey
-            val hour = monthlyDayScheduleBridge.hour
-            val minute = monthlyDayScheduleBridge.minute
-
-            return if (customTimeKey != null) {
-                check(hour == null)
-                check(minute == null)
-
-                TimePair(customTimeKey)
-            } else {
-                TimePair(HourMinute(hour!!, minute!!))
-            }
-        }
-
-    override val customTimeKey get() = monthlyDayScheduleBridge.customTimeKey
-
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
     override fun getScheduleText(): String {

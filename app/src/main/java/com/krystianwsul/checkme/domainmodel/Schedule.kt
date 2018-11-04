@@ -1,9 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.TimeStamp
+import com.krystianwsul.checkme.utils.time.*
 
 
 abstract class Schedule(protected val domainFactory: DomainFactory) {
@@ -18,11 +16,22 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
 
     val endTime get() = scheduleBridge.getEndTime()
 
-    abstract val customTimeKey: CustomTimeKey?
+    val customTimeKey get() = scheduleBridge.customTimeKey
 
     val remoteCustomTimeKey get() = scheduleBridge.remoteCustomTimeKey
 
     abstract val scheduleType: ScheduleType
+
+    val timePair
+        get() = scheduleBridge.run {
+            customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
+        }
+
+    protected val time
+        get() = scheduleBridge.run {
+            customTimeKey?.let { domainFactory.getCustomTime(it) }
+                    ?: NormalTime(hour!!, minute!!)
+        }
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         check(current(endExactTimeStamp))

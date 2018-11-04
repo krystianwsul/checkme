@@ -2,8 +2,9 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.DateTime
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import java.util.*
 
 class SingleSchedule(
@@ -12,39 +13,9 @@ class SingleSchedule(
 
     override val scheduleBridge get() = singleScheduleBridge
 
-    private val time: Time
-        get() {
-            val customTimeKey = singleScheduleBridge.customTimeKey
-            return if (customTimeKey != null) {
-                domainFactory.getCustomTime(customTimeKey)
-            } else {
-                val hour = singleScheduleBridge.hour!!
-                val minute = singleScheduleBridge.minute!!
-                NormalTime(hour, minute)
-            }
-        }
-
-    val timePair: TimePair
-        get() {
-            val customTimeKey = singleScheduleBridge.customTimeKey
-            val hour = singleScheduleBridge.hour
-            val minute = singleScheduleBridge.minute
-
-            return if (customTimeKey != null) {
-                check(hour == null)
-                check(minute == null)
-
-                TimePair(customTimeKey)
-            } else {
-                TimePair(HourMinute(hour!!, minute!!))
-            }
-        }
-
     val date get() = Date(singleScheduleBridge.year, singleScheduleBridge.month, singleScheduleBridge.day)
 
     private val dateTime get() = DateTime(date, time)
-
-    override val customTimeKey get() = singleScheduleBridge.customTimeKey
 
     override val scheduleType get() = ScheduleType.SINGLE
 

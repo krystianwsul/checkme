@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskKey
 
 interface ScheduleBridge {
@@ -15,4 +16,10 @@ interface ScheduleBridge {
     fun setEndTime(endTime: Long)
 
     fun delete()
+
+    val customTimeKey: CustomTimeKey?
+
+    val hour: Int?
+
+    val minute: Int?
 }

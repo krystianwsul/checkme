@@ -14,41 +14,11 @@ class MonthlyWeekSchedule(
 
     override val scheduleBridge get() = monthlyWeekScheduleBridge
 
-    private val time: Time
-        get() {
-            val customTimeKey = monthlyWeekScheduleBridge.customTimeKey
-            return if (customTimeKey != null) {
-                domainFactory.getCustomTime(customTimeKey)
-            } else {
-                val hour = monthlyWeekScheduleBridge.hour!!
-                val minute = monthlyWeekScheduleBridge.minute!!
-                NormalTime(hour, minute)
-            }
-        }
-
-    val timePair: TimePair
-        get() {
-            val customTimeKey = monthlyWeekScheduleBridge.customTimeKey
-            val hour = monthlyWeekScheduleBridge.hour
-            val minute = monthlyWeekScheduleBridge.minute
-
-            return if (customTimeKey != null) {
-                check(hour == null)
-                check(minute == null)
-
-                TimePair(customTimeKey)
-            } else {
-                TimePair(HourMinute(hour!!, minute!!))
-            }
-        }
-
     val dayOfMonth get() = monthlyWeekScheduleBridge.dayOfMonth
 
     val dayOfWeek get() = DayOfWeek.values()[monthlyWeekScheduleBridge.dayOfWeek]
 
     val beginningOfMonth get() = monthlyWeekScheduleBridge.beginningOfMonth
-
-    override val customTimeKey get() = monthlyWeekScheduleBridge.customTimeKey
 
     override val scheduleType get() = ScheduleType.MONTHLY_WEEK
 

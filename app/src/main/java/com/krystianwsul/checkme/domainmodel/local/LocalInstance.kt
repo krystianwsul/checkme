@@ -31,71 +31,18 @@ class LocalInstance : Instance {
 
     override val name get() = task.name
 
-    override val scheduleDate: Date
-        get() {
-            return if (realInstanceData != null) {
-                check(virtualInstanceData == null)
+    override val scheduleDate get() = (realInstanceData ?: virtualInstanceData)!!.scheduleDate
 
-                Date(realInstanceData!!.instanceRecord.scheduleYear, realInstanceData!!.instanceRecord.scheduleMonth, realInstanceData!!.instanceRecord.scheduleDay)
-            } else {
-                virtualInstanceData!!.scheduleDateTime.date
-            }
-        }
+    override val scheduleTime
+        get() = (realInstanceData ?: virtualInstanceData)!!.getScheduleTime(domainFactory)
 
-    override val scheduleTime: Time
-        get() {
-            return if (realInstanceData != null) {
-                check(virtualInstanceData == null)
+    override val instanceDate get() = (realInstanceData ?: virtualInstanceData)!!.instanceDate
 
-                val customTimeId = realInstanceData!!.instanceRecord.scheduleCustomTimeId
-                val hour = realInstanceData!!.instanceRecord.scheduleHour
-                val minute = realInstanceData!!.instanceRecord.scheduleMinute
+    override val instanceTime
+        get() = (realInstanceData ?: virtualInstanceData)!!.getInstanceTime(domainFactory)
 
-                check(hour == null == (minute == null))
-                check(customTimeId == null != (hour == null))
-
-                customTimeId?.let { domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(it)) }
-                        ?: NormalTime(hour!!, minute!!)
-            } else {
-                virtualInstanceData!!.scheduleDateTime.time
-            }
-        }
-
-    override val instanceDate: Date
-        get() {
-            return if (realInstanceData != null) {
-                check(virtualInstanceData == null)
-
-                check(realInstanceData!!.instanceRecord.instanceYear == null == (realInstanceData!!.instanceRecord.instanceMonth == null))
-                check(realInstanceData!!.instanceRecord.instanceYear == null == (realInstanceData!!.instanceRecord.instanceDay == null))
-                if (realInstanceData!!.instanceRecord.instanceYear != null)
-                    Date(realInstanceData!!.instanceRecord.instanceYear!!, realInstanceData!!.instanceRecord.instanceMonth!!, realInstanceData!!.instanceRecord.instanceDay!!)
-                else
-                    scheduleDate
-            } else {
-                virtualInstanceData!!.scheduleDateTime.date
-            }
-        }
-
-    override val instanceTime: Time
-        get() {
-            return if (realInstanceData != null) {
-                check(virtualInstanceData == null)
-
-                check(realInstanceData!!.instanceRecord.instanceHour == null == (realInstanceData!!.instanceRecord.instanceMinute == null))
-                check(realInstanceData!!.instanceRecord.instanceHour == null || realInstanceData!!.instanceRecord.instanceCustomTimeId == null)
-
-                when {
-                    realInstanceData!!.instanceRecord.instanceCustomTimeId != null -> domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(realInstanceData!!.instanceRecord.instanceCustomTimeId!!))
-                    realInstanceData!!.instanceRecord.instanceHour != null -> NormalTime(realInstanceData!!.instanceRecord.instanceHour!!, realInstanceData!!.instanceRecord.instanceMinute!!)
-                    else -> scheduleTime
-                }
-            } else {
-                virtualInstanceData!!.scheduleDateTime.time
-            }
-        }
-
-    override val done get() = realInstanceData?.instanceRecord?.done?.let { ExactTimeStamp(it) }
+    override val done
+        get() = (realInstanceData ?: virtualInstanceData)!!.done?.let { ExactTimeStamp(it) }
 
     override val notified get() = realInstanceData?.instanceRecord?.notified == true
 
@@ -147,7 +94,7 @@ class LocalInstance : Instance {
     override val remoteCustomTimeKey: Pair<String, String>? = null
 
     constructor(domainFactory: DomainFactory, localInstanceRecord: LocalInstanceRecord) : super(domainFactory) {
-        realInstanceData = InstanceData.RealInstanceData(localInstanceRecord)
+        realInstanceData = LocalRealInstanceData(localInstanceRecord)
         virtualInstanceData = null
     }
 
@@ -201,7 +148,7 @@ class LocalInstance : Instance {
     private fun createInstanceRecord(now: ExactTimeStamp) {
         val localTask = task
 
-        realInstanceData = InstanceData.RealInstanceData(domainFactory.localFactory.createInstanceRecord(localTask, this, scheduleDate, scheduleTimePair, now))
+        realInstanceData = LocalRealInstanceData(domainFactory.localFactory.createInstanceRecord(localTask, this, scheduleDate, scheduleTimePair, now))
 
         virtualInstanceData = null
     }
@@ -242,4 +189,8 @@ class LocalInstance : Instance {
         realInstanceData!!.instanceRecord.ordinal = ordinal
     }
 
+    private inner class LocalRealInstanceData(localInstanceRecord: LocalInstanceRecord) : InstanceData.RealInstanceData<Int, LocalInstanceRecord>(localInstanceRecord) {
+
+        override fun getCustomTime(customTimeId: Int) = domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(customTimeId))
+    }
 }

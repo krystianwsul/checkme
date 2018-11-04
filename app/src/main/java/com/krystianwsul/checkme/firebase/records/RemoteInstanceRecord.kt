@@ -71,7 +71,7 @@ class RemoteInstanceRecord(
 
     val taskId by lazy { remoteTaskRecord.id }
 
-    var done: Long?
+    override var done: Long?
         get() = createObject.done
         set(done) {
             if (done == createObject.done)
@@ -81,37 +81,37 @@ class RemoteInstanceRecord(
             addValue("$key/done", done)
         }
 
-    val scheduleYear by lazy { scheduleKey.scheduleDate.year }
+    override val scheduleYear by lazy { scheduleKey.scheduleDate.year }
 
-    val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
+    override val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
 
-    val scheduleDay by lazy { scheduleKey.scheduleDate.day }
+    override val scheduleDay by lazy { scheduleKey.scheduleDate.day }
 
-    val scheduleCustomTimeId by lazy {
+    override val scheduleCustomTimeId by lazy {
         scheduleKey.scheduleTimePair
                 .customTimeKey
                 ?.let { domainFactory.getRemoteCustomTimeId(remoteTaskRecord.projectId, it) }
     }
 
-    val scheduleHour by lazy {
+    override val scheduleHour by lazy {
         scheduleKey.scheduleTimePair
                 .hourMinute
                 ?.hour
     }
 
-    val scheduleMinute by lazy {
+    override val scheduleMinute by lazy {
         scheduleKey.scheduleTimePair
                 .hourMinute
                 ?.minute
     }
 
-    val instanceYear get() = createObject.instanceYear
+    override val instanceYear get() = createObject.instanceYear
 
-    val instanceMonth get() = createObject.instanceMonth
+    override val instanceMonth get() = createObject.instanceMonth
 
-    val instanceDay get() = createObject.instanceDay
+    override val instanceDay get() = createObject.instanceDay
 
-    var instanceCustomTimeId
+    override var instanceCustomTimeId
         get() = createObject.instanceCustomTimeId
         set(instanceCustomTimeId) {
             if (instanceCustomTimeId == createObject.instanceCustomTimeId)
@@ -121,7 +121,7 @@ class RemoteInstanceRecord(
             addValue("$key/instanceCustomTimeId", instanceCustomTimeId)
         }
 
-    var instanceHour
+    override var instanceHour
         get() = createObject.instanceHour
         set(instanceHour) {
             if (instanceHour == createObject.instanceHour)
@@ -131,7 +131,7 @@ class RemoteInstanceRecord(
             addValue("$key/instanceHour", instanceHour)
         }
 
-    var instanceMinute
+    override var instanceMinute
         get() = createObject.instanceMinute
         set(instanceMinute) {
             if (instanceMinute == createObject.instanceMinute)

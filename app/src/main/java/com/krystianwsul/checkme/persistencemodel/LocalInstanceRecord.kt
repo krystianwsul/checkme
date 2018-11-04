@@ -11,12 +11,12 @@ class LocalInstanceRecord(
         val id: Int,
         val taskId: Int,
         mDone: Long?,
-        val scheduleYear: Int,
-        val scheduleMonth: Int,
-        val scheduleDay: Int,
-        val scheduleCustomTimeId: Int?,
-        val scheduleHour: Int?,
-        val scheduleMinute: Int?,
+        override val scheduleYear: Int,
+        override val scheduleMonth: Int,
+        override val scheduleDay: Int,
+        override val scheduleCustomTimeId: Int?,
+        override val scheduleHour: Int?,
+        override val scheduleMinute: Int?,
         mInstanceYear: Int?,
         mInstanceMonth: Int?,
         mInstanceDay: Int?,
@@ -137,19 +137,19 @@ class LocalInstanceRecord(
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = Record.getMaxId(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID)
     }
 
-    var instanceYear by observable(mInstanceYear) { _, _, _ -> changed = true }
+    override var instanceYear by observable(mInstanceYear) { _, _, _ -> changed = true }
 
-    var instanceMonth by observable(mInstanceMonth) { _, _, _ -> changed = true }
+    override var instanceMonth by observable(mInstanceMonth) { _, _, _ -> changed = true }
 
-    var instanceDay by observable(mInstanceDay) { _, _, _ -> changed = true }
+    override var instanceDay by observable(mInstanceDay) { _, _, _ -> changed = true }
 
-    var done by observable(mDone) { _, _, _ -> changed = true }
+    override var done by observable(mDone) { _, _, _ -> changed = true }
 
-    var instanceCustomTimeId by observable(mInstanceCustomTimeId) { _, _, _ -> changed = true }
+    override var instanceCustomTimeId by observable(mInstanceCustomTimeId) { _, _, _ -> changed = true }
 
-    var instanceHour by observable(mInstanceHour) { _, _, _ -> changed = true }
+    override var instanceHour by observable(mInstanceHour) { _, _, _ -> changed = true }
 
-    var instanceMinute by observable(mInstanceMinute) { _, _, _ -> changed = true }
+    override var instanceMinute by observable(mInstanceMinute) { _, _, _ -> changed = true }
 
     var notified by observable(mNotified) { _, _, _ -> changed = true }
 

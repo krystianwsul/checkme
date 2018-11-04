@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.VirtualInstanceData
 import com.krystianwsul.checkme.utils.time.*
 
 
@@ -15,42 +16,31 @@ class RemoteInstance : Instance {
 
     private var remoteInstanceRecord: RemoteInstanceRecord? = null
 
-    private var _taskId: String? = null
-
-    private var _scheduleDateTime: DateTime? = null
+    private var virtualInstanceData: VirtualInstanceData<String>? = null
 
     private var instanceShownRecord: InstanceShownRecord? = null
 
     private val taskId
         get() = if (remoteInstanceRecord != null) {
-            check(TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime == null)
+            check(virtualInstanceData == null)
 
             remoteInstanceRecord!!.taskId
         } else {
-            check(!TextUtils.isEmpty(_taskId))
-            checkNotNull(_scheduleDateTime)
-
-            _taskId!!
+            virtualInstanceData!!.taskId
         }
 
     override val scheduleDate
         get() = if (remoteInstanceRecord != null) {
-            check(TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime == null)
+            check(virtualInstanceData == null)
 
             Date(remoteInstanceRecord!!.scheduleYear, remoteInstanceRecord!!.scheduleMonth, remoteInstanceRecord!!.scheduleDay)
         } else {
-            check(!TextUtils.isEmpty(_taskId))
-            checkNotNull(_scheduleDateTime)
-
-            _scheduleDateTime!!.date
+            virtualInstanceData!!.scheduleDateTime.date
         }
 
     override val scheduleTime: Time
         get() = if (remoteInstanceRecord != null) {
-            check(TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime == null)
+            check(virtualInstanceData == null)
 
             val customTimeId = remoteInstanceRecord!!.scheduleCustomTimeId
             val hour = remoteInstanceRecord!!.scheduleHour
@@ -62,10 +52,7 @@ class RemoteInstance : Instance {
             customTimeId?.let { remoteProject.getRemoteCustomTime(it) }
                     ?: NormalTime(hour!!, minute!!)
         } else {
-            check(!TextUtils.isEmpty(_taskId))
-            checkNotNull(_scheduleDateTime)
-
-            _scheduleDateTime!!.time
+            virtualInstanceData!!.scheduleDateTime.time
         }
 
     override val taskKey by lazy { task.taskKey }
@@ -74,8 +61,7 @@ class RemoteInstance : Instance {
 
     override val instanceDate
         get() = if (remoteInstanceRecord != null) {
-            check(_taskId == null)
-            check(_scheduleDateTime == null)
+            check(virtualInstanceData == null)
 
             if (remoteInstanceRecord!!.instanceYear != null) {
                 checkNotNull(remoteInstanceRecord!!.instanceMonth)
@@ -89,16 +75,12 @@ class RemoteInstance : Instance {
                 scheduleDate
             }
         } else {
-            checkNotNull(_taskId)
-            checkNotNull(_scheduleDateTime)
-
-            _scheduleDateTime!!.date
+            virtualInstanceData!!.scheduleDateTime.date
         }
 
     override val instanceTime
         get() = if (remoteInstanceRecord != null) {
-            check(_taskId == null)
-            check(_scheduleDateTime == null)
+            check(virtualInstanceData == null)
 
             check(remoteInstanceRecord!!.instanceHour == null == (remoteInstanceRecord!!.instanceMinute == null))
             check(remoteInstanceRecord!!.instanceHour == null || remoteInstanceRecord!!.instanceCustomTimeId == null)
@@ -109,10 +91,7 @@ class RemoteInstance : Instance {
                 else -> scheduleTime
             }
         } else {
-            checkNotNull(_taskId)
-            checkNotNull(_scheduleDateTime)
-
-            _scheduleDateTime!!.time
+            virtualInstanceData!!.scheduleDateTime.time
         }
 
     override val name get() = task.name
@@ -125,17 +104,18 @@ class RemoteInstance : Instance {
 
     override val scheduleCustomTimeKey
         get() = if (remoteInstanceRecord != null) {
-            check(TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime == null)
+            check(virtualInstanceData == null)
 
             val customTimeId = remoteInstanceRecord!!.scheduleCustomTimeId
 
             customTimeId?.let { domainFactory.getCustomTimeKey(remoteProject.id, it) }
         } else {
-            check(!TextUtils.isEmpty(_taskId))
-            checkNotNull(_scheduleDateTime)
+            val customTimeKey = virtualInstanceData!!
+                    .scheduleDateTime
+                    .time
+                    .timePair
+                    .customTimeKey
 
-            val customTimeKey = _scheduleDateTime!!.time.timePair.customTimeKey
             if (customTimeKey is CustomTimeKey.RemoteCustomTimeKey) {
                 domainFactory.getCustomTimeKey(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
             } else {
@@ -145,8 +125,7 @@ class RemoteInstance : Instance {
 
     override val scheduleHourMinute
         get() = if (remoteInstanceRecord != null) {
-            check(TextUtils.isEmpty(_taskId))
-            check(_scheduleDateTime == null)
+            check(virtualInstanceData == null)
 
             val hour = remoteInstanceRecord!!.scheduleHour
             val minute = remoteInstanceRecord!!.scheduleMinute
@@ -161,10 +140,10 @@ class RemoteInstance : Instance {
                 HourMinute(hour, minute)
             }
         } else {
-            check(!TextUtils.isEmpty(_taskId))
-            checkNotNull(_scheduleDateTime)
-
-            _scheduleDateTime!!.time.timePair.hourMinute
+            virtualInstanceData!!.scheduleDateTime
+                    .time
+                    .timePair
+                    .hourMinute
         }
 
     override val task get() = remoteProject.getRemoteTaskForce(taskId)
@@ -184,8 +163,7 @@ class RemoteInstance : Instance {
             now: ExactTimeStamp) : super(domainFactory) {
         this.remoteProject = remoteProject
         this.remoteInstanceRecord = remoteInstanceRecord
-        _taskId = null
-        _scheduleDateTime = null
+        virtualInstanceData = null
         this.instanceShownRecord = instanceShownRecord
 
         val date = instanceDate
@@ -204,14 +182,12 @@ class RemoteInstance : Instance {
 
         this.remoteProject = remoteProject
         remoteInstanceRecord = null
-        _taskId = taskId
-        _scheduleDateTime = scheduleDateTime
+        virtualInstanceData = VirtualInstanceData(taskId, scheduleDateTime)
         this.instanceShownRecord = instanceShownRecord
     }
 
     override fun exists(): Boolean {
-        check(remoteInstanceRecord == null != (_scheduleDateTime == null))
-        check(_taskId == null == (_scheduleDateTime == null))
+        check(remoteInstanceRecord == null != (virtualInstanceData == null))
 
         return remoteInstanceRecord != null
     }
@@ -246,8 +222,7 @@ class RemoteInstance : Instance {
     }
 
     override fun createInstanceHierarchy(now: ExactTimeStamp) {
-        check(remoteInstanceRecord == null != (_scheduleDateTime == null))
-        check(_taskId == null == (_scheduleDateTime == null))
+        check(remoteInstanceRecord == null != (virtualInstanceData == null))
 
         if (remoteInstanceRecord != null)
             return
@@ -264,8 +239,7 @@ class RemoteInstance : Instance {
 
         remoteInstanceRecord = task.createRemoteInstanceRecord(this, scheduleDateTime)
 
-        _taskId = null
-        _scheduleDateTime = null
+        virtualInstanceData = null
     }
 
     override fun setNotificationShown(notificationShown: Boolean, now: ExactTimeStamp) {

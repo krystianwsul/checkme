@@ -1844,7 +1844,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         for (pair in localToRemoteConversion.localTasks.values) {
             checkNotNull(pair)
 
-            val remoteTask = remoteProject.copyLocalTask(pair.first, pair.second, now)
+            val remoteTask = remoteProject.copyTask(pair.first, pair.second, now)
             localToRemoteConversion.remoteTasks[pair.first.id] = remoteTask
         }
 

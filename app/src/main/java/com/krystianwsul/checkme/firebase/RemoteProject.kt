@@ -2,9 +2,9 @@ package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.domainmodel.local.LocalInstance
-import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import com.krystianwsul.checkme.firebase.json.InstanceJson
@@ -106,37 +106,24 @@ class RemoteProject(
         remoteTaskHierarchies.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
     }
 
-    fun copyLocalTask(localTask: LocalTask, localInstances: Collection<LocalInstance>, now: ExactTimeStamp): RemoteTask {
-        val endTime = if (localTask.getEndExactTimeStamp() != null) localTask.getEndExactTimeStamp()!!.long else null
+    fun copyTask(task: Task, instances: Collection<Instance>, now: ExactTimeStamp): RemoteTask {
+        val endTime = task.getEndExactTimeStamp()?.long
 
-        val oldestVisible = localTask.getOldestVisible()
-        val oldestVisibleYear: Int?
-        val oldestVisibleMonth: Int?
-        val oldestVisibleDay: Int?
-        if (oldestVisible != null) {
-            oldestVisibleYear = oldestVisible.year
-            oldestVisibleMonth = oldestVisible.month
-            oldestVisibleDay = oldestVisible.day
-        } else {
-            oldestVisibleYear = null
-            oldestVisibleMonth = null
-            oldestVisibleDay = null
-        }
+        val oldestVisible = task.getOldestVisible()
+        val oldestVisibleYear = oldestVisible?.year
+        val oldestVisibleMonth = oldestVisible?.month
+        val oldestVisibleDay = oldestVisible?.day
 
-        val instanceJsons = HashMap<String, InstanceJson>()
-        for (localInstance in localInstances) {
-            check(localInstance.taskId == localTask.id)
+        val instanceJsons = instances.associate {
+            val instanceJson = getInstanceJson(it)
+            val scheduleKey = it.scheduleKey
 
-            val instanceJson = getInstanceJson(localInstance)
-            val scheduleKey = localInstance.scheduleKey
+            (scheduleKey.scheduleTimePair.customTimeKey as? CustomTimeKey.LocalCustomTimeKey)?.let { remoteFactory.getRemoteCustomTimeId(it, this) }
 
-            if (scheduleKey.scheduleTimePair.customTimeKey != null)
-                remoteFactory.getRemoteCustomTimeId(scheduleKey.scheduleTimePair.customTimeKey as CustomTimeKey.LocalCustomTimeKey, this)
+            RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey) to instanceJson
+        }.toMutableMap()
 
-            instanceJsons[RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey)] = instanceJson
-        }
-
-        val taskJson = TaskJson(localTask.name, localTask.startExactTimeStamp.long, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, localTask.note, instanceJsons)
+        val taskJson = TaskJson(task.name, task.startExactTimeStamp.long, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, task.note, instanceJsons)
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
 
         val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
@@ -144,16 +131,16 @@ class RemoteProject(
 
         remoteTasks[remoteTask.id] = remoteTask
 
-        remoteTask.copySchedules(localTask.schedules)
+        remoteTask.copySchedules(task.schedules)
 
         return remoteTask
     }
 
-    private fun getInstanceJson(localInstance: LocalInstance): InstanceJson {
-        val done = localInstance.done?.long
+    private fun getInstanceJson(instance: Instance): InstanceJson {
+        val done = instance.done?.long
 
-        val instanceDate = localInstance.instanceDate
-        val instanceTimePair = localInstance.instanceTimePair
+        val instanceDate = instance.instanceDate
+        val instanceTimePair = instance.instanceTimePair
 
         val instanceRemoteCustomTimeId: String?
         val instanceHour: Int?
@@ -174,7 +161,7 @@ class RemoteProject(
             instanceMinute = null
         }
 
-        return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId, instanceHour, instanceMinute, localInstance.ordinal)
+        return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId, instanceHour, instanceMinute, instance.ordinal)
     }
 
     fun copyLocalTaskHierarchy(localTaskHierarchy: LocalTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy {

@@ -19,4 +19,6 @@ interface InstanceRecord<T> {
     val instanceMinute: Int?
 
     val done: Long?
+
+    var ordinal: Double?
 }

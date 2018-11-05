@@ -141,7 +141,15 @@ class RemoteInstanceRecord(
             addValue("$key/instanceMinute", instanceMinute)
         }
 
-    val ordinal get() = createObject.ordinal
+    override var ordinal
+        get() = createObject.ordinal
+        set(ordinal) {
+            if (ordinal == createObject.ordinal)
+                return
+
+            createObject.ordinal = ordinal
+            addValue("$key/ordinal", ordinal)
+        }
 
     fun setInstanceYear(instanceYear: Int) {
         if (instanceYear == createObject.instanceYear)
@@ -165,13 +173,5 @@ class RemoteInstanceRecord(
 
         createObject.instanceDay = instanceDay
         addValue("$key/instanceDay", instanceDay)
-    }
-
-    fun setOrdinal(ordinal: Double) {
-        if (ordinal == createObject.ordinal)
-            return
-
-        createObject.ordinal = ordinal
-        addValue("$key/ordinal", ordinal)
     }
 }

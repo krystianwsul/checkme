@@ -8,14 +8,17 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.InstanceData.VirtualInstanceData
-import com.krystianwsul.checkme.utils.time.*
+import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.DateTime
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.utils.time.TimePair
 
 
 class RemoteInstance : Instance {
 
     private val remoteProject: RemoteProject
 
-    private var instanceData: InstanceData<String, RemoteInstanceRecord>
+    override var instanceData: InstanceData<String, RemoteInstanceRecord>
 
     private var instanceShownRecord: InstanceShownRecord? = null
 
@@ -26,20 +29,6 @@ class RemoteInstance : Instance {
                 is VirtualInstanceData<String, RemoteInstanceRecord> -> it.taskId
             }
         }
-
-    override val scheduleDate get() = instanceData.scheduleDate
-
-    override val scheduleTime get() = instanceData.getScheduleTime(domainFactory)
-
-    override val instanceDate get() = instanceData.instanceDate
-
-    override val instanceTime get() = instanceData.getInstanceTime(domainFactory)
-
-    override val taskKey by lazy { task.taskKey }
-
-    override val done get() = instanceData.done?.let { ExactTimeStamp(it) }
-
-    override val name get() = task.name
 
     private val remoteFactory get() = domainFactory.remoteProjectFactory!!
 
@@ -68,17 +57,6 @@ class RemoteInstance : Instance {
                     }
                 }
             }
-        }
-
-    override val scheduleHourMinute
-        get() = instanceData.let {
-            when (it) {
-                is InstanceData.RealInstanceData<String, RemoteInstanceRecord> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
-                is VirtualInstanceData<String, RemoteInstanceRecord> -> it.scheduleDateTime
-                    .time
-                    .timePair
-                    .hourMinute
-        }
         }
 
     override val task get() = remoteProject.getRemoteTaskForce(taskId)
@@ -119,28 +97,24 @@ class RemoteInstance : Instance {
         this.instanceShownRecord = instanceShownRecord
     }
 
-    override fun exists() = (instanceData is RemoteRealInstanceData)
-
     override fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp) {
         check(isRootInstance(now))
 
         createInstanceHierarchy(now)
 
-        val instanceRecord = (instanceData as RemoteRealInstanceData).instanceRecord
+        (instanceData as RemoteRealInstanceData).instanceRecord.let {
+            it.setInstanceYear(date.year)
+            it.setInstanceMonth(date.month)
+            it.setInstanceDay(date.day)
 
-        instanceRecord.setInstanceYear(date.year)
-        instanceRecord.setInstanceMonth(date.month)
-        instanceRecord.setInstanceDay(date.day)
+            val (customTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
 
-        val (customTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
-
-        instanceRecord.instanceCustomTimeId = customTimeId
-        instanceRecord.instanceHour = hour
-        instanceRecord.instanceMinute = minute
+            it.instanceCustomTimeId = customTimeId
+            it.instanceHour = hour
+            it.instanceMinute = minute
+        }
 
         createInstanceShownRecord()
-
-        checkNotNull(instanceShownRecord)
 
         instanceShownRecord!!.notified = false
     }
@@ -152,16 +126,7 @@ class RemoteInstance : Instance {
         instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
     }
 
-    override fun createInstanceHierarchy(now: ExactTimeStamp) {
-        if (instanceData is RemoteRealInstanceData)
-            return
-
-        getParentInstance(now)?.createInstanceHierarchy(now)
-
-        createInstanceRecord()
-    }
-
-    private fun createInstanceRecord() {
+    override fun createInstanceRecord(now: ExactTimeStamp) {
         val task = task
 
         val scheduleDateTime = scheduleDateTime
@@ -181,14 +146,10 @@ class RemoteInstance : Instance {
         if (done) {
             createInstanceHierarchy(now)
 
-            check(instanceData is RemoteRealInstanceData)
-
             (instanceData as RemoteRealInstanceData).instanceRecord.done = now.long
 
             instanceShownRecord?.notified = false
         } else {
-            checkNotNull(instanceData is RemoteRealInstanceData)
-
             (instanceData as RemoteRealInstanceData).instanceRecord.done = null
         }
     }
@@ -212,12 +173,6 @@ class RemoteInstance : Instance {
     override fun belongsToRemoteProject() = true
 
     override fun getNullableOrdinal() = (instanceData as? RemoteRealInstanceData)?.instanceRecord?.ordinal
-
-    override fun setOrdinal(ordinal: Double, now: ExactTimeStamp) {
-        createInstanceHierarchy(now)
-
-        (instanceData as RemoteRealInstanceData).instanceRecord.setOrdinal(ordinal)
-    }
 
     private inner class RemoteRealInstanceData(remoteInstanceRecord: RemoteInstanceRecord) : InstanceData.RealInstanceData<String, RemoteInstanceRecord>(remoteInstanceRecord) {
 

@@ -2,10 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.ScheduleKey
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
@@ -36,29 +33,42 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         }
     }
 
+    protected abstract val instanceData: InstanceData<*, *>
+
     val instanceKey get() = InstanceKey(taskKey, scheduleKey)
 
     val scheduleKey get() = ScheduleKey(scheduleDate, TimePair(scheduleCustomTimeKey, scheduleHourMinute))
 
-    abstract val scheduleDate: Date
+    val scheduleDate get() = instanceData.scheduleDate
+
+    private val scheduleTime get() = instanceData.getScheduleTime(domainFactory)
+
+    val instanceDate get() = instanceData.instanceDate
+
+    protected val instanceTime get() = instanceData.getInstanceTime(domainFactory)
 
     abstract val scheduleCustomTimeKey: CustomTimeKey?
 
-    protected abstract val scheduleHourMinute: HourMinute?
-
-    protected abstract val scheduleTime: Time
+    private val scheduleHourMinute
+        get() = instanceData.let {
+            when (it) {
+                is InstanceData.RealInstanceData<*, *> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
+                is InstanceData.VirtualInstanceData<*, *> -> it.scheduleDateTime
+                        .time
+                        .timePair
+                        .hourMinute
+            }
+        }
 
     val scheduleDateTime get() = DateTime(scheduleDate, scheduleTime)
 
-    abstract val taskKey: TaskKey
+    val taskKey by lazy { task.taskKey }
 
-    abstract val done: ExactTimeStamp?
+    val done get() = instanceData.done?.let { ExactTimeStamp(it) }
 
     val instanceDateTime get() = DateTime(instanceDate, instanceTime)
 
-    protected abstract val instanceTime: Time
-
-    abstract val name: String
+    val name get() = task.name
 
     abstract val task: Task
 
@@ -67,8 +77,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     val instanceCustomTimeKey get() = (instanceTime as? CustomTime)?.customTimeKey
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
-
-    abstract val instanceDate: Date
 
     abstract val notified: Boolean
 
@@ -92,7 +100,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract val remoteCustomTimeKey: Pair<String, String>?
 
-    abstract fun exists(): Boolean
+    fun exists() = (instanceData is InstanceData.RealInstanceData)
 
     fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
@@ -138,7 +146,16 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp)
 
-    abstract fun createInstanceHierarchy(now: ExactTimeStamp)
+    fun createInstanceHierarchy(now: ExactTimeStamp) {
+        if (instanceData is InstanceData.RealInstanceData)
+            return
+
+        getParentInstance(now)?.createInstanceHierarchy(now)
+
+        createInstanceRecord(now)
+    }
+
+    protected abstract fun createInstanceRecord(now: ExactTimeStamp)
 
     abstract fun setNotificationShown(notificationShown: Boolean, now: ExactTimeStamp)
 
@@ -205,5 +222,9 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     val ordinal get() = getNullableOrdinal() ?: task.startExactTimeStamp.long.toDouble()
 
-    abstract fun setOrdinal(ordinal: Double, now: ExactTimeStamp)
+    fun setOrdinal(ordinal: Double, now: ExactTimeStamp) {
+        createInstanceHierarchy(now)
+
+        (instanceData as InstanceData.RealInstanceData).instanceRecord.ordinal = ordinal
+    }
 }

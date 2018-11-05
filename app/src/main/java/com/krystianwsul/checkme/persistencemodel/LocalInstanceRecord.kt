@@ -155,7 +155,7 @@ class LocalInstanceRecord(
 
     var notificationShown by observable(mNotificationShown) { _, _, _ -> changed = true }
 
-    var ordinal by observable(mOrdinal) { _, _, _ -> changed = true }
+    override var ordinal by observable(mOrdinal) { _, _, _ -> changed = true }
 
     init {
         check(scheduleHour == null == (scheduleMinute == null))

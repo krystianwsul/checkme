@@ -18,7 +18,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 
-    val data = BehaviorRelay.create<D>()!!
+    val data = BehaviorRelay.create<D>()
 
     private var observer: Observer? = null
 

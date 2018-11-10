@@ -448,8 +448,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
             return lines.joinToString("\n")
         }
 
-    private val dataRelay = PublishRelay.create<Pair<Int, DataWrapper>>()!!
-    private val viewCreatedRelay = PublishRelay.create<Unit>()!!
+    private val dataRelay = PublishRelay.create<Pair<Int, DataWrapper>>()
+    private val viewCreatedRelay = PublishRelay.create<Unit>()
 
     private fun getShareData(instanceDatas: List<InstanceData>): String {
         check(instanceDatas.isNotEmpty())

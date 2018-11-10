@@ -123,5 +123,7 @@ class LocalInstance : Instance {
     private inner class LocalRealInstanceData(localInstanceRecord: LocalInstanceRecord) : InstanceData.RealInstanceData<Int, LocalInstanceRecord>(localInstanceRecord) {
 
         override fun getCustomTime(customTimeId: Int) = domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(customTimeId))
+
+        override fun getSignature() = name + " " + instanceKey.toString()
     }
 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.utils
 
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
@@ -21,6 +22,8 @@ sealed class InstanceData<T, U : InstanceRecord<T>> {
     abstract class RealInstanceData<T, U : InstanceRecord<T>>(val instanceRecord: U) : InstanceData<T, U>() {
 
         protected abstract fun getCustomTime(customTimeId: T): CustomTime
+
+        protected abstract fun getSignature(): String
 
         override val scheduleDate get() = instanceRecord.let { Date(it.scheduleYear, it.scheduleMonth, it.scheduleDay) }
 
@@ -51,7 +54,9 @@ sealed class InstanceData<T, U : InstanceRecord<T>> {
             val instanceMinute = instanceRecord.scheduleMinute
 
             check(instanceHour == null == (instanceMinute == null))
-            check(instanceHour == null || instanceCustomTimeId == null)
+
+            if ((instanceHour != null) && (instanceCustomTimeId != null))
+                MyCrashlytics.logException(InconsistentInstanceException("instance: " + getSignature() + ", instanceHour: $instanceHour, instanceCustomTimeId: $instanceCustomTimeId"))
 
             return when {
                 instanceCustomTimeId != null -> getCustomTime(instanceCustomTimeId)
@@ -75,5 +80,7 @@ sealed class InstanceData<T, U : InstanceRecord<T>> {
 
         override val done: Long? = null
     }
+
+    private class InconsistentInstanceException(message: String) : Exception(message)
 }
 

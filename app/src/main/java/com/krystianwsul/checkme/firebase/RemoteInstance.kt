@@ -177,5 +177,7 @@ class RemoteInstance : Instance {
     private inner class RemoteRealInstanceData(remoteInstanceRecord: RemoteInstanceRecord) : InstanceData.RealInstanceData<String, RemoteInstanceRecord>(remoteInstanceRecord) {
 
         override fun getCustomTime(customTimeId: String) = remoteProject.getRemoteCustomTime(customTimeId)
+
+        override fun getSignature() = name + " " + instanceKey.toString()
     }
 }

@@ -50,8 +50,8 @@ sealed class InstanceData<T, U : InstanceRecord<T>> {
 
         override fun getInstanceTime(domainFactory: DomainFactory): Time {
             val instanceCustomTimeId = instanceRecord.instanceCustomTimeId
-            val instanceHour = instanceRecord.scheduleHour
-            val instanceMinute = instanceRecord.scheduleMinute
+            val instanceHour = instanceRecord.instanceHour
+            val instanceMinute = instanceRecord.instanceMinute
 
             check(instanceHour == null == (instanceMinute == null))
 

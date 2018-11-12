@@ -24,8 +24,8 @@ android {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 22
         targetSdkVersion 28
-        versionCode 89
-        versionName "0.7.2"
+        versionCode 90
+        versionName "0.7.3"
     }
     buildTypes {
         release {
@@ -96,8 +96,8 @@ dependencies {
     implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
 
     implementation 'com.android.volley:volley:1.1.0'
-    implementation 'net.danlew:android.joda:2.9.9'
-    testImplementation 'joda-time:joda-time:2.9.9'
+    implementation 'net.danlew:android.joda:2.10.1'
+    testImplementation 'joda-time:joda-time:2.10.1'
     implementation project(path: ':treeadapter')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

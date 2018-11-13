@@ -101,7 +101,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     private var treeViewAdapter: TreeViewAdapter? = null
 
-    lateinit var parameters: Parameters
+    lateinit var parameters: Parameters // todo behaviorrelay
         private set
 
     private var expansionState: ExpansionState? = null

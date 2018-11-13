@@ -13,7 +13,10 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
@@ -37,6 +40,8 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.parcel.Parcelize
+import kotlinx.android.synthetic.main.empty_text.*
+import kotlinx.android.synthetic.main.fragment_group_list.*
 import java.util.*
 
 class GroupListFragment : AbstractFragment(), FabUser {
@@ -96,43 +101,40 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private var mGroupListProgress: ProgressBar? = null
-    private var mGroupListRecycler: RecyclerView? = null
-    private var mTreeViewAdapter: TreeViewAdapter? = null
-    private var mEmptyText: TextView? = null
+    private var treeViewAdapter: TreeViewAdapter? = null
 
-    private var mPosition: Int? = null
-    private var mTimeRange: MainActivity.TimeRange? = null
-    private var mTimeStamp: TimeStamp? = null
-    private var mInstanceKey: InstanceKey? = null
+    private var position: Int? = null
+    private var timeRange: MainActivity.TimeRange? = null
+    private var timeStamp: TimeStamp? = null
+    private var instanceKey: InstanceKey? = null
 
     var taskKey: TaskKey? = null
         private set
 
-    var mInstanceKeys: Set<InstanceKey>? = null
+    var instanceKeys: Set<InstanceKey>? = null
         private set
 
-    private var mExpansionState: ExpansionState? = null
-    private var mSelectedNodes: ArrayList<InstanceKey>? = null
+    private var expansionState: ExpansionState? = null
+    private var selectedNodes: ArrayList<InstanceKey>? = null
 
-    var mDataId: Int? = null
+    var dataId: Int? = null
         private set
 
-    var mDataWrapper: DataWrapper? = null
+    var dataWrapper: DataWrapper? = null
         private set
 
-    val dragHelper by lazy { DragHelper(mTreeViewAdapter!!) }
+    val dragHelper by lazy { DragHelper(treeViewAdapter!!) }
 
-    val mSelectionCallback: SelectionCallback = object : SelectionCallback() {
+    val selectionCallback: SelectionCallback = object : SelectionCallback() {
 
         override fun unselect() {
-            mTreeViewAdapter!!.unselect()
+            treeViewAdapter!!.unselect()
         }
 
         override fun onMenuClick(menuItem: MenuItem) {
-            check(mTreeViewAdapter != null)
+            check(treeViewAdapter != null)
 
-            val treeNodes = mTreeViewAdapter!!.selectedNodes
+            val treeNodes = treeViewAdapter!!.selectedNodes
 
             val instanceDatas = nodesToInstanceDatas(treeNodes)
             check(instanceDatas.isNotEmpty())
@@ -177,7 +179,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     check(taskKeys.isNotEmpty())
                     check(instanceDatas.all { it.TaskCurrent })
 
-                    var selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
+                    var selectedTreeNodes = treeViewAdapter!!.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
 
                     do {
@@ -186,10 +188,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         recursiveDelete(treeNode, true)
 
                         decrementSelected()
-                        selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
+                        selectedTreeNodes = treeViewAdapter!!.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
-                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -205,7 +207,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
                     check(taskKeys.size > 1)
 
-                    if (mInstanceKey == null) {
+                    if (instanceKey == null) {
                         val firstInstanceData = instanceDatas.minBy { it.InstanceTimeStamp }!!
 
                         val date = firstInstanceData.InstanceTimeStamp.date
@@ -214,18 +216,18 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                         startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
                     } else {
-                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, mInstanceKey!!.taskKey))
+                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, instanceKey!!.taskKey))
                     }
                 }
                 R.id.action_group_mark_done -> {
-                    check(mDataId != null)
-                    check(mDataWrapper != null)
+                    check(dataId != null)
+                    check(dataWrapper != null)
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(mDataId!!, SaveService.Source.GUI, instanceKeys)
+                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(dataId!!, SaveService.Source.GUI, instanceKeys)
 
-                    var selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
+                    var selectedTreeNodes = treeViewAdapter!!.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
 
                     do {
@@ -259,7 +261,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         }
 
                         decrementSelected()
-                        selectedTreeNodes = mTreeViewAdapter!!.selectedNodes
+                        selectedTreeNodes = treeViewAdapter!!.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
                     updateSelectAll()
@@ -309,7 +311,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onFirstAdded() {
-            mTreeViewAdapter!!.updateDisplayedNodes {
+            treeViewAdapter!!.updateDisplayedNodes {
                 (activity as AppCompatActivity).startSupportActionMode(this)
             }
 
@@ -321,7 +323,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
             updateMenu()
 
-            dragHelper.attachToRecyclerView(mGroupListRecycler)
+            dragHelper.attachToRecyclerView(groupListRecycler)
         }
 
         override fun onSecondAdded() {
@@ -335,7 +337,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onLastRemoved(action: () -> Unit) {
-            mTreeViewAdapter!!.updateDisplayedNodes(action)
+            treeViewAdapter!!.updateDisplayedNodes(action)
 
             updateFabVisibility()
 
@@ -347,7 +349,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         override fun onSecondToLastRemoved() {
             updateMenu()
 
-            dragHelper.attachToRecyclerView(mGroupListRecycler)
+            dragHelper.attachToRecyclerView(groupListRecycler)
         }
 
         override fun onOtherRemoved() {
@@ -359,7 +361,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
             val menu = actionMode!!.menu!!
 
-            val instanceDatas = nodesToInstanceDatas(mTreeViewAdapter!!.selectedNodes)
+            val instanceDatas = nodesToInstanceDatas(treeViewAdapter!!.selectedNodes)
             check(instanceDatas.isNotEmpty())
 
             check(instanceDatas.all { it.Done == null })
@@ -429,14 +431,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private var mFloatingActionButton: FloatingActionButton? = null
+    private var floatingActionButton: FloatingActionButton? = null
 
     val shareData: String?
         get() {
-            check(mDataWrapper != null)
-            check(mDataId != null)
+            check(dataWrapper != null)
+            check(dataId != null)
 
-            val instanceDatas = ArrayList(mDataWrapper!!.instanceDatas.values)
+            val instanceDatas = ArrayList(dataWrapper!!.instanceDatas.values)
 
             instanceDatas.sort()
 
@@ -491,12 +493,12 @@ class GroupListFragment : AbstractFragment(), FabUser {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(EXPANSION_STATE_KEY)) {
-            mExpansionState = savedInstanceState.getParcelable(EXPANSION_STATE_KEY)
+        savedInstanceState?.takeIf { it.containsKey(EXPANSION_STATE_KEY) }?.apply {
+            expansionState = getParcelable(EXPANSION_STATE_KEY)
 
-            if (savedInstanceState.containsKey(SELECTED_NODES_KEY)) {
-                mSelectedNodes = savedInstanceState.getParcelableArrayList(SELECTED_NODES_KEY)
-                check(mSelectedNodes!!.isNotEmpty())
+            if (containsKey(SELECTED_NODES_KEY)) {
+                selectedNodes = getParcelableArrayList(SELECTED_NODES_KEY)
+                check(selectedNodes!!.isNotEmpty())
             }
         }
 
@@ -505,87 +507,74 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 .addTo(createDisposable)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_group_list, container, false)!!
-
-        mGroupListProgress = view.findViewById(R.id.group_list_progress)
-        check(mGroupListProgress != null)
-
-        mGroupListRecycler = view.findViewById(R.id.group_list_recycler)
-        check(mGroupListRecycler != null)
-
-        mGroupListRecycler!!.layoutManager = LinearLayoutManager(context)
-
-        mEmptyText = view.findViewById(R.id.emptyText)
-        check(mEmptyText != null)
-
-        return view
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_group_list, container, false)!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        groupListRecycler.layoutManager = LinearLayoutManager(context)
 
         viewCreatedRelay.accept(Unit)
     }
 
     fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
-        check(mPosition == null || mPosition == position)
-        check(mTimeRange == null || mTimeRange == timeRange)
-        check(mTimeStamp == null)
-        check(mInstanceKey == null)
-        check(mInstanceKeys == null)
+        check(this.position == null || this.position == position)
+        check(this.timeRange == null || this.timeRange == timeRange)
+        check(timeStamp == null)
+        check(instanceKey == null)
+        check(instanceKeys == null)
         check(taskKey == null)
 
         check(position >= 0)
 
-        mPosition = position
-        mTimeRange = timeRange
+        this.position = position
+        this.timeRange = timeRange
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) {
-        check(mPosition == null)
-        check(mTimeRange == null)
-        check(mTimeStamp == null || mTimeStamp == timeStamp)
-        check(mInstanceKey == null)
-        check(mInstanceKeys == null)
+        check(position == null)
+        check(timeRange == null)
+        check(this.timeStamp == null || this.timeStamp == timeStamp)
+        check(instanceKey == null)
+        check(instanceKeys == null)
         check(taskKey == null)
 
-        mTimeStamp = timeStamp
+        this.timeStamp = timeStamp
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) {
-        check(mPosition == null)
-        check(mTimeRange == null)
-        check(mTimeStamp == null)
-        check(mInstanceKeys == null)
+        check(position == null)
+        check(timeRange == null)
+        check(timeStamp == null)
+        check(instanceKeys == null)
         check(taskKey == null)
 
-        mInstanceKey = instanceKey
+        this.instanceKey = instanceKey
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setInstanceKeys(instanceKeys: Set<InstanceKey>, dataId: Int, dataWrapper: DataWrapper) {
-        check(mPosition == null)
-        check(mTimeRange == null)
-        check(mTimeStamp == null)
-        check(mInstanceKey == null)
+        check(position == null)
+        check(timeRange == null)
+        check(timeStamp == null)
+        check(instanceKey == null)
         check(taskKey == null)
 
-        mInstanceKeys = instanceKeys
+        this.instanceKeys = instanceKeys
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) {
-        check(mPosition == null)
-        check(mTimeRange == null)
-        check(mTimeStamp == null)
-        check(mInstanceKey == null)
+        check(position == null)
+        check(timeRange == null)
+        check(timeStamp == null)
+        check(instanceKey == null)
         check(this.taskKey == null)
 
         this.taskKey = taskKey
@@ -594,18 +583,18 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun useGroups(): Boolean {
-        check(mPosition == null == (mTimeRange == null))
-        return mPosition != null
+        check(position == null == (timeRange == null))
+        return position != null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        if (mTreeViewAdapter != null) {
-            outState.putParcelable(EXPANSION_STATE_KEY, (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState)
+        if (treeViewAdapter != null) {
+            outState.putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState)
 
-            if (mSelectionCallback.hasActionMode) {
-                val instanceDatas = nodesToInstanceDatas(mTreeViewAdapter!!.selectedNodes)
+            if (selectionCallback.hasActionMode) {
+                val instanceDatas = nodesToInstanceDatas(treeViewAdapter!!.selectedNodes)
                 check(instanceDatas.isNotEmpty())
 
                 val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
@@ -617,70 +606,70 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun initialize(dataId: Int, dataWrapper: DataWrapper) {
-        mGroupListProgress!!.visibility = View.GONE
+        groupListProgress.visibility = View.GONE
 
-        if (mDataWrapper != null) {
-            check(mDataId != null)
+        if (this.dataWrapper != null) {
+            check(this.dataId != null)
 
-            DataDiff.diffData(mDataWrapper!!, dataWrapper)
+            DataDiff.diffData(this.dataWrapper!!, dataWrapper)
             Log.e("asdf", "difference w data:\n" + DataDiff.diff)
         } else {
-            check(mDataId == null)
+            check(this.dataId == null)
         }
 
-        mDataWrapper = dataWrapper
-        mDataId = dataId
+        this.dataWrapper = dataWrapper
+        this.dataId = dataId
 
-        if (mTreeViewAdapter != null) {
-            mExpansionState = (mTreeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState
+        if (treeViewAdapter != null) {
+            expansionState = (treeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState
 
-            val instanceDatas = nodesToInstanceDatas(mTreeViewAdapter!!.selectedNodes)
+            val instanceDatas = nodesToInstanceDatas(treeViewAdapter!!.selectedNodes)
 
             val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
 
-            mSelectedNodes = if (instanceKeys.isEmpty()) {
-                check(!mSelectionCallback.hasActionMode)
+            selectedNodes = if (instanceKeys.isEmpty()) {
+                check(!selectionCallback.hasActionMode)
                 null
             } else {
-                check(mSelectionCallback.hasActionMode)
+                check(selectionCallback.hasActionMode)
                 instanceKeys
             }
         }
 
         val emptyTextId = when {
-            mPosition != null -> {
-                check(mTimeRange != null)
+            position != null -> {
+                check(timeRange != null)
 
-                check(mTimeStamp == null)
-                check(mInstanceKey == null)
-                check(mInstanceKeys == null)
+                check(timeStamp == null)
+                check(instanceKey == null)
+                check(instanceKeys == null)
 
-                check(mDataWrapper!!.TaskEditable == null)
+                check(this.dataWrapper!!.TaskEditable == null)
 
                 R.string.instances_empty_root
             }
-            mTimeStamp != null -> {
-                check(mInstanceKey == null)
-                check(mInstanceKeys == null)
+            timeStamp != null -> {
+                check(instanceKey == null)
+                check(instanceKeys == null)
 
-                check(mDataWrapper!!.TaskEditable == null)
+                check(this.dataWrapper!!.TaskEditable == null)
 
                 null
             }
-            mInstanceKey != null -> {
-                check(mInstanceKeys == null)
+            instanceKey != null -> {
+                check(instanceKeys == null)
 
-                check(mDataWrapper!!.TaskEditable != null)
+                check(this.dataWrapper!!.TaskEditable != null)
 
-                if (mDataWrapper!!.TaskEditable!!) {
+                if (this.dataWrapper!!.TaskEditable!!) {
                     R.string.empty_child
                 } else {
                     R.string.empty_disabled
                 }
             }
-            mInstanceKeys != null -> {
-                check(mInstanceKeys!!.isNotEmpty())
-                check(mDataWrapper!!.TaskEditable == null)
+            instanceKeys != null -> {
+                check(instanceKeys!!.isNotEmpty())
+                check(this.dataWrapper!!.TaskEditable == null)
 
                 null
             }
@@ -693,76 +682,76 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         updateFabVisibility()
 
-        mTreeViewAdapter = GroupAdapter.getAdapter(this, mDataId!!, mDataWrapper!!.CustomTimeDatas, useGroups(), showPadding(), mDataWrapper!!.instanceDatas.values, mExpansionState, mSelectedNodes, mDataWrapper!!.TaskDatas, mDataWrapper!!.mNote)
+        treeViewAdapter = GroupAdapter.getAdapter(this, this.dataId!!, this.dataWrapper!!.CustomTimeDatas, useGroups(), showPadding(), this.dataWrapper!!.instanceDatas.values, expansionState, selectedNodes, this.dataWrapper!!.TaskDatas, this.dataWrapper!!.mNote)
 
-        mGroupListRecycler!!.adapter = mTreeViewAdapter
+        groupListRecycler.adapter = treeViewAdapter
 
-        mSelectionCallback.setSelected(mTreeViewAdapter!!.selectedNodes.size)
+        selectionCallback.setSelected(treeViewAdapter!!.selectedNodes.size)
 
-        if (mDataWrapper!!.instanceDatas.isEmpty() && mDataWrapper!!.mNote.isNullOrEmpty() && (mDataWrapper!!.TaskDatas == null || mDataWrapper!!.TaskDatas!!.isEmpty())) {
-            mGroupListRecycler!!.visibility = View.GONE
+        if (this.dataWrapper!!.instanceDatas.isEmpty() && this.dataWrapper!!.mNote.isNullOrEmpty() && (this.dataWrapper!!.TaskDatas == null || this.dataWrapper!!.TaskDatas!!.isEmpty())) {
+            groupListRecycler.visibility = View.GONE
 
             if (emptyTextId != null) {
-                mEmptyText!!.visibility = View.VISIBLE
-                mEmptyText!!.setText(emptyTextId)
+                emptyText.visibility = View.VISIBLE
+                emptyText.setText(emptyTextId)
             }
         } else {
-            mGroupListRecycler!!.visibility = View.VISIBLE
-            mEmptyText!!.visibility = View.GONE
+            groupListRecycler.visibility = View.VISIBLE
+            emptyText.visibility = View.GONE
         }
 
         updateSelectAll()
     }
 
     fun updateSelectAll() {
-        check(mDataWrapper != null)
-        check(mDataId != null)
+        check(dataWrapper != null)
+        check(dataId != null)
 
-        (activity as GroupListListener).setGroupSelectAllVisibility(mPosition, mDataWrapper!!.instanceDatas.values.any { it.Done == null })
+        (activity as GroupListListener).setGroupSelectAllVisibility(position, dataWrapper!!.instanceDatas.values.any { it.Done == null })
     }
 
     fun selectAll() {
-        mTreeViewAdapter!!.selectAll()
+        treeViewAdapter!!.selectAll()
     }
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         MyCrashlytics.log(javaClass.simpleName + ".setFab " + hashCode())
-        mFloatingActionButton = floatingActionButton
+        this.floatingActionButton = floatingActionButton
 
-        mFloatingActionButton!!.setOnClickListener {
-            check(mDataWrapper != null)
-            check(mInstanceKeys == null)
+        this.floatingActionButton!!.setOnClickListener {
+            check(dataWrapper != null)
+            check(instanceKeys == null)
 
             check(activity != null) // todo how the fuck is this null?
 
             when {
-                mPosition != null -> {
-                    check(mTimeRange != null)
+                position != null -> {
+                    check(timeRange != null)
 
-                    check(mTimeStamp == null)
-                    check(mInstanceKey == null)
+                    check(timeStamp == null)
+                    check(instanceKey == null)
 
-                    check(mDataWrapper!!.TaskEditable == null)
+                    check(dataWrapper!!.TaskEditable == null)
 
-                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(rangePositionToDate(mTimeRange!!, mPosition!!))))
+                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(rangePositionToDate(timeRange!!, position!!))))
                 }
-                mTimeStamp != null -> {
-                    check(mInstanceKey == null)
+                timeStamp != null -> {
+                    check(instanceKey == null)
 
-                    check(mDataWrapper!!.TaskEditable == null)
+                    check(dataWrapper!!.TaskEditable == null)
 
-                    check(mTimeStamp!! > TimeStamp.now)
+                    check(timeStamp!! > TimeStamp.now)
 
-                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(mTimeStamp!!.date, mTimeStamp!!.hourMinute)))
+                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(timeStamp!!.date, timeStamp!!.hourMinute)))
                 }
                 else -> {
-                    check(mInstanceKey != null)
+                    check(instanceKey != null)
 
-                    check(mDataWrapper!!.TaskEditable != null)
+                    check(dataWrapper!!.TaskEditable != null)
 
-                    check(mDataWrapper!!.TaskEditable!!)
+                    check(dataWrapper!!.TaskEditable!!)
 
-                    startActivity(CreateTaskActivity.getCreateIntent(mInstanceKey!!.taskKey))
+                    startActivity(CreateTaskActivity.getCreateIntent(instanceKey!!.taskKey))
                 }
             }
         }
@@ -771,38 +760,38 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun showPadding(): Boolean {
-        check(mDataWrapper != null)
+        check(dataWrapper != null)
 
         when {
-            mPosition != null -> {
-                check(mTimeRange != null)
+            position != null -> {
+                check(timeRange != null)
 
-                check(mTimeStamp == null)
-                check(mInstanceKey == null)
-                check(mInstanceKeys == null)
+                check(timeStamp == null)
+                check(instanceKey == null)
+                check(instanceKeys == null)
 
-                check(mDataWrapper!!.TaskEditable == null)
+                check(dataWrapper!!.TaskEditable == null)
 
                 return true
             }
-            mTimeStamp != null -> {
-                check(mInstanceKey == null)
-                check(mInstanceKeys == null)
+            timeStamp != null -> {
+                check(instanceKey == null)
+                check(instanceKeys == null)
 
-                check(mDataWrapper!!.TaskEditable == null)
+                check(dataWrapper!!.TaskEditable == null)
 
-                return (mTimeStamp!! > TimeStamp.now)
+                return (timeStamp!! > TimeStamp.now)
             }
-            mInstanceKey != null -> {
-                check(mInstanceKeys == null)
+            instanceKey != null -> {
+                check(instanceKeys == null)
 
-                check(mDataWrapper!!.TaskEditable != null)
+                check(dataWrapper!!.TaskEditable != null)
 
-                return mDataWrapper!!.TaskEditable!!
+                return dataWrapper!!.TaskEditable!!
             }
-            mInstanceKeys != null -> {
-                check(mInstanceKeys!!.isNotEmpty())
-                check(mDataWrapper!!.TaskEditable == null)
+            instanceKeys != null -> {
+                check(instanceKeys!!.isNotEmpty())
+                check(dataWrapper!!.TaskEditable == null)
 
                 return false
             }
@@ -815,24 +804,24 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateFabVisibility() {
-        if (mFloatingActionButton == null)
+        if (floatingActionButton == null)
             return
 
-        if (mDataWrapper != null && !mSelectionCallback.hasActionMode && showPadding()) {
-            mFloatingActionButton!!.show()
+        if (dataWrapper != null && !selectionCallback.hasActionMode && showPadding()) {
+            floatingActionButton!!.show()
         } else {
-            mFloatingActionButton!!.hide()
+            floatingActionButton!!.hide()
         }
     }
 
     override fun clearFab() {
         MyCrashlytics.log(javaClass.simpleName + ".clearFab " + hashCode())
-        if (mFloatingActionButton == null)
+        if (floatingActionButton == null)
             return
 
-        mFloatingActionButton!!.setOnClickListener(null)
+        floatingActionButton!!.setOnClickListener(null)
 
-        mFloatingActionButton = null
+        floatingActionButton = null
     }
 
     class GroupAdapter private constructor(val mGroupListFragment: GroupListFragment, val mDataId: Int, val mCustomTimeDatas: List<CustomTimeData>, private val mShowFab: Boolean) : TreeModelAdapter, NodeCollectionParent {
@@ -921,14 +910,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
             return GroupHolder(groupRow, groupRowContainer, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator)
         }
 
-        override val hasActionMode get() = mGroupListFragment.mSelectionCallback.hasActionMode
+        override val hasActionMode get() = mGroupListFragment.selectionCallback.hasActionMode
 
         override fun incrementSelected() {
-            mGroupListFragment.mSelectionCallback.incrementSelected()
+            mGroupListFragment.selectionCallback.incrementSelected()
         }
 
         override fun decrementSelected() {
-            mGroupListFragment.mSelectionCallback.decrementSelected()
+            mGroupListFragment.selectionCallback.decrementSelected()
         }
 
         override val groupAdapter = this

@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <ProgressBar
-        android:id="@+id/group_list_progress"
+        android:id="@+id/groupListProgress"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"/>
@@ -13,7 +13,7 @@
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/group_list_recycler"
+        android:id="@+id/groupListRecycler"
         android:visibility="gone"/>
 
     <include layout="@layout/empty_text"/>

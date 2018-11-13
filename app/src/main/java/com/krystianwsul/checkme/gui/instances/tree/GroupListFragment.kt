@@ -117,10 +117,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     private var expansionState: ExpansionState? = null
     private var selectedNodes: ArrayList<InstanceKey>? = null
 
-    var dataId: Int? = null
-        private set
-
-    var dataWrapper: DataWrapper? = null
+    var data: Pair<Int, DataWrapper>? = null
         private set
 
     val dragHelper by lazy { DragHelper(treeViewAdapter!!) }
@@ -220,12 +217,11 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     }
                 }
                 R.id.action_group_mark_done -> {
-                    check(dataId != null)
-                    check(dataWrapper != null)
+                    checkNotNull(data)
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(dataId!!, SaveService.Source.GUI, instanceKeys)
+                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(data!!.first, SaveService.Source.GUI, instanceKeys)
 
                     var selectedTreeNodes = treeViewAdapter!!.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
@@ -435,12 +431,12 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     val shareData: String?
         get() {
-            check(dataWrapper != null)
-            check(dataId != null)
+            checkNotNull(data)
 
-            val instanceDatas = ArrayList(dataWrapper!!.instanceDatas.values)
-
-            instanceDatas.sort()
+            val instanceDatas = data!!.second
+                    .instanceDatas
+                    .values
+                    .sorted()
 
             val lines = mutableListOf<String>()
 
@@ -503,7 +499,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         Observables.combineLatest(dataRelay, viewCreatedRelay) { pair, _ -> pair }
-                .subscribe { initialize(it.first, it.second) }
+                .subscribe(this::initialize)
                 .addTo(createDisposable)
     }
 
@@ -605,20 +601,15 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private fun initialize(dataId: Int, dataWrapper: DataWrapper) {
+    private fun initialize(data: Pair<Int, DataWrapper>) {
         groupListProgress.visibility = View.GONE
 
-        if (this.dataWrapper != null) {
-            check(this.dataId != null)
-
-            DataDiff.diffData(this.dataWrapper!!, dataWrapper)
+        if (this.data != null) {
+            DataDiff.diffData(this.data!!.second, data.second)
             Log.e("asdf", "difference w data:\n" + DataDiff.diff)
-        } else {
-            check(this.dataId == null)
         }
 
-        this.dataWrapper = dataWrapper
-        this.dataId = dataId
+        this.data = data
 
         if (treeViewAdapter != null) {
             expansionState = (treeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState
@@ -644,7 +635,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 check(instanceKey == null)
                 check(instanceKeys == null)
 
-                check(this.dataWrapper!!.TaskEditable == null)
+                check(data.second.TaskEditable == null)
 
                 R.string.instances_empty_root
             }
@@ -652,16 +643,16 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 check(instanceKey == null)
                 check(instanceKeys == null)
 
-                check(this.dataWrapper!!.TaskEditable == null)
+                check(data.second.TaskEditable == null)
 
                 null
             }
             instanceKey != null -> {
                 check(instanceKeys == null)
 
-                check(this.dataWrapper!!.TaskEditable != null)
+                check(data.second.TaskEditable != null)
 
-                if (this.dataWrapper!!.TaskEditable!!) {
+                if (data.second.TaskEditable!!) {
                     R.string.empty_child
                 } else {
                     R.string.empty_disabled
@@ -669,7 +660,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             }
             instanceKeys != null -> {
                 check(instanceKeys!!.isNotEmpty())
-                check(this.dataWrapper!!.TaskEditable == null)
+                check(data.second.TaskEditable == null)
 
                 null
             }
@@ -682,13 +673,13 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         updateFabVisibility()
 
-        treeViewAdapter = GroupAdapter.getAdapter(this, this.dataId!!, this.dataWrapper!!.CustomTimeDatas, useGroups(), showPadding(), this.dataWrapper!!.instanceDatas.values, expansionState, selectedNodes, this.dataWrapper!!.TaskDatas, this.dataWrapper!!.mNote)
+        treeViewAdapter = GroupAdapter.getAdapter(this, data.first, data.second.CustomTimeDatas, useGroups(), showPadding(), data.second.instanceDatas.values, expansionState, selectedNodes, data.second.TaskDatas, data.second.mNote)
 
         groupListRecycler.adapter = treeViewAdapter
 
         selectionCallback.setSelected(treeViewAdapter!!.selectedNodes.size)
 
-        if (this.dataWrapper!!.instanceDatas.isEmpty() && this.dataWrapper!!.mNote.isNullOrEmpty() && (this.dataWrapper!!.TaskDatas == null || this.dataWrapper!!.TaskDatas!!.isEmpty())) {
+        if (data.second.instanceDatas.isEmpty() && data.second.mNote.isNullOrEmpty() && (data.second.TaskDatas == null || data.second.TaskDatas!!.isEmpty())) {
             groupListRecycler.visibility = View.GONE
 
             if (emptyTextId != null) {
@@ -704,10 +695,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun updateSelectAll() {
-        check(dataWrapper != null)
-        check(dataId != null)
+        checkNotNull(data)
 
-        (activity as GroupListListener).setGroupSelectAllVisibility(position, dataWrapper!!.instanceDatas.values.any { it.Done == null })
+        (activity as GroupListListener).setGroupSelectAllVisibility(position, data!!.second.instanceDatas.values.any { it.Done == null })
     }
 
     fun selectAll() {
@@ -719,7 +709,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         this.floatingActionButton = floatingActionButton
 
         this.floatingActionButton!!.setOnClickListener {
-            check(dataWrapper != null)
+            checkNotNull(data)
             check(instanceKeys == null)
 
             check(activity != null) // todo how the fuck is this null?
@@ -731,14 +721,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     check(timeStamp == null)
                     check(instanceKey == null)
 
-                    check(dataWrapper!!.TaskEditable == null)
+                    check(data!!.second.TaskEditable == null)
 
                     startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(rangePositionToDate(timeRange!!, position!!))))
                 }
                 timeStamp != null -> {
                     check(instanceKey == null)
 
-                    check(dataWrapper!!.TaskEditable == null)
+                    check(data!!.second.TaskEditable == null)
 
                     check(timeStamp!! > TimeStamp.now)
 
@@ -747,9 +737,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 else -> {
                     check(instanceKey != null)
 
-                    check(dataWrapper!!.TaskEditable != null)
+                    check(data!!.second.TaskEditable != null)
 
-                    check(dataWrapper!!.TaskEditable!!)
+                    check(data!!.second.TaskEditable!!)
 
                     startActivity(CreateTaskActivity.getCreateIntent(instanceKey!!.taskKey))
                 }
@@ -760,7 +750,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun showPadding(): Boolean {
-        check(dataWrapper != null)
+        checkNotNull(data)
 
         when {
             position != null -> {
@@ -770,7 +760,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 check(instanceKey == null)
                 check(instanceKeys == null)
 
-                check(dataWrapper!!.TaskEditable == null)
+                check(data!!.second.TaskEditable == null)
 
                 return true
             }
@@ -778,20 +768,20 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 check(instanceKey == null)
                 check(instanceKeys == null)
 
-                check(dataWrapper!!.TaskEditable == null)
+                check(data!!.second.TaskEditable == null)
 
                 return (timeStamp!! > TimeStamp.now)
             }
             instanceKey != null -> {
                 check(instanceKeys == null)
 
-                check(dataWrapper!!.TaskEditable != null)
+                check(data!!.second.TaskEditable != null)
 
-                return dataWrapper!!.TaskEditable!!
+                return data!!.second.TaskEditable!!
             }
             instanceKeys != null -> {
                 check(instanceKeys!!.isNotEmpty())
-                check(dataWrapper!!.TaskEditable == null)
+                check(data!!.second.TaskEditable == null)
 
                 return false
             }
@@ -807,7 +797,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         if (floatingActionButton == null)
             return
 
-        if (dataWrapper != null && !selectionCallback.hasActionMode && showPadding()) {
+        if (data != null && !selectionCallback.hasActionMode && showPadding()) {
             floatingActionButton!!.show()
         } else {
             floatingActionButton!!.hide()

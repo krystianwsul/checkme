@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -18,7 +17,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.jakewharton.rxrelay2.PublishRelay
-import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -431,7 +429,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             return lines.joinToString("\n")
         }
 
-    private val dataRelay = PublishRelay.create<Pair<Int, DataWrapper>>()
+    private val dataRelay = PublishRelay.create<Unit>()
     private val viewCreatedRelay = PublishRelay.create<Unit>()
 
     private fun getShareData(instanceDatas: List<InstanceData>): String {
@@ -483,8 +481,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
             }
         }
 
-        Observables.combineLatest(dataRelay, viewCreatedRelay) { pair, _ -> pair }
-                .subscribe(this::initialize)
+        Observables.combineLatest(dataRelay, viewCreatedRelay) { _, _ -> Unit }
+                .subscribe { initialize() }
                 .addTo(createDisposable)
     }
 
@@ -503,31 +501,31 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         parameters = Parameters.All(dataId, dataWrapper, position, timeRange)
 
-        dataRelay.accept(Pair(dataId, dataWrapper))
+        dataRelay.accept(Unit)
     }
 
     fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) {
         parameters = Parameters.TimeStamp(dataId, dataWrapper, timeStamp)
 
-        dataRelay.accept(Pair(dataId, dataWrapper))
+        dataRelay.accept(Unit)
     }
 
     fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) {
         parameters = Parameters.InstanceKey(dataId, dataWrapper, instanceKey)
 
-        dataRelay.accept(Pair(dataId, dataWrapper))
+        dataRelay.accept(Unit)
     }
 
-    fun setInstanceKeys(instanceKeys: Set<InstanceKey>, dataId: Int, dataWrapper: DataWrapper) {
-        parameters = Parameters.InstanceKeys(dataId, dataWrapper, instanceKeys)
+    fun setInstanceKeys(dataId: Int, dataWrapper: DataWrapper) {
+        parameters = Parameters.InstanceKeys(dataId, dataWrapper)
 
-        dataRelay.accept(Pair(dataId, dataWrapper))
+        dataRelay.accept(Unit)
     }
 
     fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) {
         parameters = Parameters.TaskKey(dataId, dataWrapper, taskKey)
 
-        dataRelay.accept(Pair(dataId, dataWrapper))
+        dataRelay.accept(Unit)
     }
 
     private fun useGroups() = parameters is Parameters.All
@@ -550,16 +548,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private fun initialize(data: Pair<Int, DataWrapper>) {
+    private fun initialize() {
         groupListProgress.visibility = View.GONE
-
-        if (this::parameters.isInitialized) {
-            DataDiff.diffData(parameters.dataWrapper, data.second)
-            Log.e("asdf", "difference w data:\n" + DataDiff.diff)
-        }
-
-        parameters.dataId = data.first
-        parameters.dataWrapper = data.second
 
         if (treeViewAdapter != null) {
             expansionState = (treeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState
@@ -578,43 +568,26 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         val emptyTextId = when (val parameters = parameters) {
-            is Parameters.All -> {
-                check(data.second.TaskEditable == null)
-
-                R.string.instances_empty_root
-            }
-            is Parameters.TimeStamp -> {
-                check(data.second.TaskEditable == null)
-
-                null
-            }
-            is Parameters.InstanceKey -> {
-                check(data.second.TaskEditable != null)
-
-                if (data.second.TaskEditable!!) {
+            is Parameters.All -> R.string.instances_empty_root
+            is Parameters.TimeStamp -> null
+            is Parameters.InstanceKey -> if (parameters.dataWrapper.TaskEditable!!) {
                     R.string.empty_child
                 } else {
                     R.string.empty_disabled
                 }
-            }
-            is Parameters.InstanceKeys -> {
-                check(parameters.instanceKeys.isNotEmpty())
-                check(data.second.TaskEditable == null)
-
-                null
-            }
+            is Parameters.InstanceKeys -> null
             is Parameters.TaskKey -> null
         }
 
         updateFabVisibility()
 
-        treeViewAdapter = GroupAdapter.getAdapter(this, data.first, data.second.CustomTimeDatas, useGroups(), showPadding(), data.second.instanceDatas.values, expansionState, selectedNodes, data.second.TaskDatas, data.second.mNote)
+        treeViewAdapter = GroupAdapter.getAdapter(this, parameters.dataId, parameters.dataWrapper.CustomTimeDatas, useGroups(), showPadding(), parameters.dataWrapper.instanceDatas.values, expansionState, selectedNodes, parameters.dataWrapper.TaskDatas, parameters.dataWrapper.mNote)
 
         groupListRecycler.adapter = treeViewAdapter
 
         selectionCallback.setSelected(treeViewAdapter!!.selectedNodes.size)
 
-        if (data.second.instanceDatas.isEmpty() && data.second.mNote.isNullOrEmpty() && (data.second.TaskDatas == null || data.second.TaskDatas!!.isEmpty())) {
+        if (parameters.dataWrapper.instanceDatas.isEmpty() && parameters.dataWrapper.mNote.isNullOrEmpty() && parameters.dataWrapper.TaskDatas.isNullOrEmpty()) {
             groupListRecycler.visibility = View.GONE
 
             if (emptyTextId != null) {
@@ -909,7 +882,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         class InstanceKey(dataId: Int, dataWrapper: DataWrapper, val instanceKey: com.krystianwsul.checkme.utils.InstanceKey) : Parameters(dataId, dataWrapper)
 
-        class InstanceKeys(dataId: Int, dataWrapper: DataWrapper, val instanceKeys: Set<com.krystianwsul.checkme.utils.InstanceKey>) : Parameters(dataId, dataWrapper)
+        class InstanceKeys(dataId: Int, dataWrapper: DataWrapper) : Parameters(dataId, dataWrapper)
 
         class TaskKey(dataId: Int, dataWrapper: DataWrapper, val taskKey: com.krystianwsul.checkme.utils.TaskKey) : Parameters(dataId, dataWrapper)
     }

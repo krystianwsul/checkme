@@ -9,9 +9,5 @@ abstract class DomainData {
         private val nextId get() = sDataId++
     }
 
-    val dataId: Int
-
-    init {
-        dataId = nextId
-    }
+    val dataId = nextId
 }

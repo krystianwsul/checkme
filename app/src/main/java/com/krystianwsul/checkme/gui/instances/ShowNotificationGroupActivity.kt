@@ -62,7 +62,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
         showNotificationGroupViewModel = getViewModel<ShowNotificationGroupViewModel>().apply {
             start(this@ShowNotificationGroupActivity.instanceKeys)
 
-            createDisposable += data.subscribe { groupListFragment.setInstanceKeys(this@ShowNotificationGroupActivity.instanceKeys, it.dataId, it.dataWrapper) }
+            createDisposable += data.subscribe { groupListFragment.setInstanceKeys(it.dataId, it.dataWrapper) }
         }
     }
 

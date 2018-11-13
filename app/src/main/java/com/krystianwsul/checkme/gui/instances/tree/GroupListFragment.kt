@@ -103,7 +103,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     private var treeViewAdapter: TreeViewAdapter? = null
 
-    var parameters: Parameters? = null
+    lateinit var parameters: Parameters
         private set
 
     private var expansionState: ExpansionState? = null
@@ -206,11 +206,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     }
                 }
                 R.id.action_group_mark_done -> {
-                    checkNotNull(parameters)
-
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters!!.dataId, SaveService.Source.GUI, instanceKeys)
+                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys)
 
                     var selectedTreeNodes = treeViewAdapter!!.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
@@ -420,9 +418,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     val shareData: String?
         get() {
-            checkNotNull(parameters)
-
-            val instanceDatas = parameters!!.dataWrapper
+            val instanceDatas = parameters.dataWrapper
                     .instanceDatas
                     .values
                     .sorted()
@@ -503,7 +499,6 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
-        check(parameters == null)
         check(position >= 0)
 
         parameters = Parameters.All(dataId, dataWrapper, position, timeRange)
@@ -512,32 +507,24 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) {
-        check(parameters == null)
-
         parameters = Parameters.TimeStamp(dataId, dataWrapper, timeStamp)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) {
-        check(parameters == null)
-
         parameters = Parameters.InstanceKey(dataId, dataWrapper, instanceKey)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setInstanceKeys(instanceKeys: Set<InstanceKey>, dataId: Int, dataWrapper: DataWrapper) {
-        check(parameters == null)
-
         parameters = Parameters.InstanceKeys(dataId, dataWrapper, instanceKeys)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) {
-        check(parameters == null)
-
         parameters = Parameters.TaskKey(dataId, dataWrapper, taskKey)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
@@ -566,13 +553,13 @@ class GroupListFragment : AbstractFragment(), FabUser {
     private fun initialize(data: Pair<Int, DataWrapper>) {
         groupListProgress.visibility = View.GONE
 
-        if (parameters != null) {
-            DataDiff.diffData(parameters!!.dataWrapper, data.second)
+        if (this::parameters.isInitialized) {
+            DataDiff.diffData(parameters.dataWrapper, data.second)
             Log.e("asdf", "difference w data:\n" + DataDiff.diff)
         }
 
-        parameters!!.dataId = data.first
-        parameters!!.dataWrapper = data.second
+        parameters.dataId = data.first
+        parameters.dataWrapper = data.second
 
         if (treeViewAdapter != null) {
             expansionState = (treeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState
@@ -590,7 +577,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             }
         }
 
-        val emptyTextId = when (val parameters = parameters!!) {
+        val emptyTextId = when (val parameters = parameters) {
             is Parameters.All -> {
                 check(data.second.TaskEditable == null)
 
@@ -642,25 +629,18 @@ class GroupListFragment : AbstractFragment(), FabUser {
         updateSelectAll()
     }
 
-    fun updateSelectAll() {
-        checkNotNull(parameters)
+    fun updateSelectAll() = (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, parameters.dataWrapper.instanceDatas.values.any { it.Done == null })
 
-        (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, parameters!!.dataWrapper.instanceDatas.values.any { it.Done == null })
-    }
-
-    fun selectAll() {
-        treeViewAdapter!!.selectAll()
-    }
+    fun selectAll() = treeViewAdapter!!.selectAll()
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         MyCrashlytics.log(javaClass.simpleName + ".setFab " + hashCode())
         this.floatingActionButton = floatingActionButton
 
         this.floatingActionButton!!.setOnClickListener {
-            checkNotNull(parameters)
             checkNotNull(activity) // todo how the fuck is this null?
 
-            when (val parameters = parameters!!) {
+            when (val parameters = parameters) {
                 is Parameters.All -> {
                     check(parameters.dataWrapper.TaskEditable == null)
 
@@ -685,9 +665,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun showPadding(): Boolean {
-        checkNotNull(parameters)
-
-        return when (val parameters = parameters!!) {
+        return when (val parameters = parameters) {
             is Parameters.All -> true
             is Parameters.TimeStamp -> parameters.timeStamp > TimeStamp.now
             is Parameters.InstanceKey -> parameters.dataWrapper.TaskEditable!!
@@ -700,7 +678,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         if (floatingActionButton == null)
             return
 
-        if (parameters != null && !selectionCallback.hasActionMode && showPadding()) {
+        if (this::parameters.isInitialized && !selectionCallback.hasActionMode && showPadding()) {
             floatingActionButton!!.show()
         } else {
             floatingActionButton!!.hide()

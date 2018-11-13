@@ -227,7 +227,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
         return View.OnLongClickListener {
-            if (groupListFragment.data?.second?.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && groupListFragment.instanceKeys == null && groupListFragment.taskKey == null) {
+            if (groupListFragment.parameters?.dataWrapper?.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && (groupListFragment.parameters !is GroupListFragment.Parameters.InstanceKeys) && (groupListFragment.parameters !is GroupListFragment.Parameters.TaskKey)) {
                 check(singleInstance())
 
                 groupListFragment.dragHelper.startDrag(viewHolder)
@@ -362,11 +362,11 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             if (it.hierarchyData != null) {
                 it.hierarchyData.ordinal = ordinal
 
-                DomainFactory.getKotlinDomainFactory().setTaskHierarchyOrdinal(groupListFragment.data!!.first, it.hierarchyData)
+                DomainFactory.getKotlinDomainFactory().setTaskHierarchyOrdinal(groupListFragment.parameters!!.dataId, it.hierarchyData)
             } else {
                 it.ordinal = ordinal
 
-                DomainFactory.getKotlinDomainFactory().setInstanceOrdinal(groupListFragment.data!!.first, it.InstanceKey, ordinal)
+                DomainFactory.getKotlinDomainFactory().setInstanceOrdinal(groupListFragment.parameters!!.dataId, it.InstanceKey, ordinal)
             }
         }
     }

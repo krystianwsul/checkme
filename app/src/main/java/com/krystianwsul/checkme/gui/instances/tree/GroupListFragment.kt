@@ -103,22 +103,11 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     private var treeViewAdapter: TreeViewAdapter? = null
 
-    private var position: Int? = null
-    private var timeRange: MainActivity.TimeRange? = null
-    private var timeStamp: TimeStamp? = null
-    private var instanceKey: InstanceKey? = null
-
-    var taskKey: TaskKey? = null
-        private set
-
-    var instanceKeys: Set<InstanceKey>? = null
+    var parameters: Parameters? = null
         private set
 
     private var expansionState: ExpansionState? = null
     private var selectedNodes: ArrayList<InstanceKey>? = null
-
-    var data: Pair<Int, DataWrapper>? = null
-        private set
 
     val dragHelper by lazy { DragHelper(treeViewAdapter!!) }
 
@@ -204,7 +193,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
                     check(taskKeys.size > 1)
 
-                    if (instanceKey == null) {
+                    if (parameters is Parameters.InstanceKey) {
+                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, (parameters as Parameters.InstanceKey).instanceKey.taskKey))
+                    } else {
                         val firstInstanceData = instanceDatas.minBy { it.InstanceTimeStamp }!!
 
                         val date = firstInstanceData.InstanceTimeStamp.date
@@ -212,16 +203,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         val timePair = firstInstanceData.InstanceTimePair
 
                         startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
-                    } else {
-                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, instanceKey!!.taskKey))
                     }
                 }
                 R.id.action_group_mark_done -> {
-                    checkNotNull(data)
+                    checkNotNull(parameters)
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(data!!.first, SaveService.Source.GUI, instanceKeys)
+                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters!!.dataId, SaveService.Source.GUI, instanceKeys)
 
                     var selectedTreeNodes = treeViewAdapter!!.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
@@ -431,9 +420,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     val shareData: String?
         get() {
-            checkNotNull(data)
+            checkNotNull(parameters)
 
-            val instanceDatas = data!!.second
+            val instanceDatas = parameters!!.dataWrapper
                     .instanceDatas
                     .values
                     .sorted()
@@ -514,74 +503,47 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
-        check(this.position == null || this.position == position)
-        check(this.timeRange == null || this.timeRange == timeRange)
-        check(timeStamp == null)
-        check(instanceKey == null)
-        check(instanceKeys == null)
-        check(taskKey == null)
-
+        check(parameters == null)
         check(position >= 0)
 
-        this.position = position
-        this.timeRange = timeRange
+        parameters = Parameters.All(dataId, dataWrapper, position, timeRange)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) {
-        check(position == null)
-        check(timeRange == null)
-        check(this.timeStamp == null || this.timeStamp == timeStamp)
-        check(instanceKey == null)
-        check(instanceKeys == null)
-        check(taskKey == null)
+        check(parameters == null)
 
-        this.timeStamp = timeStamp
+        parameters = Parameters.TimeStamp(dataId, dataWrapper, timeStamp)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) {
-        check(position == null)
-        check(timeRange == null)
-        check(timeStamp == null)
-        check(instanceKeys == null)
-        check(taskKey == null)
+        check(parameters == null)
 
-        this.instanceKey = instanceKey
+        parameters = Parameters.InstanceKey(dataId, dataWrapper, instanceKey)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setInstanceKeys(instanceKeys: Set<InstanceKey>, dataId: Int, dataWrapper: DataWrapper) {
-        check(position == null)
-        check(timeRange == null)
-        check(timeStamp == null)
-        check(instanceKey == null)
-        check(taskKey == null)
+        check(parameters == null)
 
-        this.instanceKeys = instanceKeys
+        parameters = Parameters.InstanceKeys(dataId, dataWrapper, instanceKeys)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
     fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) {
-        check(position == null)
-        check(timeRange == null)
-        check(timeStamp == null)
-        check(instanceKey == null)
-        check(this.taskKey == null)
+        check(parameters == null)
 
-        this.taskKey = taskKey
+        parameters = Parameters.TaskKey(dataId, dataWrapper, taskKey)
 
         dataRelay.accept(Pair(dataId, dataWrapper))
     }
 
-    private fun useGroups(): Boolean {
-        check(position == null == (timeRange == null))
-        return position != null
-    }
+    private fun useGroups() = parameters is Parameters.All
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -604,12 +566,13 @@ class GroupListFragment : AbstractFragment(), FabUser {
     private fun initialize(data: Pair<Int, DataWrapper>) {
         groupListProgress.visibility = View.GONE
 
-        if (this.data != null) {
-            DataDiff.diffData(this.data!!.second, data.second)
+        if (parameters != null) {
+            DataDiff.diffData(parameters!!.dataWrapper, data.second)
             Log.e("asdf", "difference w data:\n" + DataDiff.diff)
         }
 
-        this.data = data
+        parameters!!.dataId = data.first
+        parameters!!.dataWrapper = data.second
 
         if (treeViewAdapter != null) {
             expansionState = (treeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState
@@ -627,29 +590,18 @@ class GroupListFragment : AbstractFragment(), FabUser {
             }
         }
 
-        val emptyTextId = when {
-            position != null -> {
-                check(timeRange != null)
-
-                check(timeStamp == null)
-                check(instanceKey == null)
-                check(instanceKeys == null)
-
+        val emptyTextId = when (val parameters = parameters!!) {
+            is Parameters.All -> {
                 check(data.second.TaskEditable == null)
 
                 R.string.instances_empty_root
             }
-            timeStamp != null -> {
-                check(instanceKey == null)
-                check(instanceKeys == null)
-
+            is Parameters.TimeStamp -> {
                 check(data.second.TaskEditable == null)
 
                 null
             }
-            instanceKey != null -> {
-                check(instanceKeys == null)
-
+            is Parameters.InstanceKey -> {
                 check(data.second.TaskEditable != null)
 
                 if (data.second.TaskEditable!!) {
@@ -658,17 +610,13 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     R.string.empty_disabled
                 }
             }
-            instanceKeys != null -> {
-                check(instanceKeys!!.isNotEmpty())
+            is Parameters.InstanceKeys -> {
+                check(parameters.instanceKeys.isNotEmpty())
                 check(data.second.TaskEditable == null)
 
                 null
             }
-            else -> {
-                checkNotNull(taskKey)
-
-                null
-            }
+            is Parameters.TaskKey -> null
         }
 
         updateFabVisibility()
@@ -695,9 +643,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     fun updateSelectAll() {
-        checkNotNull(data)
+        checkNotNull(parameters)
 
-        (activity as GroupListListener).setGroupSelectAllVisibility(position, data!!.second.instanceDatas.values.any { it.Done == null })
+        (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, parameters!!.dataWrapper.instanceDatas.values.any { it.Done == null })
     }
 
     fun selectAll() {
@@ -709,40 +657,27 @@ class GroupListFragment : AbstractFragment(), FabUser {
         this.floatingActionButton = floatingActionButton
 
         this.floatingActionButton!!.setOnClickListener {
-            checkNotNull(data)
-            check(instanceKeys == null)
+            checkNotNull(parameters)
+            checkNotNull(activity) // todo how the fuck is this null?
 
-            check(activity != null) // todo how the fuck is this null?
+            when (val parameters = parameters!!) {
+                is Parameters.All -> {
+                    check(parameters.dataWrapper.TaskEditable == null)
 
-            when {
-                position != null -> {
-                    check(timeRange != null)
-
-                    check(timeStamp == null)
-                    check(instanceKey == null)
-
-                    check(data!!.second.TaskEditable == null)
-
-                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(rangePositionToDate(timeRange!!, position!!))))
+                    startActivity(CreateTaskActivity.getCreateIntent(requireActivity(), CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
                 }
-                timeStamp != null -> {
-                    check(instanceKey == null)
+                is Parameters.TimeStamp -> {
+                    check(parameters.dataWrapper.TaskEditable == null)
+                    check(parameters.timeStamp > TimeStamp.now)
 
-                    check(data!!.second.TaskEditable == null)
-
-                    check(timeStamp!! > TimeStamp.now)
-
-                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(timeStamp!!.date, timeStamp!!.hourMinute)))
+                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
                 }
-                else -> {
-                    check(instanceKey != null)
+                is Parameters.InstanceKey -> {
+                    check(parameters.dataWrapper.TaskEditable == true)
 
-                    check(data!!.second.TaskEditable != null)
-
-                    check(data!!.second.TaskEditable!!)
-
-                    startActivity(CreateTaskActivity.getCreateIntent(instanceKey!!.taskKey))
+                    startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
                 }
+                else -> throw IllegalStateException()
             }
         }
 
@@ -750,46 +685,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun showPadding(): Boolean {
-        checkNotNull(data)
+        checkNotNull(parameters)
 
-        when {
-            position != null -> {
-                check(timeRange != null)
-
-                check(timeStamp == null)
-                check(instanceKey == null)
-                check(instanceKeys == null)
-
-                check(data!!.second.TaskEditable == null)
-
-                return true
-            }
-            timeStamp != null -> {
-                check(instanceKey == null)
-                check(instanceKeys == null)
-
-                check(data!!.second.TaskEditable == null)
-
-                return (timeStamp!! > TimeStamp.now)
-            }
-            instanceKey != null -> {
-                check(instanceKeys == null)
-
-                check(data!!.second.TaskEditable != null)
-
-                return data!!.second.TaskEditable!!
-            }
-            instanceKeys != null -> {
-                check(instanceKeys!!.isNotEmpty())
-                check(data!!.second.TaskEditable == null)
-
-                return false
-            }
-            else -> {
-                check(taskKey != null)
-
-                return false
-            }
+        return when (val parameters = parameters!!) {
+            is Parameters.All -> true
+            is Parameters.TimeStamp -> parameters.timeStamp > TimeStamp.now
+            is Parameters.InstanceKey -> parameters.dataWrapper.TaskEditable!!
+            is Parameters.InstanceKeys -> false
+            is Parameters.TaskKey -> false
         }
     }
 
@@ -797,7 +700,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         if (floatingActionButton == null)
             return
 
-        if (data != null && !selectionCallback.hasActionMode && showPadding()) {
+        if (parameters != null && !selectionCallback.hasActionMode && showPadding()) {
             floatingActionButton!!.show()
         } else {
             floatingActionButton!!.hide()
@@ -1018,5 +921,18 @@ class GroupListFragment : AbstractFragment(), FabUser {
         init {
             check(Name.isNotEmpty())
         }
+    }
+
+    sealed class Parameters(var dataId: Int, var dataWrapper: DataWrapper) {
+
+        class All(dataId: Int, dataWrapper: DataWrapper, val position: Int, val timeRange: MainActivity.TimeRange) : Parameters(dataId, dataWrapper)
+
+        class TimeStamp(dataId: Int, dataWrapper: DataWrapper, val timeStamp: com.krystianwsul.checkme.utils.time.TimeStamp) : Parameters(dataId, dataWrapper)
+
+        class InstanceKey(dataId: Int, dataWrapper: DataWrapper, val instanceKey: com.krystianwsul.checkme.utils.InstanceKey) : Parameters(dataId, dataWrapper)
+
+        class InstanceKeys(dataId: Int, dataWrapper: DataWrapper, val instanceKeys: Set<com.krystianwsul.checkme.utils.InstanceKey>) : Parameters(dataId, dataWrapper)
+
+        class TaskKey(dataId: Int, dataWrapper: DataWrapper, val taskKey: com.krystianwsul.checkme.utils.TaskKey) : Parameters(dataId, dataWrapper)
     }
 }

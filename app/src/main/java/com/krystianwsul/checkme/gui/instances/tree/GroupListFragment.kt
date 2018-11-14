@@ -100,7 +100,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private var treeViewAdapter: TreeViewAdapter? = null
+    private lateinit var treeViewAdapter: TreeViewAdapter
 
     private val parametersRelay = BehaviorRelay.create<Parameters>()
     val parameters get() = parametersRelay.value!!
@@ -108,18 +108,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
     private var expansionState: ExpansionState? = null
     private var selectedNodes: ArrayList<InstanceKey>? = null
 
-    val dragHelper by lazy { DragHelper(treeViewAdapter!!) }
+    val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
     val selectionCallback: SelectionCallback = object : SelectionCallback() {
 
-        override fun unselect() {
-            treeViewAdapter!!.unselect()
-        }
+        override fun unselect() = treeViewAdapter.unselect()
 
         override fun onMenuClick(menuItem: MenuItem) {
-            check(treeViewAdapter != null)
-
-            val treeNodes = treeViewAdapter!!.selectedNodes
+            val treeNodes = treeViewAdapter.selectedNodes
 
             val instanceDatas = nodesToInstanceDatas(treeNodes)
             check(instanceDatas.isNotEmpty())
@@ -164,19 +160,19 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     check(taskKeys.isNotEmpty())
                     check(instanceDatas.all { it.TaskCurrent })
 
-                    var selectedTreeNodes = treeViewAdapter!!.selectedNodes
+                    var selectedTreeNodes = treeViewAdapter.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
 
                     do {
-                        val treeNode = selectedTreeNodes[0]
+                        val treeNode = selectedTreeNodes.first()
 
                         recursiveDelete(treeNode, true)
 
                         decrementSelected()
-                        selectedTreeNodes = treeViewAdapter!!.selectedNodes
+                        selectedTreeNodes = treeViewAdapter.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
-                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter!!.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -209,7 +205,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                     val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys)
 
-                    var selectedTreeNodes = treeViewAdapter!!.selectedNodes
+                    var selectedTreeNodes = treeViewAdapter.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
 
                     do {
@@ -243,7 +239,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         }
 
                         decrementSelected()
-                        selectedTreeNodes = treeViewAdapter!!.selectedNodes
+                        selectedTreeNodes = treeViewAdapter.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
                     updateSelectAll()
@@ -293,7 +289,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onFirstAdded() {
-            treeViewAdapter!!.updateDisplayedNodes {
+            treeViewAdapter.updateDisplayedNodes {
                 (activity as AppCompatActivity).startSupportActionMode(this)
             }
 
@@ -319,7 +315,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onLastRemoved(action: () -> Unit) {
-            treeViewAdapter!!.updateDisplayedNodes(action)
+            treeViewAdapter.updateDisplayedNodes(action)
 
             updateFabVisibility()
 
@@ -343,7 +339,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
             val menu = actionMode!!.menu!!
 
-            val instanceDatas = nodesToInstanceDatas(treeViewAdapter!!.selectedNodes)
+            val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
             check(instanceDatas.isNotEmpty())
 
             check(instanceDatas.all { it.Done == null })
@@ -447,12 +443,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
         return lines.joinToString("\n")
     }
 
-    private fun inTree(shareTree: Map<InstanceKey, InstanceData>, instanceData: InstanceData): Boolean {
-        if (shareTree.isEmpty())
-            return false
-
-        return if (shareTree.containsKey(instanceData.InstanceKey)) true else shareTree.values.any { inTree(it.children, instanceData) }
-    }
+    private fun inTree(shareTree: Map<InstanceKey, InstanceData>, instanceData: InstanceData): Boolean = if (shareTree.containsKey(instanceData.InstanceKey)) true else shareTree.values.any { inTree(it.children, instanceData) }
 
     private fun printTree(lines: MutableList<String>, indentation: Int, instanceData: InstanceData) {
         lines.add("-".repeat(indentation) + instanceData.Name)
@@ -516,11 +507,11 @@ class GroupListFragment : AbstractFragment(), FabUser {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        if (treeViewAdapter != null) {
-            outState.putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState)
+        if (this::treeViewAdapter.isInitialized) {
+            outState.putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState)
 
             if (selectionCallback.hasActionMode) {
-                val instanceDatas = nodesToInstanceDatas(treeViewAdapter!!.selectedNodes)
+                val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
                 check(instanceDatas.isNotEmpty())
 
                 val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
@@ -534,10 +525,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
     private fun initialize() {
         groupListProgress.visibility = View.GONE
 
-        if (treeViewAdapter != null) {
-            expansionState = (treeViewAdapter!!.treeModelAdapter as GroupAdapter).expansionState
+        if (this::treeViewAdapter.isInitialized) {
+            expansionState = (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState
 
-            val instanceDatas = nodesToInstanceDatas(treeViewAdapter!!.selectedNodes)
+            val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
 
             val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
 
@@ -553,10 +544,10 @@ class GroupListFragment : AbstractFragment(), FabUser {
         val emptyTextId = when (val parameters = parameters) {
             is Parameters.All -> R.string.instances_empty_root
             is Parameters.InstanceKey -> if (parameters.dataWrapper.TaskEditable!!) {
-                    R.string.empty_child
-                } else {
-                    R.string.empty_disabled
-                }
+                R.string.empty_child
+            } else {
+                R.string.empty_disabled
+            }
             else -> null
         }
 
@@ -566,7 +557,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         groupListRecycler.adapter = treeViewAdapter
 
-        selectionCallback.setSelected(treeViewAdapter!!.selectedNodes.size)
+        selectionCallback.setSelected(treeViewAdapter.selectedNodes.size)
 
         if (parameters.dataWrapper.instanceDatas.isEmpty() && parameters.dataWrapper.mNote.isNullOrEmpty() && parameters.dataWrapper.TaskDatas.isNullOrEmpty()) {
             groupListRecycler.visibility = View.GONE
@@ -585,7 +576,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     fun updateSelectAll() = (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, parameters.dataWrapper.instanceDatas.values.any { it.Done == null })
 
-    fun selectAll() = treeViewAdapter!!.selectAll()
+    fun selectAll() = treeViewAdapter.selectAll()
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         MyCrashlytics.log(javaClass.simpleName + ".setFab " + hashCode())
@@ -606,11 +597,11 @@ class GroupListFragment : AbstractFragment(), FabUser {
     }
 
     private fun showPadding() = when (val parameters = parameters) {
-            is Parameters.All -> true
-            is Parameters.TimeStamp -> parameters.timeStamp > TimeStamp.now
-            is Parameters.InstanceKey -> parameters.dataWrapper.TaskEditable!!
+        is Parameters.All -> true
+        is Parameters.TimeStamp -> parameters.timeStamp > TimeStamp.now
+        is Parameters.InstanceKey -> parameters.dataWrapper.TaskEditable!!
         else -> false
-        }
+    }
 
     private fun updateFabVisibility() {
         floatingActionButton?.apply {
@@ -820,7 +811,6 @@ class GroupListFragment : AbstractFragment(), FabUser {
             check(Name.isNotEmpty())
             check(HourMinutes.size == 7)
         }
-
     }
 
     interface InstanceDataParent {

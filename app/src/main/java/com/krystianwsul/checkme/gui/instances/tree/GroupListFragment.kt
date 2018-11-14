@@ -16,6 +16,7 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -101,8 +102,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     private var treeViewAdapter: TreeViewAdapter? = null
 
-    lateinit var parameters: Parameters // todo behaviorrelay
-        private set
+    val parametersRelay = BehaviorRelay.create<Parameters>()
+    val parameters get() = parametersRelay.value!!
 
     private var expansionState: ExpansionState? = null
     private var selectedNodes: ArrayList<InstanceKey>? = null
@@ -429,7 +430,6 @@ class GroupListFragment : AbstractFragment(), FabUser {
             return lines.joinToString("\n")
         }
 
-    private val dataRelay = PublishRelay.create<Unit>()
     private val viewCreatedRelay = PublishRelay.create<Unit>()
 
     private fun getShareData(instanceDatas: List<InstanceData>): String {
@@ -481,7 +481,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             }
         }
 
-        Observables.combineLatest(dataRelay, viewCreatedRelay) { _, _ -> Unit }
+        Observables.combineLatest(parametersRelay, viewCreatedRelay) { _, _ -> Unit }
                 .subscribe { initialize() }
                 .addTo(createDisposable)
     }
@@ -499,34 +499,17 @@ class GroupListFragment : AbstractFragment(), FabUser {
     fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
         check(position >= 0)
 
-        parameters = Parameters.All(dataId, dataWrapper, position, timeRange)
-
-        dataRelay.accept(Unit)
+        parametersRelay.accept(Parameters.All(dataId, dataWrapper, position, timeRange))
     }
 
-    fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) {
-        parameters = Parameters.TimeStamp(dataId, dataWrapper, timeStamp)
+    fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TimeStamp(dataId, dataWrapper, timeStamp))
 
-        dataRelay.accept(Unit)
-    }
+    fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.InstanceKey(dataId, dataWrapper, instanceKey))
 
-    fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) {
-        parameters = Parameters.InstanceKey(dataId, dataWrapper, instanceKey)
+    fun setInstanceKeys(dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.InstanceKeys(dataId, dataWrapper))
 
-        dataRelay.accept(Unit)
-    }
+    fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TaskKey(dataId, dataWrapper, taskKey))
 
-    fun setInstanceKeys(dataId: Int, dataWrapper: DataWrapper) {
-        parameters = Parameters.InstanceKeys(dataId, dataWrapper)
-
-        dataRelay.accept(Unit)
-    }
-
-    fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) {
-        parameters = Parameters.TaskKey(dataId, dataWrapper, taskKey)
-
-        dataRelay.accept(Unit)
-    }
 
     private fun useGroups() = parameters is Parameters.All
 
@@ -569,14 +552,12 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         val emptyTextId = when (val parameters = parameters) {
             is Parameters.All -> R.string.instances_empty_root
-            is Parameters.TimeStamp -> null
             is Parameters.InstanceKey -> if (parameters.dataWrapper.TaskEditable!!) {
                     R.string.empty_child
                 } else {
                     R.string.empty_disabled
                 }
-            is Parameters.InstanceKeys -> null
-            is Parameters.TaskKey -> null
+            else -> null
         }
 
         updateFabVisibility()
@@ -614,22 +595,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
             checkNotNull(activity) // todo how the fuck is this null?
 
             when (val parameters = parameters) {
-                is Parameters.All -> {
-                    check(parameters.dataWrapper.TaskEditable == null)
-
-                    startActivity(CreateTaskActivity.getCreateIntent(requireActivity(), CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
-                }
-                is Parameters.TimeStamp -> {
-                    check(parameters.dataWrapper.TaskEditable == null)
-                    check(parameters.timeStamp > TimeStamp.now)
-
-                    startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
-                }
-                is Parameters.InstanceKey -> {
-                    check(parameters.dataWrapper.TaskEditable == true)
-
-                    startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
-                }
+                is Parameters.All -> startActivity(CreateTaskActivity.getCreateIntent(requireActivity(), CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
+                is Parameters.TimeStamp -> startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
+                is Parameters.InstanceKey -> startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
                 else -> throw IllegalStateException()
             }
         }
@@ -637,34 +605,27 @@ class GroupListFragment : AbstractFragment(), FabUser {
         updateFabVisibility()
     }
 
-    private fun showPadding(): Boolean {
-        return when (val parameters = parameters) {
+    private fun showPadding() = when (val parameters = parameters) {
             is Parameters.All -> true
             is Parameters.TimeStamp -> parameters.timeStamp > TimeStamp.now
             is Parameters.InstanceKey -> parameters.dataWrapper.TaskEditable!!
-            is Parameters.InstanceKeys -> false
-            is Parameters.TaskKey -> false
+        else -> false
         }
-    }
 
     private fun updateFabVisibility() {
-        if (floatingActionButton == null)
-            return
-
-        if (this::parameters.isInitialized && !selectionCallback.hasActionMode && showPadding()) {
-            floatingActionButton!!.show()
-        } else {
-            floatingActionButton!!.hide()
+        floatingActionButton?.apply {
+            if (parametersRelay.hasValue() && !selectionCallback.hasActionMode && showPadding()) {
+                show()
+            } else {
+                hide()
+            }
         }
     }
 
     override fun clearFab() {
         MyCrashlytics.log(javaClass.simpleName + ".clearFab " + hashCode())
-        if (floatingActionButton == null)
-            return
 
-        floatingActionButton!!.setOnClickListener(null)
-
+        floatingActionButton?.setOnClickListener(null)
         floatingActionButton = null
     }
 

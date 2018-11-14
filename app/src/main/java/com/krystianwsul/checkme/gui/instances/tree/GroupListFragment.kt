@@ -102,7 +102,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     private var treeViewAdapter: TreeViewAdapter? = null
 
-    val parametersRelay = BehaviorRelay.create<Parameters>()
+    private val parametersRelay = BehaviorRelay.create<Parameters>()
     val parameters get() = parametersRelay.value!!
 
     private var expansionState: ExpansionState? = null

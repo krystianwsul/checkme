@@ -117,6 +117,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     val customTimeCount get() = customTimes.size
 
+    val instanceShownCount get() = localFactory.instanceShownRecords.size
+
     fun save(dataId: Int, source: SaveService.Source) = save(listOf(dataId), source)
 
     fun save(dataIds: List<Int>, source: SaveService.Source) {

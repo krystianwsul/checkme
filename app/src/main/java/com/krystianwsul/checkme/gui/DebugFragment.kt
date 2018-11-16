@@ -64,6 +64,8 @@ class DebugFragment : AbstractFragment() {
                 append(kotlinDomainFactory.instanceCount)
                 append(", custom times: ")
                 append(kotlinDomainFactory.customTimeCount)
+                append(", instance shown: ")
+                append(kotlinDomainFactory.instanceShownCount)
 
                 val t1 = ExactTimeStamp.now
                 DomainFactory.getKotlinDomainFactory().getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)

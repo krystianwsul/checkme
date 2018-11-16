@@ -2137,7 +2137,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .toMutableSet()
 
         val instanceShownRecordNotificationDatas = localFactory.instanceShownRecords
-                .filterNot { it.notificationShown }
+                .filter { it.notificationShown }
                 .map { instanceShownRecord ->
                     val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
                     val remoteCustomTimeId = instanceShownRecord.scheduleCustomTimeId

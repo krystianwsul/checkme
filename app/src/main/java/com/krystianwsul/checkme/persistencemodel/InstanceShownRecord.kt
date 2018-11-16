@@ -110,17 +110,17 @@ class InstanceShownRecord(
 
     override val contentValues
         get() = ContentValues().apply {
-        put(COLUMN_TASK_ID, taskId)
-        put(COLUMN_SCHEDULE_YEAR, scheduleYear)
-        put(COLUMN_SCHEDULE_MONTH, scheduleMonth)
-        put(COLUMN_SCHEDULE_DAY, scheduleDay)
-        put(COLUMN_SCHEDULE_CUSTOM_TIME_ID, scheduleCustomTimeId)
-        put(COLUMN_SCHEDULE_HOUR, scheduleHour)
-        put(COLUMN_SCHEDULE_MINUTE, scheduleMinute)
-        put(COLUMN_NOTIFIED, if (notified) 1 else 0)
-        put(COLUMN_NOTIFICATION_SHOWN, if (notificationShown) 1 else 0)
-        put(COLUMN_PROJECT_ID, projectId)
-    }
+            put(COLUMN_TASK_ID, taskId)
+            put(COLUMN_SCHEDULE_YEAR, scheduleYear)
+            put(COLUMN_SCHEDULE_MONTH, scheduleMonth)
+            put(COLUMN_SCHEDULE_DAY, scheduleDay)
+            put(COLUMN_SCHEDULE_CUSTOM_TIME_ID, scheduleCustomTimeId)
+            put(COLUMN_SCHEDULE_HOUR, scheduleHour)
+            put(COLUMN_SCHEDULE_MINUTE, scheduleMinute)
+            put(COLUMN_NOTIFIED, if (notified) 1 else 0)
+            put(COLUMN_NOTIFICATION_SHOWN, if (notificationShown) 1 else 0)
+            put(COLUMN_PROJECT_ID, projectId)
+        }
 
     override val commandTable = TABLE_INSTANCES_SHOWN
     override val commandIdColumn = COLUMN_ID

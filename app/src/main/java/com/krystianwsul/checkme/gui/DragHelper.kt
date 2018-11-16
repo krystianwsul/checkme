@@ -2,9 +2,12 @@ package com.krystianwsul.checkme.gui
 
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
-class DragHelper(private val treeViewAdapter: TreeViewAdapter, private val callback: MyCallback = MyCallback(treeViewAdapter)) : ItemTouchHelper(callback) {
+class DragHelper(
+        private val treeViewAdapter: TreeViewAdapter,
+        private val callback: MyCallback = MyCallback(treeViewAdapter)) : ItemTouchHelper(callback) {
 
     private var startPosition: Int? = null
 
@@ -20,10 +23,12 @@ class DragHelper(private val treeViewAdapter: TreeViewAdapter, private val callb
     }
 
     override fun startDrag(viewHolder: RecyclerView.ViewHolder) {
+        MyCrashlytics.logMethod(this, "startPosition before: $startPosition")
         check(startPosition == null)
         check(callback.endPosition == null)
 
         startPosition = viewHolder.adapterPosition
+        MyCrashlytics.logMethod(this, "startPosition after: $startPosition")
 
         super.startDrag(viewHolder)
     }
@@ -36,8 +41,13 @@ class DragHelper(private val treeViewAdapter: TreeViewAdapter, private val callb
         lateinit var listener: (Int) -> Unit
 
         override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            MyCrashlytics.logMethod(this, "endPosition before: $endPosition")
+
             val from = viewHolder.adapterPosition
+            MyCrashlytics.logMethod(this, "from: $from")
             endPosition = target.adapterPosition
+
+            MyCrashlytics.logMethod(this, "endPosition after: $endPosition")
 
             treeViewAdapter.moveItem(from, endPosition!!)
 
@@ -49,6 +59,7 @@ class DragHelper(private val treeViewAdapter: TreeViewAdapter, private val callb
         override fun isItemViewSwipeEnabled() = false
 
         override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            MyCrashlytics.logMethod(this, "endPosition: $endPosition")
             endPosition?.let { listener(it) }
             endPosition = null
 

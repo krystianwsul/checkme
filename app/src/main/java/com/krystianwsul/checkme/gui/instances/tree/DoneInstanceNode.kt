@@ -57,12 +57,12 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
-    override val name get() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
+    override val name get() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
 
     override val details
         get() = instanceData.DisplayText
             .takeUnless { it.isNullOrEmpty() }
-            ?.let { Pair(it, ContextCompat.getColor(dividerNode.groupAdapter.mGroupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary)) }
+                ?.let { Pair(it, ContextCompat.getColor(dividerNode.groupAdapter.mGroupListFragment.activity, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary)) }
 
     override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData, groupListFragment)
 
@@ -118,7 +118,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override val isSelectable = false
 
-    override fun onClick() = groupListFragment.activity!!.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity!!, instanceData.InstanceKey))
+    override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
     override val isVisibleWhenEmpty = true
 

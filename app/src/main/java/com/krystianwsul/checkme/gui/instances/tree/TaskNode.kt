@@ -63,7 +63,7 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
         }
     }
 
-    override val name get() = Triple(taskData.Name, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
+    override val name get() = Triple(taskData.Name, ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), true)
 
     override val children
         get() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
@@ -79,7 +79,7 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
             taskData.mNote
         }
 
-        val color = ContextCompat.getColor(groupListFragment.activity!!, R.color.textSecondary)
+            val color = ContextCompat.getColor(groupListFragment.activity, R.color.textSecondary)
 
         Pair(text, color)
     }
@@ -110,7 +110,7 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
     override val isSelectable = false
 
     override fun onClick() {
-        groupListFragment.activity!!.startActivity(ShowTaskActivity.newIntent(taskData.mTaskKey))
+        groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.mTaskKey))
     }
 
     override val isVisibleWhenEmpty = true

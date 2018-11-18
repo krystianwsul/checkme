@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.synthetic.main.activity_show_notification_group.*
 
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -30,8 +31,6 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
 
     private lateinit var taskKey: TaskKey
 
-    private lateinit var groupListFragment: GroupListFragment
-
     private var selectAllVisible = false
 
     private lateinit var showTaskInstancesViewModel: ShowTaskInstancesViewModel
@@ -43,12 +42,6 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
         setSupportActionBar(toolbar)
 
         supportActionBar!!.title = null
-
-        groupListFragment = (supportFragmentManager.findFragmentById(R.id.show_notification_group_list) as? GroupListFragment) ?: GroupListFragment.newInstance().also {
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.show_notification_group_list, it)
-                    .commit()
-        }
 
         check(intent.hasExtra(TASK_KEY))
 

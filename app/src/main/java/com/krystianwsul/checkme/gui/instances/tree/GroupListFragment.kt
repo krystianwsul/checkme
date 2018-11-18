@@ -8,16 +8,13 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -36,21 +33,21 @@ import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.empty_text.*
-import kotlinx.android.synthetic.main.fragment_group_list.*
+import kotlinx.android.synthetic.main.empty_text.view.*
+import kotlinx.android.synthetic.main.fragment_group_list.view.*
 import java.util.*
 
-class GroupListFragment : AbstractFragment(), FabUser {
+class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = 0) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes), FabUser {
 
     companion object {
 
+        private const val SUPER_STATE_KEY = "superState"
         private const val EXPANSION_STATE_KEY = "expansionState"
         private const val SELECTED_NODES_KEY = "selectedNodes"
-
-        fun newInstance() = GroupListFragment()
 
         private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
             check(position >= 0)
@@ -100,6 +97,8 @@ class GroupListFragment : AbstractFragment(), FabUser {
         }
     }
 
+    val activity = context as AbstractActivity
+
     private lateinit var treeViewAdapter: TreeViewAdapter
 
     private val parametersRelay = BehaviorRelay.create<Parameters>()
@@ -128,24 +127,24 @@ class GroupListFragment : AbstractFragment(), FabUser {
                         val instanceData = instanceDatas[0]
                         check(instanceData.IsRootInstance)
 
-                        startActivity(EditInstanceActivity.getIntent(instanceData.InstanceKey))
+                        activity.startActivity(EditInstanceActivity.getIntent(instanceData.InstanceKey))
                     } else {
                         check(instanceDatas.size > 1)
                         check(instanceDatas.all { it.IsRootInstance })
 
                         val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
 
-                        startActivity(EditInstancesActivity.getIntent(instanceKeys))
+                        activity.startActivity(EditInstancesActivity.getIntent(instanceKeys))
                     }
                 }
-                R.id.action_group_share -> Utils.share(requireActivity(), getShareData(instanceDatas))
+                R.id.action_group_share -> Utils.share(activity, getShareData(instanceDatas))
                 R.id.action_group_show_task -> {
                     check(instanceDatas.size == 1)
 
                     val instanceData = instanceDatas[0]
                     check(instanceData.TaskCurrent)
 
-                    startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.taskKey))
+                    activity.startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_edit_task -> {
                     check(instanceDatas.size == 1)
@@ -153,7 +152,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val instanceData = instanceDatas[0]
                     check(instanceData.TaskCurrent)
 
-                    startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
+                    activity.startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_delete_task -> {
                     val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
@@ -182,14 +181,14 @@ class GroupListFragment : AbstractFragment(), FabUser {
                     val instanceData = instanceDatas[0]
                     check(instanceData.TaskCurrent)
 
-                    activity!!.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.taskKey))
+                    activity.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_join -> {
                     val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
                     check(taskKeys.size > 1)
 
                     if (parameters is Parameters.InstanceKey) {
-                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, (parameters as Parameters.InstanceKey).instanceKey.taskKey))
+                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, (parameters as Parameters.InstanceKey).instanceKey.taskKey))
                     } else {
                         val firstInstanceData = instanceDatas.minBy { it.InstanceTimeStamp }!!
 
@@ -197,7 +196,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
                         val timePair = firstInstanceData.InstanceTimePair
 
-                        startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
+                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
                     }
                 }
                 R.id.action_group_mark_done -> {
@@ -426,7 +425,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
             return lines.joinToString("\n")
         }
 
-    private val viewCreatedRelay = PublishRelay.create<Unit>()
+    private val compositeDisposable = CompositeDisposable()
 
     private fun getShareData(instanceDatas: List<InstanceData>): String {
         check(instanceDatas.isNotEmpty())
@@ -454,37 +453,42 @@ class GroupListFragment : AbstractFragment(), FabUser {
                 .forEach { printTree(lines, indentation + 1, it) }
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
+    init {
         check(context is GroupListListener)
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        savedInstanceState?.takeIf { it.containsKey(EXPANSION_STATE_KEY) }?.apply {
-            expansionState = getParcelable(EXPANSION_STATE_KEY)
-
-            if (containsKey(SELECTED_NODES_KEY)) {
-                selectedNodes = getParcelableArrayList(SELECTED_NODES_KEY)
-                check(selectedNodes!!.isNotEmpty())
-            }
-        }
-
-        Observables.combineLatest(parametersRelay, viewCreatedRelay) { _, _ -> Unit }
-                .subscribe { initialize() }
-                .addTo(createDisposable)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_group_list, container, false)!!
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        inflate(context, R.layout.fragment_group_list, this)
 
         groupListRecycler.layoutManager = LinearLayoutManager(context)
+    }
 
-        viewCreatedRelay.accept(Unit)
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if (state is Bundle) {
+            state.takeIf { it.containsKey(EXPANSION_STATE_KEY) }?.apply {
+                expansionState = getParcelable(EXPANSION_STATE_KEY)
+
+                if (containsKey(SELECTED_NODES_KEY)) {
+                    selectedNodes = getParcelableArrayList(SELECTED_NODES_KEY)
+                    check(selectedNodes!!.isNotEmpty())
+                }
+            }
+            super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
+        } else {
+            super.onRestoreInstanceState(state)
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        Observables.combineLatest(parametersRelay, activity.onPostCreate) { _, _ -> Unit }
+                .subscribe { initialize() }
+                .addTo(compositeDisposable)
+    }
+
+    override fun onDetachedFromWindow() {
+        compositeDisposable.clear()
+
+        super.onDetachedFromWindow()
     }
 
     fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
@@ -501,23 +505,24 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
     fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TaskKey(dataId, dataWrapper, taskKey))
 
-
     private fun useGroups() = parameters is Parameters.All
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
+    override fun onSaveInstanceState(): Parcelable {
+        return Bundle().apply {
+            putParcelable(SUPER_STATE_KEY, super.onSaveInstanceState())
 
-        if (this::treeViewAdapter.isInitialized) {
-            outState.putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState)
+            if (this@GroupListFragment::treeViewAdapter.isInitialized) {
+                putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState)
 
-            if (selectionCallback.hasActionMode) {
-                val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
-                check(instanceDatas.isNotEmpty())
+                if (selectionCallback.hasActionMode) {
+                    val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
+                    check(instanceDatas.isNotEmpty())
 
-                val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
-                check(instanceKeys.isNotEmpty())
+                    val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
+                    check(instanceKeys.isNotEmpty())
 
-                outState.putParcelableArrayList(SELECTED_NODES_KEY, instanceKeys)
+                    putParcelableArrayList(SELECTED_NODES_KEY, instanceKeys)
+                }
             }
         }
     }
@@ -586,9 +591,9 @@ class GroupListFragment : AbstractFragment(), FabUser {
             checkNotNull(activity) // todo how the fuck is this null?
 
             when (val parameters = parameters) {
-                is Parameters.All -> startActivity(CreateTaskActivity.getCreateIntent(requireActivity(), CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
-                is Parameters.TimeStamp -> startActivity(CreateTaskActivity.getCreateIntent(activity!!, CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
-                is Parameters.InstanceKey -> startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
+                is Parameters.All -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
+                is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
+                is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
                 else -> throw IllegalStateException()
             }
         }
@@ -640,7 +645,7 @@ class GroupListFragment : AbstractFragment(), FabUser {
 
         private var mNodeCollection: NodeCollection? = null
 
-        private val mDensity = mGroupListFragment.activity!!.resources.displayMetrics.density
+        private val mDensity = mGroupListFragment.activity.resources.displayMetrics.density
 
         val expansionState: ExpansionState
             get() {

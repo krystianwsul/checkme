@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -38,7 +37,6 @@ class DayFragment : AbstractFragment(), FabUser {
     private var position = 0
     private lateinit var timeRange: MainActivity.TimeRange
 
-    private var groupListFragment: GroupListFragment? = null
     private var floatingActionButton: FloatingActionButton? = null
 
     private lateinit var dayViewModel: DayViewModel
@@ -103,20 +101,16 @@ class DayFragment : AbstractFragment(), FabUser {
 
         dayTabLayout.addTab(dayTabLayout.newTab().setText(title))
 
-        groupListFragment = childFragmentManager.findFragmentById(R.id.day_frame) as GroupListFragment
-
-        floatingActionButton?.let { groupListFragment!!.setFab(it) }
+        floatingActionButton?.let { groupListFragment.setFab(it) }
 
         dayViewModel = getViewModel<DayViewModel>().apply {
             start(position, timeRange)
 
-            createDisposable += data.subscribe { groupListFragment!!.setAll(timeRange, position, it.dataId, it.dataWrapper) }
+            createDisposable += data.subscribe { groupListFragment.setAll(timeRange, position, it.dataId, it.dataWrapper) }
         }
     }
 
-    fun selectAll() {
-        groupListFragment!!.selectAll()
-    }
+    fun selectAll() = groupListFragment.selectAll()
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         if (this.floatingActionButton === floatingActionButton)
@@ -130,6 +124,6 @@ class DayFragment : AbstractFragment(), FabUser {
     override fun clearFab() {
         floatingActionButton = null
 
-        groupListFragment!!.clearFab()
+        groupListFragment.clearFab()
     }
 }

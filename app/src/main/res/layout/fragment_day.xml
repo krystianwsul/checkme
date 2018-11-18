@@ -21,7 +21,6 @@
     <com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
         android:id="@+id/groupListFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:rvp_singlePageFling="true"/>
+        android:layout_height="match_parent"/>
 
 </merge>

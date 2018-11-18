@@ -9,7 +9,6 @@ import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -462,7 +461,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
         groupListRecycler.layoutManager = LinearLayoutManager(context)
     }
 
-    override fun onRestoreInstanceState(state: Parcelable?) {
+    public override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is Bundle) {
             state.takeIf { it.containsKey(EXPANSION_STATE_KEY) }?.apply {
                 expansionState = getParcelable(EXPANSION_STATE_KEY)
@@ -497,7 +496,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
         val differentPage = (parametersRelay.value as? Parameters.All)?.let { it.timeRange != timeRange || it.position != position }
                 ?: false
-        Log.e("asdf", "position: previous page " + (parametersRelay.value as? Parameters.All)?.position)
 
         parametersRelay.accept(Parameters.All(dataId, dataWrapper, position, timeRange, differentPage))
     }
@@ -512,7 +510,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     private fun useGroups() = parameters is Parameters.All
 
-    override fun onSaveInstanceState(): Parcelable {
+    public override fun onSaveInstanceState(): Bundle {
         return Bundle().apply {
             putParcelable(SUPER_STATE_KEY, super.onSaveInstanceState())
 
@@ -530,11 +528,9 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 }
             }
         }
-    } // todo paging
+    }
 
     private fun initialize() {
-        Log.e("asdf", "position: initialize " + (parameters as Parameters.All).position)
-
         groupListProgress.visibility = View.GONE
 
         if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage == false) {

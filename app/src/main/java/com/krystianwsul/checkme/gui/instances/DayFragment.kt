@@ -5,7 +5,6 @@ import android.content.Context
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.LinearLayoutCompat
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.FabUser
@@ -21,8 +20,7 @@ import java.util.*
 
 class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr), FabUser {
 
-    private var position = 0
-    private lateinit var timeRange: MainActivity.TimeRange
+    private var key: Pair<MainActivity.TimeRange, Int>? = null
 
     private var floatingActionButton: FloatingActionButton? = null
 
@@ -39,14 +37,21 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         orientation = LinearLayoutCompat.VERTICAL
     }
 
-    fun setPosition(timeRange: MainActivity.TimeRange, position: Int) {
-        Log.e("asdf", "position: dayFragment.setPosition " + position)
+    fun saveState() {
+        activity.states[key!!] = groupListFragment.onSaveInstanceState()
+    }
 
+    fun setPosition(timeRange: MainActivity.TimeRange, position: Int) {
         entry?.stop()
         compositeDisposable.clear()
 
-        this.position = position
-        this.timeRange = timeRange
+        key?.let { saveState() }
+
+        key = Pair(timeRange, position)
+
+        activity.states[key!!]?.let {
+            groupListFragment.onRestoreInstanceState(it)
+        }
 
         val title = if (timeRange == MainActivity.TimeRange.DAY) {
             when (position) {
@@ -96,10 +101,7 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         entry = dayViewModel.getEntry(timeRange, position).apply {
             start()
 
-            compositeDisposable += data.subscribe {
-                Log.e("asdf", "position: data for $position")
-                groupListFragment.setAll(timeRange, position, it.dataId, it.dataWrapper)
-            }
+            compositeDisposable += data.subscribe { groupListFragment.setAll(timeRange, position, it.dataId, it.dataWrapper) }
         }
     }
 

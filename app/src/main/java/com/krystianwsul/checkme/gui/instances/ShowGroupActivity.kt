@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.synthetic.main.activity_show_group.*
 
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -33,8 +34,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
     private lateinit var timeStamp: TimeStamp
 
     private lateinit var actionBar: ActionBar
-
-    private lateinit var groupListFragment: GroupListFragment
 
     private var selectAllVisible = false
 
@@ -58,12 +57,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
         check(time != -1L)
 
         timeStamp = TimeStamp.fromMillis(time)
-
-        groupListFragment = (supportFragmentManager.findFragmentById(R.id.show_group_list) as? GroupListFragment) ?: GroupListFragment.newInstance().also {
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.show_group_list, it)
-                    .commit()
-        }
 
         groupListFragment.setFab(showGroupFab)
 

@@ -5,16 +5,16 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.util.ArrayMap
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewCompat
-import android.support.v4.view.ViewPager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.view.ActionMode
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
@@ -47,10 +47,13 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.lsjwzh.widget.recyclerviewpager.RecyclerViewPager
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.joda.time.DateTime
@@ -68,6 +71,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         private const val DEBUG_KEY = "debug"
         private const val SEARCH_KEY = "search"
         private const val CALENDAR_KEY = "calendar"
+        private const val DAY_STATES_KEY = "dayStates"
 
         private const val RC_SIGN_IN = 1000
 
@@ -87,7 +91,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var drawerTaskListener: DrawerLayout.DrawerListener? = null
     private var drawerGroupListener: DrawerLayout.DrawerListener? = null
-    private var onPageChangeListener: ViewPager.OnPageChangeListener? = null
+    private var onPageChangeListener: RecyclerViewPager.OnPageChangedListener? = null
     private var drawerCustomTimesListener: DrawerLayout.DrawerListener? = null
     private var drawerUsersListener: DrawerLayout.DrawerListener? = null
 
@@ -135,6 +139,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private lateinit var mainViewModel: MainViewModel
 
+    lateinit var dayViewModel: DayViewModel
+        private set
+
+    lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
+        private set
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
         return true
@@ -146,7 +156,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 findItem(R.id.action_calendar).isVisible = (timeRange == TimeRange.DAY)
                 findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
-                findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentItem] ?: false
+                findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
             }
             Tab.TASKS -> {
                 findItem(R.id.action_calendar).isVisible = false
@@ -233,35 +243,43 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-
         setSupportActionBar(mainActivityToolbar)
+        mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        savedInstanceState?.run {
-            check(containsKey(VISIBLE_TAB_KEY))
-            visibleTab = getSerializable(VISIBLE_TAB_KEY) as Tab
+        if (savedInstanceState != null) {
+            savedInstanceState.run {
+                check(containsKey(VISIBLE_TAB_KEY))
+                visibleTab = getSerializable(VISIBLE_TAB_KEY) as Tab
 
-            if (containsKey(IGNORE_FIRST_KEY)) {
-                check(visibleTab == Tab.INSTANCES)
-                ignoreFirst = true
-            }
-
-            check(containsKey(TIME_RANGE_KEY))
-            timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
-
-            check(containsKey(DEBUG_KEY))
-            debug = getBoolean(DEBUG_KEY)
-
-            if (containsKey(SEARCH_KEY)) {
-                mainActivitySearch.run {
-                    visibility = View.VISIBLE
-                    setText(getString(SEARCH_KEY))
+                if (containsKey(IGNORE_FIRST_KEY)) {
+                    check(visibleTab == Tab.INSTANCES)
+                    ignoreFirst = true
                 }
+
+                check(containsKey(TIME_RANGE_KEY))
+                timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
+
+                check(containsKey(DEBUG_KEY))
+                debug = getBoolean(DEBUG_KEY)
+
+                if (containsKey(SEARCH_KEY)) {
+                    mainActivitySearch.run {
+                        visibility = View.VISIBLE
+                        setText(getString(SEARCH_KEY))
+                    }
+                }
+
+                calendarOpen = getBoolean(CALENDAR_KEY)
+
+                updateCalendarHeight()
+                updateCalendarDate()
+
+                states = getParcelableArrayList<ParcelableState>(DAY_STATES_KEY)!!.associate {
+                    Pair(it.timeRange, it.position) to it.state
+                }.toMutableMap()
             }
-
-            calendarOpen = getBoolean(CALENDAR_KEY)
-
-            updateCalendarHeight()
-            updateCalendarDate()
+        } else {
+            states = mutableMapOf()
         }
 
         mainActivitySpinner.run {
@@ -283,7 +301,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                     if (newTimeRange != timeRange) {
                         timeRange = newTimeRange
-                        mainDaysPager.adapter = MyFragmentStatePagerAdapter(supportFragmentManager)
+                        mainDaysPager.adapter = MyFragmentStatePagerAdapter()
 
                         groupSelectAllVisible.clear()
                         invalidateOptionsMenu()
@@ -327,20 +345,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
 
         mainDaysPager.run {
-            addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            addOnPageChangedListener { _, _ ->
+                invalidateOptionsMenu()
 
-                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) = Unit
+                updateCalendarDate()
+            }
 
-                override fun onPageSelected(position: Int) {
-                    invalidateOptionsMenu()
-
-                    updateCalendarDate()
-                }
-
-                override fun onPageScrollStateChanged(state: Int) = Unit
-            })
-
-            adapter = MyFragmentStatePagerAdapter(supportFragmentManager)
+            adapter = MyFragmentStatePagerAdapter()
         }
 
         mainActivityNavigation.run {
@@ -471,7 +482,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             Log.e("asdf", "days: " + Days.daysBetween(date, LocalDate.now()).days)
 
-            mainDaysPager.currentItem = Days.daysBetween(LocalDate.now(), date).days
+            mainDaysPager.scrollToPosition(Days.daysBetween(LocalDate.now(), date).days)
 
             calendarOpen = false
             updateCalendarHeight()
@@ -482,6 +493,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             createDisposable += data.subscribe { taskListFragment.setAllTasks(it.dataId, it.taskData) }
         }
+
+        dayViewModel = getViewModel()
     }
 
     override fun onStart() {
@@ -513,7 +526,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             if (visibleTab == Tab.INSTANCES) {
                 check(mainDaysPager.visibility == View.VISIBLE)
-                if (mainDaysPager.currentItem != 0 && onPageChangeListener != null)
+                if (mainDaysPager.currentPosition != 0 && onPageChangeListener != null)
                     putInt(IGNORE_FIRST_KEY, 1)
             }
 
@@ -526,6 +539,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             }
 
             putBoolean(CALENDAR_KEY, calendarOpen)
+
+            (mainDaysPager.layoutManager!!.findViewByPosition(mainDaysPager.currentPosition) as DayFragment).saveState()
+
+            putParcelableArrayList(DAY_STATES_KEY, ArrayList(states.map { ParcelableState(it.key.first, it.key.second, it.value) }))
         }
     }
 
@@ -722,20 +739,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         check(onPageChangeListener == null)
 
-        onPageChangeListener = object : ViewPager.OnPageChangeListener {
-
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) = Unit
-
-            override fun onPageSelected(position: Int) {
-                if (ignoreFirst)
-                    ignoreFirst = false
-                else
-                    actionMode.finish()
-            }
-
-            override fun onPageScrollStateChanged(state: Int) = Unit
+        onPageChangeListener = RecyclerViewPager.OnPageChangedListener { _: Int, _: Int ->
+            if (ignoreFirst)
+                ignoreFirst = false
+            else
+                actionMode.finish()
         }
-        mainDaysPager.addOnPageChangeListener(onPageChangeListener!!)
+        mainDaysPager.addOnPageChangedListener(onPageChangeListener!!)
     }
 
     override fun onDestroyGroupActionMode() {
@@ -745,7 +755,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         mainActivityDrawer.removeDrawerListener(drawerGroupListener!!)
         drawerGroupListener = null
 
-        mainDaysPager.removeOnPageChangeListener(onPageChangeListener!!)
+        mainDaysPager.removeOnPageChangedListener(onPageChangeListener!!)
         onPageChangeListener = null
     }
 
@@ -924,12 +934,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             return
 
         mainCalendar.date = LocalDate.now()
-                .plusDays(mainDaysPager.currentItem)
+                .plusDays(mainDaysPager.currentPosition)
                 .toDateTimeAtStartOfDay()
                 .millis
     }
 
-    private inner class MyFragmentStatePagerAdapter(fragmentManager: FragmentManager) : FragmentStatePagerAdapter(fragmentManager), FabUser {
+    private inner class MyFragmentStatePagerAdapter : RecyclerView.Adapter<Holder>(), FabUser {
 
         private var currentItemRef: WeakReference<DayFragment>? = null
 
@@ -942,9 +952,34 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 return currentItemRef!!.get()!!
             }
 
-        override fun getItem(position: Int) = DayFragment.newInstance(timeRange, position)
+        init {
+            mainDaysPager.addOnPageChangedListener { _, after ->
+                val newDayFragment = mainDaysPager.layoutManager!!.findViewByPosition(after) as DayFragment
 
-        override fun getCount() = Integer.MAX_VALUE
+                currentItemRef?.let {
+                    val oldDayFragment = it.get()!!
+
+                    if (newDayFragment != oldDayFragment) {
+                        oldDayFragment.run {
+                            saveState()
+                            clearFab()
+                        }
+                    } else {
+                        return@addOnPageChangedListener
+                    }
+                }
+
+                floatingActionButton?.let { newDayFragment.setFab(it) }
+
+                currentItemRef = WeakReference(newDayFragment)
+            }
+        }
+
+        override fun getItemCount() = Integer.MAX_VALUE
+
+        override fun onCreateViewHolder(parent: ViewGroup, position: Int) = Holder(DayFragment(this@MainActivity))
+
+        override fun onBindViewHolder(holder: Holder, position: Int) = holder.dayFragment.setPosition(timeRange, position)
 
         override fun setFab(floatingActionButton: FloatingActionButton) {
             this.floatingActionButton = floatingActionButton
@@ -957,27 +992,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             currentItemRef?.let { currentItemRef!!.get()!!.clearFab() }
         }
-
-        override fun setPrimaryItem(container: ViewGroup, position: Int, obj: Any) {
-            super.setPrimaryItem(container, position, obj)
-
-            currentItemRef?.let {
-                val dayFragment = it.get()!!
-
-                if (dayFragment != obj) {
-                    dayFragment.clearFab()
-                } else {
-                    return
-                }
-            }
-
-            val dayFragment = obj as DayFragment
-
-            floatingActionButton?.let { dayFragment.setFab(it) }
-
-            currentItemRef = WeakReference(dayFragment)
-        }
     }
+
+    private class Holder(val dayFragment: DayFragment) : RecyclerView.ViewHolder(dayFragment)
 
     private class GoogleSignInException(message: String) : Exception(message)
 
@@ -995,4 +1012,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         WEEK,
         MONTH
     }
+
+    @Parcelize
+    private class ParcelableState(val timeRange: TimeRange, val position: Int, val state: Bundle) : Parcelable
 }

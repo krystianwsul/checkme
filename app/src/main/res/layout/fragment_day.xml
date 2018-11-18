@@ -1,4 +1,4 @@
-<LinearLayout
+<merge
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -18,10 +18,9 @@
         tools:ignore="UnusedAttribute"
         app:tabGravity="center"/>
 
-    <fragment
-        android:id="@+id/day_frame"
+    <com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+        android:id="@+id/groupListFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.krystianwsul.checkme.gui.instances.tree.GroupListFragment"/>
+        android:layout_height="match_parent"/>
 
-</LinearLayout>
+</merge>

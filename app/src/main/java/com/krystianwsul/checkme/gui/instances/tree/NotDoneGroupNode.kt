@@ -105,12 +105,12 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     override val name
         get(): Triple<String, Int, Boolean>? {
         return if (singleInstance()) {
-            Triple(singleInstanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
+            Triple(singleInstanceData.Name, ContextCompat.getColor(groupListFragment.activity, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
         } else {
             if (treeNode.isExpanded) {
                 null
             } else {
-                Triple(instanceDatas.sorted().joinToString(", ") { it.Name }, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), true)
+                Triple(instanceDatas.sorted().joinToString(", ") { it.Name }, ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), true)
             }
         }
     }
@@ -123,7 +123,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             return if (singleInstanceData.DisplayText.isNullOrEmpty()) {
                 null
             } else {
-                Pair(singleInstanceData.DisplayText!!, ContextCompat.getColor(groupListFragment.activity!!, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary))
+                Pair(singleInstanceData.DisplayText!!, ContextCompat.getColor(groupListFragment.activity, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary))
             }
         } else {
             val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
@@ -137,7 +137,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
             val text = date.getDisplayText() + ", " + timeText
 
-            return Pair(text, ContextCompat.getColor(groupListFragment.activity!!, R.color.textSecondary))
+            return Pair(text, ContextCompat.getColor(groupListFragment.activity, R.color.textSecondary))
         }
     }
 
@@ -214,7 +214,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         get(): Int {
         return if (singleInstance()) {
             if (treeNode.isSelected)
-                ContextCompat.getColor(groupListFragment.activity!!, R.color.selected)
+                ContextCompat.getColor(groupListFragment.activity, R.color.selected)
             else
                 Color.TRANSPARENT
         } else {
@@ -241,10 +241,10 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
     override val onClickListener get() = treeNode.onClickListener
 
     override fun onClick() {
-        groupListFragment.activity!!.startActivity(if (singleInstance()) {
-            ShowInstanceActivity.getIntent(groupListFragment.activity!!, singleInstanceData.InstanceKey)
+        groupListFragment.activity.startActivity(if (singleInstance()) {
+            ShowInstanceActivity.getIntent(groupListFragment.activity, singleInstanceData.InstanceKey)
         } else {
-            ShowGroupActivity.getIntent((treeNode.modelNode as NotDoneGroupNode).exactTimeStamp, groupListFragment.activity!!)
+            ShowGroupActivity.getIntent((treeNode.modelNode as NotDoneGroupNode).exactTimeStamp, groupListFragment.activity)
         })
     }
 
@@ -379,7 +379,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                     .values
                     .filter { it.Done == null }
                     .let {
-                        fun color() = ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) {
+                        fun color() = ContextCompat.getColor(groupListFragment.activity, if (!instanceData.TaskCurrent) {
                             R.color.textDisabled
                         } else {
                             R.color.textSecondary
@@ -444,7 +444,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val name get() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity!!, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
+        override val name get() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
 
         override val children get() = getChildrenNew(treeNode, instanceData, groupListFragment)
 
@@ -501,7 +501,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                 check(parentNotDoneGroupNode.treeNode.isExpanded)
 
             return if (treeNode.isSelected)
-                ContextCompat.getColor(groupListFragment.activity!!, R.color.selected)
+                ContextCompat.getColor(groupListFragment.activity, R.color.selected)
             else
                 Color.TRANSPARENT
         }
@@ -511,7 +511,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         override val onClickListener get() = treeNode.onClickListener
 
         override fun onClick() {
-            groupListFragment.activity!!.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity!!, instanceData.InstanceKey))
+            groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
         }
 
         override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)

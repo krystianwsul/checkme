@@ -53,8 +53,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     private var first = false
 
-    private lateinit var groupListFragment: GroupListFragment
-
     private var selectAllVisible = false
 
     private lateinit var showInstanceViewModel: ShowInstanceViewModel
@@ -154,12 +152,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
         check(intent.hasExtra(INSTANCE_KEY))
         instanceKey = intent.getParcelableExtra(INSTANCE_KEY)!!
-
-        groupListFragment = supportFragmentManager.findFragmentById(R.id.show_instance_list) as? GroupListFragment ?: GroupListFragment.newInstance().also {
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.show_instance_list, it)
-                    .commit()
-        }
 
         groupListFragment.setFab(showInstanceFab)
 

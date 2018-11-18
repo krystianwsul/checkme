@@ -26,7 +26,7 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
         return treeNode
     }
 
-    override val name get() = Triple(note, ContextCompat.getColor(groupListFragment.activity!!, R.color.textPrimary), false)
+    override val name get() = Triple(note, ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), false)
 
     override val checkBoxVisibility = View.GONE
 

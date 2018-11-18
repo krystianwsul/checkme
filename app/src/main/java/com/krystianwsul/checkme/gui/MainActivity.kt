@@ -46,6 +46,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.lsjwzh.widget.recyclerviewpager.RecyclerViewPager
@@ -134,6 +135,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private var calendarInitial: Boolean = true
 
     private lateinit var mainViewModel: MainViewModel
+
+    lateinit var dayViewModel: DayViewModel
+        private set
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
@@ -233,8 +237,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-
         setSupportActionBar(mainActivityToolbar)
+        mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
         savedInstanceState?.run {
             check(containsKey(VISIBLE_TAB_KEY))
@@ -263,8 +267,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             updateCalendarHeight()
             updateCalendarDate()
         }
-
-        mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
         mainActivitySpinner.run {
             adapter = ArrayAdapter.createFromResource(supportActionBar!!.themedContext, R.array.main_activity_spinner, R.layout.custom_toolbar_spinner).apply {
@@ -477,6 +479,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             createDisposable += data.subscribe { taskListFragment.setAllTasks(it.dataId, it.taskData) }
         }
+
+        dayViewModel = getViewModel()
     }
 
     override fun onStart() {

@@ -8,14 +8,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.DayViewModel
-import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_day.view.*
 import java.text.DateFormatSymbols
 import java.util.*
@@ -28,9 +26,10 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
 
     private var floatingActionButton: FloatingActionButton? = null
 
-    private val dayViewModel: DayViewModel
+    private val activity = context as MainActivity
 
-    private val activity = context as AbstractActivity
+    private val dayViewModel = activity.dayViewModel
+    private var entry: DayViewModel.Entry? = null
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -38,14 +37,13 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         View.inflate(context, R.layout.fragment_day, this)
 
         orientation = LinearLayoutCompat.VERTICAL
-
-        dayViewModel = activity.getViewModel()
     }
 
     fun setPosition(timeRange: MainActivity.TimeRange, position: Int) {
         Log.e("asdf", "position: dayFragment.setPosition " + position)
 
-        dayViewModel.stop()
+        entry?.stop()
+        compositeDisposable.clear()
 
         this.position = position
         this.timeRange = timeRange
@@ -95,18 +93,14 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
 
         floatingActionButton?.let { groupListFragment.setFab(it) }
 
-        dayViewModel.start(position, timeRange) // todo hold models for each page
-    }
+        entry = dayViewModel.getEntry(timeRange, position).apply {
+            start()
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-
-        dayViewModel.data
-                .subscribe {
-                    Log.e("asdf", "position: data for $position")
-                    groupListFragment.setAll(timeRange, position, it.dataId, it.dataWrapper)
-                }
-                .addTo(compositeDisposable)
+            compositeDisposable += data.subscribe {
+                Log.e("asdf", "position: data for $position")
+                groupListFragment.setAll(timeRange, position, it.dataId, it.dataWrapper)
+            }
+        }
     }
 
     override fun onDetachedFromWindow() {

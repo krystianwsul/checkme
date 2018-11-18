@@ -1,68 +1,59 @@
 package com.krystianwsul.checkme.gui.instances
 
 
-import android.os.Bundle
+import android.content.Context
 import android.support.design.widget.FloatingActionButton
-import android.view.LayoutInflater
-import android.view.ViewGroup
+import android.support.v7.widget.LinearLayoutCompat
+import android.util.AttributeSet
+import android.util.Log
+import android.view.View
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractFragment
+import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.fragment_day.*
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import kotlinx.android.synthetic.main.fragment_day.view.*
 import java.text.DateFormatSymbols
 import java.util.*
 
-class DayFragment : AbstractFragment(), FabUser {
 
-    companion object {
-
-        private const val POSITION_KEY = "position"
-        private const val TIME_RANGE_KEY = "timeRange"
-
-        fun newInstance(timeRange: MainActivity.TimeRange, day: Int) = DayFragment().apply {
-            check(day >= 0)
-
-            arguments = Bundle().apply {
-                putInt(POSITION_KEY, day)
-                putSerializable(TIME_RANGE_KEY, timeRange)
-            }
-        }
-    }
+class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr), FabUser {
 
     private var position = 0
     private lateinit var timeRange: MainActivity.TimeRange
 
     private var floatingActionButton: FloatingActionButton? = null
 
-    private lateinit var dayViewModel: DayViewModel
+    private val dayViewModel: DayViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private val activity = context as AbstractActivity
 
-        arguments!!.run {
-            check(containsKey(POSITION_KEY))
-            position = getInt(POSITION_KEY)
-            check(position >= 0)
+    private val compositeDisposable = CompositeDisposable()
 
-            check(containsKey(TIME_RANGE_KEY))
-            timeRange = getSerializable(TIME_RANGE_KEY) as MainActivity.TimeRange
-        }
+    init {
+        View.inflate(context, R.layout.fragment_day, this)
+
+        orientation = LinearLayoutCompat.VERTICAL
+
+        dayViewModel = activity.getViewModel()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_day, container, false)!!
+    fun setPosition(timeRange: MainActivity.TimeRange, position: Int) {
+        Log.e("asdf", "position: dayFragment.setPosition " + position)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+        dayViewModel.stop()
+
+        this.position = position
+        this.timeRange = timeRange
 
         val title = if (timeRange == MainActivity.TimeRange.DAY) {
             when (position) {
-                0 -> activity!!.getString(R.string.today)
-                1 -> activity!!.getString(R.string.tomorrow)
+                0 -> activity.getString(R.string.today)
+                1 -> activity.getString(R.string.tomorrow)
                 else -> {
                     Date(Calendar.getInstance().apply {
                         add(Calendar.DATE, position)
@@ -99,15 +90,29 @@ class DayFragment : AbstractFragment(), FabUser {
             }
         }
 
+        dayTabLayout.removeAllTabs()
         dayTabLayout.addTab(dayTabLayout.newTab().setText(title))
 
         floatingActionButton?.let { groupListFragment.setFab(it) }
 
-        dayViewModel = getViewModel<DayViewModel>().apply {
-            start(position, timeRange)
+        dayViewModel.start(position, timeRange) // todo hold models for each page
+    }
 
-            createDisposable += data.subscribe { groupListFragment.setAll(timeRange, position, it.dataId, it.dataWrapper) }
-        }
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        dayViewModel.data
+                .subscribe {
+                    Log.e("asdf", "position: data for $position")
+                    groupListFragment.setAll(timeRange, position, it.dataId, it.dataWrapper)
+                }
+                .addTo(compositeDisposable)
+    }
+
+    override fun onDetachedFromWindow() {
+        compositeDisposable.clear()
+
+        super.onDetachedFromWindow()
     }
 
     fun selectAll() = groupListFragment.selectAll()

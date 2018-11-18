@@ -9,6 +9,7 @@ import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -494,7 +495,11 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
     fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
         check(position >= 0)
 
-        parametersRelay.accept(Parameters.All(dataId, dataWrapper, position, timeRange))
+        val differentPage = (parametersRelay.value as? Parameters.All)?.let { it.timeRange != timeRange || it.position != position }
+                ?: false
+        Log.e("asdf", "position: previous page " + (parametersRelay.value as? Parameters.All)?.position)
+
+        parametersRelay.accept(Parameters.All(dataId, dataWrapper, position, timeRange, differentPage))
     }
 
     fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TimeStamp(dataId, dataWrapper, timeStamp))
@@ -525,12 +530,14 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 }
             }
         }
-    }
+    } // todo paging
 
     private fun initialize() {
+        Log.e("asdf", "position: initialize " + (parameters as Parameters.All).position)
+
         groupListProgress.visibility = View.GONE
 
-        if (this::treeViewAdapter.isInitialized) {
+        if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage == false) {
             expansionState = (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState
 
             val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
@@ -832,7 +839,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     sealed class Parameters(var dataId: Int, var dataWrapper: DataWrapper) {
 
-        class All(dataId: Int, dataWrapper: DataWrapper, val position: Int, val timeRange: MainActivity.TimeRange) : Parameters(dataId, dataWrapper)
+        class All(dataId: Int, dataWrapper: DataWrapper, val position: Int, val timeRange: MainActivity.TimeRange, val differentPage: Boolean) : Parameters(dataId, dataWrapper)
 
         class TimeStamp(dataId: Int, dataWrapper: DataWrapper, val timeStamp: com.krystianwsul.checkme.utils.time.TimeStamp) : Parameters(dataId, dataWrapper)
 

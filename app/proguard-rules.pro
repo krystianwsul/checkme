@@ -49,3 +49,6 @@
 -keep class android.arch.lifecycle.** {*;}
 
 -dontwarn com.android.support.v4.media.**
+
+-keep class com.lsjwzh.widget.recyclerviewpager.**
+-dontwarn com.lsjwzh.widget.recyclerviewpager.**

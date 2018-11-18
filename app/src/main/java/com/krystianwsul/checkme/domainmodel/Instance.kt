@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
@@ -99,6 +100,8 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     abstract val remoteNonNullProject: RemoteProject
 
     abstract val remoteCustomTimeKey: Pair<String, String>?
+
+    abstract val nullableInstanceShownRecord: InstanceShownRecord?
 
     fun exists() = (instanceData is InstanceData.RealInstanceData)
 

@@ -2036,10 +2036,11 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         check(irrelevantTasks.none { it.isVisible(now) })
 
-        val relevantExistingInstances = instanceRelevances.values
+        val relevantInstances = instanceRelevances.values
                 .filter { it.relevant }
                 .map { it.instance }
-                .filter { it.exists() }
+
+        val relevantExistingInstances = relevantInstances.filter { it.exists() }
 
         val irrelevantExistingInstances = ArrayList<Instance>(existingInstances)
         irrelevantExistingInstances.removeAll(relevantExistingInstances)
@@ -2095,6 +2096,11 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             irrelevantRemoteProjects = ArrayList(remoteProjects)
             irrelevantRemoteProjects.removeAll(relevantRemoteProjects)
             irrelevantRemoteProjects.forEach { it.delete() }
+
+            val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
+                    .toMutableList()
+                    .apply { removeAll(relevantInstances.map { it.nullableInstanceShownRecord }) }
+            irrelevantInstanceShownRecords.forEach { it.delete() }
         } else {
             irrelevantRemoteCustomTimes = null
             irrelevantRemoteProjects = null

@@ -65,6 +65,8 @@ class RemoteInstance : Instance {
 
     override val remoteNonNullProject get() = task.remoteProject
 
+    override val nullableInstanceShownRecord get() = instanceShownRecord
+
     override val remoteCustomTimeKey // scenario already covered by task/schedule relevance
         get() = (instanceData as? RemoteRealInstanceData)?.instanceRecord?.instanceCustomTimeId?.let { Pair(remoteProject.id, it) }
 

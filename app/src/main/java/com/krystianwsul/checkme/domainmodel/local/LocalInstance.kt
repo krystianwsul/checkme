@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.local
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.LocalInstanceRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceData
@@ -49,6 +50,8 @@ class LocalInstance : Instance {
     override val remoteNonNullProject get() = throw UnsupportedOperationException()
 
     override val remoteCustomTimeKey: Pair<String, String>? = null
+
+    override val nullableInstanceShownRecord: InstanceShownRecord? = null
 
     constructor(domainFactory: DomainFactory, localInstanceRecord: LocalInstanceRecord) : super(domainFactory) {
         instanceData = LocalRealInstanceData(localInstanceRecord)

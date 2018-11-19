@@ -47,10 +47,11 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.pageSelections
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.lsjwzh.widget.recyclerviewpager.RecyclerViewPager
+import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
@@ -91,7 +92,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var drawerTaskListener: DrawerLayout.DrawerListener? = null
     private var drawerGroupListener: DrawerLayout.DrawerListener? = null
-    private var onPageChangeListener: RecyclerViewPager.OnPageChangedListener? = null
+    private var onPageChangeDisposable: Disposable? = null
     private var drawerCustomTimesListener: DrawerLayout.DrawerListener? = null
     private var drawerUsersListener: DrawerLayout.DrawerListener? = null
 
@@ -111,6 +112,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private lateinit var headerEmail: TextView
 
     private lateinit var firebaseAuth: FirebaseAuth
+
+    private var adapterDisposable: Disposable? = null
 
     private val mAuthStateListener = { firebaseAuth: FirebaseAuth ->
         val firebaseUser = firebaseAuth.currentUser
@@ -301,6 +304,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                     if (newTimeRange != timeRange) {
                         timeRange = newTimeRange
+
+                        adapterDisposable?.dispose()
+                        adapterDisposable = null
+
                         mainDaysPager.adapter = MyFragmentStatePagerAdapter()
 
                         groupSelectAllVisible.clear()
@@ -526,7 +533,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             if (visibleTab == Tab.INSTANCES) {
                 check(mainDaysPager.visibility == View.VISIBLE)
-                if (mainDaysPager.currentPosition != 0 && onPageChangeListener != null)
+                if (mainDaysPager.currentPosition != 0 && onPageChangeDisposable != null)
                     putInt(IGNORE_FIRST_KEY, 1)
             }
 
@@ -706,6 +713,16 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         mainActivityDrawer.addDrawerListener(drawerTaskListener!!)
     }
 
+    override fun onDestroy() {
+        onPageChangeDisposable?.dispose()
+        onPageChangeDisposable = null
+
+        adapterDisposable?.dispose()
+        adapterDisposable = null
+
+        super.onDestroy()
+    }
+
     override fun onDestroyTaskActionMode() {
         checkNotNull(drawerTaskListener)
 
@@ -737,26 +754,25 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
         mainActivityDrawer.addDrawerListener(drawerGroupListener!!)
 
-        check(onPageChangeListener == null)
+        check(onPageChangeDisposable == null)
 
-        onPageChangeListener = RecyclerViewPager.OnPageChangedListener { _: Int, _: Int ->
+        onPageChangeDisposable = mainDaysPager.pageSelections().subscribe {
             if (ignoreFirst)
                 ignoreFirst = false
             else
                 actionMode.finish()
         }
-        mainDaysPager.addOnPageChangedListener(onPageChangeListener!!)
     }
 
     override fun onDestroyGroupActionMode() {
         checkNotNull(drawerGroupListener)
-        checkNotNull(onPageChangeListener)
+        checkNotNull(onPageChangeDisposable)
 
         mainActivityDrawer.removeDrawerListener(drawerGroupListener!!)
         drawerGroupListener = null
 
-        mainDaysPager.removeOnPageChangedListener(onPageChangeListener!!)
-        onPageChangeListener = null
+        onPageChangeDisposable!!.dispose()
+        onPageChangeDisposable = null
     }
 
     override fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean) {
@@ -953,8 +969,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             }
 
         init {
-            mainDaysPager.addOnPageChangedListener { _, after ->
-                val newDayFragment = mainDaysPager.layoutManager!!.findViewByPosition(after) as DayFragment
+            check(adapterDisposable == null)
+
+            adapterDisposable = mainDaysPager.pageSelections().subscribe {
+                val newDayFragment = mainDaysPager.layoutManager!!.findViewByPosition(it) as DayFragment
 
                 currentItemRef?.let {
                     val oldDayFragment = it.get()!!
@@ -965,7 +983,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             clearFab()
                         }
                     } else {
-                        return@addOnPageChangedListener
+                        return@subscribe
                     }
                 }
 

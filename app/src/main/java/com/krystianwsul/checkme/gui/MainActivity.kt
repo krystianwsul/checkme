@@ -756,12 +756,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         check(onPageChangeDisposable == null)
 
-        onPageChangeDisposable = mainDaysPager.pageSelections().subscribe {
-            if (ignoreFirst)
-                ignoreFirst = false
-            else
-                actionMode.finish()
-        }
+        onPageChangeDisposable = mainDaysPager.pageSelections()
+                .skip(1)
+                .subscribe {
+                    if (ignoreFirst)
+                        ignoreFirst = false
+                    else
+                        actionMode.finish()
+                }
     }
 
     override fun onDestroyGroupActionMode() {
@@ -969,27 +971,29 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             }
 
         init {
-            check(adapterDisposable == null)
+            mainDaysPager.addOneShotGlobalLayoutListener {
+                check(adapterDisposable == null)
 
-            adapterDisposable = mainDaysPager.pageSelections().subscribe {
-                val newDayFragment = mainDaysPager.layoutManager!!.findViewByPosition(it) as DayFragment
+                adapterDisposable = mainDaysPager.pageSelections().subscribe {
+                    val newDayFragment = mainDaysPager.layoutManager!!.findViewByPosition(it) as DayFragment
 
-                currentItemRef?.let {
-                    val oldDayFragment = it.get()!!
+                    currentItemRef?.let {
+                        val oldDayFragment = it.get()!!
 
-                    if (newDayFragment != oldDayFragment) {
-                        oldDayFragment.run {
-                            saveState()
-                            clearFab()
+                        if (newDayFragment != oldDayFragment) {
+                            oldDayFragment.run {
+                                saveState()
+                                clearFab()
+                            }
+                        } else {
+                            return@subscribe
                         }
-                    } else {
-                        return@subscribe
                     }
+
+                    floatingActionButton?.let { newDayFragment.setFab(it) }
+
+                    currentItemRef = WeakReference(newDayFragment)
                 }
-
-                floatingActionButton?.let { newDayFragment.setFab(it) }
-
-                currentItemRef = WeakReference(newDayFragment)
             }
         }
 

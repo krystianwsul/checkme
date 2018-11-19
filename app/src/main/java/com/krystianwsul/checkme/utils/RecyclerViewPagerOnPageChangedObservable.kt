@@ -1,16 +1,18 @@
 package com.krystianwsul.checkme.utils
 
 import android.support.v7.widget.RecyclerView
+import com.jakewharton.rxbinding2.InitialValueObservable
 import com.lsjwzh.widget.recyclerviewpager.RecyclerViewPager
-import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.MainThreadDisposable
 
-fun RecyclerViewPager.pageSelections() = RecyclerViewPagerOnPageChangedObservable(this).distinctUntilChanged()
+fun RecyclerViewPager.pageSelections() = RecyclerViewPagerOnPageChangedObservable(this).distinctUntilChanged()!!
 
-class RecyclerViewPagerOnPageChangedObservable(private val recyclerViewPager: RecyclerViewPager) : Observable<Int>() {
+class RecyclerViewPagerOnPageChangedObservable(private val recyclerViewPager: RecyclerViewPager) : InitialValueObservable<Int>() {
 
-    override fun subscribeActual(observer: Observer<in Int>) = observer.onSubscribe(Listener(observer))
+    override fun getInitialValue() = recyclerViewPager.currentPosition
+
+    override fun subscribeListener(observer: Observer<in Int>) = observer.onSubscribe(Listener(observer))
 
     private inner class Listener(observer: Observer<in Int>) : MainThreadDisposable() {
 

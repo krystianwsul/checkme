@@ -67,7 +67,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     companion object {
 
         private const val VISIBLE_TAB_KEY = "visibleTab"
-        private const val IGNORE_FIRST_KEY = "ignoreFirst"
         private const val TIME_RANGE_KEY = "timeRange"
         private const val DEBUG_KEY = "debug"
         private const val SEARCH_KEY = "search"
@@ -97,7 +96,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private var drawerUsersListener: DrawerLayout.DrawerListener? = null
 
     private var visibleTab = Tab.INSTANCES
-    private var ignoreFirst = false
 
     private var timeRange = TimeRange.DAY
 
@@ -253,11 +251,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             savedInstanceState.run {
                 check(containsKey(VISIBLE_TAB_KEY))
                 visibleTab = getSerializable(VISIBLE_TAB_KEY) as Tab
-
-                if (containsKey(IGNORE_FIRST_KEY)) {
-                    check(visibleTab == Tab.INSTANCES)
-                    ignoreFirst = true
-                }
 
                 check(containsKey(TIME_RANGE_KEY))
                 timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
@@ -530,13 +523,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             super.onSaveInstanceState(this)
 
             putSerializable(VISIBLE_TAB_KEY, visibleTab)
-
-            if (visibleTab == Tab.INSTANCES) {
-                check(mainDaysPager.visibility == View.VISIBLE)
-                if (mainDaysPager.currentPosition != 0 && onPageChangeDisposable != null)
-                    putInt(IGNORE_FIRST_KEY, 1)
-            }
-
             putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
 
@@ -737,6 +723,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode) {
+        Log.e("asdf", "actionmode: onCreateGroupActionMode")
+
         check(drawerGroupListener == null)
 
         drawerGroupListener = object : DrawerLayout.DrawerListener {
@@ -754,19 +742,18 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
         mainActivityDrawer.addDrawerListener(drawerGroupListener!!)
 
-        check(onPageChangeDisposable == null)
+        mainDaysPager.addOneShotGlobalLayoutListener {
+            check(onPageChangeDisposable == null)
 
-        onPageChangeDisposable = mainDaysPager.pageSelections()
-                .skip(1)
-                .subscribe {
-                    if (ignoreFirst)
-                        ignoreFirst = false
-                    else
-                        actionMode.finish()
-                }
+            onPageChangeDisposable = mainDaysPager.pageSelections()
+                    .skip(1)
+                    .subscribe { actionMode.finish() }
+        }
     }
 
     override fun onDestroyGroupActionMode() {
+        Log.e("asdf", "actionmode: onDestroyGroupActionMode")
+
         checkNotNull(drawerGroupListener)
         checkNotNull(onPageChangeDisposable)
 

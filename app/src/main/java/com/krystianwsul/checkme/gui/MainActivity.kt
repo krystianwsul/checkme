@@ -547,7 +547,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             putBoolean(CALENDAR_KEY, calendarOpen)
 
-            (mainDaysPager.layoutManager!!.findViewByPosition(mainDaysPager.currentPosition) as DayFragment).saveState()
+            (mainDaysPager.layoutManager!!.findViewByPosition(mainDaysPager.currentPosition) as? DayFragment)?.saveState()
 
             putParcelableArrayList(DAY_STATES_KEY, ArrayList(states.map { ParcelableState(it.key.first, it.key.second, it.value) }))
         }

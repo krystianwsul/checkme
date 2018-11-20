@@ -4,9 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
 
-fun animateVisibility(show: View, hide: View, duration: Int? = null) {
-    animateVisibility(listOf(show), listOf(hide), duration)
-}
+fun animateVisibility(show: View, hide: View, duration: Int? = null) = animateVisibility(listOf(show), listOf(hide), duration)
 
 fun animateVisibility(show: List<View>, hide: List<View>, duration: Int? = null) {
     val showPairs = show.map { Pair(it, HideType.GONE) }
@@ -25,12 +23,7 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
         view.run {
             resetAlpha()
 
-            if (hideType == HideType.GONE) {
-                check(visibility != View.INVISIBLE)
-            } else {
-                check(hideType == HideType.INVISIBLE)
-                check(visibility != View.GONE)
-            }
+            check(visibility != hideType.opposite)
 
             if (visibility == View.VISIBLE)
                 return@run
@@ -38,14 +31,7 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
             visibility = View.VISIBLE
             alpha = 0f
 
-            animate().setDuration(shortAnimTime.toLong())
-                    .alpha(1f)
-                    .setListener(object : AnimatorListenerAdapter() {
-
-                        override fun onAnimationEnd(animation: Animator) {
-                            visibility = View.VISIBLE
-                        }
-                    })
+            animate().setDuration(shortAnimTime.toLong()).alpha(1f)
         }
     }
 
@@ -53,18 +39,10 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
         view.run {
             resetAlpha()
 
-            if (hideType == HideType.GONE) {
-                check(visibility != View.INVISIBLE)
+            check(visibility != hideType.opposite)
 
-                if (view.visibility == View.GONE)
-                    return@run
-            } else {
-                check(hideType == HideType.INVISIBLE)
-                check(visibility != View.GONE)
-
-                if (visibility == View.INVISIBLE)
-                    return@run
-            }
+            if (visibility == hideType.visibility)
+                return@run
 
             visibility = View.VISIBLE
             alpha = 1f
@@ -74,7 +52,7 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
                     .setListener(object : AnimatorListenerAdapter() {
 
                         override fun onAnimationEnd(animation: Animator) {
-                            visibility = if (hideType == HideType.GONE) View.GONE else View.INVISIBLE
+                            visibility = hideType.visibility
                             alpha = 1f
                         }
                     })
@@ -88,7 +66,8 @@ fun View.resetAlpha() {
     alpha = 1f
 }
 
-enum class HideType {
-    GONE,
-    INVISIBLE
+enum class HideType(val visibility: Int, val opposite: Int) {
+
+    GONE(View.GONE, View.INVISIBLE),
+    INVISIBLE(View.INVISIBLE, View.GONE)
 }

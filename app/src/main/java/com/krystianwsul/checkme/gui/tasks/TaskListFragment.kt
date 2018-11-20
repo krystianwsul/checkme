@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
 import kotlinx.android.synthetic.main.empty_text.*
@@ -346,11 +347,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         updateFabVisibility()
 
-        taskListProgress.visibility = View.GONE
+        val hide = mutableListOf<View>(taskListProgress)
+        val show: View
 
         if (taskData!!.childTaskDatas.isEmpty() && taskData!!.note.isNullOrEmpty()) {
-            taskListRecycler.visibility = View.GONE
-            emptyText.visibility = View.VISIBLE
+            hide.add(taskListRecycler)
+            show = emptyText
 
             emptyText.setText(if (taskKey != null) {
                 R.string.empty_child
@@ -358,9 +360,11 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 R.string.tasks_empty_root
             })
         } else {
-            taskListRecycler.visibility = View.VISIBLE
-            emptyText.visibility = View.GONE
+            show = taskListRecycler
+            hide.add(emptyText)
         }
+
+        animateVisibility(listOf(show), hide)
 
         updateSelectAll()
 

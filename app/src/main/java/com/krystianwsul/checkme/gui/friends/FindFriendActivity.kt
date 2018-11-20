@@ -139,26 +139,29 @@ class FindFriendActivity : AppCompatActivity() {
     }
 
     private fun updateLayout() {
+        val hide = mutableListOf<View>()
+        val show = mutableListOf<View>()
+
         when {
             userData != null -> {
                 check(!loading)
 
                 findFriendEmail.isEnabled = true
-                findFriendUserLayout.visibility = View.VISIBLE
-                findFriendProgress.visibility = View.GONE
+                show.add(findFriendUserLayout)
+                hide.add(findFriendProgress)
 
                 findFriendUserName.text = userData!!.name
                 findFriendUserEmail.text = userData!!.email
             }
             loading -> {
                 findFriendEmail.isEnabled = false
-                findFriendUserLayout.visibility = View.GONE
-                findFriendProgress.visibility = View.VISIBLE
+                hide.add(findFriendUserLayout)
+                show.add(findFriendProgress)
             }
             else -> {
                 findFriendEmail.isEnabled = true
-                findFriendUserLayout.visibility = View.GONE
-                findFriendProgress.visibility = View.GONE
+                hide.add(findFriendUserLayout)
+                hide.add(findFriendProgress)
             }
         }
     }

@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.row_friend.view.*
@@ -168,18 +169,22 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         selectionCallback.setSelected(friendListAdapter!!.selected.size)
 
-        friendListProgress.visibility = View.GONE
-
         updateFabVisibility()
 
+        val hide = mutableListOf<View>(friendListProgress)
+        val show: View
+
         if (friendListAdapter!!.userDataWrappers.isEmpty()) {
-            friendListRecycler.visibility = View.GONE
-            emptyText.visibility = View.VISIBLE
+            hide.add(friendListRecycler)
+            show = emptyText
+
             emptyText.setText(R.string.friends_empty)
         } else {
-            friendListRecycler.visibility = View.VISIBLE
-            emptyText.visibility = View.GONE
+            show = friendListRecycler
+            hide.add(emptyText)
         }
+
+        animateVisibility(listOf(show), hide)
 
         (childFragmentManager.findFragmentByTag(FRIEND_PICKER_TAG) as? FriendPickerFragment)?.let { initializeFriendPickerFragment(it) }
     }

@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.treeadapter.TreeModelAdapter
@@ -531,8 +532,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
     }
 
     private fun initialize() {
-        groupListProgress.visibility = View.GONE
-
         if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage == false) {
             expansionState = (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState
 
@@ -567,17 +566,24 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size)
 
+        val hide = mutableListOf<View>(groupListProgress)
+        val show = mutableListOf<View>()
+
         if (parameters.dataWrapper.instanceDatas.isEmpty() && parameters.dataWrapper.mNote.isNullOrEmpty() && parameters.dataWrapper.TaskDatas.isNullOrEmpty()) {
-            groupListRecycler.visibility = View.GONE
+            hide.add(groupListRecycler)
 
             if (emptyTextId != null) {
-                emptyText.visibility = View.VISIBLE
+                show.add(emptyText)
                 emptyText.setText(emptyTextId)
+            } else {
+                hide.add(emptyText)
             }
         } else {
-            groupListRecycler.visibility = View.VISIBLE
-            emptyText.visibility = View.GONE
+            show.add(groupListRecycler)
+            hide.add(emptyText)
         }
+
+        animateVisibility(show, hide)
 
         updateSelectAll()
     }

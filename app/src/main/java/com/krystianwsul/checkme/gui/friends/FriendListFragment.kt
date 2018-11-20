@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
@@ -129,18 +130,22 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         selectionCallback.setSelected(friendListAdapter!!.selected.size)
 
-        friendListProgress.visibility = View.GONE
-
         updateFabVisibility()
 
+        val hide = mutableListOf<View>(friendListProgress)
+        val show: View
+
         if (data.userListDatas.isEmpty()) {
-            friendListRecycler.visibility = View.GONE
-            emptyText.visibility = View.VISIBLE
+            hide.add(friendListRecycler)
+            show = emptyText
+
             emptyText.setText(R.string.friends_empty)
         } else {
-            friendListRecycler.visibility = View.VISIBLE
-            emptyText.visibility = View.GONE
+            show = friendListRecycler
+            hide.add(emptyText)
         }
+
+        animateVisibility(listOf(show), hide)
 
         updateSelectAll()
     }

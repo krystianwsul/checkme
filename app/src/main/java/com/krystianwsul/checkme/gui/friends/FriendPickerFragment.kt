@@ -15,7 +15,7 @@ import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
-
+import com.krystianwsul.checkme.utils.animateVisibility
 
 
 class FriendPickerFragment : AbstractDialogFragment() {
@@ -54,8 +54,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        friendPickerProgress.visibility = View.GONE
-        friendPickerRecycler.visibility = View.VISIBLE
+        animateVisibility(friendPickerRecycler, friendPickerProgress)
 
         if (friendDatas != null)
             initialize()

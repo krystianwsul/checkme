@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
@@ -152,15 +153,20 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     private fun onLoadFinished(data: ProjectListViewModel.Data) {
         dataId = data.dataId
 
-        projectListProgress.visibility = View.GONE
+        val hide = mutableListOf<View>(projectListProgress)
+        val show: View
+
         if (data.projectDatas.isEmpty()) {
-            projectListRecycler.visibility = View.GONE
-            emptyText.visibility = View.VISIBLE
+            hide.add(projectListRecycler)
+            show = emptyText
+
             emptyText.setText(R.string.projects_empty)
         } else {
-            projectListRecycler.visibility = View.VISIBLE
-            emptyText.visibility = View.GONE
+            show = projectListRecycler
+            hide.add(emptyText)
         }
+
+        animateVisibility(listOf(show), hide)
 
         if (treeViewAdapter != null)
             selectedProjectIds = treeViewAdapter!!.selectedNodes

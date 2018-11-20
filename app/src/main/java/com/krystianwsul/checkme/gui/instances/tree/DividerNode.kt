@@ -99,4 +99,6 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     override fun hashCode() = 2924
 
     override fun equals(other: Any?) = other is DividerNode
+
+    override val id = hashCode()
 }

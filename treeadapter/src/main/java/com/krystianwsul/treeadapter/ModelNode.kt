@@ -27,4 +27,6 @@ interface ModelNode : Comparable<ModelNode> {
     override fun hashCode(): Int
 
     override fun equals(other: Any?): Boolean
+
+    val id: Any
 }

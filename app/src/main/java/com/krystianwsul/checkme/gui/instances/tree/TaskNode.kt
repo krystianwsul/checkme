@@ -121,4 +121,6 @@ class TaskNode(density: Float, indentation: Int, val taskData: GroupListFragment
     override fun hashCode() = taskData.hashCode()
 
     override fun equals(other: Any?) = (other as? TaskNode)?.taskData == taskData
+
+    override val id = taskData.mTaskKey
 }

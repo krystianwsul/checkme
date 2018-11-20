@@ -314,6 +314,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             override fun hashCode() = projectData.hashCode()
 
             override fun equals(other: Any?) = (other as? ProjectNode)?.projectData == projectData
+
+            override val id = projectData.id
         }
     }
 

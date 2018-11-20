@@ -68,15 +68,32 @@ class TreeViewAdapter @JvmOverloads constructor(
                         return false
                 }
 
-                return oldNodes[oldItemPosition] == newNodes[newItemPosition]
+                return oldNodes[oldItemPosition].modelNode.id == newNodes[newItemPosition].modelNode.id
             }
 
             override fun getOldListSize() = oldNodes.size + (paddingLayout?.let { 1 } ?: 0)
 
             override fun getNewListSize() = newNodes.size + (paddingLayout?.let { 1 } ?: 0)
 
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) = paddingLayout?.let { oldItemPosition == oldNodes.size }
-                    ?: false // todo this applies only to actionMode
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                if (paddingLayout != null) {
+                    if (oldItemPosition == oldNodes.size && newItemPosition == newNodes.size)
+                        return true
+                    else if (oldItemPosition == oldNodes.size || newItemPosition == newNodes.size)
+                        return false
+                }
+
+                val oldNode = oldNodes[oldItemPosition]
+                val newNode = newNodes[newItemPosition]
+
+                if (oldNode.isExpanded != newNode.isExpanded)
+                    return false
+
+                if (oldNode.isSelected != newNode.isSelected)
+                    return false
+
+                return oldNode.modelNode == newNode.modelNode
+            }
         }).dispatchUpdatesTo(this)
     }
 

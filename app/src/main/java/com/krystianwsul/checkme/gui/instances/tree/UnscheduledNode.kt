@@ -79,4 +79,6 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
     override fun hashCode() = 7654
 
     override fun equals(other: Any?) = (other as? UnscheduledNode)?.taskNodes?.map { it.taskData } == taskNodes.map { it.taskData }
+
+    override val id = hashCode()
 }

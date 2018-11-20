@@ -131,4 +131,6 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
     override fun hashCode() = instanceData.hashCode()
 
     override fun equals(other: Any?) = (other as? DoneInstanceNode)?.instanceData == instanceData
+
+    override val id = instanceData.InstanceKey
 }

@@ -379,6 +379,8 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     override fun equals(other: Any?) = (other as? NotDoneGroupNode)?.instanceDatas == instanceDatas
 
+    override val id = exactTimeStamp
+
     class NotDoneInstanceNode(density: Float, indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, private val selectable: Boolean) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
 
         companion object {
@@ -539,5 +541,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         override fun hashCode() = instanceData.hashCode()
 
         override fun equals(other: Any?) = (other as? NotDoneInstanceNode)?.instanceData == instanceData
+
+        override val id = instanceData.InstanceKey
     }
 }

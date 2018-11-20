@@ -61,4 +61,6 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
     override fun hashCode() = note.hashCode()
 
     override fun equals(other: Any?) = (other as? NoteNode)?.note == note
+
+    override val id = 98765
 }

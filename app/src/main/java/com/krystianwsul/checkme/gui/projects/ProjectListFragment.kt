@@ -310,6 +310,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             }
 
             fun remove() = projectListAdapter.remove(this)
+
+            override fun hashCode() = projectData.hashCode()
+
+            override fun equals(other: Any?) = (other as? ProjectNode)?.projectData == projectData
         }
     }
 

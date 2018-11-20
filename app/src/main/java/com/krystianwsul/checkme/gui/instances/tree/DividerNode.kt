@@ -95,4 +95,8 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     override val isVisibleDuringActionMode = false
 
     override val isSeparatorVisibleWhenNotExpanded = false
+
+    override fun hashCode() = 2924
+
+    override fun equals(other: Any?) = other is DividerNode
 }

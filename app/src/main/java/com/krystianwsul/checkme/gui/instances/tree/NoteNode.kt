@@ -57,4 +57,8 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
 
         return -1
     }
+
+    override fun hashCode() = note.hashCode()
+
+    override fun equals(other: Any?) = (other as? NoteNode)?.note == note
 }

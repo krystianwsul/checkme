@@ -126,7 +126,9 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override val isSeparatorVisibleWhenNotExpanded = false
 
-    fun removeFromParent() {
-        dividerNode.remove(this)
-    }
+    fun removeFromParent() = dividerNode.remove(this)
+
+    override fun hashCode() = instanceData.hashCode()
+
+    override fun equals(other: Any?) = (other as? DoneInstanceNode)?.instanceData == instanceData
 }

@@ -12,8 +12,7 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 
 
-
-class TaskNode(density: Float, indentation: Int, private val taskData: GroupListFragment.TaskData, private val taskParent: TaskParent) : GroupHolderNode(density, indentation), ModelNode, TaskParent {
+class TaskNode(density: Float, indentation: Int, val taskData: GroupListFragment.TaskData, private val taskParent: TaskParent) : GroupHolderNode(density, indentation), ModelNode, TaskParent {
 
     private lateinit var treeNode: TreeNode
 
@@ -118,4 +117,8 @@ class TaskNode(density: Float, indentation: Int, private val taskData: GroupList
     override val isVisibleDuringActionMode = true
 
     override val isSeparatorVisibleWhenNotExpanded = false
+
+    override fun hashCode() = taskData.hashCode()
+
+    override fun equals(other: Any?) = (other as? TaskNode)?.taskData == taskData
 }

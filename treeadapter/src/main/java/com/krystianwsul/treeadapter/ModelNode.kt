@@ -23,4 +23,8 @@ interface ModelNode : Comparable<ModelNode> {
     fun setOrdinal(ordinal: Double): Unit = throw UnsupportedOperationException()
 
     fun matchesSearch(query: String): Boolean = true
+
+    override fun hashCode(): Int
+
+    override fun equals(other: Any?): Boolean
 }

@@ -702,6 +702,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)
+
+            override fun hashCode() = childTaskData.hashCode()
+
+            override fun equals(other: Any?) = (other as? TaskWrapper)?.childTaskData == childTaskData
         }
 
         private class NoteNode(private val note: String) : ModelNode {
@@ -762,6 +766,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 return -1
             }
+
+            override fun hashCode() = 6897
+
+            override fun equals(other: Any?) = (other as? NoteNode)?.note == note
         }
 
         private inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view) {

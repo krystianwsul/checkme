@@ -76,6 +76,8 @@ class TreeNode(
             return !(hasActionMode() && hasSelectedDescendants())
         }
 
+    val state get() = State(isExpanded, isSelected, separatorVisibility, modelNode.state)
+
     // hiding
     // showing
     val expandListener: View.OnClickListener
@@ -100,17 +102,17 @@ class TreeNode(
                         throw SelectedChildrenException()
 
                     val displayedSize = displayedSize
-                    expanded = false
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1)
+                    expanded = false // todo remove remaining .notifyItem
+                    treeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1)
                 } else {
                     expanded = true
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize - 1)
+                    treeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize - 1)
                 }
 
                 if (position > 0) {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(position - 1, 2)
+                    treeViewAdapter.notifyItemRangeChanged(position - 1, 2)
                 } else {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(position)
+                    treeViewAdapter.notifyItemChanged(position)
                 }
             }
         }
@@ -119,8 +121,6 @@ class TreeNode(
         get() {
             if (!parent.isExpanded)
                 throw InvisibleNodeException()
-
-            val treeNodeCollection = treeNodeCollection
 
             val positionInCollection = treeNodeCollection.getPosition(this)
             check(positionInCollection >= 0)
@@ -166,7 +166,7 @@ class TreeNode(
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) = modelNode.onBindViewHolder(viewHolder)
 
-    override fun update() = treeNodeCollection.let { it.mTreeViewAdapter.notifyItemChanged(it.getPosition(this)) }
+    override fun update() = treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
 
     override fun updateRecursive() {
         update()
@@ -195,7 +195,7 @@ class TreeNode(
                 parent.updateRecursive()
         }
 
-        treeNodeCollection.let { it.mTreeViewAdapter.notifyItemChanged(it.getPosition(this)) }
+        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
     }
 
     private fun hasActionMode() = treeViewAdapter.hasActionMode()
@@ -280,14 +280,12 @@ class TreeNode(
     fun unselect() {
         check(!selected || modelNode.isSelectable)
 
-        val treeNodeCollection = treeNodeCollection
-
         if (selected) {
             check(modelNode.isSelectable)
             check(modelNode.isVisibleDuringActionMode)
 
             selected = false
-            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
+            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
         }
 
         val selected = selectedNodes
@@ -297,7 +295,7 @@ class TreeNode(
 
             selected.forEach { it.unselect() }
 
-            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
+            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
         }
     }
 
@@ -315,9 +313,9 @@ class TreeNode(
 
             selected = true
 
-            treeNodeCollection.mTreeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
+            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
 
-            treeNodeCollection.mTreeViewAdapter.incrementSelected()
+            treeViewAdapter.incrementSelected()
         }
 
         if (expanded) {
@@ -354,20 +352,12 @@ class TreeNode(
         }
     }
 
-    override fun remove(treeNode: TreeNode) {
+    override fun remove(treeNode: TreeNode, x: Any) { // todo remove x
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
-        val treeNodeCollection = treeNodeCollection
-
         if (!childTreeNodes!!.contains(treeNode))
             throw NoSuchNodeException()
-
-        val childDisplayedSize = treeNode.displayedSize
-
-        val oldParentPosition = treeNodeCollection.getPosition(this)
-
-        val oldChildPosition = treeNodeCollection.getPosition(treeNode)
 
         val visible = visible()
 
@@ -376,153 +366,25 @@ class TreeNode(
         if (!visible)
             return
 
-        check(oldParentPosition >= 0)
-
         if (expanded) {
-            check(oldChildPosition >= 0)
-
-            if (0 == childTreeNodes!!.map { it.displayedSize }.sum()) {
+            if (0 == childTreeNodes!!.map { it.displayedSize }.sum())
                 expanded = false
-
-                if (oldParentPosition == 0) {
-                    if (modelNode.isVisibleWhenEmpty) {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize)
-                    } else {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize)
-                    }
-                } else {
-                    if (modelNode.isVisibleWhenEmpty) {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeChanged(oldParentPosition - 1, 2)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition + 1, childDisplayedSize)
-                    } else {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldParentPosition, 1 + childDisplayedSize)
-                    }
-                }
-            } else {
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition)
-                treeNodeCollection.mTreeViewAdapter.notifyItemRangeRemoved(oldChildPosition, childDisplayedSize)
-
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldChildPosition - 1)
-
-                if (oldParentPosition > 0)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1)
-            }
-        } else {
-            if (0 == childTreeNodes!!.map { it.displayedSize }.sum()) {
-                if (oldParentPosition == 0) {
-                    if (modelNode.isVisibleWhenEmpty) {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition)
-                    } else {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(oldParentPosition)
-                    }
-                } else {
-                    if (modelNode.isVisibleWhenEmpty) {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition)
-                    } else {
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemRemoved(oldParentPosition)
-                    }
-                }
-            } else {
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition)
-
-                if (oldParentPosition > 0)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1)
-            }
         }
     }
 
-    fun removeAll() {
+    fun removeAll(x: Any) {
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
-        ArrayList(childTreeNodes!!).forEach { remove(it) }
+        ArrayList(childTreeNodes!!).forEach { remove(it, x) }
     }
 
-    override fun add(treeNode: TreeNode) {
+    override fun add(treeNode: TreeNode, x: Any) {
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
-        val treeNodeCollection = treeNodeCollection
-
-        if (expanded) {
-            if (modelNode.isVisibleWhenEmpty) {
-                val oldParentPosition = treeNodeCollection.getPosition(this)
-                check(oldParentPosition >= 0)
-
-                childTreeNodes!!.add(treeNode)
-
-                childTreeNodes!!.sort()
-
-                val newChildPosition = treeNodeCollection.getPosition(treeNode)
-                check(newChildPosition >= 0)
-
-                treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition)
-                treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newChildPosition)
-
-                val last = oldParentPosition + displayedSize - 1 == newChildPosition
-
-                if (last)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newChildPosition - 1)
-
-                if (oldParentPosition > 0)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1)
-            } else {
-                if (childTreeNodes!!.isEmpty()) {
-                    childTreeNodes!!.add(treeNode)
-
-                    childTreeNodes!!.sort()
-
-                    val newParentPosition = treeNodeCollection.getPosition(this)
-
-                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newParentPosition + 1)
-
-                    if (newParentPosition > 0)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition - 1)
-                } else {
-                    val oldParentPosition = treeNodeCollection.getPosition(this)
-                    check(oldParentPosition >= 0)
-
-                    childTreeNodes!!.add(treeNode)
-
-                    childTreeNodes!!.sort()
-
-                    val newChildPosition = treeNodeCollection.getPosition(treeNode)
-                    check(newChildPosition >= 0)
-
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition)
-                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newChildPosition)
-
-                    val last = oldParentPosition + displayedSize - 1 == newChildPosition
-
-                    if (last)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newChildPosition - 1)
-
-                    if (oldParentPosition > 0)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(oldParentPosition - 1)
-                }
-            }
-        } else {
-            childTreeNodes!!.add(treeNode)
-
-            childTreeNodes!!.sort()
-
-            if (modelNode.isVisibleDuringActionMode || !hasActionMode()) {
-                val newParentPosition = treeNodeCollection.getPosition(this)
-                check(newParentPosition >= 0)
-
-                if (!modelNode.isVisibleWhenEmpty && childTreeNodes!!.size == 1) {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemInserted(newParentPosition)
-
-                    if (newParentPosition > 0)
-                        treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition - 1)
-                } else {
-                    treeNodeCollection.mTreeViewAdapter.notifyItemChanged(newParentPosition)
-                }
-            }
-        }
+        childTreeNodes!!.add(treeNode)
+        childTreeNodes!!.sort()
     }
 
     override val selectedChildren: List<TreeNode>
@@ -589,4 +451,12 @@ class TreeNode(
     class NotSelectedException : UnsupportedOperationException("Can't deselect a node that is not selected.")
 
     class DescendantSelectedException : UnsupportedOperationException("Can't change a node's expansion state when it has selected descendants.")
+
+    data class State(
+            val isExpanded: Boolean,
+            val isSelected: Boolean,
+            val separatorVisibility: Boolean,
+            val modelState: ModelState)
+
+    override val id get() = modelNode.id
 }

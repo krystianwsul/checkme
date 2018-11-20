@@ -52,47 +52,50 @@ class TreeViewAdapter @JvmOverloads constructor(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        val oldNodes = treeNodeCollection!!.displayedNodes
+        val oldStates = treeNodeCollection!!.displayedNodes.map { it.state }
 
         action()
 
-        val newNodes = treeNodeCollection!!.displayedNodes
+        val newStates = treeNodeCollection!!.displayedNodes.map { it.state }
 
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 if (paddingLayout != null) {
-                    if (oldItemPosition == oldNodes.size && newItemPosition == newNodes.size)
+                    if (oldItemPosition == oldStates.size && newItemPosition == newStates.size)
                         return true
-                    else if (oldItemPosition == oldNodes.size || newItemPosition == newNodes.size)
+                    else if (oldItemPosition == oldStates.size || newItemPosition == newStates.size)
                         return false
                 }
 
-                return oldNodes[oldItemPosition].modelNode.id == newNodes[newItemPosition].modelNode.id
+                return oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
             }
 
-            override fun getOldListSize() = oldNodes.size + (paddingLayout?.let { 1 } ?: 0)
+            override fun getOldListSize() = oldStates.size + (paddingLayout?.let { 1 } ?: 0)
 
-            override fun getNewListSize() = newNodes.size + (paddingLayout?.let { 1 } ?: 0)
+            override fun getNewListSize() = newStates.size + (paddingLayout?.let { 1 } ?: 0)
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 if (paddingLayout != null) {
-                    if (oldItemPosition == oldNodes.size && newItemPosition == newNodes.size)
+                    if (oldItemPosition == oldStates.size && newItemPosition == newStates.size)
                         return true
-                    else if (oldItemPosition == oldNodes.size || newItemPosition == newNodes.size)
+                    else if (oldItemPosition == oldStates.size || newItemPosition == newStates.size)
                         return false
                 }
 
-                val oldNode = oldNodes[oldItemPosition]
-                val newNode = newNodes[newItemPosition]
+                val oldState = oldStates[oldItemPosition]
+                val newState = newStates[newItemPosition]
 
-                if (oldNode.isExpanded != newNode.isExpanded)
+                if (oldState.isExpanded != newState.isExpanded)
                     return false
 
-                if (oldNode.isSelected != newNode.isSelected)
+                if (oldState.isSelected != newState.isSelected)
                     return false
 
-                return oldNode.modelNode == newNode.modelNode
+                if (oldState.separatorVisibility != newState.separatorVisibility)
+                    return false
+
+                return oldState.modelState == newState.modelState
             }
         }).dispatchUpdatesTo(this)
     }

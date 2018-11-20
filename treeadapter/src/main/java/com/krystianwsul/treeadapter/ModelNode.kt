@@ -24,9 +24,7 @@ interface ModelNode : Comparable<ModelNode> {
 
     fun matchesSearch(query: String): Boolean = true
 
-    override fun hashCode(): Int
+    val state: ModelState
 
-    override fun equals(other: Any?): Boolean
-
-    val id: Any
+    val id: Any get() = throw java.lang.UnsupportedOperationException()
 }

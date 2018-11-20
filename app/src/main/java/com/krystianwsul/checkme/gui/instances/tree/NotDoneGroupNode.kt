@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import java.util.*
@@ -104,123 +105,126 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     override val name
         get(): Triple<String, Int, Boolean>? {
-        return if (singleInstance()) {
-            Triple(singleInstanceData.Name, ContextCompat.getColor(groupListFragment.activity, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
-        } else {
-            if (treeNode.isExpanded) {
-                null
+            return if (singleInstance()) {
+                Triple(singleInstanceData.Name, ContextCompat.getColor(groupListFragment.activity, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
             } else {
-                Triple(instanceDatas.sorted().joinToString(", ") { it.Name }, ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), true)
+                if (treeNode.isExpanded) {
+                    null
+                } else {
+                    Triple(instanceDatas.sorted().joinToString(", ") { it.Name }, ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), true)
+                }
             }
         }
-    }
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
     override val details
         get(): Pair<String, Int>? {
-        if (singleInstance()) {
-            return if (singleInstanceData.DisplayText.isNullOrEmpty()) {
-                null
+            if (singleInstance()) {
+                return if (singleInstanceData.DisplayText.isNullOrEmpty()) {
+                    null
+                } else {
+                    Pair(singleInstanceData.DisplayText!!, ContextCompat.getColor(groupListFragment.activity, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary))
+                }
             } else {
-                Pair(singleInstanceData.DisplayText!!, ContextCompat.getColor(groupListFragment.activity, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary))
+                val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
+
+                val date = exactTimeStamp.date
+                val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
+
+                val customTimeData = getCustomTimeData(date.dayOfWeek, hourMinute)
+
+                val timeText = customTimeData?.Name ?: hourMinute.toString()
+
+                val text = date.getDisplayText() + ", " + timeText
+
+                return Pair(text, ContextCompat.getColor(groupListFragment.activity, R.color.textSecondary))
             }
-        } else {
-            val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
-
-            val date = exactTimeStamp.date
-            val hourMinute = exactTimeStamp.toTimeStamp().hourMinute
-
-            val customTimeData = getCustomTimeData(date.dayOfWeek, hourMinute)
-
-            val timeText = customTimeData?.Name ?: hourMinute.toString()
-
-            val text = date.getDisplayText() + ", " + timeText
-
-            return Pair(text, ContextCompat.getColor(groupListFragment.activity, R.color.textSecondary))
         }
-    }
 
     override val children
         get() = if (singleInstance()) {
-        NotDoneInstanceNode.getChildrenNew(treeNode, singleInstanceData, groupListFragment)
-    } else {
-        null
-    }
+            NotDoneInstanceNode.getChildrenNew(treeNode, singleInstanceData, groupListFragment)
+        } else {
+            null
+        }
 
     override val expand
         get(): Pair<Int, View.OnClickListener>? {
-        return if (singleInstance()) {
-            val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
+            return if (singleInstance()) {
+                val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
 
-            if (singleInstanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
-                null
+                if (singleInstanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
+                    null
+                } else {
+                    Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                }
             } else {
-                Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
-            }
-        } else {
-            if (groupListFragment.selectionCallback.hasActionMode && treeNode.hasSelectedDescendants()) {
-                null
-            } else {
-                Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                if (groupListFragment.selectionCallback.hasActionMode && treeNode.hasSelectedDescendants()) {
+                    null
+                } else {
+                    Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                }
             }
         }
-    }
 
     override val checkBoxVisibility
         get() = if (singleInstance()) {
             if (groupListFragment.selectionCallback.hasActionMode) {
-            View.INVISIBLE
+                View.INVISIBLE
+            } else {
+                View.VISIBLE
+            }
         } else {
-            View.VISIBLE
+            if (treeNode.isExpanded) {
+                View.GONE
+            } else {
+                View.INVISIBLE
+            }
         }
-    } else {
-        if (treeNode.isExpanded) {
-            View.GONE
-        } else {
-            View.INVISIBLE
-        }
-    }
 
     override val checkBoxChecked = false
 
     override val checkBoxOnClickListener
         get(): View.OnClickListener {
-        val groupAdapter = nodeCollection.groupAdapter
+            val groupAdapter = nodeCollection.groupAdapter
 
             check(singleInstance())
 
             check(!groupAdapter.mGroupListFragment.selectionCallback.hasActionMode)
 
-        return View.OnClickListener {
-            it.setOnClickListener(null)
+            return View.OnClickListener {
+                it.setOnClickListener(null)
 
-            singleInstanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)
-            check(singleInstanceData.Done != null)
+                groupAdapter.treeNodeCollection
+                        .mTreeViewAdapter
+                        .updateDisplayedNodes {
+                            singleInstanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
 
-            GroupListFragment.recursiveExists(singleInstanceData)
+                            GroupListFragment.recursiveExists(singleInstanceData)
 
-            nodeCollection.dividerNode.add(singleInstanceData)
+                            nodeCollection.dividerNode.add(singleInstanceData, Unit)
 
-            notDoneGroupCollection.remove(this)
+                            notDoneGroupCollection.remove(this, Unit)
+                        }
 
-            groupAdapter.mGroupListFragment.updateSelectAll()
+                groupAdapter.mGroupListFragment.updateSelectAll()
+            }
         }
-    }
 
     override val separatorVisibility get() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
     override val backgroundColor
         get(): Int {
-        return if (singleInstance()) {
-            if (treeNode.isSelected)
-                ContextCompat.getColor(groupListFragment.activity, R.color.selected)
-            else
+            return if (singleInstance()) {
+                if (treeNode.isSelected)
+                    ContextCompat.getColor(groupListFragment.activity, R.color.selected)
+                else
+                    Color.TRANSPARENT
+            } else {
                 Color.TRANSPARENT
-        } else {
-            Color.TRANSPARENT
+            }
         }
-    }
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener {
         val groupListFragment = groupAdapter.mGroupListFragment
@@ -250,7 +254,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.mCustomTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
 
-    private fun remove(notDoneInstanceNode: NotDoneInstanceNode) {
+    private fun remove(notDoneInstanceNode: NotDoneInstanceNode, x: Any) {
         check(instanceDatas.contains(notDoneInstanceNode.instanceData))
         instanceDatas.remove(notDoneInstanceNode.instanceData)
 
@@ -263,7 +267,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         if (selected)
             childTreeNode.deselect()
 
-        treeNode.remove(childTreeNode)
+        treeNode.remove(childTreeNode, x)
 
         check(!instanceDatas.isEmpty())
         if (instanceDatas.size == 1) {
@@ -273,13 +277,13 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
             notDoneInstanceNodes.remove(notDoneInstanceNode1)
 
-            treeNode.remove(childTreeNode1)
+            treeNode.remove(childTreeNode1, x)
 
             singleInstanceNodeCollection = NodeCollection(density, indentation + 1, groupAdapter, false, treeNode, null)
 
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, selectable, null, false, null)
 
-            childTreeNodes.forEach { treeNode.add(it) }
+            childTreeNodes.forEach { treeNode.add(it, x) }
 
             if (selected)
                 this.treeNode.select()
@@ -308,14 +312,14 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    fun addInstanceData(instanceData: GroupListFragment.InstanceData) {
+    fun addInstanceData(instanceData: GroupListFragment.InstanceData, x: Any) {
         check(instanceData.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
 
         check(!instanceDatas.isEmpty())
         if (instanceDatas.size == 1) {
             check(notDoneInstanceNodes.isEmpty())
 
-            treeNode.removeAll()
+            treeNode.removeAll(x)
             singleInstanceNodeCollection = null
 
             val instanceData1 = instanceDatas.single()
@@ -323,12 +327,12 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             val notDoneInstanceNode = NotDoneInstanceNode(density, indentation, instanceData1, this@NotDoneGroupNode, selectable)
             notDoneInstanceNodes.add(notDoneInstanceNode)
 
-            treeNode.add(notDoneInstanceNode.initialize(null, null, treeNode))
+            treeNode.add(notDoneInstanceNode.initialize(null, null, treeNode), x)
         }
 
         instanceDatas.add(instanceData)
 
-        treeNode.add(newChildTreeNode(instanceData, null, null))
+        treeNode.add(newChildTreeNode(instanceData, null, null), x)
     }
 
     private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?): TreeNode {
@@ -351,9 +355,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     override val isSeparatorVisibleWhenNotExpanded = false
 
-    fun removeFromParent() {
-        notDoneGroupCollection.remove(this)
-    }
+    fun removeFromParent(x: Any) = notDoneGroupCollection.remove(this, x)
 
     override fun getOrdinal() = singleInstanceData.run { hierarchyData?.ordinal ?: ordinal }
 
@@ -371,15 +373,14 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    override fun hashCode() = if (singleInstance()) {
-        singleInstanceData.hashCode()
-    } else {
-        instanceDatas.hashCode()
+    override val id: Any = if (singleInstance()) singleInstanceData.InstanceKey else exactTimeStamp
+
+    override val state get() = State(id, instanceDatas.map { it.copy() })
+
+    data class State(val id: Any, val instanceDatas: List<GroupListFragment.InstanceData>) : ModelState {
+
+        override fun same(other: ModelState) = (other as? State)?.id == id
     }
-
-    override fun equals(other: Any?) = (other as? NotDoneGroupNode)?.instanceDatas == instanceDatas
-
-    override val id = exactTimeStamp
 
     class NotDoneInstanceNode(density: Float, indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, private val selectable: Boolean) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
 
@@ -404,7 +405,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                         } else {
                             null
                         }
-            }
+                    }
         }
 
         lateinit var treeNode: TreeNode
@@ -460,49 +461,52 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override val expand
             get(): Pair<Int, View.OnClickListener>? {
-            val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
+                val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
 
                 return if (instanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
-                null
-            } else {
-                Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                    null
+                } else {
+                    Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                }
             }
-        }
 
         override val checkBoxVisibility
             get() = if (groupListFragment.selectionCallback.hasActionMode) {
-            View.INVISIBLE
-        } else {
-            View.VISIBLE
-        }
+                View.INVISIBLE
+            } else {
+                View.VISIBLE
+            }
 
         override val checkBoxChecked = false
 
         override val checkBoxOnClickListener
             get(): View.OnClickListener {
-            val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
+                val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
                 check(notDoneGroupTreeNode.isExpanded)
 
-            val groupAdapter = parentNodeCollection.groupAdapter
+                val groupAdapter = parentNodeCollection.groupAdapter
                 check(!groupAdapter.mGroupListFragment.selectionCallback.hasActionMode)
 
-            return View.OnClickListener {
-                it.setOnClickListener(null)
+                return View.OnClickListener {
+                    it.setOnClickListener(null)
 
-                check(notDoneGroupTreeNode.isExpanded)
+                    check(notDoneGroupTreeNode.isExpanded)
 
-                instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)
-                check(instanceData.Done != null)
+                    groupAdapter.treeNodeCollection
+                            .mTreeViewAdapter
+                            .updateDisplayedNodes {
+                                instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
 
-                GroupListFragment.recursiveExists(instanceData)
+                                GroupListFragment.recursiveExists(instanceData)
 
-                parentNotDoneGroupNode.remove(this)
+                                parentNotDoneGroupNode.remove(this, Unit)
 
-                parentNodeCollection.dividerNode.add(instanceData)
+                                parentNodeCollection.dividerNode.add(instanceData, Unit)
+                            }
 
-                groupAdapter.mGroupListFragment.updateSelectAll()
+                    groupAdapter.mGroupListFragment.updateSelectAll()
+                }
             }
-        }
 
         override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
@@ -510,11 +514,11 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             get(): Int {
                 check(parentNotDoneGroupNode.treeNode.isExpanded)
 
-            return if (treeNode.isSelected)
-                ContextCompat.getColor(groupListFragment.activity, R.color.selected)
-            else
-                Color.TRANSPARENT
-        }
+                return if (treeNode.isSelected)
+                    ContextCompat.getColor(groupListFragment.activity, R.color.selected)
+                else
+                    Color.TRANSPARENT
+            }
 
         override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
@@ -534,14 +538,15 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override val isSeparatorVisibleWhenNotExpanded = false
 
-        fun removeFromParent() {
-            parentNotDoneGroupNode.remove(this)
-        }
-
-        override fun hashCode() = instanceData.hashCode()
-
-        override fun equals(other: Any?) = (other as? NotDoneInstanceNode)?.instanceData == instanceData
+        fun removeFromParent(x: Any) = parentNotDoneGroupNode.remove(this, x)
 
         override val id = instanceData.InstanceKey
+
+        override val state get() = State(instanceData.copy())
+
+        data class State(val instanceData: GroupListFragment.InstanceData) : ModelState {
+
+            override fun same(other: ModelState) = (other as? State)?.instanceData?.InstanceKey == instanceData.InstanceKey
+        }
     }
 }

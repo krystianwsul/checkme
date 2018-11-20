@@ -7,11 +7,13 @@ import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection) : GroupHolderNode(density, 0), ModelNode, TaskParent {
 
+    private lateinit var taskDatas: List<GroupListFragment.TaskData>
     private lateinit var treeNode: TreeNode
 
     private val taskNodes = mutableListOf<TaskNode>()
@@ -22,6 +24,8 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
 
     fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>?): TreeNode {
         check(!expanded || !taskDatas.isEmpty())
+
+        this.taskDatas = taskDatas
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
 
@@ -76,9 +80,10 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
 
     override val isSeparatorVisibleWhenNotExpanded = false
 
-    override fun hashCode() = 7654
+    override val state get() = State(nodeCollection.nodeContainer.id, taskDatas.map { it.copy() })
 
-    override fun equals(other: Any?) = (other as? UnscheduledNode)?.taskNodes?.map { it.taskData } == taskNodes.map { it.taskData }
+    data class State(val id: Any, val taskDatas: List<GroupListFragment.TaskData>) : ModelState {
 
-    override val id = hashCode()
+        override fun same(other: ModelState) = (other as? State)?.id == id
+    }
 }

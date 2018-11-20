@@ -80,19 +80,21 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 R.id.action_task_delete -> {
                     checkNotNull(dataId)
 
-                    do {
-                        val treeNode = selected.first()
+                    treeViewAdapter!!.updateDisplayedNodes {
+                        do {
+                            val treeNode = selected.first()
 
-                        val taskWrapper = treeNode.modelNode as TaskAdapter.TaskWrapper
+                            val taskWrapper = treeNode.modelNode as TaskAdapter.TaskWrapper
 
-                        taskWrapper.removeFromParent()
+                            taskWrapper.removeFromParent(Unit)
 
-                        decrementSelected()
+                            decrementSelected()
 
-                        selected = treeViewAdapter!!.selectedNodes
-                    } while (selected.isNotEmpty())
+                            selected = treeViewAdapter!!.selectedNodes
+                        } while (selected.isNotEmpty())
 
-                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                        DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                    }
 
                     updateSelectAll()
                 }
@@ -233,7 +235,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private var selectedTaskKeys: List<TaskKey>? = null
     private var expandedTaskIds: List<TaskKey>? = null
 
-    private var query: String? = null
+    private var query: String = ""
 
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(!childTaskDatas.isEmpty())
@@ -278,7 +280,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 check(!expandedTaskIds!!.isEmpty())
             }
 
-            query = getString(QUERY_KEY)
+            query = getString(QUERY_KEY)!!
         }
     }
 
@@ -368,7 +370,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         updateSelectAll()
 
-        query?.let { search(it) }
+        query.takeIf { it.isNotEmpty() }?.let { search(it) }
     }
 
     private fun updateSelectAll() {
@@ -500,7 +502,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = TaskHolder(taskListFragment.activity!!.layoutInflater.inflate(R.layout.row_task_list, parent, false))
 
-        override fun remove(taskWrapper: TaskWrapper) {
+        override fun remove(taskWrapper: TaskWrapper, x: Any) {
             check(taskWrappers.contains(taskWrapper))
 
             taskWrappers.remove(taskWrapper)
@@ -509,7 +511,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             val treeNode = taskWrapper.treeNode
 
-            treeNodeCollection.remove(treeNode)
+            treeNodeCollection.remove(treeNode, x)
         }
 
         override val hasActionMode get() = taskListFragment.selectionCallback.hasActionMode
@@ -679,18 +681,16 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 1
             }
 
-            fun removeFromParent() {
-                taskParent.remove(this)
-            }
+            fun removeFromParent(x: Any) = taskParent.remove(this, x)
 
-            override fun remove(taskWrapper: TaskWrapper) {
+            override fun remove(taskWrapper: TaskWrapper, x: Any) {
                 check(taskWrappers.contains(taskWrapper))
 
                 taskWrappers.remove(taskWrapper)
 
                 val childTreeNode = taskWrapper.treeNode
 
-                treeNode.remove(childTreeNode)
+                treeNode.remove(childTreeNode, x)
             }
 
             override fun getOrdinal() = childTaskData.hierarchyData!!.ordinal
@@ -703,11 +703,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)
 
-            override fun hashCode() = childTaskData.hashCode()
+            override val state get() = State(childTaskData.copy())
 
-            override fun equals(other: Any?) = (other as? TaskWrapper)?.childTaskData == childTaskData
+            data class State(val childTaskData: ChildTaskData) : ModelState {
 
-            override val id = childTaskData.taskKey
+                override fun same(other: ModelState) = (other as? State)?.childTaskData?.taskKey == childTaskData.taskKey
+            }
         }
 
         private class NoteNode(private val note: String) : ModelNode {
@@ -769,11 +770,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 return -1
             }
 
-            override fun hashCode() = 6897
+            override val state get() = State(note)
 
-            override fun equals(other: Any?) = (other as? NoteNode)?.note == note
+            data class State(val note: String) : ModelState {
 
-            override val id = hashCode()
+                override fun same(other: ModelState) = (other is State)
+            }
         }
 
         private inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -790,7 +792,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private interface TaskParent {
         val taskAdapter: TaskAdapter
 
-        fun remove(taskWrapper: TaskAdapter.TaskWrapper)
+        fun remove(taskWrapper: TaskAdapter.TaskWrapper, x: Any)
     }
 
     data class TaskData(val childTaskDatas: List<ChildTaskData>, val note: String?)

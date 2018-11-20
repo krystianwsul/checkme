@@ -163,16 +163,18 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                     var selectedTreeNodes = treeViewAdapter.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
 
-                    do {
-                        val treeNode = selectedTreeNodes.first()
+                    treeViewAdapter.updateDisplayedNodes {
+                        do {
+                            val treeNode = selectedTreeNodes.first()
 
-                        recursiveDelete(treeNode, true)
+                            recursiveDelete(treeNode, true, Unit)
 
-                        decrementSelected()
-                        selectedTreeNodes = treeViewAdapter.selectedNodes
-                    } while (selectedTreeNodes.isNotEmpty())
+                            decrementSelected()
+                            selectedTreeNodes = treeViewAdapter.selectedNodes
+                        } while (selectedTreeNodes.isNotEmpty())
 
-                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                        DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                    }
 
                     updateSelectAll()
                 }
@@ -203,44 +205,47 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 R.id.action_group_mark_done -> {
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys)
+                    treeViewAdapter.updateDisplayedNodes {
+                        val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys)
 
-                    var selectedTreeNodes = treeViewAdapter.selectedNodes
-                    check(selectedTreeNodes.isNotEmpty())
-
-                    do {
+                        var selectedTreeNodes = treeViewAdapter.selectedNodes
                         check(selectedTreeNodes.isNotEmpty())
 
-                        val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
+                        do {
+                            check(selectedTreeNodes.isNotEmpty())
 
-                        treeNode.modelNode.let {
-                            if (it is NotDoneGroupNode) {
-                                check(it.singleInstance())
+                            val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
 
-                                val instanceData = it.singleInstanceData
-                                instanceData.Done = done
+                            treeNode.modelNode.let {
+                                if (it is NotDoneGroupNode) {
+                                    check(it.singleInstance())
 
-                                recursiveExists(instanceData)
+                                    val instanceData = it.singleInstanceData
+                                    instanceData.Done = done
 
-                                val nodeCollection = it.nodeCollection
+                                    recursiveExists(instanceData)
 
-                                nodeCollection.dividerNode.add(instanceData)
-                                nodeCollection.notDoneGroupCollection.remove(it)
-                            } else {
-                                val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
-                                instanceData.Done = done
+                                    val nodeCollection = it.nodeCollection
 
-                                recursiveExists(instanceData)
+                                    nodeCollection.dividerNode.add(instanceData, Unit)
+                                    nodeCollection.notDoneGroupCollection.remove(it, Unit)
+                                } else {
+                                    val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
+                                    instanceData.Done = done
 
-                                it.removeFromParent()
+                                    recursiveExists(instanceData)
 
-                                it.parentNodeCollection.dividerNode.add(instanceData)
+                                    it.removeFromParent(Unit)
+
+                                    it.parentNodeCollection.dividerNode.add(instanceData, Unit)
+                                }
                             }
-                        }
 
-                        decrementSelected()
-                        selectedTreeNodes = treeViewAdapter.selectedNodes
-                    } while (selectedTreeNodes.isNotEmpty())
+
+                            decrementSelected()
+                            selectedTreeNodes = treeViewAdapter.selectedNodes
+                        } while (selectedTreeNodes.isNotEmpty())
+                    }
 
                     updateSelectAll()
                 }
@@ -250,7 +255,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             }
         }
 
-        private fun recursiveDelete(treeNode: TreeNode, root: Boolean) {
+        private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: Any) {
             treeNode.modelNode.let {
                 val instanceData1 = when (it) {
                     is NotDoneGroupNode -> it.singleInstanceData
@@ -259,7 +264,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                     else -> {
                         check(it is DividerNode)
 
-                        treeNode.allChildren.forEach { recursiveDelete(it, false) }
+                        treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
 
                         return
                     }
@@ -277,12 +282,12 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                     treeNode.update()
 
-                    treeNode.allChildren.forEach { recursiveDelete(it, false) }
+                    treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
                 } else {
                     when (it) {
-                        is NotDoneGroupNode -> it.removeFromParent()
-                        is NotDoneGroupNode.NotDoneInstanceNode -> it.removeFromParent()
-                        else -> (it as DoneInstanceNode).removeFromParent()
+                        is NotDoneGroupNode -> it.removeFromParent(x)
+                        is NotDoneGroupNode.NotDoneInstanceNode -> it.removeFromParent(x)
+                        else -> (it as DoneInstanceNode).removeFromParent(x)
                     }
                 }
             }

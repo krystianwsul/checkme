@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 
 class DoneInstanceNode(density: Float, indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
@@ -61,19 +62,19 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override val details
         get() = instanceData.DisplayText
-            .takeUnless { it.isNullOrEmpty() }
+                .takeUnless { it.isNullOrEmpty() }
                 ?.let { Pair(it, ContextCompat.getColor(dividerNode.groupAdapter.mGroupListFragment.activity, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary)) }
 
     override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData, groupListFragment)
 
     override val expand
         get(): Pair<Int, View.OnClickListener>? {
-        return if (instanceData.children.isEmpty()) {
-            null
-        } else {
-            Pair(if (this.treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+            return if (instanceData.children.isEmpty()) {
+                null
+            } else {
+                Pair(if (this.treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+            }
         }
-    }
 
     override val checkBoxVisibility = View.VISIBLE
 
@@ -81,23 +82,26 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override val checkBoxOnClickListener
         get(): View.OnClickListener {
-        val nodeCollection = dividerNode.nodeCollection
+            val nodeCollection = dividerNode.nodeCollection
 
-        val groupAdapter = nodeCollection.groupAdapter
+            val groupAdapter = nodeCollection.groupAdapter
 
-        return View.OnClickListener { v ->
-            v.setOnClickListener(null)
+            return View.OnClickListener { v ->
+                v.setOnClickListener(null)
 
-            instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
-            check(instanceData.Done == null)
+                groupAdapter.treeNodeCollection
+                        .mTreeViewAdapter
+                        .updateDisplayedNodes {
+                            instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
 
-            dividerNode.remove(this)
+                            dividerNode.remove(this, Unit)
 
-            nodeCollection.notDoneGroupCollection.add(instanceData)
+                            nodeCollection.notDoneGroupCollection.add(instanceData, Unit)
+                        }
 
-            groupAdapter.mGroupListFragment.updateSelectAll()
+                groupAdapter.mGroupListFragment.updateSelectAll()
+            }
         }
-    }
 
     override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
@@ -126,11 +130,14 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override val isSeparatorVisibleWhenNotExpanded = false
 
-    fun removeFromParent() = dividerNode.remove(this)
-
-    override fun hashCode() = instanceData.hashCode()
-
-    override fun equals(other: Any?) = (other as? DoneInstanceNode)?.instanceData == instanceData
+    fun removeFromParent(x: Any) = dividerNode.remove(this, x)
 
     override val id = instanceData.InstanceKey
+
+    override val state get() = State(instanceData.copy())
+
+    data class State(val instanceData: GroupListFragment.InstanceData) : ModelState {
+
+        override fun same(other: ModelState) = (other as? State)?.instanceData?.InstanceKey == instanceData.InstanceKey
+    }
 }

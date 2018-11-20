@@ -49,9 +49,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private val selectionCallback = object : SelectionCallback() {
 
-        override fun unselect() {
-            treeViewAdapter!!.unselect()
-        }
+        override fun unselect() = treeViewAdapter!!.unselect()
 
         override fun onMenuClick(menuItem: MenuItem) {
             check(treeViewAdapter != null)
@@ -69,15 +67,17 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 R.id.action_project_delete -> {
                     check(dataId != null)
 
-                    for (treeNode in selected) {
-                        val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
+                    treeViewAdapter!!.updateDisplayedNodes {
+                        for (treeNode in selected) {
+                            val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
 
-                        projectNode.remove()
+                            projectNode.remove(Unit)
 
-                        decrementSelected()
+                            decrementSelected()
+                        }
+
+                        DomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                     }
-
-                    DomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -202,22 +202,17 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateFabVisibility() {
-        if (projectListFab == null)
-            return
-
-        if (dataId != null && !selectionCallback.hasActionMode) {
-            projectListFab!!.show()
-        } else {
-            projectListFab!!.hide()
+        projectListFab?.run {
+            if (dataId != null && !selectionCallback.hasActionMode) {
+                show()
+            } else {
+                hide()
+            }
         }
     }
 
     override fun clearFab() {
-        if (projectListFab == null)
-            return
-
-        projectListFab!!.setOnClickListener(null)
-
+        projectListFab?.setOnClickListener(null)
         projectListFab = null
     }
 
@@ -245,20 +240,16 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override val hasActionMode get() = selectionCallback.hasActionMode
 
-        override fun incrementSelected() {
-            selectionCallback.incrementSelected()
-        }
+        override fun incrementSelected() = selectionCallback.incrementSelected()
 
-        override fun decrementSelected() {
-            selectionCallback.decrementSelected()
-        }
+        override fun decrementSelected() = selectionCallback.decrementSelected()
 
-        private fun remove(projectNode: ProjectNode) {
+        private fun remove(projectNode: ProjectNode, x: Any) {
             check(projectNodes.contains(projectNode))
 
             projectNodes.remove(projectNode)
 
-            treeNodeCollection.remove(projectNode.treeNode)
+            treeNodeCollection.remove(projectNode.treeNode, x)
         }
 
         inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListViewModel.ProjectData) : ModelNode {
@@ -293,9 +284,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val isSelectable = true
 
-            override fun onClick() {
-                activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
-            }
+            override fun onClick() = activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 
             override val isVisibleWhenEmpty = true
 
@@ -309,14 +298,15 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 return projectData.id.compareTo(other.projectData.id)
             }
 
-            fun remove() = projectListAdapter.remove(this)
+            fun remove(x: Any) = projectListAdapter.remove(this, x)
 
-            override fun hashCode() = projectData.hashCode()
-
-            override fun equals(other: Any?) = (other as? ProjectNode)?.projectData == projectData
-
-            override val id = projectData.id
+            override val state get() = State(projectData.copy())
         }
+    }
+
+    data class State(val projectData: ProjectListViewModel.ProjectData) : ModelState {
+
+        override fun same(other: ModelState) = (other as? State)?.projectData?.id == projectData.id
     }
 
     private class Holder(view: View) : RecyclerView.ViewHolder(view) {

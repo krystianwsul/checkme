@@ -95,44 +95,21 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
         treeNodes!!.forEach(TreeNode::unselect)
     }
 
-    override fun add(treeNode: TreeNode) {
+    override fun add(treeNode: TreeNode, x: Any) {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
         treeNodes!!.add(treeNode)
-
         treeNodes!!.sort()
-
-        val treeViewAdapter = mTreeViewAdapter
-
-        val newPosition = getPosition(treeNode)
-        check(newPosition >= 0)
-
-        treeViewAdapter.notifyItemInserted(newPosition)
-
-        if (newPosition > 0)
-            treeViewAdapter.notifyItemChanged(newPosition - 1)
     }
 
-    override fun remove(treeNode: TreeNode) {
+    override fun remove(treeNode: TreeNode, x: Any) {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
         check(treeNodes!!.contains(treeNode))
 
-        val treeViewAdapter = mTreeViewAdapter
-
-        val oldPosition = getPosition(treeNode)
-        check(oldPosition >= 0)
-
-        val displayedSize = treeNode.displayedSize
-
         treeNodes!!.remove(treeNode)
-
-        treeViewAdapter.notifyItemRangeRemoved(oldPosition, displayedSize)
-
-        if (oldPosition > 0)
-            treeViewAdapter.notifyItemChanged(oldPosition - 1)
     }
 
     override val isExpanded = true
@@ -197,4 +174,8 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")
 
     class SetTreeNodesCalledTwiceException : InitializationException("TreeNodeCollection.setTreeNodes() has already been called.")
+
+    override val id = Id
+
+    object Id
 }

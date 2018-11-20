@@ -7,6 +7,7 @@ import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import java.util.*
@@ -70,16 +71,14 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     override val onClickListener get() = treeNode.onClickListener
 
-    fun remove(doneInstanceNode: DoneInstanceNode) {
+    fun remove(doneInstanceNode: DoneInstanceNode, x: Any) {
         check(doneInstanceNodes.contains(doneInstanceNode))
         doneInstanceNodes.remove(doneInstanceNode)
 
-        treeNode.remove(doneInstanceNode.treeNode)
+        treeNode.remove(doneInstanceNode.treeNode, x)
     }
 
-    fun add(instanceData: GroupListFragment.InstanceData) {
-        treeNode.add(newChildTreeNode(instanceData, null))
-    }
+    fun add(instanceData: GroupListFragment.InstanceData, x: Any) = treeNode.add(newChildTreeNode(instanceData, null), x)
 
     override val isSelectable = false
 
@@ -96,9 +95,10 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     override val isSeparatorVisibleWhenNotExpanded = false
 
-    override fun hashCode() = 2924
+    override val state = State(nodeCollection.nodeContainer.id)
 
-    override fun equals(other: Any?) = other is DividerNode
+    data class State(val id: Any) : ModelState {
 
-    override val id = hashCode()
+        override fun same(other: ModelState) = (other as? State)?.id == id
+    }
 }

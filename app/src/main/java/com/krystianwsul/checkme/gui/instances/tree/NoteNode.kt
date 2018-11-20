@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
@@ -14,12 +15,14 @@ import java.util.*
 class NoteNode(density: Float, private val note: String, private val groupListFragment: GroupListFragment) : GroupHolderNode(density, 0), ModelNode {
 
     private lateinit var treeNode: TreeNode
+    private lateinit var nodeContainer: NodeContainer
 
     init {
         check(note.isNotEmpty())
     }
 
     fun initialize(nodeContainer: NodeContainer): TreeNode {
+        this.nodeContainer = nodeContainer
         treeNode = TreeNode(this, nodeContainer, false, false)
 
         treeNode.setChildTreeNodes(ArrayList())
@@ -58,9 +61,10 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
         return -1
     }
 
-    override fun hashCode() = note.hashCode()
+    override val state get() = State(nodeContainer.id, note)
 
-    override fun equals(other: Any?) = (other as? NoteNode)?.note == note
+    data class State(val id: Any, val note: String) : ModelState {
 
-    override val id = 98765
+        override fun same(other: ModelState) = (other as? State)?.id == id
+    }
 }

@@ -20,21 +20,21 @@ class NotDoneGroupCollection(private val density: Float, private val indentation
         notDoneInstanceDatas.map { newNotDoneGroupNode(this, mutableListOf(it), expandedGroups, expandedInstances, selectedNodes) }
     }
 
-    fun remove(notDoneGroupNode: NotDoneGroupNode) {
+    fun remove(notDoneGroupNode: NotDoneGroupNode, x: Any) {
         check(notDoneGroupNodes.contains(notDoneGroupNode))
 
         notDoneGroupNodes.remove(notDoneGroupNode)
-        nodeContainer.remove(notDoneGroupNode.treeNode)
+        nodeContainer.remove(notDoneGroupNode.treeNode, x)
     }
 
-    fun add(instanceData: GroupListFragment.InstanceData) {
+    fun add(instanceData: GroupListFragment.InstanceData, x: Any) {
         val exactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp()
 
         notDoneGroupNodes.filter { it.exactTimeStamp == exactTimeStamp }.let {
             if (it.isEmpty() || !nodeCollection.useGroups) {
-                nodeCollection.nodeContainer.add(newNotDoneGroupNode(this, mutableListOf(instanceData), null, null, null))
+                nodeCollection.nodeContainer.add(newNotDoneGroupNode(this, mutableListOf(instanceData), null, null, null), x)
             } else {
-                it.single().addInstanceData(instanceData)
+                it.single().addInstanceData(instanceData, x)
             }
         }
     }

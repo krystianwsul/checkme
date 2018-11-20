@@ -327,17 +327,19 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return comparison
             }
 
-            override fun hashCode() = parentTreeData.hashCode()
+            override val state get() = State(parentTreeData.copy())
 
-            override fun equals(other: Any?) = (other as? TaskWrapper)?.parentTreeData == parentTreeData
+            data class State(val parentTreeData: CreateTaskViewModel.ParentTreeData) : ModelState {
 
-            override val id = parentTreeData.parentKey
+                override fun same(other: ModelState) = (other as? State)?.parentTreeData?.parentKey == parentTreeData.parentKey
+            }
         }
 
         private inner class TaskHolder(val showTaskRow: View, val taskRowContainer: LinearLayout, val taskRowName: TextView, val mTaskRowDetails: TextView, val mTaskRowChildren: TextView, val mTaskRowImg: ImageView, val mTaskRowSeparator: View) : RecyclerView.ViewHolder(showTaskRow)
     }
 
     private interface TaskParent {
+
         val taskAdapter: TaskAdapter
     }
 

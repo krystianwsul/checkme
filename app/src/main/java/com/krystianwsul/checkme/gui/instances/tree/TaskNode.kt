@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 
 
@@ -118,9 +119,10 @@ class TaskNode(density: Float, indentation: Int, val taskData: GroupListFragment
 
     override val isSeparatorVisibleWhenNotExpanded = false
 
-    override fun hashCode() = taskData.hashCode()
+    override val state get() = State(taskData.copy())
 
-    override fun equals(other: Any?) = (other as? TaskNode)?.taskData == taskData
+    data class State(val taskData: GroupListFragment.TaskData) : ModelState {
 
-    override val id = taskData.mTaskKey
+        override fun same(other: ModelState) = (other as? State)?.taskData?.mTaskKey == taskData.mTaskKey
+    }
 }

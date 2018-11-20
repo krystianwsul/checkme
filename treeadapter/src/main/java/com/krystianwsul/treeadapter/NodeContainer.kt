@@ -18,7 +18,9 @@ interface NodeContainer {
 
     fun updateRecursive()
 
-    fun remove(treeNode: TreeNode)
+    fun remove(treeNode: TreeNode, x: Any)
 
-    fun add(treeNode: TreeNode)
+    fun add(treeNode: TreeNode, x: Any)
+
+    val id: Any
 }

@@ -74,9 +74,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override fun onOtherAdded() = Unit
 
-        override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
-            action()
-
+        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
             (activity as CustomTimesListListener).onDestroyCustomTimesActionMode()

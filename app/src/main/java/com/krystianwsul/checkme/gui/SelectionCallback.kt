@@ -8,7 +8,7 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 
 abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeViewAdapter)?) : ActionMode.Callback {
 
-    private var mSelected = 0
+    private var selected = 0
 
     protected var actionMode: ActionMode? = null
 
@@ -43,17 +43,21 @@ abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeV
     }
 
     override fun onDestroyActionMode(mode: ActionMode) {
-        check(actionMode != null)
+        checkNotNull(actionMode)
 
         if (!finishing) {
             treeViewAdapterGetter.update {
-                check(mSelected > 0)
+                check(selected > 0)
 
-                for (i in mSelected downTo 1) {
-                    mSelected--
+                for (i in selected downTo 1) {
+                    selected--
 
-                    when (mSelected) {
-                        0 -> onLastRemoved(TreeViewAdapter.Placeholder) { actionMode = null }
+                    when (selected) {
+                        0 -> {
+                            actionMode = null
+
+                            onLastRemoved(TreeViewAdapter.Placeholder)
+                        }
                         1 -> onSecondToLastRemoved()
                         else -> onOtherRemoved()
                     }
@@ -69,50 +73,50 @@ abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeV
     }
 
     fun setSelected(selected: Int, x: TreeViewAdapter.Placeholder) {
-        if (selected > mSelected) {
-            for (i in mSelected until selected)
+        if (selected > this.selected) {
+            for (i in this.selected until selected)
                 incrementSelected(x)
-        } else if (selected < mSelected) {
-            for (i in mSelected downTo selected + 1)
+        } else if (selected < this.selected) {
+            for (i in this.selected downTo selected + 1)
                 decrementSelected(x)
         }
     }
 
     fun incrementSelected(x: TreeViewAdapter.Placeholder) {
-        mSelected++
+        selected++
 
-        when (mSelected) {
+        when (selected) {
             1 -> {
                 check(actionMode == null)
                 onFirstAdded(x)
             }
             2 -> {
-                check(actionMode != null)
+                checkNotNull(actionMode)
                 onSecondAdded()
             }
             else -> {
-                check(actionMode != null)
+                checkNotNull(actionMode)
                 onOtherAdded()
             }
         }
     }
 
     fun decrementSelected(x: TreeViewAdapter.Placeholder) {
-        check(mSelected > 0)
-        check(actionMode != null)
+        check(selected > 0)
+        checkNotNull(actionMode)
 
-        mSelected--
+        selected--
 
-        when (mSelected) {
+        when (selected) {
             1 -> onSecondToLastRemoved()
             0 -> {
                 check(!finishing)
 
-                onLastRemoved(x) {
-                    finishing = true
-                    actionMode!!.finish()
-                    finishing = false
-                }
+                finishing = true
+                actionMode!!.finish()
+                finishing = false
+
+                onLastRemoved(x)
             }
             else -> onOtherRemoved()
         }
@@ -130,7 +134,7 @@ abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeV
 
     protected abstract fun onOtherAdded()
 
-    protected abstract fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) // todo remove action
+    protected abstract fun onLastRemoved(x: TreeViewAdapter.Placeholder)
 
     protected abstract fun onSecondToLastRemoved()
 

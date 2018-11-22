@@ -309,9 +309,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
             override fun onOtherAdded() = updateMenu()
 
-            override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
-                action()
-
+            override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
                 updateFabVisibility()
 
                 (activity as GroupListListener).onDestroyGroupActionMode()

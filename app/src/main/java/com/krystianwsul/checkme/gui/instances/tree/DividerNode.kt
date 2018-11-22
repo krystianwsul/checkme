@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -54,15 +53,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     override val expand get() = Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
 
-    override val checkBoxVisibility = View.INVISIBLE
-
-    override val checkBoxChecked get() = throw UnsupportedOperationException()
-
-    override val checkBoxOnClickListener get() = throw UnsupportedOperationException()
-
     override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
-
-    override val backgroundColor = Color.TRANSPARENT
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

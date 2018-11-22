@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
@@ -9,7 +8,6 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-
 import java.util.*
 
 class NoteNode(density: Float, private val note: String, private val groupListFragment: GroupListFragment) : GroupHolderNode(density, 0), ModelNode {
@@ -33,17 +31,11 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
 
     override val checkBoxVisibility = View.GONE
 
-    override val checkBoxChecked get() = throw UnsupportedOperationException()
+    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-    override val checkBoxOnClickListener get() = throw UnsupportedOperationException()
+    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-    override val separatorVisibility get() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
-
-    override val backgroundColor = Color.TRANSPARENT
-
-    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener? = null
-
-    override val onClickListener: View.OnClickListener? = null
+    override val onClickListener = treeNode.onClickListener
 
     override val isSelectable = false
 

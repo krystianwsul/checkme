@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.View
 
@@ -15,21 +16,21 @@ abstract class GroupHolderNode(protected val density: Float, protected val inden
 
     protected open val expand: Pair<Int, View.OnClickListener>? = null
 
-    protected abstract val checkBoxVisibility: Int
+    protected open val checkBoxVisibility: Int get() = View.INVISIBLE
 
-    protected abstract val checkBoxChecked: Boolean
+    protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException()
 
-    protected abstract val checkBoxOnClickListener: View.OnClickListener
+    protected open val checkBoxOnClickListener: View.OnClickListener get() = throw UnsupportedOperationException()
 
     protected abstract val separatorVisibility: Int
 
-    protected abstract val backgroundColor: Int
+    protected open val backgroundColor = Color.TRANSPARENT
 
-    protected abstract val onClickListener: View.OnClickListener?
+    protected abstract val onClickListener: View.OnClickListener
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
-    protected abstract fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener?
+    protected abstract fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         val groupHolder = viewHolder as GroupListFragment.GroupAdapter.GroupHolder

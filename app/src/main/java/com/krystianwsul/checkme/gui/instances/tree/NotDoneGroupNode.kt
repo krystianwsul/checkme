@@ -209,7 +209,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             }
         }
 
-    override val separatorVisibility get() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
     override val backgroundColor
         get(): Int {
@@ -372,9 +372,9 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     override val id: Any = if (singleInstance()) singleInstanceData.InstanceKey else exactTimeStamp
 
-    override val state get() = State(id, instanceDatas.map { it.copy() })
+    override val state get() = State(id, instanceDatas.map { it.copy() }, groupListFragment.selectionCallback.hasActionMode)
 
-    data class State(val id: Any, val instanceDatas: List<GroupListFragment.InstanceData>) : ModelState {
+    data class State(val id: Any, val instanceDatas: List<GroupListFragment.InstanceData>, val hasActionMode: Boolean) : ModelState {
 
         override fun same(other: ModelState) = (other as? State)?.id == id
     }
@@ -521,9 +521,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override val onClickListener get() = treeNode.onClickListener
 
-        override fun onClick() {
-            groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
-        }
+        override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
         override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
@@ -539,9 +537,9 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override val id = instanceData.InstanceKey
 
-        override val state get() = State(instanceData.copy())
+        override val state get() = State(instanceData.copy(), groupListFragment.selectionCallback.hasActionMode)
 
-        data class State(val instanceData: GroupListFragment.InstanceData) : ModelState {
+        data class State(val instanceData: GroupListFragment.InstanceData, val hasActionMode: Boolean) : ModelState {
 
             override fun same(other: ModelState) = (other as? State)?.instanceData?.InstanceKey == instanceData.InstanceKey
         }

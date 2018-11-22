@@ -1,10 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
-
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
@@ -93,15 +91,7 @@ class TaskNode(density: Float, indentation: Int, val taskData: GroupListFragment
         }
     }
 
-    override val checkBoxVisibility = View.INVISIBLE
-
-    override val checkBoxChecked get() = throw UnsupportedOperationException()
-
-    override val checkBoxOnClickListener get() = throw UnsupportedOperationException()
-
-    override val separatorVisibility get() = if (this.treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
-
-    override val backgroundColor = Color.TRANSPARENT
+    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

@@ -95,7 +95,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             override fun onOtherAdded() = Unit
 
             override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
-                treeViewAdapter.updateDisplayedNodes(action)
+                action()
 
                 updateFabVisibility()
             }

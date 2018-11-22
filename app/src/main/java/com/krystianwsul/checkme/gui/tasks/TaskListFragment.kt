@@ -160,7 +160,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
-                treeViewAdapter.updateDisplayedNodes(action)
+                action()
 
                 updateFabVisibility()
 

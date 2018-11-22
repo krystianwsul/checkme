@@ -7,11 +7,11 @@ import android.support.v7.widget.LinearLayoutCompat
 import android.util.AttributeSet
 import android.view.View
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_day.view.*
@@ -19,7 +19,7 @@ import java.text.DateFormatSymbols
 import java.util.*
 
 
-class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr), FabUser {
+class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr) {
 
     private var key: Pair<MainActivity.TimeRange, Int>? = null
 
@@ -33,6 +33,8 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
     private val compositeDisposable = CompositeDisposable()
 
     init {
+        check(context is Host)
+
         View.inflate(context, R.layout.fragment_day, this)
 
         orientation = LinearLayoutCompat.VERTICAL
@@ -97,6 +99,15 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         dayTabLayout.removeAllTabs()
         dayTabLayout.addTab(dayTabLayout.newTab().setText(title))
 
+        compositeDisposable += (context as Host).hostEvents.subscribe {
+            if (it is Event.PageVisible && it.position == position)
+                setFab(it.floatingActionButton)
+            else {
+                clearFab()
+                saveState()
+            }
+        }
+
         floatingActionButton?.let { groupListFragment.setFab(it) }
 
         entry = dayViewModel.getEntry(timeRange, position).apply {
@@ -114,7 +125,7 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
 
     fun selectAll(x: TreeViewAdapter.Placeholder) = groupListFragment.selectAll(x)
 
-    override fun setFab(floatingActionButton: FloatingActionButton) {
+    private fun setFab(floatingActionButton: FloatingActionButton) {
         if (this.floatingActionButton === floatingActionButton)
             return
 
@@ -123,9 +134,21 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         groupListFragment?.setFab(floatingActionButton)
     }
 
-    override fun clearFab() {
+    private fun clearFab() {
         floatingActionButton = null
 
         groupListFragment.clearFab()
+    }
+
+    interface Host {
+
+        val hostEvents: Observable<Event>
+    }
+
+    sealed class Event {
+
+        data class PageVisible(val position: Int, val floatingActionButton: FloatingActionButton) : Event()
+
+        object Invisible : Event()
     }
 }

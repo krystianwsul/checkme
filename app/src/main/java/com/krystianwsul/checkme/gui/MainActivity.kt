@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.design.widget.FloatingActionButton
 import android.support.v4.util.ArrayMap
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewCompat
@@ -33,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.jakewharton.rxbinding2.widget.textChanges
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -52,7 +52,9 @@ import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
@@ -64,7 +66,7 @@ import org.joda.time.Days
 import org.joda.time.LocalDate
 import java.lang.ref.WeakReference
 
-class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, TaskListFragment.TaskListListener {
+class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, TaskListFragment.TaskListListener, DayFragment.Host {
 
     companion object {
 
@@ -97,7 +99,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private var drawerCustomTimesListener: DrawerLayout.DrawerListener? = null
     private var drawerUsersListener: DrawerLayout.DrawerListener? = null
 
-    private var visibleTab = Tab.INSTANCES
+    private val visibleTab = BehaviorRelay.createDefault(Tab.INSTANCES)
+    private val daysPosition = BehaviorRelay.create<Int>()
+
+    override lateinit var hostEvents: Observable<DayFragment.Event>
+        private set
 
     private var timeRange = TimeRange.DAY
 
@@ -112,8 +118,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private lateinit var headerEmail: TextView
 
     private lateinit var firebaseAuth: FirebaseAuth
-
-    private var adapterDisposable: Disposable? = null
 
     private val mAuthStateListener = { firebaseAuth: FirebaseAuth ->
         val firebaseUser = firebaseAuth.currentUser
@@ -154,7 +158,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) = menu.run {
-        when (visibleTab) {
+        when (visibleTab.value!!) {
             Tab.INSTANCES -> {
                 findItem(R.id.action_calendar).isVisible = (timeRange == TimeRange.DAY)
                 findItem(R.id.action_close).isVisible = false
@@ -214,7 +218,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 invalidateOptionsMenu()
             }
-            R.id.action_select_all -> when (visibleTab) {
+            R.id.action_select_all -> when (visibleTab.value!!) {
                 MainActivity.Tab.INSTANCES -> {
                     val myFragmentStatePagerAdapter = mainDaysPager.adapter as MyFragmentStatePagerAdapter
                     myFragmentStatePagerAdapter.currentItem
@@ -256,10 +260,21 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         setSupportActionBar(mainActivityToolbar)
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
+        hostEvents = Observables.combineLatest(visibleTab, daysPosition) { tab: Tab, position: Int ->
+            if (tab == Tab.INSTANCES) {
+                DayFragment.Event.PageVisible(position, mainFab)
+            } else {
+                DayFragment.Event.Invisible
+            }
+        }
+                .distinctUntilChanged()
+                .replay(1)
+                .apply { connect() }
+
         if (savedInstanceState != null) {
             savedInstanceState.run {
                 check(containsKey(VISIBLE_TAB_KEY))
-                visibleTab = getSerializable(VISIBLE_TAB_KEY) as Tab
+                visibleTab.accept(getSerializable(VISIBLE_TAB_KEY) as Tab)
 
                 check(containsKey(TIME_RANGE_KEY))
                 timeRange = getSerializable(TIME_RANGE_KEY) as TimeRange
@@ -297,7 +312,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    check(visibleTab == Tab.INSTANCES)
+                    check(visibleTab.value!! == Tab.INSTANCES)
 
                     check(position >= 0)
                     check(position < 3)
@@ -306,9 +321,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                     if (newTimeRange != timeRange) {
                         timeRange = newTimeRange
-
-                        adapterDisposable?.dispose()
-                        adapterDisposable = null
 
                         mainDaysPager.adapter = MyFragmentStatePagerAdapter()
 
@@ -354,11 +366,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
 
         mainDaysPager.run {
-            addOnPageChangedListener { _, _ ->
+            pageSelections().subscribe {
+                daysPosition.accept(it)
+
                 invalidateOptionsMenu()
 
                 updateCalendarDate()
-            }
+            }.addTo(createDisposable)
 
             adapter = MyFragmentStatePagerAdapter()
         }
@@ -405,7 +419,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                             firebaseAuth.signOut()
 
-                            if (visibleTab == Tab.FRIENDS || visibleTab == Tab.PROJECTS) {
+                            if (visibleTab.value!! == Tab.FRIENDS || visibleTab.value!! == Tab.PROJECTS) {
                                 mainActivityNavigation.setCheckedItem(R.id.main_drawer_instances)
                                 showTab(Tab.INSTANCES)
                             }
@@ -457,7 +471,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             updateCalendarHeight()
         }
 
-        showTab(visibleTab)
+        showTab(visibleTab.value!!)
 
         TickJobIntentService.startServiceRegister(this, "MainActivity: TickJobIntentService.startServiceRegister")
 
@@ -534,7 +548,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         outState.run {
             super.onSaveInstanceState(this)
 
-            putSerializable(VISIBLE_TAB_KEY, visibleTab)
+            putSerializable(VISIBLE_TAB_KEY, visibleTab.value!!)
             putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
 
@@ -571,8 +585,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
-                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).setFab(mainFab)
-
                 closeSearch()
             }
             MainActivity.Tab.TASKS -> {
@@ -586,7 +598,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 mainActivitySpinner.visibility = View.GONE
                 mainFriendListFrame.visibility = View.GONE
 
-                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
@@ -606,7 +617,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 mainActivitySpinner.visibility = View.GONE
                 mainFriendListFrame.visibility = View.GONE
 
-                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
                 taskListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
@@ -628,7 +638,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 mainActivitySpinner.visibility = View.GONE
                 mainFriendListFrame.visibility = View.GONE
 
-                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 friendListFragment.clearFab()
@@ -652,7 +661,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 mainActivitySpinner.visibility = View.GONE
                 mainFriendListFrame.visibility = View.VISIBLE
 
-                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
@@ -674,7 +682,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 mainActivitySpinner.visibility = View.GONE
                 mainFriendListFrame.visibility = View.GONE
 
-                (mainDaysPager.adapter as MyFragmentStatePagerAdapter).clearFab()
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
@@ -687,7 +694,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             }
         }
 
-        visibleTab = tab
+        visibleTab.accept(tab)
 
         updateCalendarHeight()
     }
@@ -717,9 +724,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun onDestroy() {
         onPageChangeDisposable?.dispose()
         onPageChangeDisposable = null
-
-        adapterDisposable?.dispose()
-        adapterDisposable = null
 
         super.onDestroy()
     }
@@ -966,11 +970,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 .millis
     }
 
-    private inner class MyFragmentStatePagerAdapter : RecyclerView.Adapter<Holder>(), FabUser {
+    private inner class MyFragmentStatePagerAdapter : RecyclerView.Adapter<Holder>() {
 
         private var currentItemRef: WeakReference<DayFragment>? = null
-
-        private var floatingActionButton: FloatingActionButton? = null
 
         val currentItem: DayFragment
             get() {
@@ -979,51 +981,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 return currentItemRef!!.get()!!
             }
 
-        init {
-            mainDaysPager.addOneShotGlobalLayoutListener {
-                check(adapterDisposable == null)
-
-                adapterDisposable = mainDaysPager.pageSelections().subscribe {
-                    // todo find a better way
-                    val newDayFragment = mainDaysPager.layoutManager!!.findViewByPosition(it) as DayFragment
-
-                    currentItemRef?.let {
-                        val oldDayFragment = it.get()!!
-
-                        if (newDayFragment != oldDayFragment) {
-                            oldDayFragment.run {
-                                saveState()
-                                clearFab()
-                            }
-                        } else {
-                            return@subscribe
-                        }
-                    }
-
-                    floatingActionButton?.let { newDayFragment.setFab(it) }
-
-                    currentItemRef = WeakReference(newDayFragment)
-                }
-            }
-        }
-
         override fun getItemCount() = Integer.MAX_VALUE
 
         override fun onCreateViewHolder(parent: ViewGroup, position: Int) = Holder(DayFragment(this@MainActivity))
 
         override fun onBindViewHolder(holder: Holder, position: Int) = holder.dayFragment.setPosition(timeRange, position)
-
-        override fun setFab(floatingActionButton: FloatingActionButton) {
-            this.floatingActionButton = floatingActionButton
-
-            currentItemRef?.let { it.get()!!.setFab(this.floatingActionButton!!) }
-        }
-
-        override fun clearFab() {
-            floatingActionButton = null
-
-            currentItemRef?.let { currentItemRef!!.get()!!.clearFab() }
-        }
     }
 
     private class Holder(val dayFragment: DayFragment) : RecyclerView.ViewHolder(dayFragment)

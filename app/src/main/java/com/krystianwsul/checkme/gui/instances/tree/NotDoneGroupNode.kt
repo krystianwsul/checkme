@@ -194,7 +194,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                 it.setOnClickListener(null)
 
                 groupAdapter.treeNodeCollection
-                        .mTreeViewAdapter
+                        .treeViewAdapter
                         .updateDisplayedNodes {
                             singleInstanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
 
@@ -490,7 +490,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
                     check(notDoneGroupTreeNode.isExpanded)
 
                     groupAdapter.treeNodeCollection
-                            .mTreeViewAdapter
+                            .treeViewAdapter
                             .updateDisplayedNodes {
                                 instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
 

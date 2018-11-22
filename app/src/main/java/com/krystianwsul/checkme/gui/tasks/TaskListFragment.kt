@@ -52,7 +52,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
     private val selectionCallback by lazy {
-        object : SelectionCallback(treeViewAdapter) {
+        object : SelectionCallback({ treeViewAdapter }) {
 
             override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 

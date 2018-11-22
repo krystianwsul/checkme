@@ -711,11 +711,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             override fun onDrawerClosed(drawerView: View) = Unit
 
             override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING) {
-                    treeViewAdapter.updateDisplayedNodes {
-                        actionMode.finish()
-                    }
-                }
+                if (newState == DrawerLayout.STATE_DRAGGING)
+                    actionMode.finish()
             }
         }
         mainActivityDrawer.addDrawerListener(drawerTaskListener!!)
@@ -755,11 +752,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             override fun onDrawerClosed(drawerView: View) = Unit
 
             override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING) {
-                    treeViewAdapter.updateDisplayedNodes {
-                        actionMode.finish()
-                    }
-                }
+                if (newState == DrawerLayout.STATE_DRAGGING)
+                    actionMode.finish()
             }
         }
         mainActivityDrawer.addDrawerListener(drawerGroupListener!!)
@@ -769,11 +763,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             onPageChangeDisposable = mainDaysPager.pageSelections()
                     .skip(1)
-                    .subscribe {
-                        treeViewAdapter.updateDisplayedNodes {
-                            actionMode.finish()
-                        }
-                    }
+                    .subscribe { actionMode.finish() }
         }
     }
 

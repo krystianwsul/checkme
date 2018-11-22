@@ -6,33 +6,35 @@ import android.view.MenuItem
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
-abstract class SelectionCallback(private val treeViewAdapter: TreeViewAdapter?) : ActionMode.Callback {
+abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeViewAdapter)?) : ActionMode.Callback {
 
     private var mSelected = 0
 
     protected var actionMode: ActionMode? = null
 
-    private var mFinishing = false
+    private var finishing = false
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+        check(actionMode == null)
+
         actionMode = mode
         return true
     }
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
 
-    private fun TreeViewAdapter?.update(action: () -> Unit) {
+    private fun (() -> TreeViewAdapter)?.update(action: () -> Unit) {
         if (this != null)
-            updateDisplayedNodes(action)
+            this().updateDisplayedNodes(action)
         else
             action()
     }
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-        treeViewAdapter.update {
+        treeViewAdapterGetter.update {
             onMenuClick(item, TreeViewAdapter.Placeholder)
 
-            check(!mFinishing)
+            check(!finishing)
 
             actionMode?.finish()
         }
@@ -43,8 +45,8 @@ abstract class SelectionCallback(private val treeViewAdapter: TreeViewAdapter?) 
     override fun onDestroyActionMode(mode: ActionMode) {
         check(actionMode != null)
 
-        if (!mFinishing) {
-            treeViewAdapter.update {
+        if (!finishing) {
+            treeViewAdapterGetter.update {
                 check(mSelected > 0)
 
                 for (i in mSelected downTo 1) {
@@ -104,12 +106,12 @@ abstract class SelectionCallback(private val treeViewAdapter: TreeViewAdapter?) 
         when (mSelected) {
             1 -> onSecondToLastRemoved()
             0 -> {
-                check(!mFinishing)
+                check(!finishing)
 
                 onLastRemoved(x) {
-                    mFinishing = true
+                    finishing = true
                     actionMode!!.finish()
-                    mFinishing = false
+                    finishing = false
                 }
             }
             else -> onOtherRemoved()
@@ -128,7 +130,7 @@ abstract class SelectionCallback(private val treeViewAdapter: TreeViewAdapter?) 
 
     protected abstract fun onOtherAdded()
 
-    protected abstract fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit)
+    protected abstract fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) // todo remove action
 
     protected abstract fun onSecondToLastRemoved()
 

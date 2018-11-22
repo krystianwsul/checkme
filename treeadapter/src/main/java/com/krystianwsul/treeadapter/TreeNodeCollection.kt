@@ -2,9 +2,9 @@ package com.krystianwsul.treeadapter
 
 import java.util.*
 
-class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer {
+class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
 
-    private var treeNodes: MutableList<TreeNode>? = null
+    private var treeNodes: MutableList<TreeNode>? = null // todo sorted set
 
     val selectedNodes: List<TreeNode>
         get() {
@@ -26,7 +26,6 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
                 throw SetTreeNodesCalledTwiceException()
 
             treeNodes = ArrayList(rootTreeNodes)
-
             treeNodes!!.sort()
         }
 

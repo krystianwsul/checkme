@@ -35,7 +35,7 @@ class TreeNode(
             }
         }
 
-    private val treeViewAdapter by lazy { treeNodeCollection.mTreeViewAdapter }
+    private val treeViewAdapter by lazy { treeNodeCollection.treeViewAdapter }
 
     val isSelected: Boolean
         get() {

@@ -90,7 +90,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
                 v.setOnClickListener(null)
 
                 groupAdapter.treeNodeCollection
-                        .mTreeViewAdapter
+                        .treeViewAdapter
                         .updateDisplayedNodes {
                             instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
 

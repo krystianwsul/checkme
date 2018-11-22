@@ -48,7 +48,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     private var dataId: Int? = null
 
     private val selectionCallback by lazy {
-        object : SelectionCallback(treeViewAdapter) {
+        object : SelectionCallback({ treeViewAdapter }) {
 
             override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 

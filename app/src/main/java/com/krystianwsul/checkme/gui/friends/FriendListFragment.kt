@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
@@ -46,13 +47,11 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private var selectedIds: List<String>? = null
 
-    private val selectionCallback = object : SelectionCallback() {
+    private val selectionCallback = object : SelectionCallback(null) {
 
-        override fun unselect() {
-            friendListAdapter!!.unselect()
-        }
+        override fun unselect(x: TreeViewAdapter.Placeholder) = friendListAdapter!!.unselect()
 
-        override fun onMenuClick(menuItem: MenuItem) {
+        override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
             val selectedUserDataEmails = friendListAdapter!!.selected
             check(!selectedUserDataEmails.isEmpty())
 
@@ -66,7 +65,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
             }
         }
 
-        override fun onFirstAdded() {
+        override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             actionMode!!.menuInflater.inflate(R.menu.menu_custom_times, actionMode!!.menu)
@@ -80,7 +79,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override fun onOtherAdded() = Unit
 
-        override fun onLastRemoved(action: () -> Unit) {
+        override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
             action()
 
             updateFabVisibility()
@@ -128,7 +127,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         friendListAdapter = FriendListAdapter(data.userListDatas, selectedIds!!)
         friendListRecycler.adapter = friendListAdapter
 
-        selectionCallback.setSelected(friendListAdapter!!.selected.size)
+        selectionCallback.setSelected(friendListAdapter!!.selected.size, TreeViewAdapter.Placeholder)
 
         updateFabVisibility()
 
@@ -276,9 +275,9 @@ class FriendListFragment : AbstractFragment(), FabUser {
             selected = !selected
 
             if (selected) {
-                selectionCallback.incrementSelected()
+                selectionCallback.incrementSelected(TreeViewAdapter.Placeholder)
             } else {
-                selectionCallback.decrementSelected()
+                selectionCallback.decrementSelected(TreeViewAdapter.Placeholder)
             }
 
             val position = friendListAdapter!!.userDataWrappers.indexOf(this)

@@ -18,14 +18,18 @@ class TreeNode(
 
     val onLongClickListener
         get() = View.OnLongClickListener {
-            this@TreeNode.onLongClick()
+            treeViewAdapter.updateDisplayedNodes {
+                this@TreeNode.onLongClick(TreeViewAdapter.Placeholder)
+            }
             true
         }
 
     val onClickListener
         get() = View.OnClickListener {
             if (hasActionMode()) {
-                onLongClick()
+                treeViewAdapter.updateDisplayedNodes {
+                    onLongClick(TreeViewAdapter.Placeholder)
+                }
             } else {
                 modelNode.onClick()
             }
@@ -89,30 +93,21 @@ class TreeNode(
                 if (childTreeNodes!!.isEmpty())
                     throw EmptyExpandedException()
 
-                val treeNodeCollection = treeNodeCollection
-
                 if (hasSelectedDescendants() && hasActionMode())
                     throw DescendantSelectedException()
 
                 val position = treeNodeCollection.getPosition(this@TreeNode)
                 check(position >= 0)
 
-                if (expanded) {
-                    if (hasSelectedDescendants())
-                        throw SelectedChildrenException()
+                treeViewAdapter.updateDisplayedNodes {
+                    expanded = if (expanded) {
+                        if (hasSelectedDescendants())
+                            throw SelectedChildrenException()
 
-                    val displayedSize = displayedSize
-                    expanded = false // todo remove remaining .notifyItem
-                    treeViewAdapter.notifyItemRangeRemoved(position + 1, displayedSize - 1)
-                } else {
-                    expanded = true
-                    treeViewAdapter.notifyItemRangeInserted(position + 1, displayedSize - 1)
-                }
-
-                if (position > 0) {
-                    treeViewAdapter.notifyItemRangeChanged(position - 1, 2)
-                } else {
-                    treeViewAdapter.notifyItemChanged(position)
+                        false
+                    } else {
+                        true
+                    }
                 }
             }
         }
@@ -166,43 +161,26 @@ class TreeNode(
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) = modelNode.onBindViewHolder(viewHolder)
 
-    override fun update() = treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
-
-    override fun updateRecursive() {
-        update()
-
-        parent.updateRecursive()
-    }
-
     override fun compareTo(other: TreeNode) = modelNode.compareTo(other.modelNode)
 
-    private fun onLongClick() {
+    private fun onLongClick(x: TreeViewAdapter.Placeholder) {
         if (!modelNode.isSelectable)
             return
 
         selected = !selected
 
         if (selected) {
-            incrementSelected()
-
-            if (parent.selectedChildren.size == 1)
-            // first in group
-                parent.updateRecursive()
+            incrementSelected(x)
         } else {
-            decrementSelected()
-
-            if (parent.selectedChildren.isEmpty())// last in group
-                parent.updateRecursive()
+            decrementSelected(x)
         }
-
-        treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
     }
 
     private fun hasActionMode() = treeViewAdapter.hasActionMode()
 
-    private fun incrementSelected() = treeViewAdapter.incrementSelected()
+    private fun incrementSelected(x: TreeViewAdapter.Placeholder) = treeViewAdapter.incrementSelected(x)
 
-    private fun decrementSelected() = treeViewAdapter.decrementSelected()
+    private fun decrementSelected(x: TreeViewAdapter.Placeholder) = treeViewAdapter.decrementSelected(x)
 
     override val displayedSize: Int
         get() {
@@ -277,7 +255,7 @@ class TreeNode(
         return -1
     }
 
-    fun unselect() {
+    fun unselect(x: TreeViewAdapter.Placeholder) {
         check(!selected || modelNode.isSelectable)
 
         if (selected) {
@@ -285,7 +263,6 @@ class TreeNode(
             check(modelNode.isVisibleDuringActionMode)
 
             selected = false
-            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
         }
 
         val selected = selectedNodes
@@ -293,35 +270,29 @@ class TreeNode(
         if (!selected.isEmpty()) {
             check(expanded)
 
-            selected.forEach { it.unselect() }
-
-            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
+            selected.forEach { it.unselect(x) }
         }
     }
 
-    fun selectAll() {
+    fun selectAll(x: TreeViewAdapter.Placeholder) {
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
         if (selected)
             throw SelectAllException()
 
-        val treeNodeCollection = treeNodeCollection
-
         if (modelNode.isSelectable) {
             check(modelNode.isVisibleDuringActionMode)
 
             selected = true
 
-            treeViewAdapter.notifyItemChanged(treeNodeCollection.getPosition(this))
-
-            treeViewAdapter.incrementSelected()
+            treeViewAdapter.incrementSelected(x)
         }
 
         if (expanded) {
             check(!childTreeNodes!!.isEmpty())
 
-            childTreeNodes!!.forEach { it.selectAll() }
+            childTreeNodes!!.forEach { it.selectAll(x) }
         }
     }
 
@@ -352,7 +323,7 @@ class TreeNode(
         }
     }
 
-    override fun remove(treeNode: TreeNode, x: Any) { // todo remove x
+    override fun remove(treeNode: TreeNode, x: TreeViewAdapter.Placeholder) {
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
@@ -372,14 +343,14 @@ class TreeNode(
         }
     }
 
-    fun removeAll(x: Any) {
+    fun removeAll(x: TreeViewAdapter.Placeholder) {
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
         ArrayList(childTreeNodes!!).forEach { remove(it, x) }
     }
 
-    override fun add(treeNode: TreeNode, x: Any) {
+    override fun add(treeNode: TreeNode, x: TreeViewAdapter.Placeholder) {
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
@@ -409,21 +380,21 @@ class TreeNode(
 
     override val indentation by lazy { parent.indentation + 1 }
 
-    fun select() {
+    fun select(x: TreeViewAdapter.Placeholder) {
         if (selected)
             throw SelectCalledTwiceException()
 
         if (!modelNode.isSelectable)
             throw NotSelectableSelectedException()
 
-        onLongClick()
+        onLongClick(x)
     }
 
-    fun deselect() {
+    fun deselect(x: TreeViewAdapter.Placeholder) {
         if (!selected)
             throw NotSelectedException()
 
-        onLongClick()
+        onLongClick(x)
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")

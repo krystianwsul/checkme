@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeViewAdapter
 
 class DoneInstanceNode(density: Float, indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
 
@@ -94,9 +95,9 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
                         .updateDisplayedNodes {
                             instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
 
-                            dividerNode.remove(this, Unit)
+                            dividerNode.remove(this, TreeViewAdapter.Placeholder)
 
-                            nodeCollection.notDoneGroupCollection.add(instanceData, Unit)
+                            nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
                         }
 
                 groupAdapter.mGroupListFragment.updateSelectAll()
@@ -130,7 +131,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
     override val isSeparatorVisibleWhenNotExpanded = false
 
-    fun removeFromParent(x: Any) = dividerNode.remove(this, x)
+    fun removeFromParent(x: TreeViewAdapter.Placeholder) = dividerNode.remove(this, x)
 
     override val id = instanceData.InstanceKey
 

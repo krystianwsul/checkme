@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.toolbar.*
@@ -126,7 +127,11 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
                 finish()
             }
-            R.id.task_menu_select_all -> taskListFragment.selectAll()
+            R.id.task_menu_select_all -> {
+                taskListFragment.treeViewAdapter.updateDisplayedNodes {
+                    taskListFragment.selectAll(TreeViewAdapter.Placeholder)
+                }
+            }
             R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKey))
             else -> throw UnsupportedOperationException()
         }
@@ -146,7 +151,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         taskListFragment.setTaskKey(taskKey, data.dataId, data.taskData)
     }
 
-    override fun onCreateTaskActionMode(actionMode: ActionMode) = Unit
+    override fun onCreateTaskActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
 
     override fun onDestroyTaskActionMode() = Unit
 

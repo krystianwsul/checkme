@@ -49,7 +49,9 @@ class DragHelper(
 
             MyCrashlytics.logMethod(this, "endPosition after: $endPosition")
 
-            treeViewAdapter.moveItem(from, endPosition!!)
+            treeViewAdapter.updateDisplayedNodes {
+                treeViewAdapter.moveItem(from, endPosition!!, TreeViewAdapter.Placeholder)
+            }
 
             return true
         }

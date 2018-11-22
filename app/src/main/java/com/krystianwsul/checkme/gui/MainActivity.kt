@@ -51,11 +51,13 @@ import com.krystianwsul.checkme.utils.pageSelections
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_day.view.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.joda.time.DateTime
 import org.joda.time.Days
@@ -215,11 +217,18 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             R.id.action_select_all -> when (visibleTab) {
                 MainActivity.Tab.INSTANCES -> {
                     val myFragmentStatePagerAdapter = mainDaysPager.adapter as MyFragmentStatePagerAdapter
-                    myFragmentStatePagerAdapter.currentItem.selectAll()
+                    myFragmentStatePagerAdapter.currentItem
+                            .groupListFragment
+                            .treeViewAdapter
+                            .updateDisplayedNodes {
+                                myFragmentStatePagerAdapter.currentItem.selectAll(TreeViewAdapter.Placeholder)
+                            }
                 }
                 MainActivity.Tab.TASKS -> {
                     val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
-                    taskListFragment.selectAll()
+                    taskListFragment.treeViewAdapter.updateDisplayedNodes {
+                        taskListFragment.selectAll(TreeViewAdapter.Placeholder)
+                    }
                 }
                 MainActivity.Tab.CUSTOM_TIMES -> showCustomTimesFragment.selectAll()
                 MainActivity.Tab.FRIENDS -> friendListFragment.selectAll()
@@ -680,7 +689,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         updateCalendarHeight()
     }
 
-    override fun onCreateTaskActionMode(actionMode: ActionMode) {
+    override fun onCreateTaskActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
         check(drawerTaskListener == null)
 
         drawerTaskListener = object : DrawerLayout.DrawerListener {
@@ -692,8 +701,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             override fun onDrawerClosed(drawerView: View) = Unit
 
             override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING)
-                    actionMode.finish()
+                if (newState == DrawerLayout.STATE_DRAGGING) {
+                    treeViewAdapter.updateDisplayedNodes {
+                        actionMode.finish()
+                    }
+                }
             }
         }
         mainActivityDrawer.addDrawerListener(drawerTaskListener!!)
@@ -722,7 +734,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         invalidateOptionsMenu()
     }
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode) {
+    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
         Log.e("asdf", "actionmode: onCreateGroupActionMode")
 
         check(drawerGroupListener == null)
@@ -736,8 +748,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             override fun onDrawerClosed(drawerView: View) = Unit
 
             override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING)
-                    actionMode.finish()
+                if (newState == DrawerLayout.STATE_DRAGGING) {
+                    treeViewAdapter.updateDisplayedNodes {
+                        actionMode.finish()
+                    }
+                }
             }
         }
         mainActivityDrawer.addDrawerListener(drawerGroupListener!!)
@@ -747,7 +762,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             onPageChangeDisposable = mainDaysPager.pageSelections()
                     .skip(1)
-                    .subscribe { actionMode.finish() }
+                    .subscribe {
+                        treeViewAdapter.updateDisplayedNodes {
+                            actionMode.finish()
+                        }
+                    }
         }
     }
 

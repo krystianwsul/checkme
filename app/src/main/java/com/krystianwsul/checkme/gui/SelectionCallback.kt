@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.gui
 import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
+import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
-
-abstract class SelectionCallback : ActionMode.Callback {
+abstract class SelectionCallback(private val treeViewAdapter: TreeViewAdapter?) : ActionMode.Callback {
 
     private var mSelected = 0
 
@@ -21,12 +21,21 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
 
+    private fun TreeViewAdapter?.update(action: () -> Unit) {
+        if (this != null)
+            updateDisplayedNodes(action)
+        else
+            action()
+    }
+
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-        onMenuClick(item)
+        treeViewAdapter.update {
+            onMenuClick(item, TreeViewAdapter.Placeholder)
 
-        check(!mFinishing)
+            check(!mFinishing)
 
-        actionMode?.finish()
+            actionMode?.finish()
+        }
 
         return true
     }
@@ -35,41 +44,45 @@ abstract class SelectionCallback : ActionMode.Callback {
         check(actionMode != null)
 
         if (!mFinishing) {
-            check(mSelected > 0)
+            treeViewAdapter.update {
+                check(mSelected > 0)
 
-            for (i in mSelected downTo 1) {
-                mSelected--
+                for (i in mSelected downTo 1) {
+                    mSelected--
 
-                when (mSelected) {
-                    1 -> onSecondToLastRemoved()
-                    0 -> onLastRemoved { actionMode = null }
-                    else -> onOtherRemoved()
+                    when (mSelected) {
+                        0 -> onLastRemoved(TreeViewAdapter.Placeholder) { actionMode = null }
+                        1 -> onSecondToLastRemoved()
+                        else -> onOtherRemoved()
+                    }
                 }
+
+                unselect(TreeViewAdapter.Placeholder)
             }
         } else {
             actionMode = null
-        }
 
-        unselect()
+            unselect(TreeViewAdapter.Placeholder)
+        }
     }
 
-    fun setSelected(selected: Int) {
+    fun setSelected(selected: Int, x: TreeViewAdapter.Placeholder) {
         if (selected > mSelected) {
             for (i in mSelected until selected)
-                incrementSelected()
+                incrementSelected(x)
         } else if (selected < mSelected) {
             for (i in mSelected downTo selected + 1)
-                decrementSelected()
+                decrementSelected(x)
         }
     }
 
-    fun incrementSelected() {
+    fun incrementSelected(x: TreeViewAdapter.Placeholder) {
         mSelected++
 
         when (mSelected) {
             1 -> {
                 check(actionMode == null)
-                onFirstAdded()
+                onFirstAdded(x)
             }
             2 -> {
                 check(actionMode != null)
@@ -82,7 +95,7 @@ abstract class SelectionCallback : ActionMode.Callback {
         }
     }
 
-    fun decrementSelected() {
+    fun decrementSelected(x: TreeViewAdapter.Placeholder) {
         check(mSelected > 0)
         check(actionMode != null)
 
@@ -93,7 +106,7 @@ abstract class SelectionCallback : ActionMode.Callback {
             0 -> {
                 check(!mFinishing)
 
-                onLastRemoved {
+                onLastRemoved(x) {
                     mFinishing = true
                     actionMode!!.finish()
                     mFinishing = false
@@ -105,17 +118,17 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     val hasActionMode get() = actionMode != null
 
-    protected abstract fun unselect()
+    protected abstract fun unselect(x: TreeViewAdapter.Placeholder)
 
-    protected abstract fun onMenuClick(menuItem: MenuItem)
+    protected abstract fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder)
 
-    protected abstract fun onFirstAdded()
+    protected abstract fun onFirstAdded(x: TreeViewAdapter.Placeholder)
 
     protected abstract fun onSecondAdded()
 
     protected abstract fun onOtherAdded()
 
-    protected abstract fun onLastRemoved(action: () -> Unit)
+    protected abstract fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit)
 
     protected abstract fun onSecondToLastRemoved()
 

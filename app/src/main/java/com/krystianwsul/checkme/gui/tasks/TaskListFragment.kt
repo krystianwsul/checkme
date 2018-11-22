@@ -46,178 +46,179 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private var taskData: TaskData? = null
 
-    private var treeViewAdapter: TreeViewAdapter? = null
+    lateinit var treeViewAdapter: TreeViewAdapter
+        private set
 
-    private val dragHelper by lazy { DragHelper(treeViewAdapter!!) }
+    private val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
-    private val selectionCallback = object : SelectionCallback() {
+    private val selectionCallback by lazy {
+        object : SelectionCallback(treeViewAdapter) {
 
-        override fun unselect() = treeViewAdapter!!.unselect()
+            override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(menuItem: MenuItem) {
-            var selected = treeViewAdapter!!.selectedNodes
-            check(!selected.isEmpty())
+            override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
+                var selected = treeViewAdapter.selectedNodes
+                check(!selected.isEmpty())
 
-            val taskWrappers = selected.map { it.modelNode as TaskAdapter.TaskWrapper }
+                val taskWrappers = selected.map { it.modelNode as TaskAdapter.TaskWrapper }
 
-            val childTaskDatas = taskWrappers.map { it.childTaskData }
+                val childTaskDatas = taskWrappers.map { it.childTaskData }
 
-            val taskKeys = ArrayList(childTaskDatas.map { it.taskKey })
+                val taskKeys = ArrayList(childTaskDatas.map { it.taskKey })
 
-            when (menuItem.itemId) {
-                R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
-                R.id.action_task_edit -> {
-                    check(selected.size == 1)
+                when (menuItem.itemId) {
+                    R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
+                    R.id.action_task_edit -> {
+                        check(selected.size == 1)
 
-                    val childTaskData = (selected[0].modelNode as TaskAdapter.TaskWrapper).childTaskData
+                        val childTaskData = (selected[0].modelNode as TaskAdapter.TaskWrapper).childTaskData
 
-                    startActivity(CreateTaskActivity.getEditIntent(childTaskData.taskKey))
-                }
-                R.id.action_task_join -> startActivity(if (taskKey == null)
-                    CreateTaskActivity.getJoinIntent(taskKeys)
-                else
-                    CreateTaskActivity.getJoinIntent(taskKeys, taskKey!!))
-                R.id.action_task_delete -> {
-                    checkNotNull(dataId)
-
-                    treeViewAdapter!!.updateDisplayedNodes {
-                        do {
-                            val treeNode = selected.first()
-
-                            val taskWrapper = treeNode.modelNode as TaskAdapter.TaskWrapper
-
-                            taskWrapper.removeFromParent(Unit)
-
-                            decrementSelected()
-
-                            selected = treeViewAdapter!!.selectedNodes
-                        } while (selected.isNotEmpty())
-
-                        DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                        startActivity(CreateTaskActivity.getEditIntent(childTaskData.taskKey))
                     }
+                    R.id.action_task_join -> startActivity(if (taskKey == null)
+                        CreateTaskActivity.getJoinIntent(taskKeys)
+                    else
+                        CreateTaskActivity.getJoinIntent(taskKeys, taskKey!!))
+                    R.id.action_task_delete -> {
+                        checkNotNull(dataId)
 
-                    updateSelectAll()
-                }
-                R.id.action_task_add -> {
-                    val childTaskData1 = (selected.single().modelNode as TaskAdapter.TaskWrapper).childTaskData
+                        treeViewAdapter.updateDisplayedNodes {
+                            do {
+                                val treeNode = selected.first()
 
-                    startActivity(CreateTaskActivity.getCreateIntent(childTaskData1.taskKey))
+                                val taskWrapper = treeNode.modelNode as TaskAdapter.TaskWrapper
+
+                                taskWrapper.removeFromParent(TreeViewAdapter.Placeholder)
+
+                                decrementSelected(x)
+
+                                selected = treeViewAdapter.selectedNodes
+                            } while (selected.isNotEmpty())
+
+                            DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                        }
+
+                        updateSelectAll()
+                    }
+                    R.id.action_task_add -> {
+                        val childTaskData1 = (selected.single().modelNode as TaskAdapter.TaskWrapper).childTaskData
+
+                        startActivity(CreateTaskActivity.getCreateIntent(childTaskData1.taskKey))
+                    }
+                    else -> throw UnsupportedOperationException()
                 }
-                else -> throw UnsupportedOperationException()
             }
-        }
 
-        override fun onFirstAdded() {
-            treeViewAdapter!!.updateDisplayedNodes {
+            override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
                 (activity as AppCompatActivity).startSupportActionMode(this)
+
+                actionMode!!.menuInflater.inflate(R.menu.menu_edit_tasks, actionMode!!.menu)
+
+                updateFabVisibility()
+
+                (activity as TaskListListener).onCreateTaskActionMode(actionMode!!, treeViewAdapter)
+
+                dragHelper.attachToRecyclerView(taskListRecycler)
             }
 
-            actionMode!!.menuInflater.inflate(R.menu.menu_edit_tasks, actionMode!!.menu)
+            override fun onSecondAdded() {
+                val selectedNodes = treeViewAdapter.selectedNodes
+                check(!selectedNodes.isEmpty())
 
-            updateFabVisibility()
+                val projectIdCount = selectedNodes.asSequence()
+                        .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
+                        .distinct()
+                        .count()
 
-            (activity as TaskListListener).onCreateTaskActionMode(actionMode!!)
+                check(projectIdCount > 0)
 
-            dragHelper.attachToRecyclerView(taskListRecycler)
-        }
+                actionMode!!.menu.run {
+                    findItem(R.id.action_task_join).isVisible = projectIdCount == 1
+                    findItem(R.id.action_task_edit).isVisible = false
+                    findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
+                    findItem(R.id.action_task_add).isVisible = false
+                }
 
-        override fun onSecondAdded() {
-            val selectedNodes = treeViewAdapter!!.selectedNodes
-            check(!selectedNodes.isEmpty())
-
-            val projectIdCount = selectedNodes.asSequence()
-                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
-                    .distinct()
-                    .count()
-
-            check(projectIdCount > 0)
-
-            actionMode!!.menu.run {
-                findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                findItem(R.id.action_task_edit).isVisible = false
-                findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
-                findItem(R.id.action_task_add).isVisible = false
+                dragHelper.attachToRecyclerView(null)
             }
 
-            dragHelper.attachToRecyclerView(null)
-        }
+            override fun onOtherAdded() {
+                val selectedNodes = treeViewAdapter.selectedNodes
+                check(!selectedNodes.isEmpty())
 
-        override fun onOtherAdded() {
-            val selectedNodes = treeViewAdapter!!.selectedNodes
-            check(!selectedNodes.isEmpty())
+                val projectIdCount = selectedNodes.asSequence()
+                        .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
+                        .distinct()
+                        .count()
 
-            val projectIdCount = selectedNodes.asSequence()
-                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
-                    .distinct()
-                    .count()
+                check(projectIdCount > 0)
 
-            check(projectIdCount > 0)
-
-            actionMode!!.menu.run {
-                findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
-            }
-        }
-
-        override fun onLastRemoved(action: () -> Unit) {
-            treeViewAdapter!!.updateDisplayedNodes(action)
-
-            updateFabVisibility()
-
-            (activity as TaskListListener).onDestroyTaskActionMode()
-
-            dragHelper.attachToRecyclerView(null)
-        }
-
-        override fun onSecondToLastRemoved() {
-            actionMode!!.menu.run {
-                findItem(R.id.action_task_join).isVisible = false
-                findItem(R.id.action_task_edit).isVisible = true
-                findItem(R.id.action_task_delete).isVisible = true
-                findItem(R.id.action_task_add).isVisible = true
-            }
-
-            dragHelper.attachToRecyclerView(taskListRecycler)
-        }
-
-        override fun onOtherRemoved() {
-            val selectedNodes = treeViewAdapter!!.selectedNodes
-            check(selectedNodes.size > 1)
-
-            val projectIdCount = selectedNodes.asSequence()
-                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
-                    .distinct()
-                    .count()
-
-            check(projectIdCount > 0)
-
-            actionMode!!.menu.run {
-                findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
-            }
-        }
-
-        private fun containsLoop(treeNodes: List<TreeNode>): Boolean {
-            check(treeNodes.size > 1)
-
-            for (treeNode in treeNodes) {
-                val parents = ArrayList<TreeNode>()
-                addParents(parents, treeNode)
-
-                for (parent in parents) {
-                    if (treeNodes.contains(parent))
-                        return true
+                actionMode!!.menu.run {
+                    findItem(R.id.action_task_join).isVisible = projectIdCount == 1
+                    findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
                 }
             }
 
-            return false
-        }
+            override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
+                treeViewAdapter.updateDisplayedNodes(action)
 
-        private fun addParents(parents: MutableList<TreeNode>, treeNode: TreeNode) {
-            val parent = treeNode.parent as? TreeNode ?: return
+                updateFabVisibility()
 
-            parents.add(parent)
-            addParents(parents, parent)
+                (activity as TaskListListener).onDestroyTaskActionMode()
+
+                dragHelper.attachToRecyclerView(null)
+            }
+
+            override fun onSecondToLastRemoved() {
+                actionMode!!.menu.run {
+                    findItem(R.id.action_task_join).isVisible = false
+                    findItem(R.id.action_task_edit).isVisible = true
+                    findItem(R.id.action_task_delete).isVisible = true
+                    findItem(R.id.action_task_add).isVisible = true
+                }
+
+                dragHelper.attachToRecyclerView(taskListRecycler)
+            }
+
+            override fun onOtherRemoved() {
+                val selectedNodes = treeViewAdapter.selectedNodes
+                check(selectedNodes.size > 1)
+
+                val projectIdCount = selectedNodes.asSequence()
+                        .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
+                        .distinct()
+                        .count()
+
+                check(projectIdCount > 0)
+
+                actionMode!!.menu.run {
+                    findItem(R.id.action_task_join).isVisible = projectIdCount == 1
+                    findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
+                }
+            }
+
+            private fun containsLoop(treeNodes: List<TreeNode>): Boolean {
+                check(treeNodes.size > 1)
+
+                for (treeNode in treeNodes) {
+                    val parents = ArrayList<TreeNode>()
+                    addParents(parents, treeNode)
+
+                    for (parent in parents) {
+                        if (treeNodes.contains(parent))
+                            return true
+                    }
+                }
+
+                return false
+            }
+
+            private fun addParents(parents: MutableList<TreeNode>, treeNode: TreeNode) {
+                val parent = treeNode.parent as? TreeNode ?: return
+
+                parents.add(parent)
+                addParents(parents, parent)
+            }
         }
     }
 
@@ -325,8 +326,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         checkNotNull(dataId)
 
-        if (treeViewAdapter != null) {
-            val selected = treeViewAdapter!!.selectedNodes
+        if (this::treeViewAdapter.isInitialized) {
+            val selected = treeViewAdapter.selectedNodes
 
             selectedTaskKeys = if (selected.isEmpty()) {
                 check(!selectionCallback.hasActionMode)
@@ -336,7 +337,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 selected.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey }
             }
 
-            val expanded = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expandedTaskKeys
+            val expanded = (treeViewAdapter.treeModelAdapter as TaskAdapter).expandedTaskKeys
 
             expandedTaskIds = if (expanded.isEmpty()) null else expanded
         }
@@ -345,7 +346,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         taskListRecycler.adapter = treeViewAdapter
 
-        selectionCallback.setSelected(treeViewAdapter!!.selectedNodes.size)
+        treeViewAdapter.updateDisplayedNodes {
+            selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+        }
 
         updateFabVisibility()
 
@@ -375,7 +378,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private fun updateSelectAll() {
         checkNotNull(treeViewAdapter)
-        val taskAdapter = treeViewAdapter!!.treeModelAdapter as TaskAdapter
+        val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter
 
         (activity as TaskListListener).setTaskSelectAllVisibility(!taskAdapter.taskWrappers.isEmpty())
     }
@@ -384,8 +387,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
         super.onSaveInstanceState(outState)
 
         outState.run {
-            if (treeViewAdapter != null) {
-                val selected = treeViewAdapter!!.selectedNodes
+            if (this@TaskListFragment::treeViewAdapter.isInitialized) {
+                val selected = treeViewAdapter.selectedNodes
 
                 if (!selected.isEmpty()) {
                     check(selectionCallback.hasActionMode)
@@ -396,7 +399,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     putParcelableArrayList(SELECTED_TASK_KEYS_KEY, taskKeys)
                 }
 
-                val expandedTaskKeys = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expandedTaskKeys
+                val expandedTaskKeys = (treeViewAdapter.treeModelAdapter as TaskAdapter).expandedTaskKeys
 
                 if (!expandedTaskKeys.isEmpty())
                     putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedTaskKeys))
@@ -406,7 +409,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    fun selectAll() = treeViewAdapter!!.selectAll()
+    fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         taskListFragmentFab = floatingActionButton
@@ -440,9 +443,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
     fun search(query: String) {
         this.query = query
 
-        treeViewAdapter?.let {
-            it.updateDisplayedNodes {
-                it.query = query
+        if (this::treeViewAdapter.isInitialized) {
+            treeViewAdapter.updateDisplayedNodes {
+                treeViewAdapter.query = query
             }
         }
     }
@@ -502,7 +505,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = TaskHolder(taskListFragment.activity!!.layoutInflater.inflate(R.layout.row_task_list, parent, false))
 
-        override fun remove(taskWrapper: TaskWrapper, x: Any) {
+        override fun remove(taskWrapper: TaskWrapper, x: TreeViewAdapter.Placeholder) {
             check(taskWrappers.contains(taskWrapper))
 
             taskWrappers.remove(taskWrapper)
@@ -516,13 +519,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override val hasActionMode get() = taskListFragment.selectionCallback.hasActionMode
 
-        override fun incrementSelected() {
-            taskListFragment.selectionCallback.incrementSelected()
-        }
+        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = taskListFragment.selectionCallback.incrementSelected(x)
 
-        override fun decrementSelected() {
-            taskListFragment.selectionCallback.decrementSelected()
-        }
+        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = taskListFragment.selectionCallback.decrementSelected(x)
 
         class TaskWrapper(private val density: Float, private val indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : ModelNode, TaskParent {
 
@@ -681,9 +680,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 1
             }
 
-            fun removeFromParent(x: Any) = taskParent.remove(this, x)
+            fun removeFromParent(x: TreeViewAdapter.Placeholder) = taskParent.remove(this, x)
 
-            override fun remove(taskWrapper: TaskWrapper, x: Any) {
+            override fun remove(taskWrapper: TaskWrapper, x: TreeViewAdapter.Placeholder) {
                 check(taskWrappers.contains(taskWrapper))
 
                 taskWrappers.remove(taskWrapper)
@@ -792,7 +791,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private interface TaskParent {
         val taskAdapter: TaskAdapter
 
-        fun remove(taskWrapper: TaskAdapter.TaskWrapper, x: Any)
+        fun remove(taskWrapper: TaskAdapter.TaskWrapper, x: TreeViewAdapter.Placeholder)
     }
 
     data class TaskData(val childTaskDatas: List<ChildTaskData>, val note: String?)
@@ -827,7 +826,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     interface TaskListListener {
 
-        fun onCreateTaskActionMode(actionMode: ActionMode)
+        fun onCreateTaskActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter)
         fun onDestroyTaskActionMode()
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
     }

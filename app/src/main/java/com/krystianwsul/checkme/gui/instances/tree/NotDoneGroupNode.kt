@@ -14,10 +14,7 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimeStamp
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.ModelState
-import com.krystianwsul.treeadapter.NodeContainer
-import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.*
 import java.util.*
 
 class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, private val instanceDatas: MutableList<GroupListFragment.InstanceData>, private val selectable: Boolean) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
@@ -203,9 +200,9 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
                             GroupListFragment.recursiveExists(singleInstanceData)
 
-                            nodeCollection.dividerNode.add(singleInstanceData, Unit)
+                            nodeCollection.dividerNode.add(singleInstanceData, TreeViewAdapter.Placeholder)
 
-                            notDoneGroupCollection.remove(this, Unit)
+                            notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
                         }
 
                 groupAdapter.mGroupListFragment.updateSelectAll()
@@ -254,7 +251,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.mCustomTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
 
-    private fun remove(notDoneInstanceNode: NotDoneInstanceNode, x: Any) {
+    private fun remove(notDoneInstanceNode: NotDoneInstanceNode, x: TreeViewAdapter.Placeholder) {
         check(instanceDatas.contains(notDoneInstanceNode.instanceData))
         instanceDatas.remove(notDoneInstanceNode.instanceData)
 
@@ -265,7 +262,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         val selected = childTreeNode.isSelected
 
         if (selected)
-            childTreeNode.deselect()
+            childTreeNode.deselect(x)
 
         treeNode.remove(childTreeNode, x)
 
@@ -286,7 +283,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
             childTreeNodes.forEach { treeNode.add(it, x) }
 
             if (selected)
-                this.treeNode.select()
+                treeNode.select(x)
         }
     }
 
@@ -312,7 +309,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
         }
     }
 
-    fun addInstanceData(instanceData: GroupListFragment.InstanceData, x: Any) {
+    fun addInstanceData(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) {
         check(instanceData.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
 
         check(!instanceDatas.isEmpty())
@@ -355,7 +352,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
     override val isSeparatorVisibleWhenNotExpanded = false
 
-    fun removeFromParent(x: Any) = notDoneGroupCollection.remove(this, x)
+    fun removeFromParent(x: TreeViewAdapter.Placeholder) = notDoneGroupCollection.remove(this, x)
 
     override fun getOrdinal() = singleInstanceData.run { hierarchyData?.ordinal ?: ordinal }
 
@@ -499,9 +496,9 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
                                 GroupListFragment.recursiveExists(instanceData)
 
-                                parentNotDoneGroupNode.remove(this, Unit)
+                                parentNotDoneGroupNode.remove(this, TreeViewAdapter.Placeholder)
 
-                                parentNodeCollection.dividerNode.add(instanceData, Unit)
+                                parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
                             }
 
                     groupAdapter.mGroupListFragment.updateSelectAll()
@@ -538,7 +535,7 @@ class NotDoneGroupNode(density: Float, indentation: Int, private val notDoneGrou
 
         override val isSeparatorVisibleWhenNotExpanded = false
 
-        fun removeFromParent(x: Any) = parentNotDoneGroupNode.remove(this, x)
+        fun removeFromParent(x: TreeViewAdapter.Placeholder) = parentNotDoneGroupNode.remove(this, x)
 
         override val id = instanceData.InstanceKey
 

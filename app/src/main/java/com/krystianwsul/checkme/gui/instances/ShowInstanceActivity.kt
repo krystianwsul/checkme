@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_instance.*
 import kotlinx.android.synthetic.main.toolbar.*
@@ -129,7 +130,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     if (!it.exists)
                         finish()
                 }
-                R.id.instance_menu_select_all -> groupListFragment.selectAll()
+                R.id.instance_menu_select_all -> {
+                    groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                        groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+                    }
+                }
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -200,7 +205,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         invalidateOptionsMenu()
     }
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
+    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
 

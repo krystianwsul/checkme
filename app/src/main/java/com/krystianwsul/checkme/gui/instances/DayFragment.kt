@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.DayViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_day.view.*
@@ -111,7 +112,7 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         super.onDetachedFromWindow()
     }
 
-    fun selectAll() = groupListFragment.selectAll()
+    fun selectAll(x: TreeViewAdapter.Placeholder) = groupListFragment.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         if (this.floatingActionButton === floatingActionButton)

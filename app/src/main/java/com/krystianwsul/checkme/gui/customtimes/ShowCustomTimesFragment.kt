@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import java.util.*
 
@@ -41,12 +42,11 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private var selectedCustomTimeIds: List<Int>? = null
 
-    private val selectionCallback = object : SelectionCallback() {
-        override fun unselect() {
-            customTimesAdapter!!.unselect()
-        }
+    private val selectionCallback = object : SelectionCallback(null) {
 
-        override fun onMenuClick(menuItem: MenuItem) {
+        override fun unselect(x: TreeViewAdapter.Placeholder) = customTimesAdapter!!.unselect()
+
+        override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
             val customTimeIds = customTimesAdapter!!.selected
             check(!customTimeIds.isEmpty())
 
@@ -60,7 +60,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             }
         }
 
-        override fun onFirstAdded() {
+        override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             actionMode!!.menuInflater.inflate(R.menu.menu_custom_times, actionMode!!.menu)
@@ -74,7 +74,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override fun onOtherAdded() = Unit
 
-        override fun onLastRemoved(action: () -> Unit) {
+        override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
             action()
 
             updateFabVisibility()
@@ -132,7 +132,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         customTimesAdapter = CustomTimesAdapter(data, this, selectedCustomTimeIds)
         showTimesList.adapter = customTimesAdapter
 
-        selectionCallback.setSelected(customTimesAdapter!!.selected.size)
+        selectionCallback.setSelected(customTimesAdapter!!.selected.size, TreeViewAdapter.Placeholder)
 
         if (data.entries.isEmpty()) {
             showTimesList.visibility = View.GONE
@@ -218,7 +218,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         fun selectAll() {
             check(!selectionCallback.hasActionMode)
 
-            customTimeWrappers.filterNot { it.selected }.forEach { it.toggleSelect() }
+            customTimeWrappers.filterNot { it.selected }.forEach { it.toggleSelect(TreeViewAdapter.Placeholder) }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomTimeHolder {
@@ -282,7 +282,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             fun onLongClick() {
                 val customTimeWrapper = customTimeWrappers[adapterPosition]
 
-                customTimeWrapper.toggleSelect()
+                customTimeWrapper.toggleSelect(TreeViewAdapter.Placeholder)
             }
         }
     }
@@ -298,13 +298,13 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             }
         }
 
-        fun toggleSelect() {
+        fun toggleSelect(x: TreeViewAdapter.Placeholder) {
             selected = !selected
 
             if (selected) {
-                selectionCallback.incrementSelected()
+                selectionCallback.incrementSelected(x)
             } else {
-                selectionCallback.decrementSelected()
+                selectionCallback.decrementSelected(x)
             }
 
             val position = customTimesAdapter!!.customTimeWrappers.indexOf(this)
@@ -315,6 +315,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     interface CustomTimesListListener {
+
         fun onCreateCustomTimesActionMode(actionMode: ActionMode)
         fun onDestroyCustomTimesActionMode()
         fun setCustomTimesSelectAllVisibility(selectAllVisible: Boolean)

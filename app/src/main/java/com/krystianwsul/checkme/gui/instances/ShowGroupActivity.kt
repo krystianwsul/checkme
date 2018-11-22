@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_group.*
 
@@ -79,7 +80,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
         groupListFragment.setTimeStamp(timeStamp, data.dataId, data.dataWrapper)
     }
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
+    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
 
@@ -102,7 +103,9 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         check(item.itemId == R.id.action_select_all)
 
-        groupListFragment.selectAll()
+        groupListFragment.treeViewAdapter.updateDisplayedNodes {
+            groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+        }
 
         return true
     }

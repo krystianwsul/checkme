@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_notification_group.*
 
@@ -54,7 +55,7 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
         }
     }
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode) = Unit
+    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
 
@@ -77,7 +78,9 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         check(item.itemId == R.id.action_select_all)
 
-        groupListFragment.selectAll()
+        groupListFragment.treeViewAdapter.updateDisplayedNodes {
+            groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+        }
 
         return true
     }

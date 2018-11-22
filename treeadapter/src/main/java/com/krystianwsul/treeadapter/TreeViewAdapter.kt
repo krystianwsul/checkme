@@ -28,6 +28,8 @@ class TreeViewAdapter @JvmOverloads constructor(
 
     var query: String = ""
 
+    private var updating = false
+
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection) {
         if (this.treeNodeCollection != null)
             throw SetTreeNodeCollectionCalledTwiceException()
@@ -44,17 +46,21 @@ class TreeViewAdapter @JvmOverloads constructor(
 
     fun hasActionMode() = treeModelAdapter.hasActionMode
 
-    fun incrementSelected() = treeModelAdapter.incrementSelected()
+    fun incrementSelected(x: TreeViewAdapter.Placeholder) = treeModelAdapter.incrementSelected(x)
 
-    fun decrementSelected() = treeModelAdapter.decrementSelected()
+    fun decrementSelected(x: TreeViewAdapter.Placeholder) = treeModelAdapter.decrementSelected(x)
 
     fun updateDisplayedNodes(action: () -> Unit) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
+        check(!updating)
+
         val oldStates = treeNodeCollection!!.displayedNodes.map { it.state }
 
+        updating = true
         action()
+        updating = false
 
         val newStates = treeNodeCollection!!.displayedNodes.map { it.state }
 
@@ -100,20 +106,20 @@ class TreeViewAdapter @JvmOverloads constructor(
         }).dispatchUpdatesTo(this)
     }
 
-    fun unselect() {
+    fun unselect(x: TreeViewAdapter.Placeholder) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        treeNodeCollection!!.unselect()
+        treeNodeCollection!!.unselect(x)
     }
 
-    fun selectAll() {
+    fun selectAll(x: TreeViewAdapter.Placeholder) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
         check(!treeModelAdapter.hasActionMode)
 
-        treeNodeCollection!!.selectAll()
+        treeNodeCollection!!.selectAll(x)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -157,11 +163,11 @@ class TreeViewAdapter @JvmOverloads constructor(
             treeNodeCollection!!.getItemViewType(position)
     }
 
-    fun moveItem(from: Int, to: Int) {
+    fun moveItem(from: Int, to: Int, x: TreeViewAdapter.Placeholder) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        treeNodeCollection!!.moveItem(from, to)
+        treeNodeCollection!!.moveItem(from, to, x)
     }
 
     fun setNewItemPosition(position: Int) {
@@ -176,4 +182,6 @@ class TreeViewAdapter @JvmOverloads constructor(
     class SetTreeNodeCollectionCalledTwiceException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has already been called.")
 
     private class PaddingHolder(view: View) : RecyclerView.ViewHolder(view)
+
+    object Placeholder
 }

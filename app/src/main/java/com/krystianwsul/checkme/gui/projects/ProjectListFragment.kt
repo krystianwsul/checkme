@@ -43,73 +43,67 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private var projectListFab: FloatingActionButton? = null
 
-    private var treeViewAdapter: TreeViewAdapter? = null
+    private lateinit var treeViewAdapter: TreeViewAdapter
 
     private var dataId: Int? = null
 
-    private val selectionCallback = object : SelectionCallback() {
+    private val selectionCallback by lazy {
+        object : SelectionCallback(treeViewAdapter) {
 
-        override fun unselect() = treeViewAdapter!!.unselect()
+            override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(menuItem: MenuItem) {
-            check(treeViewAdapter != null)
+            override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
+                val selected = treeViewAdapter.selectedNodes
+                check(!selected.isEmpty())
 
-            val selected = treeViewAdapter!!.selectedNodes
-            check(!selected.isEmpty())
+                val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
 
-            val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
+                val projectIds = projectNodes.asSequence()
+                        .map { it.projectData.id }
+                        .toSet()
 
-            val projectIds = projectNodes.asSequence()
-                    .map { it.projectData.id }
-                    .toSet()
+                when (menuItem.itemId) {
+                    R.id.action_project_delete -> {
+                        check(dataId != null)
 
-            when (menuItem.itemId) {
-                R.id.action_project_delete -> {
-                    check(dataId != null)
+                        treeViewAdapter.updateDisplayedNodes {
+                            for (treeNode in selected) {
+                                val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
 
-                    treeViewAdapter!!.updateDisplayedNodes {
-                        for (treeNode in selected) {
-                            val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
+                                projectNode.remove(TreeViewAdapter.Placeholder)
 
-                            projectNode.remove(Unit)
+                                decrementSelected(x)
+                            }
 
-                            decrementSelected()
+                            DomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                         }
-
-                        DomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                     }
+                    else -> throw UnsupportedOperationException()
                 }
-                else -> throw UnsupportedOperationException()
             }
-        }
 
-        override fun onFirstAdded() {
-            check(treeViewAdapter != null)
-
-            treeViewAdapter!!.updateDisplayedNodes {
+            override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
                 (activity as AppCompatActivity).startSupportActionMode(this)
+
+                actionMode!!.menuInflater.inflate(R.menu.menu_projects, actionMode!!.menu)
+
+                updateFabVisibility()
             }
 
-            actionMode!!.menuInflater.inflate(R.menu.menu_projects, actionMode!!.menu)
+            override fun onSecondAdded() = Unit
 
-            updateFabVisibility()
+            override fun onOtherAdded() = Unit
+
+            override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
+                treeViewAdapter.updateDisplayedNodes(action)
+
+                updateFabVisibility()
+            }
+
+            override fun onSecondToLastRemoved() = Unit
+
+            override fun onOtherRemoved() = Unit
         }
-
-        override fun onSecondAdded() = Unit
-
-        override fun onOtherAdded() = Unit
-
-        override fun onLastRemoved(action: () -> Unit) {
-            check(treeViewAdapter != null)
-
-            treeViewAdapter!!.updateDisplayedNodes(action)
-
-            updateFabVisibility()
-        }
-
-        override fun onSecondToLastRemoved() = Unit
-
-        override fun onOtherRemoved() = Unit
     }
 
     private var selectedProjectIds: Set<String> = setOf()
@@ -168,15 +162,17 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         animateVisibility(listOf(show), hide)
 
-        if (treeViewAdapter != null)
-            selectedProjectIds = treeViewAdapter!!.selectedNodes
+        if (this::treeViewAdapter.isInitialized)
+            selectedProjectIds = treeViewAdapter.selectedNodes
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toSet()
 
         treeViewAdapter = ProjectListAdapter().initialize(data.projectDatas)
         projectListRecycler.adapter = treeViewAdapter
 
-        selectionCallback.setSelected(treeViewAdapter!!.selectedNodes.size)
+        treeViewAdapter.updateDisplayedNodes {
+            selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+        }
 
         updateFabVisibility()
     }
@@ -184,8 +180,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        if (treeViewAdapter != null)
-            selectedProjectIds = treeViewAdapter!!.selectedNodes
+        if (this::treeViewAdapter.isInitialized)
+            selectedProjectIds = treeViewAdapter.selectedNodes
                     .asSequence()
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toSet()
@@ -240,11 +236,11 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override val hasActionMode get() = selectionCallback.hasActionMode
 
-        override fun incrementSelected() = selectionCallback.incrementSelected()
+        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.incrementSelected(x)
 
-        override fun decrementSelected() = selectionCallback.decrementSelected()
+        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
 
-        private fun remove(projectNode: ProjectNode, x: Any) {
+        private fun remove(projectNode: ProjectNode, x: TreeViewAdapter.Placeholder) {
             check(projectNodes.contains(projectNode))
 
             projectNodes.remove(projectNode)
@@ -298,7 +294,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 return projectData.id.compareTo(other.projectData.id)
             }
 
-            fun remove(x: Any) = projectListAdapter.remove(this, x)
+            fun remove(x: TreeViewAdapter.Placeholder) = projectListAdapter.remove(this, x)
 
             override val state get() = State(projectData.copy())
         }

@@ -176,9 +176,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override val hasActionMode = false
 
-        override fun incrementSelected() = throw UnsupportedOperationException()
+        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
-        override fun decrementSelected() = throw UnsupportedOperationException()
+        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
         private class TaskWrapper(private val density: Float, private val indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : ModelNode, TaskParent {
 

@@ -14,13 +14,9 @@ interface NodeContainer {
 
     fun getPosition(treeNode: TreeNode): Int
 
-    fun update()
+    fun remove(treeNode: TreeNode, x: TreeViewAdapter.Placeholder)
 
-    fun updateRecursive()
-
-    fun remove(treeNode: TreeNode, x: Any)
-
-    fun add(treeNode: TreeNode, x: Any)
+    fun add(treeNode: TreeNode, x: TreeViewAdapter.Placeholder)
 
     val id: Any
 }

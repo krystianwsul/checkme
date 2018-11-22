@@ -88,14 +88,14 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
             return treeNodes!!.flatMap { it.displayedNodes }
         }
 
-    fun unselect() {
+    fun unselect(x: TreeViewAdapter.Placeholder) {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
-        treeNodes!!.forEach(TreeNode::unselect)
+        treeNodes!!.forEach { it.unselect(x) }
     }
 
-    override fun add(treeNode: TreeNode, x: Any) {
+    override fun add(treeNode: TreeNode, x: TreeViewAdapter.Placeholder) {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
@@ -103,7 +103,7 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
         treeNodes!!.sort()
     }
 
-    override fun remove(treeNode: TreeNode, x: Any) {
+    override fun remove(treeNode: TreeNode, x: TreeViewAdapter.Placeholder) {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
@@ -114,24 +114,20 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
 
     override val isExpanded = true
 
-    override fun update() = Unit
-
-    override fun updateRecursive() = Unit
-
     override val selectedChildren get() = selectedNodes
 
     override val treeNodeCollection = this
 
-    fun selectAll() {
+    fun selectAll(x: TreeViewAdapter.Placeholder) {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
-        treeNodes!!.forEach(TreeNode::selectAll)
+        treeNodes!!.forEach { it.selectAll(x) }
     }
 
     override val indentation = 0
 
-    fun moveItem(fromPosition: Int, toPosition: Int) {
+    fun moveItem(fromPosition: Int, toPosition: Int, x: TreeViewAdapter.Placeholder) {
         if (treeNodes == null)
             throw SetTreeNodesNotCalledException()
 
@@ -144,7 +140,6 @@ class TreeNodeCollection(val mTreeViewAdapter: TreeViewAdapter) : NodeContainer 
                 Collections.swap(treeNodes!!, i, i - 1)
             }
         }
-        mTreeViewAdapter.notifyItemMoved(fromPosition, toPosition)
     }
 
     fun setNewItemPosition(position: Int) {

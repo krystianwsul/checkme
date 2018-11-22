@@ -6,10 +6,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.ModelState
-import com.krystianwsul.treeadapter.NodeContainer
-import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.*
 import java.util.*
 
 class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(density, indentation), ModelNode {
@@ -71,14 +68,14 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
 
     override val onClickListener get() = treeNode.onClickListener
 
-    fun remove(doneInstanceNode: DoneInstanceNode, x: Any) {
+    fun remove(doneInstanceNode: DoneInstanceNode, x: TreeViewAdapter.Placeholder) {
         check(doneInstanceNodes.contains(doneInstanceNode))
         doneInstanceNodes.remove(doneInstanceNode)
 
         treeNode.remove(doneInstanceNode.treeNode, x)
     }
 
-    fun add(instanceData: GroupListFragment.InstanceData, x: Any) = treeNode.add(newChildTreeNode(instanceData, null), x)
+    fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, null), x)
 
     override val isSelectable = false
 

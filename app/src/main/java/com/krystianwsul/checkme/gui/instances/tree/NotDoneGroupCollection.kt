@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
 class NotDoneGroupCollection(private val density: Float, private val indentation: Int, val nodeCollection: NodeCollection, private val nodeContainer: NodeContainer, private val selectable: Boolean) {
@@ -20,14 +21,14 @@ class NotDoneGroupCollection(private val density: Float, private val indentation
         notDoneInstanceDatas.map { newNotDoneGroupNode(this, mutableListOf(it), expandedGroups, expandedInstances, selectedNodes) }
     }
 
-    fun remove(notDoneGroupNode: NotDoneGroupNode, x: Any) {
+    fun remove(notDoneGroupNode: NotDoneGroupNode, x: TreeViewAdapter.Placeholder) {
         check(notDoneGroupNodes.contains(notDoneGroupNode))
 
         notDoneGroupNodes.remove(notDoneGroupNode)
         nodeContainer.remove(notDoneGroupNode.treeNode, x)
     }
 
-    fun add(instanceData: GroupListFragment.InstanceData, x: Any) {
+    fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) {
         val exactTimeStamp = instanceData.InstanceTimeStamp.toExactTimeStamp()
 
         notDoneGroupNodes.filter { it.exactTimeStamp == exactTimeStamp }.let {

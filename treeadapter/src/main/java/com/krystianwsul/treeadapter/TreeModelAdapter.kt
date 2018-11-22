@@ -9,7 +9,7 @@ interface TreeModelAdapter {
 
     val hasActionMode: Boolean
 
-    fun incrementSelected()
+    fun incrementSelected(x: TreeViewAdapter.Placeholder)
 
-    fun decrementSelected()
+    fun decrementSelected(x: TreeViewAdapter.Placeholder)
 }

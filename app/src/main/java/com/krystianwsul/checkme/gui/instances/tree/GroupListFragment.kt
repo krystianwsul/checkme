@@ -100,7 +100,8 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     val activity = context as AbstractActivity
 
-    private lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter
+        private set
 
     private val parametersRelay = BehaviorRelay.create<Parameters>()
     val parameters get() = parametersRelay.value!!
@@ -110,307 +111,303 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
-    val selectionCallback: SelectionCallback = object : SelectionCallback() {
+    val selectionCallback: SelectionCallback by lazy {
+        object : SelectionCallback(treeViewAdapter) {
 
-        override fun unselect() = treeViewAdapter.unselect()
+            override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(menuItem: MenuItem) {
-            val treeNodes = treeViewAdapter.selectedNodes
+            override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
+                val treeNodes = treeViewAdapter.selectedNodes
 
-            val instanceDatas = nodesToInstanceDatas(treeNodes)
-            check(instanceDatas.isNotEmpty())
+                val instanceDatas = nodesToInstanceDatas(treeNodes)
+                check(instanceDatas.isNotEmpty())
 
-            when (menuItem.itemId) {
-                R.id.action_group_edit_instance -> {
-                    check(instanceDatas.isNotEmpty())
+                when (menuItem.itemId) {
+                    R.id.action_group_edit_instance -> {
+                        check(instanceDatas.isNotEmpty())
 
-                    if (instanceDatas.size == 1) {
+                        if (instanceDatas.size == 1) {
+                            val instanceData = instanceDatas[0]
+                            check(instanceData.IsRootInstance)
+
+                            activity.startActivity(EditInstanceActivity.getIntent(instanceData.InstanceKey))
+                        } else {
+                            check(instanceDatas.size > 1)
+                            check(instanceDatas.all { it.IsRootInstance })
+
+                            val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
+
+                            activity.startActivity(EditInstancesActivity.getIntent(instanceKeys))
+                        }
+                    }
+                    R.id.action_group_share -> Utils.share(activity, getShareData(instanceDatas))
+                    R.id.action_group_show_task -> {
+                        check(instanceDatas.size == 1)
+
                         val instanceData = instanceDatas[0]
-                        check(instanceData.IsRootInstance)
+                        check(instanceData.TaskCurrent)
 
-                        activity.startActivity(EditInstanceActivity.getIntent(instanceData.InstanceKey))
-                    } else {
-                        check(instanceDatas.size > 1)
-                        check(instanceDatas.all { it.IsRootInstance })
-
-                        val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
-
-                        activity.startActivity(EditInstancesActivity.getIntent(instanceKeys))
+                        activity.startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.taskKey))
                     }
-                }
-                R.id.action_group_share -> Utils.share(activity, getShareData(instanceDatas))
-                R.id.action_group_show_task -> {
-                    check(instanceDatas.size == 1)
+                    R.id.action_group_edit_task -> {
+                        check(instanceDatas.size == 1)
 
-                    val instanceData = instanceDatas[0]
-                    check(instanceData.TaskCurrent)
+                        val instanceData = instanceDatas[0]
+                        check(instanceData.TaskCurrent)
 
-                    activity.startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.taskKey))
-                }
-                R.id.action_group_edit_task -> {
-                    check(instanceDatas.size == 1)
-
-                    val instanceData = instanceDatas[0]
-                    check(instanceData.TaskCurrent)
-
-                    activity.startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
-                }
-                R.id.action_group_delete_task -> {
-                    val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
-                    check(taskKeys.isNotEmpty())
-                    check(instanceDatas.all { it.TaskCurrent })
-
-                    var selectedTreeNodes = treeViewAdapter.selectedNodes
-                    check(selectedTreeNodes.isNotEmpty())
-
-                    treeViewAdapter.updateDisplayedNodes {
-                        do {
-                            val treeNode = selectedTreeNodes.first()
-
-                            recursiveDelete(treeNode, true, Unit)
-
-                            decrementSelected()
-                            selectedTreeNodes = treeViewAdapter.selectedNodes
-                        } while (selectedTreeNodes.isNotEmpty())
-
-                        DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                        activity.startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
                     }
-
-                    updateSelectAll()
-                }
-                R.id.action_group_add_task -> {
-                    check(instanceDatas.size == 1)
-
-                    val instanceData = instanceDatas[0]
-                    check(instanceData.TaskCurrent)
-
-                    activity.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.taskKey))
-                }
-                R.id.action_group_join -> {
-                    val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
-                    check(taskKeys.size > 1)
-
-                    if (parameters is Parameters.InstanceKey) {
-                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, (parameters as Parameters.InstanceKey).instanceKey.taskKey))
-                    } else {
-                        val firstInstanceData = instanceDatas.minBy { it.InstanceTimeStamp }!!
-
-                        val date = firstInstanceData.InstanceTimeStamp.date
-
-                        val timePair = firstInstanceData.InstanceTimePair
-
-                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
-                    }
-                }
-                R.id.action_group_mark_done -> {
-                    val instanceKeys = instanceDatas.map { it.InstanceKey }
-
-                    treeViewAdapter.updateDisplayedNodes {
-                        val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys)
+                    R.id.action_group_delete_task -> {
+                        val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
+                        check(taskKeys.isNotEmpty())
+                        check(instanceDatas.all { it.TaskCurrent })
 
                         var selectedTreeNodes = treeViewAdapter.selectedNodes
                         check(selectedTreeNodes.isNotEmpty())
 
-                        do {
+                        treeViewAdapter.updateDisplayedNodes {
+                            do {
+                                val treeNode = selectedTreeNodes.first()
+
+                                recursiveDelete(treeNode, true, TreeViewAdapter.Placeholder)
+
+                                decrementSelected(x)
+                                selectedTreeNodes = treeViewAdapter.selectedNodes
+                            } while (selectedTreeNodes.isNotEmpty())
+
+                            DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                        }
+
+                        updateSelectAll()
+                    }
+                    R.id.action_group_add_task -> {
+                        check(instanceDatas.size == 1)
+
+                        val instanceData = instanceDatas[0]
+                        check(instanceData.TaskCurrent)
+
+                        activity.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.taskKey))
+                    }
+                    R.id.action_group_join -> {
+                        val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
+                        check(taskKeys.size > 1)
+
+                        if (parameters is Parameters.InstanceKey) {
+                            activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, (parameters as Parameters.InstanceKey).instanceKey.taskKey))
+                        } else {
+                            val firstInstanceData = instanceDatas.minBy { it.InstanceTimeStamp }!!
+
+                            val date = firstInstanceData.InstanceTimeStamp.date
+
+                            val timePair = firstInstanceData.InstanceTimePair
+
+                            activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
+                        }
+                    }
+                    R.id.action_group_mark_done -> {
+                        val instanceKeys = instanceDatas.map { it.InstanceKey }
+
+                        treeViewAdapter.updateDisplayedNodes {
+                            val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys)
+
+                            var selectedTreeNodes = treeViewAdapter.selectedNodes
                             check(selectedTreeNodes.isNotEmpty())
 
-                            val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
+                            do {
+                                check(selectedTreeNodes.isNotEmpty())
 
-                            treeNode.modelNode.let {
-                                if (it is NotDoneGroupNode) {
-                                    check(it.singleInstance())
+                                val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
 
-                                    val instanceData = it.singleInstanceData
-                                    instanceData.Done = done
+                                treeNode.modelNode.let {
+                                    if (it is NotDoneGroupNode) {
+                                        check(it.singleInstance())
 
-                                    recursiveExists(instanceData)
+                                        val instanceData = it.singleInstanceData
+                                        instanceData.Done = done
 
-                                    val nodeCollection = it.nodeCollection
+                                        recursiveExists(instanceData)
 
-                                    nodeCollection.dividerNode.add(instanceData, Unit)
-                                    nodeCollection.notDoneGroupCollection.remove(it, Unit)
-                                } else {
-                                    val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
-                                    instanceData.Done = done
+                                        val nodeCollection = it.nodeCollection
 
-                                    recursiveExists(instanceData)
+                                        nodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
+                                        nodeCollection.notDoneGroupCollection.remove(it, TreeViewAdapter.Placeholder)
+                                    } else {
+                                        val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
+                                        instanceData.Done = done
 
-                                    it.removeFromParent(Unit)
+                                        recursiveExists(instanceData)
 
-                                    it.parentNodeCollection.dividerNode.add(instanceData, Unit)
+                                        it.removeFromParent(TreeViewAdapter.Placeholder)
+
+                                        it.parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
+                                    }
                                 }
-                            }
 
 
-                            decrementSelected()
-                            selectedTreeNodes = treeViewAdapter.selectedNodes
-                        } while (selectedTreeNodes.isNotEmpty())
+                                decrementSelected(x)
+                                selectedTreeNodes = treeViewAdapter.selectedNodes
+                            } while (selectedTreeNodes.isNotEmpty())
+                        }
+
+                        updateSelectAll()
                     }
-
-                    updateSelectAll()
-                }
-                else -> {
-                    throw UnsupportedOperationException()
+                    else -> {
+                        throw UnsupportedOperationException()
+                    }
                 }
             }
-        }
 
-        private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: Any) {
-            treeNode.modelNode.let {
-                val instanceData1 = when (it) {
-                    is NotDoneGroupNode -> it.singleInstanceData
-                    is NotDoneGroupNode.NotDoneInstanceNode -> it.instanceData
-                    is DoneInstanceNode -> it.instanceData
-                    else -> {
-                        check(it is DividerNode)
+            private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: TreeViewAdapter.Placeholder) {
+                treeNode.modelNode.let {
+                    val instanceData1 = when (it) {
+                        is NotDoneGroupNode -> it.singleInstanceData
+                        is NotDoneGroupNode.NotDoneInstanceNode -> it.instanceData
+                        is DoneInstanceNode -> it.instanceData
+                        else -> {
+                            check(it is DividerNode)
+
+                            treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
+
+                            return
+                        }
+                    }
+
+                    if (instanceData1.Exists || !root) {
+                        instanceData1.TaskCurrent = false
+                        instanceData1.IsRootTask = null
+                    } else {
+                        instanceData1.instanceDataParent.remove(instanceData1.InstanceKey)
+                    }
+
+                    if (instanceData1.Exists || !root) {
+                        treeNode.unselect(x)
 
                         treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
-
-                        return
-                    }
-                }
-
-                if (instanceData1.Exists || !root) {
-                    instanceData1.TaskCurrent = false
-                    instanceData1.IsRootTask = null
-                } else {
-                    instanceData1.instanceDataParent.remove(instanceData1.InstanceKey)
-                }
-
-                if (instanceData1.Exists || !root) {
-                    treeNode.unselect()
-
-                    treeNode.update()
-
-                    treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
-                } else {
-                    when (it) {
-                        is NotDoneGroupNode -> it.removeFromParent(x)
-                        is NotDoneGroupNode.NotDoneInstanceNode -> it.removeFromParent(x)
-                        else -> (it as DoneInstanceNode).removeFromParent(x)
+                    } else {
+                        when (it) {
+                            is NotDoneGroupNode -> it.removeFromParent(x)
+                            is NotDoneGroupNode.NotDoneInstanceNode -> it.removeFromParent(x)
+                            else -> (it as DoneInstanceNode).removeFromParent(x)
+                        }
                     }
                 }
             }
-        }
 
-        override fun onFirstAdded() {
-            treeViewAdapter.updateDisplayedNodes {
+            override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
                 (activity as AppCompatActivity).startSupportActionMode(this)
+
+                actionMode!!.menuInflater.inflate(R.menu.menu_edit_groups, actionMode!!.menu)
+
+                updateFabVisibility()
+
+                (activity as GroupListListener).onCreateGroupActionMode(actionMode!!, treeViewAdapter)
+
+                updateMenu()
+
+                dragHelper.attachToRecyclerView(groupListRecycler)
             }
 
-            actionMode!!.menuInflater.inflate(R.menu.menu_edit_groups, actionMode!!.menu)
+            override fun onSecondAdded() {
+                updateMenu()
 
-            updateFabVisibility()
+                dragHelper.attachToRecyclerView(null)
+            }
 
-            (activity as GroupListListener).onCreateGroupActionMode(actionMode!!)
+            override fun onOtherAdded() = updateMenu()
 
-            updateMenu()
+            override fun onLastRemoved(x: TreeViewAdapter.Placeholder, action: () -> Unit) {
+                action()
 
-            dragHelper.attachToRecyclerView(groupListRecycler)
-        }
+                updateFabVisibility()
 
-        override fun onSecondAdded() {
-            updateMenu()
+                (activity as GroupListListener).onDestroyGroupActionMode()
 
-            dragHelper.attachToRecyclerView(null)
-        }
+                dragHelper.attachToRecyclerView(null)
+            }
 
-        override fun onOtherAdded() {
-            updateMenu()
-        }
+            override fun onSecondToLastRemoved() {
+                updateMenu()
 
-        override fun onLastRemoved(action: () -> Unit) {
-            treeViewAdapter.updateDisplayedNodes(action)
+                dragHelper.attachToRecyclerView(groupListRecycler)
+            }
 
-            updateFabVisibility()
+            override fun onOtherRemoved() {
+                updateMenu()
+            }
 
-            (activity as GroupListListener).onDestroyGroupActionMode()
+            private fun updateMenu() {
+                check(actionMode != null)
 
-            dragHelper.attachToRecyclerView(null)
-        }
+                val menu = actionMode!!.menu!!
 
-        override fun onSecondToLastRemoved() {
-            updateMenu()
+                val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
+                check(instanceDatas.isNotEmpty())
 
-            dragHelper.attachToRecyclerView(groupListRecycler)
-        }
+                check(instanceDatas.all { it.Done == null })
 
-        override fun onOtherRemoved() {
-            updateMenu()
-        }
+                if (instanceDatas.size == 1) {
+                    val instanceData = instanceDatas.single()
 
-        private fun updateMenu() {
-            check(actionMode != null)
+                    menu.apply {
+                        findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance
+                        findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
+                        findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
+                        findItem(R.id.action_group_join).isVisible = false
+                        findItem(R.id.action_group_delete_task).isVisible = instanceData.TaskCurrent
+                        findItem(R.id.action_group_add_task).isVisible = instanceData.TaskCurrent
+                    }
+                } else {
+                    check(instanceDatas.size > 1)
 
-            val menu = actionMode!!.menu!!
+                    menu.apply {
+                        findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance }
+                        findItem(R.id.action_group_show_task).isVisible = false
+                        findItem(R.id.action_group_edit_task).isVisible = false
+                        findItem(R.id.action_group_add_task).isVisible = false
+                    }
 
-            val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
-            check(instanceDatas.isNotEmpty())
+                    if (instanceDatas.all { it.TaskCurrent }) {
+                        val projectIdCount = instanceDatas.asSequence()
+                                .map { it.InstanceKey.taskKey.remoteProjectId }
+                                .distinct()
+                                .count()
 
-            check(instanceDatas.all { it.Done == null })
+                        check(projectIdCount > 0)
 
-            if (instanceDatas.size == 1) {
-                val instanceData = instanceDatas.single()
-
-                menu.apply {
-                    findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance
-                    findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
-                    findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
-                    findItem(R.id.action_group_join).isVisible = false
-                    findItem(R.id.action_group_delete_task).isVisible = instanceData.TaskCurrent
-                    findItem(R.id.action_group_add_task).isVisible = instanceData.TaskCurrent
+                        menu.findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
+                        menu.findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
+                    } else {
+                        menu.findItem(R.id.action_group_join).isVisible = false
+                        menu.findItem(R.id.action_group_delete_task).isVisible = false
+                    }
                 }
-            } else {
+            }
+
+            private fun containsLoop(instanceDatas: List<InstanceData>): Boolean {
                 check(instanceDatas.size > 1)
 
-                menu.apply {
-                    findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance }
-                    findItem(R.id.action_group_show_task).isVisible = false
-                    findItem(R.id.action_group_edit_task).isVisible = false
-                    findItem(R.id.action_group_add_task).isVisible = false
+                for (instanceData in instanceDatas) {
+                    val parents = ArrayList<InstanceData>()
+                    addParents(parents, instanceData)
+
+                    parents.forEach {
+                        if (instanceDatas.contains(it))
+                            return true
+                    }
                 }
 
-                if (instanceDatas.all { it.TaskCurrent }) {
-                    val projectIdCount = instanceDatas.asSequence()
-                            .map { it.InstanceKey.taskKey.remoteProjectId }
-                            .distinct()
-                            .count()
-
-                    check(projectIdCount > 0)
-
-                    menu.findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
-                    menu.findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
-                } else {
-                    menu.findItem(R.id.action_group_join).isVisible = false
-                    menu.findItem(R.id.action_group_delete_task).isVisible = false
-                }
-            }
-        }
-
-        private fun containsLoop(instanceDatas: List<InstanceData>): Boolean {
-            check(instanceDatas.size > 1)
-
-            for (instanceData in instanceDatas) {
-                val parents = ArrayList<InstanceData>()
-                addParents(parents, instanceData)
-
-                parents.forEach {
-                    if (instanceDatas.contains(it))
-                        return true
-                }
+                return false
             }
 
-            return false
-        }
+            private fun addParents(parents: MutableList<InstanceData>, instanceData: InstanceData) {
+                if (instanceData.instanceDataParent !is InstanceData)
+                    return
 
-        private fun addParents(parents: MutableList<InstanceData>, instanceData: InstanceData) {
-            if (instanceData.instanceDataParent !is InstanceData)
-                return
+                val parent = instanceData.instanceDataParent as InstanceData
 
-            val parent = instanceData.instanceDataParent as InstanceData
-
-            parents.add(parent)
-            addParents(parents, parent)
+                parents.add(parent)
+                addParents(parents, parent)
+            }
         }
     }
 
@@ -553,6 +550,15 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             }
         }
 
+        treeViewAdapter = GroupAdapter.getAdapter(this, parameters.dataId, parameters.dataWrapper.CustomTimeDatas, useGroups(), showPadding(), parameters.dataWrapper.instanceDatas.values, expansionState, selectedNodes, parameters.dataWrapper.TaskDatas, parameters.dataWrapper.mNote)
+        groupListRecycler.adapter = treeViewAdapter
+
+        treeViewAdapter.updateDisplayedNodes {
+            selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+        }
+
+        updateFabVisibility()
+
         val emptyTextId = when (val parameters = parameters) {
             is Parameters.All -> R.string.instances_empty_root
             is Parameters.InstanceKey -> if (parameters.dataWrapper.TaskEditable!!) {
@@ -562,14 +568,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             }
             else -> null
         }
-
-        updateFabVisibility()
-
-        treeViewAdapter = GroupAdapter.getAdapter(this, parameters.dataId, parameters.dataWrapper.CustomTimeDatas, useGroups(), showPadding(), parameters.dataWrapper.instanceDatas.values, expansionState, selectedNodes, parameters.dataWrapper.TaskDatas, parameters.dataWrapper.mNote)
-
-        groupListRecycler.adapter = treeViewAdapter
-
-        selectionCallback.setSelected(treeViewAdapter.selectedNodes.size)
 
         val hide = mutableListOf<View>(groupListProgress)
         val show = mutableListOf<View>()
@@ -595,7 +593,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     fun updateSelectAll() = (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, parameters.dataWrapper.instanceDatas.values.any { it.Done == null })
 
-    fun selectAll() = treeViewAdapter.selectAll()
+    fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         MyCrashlytics.log(javaClass.simpleName + ".setFab " + hashCode())
@@ -727,13 +725,9 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
         override val hasActionMode get() = mGroupListFragment.selectionCallback.hasActionMode
 
-        override fun incrementSelected() {
-            mGroupListFragment.selectionCallback.incrementSelected()
-        }
+        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = mGroupListFragment.selectionCallback.incrementSelected(x)
 
-        override fun decrementSelected() {
-            mGroupListFragment.selectionCallback.decrementSelected()
-        }
+        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = mGroupListFragment.selectionCallback.decrementSelected(x)
 
         override val groupAdapter = this
 
@@ -758,7 +752,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     interface GroupListListener {
 
-        fun onCreateGroupActionMode(actionMode: ActionMode)
+        fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter)
 
         fun onDestroyGroupActionMode()
 

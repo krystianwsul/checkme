@@ -12,6 +12,12 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     val onPostCreate = BehaviorRelay.create<Unit>()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        MyCrashlytics.logMethod(this)
+
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onPostCreate(savedInstanceState: Bundle?) {
         MyCrashlytics.logMethod(this)
 
@@ -21,12 +27,26 @@ abstract class AbstractActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        MyCrashlytics.log(javaClass.simpleName + ".onResume")
+        MyCrashlytics.logMethod(this)
 
         super.onResume()
     }
 
+    override fun onPause() {
+        MyCrashlytics.logMethod(this)
+
+        super.onPause()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        MyCrashlytics.logMethod(this)
+
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onDestroy() {
+        MyCrashlytics.logMethod(this)
+
         createDisposable.dispose()
 
         super.onDestroy()

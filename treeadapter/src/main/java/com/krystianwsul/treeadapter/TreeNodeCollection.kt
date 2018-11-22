@@ -130,14 +130,11 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
         if (!this::treeNodes.isInitialized)
             throw SetTreeNodesNotCalledException()
 
-        if (fromPosition < toPosition) {
-            for (i in fromPosition until toPosition) {
-                Collections.swap(treeNodes, i, i + 1)
-            }
-        } else {
-            for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(treeNodes, i, i - 1)
-            }
+        val treeNode = treeNodes[fromPosition]
+
+        treeNodes.apply {
+            removeAt(fromPosition)
+            add(toPosition, treeNode)
         }
     }
 

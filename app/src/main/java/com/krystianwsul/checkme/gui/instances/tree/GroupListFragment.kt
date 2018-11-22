@@ -165,18 +165,16 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                         var selectedTreeNodes = treeViewAdapter.selectedNodes
                         check(selectedTreeNodes.isNotEmpty())
 
-                        treeViewAdapter.updateDisplayedNodes {
                             do {
                                 val treeNode = selectedTreeNodes.first()
 
-                                recursiveDelete(treeNode, true, TreeViewAdapter.Placeholder)
+                                recursiveDelete(treeNode, true, x)
 
                                 decrementSelected(x)
                                 selectedTreeNodes = treeViewAdapter.selectedNodes
                             } while (selectedTreeNodes.isNotEmpty())
 
                             DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
-                        }
 
                         updateSelectAll()
                     }
@@ -207,7 +205,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                     R.id.action_group_mark_done -> {
                         val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                        treeViewAdapter.updateDisplayedNodes {
                             val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys)
 
                             var selectedTreeNodes = treeViewAdapter.selectedNodes
@@ -229,25 +226,23 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                                         val nodeCollection = it.nodeCollection
 
-                                        nodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
-                                        nodeCollection.notDoneGroupCollection.remove(it, TreeViewAdapter.Placeholder)
+                                        nodeCollection.dividerNode.add(instanceData, x)
+                                        nodeCollection.notDoneGroupCollection.remove(it, x)
                                     } else {
                                         val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
                                         instanceData.Done = done
 
                                         recursiveExists(instanceData)
 
-                                        it.removeFromParent(TreeViewAdapter.Placeholder)
+                                        it.removeFromParent(x)
 
-                                        it.parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
+                                        it.parentNodeCollection.dividerNode.add(instanceData, x)
                                     }
                                 }
-
 
                                 decrementSelected(x)
                                 selectedTreeNodes = treeViewAdapter.selectedNodes
                             } while (selectedTreeNodes.isNotEmpty())
-                        }
 
                         updateSelectAll()
                     }

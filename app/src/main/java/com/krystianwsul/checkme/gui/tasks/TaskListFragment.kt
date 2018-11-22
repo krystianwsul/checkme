@@ -82,13 +82,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     R.id.action_task_delete -> {
                         checkNotNull(dataId)
 
-                        treeViewAdapter.updateDisplayedNodes {
                             do {
                                 val treeNode = selected.first()
 
                                 val taskWrapper = treeNode.modelNode as TaskAdapter.TaskWrapper
 
-                                taskWrapper.removeFromParent(TreeViewAdapter.Placeholder)
+                                taskWrapper.removeFromParent(x)
 
                                 decrementSelected(x)
 
@@ -96,7 +95,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                             } while (selected.isNotEmpty())
 
                             DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
-                        }
 
                         updateSelectAll()
                     }
@@ -348,6 +346,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         treeViewAdapter.updateDisplayedNodes {
             selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+
+            query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
         }
 
         updateFabVisibility()
@@ -372,8 +372,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
         animateVisibility(listOf(show), hide)
 
         updateSelectAll()
-
-        query.takeIf { it.isNotEmpty() }?.let { search(it) }
     }
 
     private fun updateSelectAll() {
@@ -440,14 +438,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = null
     }
 
-    fun search(query: String) {
+    fun search(query: String, x: TreeViewAdapter.Placeholder) {
         this.query = query
 
-        if (this::treeViewAdapter.isInitialized) {
-            treeViewAdapter.updateDisplayedNodes {
-                treeViewAdapter.query = query
-            }
-        }
+        treeViewAdapter.query = query
     }
 
     private class TaskAdapter private constructor(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {

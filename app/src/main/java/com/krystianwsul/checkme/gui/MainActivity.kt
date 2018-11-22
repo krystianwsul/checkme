@@ -474,9 +474,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         firebaseAuth = FirebaseAuth.getInstance()
 
         mainActivitySearch.textChanges()
+                .skipInitialValue()
                 .subscribe {
                     val query = it.toString().toLowerCase()
-                    taskListFragment.search(query)
+                    taskListFragment.treeViewAdapter.updateDisplayedNodes {
+                        taskListFragment.search(query, TreeViewAdapter.Placeholder)
+                    }
 
                     if (query.isEmpty())
                         mainFab.show()
@@ -981,6 +984,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 check(adapterDisposable == null)
 
                 adapterDisposable = mainDaysPager.pageSelections().subscribe {
+                    // todo find a better way
                     val newDayFragment = mainDaysPager.layoutManager!!.findViewByPosition(it) as DayFragment
 
                     currentItemRef?.let {

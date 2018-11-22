@@ -66,14 +66,12 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                     R.id.action_project_delete -> {
                         check(dataId != null)
 
-                        treeViewAdapter.updateDisplayedNodes {
                             for (treeNode in selected) {
                                 val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
 
-                                projectNode.remove(TreeViewAdapter.Placeholder)
+                                projectNode.remove(x)
 
                                 decrementSelected(x)
-                            }
 
                             DomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                         }

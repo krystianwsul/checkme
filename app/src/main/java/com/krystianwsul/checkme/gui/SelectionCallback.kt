@@ -12,7 +12,8 @@ abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeV
 
     protected var actionMode: ActionMode? = null
 
-    private var finishing = false
+    private var menuClick = false
+    private var removingLast = false
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         check(actionMode == null)
@@ -34,9 +35,12 @@ abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeV
         treeViewAdapterGetter.update {
             onMenuClick(item, TreeViewAdapter.Placeholder)
 
-            check(!finishing)
+            check(!removingLast)
+            check(!menuClick)
 
+            menuClick = true
             actionMode?.finish()
+            menuClick = false
         }
 
         return true
@@ -45,31 +49,35 @@ abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeV
     override fun onDestroyActionMode(mode: ActionMode) {
         checkNotNull(actionMode)
 
-        if (!finishing) {
-            treeViewAdapterGetter.update {
-                check(selected > 0)
-
-                for (i in selected downTo 1) {
-                    selected--
-
-                    when (selected) {
-                        0 -> {
-                            actionMode = null
-
-                            onLastRemoved(TreeViewAdapter.Placeholder)
-                        }
-                        1 -> onSecondToLastRemoved()
-                        else -> onOtherRemoved()
-                    }
-                }
-
-                unselect(TreeViewAdapter.Placeholder)
-            }
-        } else {
+        if (removingLast) {
             actionMode = null
-
-            unselect(TreeViewAdapter.Placeholder)
+        } else if (menuClick) {
+            countdown()
+        } else {
+            treeViewAdapterGetter.update {
+                countdown()
+            }
         }
+    }
+
+    private fun countdown() {
+        check(selected > 0)
+
+        for (i in selected downTo 1) {
+            selected--
+
+            when (selected) {
+                0 -> {
+                    actionMode = null
+
+                    onLastRemoved(TreeViewAdapter.Placeholder)
+                }
+                1 -> onSecondToLastRemoved()
+                else -> onOtherRemoved()
+            }
+        }
+
+        unselect(TreeViewAdapter.Placeholder)
     }
 
     fun setSelected(selected: Int, x: TreeViewAdapter.Placeholder) {
@@ -110,11 +118,12 @@ abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeV
         when (selected) {
             1 -> onSecondToLastRemoved()
             0 -> {
-                check(!finishing)
+                check(!removingLast)
+                check(!menuClick)
 
-                finishing = true
+                removingLast = true
                 actionMode!!.finish()
-                finishing = false
+                removingLast = false
 
                 onLastRemoved(x)
             }

@@ -40,6 +40,8 @@ class DragHelper(
 
         lateinit var listener: (Int) -> Unit
 
+        override fun isLongPressDragEnabled() = false
+
         override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
             MyCrashlytics.logMethod(this, "endPosition before: $endPosition")
 

@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.toolbar.*
@@ -42,6 +43,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
     private lateinit var taskListFragment: TaskListFragment
 
     private lateinit var showTaskViewModel: ShowTaskViewModel
+
+    override val search = Observable.never<String>()!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

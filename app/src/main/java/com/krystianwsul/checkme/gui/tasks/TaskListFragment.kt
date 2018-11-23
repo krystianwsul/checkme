@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -22,6 +23,9 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
 import kotlinx.android.synthetic.main.row_task_list.view.*
@@ -234,6 +238,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private var query: String = ""
 
+    private val initializeDisposable = CompositeDisposable()
+
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(!childTaskDatas.isEmpty())
 
@@ -322,6 +328,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         checkNotNull(dataId)
 
+        initializeDisposable.clear()
+
         if (this::treeViewAdapter.isInitialized) {
             val selected = treeViewAdapter.selectedNodes
 
@@ -347,6 +355,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
         }
+
+        (context as TaskListListener).search
+                .subscribe {
+                    treeViewAdapter.updateDisplayedNodes {
+                        search(it, TreeViewAdapter.Placeholder)
+                    }
+                }
+                .addTo(initializeDisposable)
 
         updateFabVisibility()
 
@@ -436,10 +452,17 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = null
     }
 
-    fun search(query: String, x: TreeViewAdapter.Placeholder) {
+    private fun search(query: String, x: TreeViewAdapter.Placeholder) {
+        Log.e("asdf", "search: $query")
         this.query = query
 
         treeViewAdapter.query = query
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        initializeDisposable.clear()
     }
 
     private class TaskAdapter private constructor(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {
@@ -821,5 +844,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         fun onCreateTaskActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter)
         fun onDestroyTaskActionMode()
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
+
+        val search: Observable<String>
     }
 }

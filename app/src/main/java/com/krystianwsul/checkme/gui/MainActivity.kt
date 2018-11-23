@@ -152,6 +152,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
         private set
 
+    override val search by lazy {
+        mainActivitySearch.textChanges()
+                .map { it.toString() }
+                .share()!!
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
         return true
@@ -487,14 +493,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         firebaseAuth = FirebaseAuth.getInstance()
 
-        mainActivitySearch.textChanges()
-                .skipInitialValue()
+        search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {
                     val query = it.toString().toLowerCase()
-                    taskListFragment.treeViewAdapter.updateDisplayedNodes {
-                        taskListFragment.search(query, TreeViewAdapter.Placeholder)
-                    }
-
                     if (query.isEmpty())
                         mainFab.show()
                     else

@@ -322,12 +322,10 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             dragHelper.attachToRecyclerView(groupListRecycler)
         }
 
-        override fun onOtherRemoved() {
-            updateMenu()
-        }
+        override fun onOtherRemoved() = updateMenu()
 
         private fun updateMenu() {
-            check(actionMode != null)
+            checkNotNull(actionMode)
 
             val menu = actionMode!!.menu!!
 

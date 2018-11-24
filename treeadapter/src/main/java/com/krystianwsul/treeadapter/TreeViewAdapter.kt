@@ -101,6 +101,9 @@ class TreeViewAdapter @JvmOverloads constructor(
                 if (oldState.separatorVisibility != newState.separatorVisibility)
                     return false
 
+                if (oldState.expandVisible != newState.expandVisible)
+                    return false
+
                 return oldState.modelState == newState.modelState
             }
         }).dispatchUpdatesTo(this)

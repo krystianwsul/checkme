@@ -20,18 +20,42 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
+
+        <activity android:name=".gui.TutorialActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".gui.MainActivity"
             android:theme="@style/AppTheme.NavDrawer"
             android:launchMode="singleTask"/>
-        <activity android:name=".gui.tasks.ShowTaskActivity"/>
-        <activity android:name=".gui.instances.ShowGroupActivity"/>
+
+        <activity
+            android:name=".gui.tasks.ShowTaskActivity"
+            android:theme="@style/AppTheme.Toolbar"/>
+
+        <activity
+            android:name=".gui.instances.ShowGroupActivity"
+            android:theme="@style/AppTheme.Toolbar"/>
+
         <activity
             android:name=".gui.instances.ShowNotificationGroupActivity"
-            android:launchMode="singleTask"/>
-        <activity android:name=".gui.instances.ShowInstanceActivity"/>
-        <activity android:name=".gui.instances.ShowTaskInstancesActivity"/>
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.Toolbar"/>
+
+        <activity
+            android:name=".gui.instances.ShowInstanceActivity"
+            android:theme="@style/AppTheme.Toolbar"/>
+
+        <activity
+            android:name=".gui.instances.ShowTaskInstancesActivity"
+            android:theme="@style/AppTheme.Toolbar"/>
+
         <activity android:name=".gui.customtimes.ShowCustomTimeActivity"/>
+
         <activity
             android:name=".gui.tasks.CreateTaskActivity"
             android:windowSoftInputMode="stateHidden"> <!-- keyboard hack -->
@@ -44,8 +68,18 @@
                 <data android:mimeType="text/plain"/>
             </intent-filter>
         </activity>
+
         <activity android:name=".gui.instances.EditInstanceActivity"/>
+
         <activity android:name=".gui.instances.EditInstancesActivity"/>
+
+        <activity
+            android:name=".gui.projects.ShowProjectActivity"
+            android:theme="@style/AppTheme.Toolbar"/>
+
+        <activity
+            android:name=".gui.friends.FindFriendActivity"
+            android:windowSoftInputMode="stateVisible"/>
 
         <receiver
             android:name=".notifications.BootReceiver"
@@ -55,10 +89,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
-
-        <service
-            android:name=".notifications.TickJobIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <receiver
             android:name=".notifications.TimeChangeReceiver"
@@ -71,25 +101,24 @@
         </receiver>
 
         <service
+            android:name=".notifications.TickJobIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+        <service
             android:name=".notifications.GroupNotificationDeleteService"
             android:exported="false"/>
+
         <service
             android:name=".notifications.InstanceDoneService"
             android:exported="false"/>
+
         <service
             android:name=".notifications.InstanceHourService"
             android:exported="false"/>
+
         <service
             android:name=".notifications.InstanceNotificationDeleteService"
             android:exported="false"/>
-
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="e6ad996c53b8b11ff453660591b423b7ac73008d"/>
-
-        <activity
-            android:name=".gui.friends.FindFriendActivity"
-            android:windowSoftInputMode="stateVisible"/>
 
         <service
             android:name=".MyFirebaseMessagingService"
@@ -98,6 +127,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
+
         <service
             android:name=".MyFirebaseInstanceIdService"
             tools:ignore="ExportedService">
@@ -105,8 +135,6 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
-
-        <activity android:name=".gui.projects.ShowProjectActivity"/>
 
         <service
             android:name=".notifications.FirebaseTickService"
@@ -116,12 +144,9 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".gui.TutorialActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="e6ad996c53b8b11ff453660591b423b7ac73008d"/>
 
     </application>
 

@@ -6,7 +6,7 @@ import android.view.MenuItem
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
-abstract class SelectionCallback(private val treeViewAdapterGetter: (() -> TreeViewAdapter)?) : ActionMode.Callback {
+abstract class SelectionCallback(protected val treeViewAdapterGetter: (() -> TreeViewAdapter)?) : ActionMode.Callback {
 
     private var selected = 0
 

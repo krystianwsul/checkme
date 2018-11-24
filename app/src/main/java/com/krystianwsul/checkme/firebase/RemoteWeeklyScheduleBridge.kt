@@ -19,15 +19,11 @@ class RemoteWeeklyScheduleBridge(private val domainFactory: DomainFactory, priva
 
     override fun getEndTime() = mRemoteWeeklyScheduleRecord.endTime
 
-    override fun setEndTime(endTime: Long) {
-        mRemoteWeeklyScheduleRecord.setEndTime(endTime)
-    }
+    override fun setEndTime(endTime: Long) = mRemoteWeeklyScheduleRecord.setEndTime(endTime)
 
     override val rootTaskKey get() = mRemoteWeeklyScheduleRecord.run { TaskKey(projectId, taskId) }
 
-    override fun delete() {
-        mRemoteWeeklyScheduleRecord.delete()
-    }
+    override fun delete() = mRemoteWeeklyScheduleRecord.delete()
 
     override val remoteCustomTimeKey get() = mRemoteWeeklyScheduleRecord.run { customTimeId?.let { Pair(projectId, it) } }
 }

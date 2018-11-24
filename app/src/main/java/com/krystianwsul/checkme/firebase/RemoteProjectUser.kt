@@ -5,10 +5,11 @@ import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.records.RemoteProjectUserRecord
 
 
+class RemoteProjectUser(
+        private val remoteProject: RemoteProject,
+        private val remoteProjectUserRecord: RemoteProjectUserRecord) {
 
-class RemoteProjectUser(private val remoteProject: RemoteProject, private val remoteProjectUserRecord: RemoteProjectUserRecord) {
-
-    val id by lazy { remoteProjectUserRecord.id }
+    val id = remoteProjectUserRecord.id
 
     var name
         get() = remoteProjectUserRecord.name
@@ -18,7 +19,7 @@ class RemoteProjectUser(private val remoteProject: RemoteProject, private val re
             remoteProjectUserRecord.name = name
         }
 
-    val email get() = remoteProjectUserRecord.email
+    val email = remoteProjectUserRecord.email
 
     fun delete() {
         remoteProject.deleteUser(this)

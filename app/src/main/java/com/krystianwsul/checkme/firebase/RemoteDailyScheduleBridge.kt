@@ -12,9 +12,7 @@ class RemoteDailyScheduleBridge(private val domainFactory: DomainFactory, privat
 
     override fun getEndTime() = mRemoteDailyScheduleRecord.endTime
 
-    override fun setEndTime(endTime: Long) {
-        mRemoteDailyScheduleRecord.setEndTime(endTime)
-    }
+    override fun setEndTime(endTime: Long) = mRemoteDailyScheduleRecord.setEndTime(endTime)
 
     override val rootTaskKey get() = TaskKey(mRemoteDailyScheduleRecord.projectId, mRemoteDailyScheduleRecord.taskId)
 
@@ -24,9 +22,7 @@ class RemoteDailyScheduleBridge(private val domainFactory: DomainFactory, privat
 
     override val minute get() = mRemoteDailyScheduleRecord.minute
 
-    override fun delete() {
-        mRemoteDailyScheduleRecord.delete()
-    }
+    override fun delete() = mRemoteDailyScheduleRecord.delete()
 
     override val remoteCustomTimeKey get() = mRemoteDailyScheduleRecord.customTimeId?.let { Pair(mRemoteDailyScheduleRecord.projectId, it) }
 

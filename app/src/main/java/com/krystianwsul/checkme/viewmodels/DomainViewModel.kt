@@ -81,7 +81,10 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     fun stop() {
         kotlinDomainFactory.removeFirebaseListener(firebaseListener)
+
+        observer?.let { ObserverHolder.removeDomainObserver(it) }
         observer = null
+
         compositeDisposable.clear()
     }
 

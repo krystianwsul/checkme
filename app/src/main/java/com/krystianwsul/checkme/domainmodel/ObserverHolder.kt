@@ -11,20 +11,22 @@ object ObserverHolder {
     fun addDomainObserver(observer: DomainObserver) = observers.add(WeakReference(observer))
 
     @Synchronized
+    fun removeDomainObserver(observer: DomainObserver) {
+        val remove = observers.filter { it.get().let { it == null || it == observer } }
+
+        remove.forEach { observers.remove(it) }
+    }
+
+    @Synchronized
     fun clear() = observers.clear()
 
     @Synchronized
     fun notifyDomainObservers(dataIds: List<Int>) {
-        val remove = mutableListOf<WeakReference<DomainObserver>>()
-
-        for (reference in observers) {
-            val observer = reference.get()
-            if (observer == null)
-                remove.add(reference)
-            else
-                observer.onDomainChanged(dataIds)
-        }
+        val remove = observers.filter { it.get() == null }
 
         remove.forEach { observers.remove(it) }
+
+        for (reference in observers)
+            reference.get()!!.onDomainChanged(dataIds)
     }
 }

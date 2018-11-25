@@ -19,13 +19,13 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.row_project.view.*
 import java.util.*
 
 class ProjectListFragment : AbstractFragment(), FabUser {
@@ -226,7 +226,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             return treeViewAdapter
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = Holder(activity!!.layoutInflater.inflate(R.layout.row_project, parent, false)!!)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(activity!!.layoutInflater.inflate(R.layout.row_list, parent, false)!!)
 
         override val hasActionMode get() = selectionCallback.hasActionMode
 
@@ -254,10 +254,18 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             }
 
             override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                (viewHolder as Holder).run {
-                    projectName.text = projectData.name
+                (viewHolder as NodeHolder).run {
+                    rowCheckBox.visibility = View.GONE
 
-                    projectUsers.text = projectData.users
+                    rowName.text = projectData.name
+
+                    rowDetails.text = projectData.users
+
+                    rowChildren.visibility = View.GONE
+
+                    rowExpand.visibility = View.GONE
+
+                    rowSeparator.visibility = View.GONE
 
                     itemView.setOnClickListener(treeNode.onClickListener)
 
@@ -297,11 +305,5 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     data class State(val projectData: ProjectListViewModel.ProjectData) : ModelState {
 
         override fun same(other: ModelState) = (other as? State)?.projectData?.id == projectData.id
-    }
-
-    private class Holder(view: View) : RecyclerView.ViewHolder(view) {
-
-        val projectName = itemView.projectName!!
-        val projectUsers = itemView.projectUsers!!
     }
 }

@@ -7,13 +7,12 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.RelativeLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -692,19 +691,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             return treeViewAdapter!!
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            val groupRow = LayoutInflater.from(parent.context).inflate(R.layout.row_group_list, parent, false) as LinearLayout
-
-            val groupRowContainer = groupRow.findViewById<LinearLayout>(R.id.group_row_container)
-            val groupRowName = groupRow.findViewById<TextView>(R.id.group_row_name)
-            val groupRowDetails = groupRow.findViewById<TextView>(R.id.group_row_details)
-            val groupRowChildren = groupRow.findViewById<TextView>(R.id.group_row_children)
-            val groupRowExpand = groupRow.findViewById<ImageView>(R.id.group_row_expand)
-            val groupCheckBox = groupRow.findViewById<CheckBox>(R.id.group_row_checkbox)
-            val groupRowSeparator = groupRow.findViewById<View>(R.id.group_row_separator)
-
-            return GroupHolder(groupRow, groupRowContainer, groupRowName, groupRowDetails, groupRowChildren, groupRowExpand, groupCheckBox, groupRowSeparator)
-        }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
 
         override val hasActionMode get() = mGroupListFragment.selectionCallback.hasActionMode
 
@@ -714,15 +701,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
         override val groupAdapter = this
 
-        class GroupHolder(
-                val groupRow: LinearLayout,
-                val groupRowContainer: LinearLayout,
-                val groupRowName: TextView,
-                val groupRowDetails: TextView,
-                val groupRowChildren: TextView,
-                val groupRowExpand: ImageView,
-                val groupRowCheckBox: CheckBox,
-                val groupRowSeparator: View) : RecyclerView.ViewHolder(groupRow)
     }
 
     @Parcelize

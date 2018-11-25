@@ -33,14 +33,14 @@ abstract class GroupHolderNode(protected val density: Float, protected val inden
     protected abstract fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-        val groupHolder = viewHolder as GroupListFragment.GroupAdapter.GroupHolder
+        val groupHolder = viewHolder as NodeHolder
 
         val padding = 48 * indentation
 
         groupHolder.run {
-            groupRowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
+            rowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
 
-            groupRowName.run {
+            rowName.run {
                 name.let {
                     if (it != null) {
                         visibility = View.VISIBLE
@@ -53,7 +53,7 @@ abstract class GroupHolderNode(protected val density: Float, protected val inden
                 }
             }
 
-            groupRowDetails.run {
+            rowDetails.run {
                 details.let {
                     if (it != null) {
                         visibility = View.VISIBLE
@@ -65,7 +65,7 @@ abstract class GroupHolderNode(protected val density: Float, protected val inden
                 }
             }
 
-            groupRowChildren.run {
+            rowChildren.run {
                 children.let {
                     if (it != null) {
                         visibility = View.VISIBLE
@@ -77,7 +77,7 @@ abstract class GroupHolderNode(protected val density: Float, protected val inden
                 }
             }
 
-            groupRowExpand.run {
+            rowExpand.run {
                 expand.let {
                     if (it != null) {
                         visibility = View.VISIBLE
@@ -89,7 +89,7 @@ abstract class GroupHolderNode(protected val density: Float, protected val inden
                 }
             }
 
-            groupRowCheckBox.run {
+            rowCheckBox.run {
                 checkBoxVisibility.let {
                     visibility = it
                     if (it == View.VISIBLE) {
@@ -99,9 +99,9 @@ abstract class GroupHolderNode(protected val density: Float, protected val inden
                 }
             }
 
-            groupRowSeparator.visibility = separatorVisibility
+            rowSeparator.visibility = separatorVisibility
 
-            groupRow.run {
+            itemView.run {
                 setBackgroundColor(backgroundColor)
                 setOnLongClickListener(getOnLongClickListener(viewHolder))
                 setOnClickListener(onClickListener)

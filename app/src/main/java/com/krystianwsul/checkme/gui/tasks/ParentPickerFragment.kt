@@ -10,16 +10,12 @@ import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.treeadapter.*
-
-import kotlinx.android.synthetic.main.row_task_list.view.*
 import java.util.*
 
 class ParentPickerFragment : AbstractDialogFragment() {
@@ -159,20 +155,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             return treeViewAdapter
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskHolder {
-            val showTaskRow = parentPickerFragment.requireActivity()
-                    .layoutInflater
-                    .inflate(R.layout.row_task_list, parent, false)
-
-            val taskRowContainer = showTaskRow.taskRowContainer
-            val taskRowName = showTaskRow.taskRowName
-            val taskRowDetails = showTaskRow.taskRowDetails
-            val taskRowChildren = showTaskRow.taskRowChildren
-            val taskRowImage = showTaskRow.taskRowImg
-            val taskRowSeparator = showTaskRow.taskRowSeparator
-
-            return TaskHolder(showTaskRow, taskRowContainer!!, taskRowName!!, taskRowDetails!!, taskRowChildren!!, taskRowImage!!, taskRowSeparator!!)
-        }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false))
 
         override val hasActionMode = false
 
@@ -243,53 +226,55 @@ class ParentPickerFragment : AbstractDialogFragment() {
             }
 
             override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                val taskHolder = viewHolder as TaskHolder
+                val taskHolder = viewHolder as NodeHolder
 
                 val treeNode = treeNode
 
                 val parentPickerFragment = parentFragment
 
                 if (treeNode.isSelected)
-                    taskHolder.showTaskRow.setBackgroundColor(ContextCompat.getColor(parentPickerFragment.requireActivity(), R.color.selected))
+                    taskHolder.itemView.setBackgroundColor(ContextCompat.getColor(parentPickerFragment.requireActivity(), R.color.selected))
                 else
-                    taskHolder.showTaskRow.setBackgroundColor(Color.TRANSPARENT)
+                    taskHolder.itemView.setBackgroundColor(Color.TRANSPARENT)
 
-                taskHolder.showTaskRow.setOnLongClickListener(treeNode.onLongClickListener)
+                taskHolder.itemView.setOnLongClickListener(treeNode.onLongClickListener)
+
+                taskHolder.rowCheckBox.visibility = View.GONE
 
                 val padding = 48 * indentation
 
-                taskHolder.taskRowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
+                taskHolder.rowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
 
                 if (parentTreeData.parentTreeDatas.isEmpty()) {
                     check(!treeNode.expandVisible)
 
-                    taskHolder.mTaskRowImg.visibility = View.INVISIBLE
+                    taskHolder.rowExpand.visibility = View.INVISIBLE
                 } else {
                     check(treeNode.expandVisible)
 
-                    taskHolder.mTaskRowImg.visibility = View.VISIBLE
+                    taskHolder.rowExpand.visibility = View.VISIBLE
 
                     if (treeNode.isExpanded)
-                        taskHolder.mTaskRowImg.setImageResource(R.drawable.ic_expand_less_black_36dp)
+                        taskHolder.rowExpand.setImageResource(R.drawable.ic_expand_less_black_36dp)
                     else
-                        taskHolder.mTaskRowImg.setImageResource(R.drawable.ic_expand_more_black_36dp)
+                        taskHolder.rowExpand.setImageResource(R.drawable.ic_expand_more_black_36dp)
 
-                    taskHolder.mTaskRowImg.setOnClickListener(treeNode.expandListener)
+                    taskHolder.rowExpand.setOnClickListener(treeNode.expandListener)
                 }
 
-                taskHolder.taskRowName.text = parentTreeData.name
+                taskHolder.rowName.text = parentTreeData.name
 
                 if (TextUtils.isEmpty(parentTreeData.scheduleText)) {
-                    taskHolder.mTaskRowDetails.visibility = View.GONE
+                    taskHolder.rowDetails.visibility = View.GONE
                 } else {
-                    taskHolder.mTaskRowDetails.visibility = View.VISIBLE
-                    taskHolder.mTaskRowDetails.text = parentTreeData.scheduleText
+                    taskHolder.rowDetails.visibility = View.VISIBLE
+                    taskHolder.rowDetails.text = parentTreeData.scheduleText
                 }
 
                 if ((parentTreeData.parentTreeDatas.isEmpty() || treeNode.isExpanded) && TextUtils.isEmpty(parentTreeData.note)) {
-                    taskHolder.mTaskRowChildren.visibility = View.GONE
+                    taskHolder.rowChildren.visibility = View.GONE
                 } else {
-                    taskHolder.mTaskRowChildren.visibility = View.VISIBLE
+                    taskHolder.rowChildren.visibility = View.VISIBLE
 
                     val text = if (!parentTreeData.parentTreeDatas.isEmpty() && !treeNode.isExpanded) {
                         parentTreeData.parentTreeDatas
@@ -303,12 +288,12 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                     check(!TextUtils.isEmpty(text))
 
-                    taskHolder.mTaskRowChildren.text = text
+                    taskHolder.rowChildren.text = text
                 }
 
-                taskHolder.mTaskRowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+                taskHolder.rowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-                taskHolder.showTaskRow.setOnClickListener(treeNode.onClickListener)
+                taskHolder.itemView.setOnClickListener(treeNode.onClickListener)
             }
 
             override fun onClick() {
@@ -334,8 +319,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 override fun same(other: ModelState) = (other as? State)?.parentTreeData?.parentKey == parentTreeData.parentKey
             }
         }
-
-        private inner class TaskHolder(val showTaskRow: View, val taskRowContainer: LinearLayout, val taskRowName: TextView, val mTaskRowDetails: TextView, val mTaskRowChildren: TextView, val mTaskRowImg: ImageView, val mTaskRowSeparator: View) : RecyclerView.ViewHolder(showTaskRow)
     }
 
     private interface TaskParent {

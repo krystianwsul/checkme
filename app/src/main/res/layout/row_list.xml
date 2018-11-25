@@ -4,70 +4,80 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="5dp"
-    android:orientation="vertical">
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/listVerticalPadding">
 
     <LinearLayout
+        android:id="@+id/rowContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:orientation="horizontal"
-        android:id="@+id/taskRowContainer">
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/rowCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="16dp"/>
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center_vertical">
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/taskRowName"
-                android:singleLine="true"
+                android:id="@+id/rowName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
+                android:singleLine="true"
                 android:textColor="@color/textPrimary"
+                android:textSize="@dimen/textPrimary"
                 tools:ignore="Deprecated"/>
 
             <TextView
-                android:id="@+id/taskRowDetails"
-                android:singleLine="true"
+                android:id="@+id/rowDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:singleLine="true"
                 android:textColor="@color/textSecondary"
+                android:textSize="@dimen/textSecondary"
                 tools:ignore="Deprecated"/>
 
             <TextView
-                android:id="@+id/taskRowChildren"
-                android:singleLine="true"
+                android:id="@+id/rowChildren"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:singleLine="true"
                 android:textColor="@color/textSecondary"
+                android:textSize="@dimen/textSecondary"
                 tools:ignore="Deprecated"/>
 
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/taskRowImg"
+            android:id="@+id/rowExpand"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:src="@drawable/ic_list_black_36dp"
-            android:contentDescription="@string/list"
-            android:layout_gravity="center_vertical" />
+            android:contentDescription="@string/expand"
+            android:src="@drawable/ic_expand_more_black_36dp"
+            android:visibility="invisible"/>
 
     </LinearLayout>
 
     <View
+        android:id="@+id/rowSeparator"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="4dp"
-        android:visibility="invisible"
-        android:id="@+id/taskRowSeparator"
-        android:background="?android:attr/listDivider" />
+        android:background="?android:attr/listDivider"
+        android:visibility="invisible"/>
 
 </LinearLayout>

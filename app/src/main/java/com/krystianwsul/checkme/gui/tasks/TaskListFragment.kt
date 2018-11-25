@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
@@ -28,7 +29,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
-import kotlinx.android.synthetic.main.row_task_list.view.*
 import java.util.*
 
 class TaskListFragment : AbstractFragment(), FabUser {
@@ -518,7 +518,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             return treeViewAdapter
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = TaskHolder(taskListFragment.activity!!.layoutInflater.inflate(R.layout.row_task_list, parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(taskListFragment.activity!!.layoutInflater.inflate(R.layout.row_list, parent, false))
 
         override fun remove(taskWrapper: TaskWrapper, x: TreeViewAdapter.Placeholder) {
             check(taskWrappers.contains(taskWrapper))
@@ -592,7 +592,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                (viewHolder as TaskHolder).run {
+                (viewHolder as NodeHolder).run {
                     itemView.run {
                         setBackgroundColor(if (treeNode.isSelected)
                             ContextCompat.getColor(taskListFragment.activity!!, R.color.selected)
@@ -610,11 +610,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         setOnClickListener(treeNode.onClickListener)
                     }
 
+                    rowCheckBox.visibility = View.GONE
+
                     val padding = 48 * indentation
+                    rowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
 
-                    taskRowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
-
-                    taskRowImg.run {
+                    rowExpand.run {
                         visibility = if (!treeNode.expandVisible) {
                             View.INVISIBLE
                         } else {
@@ -631,12 +632,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         }
                     }
 
-                    taskRowName.run {
+                    rowName.run {
                         text = childTaskData.name
                         setSingleLine(true)
                     }
 
-                    taskRowDetails.run {
+                    rowDetails.run {
                         visibility = if (childTaskData.scheduleText.isNullOrEmpty()) {
                             View.GONE
                         } else {
@@ -645,7 +646,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         }
                     }
 
-                    taskRowChildren.run {
+                    rowChildren.run {
                         visibility = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
                             View.GONE
                         } else {
@@ -663,7 +664,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         }
                     }
 
-                    taskRowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+                    rowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
                 }
             }
 
@@ -742,27 +743,29 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                (viewHolder as TaskHolder).run {
+                (viewHolder as NodeHolder).run {
                     itemView.run {
                         setBackgroundColor(Color.TRANSPARENT)
                         setOnLongClickListener(null)
                         setOnClickListener(null)
                     }
 
-                    taskRowContainer.setPadding(0, 0, 0, 0)
+                    rowContainer.setPadding(0, 0, 0, 0)
 
-                    taskRowImg.visibility = View.INVISIBLE
+                    rowCheckBox.visibility = View.GONE
 
-                    taskRowName.run {
+                    rowExpand.visibility = View.GONE
+
+                    rowName.run {
                         text = note
                         setSingleLine(false)
                     }
 
-                    taskRowDetails.visibility = View.GONE
+                    rowDetails.visibility = View.GONE
 
-                    taskRowChildren.visibility = View.GONE
+                    rowChildren.visibility = View.GONE
 
-                    taskRowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+                    rowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
                 }
             }
 
@@ -790,16 +793,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 override fun same(other: ModelState) = (other is State)
             }
-        }
-
-        private inner class TaskHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-            val taskRowContainer = itemView.taskRowContainer!!
-            val taskRowName = itemView.taskRowName!!
-            val taskRowDetails = itemView.taskRowDetails!!
-            val taskRowChildren = itemView.taskRowChildren!!
-            val taskRowImg = itemView.taskRowImg!!
-            val taskRowSeparator = itemView.taskRowSeparator!!
         }
     }
 

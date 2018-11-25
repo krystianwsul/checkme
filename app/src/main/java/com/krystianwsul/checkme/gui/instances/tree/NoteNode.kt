@@ -35,7 +35,7 @@ class NoteNode(density: Float, private val note: String, private val groupListFr
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-    override val onClickListener = treeNode.onClickListener
+    override val onClickListener get() = treeNode.onClickListener
 
     override val isSelectable = false
 

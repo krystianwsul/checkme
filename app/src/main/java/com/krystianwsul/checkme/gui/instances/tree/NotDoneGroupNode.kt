@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Color
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
@@ -103,12 +102,12 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
     override val name
         get(): Triple<String, Int, Boolean>? {
             return if (singleInstance()) {
-                Triple(singleInstanceData.Name, ContextCompat.getColor(groupListFragment.activity, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
+                Triple(singleInstanceData.Name, if (!singleInstanceData.TaskCurrent) colorDisabled else colorPrimary, true)
             } else {
                 if (treeNode.isExpanded) {
                     null
                 } else {
-                    Triple(instanceDatas.sorted().joinToString(", ") { it.Name }, ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), true)
+                    Triple(instanceDatas.sorted().joinToString(", ") { it.Name }, colorPrimary, true)
                 }
             }
         }
@@ -121,7 +120,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                 return if (singleInstanceData.DisplayText.isNullOrEmpty()) {
                     null
                 } else {
-                    Pair(singleInstanceData.DisplayText!!, ContextCompat.getColor(groupListFragment.activity, if (!singleInstanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary))
+                    Pair(singleInstanceData.DisplayText!!, if (!singleInstanceData.TaskCurrent) colorDisabled else colorSecondary)
                 }
             } else {
                 val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
@@ -135,13 +134,13 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
                 val text = date.getDisplayText() + ", " + timeText
 
-                return Pair(text, ContextCompat.getColor(groupListFragment.activity, R.color.textSecondary))
+                return Pair(text, colorSecondary)
             }
         }
 
     override val children
         get() = if (singleInstance()) {
-            NotDoneInstanceNode.getChildrenNew(treeNode, singleInstanceData, groupListFragment)
+            NotDoneInstanceNode.getChildrenNew(treeNode, singleInstanceData)
         } else {
             null
         }
@@ -215,7 +214,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         get(): Int {
             return if (singleInstance()) {
                 if (treeNode.isSelected)
-                    ContextCompat.getColor(groupListFragment.activity, R.color.selected)
+                    colorSelected
                 else
                     Color.TRANSPARENT
             } else {
@@ -383,15 +382,11 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
         companion object {
 
-            fun getChildrenNew(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData, groupListFragment: GroupListFragment) = instanceData.children
+            fun getChildrenNew(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData) = instanceData.children
                     .values
                     .filter { it.Done == null }
                     .let {
-                        fun color() = ContextCompat.getColor(groupListFragment.activity, if (!instanceData.TaskCurrent) {
-                            R.color.textDisabled
-                        } else {
-                            R.color.textSecondary
-                        })
+                        fun color() = if (!instanceData.TaskCurrent) colorDisabled else colorSecondary
 
                         if (it.isNotEmpty() && !treeNode.isExpanded) {
                             val children = it.sorted().joinToString(", ") { it.Name }
@@ -452,9 +447,9 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val name get() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
+        override val name get() = Triple(instanceData.Name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
 
-        override val children get() = getChildrenNew(treeNode, instanceData, groupListFragment)
+        override val children get() = getChildrenNew(treeNode, instanceData)
 
         override val expand
             get(): Pair<Int, View.OnClickListener>? {
@@ -512,7 +507,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                 check(parentNotDoneGroupNode.treeNode.isExpanded)
 
                 return if (treeNode.isSelected)
-                    ContextCompat.getColor(groupListFragment.activity, R.color.selected)
+                    colorSelected
                 else
                     Color.TRANSPARENT
             }

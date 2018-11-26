@@ -1,13 +1,34 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Color
+import android.support.annotation.ColorRes
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.setIndent
 
 import com.krystianwsul.treeadapter.ModelNode
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
+
+    companion object {
+
+        private fun getColor(@ColorRes color: Int) = ContextCompat.getColor(MyApplication.instance, color)
+
+        @JvmStatic
+        protected val colorPrimary by lazy { getColor(R.color.textPrimary) }
+
+        @JvmStatic
+        protected val colorSecondary by lazy { getColor(R.color.textSecondary) }
+
+        @JvmStatic
+        protected val colorDisabled by lazy { getColor(R.color.textDisabled) }
+
+        @JvmStatic
+        protected val colorSelected by lazy { getColor(R.color.selected) }
+    }
 
     protected open val name: Triple<String, Int, Boolean>? = null
 

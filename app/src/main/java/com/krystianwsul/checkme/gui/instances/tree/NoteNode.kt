@@ -1,9 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import com.krystianwsul.checkme.R
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
@@ -27,7 +25,7 @@ class NoteNode(private val note: String, private val groupListFragment: GroupLis
         return treeNode
     }
 
-    override val name get() = Triple(note, ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), false)
+    override val name get() = Triple(note, colorPrimary, false)
 
     override val checkBoxVisibility = View.GONE
 

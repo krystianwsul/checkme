@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
@@ -58,14 +57,14 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
-    override val name get() = Triple(instanceData.Name, ContextCompat.getColor(groupListFragment.activity, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textPrimary), true)
+    override val name get() = Triple(instanceData.Name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
 
     override val details
         get() = instanceData.DisplayText
                 .takeUnless { it.isNullOrEmpty() }
-                ?.let { Pair(it, ContextCompat.getColor(dividerNode.groupAdapter.mGroupListFragment.activity, if (!instanceData.TaskCurrent) R.color.textDisabled else R.color.textSecondary)) }
+                ?.let { Pair(it, if (!instanceData.TaskCurrent) colorDisabled else colorSecondary) }
 
-    override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData, groupListFragment)
+    override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData)
 
     override val expand
         get(): Pair<Int, View.OnClickListener>? {

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
@@ -61,7 +60,7 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
         }
     }
 
-    override val name get() = Triple(taskData.Name, ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), true)
+    override val name get() = Triple(taskData.Name, colorPrimary, true)
 
     override val children
         get() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
@@ -77,7 +76,7 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
             taskData.mNote
         }
 
-            val color = ContextCompat.getColor(groupListFragment.activity, R.color.textSecondary)
+            val color = colorSecondary
 
         Pair(text, color)
     }

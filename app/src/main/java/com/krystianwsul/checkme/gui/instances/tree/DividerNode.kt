@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
@@ -49,7 +48,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
             doneInstanceNode.addExpandedInstances(expandedInstances)
     }
 
-    override val name get() = Triple(groupListFragment.activity.getString(R.string.done), ContextCompat.getColor(groupListFragment.activity, R.color.textPrimary), true)
+    override val name get() = Triple(groupListFragment.activity.getString(R.string.done), colorPrimary, true)
 
     override val expand get() = Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
 

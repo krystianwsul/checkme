@@ -642,8 +642,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
         private var nodeCollection: NodeCollection? = null
 
-        private val mDensity = mGroupListFragment.activity.resources.displayMetrics.density
-
         val expansionState: ExpansionState
             get() {
                 val expandedGroups = nodeCollection!!.expandedGroups
@@ -664,7 +662,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             treeViewAdapter = TreeViewAdapter(this, if (mShowFab) R.layout.row_group_list_fab_padding else null)
             treeNodeCollection = TreeNodeCollection(treeViewAdapter!!)
 
-            nodeCollection = NodeCollection(mDensity, 0, this, useGroups, treeNodeCollection, note)
+            nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 
             var expandedGroups: List<TimeStamp>? = null
             var expandedInstances: HashMap<InstanceKey, Boolean>? = null

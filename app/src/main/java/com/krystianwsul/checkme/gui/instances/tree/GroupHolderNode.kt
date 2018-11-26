@@ -3,10 +3,11 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import com.krystianwsul.checkme.utils.setIndent
 
 import com.krystianwsul.treeadapter.ModelNode
 
-abstract class GroupHolderNode(protected val density: Float, protected val indentation: Int) : ModelNode {
+abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val name: Triple<String, Int, Boolean>? = null
 
@@ -35,10 +36,8 @@ abstract class GroupHolderNode(protected val density: Float, protected val inden
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         val groupHolder = viewHolder as GroupListFragment.GroupAdapter.GroupHolder
 
-        val padding = 48 * indentation
-
         groupHolder.run {
-            groupRowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
+            groupRowContainer.setIndent(indentation)
 
             groupRowName.run {
                 name.let {

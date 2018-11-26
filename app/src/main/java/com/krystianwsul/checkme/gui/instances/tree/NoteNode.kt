@@ -10,7 +10,7 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import java.util.*
 
-class NoteNode(density: Float, private val note: String, private val groupListFragment: GroupListFragment) : GroupHolderNode(density, 0), ModelNode {
+class NoteNode(private val note: String, private val groupListFragment: GroupListFragment) : GroupHolderNode(0), ModelNode {
 
     private lateinit var treeNode: TreeNode
     private lateinit var nodeContainer: NodeContainer

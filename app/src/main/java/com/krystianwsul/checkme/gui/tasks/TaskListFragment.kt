@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
@@ -475,9 +476,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             fun getAdapter(taskListFragment: TaskListFragment, taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?): TreeViewAdapter {
                 val taskAdapter = TaskAdapter(taskListFragment)
 
-                val density = taskListFragment.activity!!.resources.displayMetrics.density
-
-                return taskAdapter.initialize(density, taskData, selectedTaskKeys, expandedTaskKeys)
+                return taskAdapter.initialize(taskData, selectedTaskKeys, expandedTaskKeys)
             }
         }
 
@@ -490,7 +489,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         val expandedTaskKeys get() = taskWrappers.flatMap { it.expandedTaskKeys }
 
-        private fun initialize(density: Float, taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?): TreeViewAdapter {
+        private fun initialize(taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?): TreeViewAdapter {
             treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
 
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
@@ -506,7 +505,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             for (childTaskData in taskData.childTaskDatas) {
-                val taskWrapper = TaskWrapper(density, 0, this, childTaskData)
+                val taskWrapper = TaskWrapper(0, this, childTaskData)
 
                 treeNodes.add(taskWrapper.initialize(selectedTaskKeys, this.treeNodeCollection, expandedTaskKeys))
 
@@ -538,7 +537,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = taskListFragment.selectionCallback.decrementSelected(x)
 
-        class TaskWrapper(private val density: Float, private val indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : ModelNode, TaskParent {
+        class TaskWrapper(private val indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : ModelNode, TaskParent {
 
             lateinit var treeNode: TreeNode
 
@@ -574,21 +573,21 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     false
                 }
 
-                this.treeNode = TreeNode(this, nodeContainer, expanded, selected)
+                treeNode = TreeNode(this, nodeContainer, expanded, selected)
 
                 val treeNodes = mutableListOf<TreeNode>()
 
                 for (childTaskData in childTaskData.children) {
-                    val taskWrapper = TaskWrapper(density, indentation + 1, this, childTaskData)
+                    val taskWrapper = TaskWrapper(indentation + 1, this, childTaskData)
 
-                    treeNodes.add(taskWrapper.initialize(selectedTaskKeys, this.treeNode, expandedTaskKeys))
+                    treeNodes.add(taskWrapper.initialize(selectedTaskKeys, treeNode, expandedTaskKeys))
 
                     taskWrappers.add(taskWrapper)
                 }
 
-                this.treeNode.setChildTreeNodes(treeNodes)
+                treeNode.setChildTreeNodes(treeNodes)
 
-                return this.treeNode
+                return treeNode
             }
 
             override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
@@ -610,9 +609,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         setOnClickListener(treeNode.onClickListener)
                     }
 
-                    val padding = 48 * indentation
-
-                    taskRowContainer.setPadding((padding * density + 0.5f).toInt(), 0, 0, 0)
+                    taskRowContainer.setIndent(indentation)
 
                     taskRowImg.run {
                         visibility = if (!treeNode.expandVisible) {
@@ -749,7 +746,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         setOnClickListener(null)
                     }
 
-                    taskRowContainer.setPadding(0, 0, 0, 0)
+                    taskRowContainer.setIndent(0)
 
                     taskRowImg.visibility = View.INVISIBLE
 

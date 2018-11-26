@@ -4,7 +4,6 @@ package com.krystianwsul.checkme.gui.projects
 import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -19,6 +18,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -242,7 +242,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             treeNodeCollection.remove(projectNode.treeNode, x)
         }
 
-        inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListViewModel.ProjectData) : ModelNode {
+        inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
 
             lateinit var treeNode: TreeNode
                 private set
@@ -253,34 +253,25 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
-            override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                (viewHolder as NodeHolder).run {
-                    rowCheckBox.visibility = View.GONE
+            override val name get() = Triple(projectData.name, colorPrimary, true)
 
-                    rowName.text = projectData.name
+            override val details get() = Pair(projectData.users, colorSecondary)
 
-                    rowDetails.text = projectData.users
-
-                    rowChildren.visibility = View.GONE
-
-                    rowExpand.visibility = View.GONE
-
-                    rowSeparator.visibility = View.GONE
-
-                    itemView.setOnClickListener(treeNode.onClickListener)
-
-                    itemView.setOnLongClickListener(treeNode.onLongClickListener)
-
-                    if (treeNode.isSelected)
-                        itemView.setBackgroundColor(ContextCompat.getColor(activity!!, R.color.selected))
-                    else
-                        itemView.setBackgroundColor(Color.TRANSPARENT)
-                }
-            }
+            override val children: Pair<String, Int>? = null
 
             override val itemViewType = 0
 
             override val isSelectable = true
+
+            override val onClickListener get() = treeNode.onClickListener
+
+            override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
+
+            override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
+
+            override val separatorVisibility get() = View.INVISIBLE
+
+            override val checkBoxVisibility = View.GONE
 
             override fun onClick() = activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 

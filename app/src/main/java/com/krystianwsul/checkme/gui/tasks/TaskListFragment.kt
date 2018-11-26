@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
@@ -605,17 +604,17 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         childTaskData.note
                     }
 
-                    Pair(text, ContextCompat.getColor(taskListFragment.requireContext(), R.color.textSecondary))
+                    Pair(text, colorSecondary)
                 }
 
             override val details
                 get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
                     null
                 } else {
-                    Pair(childTaskData.scheduleText, ContextCompat.getColor(taskListFragment.requireActivity(), R.color.textSecondary))
+                    Pair(childTaskData.scheduleText, colorSecondary)
                 }
 
-            override val name get() = Triple(childTaskData.name, ContextCompat.getColor(taskListFragment.requireActivity(), R.color.textPrimary), true)
+            override val name get() = Triple(childTaskData.name, colorPrimary, true)
 
             override val expand
                 get() = if (treeNode.expandVisible) {
@@ -624,7 +623,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     null
                 }
 
-            override val backgroundColor get() = if (treeNode.isSelected) ContextCompat.getColor(taskListFragment.activity!!, R.color.selected) else Color.TRANSPARENT
+            override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
             override val onClickListener get() = treeNode.onClickListener
 

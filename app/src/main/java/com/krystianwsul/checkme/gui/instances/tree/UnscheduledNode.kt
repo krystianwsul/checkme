@@ -10,7 +10,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection) : GroupHolderNode(density, 0), ModelNode, TaskParent {
+class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderNode(0), ModelNode, TaskParent {
 
     private lateinit var taskDatas: List<GroupListFragment.TaskData>
     private lateinit var treeNode: TreeNode
@@ -33,7 +33,7 @@ class UnscheduledNode(density: Float, private val nodeCollection: NodeCollection
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>?) = TaskNode(density, 0, taskData, this).let {
+    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>?) = TaskNode(0, taskData, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys)

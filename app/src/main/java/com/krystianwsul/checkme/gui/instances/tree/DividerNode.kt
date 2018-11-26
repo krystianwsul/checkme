@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
 import java.util.*
 
-class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(density, indentation), ModelNode {
+class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(indentation), ModelNode {
 
     private lateinit var treeNode: TreeNode
 
@@ -33,7 +33,7 @@ class DividerNode(density: Float, indentation: Int, val nodeCollection: NodeColl
     private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>?): TreeNode {
         checkNotNull(instanceData.Done)
 
-        val doneInstanceNode = DoneInstanceNode(density, indentation, instanceData, this)
+        val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
 
         val childTreeNode = doneInstanceNode.initialize(treeNode, expandedInstances)
 

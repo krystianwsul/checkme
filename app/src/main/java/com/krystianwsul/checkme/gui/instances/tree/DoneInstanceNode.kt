@@ -13,7 +13,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
-class DoneInstanceNode(density: Float, indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(density, indentation), ModelNode, NodeCollectionParent {
+class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(indentation), ModelNode, NodeCollectionParent {
 
     lateinit var treeNode: TreeNode
         private set
@@ -37,7 +37,7 @@ class DoneInstanceNode(density: Float, indentation: Int, val instanceData: Group
 
         treeNode = TreeNode(this, dividerTreeNode, expanded, false)
 
-        nodeCollection = NodeCollection(density, indentation + 1, groupAdapter, false, this.treeNode, null)
+        nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, this.treeNode, null)
         treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, null, false, null, false, null))
 
         return treeNode

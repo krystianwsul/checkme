@@ -78,3 +78,5 @@ private fun <T> getNextRange(list: List<T>, shouldSplit: (T, T) -> Boolean): Lis
 
     return ArrayList(list.subList(0, i))
 }
+
+fun View.setIndent(indent: Int) = setPadding((indent * 48 * context.resources.displayMetrics.density + 0.5f).toInt(), 0, 0, 0)

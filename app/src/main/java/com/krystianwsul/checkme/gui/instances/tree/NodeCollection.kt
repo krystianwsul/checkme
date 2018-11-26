@@ -7,7 +7,7 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 
-class NodeCollection(private val density: Float, private val indentation: Int, val groupAdapter: GroupListFragment.GroupAdapter, val useGroups: Boolean, val nodeContainer: NodeContainer, private val note: String?) {
+class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFragment.GroupAdapter, val useGroups: Boolean, val nodeContainer: NodeContainer, private val note: String?) {
 
     lateinit var notDoneGroupCollection: NotDoneGroupCollection
         private set
@@ -33,21 +33,21 @@ class NodeCollection(private val density: Float, private val indentation: Int, v
             if (!note.isNullOrEmpty()) {
                 check(indentation == 0)
 
-                add(NoteNode(density, note, groupAdapter.mGroupListFragment).initialize(nodeContainer))
+                add(NoteNode(note, groupAdapter.mGroupListFragment).initialize(nodeContainer))
             }
 
-            notDoneGroupCollection = NotDoneGroupCollection(density, indentation, this@NodeCollection, nodeContainer, selectable)
+            notDoneGroupCollection = NotDoneGroupCollection(indentation, this@NodeCollection, nodeContainer, selectable)
 
             addAll(notDoneGroupCollection.initialize(notDoneInstanceDatas, expandedGroups, expandedInstances, selectedNodes))
 
             check(indentation == 0 || taskDatas == null)
             if (taskDatas?.isEmpty() == false) {
-                unscheduledNode = UnscheduledNode(density, this@NodeCollection)
+                unscheduledNode = UnscheduledNode(this@NodeCollection)
 
                 add(unscheduledNode!!.initialize(unscheduledExpanded, nodeContainer, taskDatas, expandedTaskKeys))
             }
 
-            dividerNode = DividerNode(density, indentation, this@NodeCollection)
+            dividerNode = DividerNode(indentation, this@NodeCollection)
 
             add(dividerNode.initialize(doneExpanded && !doneInstanceDatas.isEmpty(), nodeContainer, doneInstanceDatas, expandedInstances))
         }

@@ -33,7 +33,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected abstract fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener
 
-    override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
+    final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         val groupHolder = viewHolder as NodeHolder
 
         groupHolder.run {

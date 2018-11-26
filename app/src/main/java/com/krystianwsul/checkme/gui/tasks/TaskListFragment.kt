@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
@@ -87,19 +88,19 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     R.id.action_task_delete -> {
                         checkNotNull(dataId)
 
-                            do {
-                                val treeNode = selected.first()
+                        do {
+                            val treeNode = selected.first()
 
-                                val taskWrapper = treeNode.modelNode as TaskAdapter.TaskWrapper
+                            val taskWrapper = treeNode.modelNode as TaskAdapter.TaskWrapper
 
-                                taskWrapper.removeFromParent(x)
+                            taskWrapper.removeFromParent(x)
 
-                                decrementSelected(x)
+                            decrementSelected(x)
 
-                                selected = treeViewAdapter.selectedNodes
-                            } while (selected.isNotEmpty())
+                            selected = treeViewAdapter.selectedNodes
+                        } while (selected.isNotEmpty())
 
-                            DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                        DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
 
                         updateSelectAll()
                     }
@@ -247,8 +248,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
         mutableListOf<ChildTaskData>().apply {
             childTaskDatas.filterNot { inTree(this, it) }.forEach { this.add(it) }
         }.forEach { childTaskData ->
-                    printTree(it, 0, childTaskData)
-                }
+            printTree(it, 0, childTaskData)
+        }
     }.joinToString("\n")
 
     private fun inTree(shareTree: List<ChildTaskData>, childTaskData: ChildTaskData): Boolean {
@@ -453,7 +454,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = null
     }
 
-    private fun search(query: String, x: TreeViewAdapter.Placeholder) {
+    private fun search(query: String, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         Log.e("asdf", "search: $query")
         this.query = query
 
@@ -537,7 +538,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = taskListFragment.selectionCallback.decrementSelected(x)
 
-        class TaskWrapper(private val indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : ModelNode, TaskParent {
+        class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : GroupHolderNode(indentation), TaskParent {
 
             lateinit var treeNode: TreeNode
 
@@ -590,77 +591,49 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
-            override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                (viewHolder as NodeHolder).run {
-                    itemView.run {
-                        setBackgroundColor(if (treeNode.isSelected)
-                            ContextCompat.getColor(taskListFragment.activity!!, R.color.selected)
-                        else
-                            Color.TRANSPARENT)
+            override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
-                        setOnLongClickListener {
-                            if (taskListFragment.taskKey != null && treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
-                                taskListFragment.dragHelper.startDrag(viewHolder)
-                                true
-                            } else {
-                                treeNode.onLongClickListener.onLongClick(it)
-                            }
-                        }
-                        setOnClickListener(treeNode.onClickListener)
+            override val children
+                get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
+                    null
+                } else {
+                    val text = if (!childTaskData.children.isEmpty() && !treeNode.isExpanded) {
+                        childTaskData.children.joinToString(", ") { it.name }
+                    } else {
+                        check(!childTaskData.note.isNullOrEmpty())
+
+                        childTaskData.note
                     }
 
-                    rowContainer.setIndent(indentation)
+                    Pair(text, ContextCompat.getColor(taskListFragment.requireContext(), R.color.textSecondary))
+                }
 
-                    rowExpand.run {
-                        visibility = if (!treeNode.expandVisible) {
-                            View.INVISIBLE
-                        } else {
-                            check(!childTaskData.children.isEmpty())
+            override val details
+                get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
+                    null
+                } else {
+                    Pair(childTaskData.scheduleText, ContextCompat.getColor(taskListFragment.requireActivity(), R.color.textSecondary))
+                }
 
-                            setImageResource(if (treeNode.isExpanded)
-                                R.drawable.ic_expand_less_black_36dp
-                            else
-                                R.drawable.ic_expand_more_black_36dp)
+            override val name get() = Triple(childTaskData.name, ContextCompat.getColor(taskListFragment.requireActivity(), R.color.textPrimary), true)
 
-                            setOnClickListener(treeNode.expandListener)
+            override val expand
+                get() = if (treeNode.expandVisible) {
+                    Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                } else {
+                    null
+                }
 
-                            View.VISIBLE
-                        }
-                    }
+            override val backgroundColor get() = if (treeNode.isSelected) ContextCompat.getColor(taskListFragment.activity!!, R.color.selected) else Color.TRANSPARENT
 
-                    rowName.run {
-                        text = childTaskData.name
-                        setSingleLine(true)
-                    }
+            override val onClickListener get() = treeNode.onClickListener
 
-                    rowDetails.run {
-                        visibility = if (childTaskData.scheduleText.isNullOrEmpty()) {
-                            View.GONE
-                        } else {
-                            text = childTaskData.scheduleText
-                            View.VISIBLE
-                        }
-                    }
-
-                    rowChildren.run {
-                        visibility = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
-                            View.GONE
-                        } else {
-                            text = if (!childTaskData.children.isEmpty() && !treeNode.isExpanded) {
-                                childTaskData.children.joinToString(", ") { it.name }
-                            } else {
-                                check(!childTaskData.note.isNullOrEmpty())
-
-                                childTaskData.note
-                            }.apply {
-                                check(!isNullOrEmpty())
-                            }
-
-                            View.VISIBLE
-                        }
-                    }
-
-                    rowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+            override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = View.OnLongClickListener {
+                if (taskListFragment.taskKey != null && treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
+                    taskListFragment.dragHelper.startDrag(viewHolder)
+                    true
+                } else {
+                    treeNode.onLongClickListener.onLongClick(it)
                 }
             }
 
@@ -715,6 +688,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)
 
             override val state get() = State(childTaskData.copy())
+
 
             data class State(val childTaskData: ChildTaskData) : ModelState {
 

@@ -54,7 +54,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     override val checkBoxVisibility = View.INVISIBLE
 
-    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

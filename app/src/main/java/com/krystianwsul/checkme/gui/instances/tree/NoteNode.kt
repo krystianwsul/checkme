@@ -1,14 +1,13 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.support.v7.widget.RecyclerView
-import android.view.View
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import java.util.*
 
-class NoteNode(private val note: String, private val groupListFragment: GroupListFragment) : GroupHolderNode(0), ModelNode {
+class NoteNode(private val note: String) : GroupHolderNode(0), ModelNode {
 
     private lateinit var treeNode: TreeNode
     private lateinit var nodeContainer: NodeContainer
@@ -27,7 +26,7 @@ class NoteNode(private val note: String, private val groupListFragment: GroupLis
 
     override val name get() = Triple(note, colorPrimary, false)
 
-    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

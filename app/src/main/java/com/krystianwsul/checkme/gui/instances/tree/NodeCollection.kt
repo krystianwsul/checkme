@@ -33,7 +33,7 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
             if (!note.isNullOrEmpty()) {
                 check(indentation == 0)
 
-                add(NoteNode(note, groupAdapter.mGroupListFragment).initialize(nodeContainer))
+                add(NoteNode(note).initialize(nodeContainer))
             }
 
             notDoneGroupCollection = NotDoneGroupCollection(indentation, this@NodeCollection, nodeContainer, selectable)

@@ -590,7 +590,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
-            override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+            override val separatorVisible get() = treeNode.separatorVisible
 
             override val children
                 get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
@@ -627,12 +627,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override val onClickListener get() = treeNode.onClickListener
 
-            override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = View.OnLongClickListener {
+            override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = {
                 if (taskListFragment.taskKey != null && treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
                     taskListFragment.dragHelper.startDrag(viewHolder)
                     true
                 } else {
-                    treeNode.onLongClickListener.onLongClick(it)
+                    treeNode.onLongClickListener()
                 }
             }
 
@@ -734,7 +734,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                     rowChildren.visibility = View.GONE
 
-                    rowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+                    rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
                 }
             }
 

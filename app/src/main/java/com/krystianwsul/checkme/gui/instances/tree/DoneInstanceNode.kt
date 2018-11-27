@@ -67,27 +67,23 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
     override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData)
 
     override val expand
-        get(): Pair<Int, View.OnClickListener>? {
-            return if (instanceData.children.isEmpty()) {
-                null
-            } else {
-                Pair(if (this.treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
-            }
+        get() = if (instanceData.children.isEmpty()) {
+            null
+        } else {
+            Pair(if (this.treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
         }
 
     override val checkBoxVisibility = View.VISIBLE
 
     override val checkBoxChecked = true
 
-    override val checkBoxOnClickListener
-        get(): View.OnClickListener {
+    override val checkBoxOnClickListener: () -> Unit
+        get() {
             val nodeCollection = dividerNode.nodeCollection
 
             val groupAdapter = nodeCollection.groupAdapter
 
-            return View.OnClickListener { v ->
-                v.setOnClickListener(null)
-
+            return {
                 groupAdapter.treeNodeCollection
                         .treeViewAdapter
                         .updateDisplayedNodes {
@@ -102,7 +98,7 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
             }
         }
 
-    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

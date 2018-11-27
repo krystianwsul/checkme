@@ -36,23 +36,23 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val children: Pair<String, Int>? = null
 
-    protected open val expand: Pair<Int, View.OnClickListener>? = null
+    protected open val expand: Pair<Int, () -> Unit>? = null
 
     protected open val checkBoxVisibility = View.GONE
 
-    protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException()
+    protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException() // todo merge
 
-    protected open val checkBoxOnClickListener: View.OnClickListener get() = throw UnsupportedOperationException()
+    protected open val checkBoxOnClickListener: () -> Unit get() = throw UnsupportedOperationException()
 
-    protected abstract val separatorVisibility: Int
+    protected open val separatorVisible = false
 
     protected open val backgroundColor = Color.TRANSPARENT
 
-    protected abstract val onClickListener: View.OnClickListener
+    protected abstract val onClickListener: () -> Unit
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
-    protected abstract fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): View.OnLongClickListener
+    protected abstract fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): () -> Boolean
 
     final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         val groupHolder = viewHolder as NodeHolder
@@ -102,7 +102,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     if (it != null) {
                         visibility = View.VISIBLE
                         setImageResource(it.first)
-                        setOnClickListener(it.second)
+                        setOnClickListener { _ -> it.second() }
                     } else {
                         visibility = View.INVISIBLE
                     }
@@ -114,17 +114,18 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     visibility = it
                     if (it == View.VISIBLE) {
                         isChecked = checkBoxChecked
-                        setOnClickListener(checkBoxOnClickListener)
+                        setOnClickListener { checkBoxOnClickListener() }
                     }
                 }
             }
 
-            rowSeparator.visibility = separatorVisibility
+            rowSeparator.visibility = if (separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {
                 setBackgroundColor(backgroundColor)
-                setOnLongClickListener(getOnLongClickListener(viewHolder))
-                setOnClickListener(onClickListener)
+                val onLongClickListener = getOnLongClickListener(viewHolder)
+                setOnLongClickListener { onLongClickListener() }
+                setOnClickListener { onClickListener() }
             }
         }
     }

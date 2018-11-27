@@ -1,7 +1,6 @@
 package com.krystianwsul.treeadapter
 
 import android.support.v7.widget.RecyclerView
-import android.view.View
 import java.util.*
 
 class TreeNode(
@@ -17,7 +16,7 @@ class TreeNode(
     val itemViewType = modelNode.itemViewType
 
     val onLongClickListener
-        get() = View.OnLongClickListener {
+        get() = {
             treeViewAdapter.updateDisplayedNodes {
                 this@TreeNode.onLongClick(TreeViewAdapter.Placeholder)
             }
@@ -25,7 +24,7 @@ class TreeNode(
         }
 
     val onClickListener
-        get() = View.OnClickListener {
+        get() = {
             if (hasActionMode()) {
                 treeViewAdapter.updateDisplayedNodes {
                     onLongClick(TreeViewAdapter.Placeholder)
@@ -80,16 +79,16 @@ class TreeNode(
             return !(hasActionMode() && hasSelectedDescendants())
         }
 
-    val state get() = State(isExpanded, isSelected, expandVisible, separatorVisibility, modelNode.state)
+    val state get() = State(isExpanded, isSelected, expandVisible, separatorVisible, modelNode.state)
 
     // hiding
     // showing
-    val expandListener: View.OnClickListener
+    val expandListener: () -> Unit
         get() {
             if (childTreeNodes == null)
                 throw SetChildTreeNodesNotCalledException()
 
-            return View.OnClickListener {
+            return {
                 if (childTreeNodes!!.isEmpty())
                     throw EmptyExpandedException()
 
@@ -112,7 +111,7 @@ class TreeNode(
             }
         }
 
-    val separatorVisibility: Boolean
+    val separatorVisible: Boolean
         get() {
             if (!parent.isExpanded)
                 throw InvisibleNodeException()

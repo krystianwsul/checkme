@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.support.v7.widget.RecyclerView
-import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
@@ -64,33 +63,31 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
 
     override val children
         get() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
-        null
-    } else {
-        val text = if (!expanded() && !taskData.Children.isEmpty()) {
-            taskData.Children
-                    .sortedBy { it.mStartExactTimeStamp }
-                    .joinToString(", ") { it.Name }
+            null
         } else {
-            check(!taskData.mNote.isNullOrEmpty())
+            val text = if (!expanded() && !taskData.Children.isEmpty()) {
+                taskData.Children
+                        .sortedBy { it.mStartExactTimeStamp }
+                        .joinToString(", ") { it.Name }
+            } else {
+                check(!taskData.mNote.isNullOrEmpty())
 
-            taskData.mNote
-        }
+                taskData.mNote
+            }
 
             val color = colorSecondary
 
-        Pair(text, color)
-    }
+            Pair(text, color)
+        }
 
     override val expand
-        get(): Pair<Int, View.OnClickListener>? {
-        return if (taskData.Children.isEmpty()) {
+        get() = if (taskData.Children.isEmpty()) {
             null
         } else {
             Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
         }
-    }
 
-    override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

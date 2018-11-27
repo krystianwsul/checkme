@@ -236,7 +236,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 else
                     taskHolder.itemView.setBackgroundColor(Color.TRANSPARENT)
 
-                taskHolder.itemView.setOnLongClickListener(treeNode.onLongClickListener)
+                taskHolder.itemView.setOnLongClickListener { treeNode.onLongClickListener() }
 
                 taskHolder.rowCheckBox.visibility = View.GONE
 
@@ -256,7 +256,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     else
                         taskHolder.rowExpand.setImageResource(R.drawable.ic_expand_more_black_36dp)
 
-                    taskHolder.rowExpand.setOnClickListener(treeNode.expandListener)
+                    taskHolder.rowExpand.setOnClickListener { treeNode.expandListener() }
                 }
 
                 taskHolder.rowName.text = parentTreeData.name
@@ -288,9 +288,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     taskHolder.rowChildren.text = text
                 }
 
-                taskHolder.rowSeparator.visibility = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
+                taskHolder.rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
-                taskHolder.itemView.setOnClickListener(treeNode.onClickListener)
+                taskHolder.itemView.setOnClickListener { treeNode.onClickListener() }
             }
 
             override fun onClick() {

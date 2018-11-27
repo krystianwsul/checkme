@@ -269,7 +269,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
-            override val separatorVisibility get() = View.INVISIBLE
+            override val separatorVisible = false
 
             override fun onClick() = activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 

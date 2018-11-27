@@ -374,7 +374,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         override fun same(other: ModelState) = (other as? State)?.id == id
     }
 
-    class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, private val selectable: Boolean /* todo override*/) : GroupHolderNode(indentation), ModelNode, NodeCollectionParent {
+    class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, override val isSelectable: Boolean) : GroupHolderNode(indentation), ModelNode, NodeCollectionParent {
 
         companion object {
 
@@ -423,15 +423,13 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
             treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
 
             nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
-            treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, selectedNodes, selectable, null, false, null))
+            treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, selectedNodes, isSelectable, null, false, null))
 
             return this.treeNode
         }
 
-        private fun expanded() = treeNode.isExpanded
-
         fun addExpandedInstances(expandedInstances: Map<InstanceKey, Boolean>) {
-            if (!expanded())
+            if (!treeNode.isExpanded)
                 return
 
             check(!expandedInstances.containsKey(instanceData.InstanceKey))
@@ -513,8 +511,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
         override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
-
-        override val isSelectable = selectable
 
         override val isVisibleWhenEmpty = true
 

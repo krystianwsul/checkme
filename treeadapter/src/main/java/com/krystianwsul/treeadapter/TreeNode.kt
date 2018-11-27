@@ -70,9 +70,6 @@ class TreeNode(
             if (!visible())
                 throw InvisibleNodeException()
 
-            if (childTreeNodes!!.isEmpty())
-                return false
-
             if (childTreeNodes!!.none { it.canBeShown() })
                 return false
 

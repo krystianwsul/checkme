@@ -39,8 +39,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val children: Pair<String, Int>? = null
 
-    protected abstract val expandable: Boolean// todo false
-
     protected open val checkBoxVisibility = View.GONE
 
     protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException()
@@ -99,7 +97,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             rowExpand.run {
-                if (expandable) {
+                if (treeNode.expandVisible) {
                         visibility = View.VISIBLE
                     setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
                     setOnClickListener { treeNode.expandListener() }

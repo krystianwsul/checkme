@@ -144,13 +144,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
             null
         }
 
-    override val expandable
-        get() = if (singleInstance()) {
-            !(singleInstanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !treeNode.allChildren.any { it.canBeShown() }))
-        } else {
-            !(groupListFragment.selectionCallback.hasActionMode && treeNode.hasSelectedDescendants())
-        }
-
     override val checkBoxVisibility
         get() = if (singleInstance()) {
             if (groupListFragment.selectionCallback.hasActionMode) {
@@ -431,8 +424,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         override val name get() = Triple(instanceData.Name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
 
         override val children get() = getChildrenNew(treeNode, instanceData)
-
-        override val expandable get() = !(instanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !treeNode.allChildren.any { it.canBeShown() }))
 
         override val checkBoxVisibility
             get() = if (groupListFragment.selectionCallback.hasActionMode) {

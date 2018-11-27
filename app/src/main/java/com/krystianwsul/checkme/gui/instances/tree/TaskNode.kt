@@ -80,8 +80,6 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
             Pair(text, color)
         }
 
-    override val expandable get() = taskData.children.isNotEmpty()
-
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
     override val onClickListener get() = treeNode.onClickListener

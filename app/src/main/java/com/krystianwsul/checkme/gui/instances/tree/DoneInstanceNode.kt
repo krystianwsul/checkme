@@ -65,8 +65,6 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
 
     override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData)
 
-    override val expandable get() = instanceData.children.isNotEmpty()
-
     override val checkBoxVisibility = View.VISIBLE
 
     override val checkBoxChecked = true

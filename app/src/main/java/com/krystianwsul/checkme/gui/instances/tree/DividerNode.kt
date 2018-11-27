@@ -51,8 +51,6 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     override val name get() = Triple(groupListFragment.activity.getString(R.string.done), colorPrimary, true)
 
-    override val expandable = true
-
     override val checkBoxVisibility = View.INVISIBLE
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener

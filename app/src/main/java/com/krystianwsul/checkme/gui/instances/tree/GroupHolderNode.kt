@@ -50,7 +50,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val onClickListener: (() -> Unit)? = null
 
-    protected open fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): (() -> Boolean)? = null
+    protected open fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): (() -> Boolean)? = null // todo can be changed to treeNode.etc
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 

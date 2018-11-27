@@ -4,17 +4,15 @@ package com.krystianwsul.checkme.gui.tasks
 import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
-import android.view.View
 import android.view.ViewGroup
 import com.afollestad.materialdialogs.MaterialDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
-import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.treeadapter.*
 import java.util.*
@@ -162,7 +160,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
-        private class TaskWrapper(private val indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : ModelNode, TaskParent {
+        private class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : GroupHolderNode(indentation), TaskParent {
 
             lateinit var treeNode: TreeNode
                 private set
@@ -224,74 +222,46 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return treeNode
             }
 
-            override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                val taskHolder = viewHolder as NodeHolder
+            override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
-                val treeNode = treeNode
+            override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-                val parentPickerFragment = parentFragment
-
-                if (treeNode.isSelected)
-                    taskHolder.itemView.setBackgroundColor(ContextCompat.getColor(parentPickerFragment.requireActivity(), R.color.selected))
-                else
-                    taskHolder.itemView.setBackgroundColor(Color.TRANSPARENT)
-
-                taskHolder.itemView.setOnLongClickListener { treeNode.onLongClickListener() }
-
-                taskHolder.rowCheckBox.visibility = View.GONE
-
-                taskHolder.rowContainer.setIndent(indentation)
-
-                if (parentTreeData.parentTreeDatas.isEmpty()) {
-                    check(!treeNode.expandVisible)
-
-                    taskHolder.rowExpand.visibility = View.INVISIBLE
+            override val expand: Pair<Boolean, () -> Unit>?
+                get() = if (parentTreeData.parentTreeDatas.isEmpty()) {
+                    null
                 } else {
-                    check(treeNode.expandVisible)
-
-                    taskHolder.rowExpand.visibility = View.VISIBLE
-
-                    if (treeNode.isExpanded)
-                        taskHolder.rowExpand.setImageResource(R.drawable.ic_expand_less_black_36dp)
-                    else
-                        taskHolder.rowExpand.setImageResource(R.drawable.ic_expand_more_black_36dp)
-
-                    taskHolder.rowExpand.setOnClickListener { treeNode.expandListener() }
+                    Pair(treeNode.isExpanded, treeNode.expandListener)
                 }
 
-                taskHolder.rowName.text = parentTreeData.name
+            override val name get() = Triple(parentTreeData.name, colorPrimary, true)
 
-                if (TextUtils.isEmpty(parentTreeData.scheduleText)) {
-                    taskHolder.rowDetails.visibility = View.GONE
+            override val details: Pair<String, Int>?
+                get() = if (parentTreeData.scheduleText.isNullOrEmpty()) {
+                    null
                 } else {
-                    taskHolder.rowDetails.visibility = View.VISIBLE
-                    taskHolder.rowDetails.text = parentTreeData.scheduleText
+                    Pair(parentTreeData.scheduleText, colorSecondary)
                 }
 
-                if ((parentTreeData.parentTreeDatas.isEmpty() || treeNode.isExpanded) && TextUtils.isEmpty(parentTreeData.note)) {
-                    taskHolder.rowChildren.visibility = View.GONE
+            override val children: Pair<String, Int>?
+                get() = if ((parentTreeData.parentTreeDatas.isEmpty() || treeNode.isExpanded) && TextUtils.isEmpty(parentTreeData.note)) {
+                    null
                 } else {
-                    taskHolder.rowChildren.visibility = View.VISIBLE
-
                     val text = if (!parentTreeData.parentTreeDatas.isEmpty() && !treeNode.isExpanded) {
                         parentTreeData.parentTreeDatas
                                 .values
                                 .joinToString(", ") { it.name }
                     } else {
-                        check(!TextUtils.isEmpty(parentTreeData.note))
+                        check(!parentTreeData.note.isNullOrEmpty())
 
                         parentTreeData.note
                     }
 
-                    check(!TextUtils.isEmpty(text))
-
-                    taskHolder.rowChildren.text = text
+                    Pair(text, colorSecondary)
                 }
 
-                taskHolder.rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
+            override val separatorVisible get() = treeNode.separatorVisible
 
-                taskHolder.itemView.setOnClickListener { treeNode.onClickListener() }
-            }
+            override val onClickListener get() = treeNode.onClickListener
 
             override fun onClick() {
                 val parentPickerFragment = parentFragment

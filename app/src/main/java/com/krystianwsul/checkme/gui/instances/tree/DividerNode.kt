@@ -13,7 +13,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     private val doneInstanceNodes = ArrayList<DoneInstanceNode>()
 
-    val groupAdapter get() = nodeCollection.groupAdapter
+    private val groupAdapter get() = nodeCollection.groupAdapter
 
     private val groupListFragment get() = groupAdapter.mGroupListFragment
 
@@ -51,6 +51,8 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     override val name get() = Triple(groupListFragment.activity.getString(R.string.done), colorPrimary, true)
 
     override val expand get() = Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+
+    override val checkBoxVisibility = View.INVISIBLE
 
     override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 

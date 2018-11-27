@@ -27,8 +27,6 @@ class NoteNode(private val note: String, private val groupListFragment: GroupLis
 
     override val name get() = Triple(note, colorPrimary, false)
 
-    override val checkBoxVisibility = View.GONE
-
     override val separatorVisibility get() = if (treeNode.separatorVisibility) View.VISIBLE else View.INVISIBLE
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener

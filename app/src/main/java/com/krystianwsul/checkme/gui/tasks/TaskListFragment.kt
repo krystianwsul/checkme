@@ -695,7 +695,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
         }
 
-        private class NoteNode(private val note: String) : ModelNode {
+        private class NoteNode(private val note: String) : ModelNode { // todo GroupHolderNode
 
             lateinit var treeNode: TreeNode
                 private set

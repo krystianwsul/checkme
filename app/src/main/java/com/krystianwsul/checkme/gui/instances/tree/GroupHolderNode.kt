@@ -38,7 +38,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val expand: Pair<Int, View.OnClickListener>? = null
 
-    protected open val checkBoxVisibility: Int get() = View.INVISIBLE
+    protected open val checkBoxVisibility = View.GONE
 
     protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException()
 

@@ -271,8 +271,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val separatorVisibility get() = View.INVISIBLE
 
-            override val checkBoxVisibility = View.GONE
-
             override fun onClick() = activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 
             override val isVisibleWhenEmpty = true

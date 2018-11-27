@@ -51,7 +51,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val name get() = Triple(groupListFragment.activity.getString(R.string.noReminder), colorPrimary, true)
 
-    override val expand get() = Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+    override val expand get() = Pair(treeNode.isExpanded, treeNode.expandListener)
 
     override val separatorVisible get() = treeNode.separatorVisible
 

@@ -618,7 +618,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override val expand
                 get() = if (treeNode.expandVisible) {
-                    Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                    Pair(treeNode.isExpanded, treeNode.expandListener)
                 } else {
                     null
                 }

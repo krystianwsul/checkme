@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -152,13 +151,13 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
             if (singleInstanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
                 null
             } else {
-                Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                Pair(treeNode.isExpanded, treeNode.expandListener)
             }
         } else {
             if (groupListFragment.selectionCallback.hasActionMode && treeNode.hasSelectedDescendants()) {
                 null
             } else {
-                Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+                Pair(treeNode.isExpanded, treeNode.expandListener)
             }
         }
 
@@ -446,14 +445,10 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         override val children get() = getChildrenNew(treeNode, instanceData)
 
         override val expand
-            get(): Pair<Int, () -> Unit>? {
-                val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
-
-                return if (instanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
-                    null
-                } else {
-                    Pair(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
-                }
+            get() = if (instanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !treeNode.allChildren.any { it.canBeShown() })) {
+                null
+            } else {
+                Pair(treeNode.isExpanded, treeNode.expandListener)
             }
 
         override val checkBoxVisibility

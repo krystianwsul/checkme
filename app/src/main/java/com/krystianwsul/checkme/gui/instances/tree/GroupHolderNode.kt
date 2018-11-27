@@ -36,7 +36,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val children: Pair<String, Int>? = null
 
-    protected open val expand: Pair<Int, () -> Unit>? = null
+    protected open val expand: Pair<Boolean, () -> Unit>? = null
 
     protected open val checkBoxVisibility = View.GONE
 
@@ -101,7 +101,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 expand.let {
                     if (it != null) {
                         visibility = View.VISIBLE
-                        setImageResource(it.first)
+                        setImageResource(if (it.first) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
                         setOnClickListener { _ -> it.second() }
                     } else {
                         visibility = View.INVISIBLE

@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.support.v7.widget.RecyclerView
 import android.view.View
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -70,7 +69,7 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
         get() = if (instanceData.children.isEmpty()) {
             null
         } else {
-            Pair(if (this.treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp, treeNode.expandListener)
+            Pair(treeNode.isExpanded, treeNode.expandListener)
         }
 
     override val checkBoxVisibility = View.VISIBLE

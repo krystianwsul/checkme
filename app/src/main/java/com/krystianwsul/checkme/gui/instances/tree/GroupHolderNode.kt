@@ -40,7 +40,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val checkBoxVisibility = View.GONE
 
-    protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException() // todo merge
+    protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException()
 
     protected open val checkBoxOnClickListener: () -> Unit get() = throw UnsupportedOperationException()
 

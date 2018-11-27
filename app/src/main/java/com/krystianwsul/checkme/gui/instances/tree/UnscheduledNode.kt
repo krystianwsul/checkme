@@ -8,7 +8,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
-class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderNode(0), ModelNode, TaskParent {
+class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderNode(0), TaskParent {
 
     private lateinit var taskDatas: List<GroupListFragment.TaskData>
     private lateinit var treeNode: TreeNode

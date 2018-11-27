@@ -11,7 +11,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
-class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(indentation), ModelNode, NodeCollectionParent {
+class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(indentation), NodeCollectionParent {
 
     lateinit var treeNode: TreeNode
         private set

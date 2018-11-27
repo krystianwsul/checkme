@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
 import java.util.*
 
-class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(indentation), ModelNode {
+class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(indentation) {
 
     private lateinit var treeNode: TreeNode
 

@@ -15,7 +15,7 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.treeadapter.*
 import java.util.*
 
-class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, private val instanceDatas: MutableList<GroupListFragment.InstanceData>, private val selectable: Boolean) : GroupHolderNode(indentation), ModelNode, NodeCollectionParent {
+class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, private val instanceDatas: MutableList<GroupListFragment.InstanceData>, private val selectable: Boolean) : GroupHolderNode(indentation), NodeCollectionParent {
 
     lateinit var treeNode: TreeNode
         private set
@@ -373,7 +373,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         override fun same(other: ModelState) = (other as? State)?.id == id
     }
 
-    class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, override val isSelectable: Boolean) : GroupHolderNode(indentation), ModelNode, NodeCollectionParent {
+    class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, override val isSelectable: Boolean) : GroupHolderNode(indentation), NodeCollectionParent {
 
         companion object {
 

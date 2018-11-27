@@ -9,7 +9,9 @@ import java.util.*
 
 class NoteNode(private val note: String) : GroupHolderNode(0) {
 
-    private lateinit var treeNode: TreeNode
+    override lateinit var treeNode: TreeNode
+        private set
+
     private lateinit var nodeContainer: NodeContainer
 
     init {
@@ -25,8 +27,6 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
     }
 
     override val name get() = Triple(note, colorPrimary, false)
-
-    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

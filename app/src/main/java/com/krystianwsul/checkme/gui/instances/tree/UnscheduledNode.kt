@@ -11,7 +11,9 @@ import com.krystianwsul.treeadapter.TreeNode
 class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderNode(0), TaskParent {
 
     private lateinit var taskDatas: List<GroupListFragment.TaskData>
-    private lateinit var treeNode: TreeNode
+
+    override lateinit var treeNode: TreeNode
+        private set
 
     private val taskNodes = mutableListOf<TaskNode>()
 
@@ -52,8 +54,6 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
     override val name get() = Triple(groupListFragment.activity.getString(R.string.noReminder), colorPrimary, true)
 
     override val expand get() = Pair(treeNode.isExpanded, treeNode.expandListener)
-
-    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

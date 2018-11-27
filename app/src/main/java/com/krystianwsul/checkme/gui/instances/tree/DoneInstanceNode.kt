@@ -13,7 +13,7 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 
 class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val dividerNode: DividerNode) : GroupHolderNode(indentation), NodeCollectionParent {
 
-    lateinit var treeNode: TreeNode
+    public override lateinit var treeNode: TreeNode
         private set
 
     private lateinit var nodeCollection: NodeCollection
@@ -96,8 +96,6 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
                 groupAdapter.mGroupListFragment.updateSelectAll()
             }
         }
-
-    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

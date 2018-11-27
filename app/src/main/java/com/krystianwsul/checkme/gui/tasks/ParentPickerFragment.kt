@@ -162,7 +162,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         private class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : GroupHolderNode(indentation), TaskParent {
 
-            lateinit var treeNode: TreeNode
+            override lateinit var treeNode: TreeNode
                 private set
 
             private lateinit var taskWrappers: MutableList<TaskWrapper>
@@ -258,8 +258,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                     Pair(text, colorSecondary)
                 }
-
-            override val separatorVisible get() = treeNode.separatorVisible
 
             override val onClickListener get() = treeNode.onClickListener
 

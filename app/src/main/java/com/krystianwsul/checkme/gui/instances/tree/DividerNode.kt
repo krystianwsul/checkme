@@ -9,7 +9,8 @@ import java.util.*
 
 class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(indentation) {
 
-    private lateinit var treeNode: TreeNode
+    override lateinit var treeNode: TreeNode
+        private set
 
     private val doneInstanceNodes = ArrayList<DoneInstanceNode>()
 
@@ -53,8 +54,6 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     override val expand get() = Pair(treeNode.isExpanded, treeNode.expandListener)
 
     override val checkBoxVisibility = View.INVISIBLE
-
-    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

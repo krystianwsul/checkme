@@ -10,7 +10,8 @@ import com.krystianwsul.treeadapter.TreeNode
 
 class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, private val taskParent: TaskParent) : GroupHolderNode(indentation), TaskParent {
 
-    private lateinit var treeNode: TreeNode
+    override lateinit var treeNode: TreeNode
+        private set
 
     private val taskNodes = mutableListOf<TaskNode>()
 
@@ -85,8 +86,6 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
         } else {
             Pair(treeNode.isExpanded, treeNode.expandListener)
         }
-
-    override val separatorVisible get() = treeNode.separatorVisible
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

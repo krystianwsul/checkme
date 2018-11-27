@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.setIndent
 
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.TreeNode
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
@@ -30,6 +31,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         protected val colorSelected by lazy { getColor(R.color.selected) }
     }
 
+    protected abstract val treeNode: TreeNode
+
     protected open val name: Triple<String, Int, Boolean>? = null
 
     protected open val details: Pair<String, Int>? = null
@@ -43,8 +46,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
     protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException()
 
     protected open val checkBoxOnClickListener: () -> Unit get() = throw UnsupportedOperationException()
-
-    protected open val separatorVisible = false
 
     protected open val backgroundColor = Color.TRANSPARENT
 
@@ -119,7 +120,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 }
             }
 
-            rowSeparator.visibility = if (separatorVisible) View.VISIBLE else View.INVISIBLE
+            rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {
                 setBackgroundColor(backgroundColor)

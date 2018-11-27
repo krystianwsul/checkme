@@ -244,7 +244,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
 
-            lateinit var treeNode: TreeNode
+            public override lateinit var treeNode: TreeNode
                 private set
 
             fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
@@ -268,8 +268,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
             override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
-
-            override val separatorVisible = false
 
             override fun onClick() = activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 

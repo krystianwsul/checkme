@@ -538,7 +538,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : GroupHolderNode(indentation), TaskParent {
 
-            lateinit var treeNode: TreeNode
+            public override lateinit var treeNode: TreeNode
+                private set
 
             private val taskWrappers = mutableListOf<TaskWrapper>()
 
@@ -588,8 +589,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 return treeNode
             }
-
-            override val separatorVisible get() = treeNode.separatorVisible
 
             override val children
                 get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
@@ -696,7 +695,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         private class NoteNode(private val note: String) : GroupHolderNode(0) {
 
-            lateinit var treeNode: TreeNode
+            override lateinit var treeNode: TreeNode
                 private set
 
             init {
@@ -713,8 +712,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override val backgroundColor = Color.TRANSPARENT
 
             override val name get() = Triple(note, colorPrimary, false)
-
-            override val separatorVisible get() = treeNode.separatorVisible
 
             override val itemViewType = TYPE_NOTE
 

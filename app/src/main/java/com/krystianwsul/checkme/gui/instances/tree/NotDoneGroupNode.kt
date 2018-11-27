@@ -17,7 +17,7 @@ import java.util.*
 
 class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, private val instanceDatas: MutableList<GroupListFragment.InstanceData>, private val selectable: Boolean) : GroupHolderNode(indentation), NodeCollectionParent {
 
-    lateinit var treeNode: TreeNode
+    public override lateinit var treeNode: TreeNode
         private set
 
     private val notDoneInstanceNodes = ArrayList<NotDoneInstanceNode>()
@@ -202,8 +202,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                 groupAdapter.mGroupListFragment.updateSelectAll()
             }
         }
-
-    override val separatorVisible get() = treeNode.separatorVisible
 
     override val backgroundColor
         get(): Int {
@@ -395,7 +393,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                     }
         }
 
-        lateinit var treeNode: TreeNode
+        public override lateinit var treeNode: TreeNode
             private set
 
         private lateinit var nodeCollection: NodeCollection
@@ -486,8 +484,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                     groupAdapter.mGroupListFragment.updateSelectAll()
                 }
             }
-
-        override val separatorVisible get() = treeNode.separatorVisible
 
         override val backgroundColor
             get(): Int {

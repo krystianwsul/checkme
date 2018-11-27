@@ -50,10 +50,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     private val selectionCallback by lazy {
         object : SelectionCallback({ treeViewAdapter }) {
 
-            override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+            override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapterGetter!!().unselect(x)
 
             override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
-                val selected = treeViewAdapter.selectedNodes
+                val selected = treeViewAdapterGetter!!().selectedNodes
                 check(!selected.isEmpty())
 
                 val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }

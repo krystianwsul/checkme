@@ -240,7 +240,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         taskListFragment.selectAll(TreeViewAdapter.Placeholder)
                     }
                 }
-                MainActivity.Tab.CUSTOM_TIMES -> showCustomTimesFragment.selectAll()
+                MainActivity.Tab.CUSTOM_TIMES -> {
+                    val showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
+                    showCustomTimesFragment.treeViewAdapter.updateDisplayedNodes {
+                        showCustomTimesFragment.selectAll(TreeViewAdapter.Placeholder)
+                    }
+                }
                 MainActivity.Tab.FRIENDS -> friendListFragment.selectAll()
                 else -> throw UnsupportedOperationException()
             }

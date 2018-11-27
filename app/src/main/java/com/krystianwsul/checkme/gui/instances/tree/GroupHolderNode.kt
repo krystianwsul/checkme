@@ -33,7 +33,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected abstract val treeNode: TreeNode
 
-    protected open val name: Triple<String, Int, Boolean>? = null
+    protected abstract val name: Triple<String, Int, Boolean>?
 
     protected open val details: Pair<String, Int>? = null
 
@@ -52,6 +52,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
     protected open fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): (() -> Boolean)? = null // todo can be changed to treeNode.etc
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
+
+    // todo model state
 
     final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         val groupHolder = viewHolder as NodeHolder

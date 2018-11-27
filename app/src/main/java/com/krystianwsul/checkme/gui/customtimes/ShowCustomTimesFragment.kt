@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
@@ -20,10 +19,12 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
 import java.util.*
 
@@ -37,22 +38,25 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     private lateinit var showTimesList: RecyclerView
-    private var customTimesAdapter: CustomTimesAdapter? = null
+
+    lateinit var treeViewAdapter: TreeViewAdapter
+        private set
+
     private lateinit var emptyText: TextView
 
     private var selectedCustomTimeIds: List<Int>? = null
 
-    private val selectionCallback = object : SelectionCallback(null) {
+    private val selectionCallback = object : SelectionCallback({ treeViewAdapter }) {
 
-        override fun unselect(x: TreeViewAdapter.Placeholder) = customTimesAdapter!!.unselect()
+        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapterGetter!!().unselect(x)
 
         override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
-            val customTimeIds = customTimesAdapter!!.selected
+            val customTimeIds = selectedIds
             check(!customTimeIds.isEmpty())
 
             when (menuItem.itemId) {
                 R.id.action_custom_times_delete -> {
-                    customTimesAdapter!!.removeSelected()
+                    (treeViewAdapterGetter!!().treeModelAdapter as CustomTimesAdapter).removeSelected(x)
 
                     updateSelectAll()
                 }
@@ -87,7 +91,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private var showTimesFab: FloatingActionButton? = null
 
-    private var data: ShowCustomTimesViewModel.Data? = null
+    private lateinit var data: ShowCustomTimesViewModel.Data
 
     private lateinit var showCustomTimesViewModel: ShowCustomTimesViewModel
 
@@ -122,15 +126,17 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     private fun onLoadFinished(data: ShowCustomTimesViewModel.Data) {
         this.data = data
 
-        customTimesAdapter?.let {
-            val selectedCustomTimeIds = it.selected
-            this.selectedCustomTimeIds = if (selectedCustomTimeIds.isEmpty()) null else selectedCustomTimeIds
-        }
+        if (this::treeViewAdapter.isInitialized)
+            selectedCustomTimeIds = treeViewAdapter.selectedNodes
+                    .asSequence()
+                    .map { (it.modelNode as CustomTimeNode).customTimeData.id }
+                    .toList()
+                    .takeIf { it.isNotEmpty() }
 
-        customTimesAdapter = CustomTimesAdapter(data, this, selectedCustomTimeIds)
-        showTimesList.adapter = customTimesAdapter
+        treeViewAdapter = CustomTimesAdapter().initialize()
+        showTimesList.adapter = treeViewAdapter
 
-        selectionCallback.setSelected(customTimesAdapter!!.selected.size, TreeViewAdapter.Placeholder)
+        selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
         if (data.entries.isEmpty()) {
             showTimesList.visibility = View.GONE
@@ -146,25 +152,25 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         updateFabVisibility()
     }
 
+    private val selectedIds
+        get() = treeViewAdapter.selectedNodes
+                .asSequence()
+                .map { (it.modelNode as CustomTimeNode).customTimeData.id }
+                .toSet()
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        customTimesAdapter?.let {
-            val selectedCustomTimeIds = it.selected
+        if (this::treeViewAdapter.isInitialized) {
+            val selectedCustomTimeIds = selectedIds
             if (!selectedCustomTimeIds.isEmpty())
                 outState.putIntegerArrayList(SELECTED_CUSTOM_TIME_IDS_KEY, ArrayList(selectedCustomTimeIds))
         }
     }
 
-    private fun updateSelectAll() {
-        check(customTimesAdapter != null)
+    private fun updateSelectAll() = (activity as CustomTimesListListener).setCustomTimesSelectAllVisibility(treeViewAdapter.itemCount != 0)
 
-        (activity as CustomTimesListListener).setCustomTimesSelectAllVisibility(customTimesAdapter!!.itemCount != 0)
-    }
-
-    fun selectAll() {
-        customTimesAdapter!!.selectAll()
-    }
+    fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
         showTimesFab = floatingActionButton
@@ -176,7 +182,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private fun updateFabVisibility() {
         showTimesFab?.let {
-            if (data != null && !selectionCallback.hasActionMode) {
+            if (this::data.isInitialized && !selectionCallback.hasActionMode) {
                 it.show()
             } else {
                 it.hide()
@@ -189,127 +195,84 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         showTimesFab = null
     }
 
-    private inner class CustomTimesAdapter(data: ShowCustomTimesViewModel.Data, private val showCustomTimesFragment: ShowCustomTimesFragment, selectedCustomTimeIds: List<Int>?) : RecyclerView.Adapter<CustomTimesAdapter.CustomTimeHolder>() {
+    private inner class CustomTimesAdapter : TreeModelAdapter {
 
         private val dataId = data.dataId
 
         val customTimeWrappers = data.entries
                 .asSequence()
-                .map { CustomTimeWrapper(it, selectedCustomTimeIds) }
+                .map { CustomTimeNode(it) }
                 .toMutableList()
 
-        val selected
-            get() = customTimeWrappers.asSequence()
-                    .filter { it.selected }
-                    .map { it.customTimeData.id }
-                    .toList()
+        private lateinit var treeViewAdapter: TreeViewAdapter
+        private lateinit var treeNodeCollection: TreeNodeCollection
 
-        override fun getItemCount() = customTimeWrappers.size
+        fun initialize(): TreeViewAdapter {
+            treeViewAdapter = TreeViewAdapter(this)
+            treeNodeCollection = TreeNodeCollection(treeViewAdapter)
+            treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
-        fun unselect() {
-            customTimeWrappers.filter { it.selected }.forEach {
-                it.selected = false
-                notifyItemChanged(customTimeWrappers.indexOf(it))
-            }
+            treeNodeCollection.nodes = customTimeWrappers.map { it.initialize(treeNodeCollection) }
+
+            return treeViewAdapter
         }
 
-        fun selectAll() {
-            check(!selectionCallback.hasActionMode)
+        override val hasActionMode get() = selectionCallback.hasActionMode
 
-            customTimeWrappers.filterNot { it.selected }.forEach { it.toggleSelect(TreeViewAdapter.Placeholder) }
-        }
+        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.incrementSelected(x)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomTimeHolder {
-            val layoutInflater = LayoutInflater.from(showCustomTimesFragment.activity)
-            val showCustomTimesRow = layoutInflater.inflate(R.layout.row_show_custom_times, parent, false)
+        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
 
-            val timesRowName = showCustomTimesRow.findViewById<TextView>(R.id.times_row_name)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
 
-            return CustomTimeHolder(showCustomTimesRow, timesRowName)
-        }
+        fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+            val selectedCustomTimeWrappers = customTimeWrappers.filter { it.treeNode.isSelected }
 
-        override fun onBindViewHolder(customTimeHolder: CustomTimeHolder, position: Int) {
-            customTimeHolder.run {
-                val customTimeWrapper = customTimeWrappers[position]
-
-                timesRowName.text = customTimeWrapper.customTimeData.name
-
-                showCustomTimeRow.run {
-                    if (customTimeWrapper.selected)
-                        setBackgroundColor(ContextCompat.getColor(showCustomTimesFragment.activity!!, R.color.selected))
-                    else
-                        setBackgroundColor(Color.TRANSPARENT)
-
-                    setOnLongClickListener {
-                        onLongClick()
-                        true
-                    }
-
-                    setOnClickListener {
-                        if (showCustomTimesFragment.selectionCallback.hasActionMode)
-                            onLongClick()
-                        else
-                            onRowClick()
-                    }
-                }
-            }
-        }
-
-        fun removeSelected() {
-            val selectedCustomTimeWrappers = customTimeWrappers.filter { it.selected }
-
-            selectedCustomTimeWrappers.map { customTimeWrappers.indexOf(it) }.forEach {
-                customTimeWrappers.removeAt(it)
-                notifyItemRemoved(it)
-
-            }
+            selectedCustomTimeWrappers.map { customTimeWrappers.indexOf(it) }.forEach { customTimeWrappers.removeAt(it) }
 
             val selectedCustomTimeIds = selectedCustomTimeWrappers.map { it.customTimeData.id }
 
             DomainFactory.getKotlinDomainFactory().setCustomTimeCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds)
         }
-
-        private inner class CustomTimeHolder(val showCustomTimeRow: View, val timesRowName: TextView) : RecyclerView.ViewHolder(showCustomTimeRow) {
-
-            fun onRowClick() {
-                val customTimeWrapper = customTimeWrappers[adapterPosition]
-
-                showCustomTimesFragment.activity!!.startActivity(ShowCustomTimeActivity.getEditIntent(customTimeWrapper.customTimeData.id, showCustomTimesFragment.activity!!))
-            }
-
-            fun onLongClick() {
-                val customTimeWrapper = customTimeWrappers[adapterPosition]
-
-                customTimeWrapper.toggleSelect(TreeViewAdapter.Placeholder)
-            }
-        }
     }
 
-    private inner class CustomTimeWrapper(val customTimeData: ShowCustomTimesViewModel.CustomTimeData, selectedCustomTimeIds: List<Int>?) {
-        var selected = false
+    private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) : GroupHolderNode(0) {
 
-        init {
-            if (selectedCustomTimeIds != null) {
-                check(!selectedCustomTimeIds.isEmpty())
+        public override lateinit var treeNode: TreeNode
+            private set
 
-                selected = selectedCustomTimeIds.contains(customTimeData.id)
-            }
+        fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
+            treeNode = TreeNode(this, treeNodeCollection, false, selectedCustomTimeIds?.contains(customTimeData.id)
+                    ?: false)
+            treeNode.setChildTreeNodes(listOf())
+            return treeNode
         }
 
-        fun toggleSelect(x: TreeViewAdapter.Placeholder) {
-            selected = !selected
+        override val name get() = Triple(customTimeData.name, colorPrimary, true)
 
-            if (selected) {
-                selectionCallback.incrementSelected(x)
-            } else {
-                selectionCallback.decrementSelected(x)
-            }
+        override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
-            val position = customTimesAdapter!!.customTimeWrappers.indexOf(this)
-            check(position >= 0)
+        override val isSelectable = true
 
-            customTimesAdapter!!.notifyItemChanged(position)
-        }
+        override val isSeparatorVisibleWhenNotExpanded = false
+
+        override val isVisibleDuringActionMode = true
+
+        override val isVisibleWhenEmpty = true
+
+        override val onClickListener get() = treeNode.onClickListener
+
+        override fun onClick() = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
+
+        override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
+
+        override fun compareTo(other: ModelNode) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
+
+        override val state: ModelState
+            get() = object : ModelState {
+
+                override fun same(other: ModelState) = true
+            }//todo
     }
 
     interface CustomTimesListListener {

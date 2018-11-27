@@ -226,7 +226,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             return treeViewAdapter
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(activity!!.layoutInflater.inflate(R.layout.row_list, parent, false)!!)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false)!!)
 
         override val hasActionMode get() = selectionCallback.hasActionMode
 

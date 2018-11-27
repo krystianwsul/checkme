@@ -585,7 +585,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
     override fun setFab(floatingActionButton: FloatingActionButton) {
         this.floatingActionButton = floatingActionButton
 
-        this.floatingActionButton!!.setOnClickListener {
+        floatingActionButton.setOnClickListener {
             checkNotNull(activity) // todo how the fuck is this null?
 
             when (val parameters = parameters) {
@@ -634,32 +634,32 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             }
         }
 
-        private var treeViewAdapter: TreeViewAdapter? = null
+        private lateinit var treeViewAdapter: TreeViewAdapter
 
         lateinit var treeNodeCollection: TreeNodeCollection
             private set
 
-        private var nodeCollection: NodeCollection? = null
+        private lateinit var nodeCollection: NodeCollection
 
         val expansionState: ExpansionState
             get() {
-                val expandedGroups = nodeCollection!!.expandedGroups
+                val expandedGroups = nodeCollection.expandedGroups
 
                 val expandedInstances = HashMap<InstanceKey, Boolean>()
-                nodeCollection!!.addExpandedInstances(expandedInstances)
+                nodeCollection.addExpandedInstances(expandedInstances)
 
-                val doneExpanded = nodeCollection!!.doneExpanded
+                val doneExpanded = nodeCollection.doneExpanded
 
-                val unscheduledExpanded = nodeCollection!!.unscheduledExpanded
+                val unscheduledExpanded = nodeCollection.unscheduledExpanded
 
-                val expandedTaskKeys = nodeCollection!!.expandedTaskKeys
+                val expandedTaskKeys = nodeCollection.expandedTaskKeys
 
                 return ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys)
             }
 
         private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>, expansionState: GroupListFragment.ExpansionState?, selectedNodes: ArrayList<InstanceKey>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
             treeViewAdapter = TreeViewAdapter(this, if (mShowFab) R.layout.row_group_list_fab_padding else null)
-            treeNodeCollection = TreeNodeCollection(treeViewAdapter!!)
+            treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 
@@ -683,10 +683,10 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 unscheduledExpanded = false
             }
 
-            treeNodeCollection.nodes = nodeCollection!!.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTaskKeys)
-            treeViewAdapter!!.setTreeNodeCollection(treeNodeCollection)
+            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTaskKeys)
+            treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
-            return treeViewAdapter!!
+            return treeViewAdapter
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))

@@ -614,12 +614,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override val name get() = Triple(childTaskData.name, colorPrimary, true)
 
-            override val expand
-                get() = if (treeNode.expandVisible) {
-                    Pair(treeNode.isExpanded, treeNode.expandListener)
-                } else {
-                    null
-                }
+            override val expandable = treeNode.expandVisible // todo default?
 
             override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
@@ -712,6 +707,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override val backgroundColor = Color.TRANSPARENT
 
             override val name get() = Triple(note, colorPrimary, false)
+
+            override val expandable = false
 
             override val itemViewType = TYPE_NOTE
 

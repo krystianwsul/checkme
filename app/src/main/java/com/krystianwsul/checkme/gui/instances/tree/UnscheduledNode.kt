@@ -53,7 +53,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val name get() = Triple(groupListFragment.activity.getString(R.string.noReminder), colorPrimary, true)
 
-    override val expand get() = Pair(treeNode.isExpanded, treeNode.expandListener)
+    override val expandable = true
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

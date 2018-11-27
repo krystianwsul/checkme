@@ -144,21 +144,11 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
             null
         }
 
-    override val expand
+    override val expandable
         get() = if (singleInstance()) {
-            val visibleChildren = treeNode.allChildren.any { it.canBeShown() }
-
-            if (singleInstanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !visibleChildren)) {
-                null
-            } else {
-                Pair(treeNode.isExpanded, treeNode.expandListener)
-            }
+            !(singleInstanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !treeNode.allChildren.any { it.canBeShown() }))
         } else {
-            if (groupListFragment.selectionCallback.hasActionMode && treeNode.hasSelectedDescendants()) {
-                null
-            } else {
-                Pair(treeNode.isExpanded, treeNode.expandListener)
-            }
+            !(groupListFragment.selectionCallback.hasActionMode && treeNode.hasSelectedDescendants())
         }
 
     override val checkBoxVisibility
@@ -442,12 +432,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
         override val children get() = getChildrenNew(treeNode, instanceData)
 
-        override val expand
-            get() = if (instanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !treeNode.allChildren.any { it.canBeShown() })) {
-                null
-            } else {
-                Pair(treeNode.isExpanded, treeNode.expandListener)
-            }
+        override val expandable get() = !(instanceData.children.isEmpty() || groupListFragment.selectionCallback.hasActionMode && (treeNode.hasSelectedDescendants() || !treeNode.allChildren.any { it.canBeShown() }))
 
         override val checkBoxVisibility
             get() = if (groupListFragment.selectionCallback.hasActionMode) {

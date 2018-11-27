@@ -790,7 +790,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
         fun remove(instanceKey: InstanceKey)
     }
 
-    data class TaskData(val mTaskKey: TaskKey, val Name: String, val Children: List<TaskData>, val mStartExactTimeStamp: ExactTimeStamp, val mNote: String?) {
+    data class TaskData(val mTaskKey: TaskKey, val Name: String, val children: List<TaskData>, val mStartExactTimeStamp: ExactTimeStamp, val mNote: String?) {
 
         init {
             check(Name.isNotEmpty())

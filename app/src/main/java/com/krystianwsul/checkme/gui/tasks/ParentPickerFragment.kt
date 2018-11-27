@@ -226,12 +226,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
-            override val expand: Pair<Boolean, () -> Unit>?
-                get() = if (parentTreeData.parentTreeDatas.isEmpty()) {
-                    null
-                } else {
-                    Pair(treeNode.isExpanded, treeNode.expandListener)
-                }
+            override val expandable get() = parentTreeData.parentTreeDatas.isNotEmpty()
 
             override val name get() = Triple(parentTreeData.name, colorPrimary, true)
 

@@ -259,6 +259,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val children: Pair<String, Int>? = null
 
+            override val expandable = false
+
             override val itemViewType = 0
 
             override val isSelectable = true

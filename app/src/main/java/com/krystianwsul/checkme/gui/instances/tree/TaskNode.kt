@@ -32,11 +32,11 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
         }
 
     fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>?): TreeNode {
-        val expanded = expandedTaskKeys?.contains(taskData.mTaskKey) == true && !taskData.Children.isEmpty()
+        val expanded = expandedTaskKeys?.contains(taskData.mTaskKey) == true && !taskData.children.isEmpty()
 
         treeNode = TreeNode(this, parentTreeNode, expanded, false)
 
-        treeNode.setChildTreeNodes(taskData.Children.map { newChildTreeNode(it, expandedTaskKeys) })
+        treeNode.setChildTreeNodes(taskData.children.map { newChildTreeNode(it, expandedTaskKeys) })
 
         return treeNode
     }
@@ -62,11 +62,11 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
     override val name get() = Triple(taskData.Name, colorPrimary, true)
 
     override val children
-        get() = if ((taskData.Children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
+        get() = if ((taskData.children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
             null
         } else {
-            val text = if (!expanded() && !taskData.Children.isEmpty()) {
-                taskData.Children
+            val text = if (!expanded() && !taskData.children.isEmpty()) {
+                taskData.children
                         .sortedBy { it.mStartExactTimeStamp }
                         .joinToString(", ") { it.Name }
             } else {
@@ -80,12 +80,7 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
             Pair(text, color)
         }
 
-    override val expand
-        get() = if (taskData.Children.isEmpty()) {
-            null
-        } else {
-            Pair(treeNode.isExpanded, treeNode.expandListener)
-        }
+    override val expandable get() = taskData.children.isNotEmpty()
 
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 

@@ -39,7 +39,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val children: Pair<String, Int>? = null
 
-    protected open val expand: Pair<Boolean, () -> Unit>? = null
+    protected abstract val expandable: Boolean// todo false
 
     protected open val checkBoxVisibility = View.GONE
 
@@ -99,14 +99,12 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             rowExpand.run {
-                expand.let {
-                    if (it != null) {
+                if (expandable) {
                         visibility = View.VISIBLE
-                        setImageResource(if (it.first) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
-                        setOnClickListener { _ -> it.second() }
+                    setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
+                    setOnClickListener { treeNode.expandListener() }
                     } else {
                         visibility = View.INVISIBLE
-                    }
                 }
             }
 

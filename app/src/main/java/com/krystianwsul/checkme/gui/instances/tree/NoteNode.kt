@@ -28,6 +28,8 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
 
     override val name get() = Triple(note, colorPrimary, false)
 
+    override val expandable = false
+
     override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
 
     override val onClickListener get() = treeNode.onClickListener

@@ -48,11 +48,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val backgroundColor = Color.TRANSPARENT
 
-    protected abstract val onClickListener: () -> Unit
+    protected open val onClickListener: (() -> Unit)? = null
+
+    protected open fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): (() -> Boolean)? = null
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
-
-    protected abstract fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): () -> Boolean
 
     final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         val groupHolder = viewHolder as NodeHolder
@@ -124,8 +124,17 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             itemView.run {
                 setBackgroundColor(backgroundColor)
                 val onLongClickListener = getOnLongClickListener(viewHolder)
-                setOnLongClickListener { onLongClickListener() }
-                setOnClickListener { onClickListener() }
+                if (onLongClickListener != null)
+                    setOnLongClickListener { onLongClickListener() }
+                else
+                    setOnClickListener(null)
+
+                onClickListener.let {
+                    if (it != null)
+                        setOnClickListener { it() }
+                    else
+                        setOnClickListener(null)
+                }
             }
         }
     }

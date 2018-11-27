@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
@@ -695,7 +694,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
         }
 
-        private class NoteNode(private val note: String) : ModelNode { // todo GroupHolderNode
+        private class NoteNode(private val note: String) : GroupHolderNode(0) {
 
             lateinit var treeNode: TreeNode
                 private set
@@ -711,32 +710,11 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
-            override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
-                (viewHolder as NodeHolder).run {
-                    itemView.run {
-                        setBackgroundColor(Color.TRANSPARENT)
-                        setOnLongClickListener(null)
-                        setOnClickListener(null)
-                    }
+            override val backgroundColor = Color.TRANSPARENT
 
-                    rowContainer.setIndent(0)
+            override val name get() = Triple(note, colorPrimary, false)
 
-                    rowCheckBox.visibility = View.GONE
-
-                    rowExpand.visibility = View.GONE
-
-                    rowName.run {
-                        text = note
-                        setSingleLine(false)
-                    }
-
-                    rowDetails.visibility = View.GONE
-
-                    rowChildren.visibility = View.GONE
-
-                    rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
-                }
-            }
+            override val separatorVisible get() = treeNode.separatorVisible
 
             override val itemViewType = TYPE_NOTE
 

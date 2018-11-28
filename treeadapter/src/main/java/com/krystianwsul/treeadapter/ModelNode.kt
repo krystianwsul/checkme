@@ -26,5 +26,5 @@ interface ModelNode : Comparable<ModelNode> {
 
     val state: ModelState
 
-    val id: Any get() = throw java.lang.UnsupportedOperationException()
+    val id: Any
 }

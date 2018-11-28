@@ -4,10 +4,17 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.NodeContainer
+import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import java.util.*
 
 class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupHolderNode(indentation) {
+
+    override val id get() = Id(nodeCollection.nodeContainer.id)
+
+    data class Id(val id: Any)
 
     override lateinit var treeNode: TreeNode
         private set
@@ -53,9 +60,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     override val checkBoxVisibility = View.INVISIBLE
 
-    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
-
-    override val onClickListener get() = treeNode.onClickListener
+    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     fun remove(doneInstanceNode: DoneInstanceNode, x: TreeViewAdapter.Placeholder) {
         check(doneInstanceNodes.contains(doneInstanceNode))
@@ -80,11 +85,4 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     override val isVisibleDuringActionMode = false
 
     override val isSeparatorVisibleWhenNotExpanded = false
-
-    override val state = State(nodeCollection.nodeContainer.id)
-
-    data class State(val id: Any) : ModelState {
-
-        override fun same(other: ModelState) = (other as? State)?.id == id
-    }
 }

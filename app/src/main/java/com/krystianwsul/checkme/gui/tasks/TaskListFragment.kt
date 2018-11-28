@@ -538,6 +538,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : GroupHolderNode(indentation), TaskParent {
 
+            override val id = childTaskData.taskKey
+
             public override lateinit var treeNode: TreeNode
                 private set
 
@@ -616,15 +618,11 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
-            override val onClickListener get() = treeNode.onClickListener
-
-            override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = {
-                if (taskListFragment.taskKey != null && treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
-                    taskListFragment.dragHelper.startDrag(viewHolder)
-                    true
-                } else {
-                    treeNode.onLongClickListener()
-                }
+            override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = if (taskListFragment.taskKey != null && treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
+                taskListFragment.dragHelper.startDrag(viewHolder)
+                true
+            } else {
+                treeNode.onLongClickListener()
             }
 
             override val itemViewType = TYPE_TASK
@@ -676,20 +674,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)
-
-            override val state get() = State(childTaskData.copy())
-
-
-            data class State(val childTaskData: ChildTaskData) : ModelState {
-
-                override fun same(other: ModelState) = (other as? State)?.childTaskData?.taskKey == childTaskData.taskKey
-            }
         }
 
         private class NoteNode(private val note: String) : GroupHolderNode(0) {
 
             override lateinit var treeNode: TreeNode
                 private set
+
+            override val id = Unit
 
             init {
                 check(note.isNotEmpty())
@@ -722,13 +714,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 check(other is TaskWrapper)
 
                 return -1
-            }
-
-            override val state get() = State(note)
-
-            data class State(val note: String) : ModelState {
-
-                override fun same(other: ModelState) = (other is State)
             }
         }
     }

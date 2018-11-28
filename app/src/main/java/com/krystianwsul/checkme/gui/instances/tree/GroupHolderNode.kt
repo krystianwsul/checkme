@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.setIndent
 
 import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
@@ -41,19 +42,31 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val checkBoxVisibility = View.GONE
 
-    protected open val checkBoxChecked: Boolean get() = throw UnsupportedOperationException()
+    protected open val checkBoxChecked = false
 
-    protected open val checkBoxOnClickListener: () -> Unit get() = throw UnsupportedOperationException()
+    protected open fun checkBoxOnClickListener() = Unit
 
     protected open val backgroundColor = Color.TRANSPARENT
 
-    protected open val onClickListener: (() -> Unit)? = null
-
-    protected open fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): (() -> Boolean)? = null // todo can be changed to treeNode.etc
+    protected open fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = false
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
-    // todo model state
+    final override val state get() = State(id, name, details, children, backgroundColor, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxChecked)
+
+    data class State(
+            val id: Any,
+            val name: Triple<String, Int, Boolean>?,
+            val details: Pair<String, Int>?,
+            val children: Pair<String, Int>?,
+            val backgroundColor: Int,
+            val indentation: Int,
+            val expandVisible: Boolean,
+            val isExpanded: Boolean,
+            val checkboxChecked: Boolean) : ModelState {
+
+        override fun same(other: ModelState) = (other as State).id == id
+    }
 
     final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
         val groupHolder = viewHolder as NodeHolder
@@ -99,41 +112,23 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             rowExpand.run {
-                if (treeNode.expandVisible) {
-                        visibility = View.VISIBLE
-                    setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
-                    setOnClickListener { treeNode.expandListener() }
-                    } else {
-                        visibility = View.INVISIBLE
-                }
+                visibility = if (treeNode.expandVisible) View.VISIBLE else View.INVISIBLE
+                setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
+                setOnClickListener { treeNode.expandListener() }
             }
 
             rowCheckBox.run {
-                checkBoxVisibility.let {
-                    visibility = it
-                    if (it == View.VISIBLE) {
-                        isChecked = checkBoxChecked
-                        setOnClickListener { checkBoxOnClickListener() }
-                    }
-                }
+                visibility = checkBoxVisibility
+                isChecked = checkBoxChecked
+                setOnClickListener { checkBoxOnClickListener() }
             }
 
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {
                 setBackgroundColor(backgroundColor)
-                val onLongClickListener = getOnLongClickListener(viewHolder)
-                if (onLongClickListener != null)
-                    setOnLongClickListener { onLongClickListener() }
-                else
-                    setOnClickListener(null)
-
-                onClickListener.let {
-                    if (it != null)
-                        setOnClickListener { it() }
-                    else
-                        setOnClickListener(null)
-                }
+                setOnLongClickListener { onLongClickListener(viewHolder) }
+                setOnClickListener { treeNode.onClickListener() }
             }
         }
     }

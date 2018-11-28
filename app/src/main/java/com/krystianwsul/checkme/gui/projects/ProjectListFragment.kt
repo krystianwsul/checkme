@@ -244,6 +244,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
 
+            override val id = projectData.id
+
             public override lateinit var treeNode: TreeNode
                 private set
 
@@ -263,9 +265,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val isSelectable = true
 
-            override val onClickListener get() = treeNode.onClickListener
-
-            override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
+            override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
             override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
@@ -284,13 +284,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             }
 
             fun remove(x: TreeViewAdapter.Placeholder) = projectListAdapter.remove(this, x)
-
-            override val state get() = State(projectData.copy())
         }
-    }
-
-    data class State(val projectData: ProjectListViewModel.ProjectData) : ModelState {
-
-        override fun same(other: ModelState) = (other as? State)?.projectData?.id == projectData.id
     }
 }

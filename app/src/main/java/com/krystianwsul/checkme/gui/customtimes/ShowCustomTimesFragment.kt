@@ -241,6 +241,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         public override lateinit var treeNode: TreeNode
             private set
 
+        override val id = customTimeData.id
+
         fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
             treeNode = TreeNode(this, treeNodeCollection, false, selectedCustomTimeIds?.contains(customTimeData.id)
                     ?: false)
@@ -260,19 +262,11 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val isVisibleWhenEmpty = true
 
-        override val onClickListener get() = treeNode.onClickListener
-
         override fun onClick() = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
-        override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
+        override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
         override fun compareTo(other: ModelNode) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
-
-        override val state: ModelState
-            get() = object : ModelState {
-
-                override fun same(other: ModelState) = true
-            }//todo
     }
 
     interface CustomTimesListListener {

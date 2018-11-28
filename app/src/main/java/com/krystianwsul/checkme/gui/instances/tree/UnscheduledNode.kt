@@ -4,11 +4,14 @@ import android.support.v7.widget.RecyclerView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderNode(0), TaskParent {
+
+    override val id get() = Id(nodeCollection.nodeContainer.id)
+
+    data class Id(val id: Any)
 
     private lateinit var taskDatas: List<GroupListFragment.TaskData>
 
@@ -53,9 +56,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val name get() = Triple(groupListFragment.activity.getString(R.string.noReminder), colorPrimary, true)
 
-    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
-
-    override val onClickListener get() = treeNode.onClickListener
+    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     override val isSelectable = false
 
@@ -66,11 +67,4 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
     override val isVisibleDuringActionMode = false
 
     override val isSeparatorVisibleWhenNotExpanded = false
-
-    override val state get() = State(nodeCollection.nodeContainer.id, taskDatas.map { it.copy() })
-
-    data class State(val id: Any, val taskDatas: List<GroupListFragment.TaskData>) : ModelState {
-
-        override fun same(other: ModelState) = (other as? State)?.id == id
-    }
 }

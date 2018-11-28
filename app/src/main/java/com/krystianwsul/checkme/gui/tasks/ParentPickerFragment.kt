@@ -165,6 +165,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override lateinit var treeNode: TreeNode
                 private set
 
+            override val id = parentTreeData.parentKey
+
             private lateinit var taskWrappers: MutableList<TaskWrapper>
 
             override val taskAdapter get() = taskParent.taskAdapter
@@ -224,7 +226,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
-            override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
+            override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
             override val name get() = Triple(parentTreeData.name, colorPrimary, true)
 
@@ -252,8 +254,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     Pair(text, colorSecondary)
                 }
 
-            override val onClickListener get() = treeNode.onClickListener
-
             override fun onClick() {
                 val parentPickerFragment = parentFragment
 
@@ -268,13 +268,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     comparison = -comparison
 
                 return comparison
-            }
-
-            override val state get() = State(parentTreeData.copy())
-
-            data class State(val parentTreeData: CreateTaskViewModel.ParentTreeData) : ModelState {
-
-                override fun same(other: ModelState) = (other as? State)?.parentTreeData?.parentKey == parentTreeData.parentKey
             }
         }
     }

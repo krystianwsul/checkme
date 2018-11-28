@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
@@ -69,30 +68,25 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
 
     override val checkBoxChecked = true
 
-    override val checkBoxOnClickListener: () -> Unit
-        get() {
-            val nodeCollection = dividerNode.nodeCollection
+    override fun checkBoxOnClickListener() {
+        val nodeCollection = dividerNode.nodeCollection
 
-            val groupAdapter = nodeCollection.groupAdapter
+        val groupAdapter = nodeCollection.groupAdapter
 
-            return {
-                groupAdapter.treeNodeCollection
-                        .treeViewAdapter
-                        .updateDisplayedNodes {
-                            instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
+        groupAdapter.treeNodeCollection
+                .treeViewAdapter
+                .updateDisplayedNodes {
+                    instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
 
-                            dividerNode.remove(this, TreeViewAdapter.Placeholder)
+                    dividerNode.remove(this, TreeViewAdapter.Placeholder)
 
-                            nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
-                        }
+                    nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
+                }
 
-                groupAdapter.mGroupListFragment.updateSelectAll()
-            }
-        }
+        groupAdapter.mGroupListFragment.updateSelectAll()
+    }
 
-    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
-
-    override val onClickListener get() = treeNode.onClickListener
+    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     override fun compareTo(other: ModelNode): Int {
         checkNotNull(instanceData.Done)
@@ -116,11 +110,4 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
     fun removeFromParent(x: TreeViewAdapter.Placeholder) = dividerNode.remove(this, x)
 
     override val id = instanceData.InstanceKey
-
-    override val state get() = State(instanceData.copy())
-
-    data class State(val instanceData: GroupListFragment.InstanceData) : ModelState {
-
-        override fun same(other: ModelState) = (other as? State)?.instanceData?.InstanceKey == instanceData.InstanceKey
-    }
 }

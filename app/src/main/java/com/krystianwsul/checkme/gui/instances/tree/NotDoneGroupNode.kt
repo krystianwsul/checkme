@@ -12,7 +12,10 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimeStamp
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.NodeContainer
+import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import java.util.*
 
 class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, private val instanceDatas: MutableList<GroupListFragment.InstanceData>, private val selectable: Boolean) : GroupHolderNode(indentation), NodeCollectionParent {
@@ -161,15 +164,13 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
     override val checkBoxChecked = false
 
-    override val checkBoxOnClickListener: () -> Unit
-        get() {
+    override fun checkBoxOnClickListener() {
             val groupAdapter = nodeCollection.groupAdapter
 
             check(singleInstance())
 
             check(!groupAdapter.mGroupListFragment.selectionCallback.hasActionMode)
 
-            return {
                 groupAdapter.treeNodeCollection
                         .treeViewAdapter
                         .updateDisplayedNodes {
@@ -183,7 +184,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                         }
 
                 groupAdapter.mGroupListFragment.updateSelectAll()
-            }
         }
 
     override val backgroundColor
@@ -198,12 +198,11 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
             }
         }
 
-    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder): () -> Boolean {
+    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.mGroupListFragment
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
-        return {
-            if (groupListFragment.parameters.dataWrapper.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && (groupListFragment.parameters !is GroupListFragment.Parameters.InstanceKeys) && (groupListFragment.parameters !is GroupListFragment.Parameters.TaskKey)) {
+        return if (groupListFragment.parameters.dataWrapper.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && (groupListFragment.parameters !is GroupListFragment.Parameters.InstanceKeys) && (groupListFragment.parameters !is GroupListFragment.Parameters.TaskKey)) {
                 check(singleInstance())
 
                 groupListFragment.dragHelper.startDrag(viewHolder)
@@ -211,10 +210,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
             } else {
                 treeNode.onLongClickListener()
             }
-        }
     }
-
-    override val onClickListener get() = treeNode.onClickListener
 
     override fun onClick() {
         groupListFragment.activity.startActivity(if (singleInstance()) {
@@ -347,13 +343,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
     override val id: Any = if (singleInstance()) singleInstanceData.InstanceKey else exactTimeStamp
 
-    override val state get() = State(id, instanceDatas.map { it.copy() }, groupListFragment.selectionCallback.hasActionMode)
-
-    data class State(val id: Any, val instanceDatas: List<GroupListFragment.InstanceData>, val hasActionMode: Boolean) : ModelState {
-
-        override fun same(other: ModelState) = (other as? State)?.id == id
-    }
-
     class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, override val isSelectable: Boolean) : GroupHolderNode(indentation), NodeCollectionParent {
 
         companion object {
@@ -434,16 +423,12 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
         override val checkBoxChecked = false
 
-        override val checkBoxOnClickListener: () -> Unit
-            get() {
+        override fun checkBoxOnClickListener() {
                 val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
                 check(notDoneGroupTreeNode.isExpanded)
 
                 val groupAdapter = parentNodeCollection.groupAdapter
                 check(!groupAdapter.mGroupListFragment.selectionCallback.hasActionMode)
-
-                return {
-                    check(notDoneGroupTreeNode.isExpanded)
 
                     groupAdapter.treeNodeCollection
                             .treeViewAdapter
@@ -458,7 +443,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                             }
 
                     groupAdapter.mGroupListFragment.updateSelectAll()
-                }
             }
 
         override val backgroundColor
@@ -471,9 +455,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                     Color.TRANSPARENT
             }
 
-        override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
-
-        override val onClickListener get() = treeNode.onClickListener
+        override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
         override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
@@ -488,12 +470,5 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         fun removeFromParent(x: TreeViewAdapter.Placeholder) = parentNotDoneGroupNode.remove(this, x)
 
         override val id = instanceData.InstanceKey
-
-        override val state get() = State(instanceData.copy(), groupListFragment.selectionCallback.hasActionMode)
-
-        data class State(val instanceData: GroupListFragment.InstanceData, val hasActionMode: Boolean) : ModelState {
-
-            override fun same(other: ModelState) = (other as? State)?.instanceData?.InstanceKey == instanceData.InstanceKey
-        }
     }
 }

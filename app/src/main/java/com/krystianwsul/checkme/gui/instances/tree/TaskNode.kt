@@ -4,7 +4,6 @@ import android.support.v7.widget.RecyclerView
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
-import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 
 
@@ -12,6 +11,8 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
 
     override lateinit var treeNode: TreeNode
         private set
+
+    override val id = taskData.taskKey
 
     private val taskNodes = mutableListOf<TaskNode>()
 
@@ -25,14 +26,14 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
         } else {
             mutableListOf<TaskKey>().apply {
                 if (expanded())
-                    add(taskData.mTaskKey)
+                    add(taskData.taskKey)
 
                 addAll(taskNodes.flatMap { it.expandedTaskKeys })
             }
         }
 
     fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>?): TreeNode {
-        val expanded = expandedTaskKeys?.contains(taskData.mTaskKey) == true && !taskData.children.isEmpty()
+        val expanded = expandedTaskKeys?.contains(taskData.taskKey) == true && !taskData.children.isEmpty()
 
         treeNode = TreeNode(this, parentTreeNode, expanded, false)
 
@@ -80,14 +81,12 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
             Pair(text, color)
         }
 
-    override fun getOnLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener
-
-    override val onClickListener get() = treeNode.onClickListener
+    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     override val isSelectable = false
 
     override fun onClick() {
-        groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.mTaskKey))
+        groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))
     }
 
     override val isVisibleWhenEmpty = true
@@ -95,11 +94,4 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
     override val isVisibleDuringActionMode = true
 
     override val isSeparatorVisibleWhenNotExpanded = false
-
-    override val state get() = State(taskData.copy())
-
-    data class State(val taskData: GroupListFragment.TaskData) : ModelState {
-
-        override fun same(other: ModelState) = (other as? State)?.taskData?.mTaskKey == taskData.mTaskKey
-    }
 }

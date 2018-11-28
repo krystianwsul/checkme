@@ -204,6 +204,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        MyCrashlytics.logMethod(this, "item: " + item.title)
+
         when (item.itemId) {
             R.id.action_calendar -> {
                 Log.e("asdf", "calendarOpen: $calendarOpen")
@@ -227,12 +229,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             R.id.action_select_all -> when (visibleTab.value!!) {
                 MainActivity.Tab.INSTANCES -> {
                     val myFragmentStatePagerAdapter = mainDaysPager.adapter as MyFragmentStatePagerAdapter
-                    myFragmentStatePagerAdapter.currentItem
-                            .groupListFragment
-                            .treeViewAdapter
-                            .updateDisplayedNodes {
-                                myFragmentStatePagerAdapter.currentItem.selectAll(TreeViewAdapter.Placeholder)
-                            }
+                    myFragmentStatePagerAdapter.currentItem.let {
+                        // todo do same as for fab
+                        it.groupListFragment
+                                .treeViewAdapter
+                                .updateDisplayedNodes {
+                                    it.selectAll(TreeViewAdapter.Placeholder)
+                                }
+                    }
                 }
                 MainActivity.Tab.TASKS -> {
                     val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment

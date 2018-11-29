@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.LinearLayoutCompat
 import android.util.AttributeSet
 import android.view.View
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.Date
@@ -13,7 +14,7 @@ import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_day.view.*
 import java.text.DateFormatSymbols
 import java.util.*
@@ -21,7 +22,7 @@ import java.util.*
 
 class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr) {
 
-    private var key: Pair<MainActivity.TimeRange, Int>? = null
+    private val key = BehaviorRelay.create<Pair<MainActivity.TimeRange, Int>>()
 
     private var floatingActionButton: FloatingActionButton? = null
 
@@ -41,18 +42,18 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
     }
 
     fun saveState() {
-        activity.states[key!!] = groupListFragment.onSaveInstanceState()
+        activity.states[key.value!!] = groupListFragment.onSaveInstanceState()
     }
 
     fun setPosition(timeRange: MainActivity.TimeRange, position: Int) {
         entry?.stop()
         compositeDisposable.clear()
 
-        key?.let { saveState() }
+        key.value?.let { saveState() }
 
-        key = Pair(timeRange, position)
+        key.accept(Pair(timeRange, position))
 
-        activity.states[key!!]?.let {
+        activity.states[key.value!!]?.let {
             groupListFragment.onRestoreInstanceState(it)
         }
 
@@ -99,22 +100,28 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         dayTabLayout.removeAllTabs()
         dayTabLayout.addTab(dayTabLayout.newTab().setText(title))
 
-        compositeDisposable += (context as Host).hostEvents.subscribe {
-            if (it is Event.PageVisible && it.position == position)
-                setFab(it.floatingActionButton)
-            else {
-                clearFab()
-                saveState()
-            }
-        }
-
         floatingActionButton?.let { groupListFragment.setFab(it) }
 
-        entry = dayViewModel.getEntry(timeRange, position).apply {
-            start()
+        entry = dayViewModel.getEntry(timeRange, position).apply { start() }
+    }
 
-            compositeDisposable += data.subscribe { groupListFragment.setAll(timeRange, position, it.dataId, it.dataWrapper) }
-        }
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        key.switchMap { key -> (context as Host).hostEvents.map { Pair(key, it) } }
+                .subscribe { (key, event) ->
+                    if (event is Event.PageVisible && event.position == key.second)
+                        setFab(event.floatingActionButton)
+                    else {
+                        clearFab()
+                        saveState()
+                    }
+                }
+                .addTo(compositeDisposable)
+
+        key.switchMap { key -> entry!!.data.map { Pair(key, it) } }
+                .subscribe { (key, data) -> groupListFragment.setAll(key.first, key.second, data.dataId, data.dataWrapper) }
+                .addTo(compositeDisposable)
     }
 
     override fun onDetachedFromWindow() {

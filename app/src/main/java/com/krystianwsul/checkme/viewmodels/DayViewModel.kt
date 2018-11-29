@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
 import android.arch.lifecycle.ViewModel
-import android.os.Bundle
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -36,10 +35,9 @@ class DayViewModel : ViewModel() {
     inner class Entry(private val timeRange: MainActivity.TimeRange, private val position: Int) {
 
         val data = BehaviorRelay.create<DayData>()
-        var observer: Observer? = null
-        var state: Bundle? = null
+        private var observer: Observer? = null
 
-        val firebaseListener = { _: DomainFactory ->
+        private val firebaseListener = { _: DomainFactory ->
             check(kotlinDomainFactory.getIsConnected())
 
             load()

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.utils
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
+import android.view.ViewPropertyAnimator
 
 fun animateVisibility(show: View, hide: View, duration: Int? = null) = animateVisibility(listOf(show), listOf(hide), duration)
 
@@ -31,7 +32,9 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
             visibility = View.VISIBLE
             alpha = 0f
 
-            animate().setDuration(shortAnimTime.toLong()).alpha(1f)
+            animate().setDuration(shortAnimTime.toLong())
+                    .alpha(1f)
+                    .onEnd { visibility = View.VISIBLE }
         }
     }
 
@@ -49,15 +52,19 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
 
             animate().setDuration(shortAnimTime.toLong())
                     .alpha(0f)
-                    .setListener(object : AnimatorListenerAdapter() {
-
-                        override fun onAnimationEnd(animation: Animator) {
-                            visibility = hideType.visibility
-                            alpha = 1f
-                        }
-                    })
+                    .onEnd {
+                        visibility = hideType.visibility
+                        alpha = 1f
+                    }
         }
     }
+}
+
+private fun ViewPropertyAnimator.onEnd(action: () -> Unit) {
+    setListener(object : AnimatorListenerAdapter() {
+
+        override fun onAnimationEnd(animation: Animator?) = action()
+    })
 }
 
 fun View.resetAlpha() {

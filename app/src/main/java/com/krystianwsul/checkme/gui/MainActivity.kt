@@ -125,14 +125,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             userInfo = UserInfo(firebaseUser)
 
             DomainFactory.getKotlinDomainFactory().setUserInfo(SaveService.Source.GUI, userInfo!!)
-
-            Log.e("asdf", "firebase logged in")
         } else {
             userInfo = null
 
             DomainFactory.getKotlinDomainFactory().clearUserInfo()
-
-            Log.e("asdf", "firebase logged out")
         }
 
         updateSignInState(firebaseUser)
@@ -208,8 +204,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         when (item.itemId) {
             R.id.action_calendar -> {
-                Log.e("asdf", "calendarOpen: $calendarOpen")
-
                 calendarOpen = !calendarOpen
 
                 updateCalendarHeight()
@@ -474,8 +468,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
 
         mainCalendar.addOneShotGlobalLayoutListener {
-            Log.e("asdf", "height: " + mainCalendar.height)
-
             calendarHeight = mainCalendar.height
 
             updateCalendarHeight()
@@ -510,8 +502,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         mainCalendar.minDate = DateTime.now().millis
         mainCalendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
             val date = LocalDate(year, month + 1, dayOfMonth)
-
-            Log.e("asdf", "days: " + Days.daysBetween(date, LocalDate.now()).days)
 
             mainDaysPager.scrollToPosition(Days.daysBetween(LocalDate.now(), date).days)
 
@@ -744,8 +734,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
-        Log.e("asdf", "actionmode: onCreateGroupActionMode")
-
         check(drawerGroupListener == null)
 
         drawerGroupListener = object : DrawerLayout.DrawerListener {
@@ -773,8 +761,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onDestroyGroupActionMode() {
-        Log.e("asdf", "actionmode: onDestroyGroupActionMode")
-
         checkNotNull(drawerGroupListener)
         checkNotNull(onPageChangeDisposable)
 
@@ -870,20 +856,16 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 firebaseAuth.signInWithCredential(credential)
                         .addOnCompleteListener(this) { task ->
-                            Log.e("asdf", "signInWithCredential:onComplete:" + task.isSuccessful)
-
-                            if (!task.isSuccessful) {
+                            if (task.isSuccessful) {
+                                Toast.makeText(this, getString(R.string.signInAs) + " " + task.result.user.displayName, Toast.LENGTH_SHORT).show()
+                            } else {
                                 val exception = task.exception!!
-
-                                Log.e("asdf", "firebase signin error: $exception")
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
 
                                 MyCrashlytics.logException(exception)
 
                                 Auth.GoogleSignInApi.signOut(googleApiClient)
-                            } else {
-                                Toast.makeText(this, getString(R.string.signInAs) + " " + task.result.user.displayName, Toast.LENGTH_SHORT).show()
                             }
                         }
             } else {

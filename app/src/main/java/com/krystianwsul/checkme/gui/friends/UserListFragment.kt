@@ -13,9 +13,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.RelativeLayout
-import android.widget.TextView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
@@ -26,6 +23,8 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import kotlinx.android.parcel.Parcelize
+import kotlinx.android.synthetic.main.empty_text.*
+import kotlinx.android.synthetic.main.fragment_friend_list.*
 import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
 
@@ -34,17 +33,11 @@ class UserListFragment : AbstractFragment(), FabUser {
     companion object {
 
         private const val PROJECT_ID_KEY = "projectId"
-
         private const val SAVE_STATE_KEY = "saveState"
-
         private const val FRIEND_PICKER_TAG = "friendPicker"
 
         fun newInstance() = UserListFragment()
     }
-
-    private lateinit var friendListProgress: ProgressBar
-    private lateinit var friendListRecycler: RecyclerView
-    private lateinit var emptyText: TextView
 
     private var projectId: String? = null
 
@@ -109,32 +102,26 @@ class UserListFragment : AbstractFragment(), FabUser {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val friendListLayout = view as RelativeLayout
-
-        friendListProgress = friendListLayout.findViewById(R.id.friendListProgress)
-
-        friendListRecycler = friendListLayout.findViewById(R.id.friendListRecycler)
-
         friendListRecycler.layoutManager = LinearLayoutManager(activity)
 
-        emptyText = friendListLayout.findViewById(R.id.emptyText)
-
-        if (savedInstanceState?.containsKey(SAVE_STATE_KEY) == true) {
+        if (savedInstanceState?.containsKey(SAVE_STATE_KEY) == true)
             saveState = savedInstanceState.getParcelable(SAVE_STATE_KEY)!!
-        }
     }
 
     private fun initializeFriendPickerFragment(friendPickerFragment: FriendPickerFragment) {
         check(data != null)
 
         val userIds = friendListAdapter!!.userDataWrappers
+                .asSequence()
                 .map { it.userListData.id }
                 .toSet()
 
         val friendDatas = data!!.friendDatas
                 .values
+                .asSequence()
                 .filterNot { userIds.contains(it.id) }
                 .map { FriendPickerFragment.FriendData(it.id, it.name, it.email) }
+                .toList()
 
         friendPickerFragment.initialize(friendDatas) { friendId ->
             check(data!!.friendDatas.containsKey(friendId))
@@ -172,7 +159,6 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         val hide = mutableListOf<View>(friendListProgress)
         val show: View
-
         if (friendListAdapter!!.userDataWrappers.isEmpty()) {
             hide.add(friendListRecycler)
             show = emptyText
@@ -358,7 +344,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     inner class UserDataWrapper(val userListData: ShowProjectViewModel.UserListData, selectedIds: Set<String>) {
 
-        var selected = false
+        var selected = false // todo
 
         init {
             selected = selectedIds.contains(userListData.id)

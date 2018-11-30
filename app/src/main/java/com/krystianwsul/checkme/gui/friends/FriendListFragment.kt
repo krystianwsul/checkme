@@ -48,7 +48,9 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private var selectedIds = listOf<String>()
 
-    private val selectionCallback = object : SelectionCallback(null) {
+    private val selectionCallback = object : SelectionCallback() {
+
+        override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 

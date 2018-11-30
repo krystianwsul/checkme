@@ -109,7 +109,9 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
-    val selectionCallback = object : SelectionCallback({ treeViewAdapter }) {
+    val selectionCallback = object : SelectionCallback() {
+
+        override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 

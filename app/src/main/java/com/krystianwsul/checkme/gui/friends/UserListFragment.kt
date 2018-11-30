@@ -54,7 +54,11 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var saveState: SaveState? = null
 
-    private val selectionCallback = object : SelectionCallback(null) {
+    private val selectionCallback = object : SelectionCallback() { // todo
+
+        override fun getTreeViewAdapter(): TreeViewAdapter {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = friendListAdapter!!.unselect()
 

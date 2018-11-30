@@ -6,7 +6,7 @@ import android.view.MenuItem
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
-abstract class SelectionCallback(protected val treeViewAdapterGetter: (() -> TreeViewAdapter)?) : ActionMode.Callback {
+abstract class SelectionCallback : ActionMode.Callback {
 
     private var selected = 0
 
@@ -14,6 +14,8 @@ abstract class SelectionCallback(protected val treeViewAdapterGetter: (() -> Tre
 
     private var menuClick = false
     private var removingLast = false
+
+    protected abstract fun getTreeViewAdapter(): TreeViewAdapter
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         check(actionMode == null)
@@ -24,15 +26,8 @@ abstract class SelectionCallback(protected val treeViewAdapterGetter: (() -> Tre
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
 
-    private fun (() -> TreeViewAdapter)?.update(action: () -> Unit) {
-        if (this != null)
-            this().updateDisplayedNodes(action)
-        else
-            action()
-    }
-
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-        treeViewAdapterGetter.update {
+        getTreeViewAdapter().updateDisplayedNodes {
             onMenuClick(item, TreeViewAdapter.Placeholder)
 
             check(!removingLast)
@@ -49,12 +44,10 @@ abstract class SelectionCallback(protected val treeViewAdapterGetter: (() -> Tre
     override fun onDestroyActionMode(mode: ActionMode) {
         checkNotNull(actionMode)
 
-        if (removingLast) {
-            actionMode = null
-        } else if (menuClick) {
-            countdown()
-        } else {
-            treeViewAdapterGetter.update {
+        when {
+            removingLast -> actionMode = null
+            menuClick -> countdown()
+            else -> getTreeViewAdapter().updateDisplayedNodes {
                 countdown()
             }
         }

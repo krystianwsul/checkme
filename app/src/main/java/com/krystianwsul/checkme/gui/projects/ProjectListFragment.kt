@@ -47,57 +47,57 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private var dataId: Int? = null
 
-    private val selectionCallback by lazy {
-        object : SelectionCallback({ treeViewAdapter }) {
+    private val selectionCallback = object : SelectionCallback() {
 
-            override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapterGetter!!().unselect(x)
+        override fun getTreeViewAdapter() = treeViewAdapter
 
-            override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
-                val selected = treeViewAdapterGetter!!().selectedNodes
-                check(!selected.isEmpty())
+        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-                val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
+        override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
+            val selected = treeViewAdapter.selectedNodes
+            check(!selected.isEmpty())
 
-                val projectIds = projectNodes.asSequence()
-                        .map { it.projectData.id }
-                        .toSet()
+            val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
 
-                when (menuItem.itemId) {
-                    R.id.action_project_delete -> {
-                        check(dataId != null)
+            val projectIds = projectNodes.asSequence()
+                    .map { it.projectData.id }
+                    .toSet()
 
-                            for (treeNode in selected) {
-                                val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
+            when (menuItem.itemId) {
+                R.id.action_project_delete -> {
+                    check(dataId != null)
 
-                                projectNode.remove(x)
+                    for (treeNode in selected) {
+                        val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
 
-                                decrementSelected(x)
+                        projectNode.remove(x)
 
-                            DomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
-                        }
+                        decrementSelected(x)
+
+                        DomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                     }
-                    else -> throw UnsupportedOperationException()
                 }
+                else -> throw UnsupportedOperationException()
             }
-
-            override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
-                (activity as AppCompatActivity).startSupportActionMode(this)
-
-                actionMode!!.menuInflater.inflate(R.menu.menu_projects, actionMode!!.menu)
-
-                updateFabVisibility()
-            }
-
-            override fun onSecondAdded() = Unit
-
-            override fun onOtherAdded() = Unit
-
-            override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = updateFabVisibility()
-
-            override fun onSecondToLastRemoved() = Unit
-
-            override fun onOtherRemoved() = Unit
         }
+
+        override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
+            (activity as AppCompatActivity).startSupportActionMode(this)
+
+            actionMode!!.menuInflater.inflate(R.menu.menu_projects, actionMode!!.menu)
+
+            updateFabVisibility()
+        }
+
+        override fun onSecondAdded() = Unit
+
+        override fun onOtherAdded() = Unit
+
+        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = updateFabVisibility()
+
+        override fun onSecondToLastRemoved() = Unit
+
+        override fun onOtherRemoved() = Unit
     }
 
     private var selectedProjectIds: Set<String> = setOf()

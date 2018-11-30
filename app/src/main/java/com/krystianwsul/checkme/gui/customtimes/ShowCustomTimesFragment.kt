@@ -46,9 +46,11 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private var selectedCustomTimeIds: List<Int>? = null
 
-    private val selectionCallback = object : SelectionCallback({ treeViewAdapter }) {
+    private val selectionCallback = object : SelectionCallback() {
 
-        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapterGetter!!().unselect(x)
+        override fun getTreeViewAdapter() = treeViewAdapter
+
+        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
         override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
             val customTimeIds = selectedIds
@@ -56,7 +58,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             when (menuItem.itemId) {
                 R.id.action_custom_times_delete -> {
-                    (treeViewAdapterGetter!!().treeModelAdapter as CustomTimesAdapter).removeSelected(x)
+                    (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).removeSelected(x)
 
                     updateSelectAll()
                 }

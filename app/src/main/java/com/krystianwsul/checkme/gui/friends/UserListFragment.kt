@@ -5,10 +5,8 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -18,14 +16,15 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.krystianwsul.treeadapter.*
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_friend_list.*
-import kotlinx.android.synthetic.main.row_friend.view.*
 import java.util.*
 
 class UserListFragment : AbstractFragment(), FabUser {
@@ -41,28 +40,22 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var projectId: String? = null
 
-    private var friendListAdapter: FriendListAdapter? = null
+    private lateinit var treeViewAdapter: TreeViewAdapter
 
     private var data: ShowProjectViewModel.Data? = null
 
     private var saveState: SaveState? = null
 
-    private val selectionCallback = object : SelectionCallback() { // todo
+    private val selectionCallback = object : SelectionCallback() {
 
-        override fun getTreeViewAdapter(): TreeViewAdapter {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun getTreeViewAdapter() = treeViewAdapter
 
-        override fun unselect(x: TreeViewAdapter.Placeholder) = friendListAdapter!!.unselect()
+        override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
         override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
-            val selectedUserDataEmails = friendListAdapter!!.selected
-            check(!selectedUserDataEmails.isEmpty())
+            check(menuItem.itemId == R.id.action_custom_times_delete)
 
-            when (menuItem.itemId) {
-                R.id.action_custom_times_delete -> friendListAdapter!!.removeSelected()
-                else -> throw UnsupportedOperationException()
-            }
+            (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
@@ -111,8 +104,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     private fun initializeFriendPickerFragment(friendPickerFragment: FriendPickerFragment) {
         check(data != null)
 
-        val userIds = friendListAdapter!!.userDataWrappers
-                .asSequence()
+        val userIds = getSelected()
                 .map { it.userListData.id }
                 .toSet()
 
@@ -125,14 +117,13 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         friendPickerFragment.initialize(friendDatas) { friendId ->
             check(data!!.friendDatas.containsKey(friendId))
-            check(friendListAdapter!!.userDataWrappers.none { it.userListData.id == friendId })
+            check(getSelected().none { it.userListData.id == friendId })
 
             val friendData = data!!.friendDatas[friendId]!!
 
-            val position = friendListAdapter!!.itemCount
-
-            friendListAdapter!!.userDataWrappers.add(UserDataWrapper(friendData, HashSet()))
-            friendListAdapter!!.notifyItemChanged(position)
+            treeViewAdapter.updateDisplayedNodes {
+                (treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.add(UserNode(friendData, HashSet()))
+            }
 
             if (data!!.userListDatas.isEmpty()) {
                 emptyText.visibility = View.GONE
@@ -145,21 +136,21 @@ class UserListFragment : AbstractFragment(), FabUser {
         this.projectId = projectId
         this.data = data
 
-        if (friendListAdapter != null)
-            saveState = friendListAdapter!!.saveState
+        if (this::treeViewAdapter.isInitialized)
+            saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
         else if (saveState == null)
             saveState = SaveState(HashSet(), HashSet(), HashSet())
 
-        friendListAdapter = FriendListAdapter(data.userListDatas, saveState!!)
-        friendListRecycler.adapter = friendListAdapter
+        treeViewAdapter = FriendListAdapter(data.userListDatas, saveState!!).initialize()
+        friendListRecycler.adapter = treeViewAdapter
 
-        selectionCallback.setSelected(friendListAdapter!!.selected.size, TreeViewAdapter.Placeholder)
+        selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
         updateFabVisibility()
 
         val hide = mutableListOf<View>(friendListProgress)
         val show: View
-        if (friendListAdapter!!.userDataWrappers.isEmpty()) {
+        if ((treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.isEmpty()) {
             hide.add(friendListRecycler)
             show = emptyText
 
@@ -177,14 +168,15 @@ class UserListFragment : AbstractFragment(), FabUser {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        friendListAdapter?.let { outState.putParcelable(SAVE_STATE_KEY, it.saveState) }
+        if (this::treeViewAdapter.isInitialized)
+            (treeViewAdapter.treeModelAdapter as FriendListAdapter).let { outState.putParcelable(SAVE_STATE_KEY, it.getSaveState()) }
     }
 
     fun dataChanged(): Boolean {
         if (data == null)
             return false
 
-        val saveState = friendListAdapter!!.saveState
+        val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
         if (!saveState.addedIds.isEmpty())
             return true
@@ -195,9 +187,8 @@ class UserListFragment : AbstractFragment(), FabUser {
     fun save(name: String) {
         check(name.isNotEmpty())
         check(data != null)
-        check(friendListAdapter != null)
 
-        val saveState = friendListAdapter!!.saveState
+        val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
         if (projectId.isNullOrEmpty()) {
             check(saveState.removedIds.isEmpty())
@@ -213,7 +204,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         friendListFab = floatingActionButton
 
-        friendListFab!!.setOnClickListener {
+        floatingActionButton.setOnClickListener {
             FriendPickerFragment.newInstance().also {
                 initializeFriendPickerFragment(it)
                 it.show(childFragmentManager, FRIEND_PICKER_TAG)
@@ -224,13 +215,12 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateFabVisibility() {
-        if (friendListFab == null)
-            return
-
-        if (data != null && !selectionCallback.hasActionMode) {
-            friendListFab!!.show()
-        } else {
-            friendListFab!!.hide()
+        friendListFab?.let {
+            if (data != null && !selectionCallback.hasActionMode) {
+                it.show()
+            } else {
+                it.hide()
+            }
         }
     }
 
@@ -238,36 +228,14 @@ class UserListFragment : AbstractFragment(), FabUser {
         check(friendListFab != null)
 
         friendListFab!!.setOnClickListener(null)
-
         friendListFab = null
     }
 
-    inner class FriendListAdapter(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) : RecyclerView.Adapter<FriendListAdapter.FriendHolder>() {
+    private fun getSelected() = treeViewAdapter.selectedNodes.map { (it.modelNode as UserNode) }
 
-        val userDataWrappers: MutableList<UserDataWrapper>
+    inner class FriendListAdapter(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) : TreeModelAdapter {
 
-        val selected get() = userDataWrappers.filter { it.selected }.map { it.userListData.email }
-
-        val saveState: SaveState
-            get() {
-                check(data != null)
-
-                val oldUserIds = data!!.userListDatas
-                        .map { it.id }
-                        .toSet()
-
-                val newUserIds = userDataWrappers.map { it.userListData.id }.toSet()
-
-                val addedIds = newUserIds.minus(oldUserIds)
-                val removedIds = oldUserIds.minus(newUserIds)
-
-                val selectedIds = userDataWrappers
-                        .filter { it.selected }
-                        .map { it.userListData.id }
-                        .toSet()
-
-                return SaveState(addedIds, removedIds, selectedIds)
-            }
+        val userNodes: MutableList<UserNode>
 
         init {
             check(data != null)
@@ -282,87 +250,88 @@ class UserListFragment : AbstractFragment(), FabUser {
                         .associateBy { it.id })
             }
 
-            userDataWrappers = userListMap.values
+            userNodes = userListMap.values
                     .sortedBy { it.id }
-                    .map { UserDataWrapper(it, saveState.selectedIds) }
+                    .map { UserNode(it, saveState.selectedIds) }
                     .toMutableList()
         }
 
-        override fun getItemCount() = userDataWrappers.size
+        private lateinit var treeViewAdapter: TreeViewAdapter
+        private lateinit var treeNodeCollection: TreeNodeCollection
 
-        fun unselect() {
-            userDataWrappers.filter { it.selected }.forEach {
-                it.selected = false
-                notifyItemChanged(userDataWrappers.indexOf(it))
-            }
+        fun initialize(): TreeViewAdapter {
+            treeViewAdapter = TreeViewAdapter(this)
+
+            treeNodeCollection = TreeNodeCollection(treeViewAdapter)
+            treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
+
+            treeNodeCollection.nodes = userNodes.map { it.initialize(treeNodeCollection) }
+
+            return treeViewAdapter
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = FriendHolder(activity!!.layoutInflater.inflate(R.layout.row_friend, parent, false))
+        fun getSaveState(): SaveState {
+            check(data != null)
 
-        override fun onBindViewHolder(friendHolder: FriendHolder, position: Int) {
-            val userDataWrapper = userDataWrappers[position]
+            val oldUserIds = data!!.userListDatas
+                    .map { it.id }
+                    .toSet()
 
-            friendHolder.friendName.text = userDataWrapper.userListData.name
-            friendHolder.friendEmail.text = userDataWrapper.userListData.email
+            val newUserIds = userNodes.map { it.userListData.id }.toSet()
 
-            if (userDataWrapper.selected)
-                friendHolder.itemView.setBackgroundColor(ContextCompat.getColor(activity!!, R.color.selected))
-            else
-                friendHolder.itemView.setBackgroundColor(Color.TRANSPARENT)
+            val addedIds = newUserIds.minus(oldUserIds)
+            val removedIds = oldUserIds.minus(newUserIds)
 
-            friendHolder.itemView.setOnLongClickListener {
-                friendHolder.onLongClick()
-                true
-            }
+            val selectedIds = getSelected().map { it.userListData.id }.toSet()
 
-            friendHolder.itemView.setOnClickListener {
-                if (selectionCallback.hasActionMode)
-                    friendHolder.onLongClick()
-            }
+            return SaveState(addedIds, removedIds, selectedIds)
         }
 
-        fun removeSelected() {
-            val selectedUserDataWrappers = userDataWrappers.filter { it.selected }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(activity!!.layoutInflater.inflate(R.layout.row_list, parent, false))
 
-            for (userDataWrapper in selectedUserDataWrappers) {
-                val position = userDataWrappers.indexOf(userDataWrapper)
-                userDataWrappers.removeAt(position)
-                notifyItemRemoved(position)
-            }
+        fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+            val selectedUserDataWrappers = getSelected()
+
+            for (userDataWrapper in selectedUserDataWrappers)
+                userNodes.remove(userDataWrapper)
         }
 
-        inner class FriendHolder(view: View) : RecyclerView.ViewHolder(view) {
+        override val hasActionMode get() = selectionCallback.hasActionMode
 
-            val friendName = itemView.friendName!!
-            val friendEmail = itemView.friendEmail!!
+        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.incrementSelected(x)
 
-            fun onLongClick() {
-                userDataWrappers[adapterPosition].toggleSelect()
-            }
-        }
+        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
     }
 
-    inner class UserDataWrapper(val userListData: ShowProjectViewModel.UserListData, selectedIds: Set<String>) {
+    inner class UserNode(val userListData: ShowProjectViewModel.UserListData, private val selectedIds: Set<String>) : GroupHolderNode(0) {
 
-        var selected = false // todo
+        override val name = Triple(userListData.name, colorPrimary, true)
 
-        init {
-            selected = selectedIds.contains(userListData.id)
-        }
+        override val details = Pair(userListData.email, colorSecondary)
 
-        fun toggleSelect() {
-            selected = !selected
+        override lateinit var treeNode: TreeNode
+            private set
 
-            if (selected) {
-                selectionCallback.incrementSelected(TreeViewAdapter.Placeholder)
-            } else {
-                selectionCallback.decrementSelected(TreeViewAdapter.Placeholder)
-            }
+        override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT // todo move to GroupHolderNode
 
-            val position = friendListAdapter!!.userDataWrappers.indexOf(this)
-            check(position >= 0)
+        override val id = userListData.id
 
-            friendListAdapter!!.notifyItemChanged(position)
+        override val isSelectable = true
+
+        override val isSeparatorVisibleWhenNotExpanded = false
+
+        override val isVisibleDuringActionMode = true
+
+        override val isVisibleWhenEmpty = true
+
+        override fun onClick() = Unit
+
+        override fun compareTo(other: ModelNode) = userListData.id.compareTo((other as UserNode).userListData.id)
+
+        fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
+            treeNode = TreeNode(this, treeNodeCollection, false, selectedIds.contains(userListData.id))
+            treeNode.setChildTreeNodes(listOf())
+            return treeNode
         }
     }
 

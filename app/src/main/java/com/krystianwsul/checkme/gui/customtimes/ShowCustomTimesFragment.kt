@@ -193,7 +193,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     }
 
     override fun clearFab() {
-        showTimesFab?.setOnClickListener(null)
         showTimesFab = null
     }
 

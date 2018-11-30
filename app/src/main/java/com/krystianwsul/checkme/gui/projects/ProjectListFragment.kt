@@ -202,7 +202,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     }
 
     override fun clearFab() {
-        projectListFab?.setOnClickListener(null)
         projectListFab = null
     }
 

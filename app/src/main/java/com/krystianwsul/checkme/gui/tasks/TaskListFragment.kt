@@ -447,8 +447,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     override fun clearFab() {
-        taskListFragmentFab?.setOnClickListener(null)
-
         taskListFragmentFab = null
     }
 
@@ -703,6 +701,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override val isSelectable = false
 
             override fun onClick() = Unit
+
+            override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
             override val isVisibleWhenEmpty = true
 

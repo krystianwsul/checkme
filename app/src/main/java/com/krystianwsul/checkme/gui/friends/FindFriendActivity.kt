@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.gui.MainActivity
+import com.krystianwsul.checkme.utils.animateVisibility
 import kotlinx.android.synthetic.main.activity_find_friend.*
 
 class FindFriendActivity : AppCompatActivity() {
@@ -164,6 +165,8 @@ class FindFriendActivity : AppCompatActivity() {
                 hide.add(findFriendProgress)
             }
         }
+
+        animateVisibility(show, hide)
     }
 
     override fun onStop() {

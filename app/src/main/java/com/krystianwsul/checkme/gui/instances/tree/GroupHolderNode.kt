@@ -48,7 +48,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val backgroundColor = Color.TRANSPARENT
 
-    protected open fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = false
+    protected abstract fun onLongClickListener(viewHolder: RecyclerView.ViewHolder): Boolean
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 

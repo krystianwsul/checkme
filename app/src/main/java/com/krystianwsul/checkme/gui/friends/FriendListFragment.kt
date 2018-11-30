@@ -187,8 +187,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
     }
 
     override fun clearFab() {
-        friendListFab?.setOnClickListener(null)
-
         friendListFab = null
     }
 
@@ -253,6 +251,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override val isVisibleDuringActionMode = true
 
         override fun onClick() = Unit
+
+        override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
         override fun compareTo(other: ModelNode) = userListData.id.compareTo((other as FriendNode).userListData.id)
 

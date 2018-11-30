@@ -7,6 +7,7 @@ import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -122,13 +123,15 @@ class UserListFragment : AbstractFragment(), FabUser {
             val friendData = data!!.friendDatas[friendId]!!
 
             treeViewAdapter.updateDisplayedNodes {
-                (treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.add(UserNode(friendData, HashSet()))
+                val userNode = UserNode(friendData, HashSet())
+
+                (treeViewAdapter.treeModelAdapter as FriendListAdapter).apply {
+                    userNodes.add(userNode)
+                    treeNodeCollection.add(userNode.initialize(treeNodeCollection), TreeViewAdapter.Placeholder)
+                }
             }
 
-            if (data!!.userListDatas.isEmpty()) {
-                emptyText.visibility = View.GONE
-                friendListRecycler.visibility = View.VISIBLE
-            }
+            updateVisibility()
         }
     }
 
@@ -147,7 +150,12 @@ class UserListFragment : AbstractFragment(), FabUser {
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
         updateFabVisibility()
+        updateVisibility()
 
+        (childFragmentManager.findFragmentByTag(FRIEND_PICKER_TAG) as? FriendPickerFragment)?.let { initializeFriendPickerFragment(it) }
+    }
+
+    private fun updateVisibility() {
         val hide = mutableListOf<View>(friendListProgress)
         val show: View
         if ((treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.isEmpty()) {
@@ -161,8 +169,6 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
 
         animateVisibility(listOf(show), hide)
-
-        (childFragmentManager.findFragmentByTag(FRIEND_PICKER_TAG) as? FriendPickerFragment)?.let { initializeFriendPickerFragment(it) }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -227,7 +233,6 @@ class UserListFragment : AbstractFragment(), FabUser {
     override fun clearFab() {
         check(friendListFab != null)
 
-        friendListFab!!.setOnClickListener(null)
         friendListFab = null
     }
 
@@ -257,7 +262,8 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
 
         private lateinit var treeViewAdapter: TreeViewAdapter
-        private lateinit var treeNodeCollection: TreeNodeCollection
+        lateinit var treeNodeCollection: TreeNodeCollection
+            private set
 
         fun initialize(): TreeViewAdapter {
             treeViewAdapter = TreeViewAdapter(this)
@@ -292,8 +298,10 @@ class UserListFragment : AbstractFragment(), FabUser {
         fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = getSelected()
 
-            for (userDataWrapper in selectedUserDataWrappers)
+            for (userDataWrapper in selectedUserDataWrappers) {
                 userNodes.remove(userDataWrapper)
+                (treeViewAdapter.treeModelAdapter as FriendListAdapter).treeNodeCollection.remove(userDataWrapper.treeNode, x)
+            }
         }
 
         override val hasActionMode get() = selectionCallback.hasActionMode
@@ -309,7 +317,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val details = Pair(userListData.email, colorSecondary)
 
-        override lateinit var treeNode: TreeNode
+        public override lateinit var treeNode: TreeNode
             private set
 
         override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT // todo move to GroupHolderNode
@@ -325,6 +333,8 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val isVisibleWhenEmpty = true
 
         override fun onClick() = Unit
+
+        override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
         override fun compareTo(other: ModelNode) = userListData.id.compareTo((other as UserNode).userListData.id)
 

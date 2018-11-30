@@ -619,7 +619,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
     }
 
     override fun clearFab() {
-        floatingActionButton?.setOnClickListener(null)
         floatingActionButton = null
     }
 

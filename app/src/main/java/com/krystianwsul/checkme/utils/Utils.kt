@@ -79,3 +79,12 @@ object Utils {
         s1 == s2
     }
 }
+
+inline fun <reified T, U> T.getPrivateField(name: String): U {
+    return T::class.java.getDeclaredField(name).let {
+        it.isAccessible = true
+
+        @Suppress("UNCHECKED_CAST")
+        it.get(this) as U
+    }
+}

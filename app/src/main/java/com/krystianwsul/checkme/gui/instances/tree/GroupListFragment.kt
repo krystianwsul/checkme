@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.*
 import android.widget.RelativeLayout
@@ -20,10 +21,7 @@ import com.krystianwsul.checkme.gui.instances.EditInstancesActivity
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.treeadapter.TreeModelAdapter
@@ -108,23 +106,23 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
-    private var bottomMenu: Pair<MaterialCab, Menu>? = null
-
     val selectionCallback = object : SelectionCallback() {
+
+        private var bottomMenu: Menu? = null
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            super.onCreateActionMode(mode, menu)
+
+            var cab: MaterialCab? = null
+
             MaterialCab.attach(activity, listener.bottomActionModeId) {
+                cab = this
+
                 backgroundColorRes(R.color.actionModeBackground)
                 closeDrawableRes = R.drawable.empty
                 menuRes = R.menu.menu_edit_groups_bottom
-
-                onCreate { cab, menu ->
-                    check(bottomMenu == null)
-
-                    bottomMenu = Pair(cab, menu)
-                }
 
                 // todo animations androidx
 
@@ -142,7 +140,11 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 }
             }
 
-            return super.onCreateActionMode(mode, menu)
+            check(bottomMenu == null)
+
+            bottomMenu = cab!!.getPrivateField<MaterialCab, Toolbar>("toolbar").menu
+
+            return true
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
@@ -382,7 +384,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                     findItem(R.id.action_group_open).isVisible = true
                 }
 
-                bottomMenu!!.second.apply {
+                bottomMenu!!.apply {
                     findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_join).isVisible = false
@@ -397,26 +399,22 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                     findItem(R.id.action_group_open).isVisible = false
                 }
 
-                bottomMenu!!.second.apply {
+                bottomMenu!!.apply {
                     findItem(R.id.action_group_show_task).isVisible = false
                     findItem(R.id.action_group_edit_task).isVisible = false
                     findItem(R.id.action_group_add_task).isVisible = false
-                }
 
-                if (instanceDatas.all { it.TaskCurrent }) {
-                    val projectIdCount = instanceDatas.asSequence()
-                            .map { it.InstanceKey.taskKey.remoteProjectId }
-                            .distinct()
-                            .count()
+                    if (instanceDatas.all { it.TaskCurrent }) {
+                        val projectIdCount = instanceDatas.asSequence()
+                                .map { it.InstanceKey.taskKey.remoteProjectId }
+                                .distinct()
+                                .count()
 
-                    check(projectIdCount > 0)
+                        check(projectIdCount > 0)
 
-                    bottomMenu!!.second.apply {
                         findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
                         findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
-                    }
-                } else {
-                    bottomMenu!!.second.apply {
+                    } else {
                         findItem(R.id.action_group_join).isVisible = false
                         findItem(R.id.action_group_delete_task).isVisible = false
                     }
@@ -530,6 +528,8 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     override fun onDetachedFromWindow() {
         compositeDisposable.clear()
+
+        MaterialCab.destroy()
 
         super.onDetachedFromWindow()
     }

@@ -15,4 +15,10 @@
         android:orderInCategory="600"
         app:showAsAction="always"
         android:icon="@drawable/ic_check_box_outline_blank_white_24dp"/>
+    <item
+        android:id="@+id/action_group_open"
+        android:title="@string/open"
+        android:orderInCategory="800"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_keyboard_arrow_right_white_24dp"/>
 </menu>

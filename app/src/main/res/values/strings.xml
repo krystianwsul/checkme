@@ -72,4 +72,5 @@
     <string name="tutorial3">You can set a reminder for a specific hour.  Also, you can add a named time of day as a shortcut, if you often have things to do at a specific time.</string>
     <string name="tutorial4">Sign into your Google account to share tasks with other users.  Start out by searching for users by e-mail address to add them as friends.  Next, create a project, and add friends to it.  Finally, when creating or editing a task, set the project as its parent.</string>
     <string name="tutorial">Tutorial</string>
+    <string name="open">Open</string>
 </resources>

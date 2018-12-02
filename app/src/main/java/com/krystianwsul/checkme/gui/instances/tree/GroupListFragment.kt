@@ -283,9 +283,10 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                     updateSelectAll()
                 }
-                else -> {
-                    throw UnsupportedOperationException()
-                }
+                R.id.action_group_open -> treeNodes.single()
+                        .modelNode
+                        .onClick()
+                else -> throw UnsupportedOperationException()
             }
         }
 
@@ -378,6 +379,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                 menu.apply {
                     findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance
+                    findItem(R.id.action_group_open).isVisible = true
                 }
 
                 bottomMenu!!.second.apply {
@@ -392,6 +394,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                 menu.apply {
                     findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance }
+                    findItem(R.id.action_group_open).isVisible = false
                 }
 
                 bottomMenu!!.second.apply {

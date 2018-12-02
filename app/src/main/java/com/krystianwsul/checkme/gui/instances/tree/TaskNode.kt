@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -94,4 +95,6 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
     override val isVisibleDuringActionMode = true
 
     override val isSeparatorVisibleWhenNotExpanded = false
+
+    override val checkBoxVisibility = View.INVISIBLE
 }

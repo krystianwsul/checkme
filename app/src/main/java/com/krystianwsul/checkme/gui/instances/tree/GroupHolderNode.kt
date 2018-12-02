@@ -120,7 +120,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             rowCheckBox.run {
                 visibility = checkBoxVisibility
                 isChecked = checkBoxChecked
-                setOnClickListener { checkBoxOnClickListener() }
+                setOnClickListener {
+                    setOnClickListener(null)
+                    checkBoxOnClickListener()
+                }
             }
 
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE

@@ -39,7 +39,12 @@
             app:layout_anchor="@id/show_group_list"
             app:layout_anchorGravity="bottom|right|end"/>
 
+        <ViewStub
+            android:id="@+id/showGroupBottomActionBar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_gravity="bottom"/>
+
     </android.support.design.widget.CoordinatorLayout>
 
 </android.support.v4.widget.DrawerLayout>
-

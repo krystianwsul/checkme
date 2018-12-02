@@ -11,4 +11,5 @@
     <color name="textPrimaryWhite">#FFFFFFFF</color>
     <color name="textSecondaryWhite">#B2FFFFFF</color>
     <color name="textDisabledWhite">#7FFFFFFF</color>
+    <color name="actionModeBackground">#303030</color>
 </resources>

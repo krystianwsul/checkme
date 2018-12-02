@@ -28,6 +28,12 @@
 
         </android.support.v4.widget.NestedScrollView>
 
+        <ViewStub
+            android:id="@+id/showNotificationGroupBottomActionBar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_gravity="bottom"/>
+
     </android.support.design.widget.CoordinatorLayout>
 
 </android.support.v4.widget.DrawerLayout>

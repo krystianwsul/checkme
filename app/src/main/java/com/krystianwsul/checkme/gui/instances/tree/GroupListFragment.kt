@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import com.afollestad.materialcab.MaterialCab
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -97,6 +98,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
     }
 
     val activity = context as AbstractActivity
+    val listener = context as GroupListListener
 
     lateinit var treeViewAdapter: TreeViewAdapter
         private set
@@ -299,6 +301,12 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             updateMenu()
 
             dragHelper.attachToRecyclerView(groupListRecycler)
+
+            MaterialCab.attach(activity, listener.bottomActionModeId) {
+                title = "asdf"
+                backgroundColorRes(R.color.actionModeBackground)
+                closeDrawableRes = R.drawable.empty
+            }
         }
 
         override fun onSecondAdded() {
@@ -312,9 +320,11 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
-            (activity as GroupListListener).onDestroyGroupActionMode()
+            listener.onDestroyGroupActionMode()
 
             dragHelper.attachToRecyclerView(null)
+
+            MaterialCab.destroy()
         }
 
         override fun onSecondToLastRemoved() {
@@ -717,6 +727,8 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
         fun onDestroyGroupActionMode()
 
         fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean)
+
+        val bottomActionModeId: Int
     }
 
     data class DataWrapper(

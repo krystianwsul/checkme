@@ -215,6 +215,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         invalidateOptionsMenu()
     }
 
+    override val bottomActionModeId = R.id.showInstanceBottomActionBar
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         check(requestCode == ShowTaskActivity.REQUEST_EDIT_TASK)
 

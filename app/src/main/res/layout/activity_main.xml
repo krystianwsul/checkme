@@ -49,7 +49,9 @@
                     android:hint="@string/search"
                     android:textColorHint="@color/textDisabledWhite"
                     android:imeOptions="actionSearch"
-                    android:visibility="gone"/>
+                    android:visibility="gone"
+                    android:importantForAutofill="no"
+                    tools:targetApi="o"/>
                 
             </android.support.v7.widget.Toolbar>
 
@@ -126,6 +128,12 @@
             android:visibility="invisible"
             app:layout_anchor="@id/main_frame"
             app:layout_anchorGravity="bottom|right|end"/>
+
+        <ViewStub
+            android:id="@+id/mainBottomActionBar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_gravity="bottom"/>
 
     </android.support.design.widget.CoordinatorLayout>
 

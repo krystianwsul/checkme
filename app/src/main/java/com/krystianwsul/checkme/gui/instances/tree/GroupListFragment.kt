@@ -8,10 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.RelativeLayout
 import com.afollestad.materialcab.MaterialCab
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -111,9 +108,48 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
+    private var bottomMenu: Pair<MaterialCab, Menu>? = null
+
     val selectionCallback = object : SelectionCallback() {
 
         override fun getTreeViewAdapter() = treeViewAdapter
+
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            MaterialCab.attach(activity, listener.bottomActionModeId) {
+                backgroundColorRes(R.color.actionModeBackground)
+                closeDrawableRes = R.drawable.empty
+                menuRes = R.menu.menu_edit_groups_bottom
+
+                onCreate { cab, menu ->
+                    check(bottomMenu == null)
+
+                    bottomMenu = Pair(cab, menu)
+                }
+
+                // todo animations androidx
+
+                onSelection {
+                    actionItemClicked(it)
+                    true
+                }
+
+                onDestroy {
+                    checkNotNull(bottomMenu)
+
+                    bottomMenu = null
+
+                    true
+                }
+            }
+
+            return super.onCreateActionMode(mode, menu)
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            MaterialCab.destroy()
+
+            super.onDestroyActionMode(mode)
+        }
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
@@ -301,12 +337,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             updateMenu()
 
             dragHelper.attachToRecyclerView(groupListRecycler)
-
-            MaterialCab.attach(activity, listener.bottomActionModeId) {
-                title = "asdf"
-                backgroundColorRes(R.color.actionModeBackground)
-                closeDrawableRes = R.drawable.empty
-            }
         }
 
         override fun onSecondAdded() {
@@ -323,8 +353,6 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             listener.onDestroyGroupActionMode()
 
             dragHelper.attachToRecyclerView(null)
-
-            MaterialCab.destroy()
         }
 
         override fun onSecondToLastRemoved() {
@@ -350,6 +378,9 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                 menu.apply {
                     findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance
+                }
+
+                bottomMenu!!.second.apply {
                     findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_join).isVisible = false
@@ -361,6 +392,9 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                 menu.apply {
                     findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance }
+                }
+
+                bottomMenu!!.second.apply {
                     findItem(R.id.action_group_show_task).isVisible = false
                     findItem(R.id.action_group_edit_task).isVisible = false
                     findItem(R.id.action_group_add_task).isVisible = false
@@ -374,11 +408,15 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                     check(projectIdCount > 0)
 
-                    menu.findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
-                    menu.findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
+                    bottomMenu!!.second.apply {
+                        findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
+                        findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
+                    }
                 } else {
-                    menu.findItem(R.id.action_group_join).isVisible = false
-                    menu.findItem(R.id.action_group_delete_task).isVisible = false
+                    bottomMenu!!.second.apply {
+                        findItem(R.id.action_group_join).isVisible = false
+                        findItem(R.id.action_group_delete_task).isVisible = false
+                    }
                 }
             }
         }

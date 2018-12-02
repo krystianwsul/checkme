@@ -12,20 +12,20 @@
         android:id="@+id/rowContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:minHeight="36dp"
+        android:gravity="center_vertical">
 
         <CheckBox
             android:id="@+id/rowCheckbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"/>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
             android:orientation="vertical">
@@ -63,7 +63,6 @@
             android:id="@+id/rowExpand"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:contentDescription="@string/expand"

@@ -82,7 +82,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     override val isVisibleWhenEmpty = false
 
-    override val isVisibleDuringActionMode = false
+    override val isVisibleDuringActionMode = true
 
     override val isSeparatorVisibleWhenNotExpanded = false
 }

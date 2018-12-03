@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -15,7 +16,8 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
     public override lateinit var treeNode: TreeNode
         private set
 
-    private lateinit var nodeCollection: NodeCollection
+    lateinit var nodeCollection: NodeCollection
+        private set
 
     private val parentNodeCollection get() = dividerNode.nodeCollection
 
@@ -35,7 +37,7 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
         treeNode = TreeNode(this, dividerTreeNode, expanded, false)
 
         nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, this.treeNode, null)
-        treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, null, false, null, false, null))
+        treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, null, null, false, null))
 
         return treeNode
     }
@@ -55,7 +57,7 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
-    override val name get() = Triple(instanceData.Name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
+    override val name get() = Triple(instanceData.name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
 
     override val details
         get() = instanceData.DisplayText
@@ -97,7 +99,7 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
         return -instanceData.Done!!.compareTo(doneInstanceNode.instanceData.Done!!) // negate
     }
 
-    override val isSelectable = false
+    override val isSelectable = true
 
     override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
@@ -110,4 +112,6 @@ class DoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.Ins
     fun removeFromParent(x: TreeViewAdapter.Placeholder) = dividerNode.remove(this, x)
 
     override val id = instanceData.InstanceKey
+
+    override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 }

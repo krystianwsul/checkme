@@ -957,7 +957,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
-    fun setInstancesDone(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>): ExactTimeStamp {
+    fun setInstancesDone(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>, done: Boolean): ExactTimeStamp {
         MyCrashlytics.log("DomainFactory.setInstancesDone")
         check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
@@ -965,7 +965,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         val instances = instanceKeys.map(this::getInstance)
 
-        instances.forEach { it.setDone(true, now) }
+        instances.forEach { it.setDone(done, now) }
 
         val remoteProjects = instances.mapNotNull(Instance::remoteNullableProject).toSet()
 

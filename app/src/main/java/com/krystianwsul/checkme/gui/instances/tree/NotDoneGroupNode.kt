@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Color
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.View
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
@@ -18,7 +19,7 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import java.util.*
 
-class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, private val instanceDatas: MutableList<GroupListFragment.InstanceData>, private val selectable: Boolean) : GroupHolderNode(indentation), NodeCollectionParent {
+class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: NotDoneGroupCollection, val instanceDatas: MutableList<GroupListFragment.InstanceData>) : GroupHolderNode(indentation), NodeCollectionParent {
 
     public override lateinit var treeNode: TreeNode
         private set
@@ -70,7 +71,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         if (instanceDatas.size == 1) {
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
-            treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedNodes, selectable, null, false, null))
+            treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedNodes, null, false, null))
         } else {
             val notDoneInstanceTreeNodes = instanceDatas.map { newChildTreeNode(it, expandedInstances, selectedNodes) }
 
@@ -104,12 +105,12 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
     override val name
         get(): Triple<String, Int, Boolean>? {
             return if (singleInstance()) {
-                Triple(singleInstanceData.Name, if (!singleInstanceData.TaskCurrent) colorDisabled else colorPrimary, true)
+                Triple(singleInstanceData.name, if (!singleInstanceData.TaskCurrent) colorDisabled else colorPrimary, true)
             } else {
                 if (treeNode.isExpanded) {
                     null
                 } else {
-                    Triple(instanceDatas.sorted().joinToString(", ") { it.Name }, colorPrimary, true)
+                    Triple(instanceDatas.sorted().joinToString(", ") { it.name }, colorPrimary, true)
                 }
             }
         }
@@ -186,17 +187,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                 groupAdapter.mGroupListFragment.updateSelectAll()
         }
 
-    override val backgroundColor
-        get(): Int {
-            return if (singleInstance()) {
-                if (treeNode.isSelected)
-                    colorSelected
-                else
-                    Color.TRANSPARENT
-            } else {
-                Color.TRANSPARENT
-            }
-        }
+    override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
     override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.mGroupListFragment
@@ -223,6 +214,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
     private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.mCustomTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
 
     private fun remove(notDoneInstanceNode: NotDoneInstanceNode, x: TreeViewAdapter.Placeholder) {
+        Log.e("asdf", "test removing " + notDoneInstanceNode.instanceData.name)
         check(instanceDatas.contains(notDoneInstanceNode.instanceData))
         instanceDatas.remove(notDoneInstanceNode.instanceData)
 
@@ -232,29 +224,42 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         val childTreeNode = notDoneInstanceNode.treeNode
         val selected = childTreeNode.isSelected
 
-        if (selected)
+        if (selected) {
+            Log.e("asdf", "test deselecting " + notDoneInstanceNode.instanceData.name)
             childTreeNode.deselect(x)
+        }
 
         treeNode.remove(childTreeNode, x)
 
         check(!instanceDatas.isEmpty())
         if (instanceDatas.size == 1) {
             val notDoneInstanceNode1 = notDoneInstanceNodes.single()
-
-            val childTreeNode1 = notDoneInstanceNode1.treeNode
-
+            Log.e("asdf", "test last " + notDoneInstanceNode1.instanceData.name)
             notDoneInstanceNodes.remove(notDoneInstanceNode1)
 
-            treeNode.remove(childTreeNode1, x)
+            val childTreeNode1 = notDoneInstanceNode1.treeNode
+            val selected1 = childTreeNode1.isSelected
+
+            if (selected1) {
+                Log.e("asdf", "test deselecting " + notDoneInstanceNode1.instanceData.name)
+                childTreeNode1.deselect(x)
+            }
 
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
-            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, selectable, null, false, null)
+            Log.e("asdf", "test creating collection for " + instanceDatas[0].name)
 
-            childTreeNodes.forEach { treeNode.add(it, x) }
+            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, null, false, null)
 
-            if (selected)
+            childTreeNodes.forEach {
+                Log.e("asdf", "test adding child node " + it.modelNode)
+                treeNode.add(it, x)
+            }
+
+            if (selected1) {
+                Log.e("asdf", "test selecting " + notDoneInstanceNode1.instanceData.name)
                 treeNode.select(x)
+            }
         }
     }
 
@@ -292,7 +297,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
             val instanceData1 = instanceDatas.single()
 
-            val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData1, this@NotDoneGroupNode, selectable)
+            val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData1, this@NotDoneGroupNode)
             notDoneInstanceNodes.add(notDoneInstanceNode)
 
             treeNode.add(notDoneInstanceNode.initialize(null, null, treeNode), x)
@@ -304,7 +309,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
     }
 
     private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?): TreeNode {
-        val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData, this, selectable)
+        val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData, this)
 
         val childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selectedNodes, treeNode)
 
@@ -315,7 +320,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
     fun expanded() = treeNode.isExpanded
 
-    override val isSelectable get() = selectable && notDoneInstanceNodes.isEmpty()
+    override val isSelectable = true
 
     override val isVisibleWhenEmpty = true
 
@@ -343,7 +348,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
     override val id: Any = if (singleInstance()) singleInstanceData.InstanceKey else exactTimeStamp
 
-    class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, override val isSelectable: Boolean) : GroupHolderNode(indentation), NodeCollectionParent {
+    class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode) : GroupHolderNode(indentation), NodeCollectionParent {
 
         companion object {
 
@@ -354,7 +359,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                         fun color() = if (!instanceData.TaskCurrent) colorDisabled else colorSecondary
 
                         if (it.isNotEmpty() && !treeNode.isExpanded) {
-                            val children = it.sorted().joinToString(", ") { it.Name }
+                            val children = it.sorted().joinToString(", ") { it.name }
 
                             Pair(children, color())
                         } else if (!instanceData.mNote.isNullOrEmpty()) {
@@ -364,6 +369,8 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
                         }
                     }
         }
+
+        override val isSelectable = true
 
         public override lateinit var treeNode: TreeNode
             private set
@@ -392,7 +399,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
             treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
 
             nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
-            treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, selectedNodes, isSelectable, null, false, null))
+            treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, selectedNodes, null, false, null))
 
             return this.treeNode
         }
@@ -410,7 +417,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val name get() = Triple(instanceData.Name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
+        override val name get() = Triple(instanceData.name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
 
         override val children get() = getChildrenNew(treeNode, instanceData)
 

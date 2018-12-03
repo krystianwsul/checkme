@@ -66,14 +66,15 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             return Date(calendar)
         }
 
-        private fun nodesToInstanceDatas(treeNodes: List<TreeNode>): List<InstanceData> {
-            val instanceDatas = ArrayList<InstanceData>()
+        private fun nodesToInstanceDatas(treeNodes: List<TreeNode>): Set<InstanceData> {
+            val instanceDatas = hashSetOf<InstanceData>()
             for (treeNode in treeNodes) {
                 treeNode.modelNode.let {
-                    if (it is NotDoneGroupNode) {
-                        instanceDatas.add(it.singleInstanceData)
-                    } else {
-                        instanceDatas.add((it as NotDoneGroupNode.NotDoneInstanceNode).instanceData)
+                    when (it) {
+                        is NotDoneGroupNode -> instanceDatas.addAll(it.instanceDatas)
+                        is NotDoneGroupNode.NotDoneInstanceNode -> instanceDatas.add(it.instanceData)
+                        is DoneInstanceNode -> instanceDatas.add(it.instanceData)
+                        else -> throw IllegalArgumentException()
                     }
                 }
             }
@@ -166,7 +167,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                     check(instanceDatas.isNotEmpty())
 
                     if (instanceDatas.size == 1) {
-                        val instanceData = instanceDatas[0]
+                        val instanceData = instanceDatas.single()
                         check(instanceData.IsRootInstance)
 
                         activity.startActivity(EditInstanceActivity.getIntent(instanceData.InstanceKey))
@@ -181,17 +182,13 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 }
                 R.id.action_group_share -> Utils.share(activity, getShareData(instanceDatas))
                 R.id.action_group_show_task -> {
-                    check(instanceDatas.size == 1)
-
-                    val instanceData = instanceDatas[0]
+                    val instanceData = instanceDatas.single()
                     check(instanceData.TaskCurrent)
 
                     activity.startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_edit_task -> {
-                    check(instanceDatas.size == 1)
-
-                    val instanceData = instanceDatas[0]
+                    val instanceData = instanceDatas.single()
                     check(instanceData.TaskCurrent)
 
                     activity.startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
@@ -218,9 +215,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                     updateSelectAll()
                 }
                 R.id.action_group_add_task -> {
-                    check(instanceDatas.size == 1)
-
-                    val instanceData = instanceDatas[0]
+                    val instanceData = instanceDatas.single()
                     check(instanceData.TaskCurrent)
 
                     activity.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.taskKey))
@@ -242,9 +237,11 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                     }
                 }
                 R.id.action_group_mark_done -> {
+                    check(instanceDatas.all { it.Done == null })
+
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys)
+                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, true)
 
                     var selectedTreeNodes = treeViewAdapter.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
@@ -277,6 +274,37 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                                 it.parentNodeCollection.dividerNode.add(instanceData, x)
                             }
+                        }
+
+                        selectedTreeNodes = treeViewAdapter.selectedNodes
+                    } while (selectedTreeNodes.isNotEmpty())
+
+                    updateSelectAll()
+                }
+                R.id.action_group_mark_not_done -> {
+                    check(instanceDatas.all { it.Done != null })
+
+                    val instanceKeys = instanceDatas.map { it.InstanceKey }
+
+                    DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
+
+                    var selectedTreeNodes = treeViewAdapter.selectedNodes
+                    check(selectedTreeNodes.isNotEmpty())
+
+                    do {
+                        check(selectedTreeNodes.isNotEmpty())
+
+                        val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
+
+                        treeNode.modelNode.let {
+                            val instanceData = (it as DoneInstanceNode).instanceData
+                            instanceData.Done = null
+
+                            recursiveExists(instanceData)
+
+                            it.removeFromParent(x)
+
+                            it.nodeCollection.notDoneGroupCollection.add(instanceData, x)
                         }
 
                         decrementSelected(x)
@@ -374,7 +402,15 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
             check(instanceDatas.isNotEmpty())
 
-            check(instanceDatas.all { it.Done == null })
+            val modelNodes = treeViewAdapter.selectedNodes.map { it.modelNode }
+
+            val allNotDone = modelNodes.all { (it is NotDoneGroupNode && it.singleInstance()) || it is NotDoneGroupNode.NotDoneInstanceNode }
+            val allDone = modelNodes.all { it is DoneInstanceNode }
+
+            menu.apply {
+                findItem(R.id.action_group_mark_done).isVisible = allNotDone
+                findItem(R.id.action_group_mark_not_done).isVisible = allDone
+            }
 
             if (instanceDatas.size == 1) {
                 val instanceData = instanceDatas.single()
@@ -422,7 +458,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             }
         }
 
-        private fun containsLoop(instanceDatas: List<InstanceData>): Boolean {
+        private fun containsLoop(instanceDatas: Collection<InstanceData>): Boolean {
             check(instanceDatas.size > 1)
 
             for (instanceData in instanceDatas) {
@@ -468,7 +504,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
     private val compositeDisposable = CompositeDisposable()
 
-    private fun getShareData(instanceDatas: List<InstanceData>): String {
+    private fun getShareData(instanceDatas: Collection<InstanceData>): String {
         check(instanceDatas.isNotEmpty())
 
         val tree = LinkedHashMap<InstanceKey, InstanceData>()
@@ -486,7 +522,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
     private fun inTree(shareTree: Map<InstanceKey, InstanceData>, instanceData: InstanceData): Boolean = if (shareTree.containsKey(instanceData.InstanceKey)) true else shareTree.values.any { inTree(it.children, instanceData) }
 
     private fun printTree(lines: MutableList<String>, indentation: Int, instanceData: InstanceData) {
-        lines.add("-".repeat(indentation) + instanceData.Name)
+        lines.add("-".repeat(indentation) + instanceData.name)
 
         instanceData.children
                 .values
@@ -735,7 +771,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 unscheduledExpanded = false
             }
 
-            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, true, taskDatas, unscheduledExpanded, expandedTaskKeys)
+            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, taskDatas, unscheduledExpanded, expandedTaskKeys)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
             return treeViewAdapter
@@ -790,7 +826,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             var Done: ExactTimeStamp?,
             val InstanceKey: InstanceKey,
             val DisplayText: String?,
-            val Name: String,
+            val name: String,
             val InstanceTimeStamp: TimeStamp,
             var TaskCurrent: Boolean,
             val IsRootInstance: Boolean,
@@ -805,7 +841,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
         lateinit var instanceDataParent: InstanceDataParent
 
         init {
-            check(Name.isNotEmpty())
+            check(name.isNotEmpty())
         }
 
         override fun remove(instanceKey: InstanceKey) {

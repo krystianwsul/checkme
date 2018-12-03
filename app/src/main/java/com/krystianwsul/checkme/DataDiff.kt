@@ -23,7 +23,7 @@ object DataDiff {
 
         for (instanceKey in instanceKeys) {
             if (!oldInstanceDatas.keys.contains(instanceKey)) {
-                sDiff.add(indent + newInstanceDatas[instanceKey]!!.Name + " missing from oldData")
+                sDiff.add(indent + newInstanceDatas[instanceKey]!!.name + " missing from oldData")
                 continue
             }
 
@@ -31,7 +31,7 @@ object DataDiff {
             checkNotNull(oldInstanceData)
 
             if (!newInstanceDatas.keys.contains(instanceKey)) {
-                sDiff.add(indent + oldInstanceData.Name + " missing from newData")
+                sDiff.add(indent + oldInstanceData.name + " missing from newData")
                 continue
             }
 
@@ -39,7 +39,7 @@ object DataDiff {
             checkNotNull(newInstanceData)
 
             if (oldInstanceData != newInstanceData) {
-                sDiff.add(indent + "difference in " + oldInstanceData.Name + ":")
+                sDiff.add(indent + "difference in " + oldInstanceData.name + ":")
 
                 diffInstance(indent + "\t", oldInstanceData, newInstanceData)
             }
@@ -56,8 +56,8 @@ object DataDiff {
         if (oldInstanceData.DisplayText != newInstanceData.DisplayText)
             sDiff.add(indent + "oldInstanceData.displayText == " + oldInstanceData.DisplayText + ", newInstanceData.displayText == " + newInstanceData.DisplayText)
 
-        if (oldInstanceData.Name != newInstanceData.Name)
-            sDiff.add(indent + "oldInstanceData.name == " + oldInstanceData.Name + ", newInstanceData.name == " + newInstanceData.Name)
+        if (oldInstanceData.name != newInstanceData.name)
+            sDiff.add(indent + "oldInstanceData.name == " + oldInstanceData.name + ", newInstanceData.name == " + newInstanceData.name)
 
         if (oldInstanceData.InstanceTimeStamp != newInstanceData.InstanceTimeStamp)
             sDiff.add(indent + "oldInstanceData.InstanceTimeStamp == " + oldInstanceData.InstanceTimeStamp + ", newInstanceData.InstanceTimeStamp == " + newInstanceData.InstanceTimeStamp)

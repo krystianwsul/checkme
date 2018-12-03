@@ -745,6 +745,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
         check(drawerGroupListener == null)
+        check(onPageChangeDisposable == null)
 
         drawerGroupListener = object : DrawerLayout.DrawerListener {
 
@@ -761,13 +762,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
         mainActivityDrawer.addDrawerListener(drawerGroupListener!!)
 
-        mainDaysPager.addOneShotGlobalLayoutListener {
-            check(onPageChangeDisposable == null)
-
-            onPageChangeDisposable = mainDaysPager.pageSelections()
-                    .skip(1)
-                    .subscribe { actionMode.finish() }
-        }
+        onPageChangeDisposable = mainDaysPager.pageSelections()
+                .skip(1)
+                .subscribe { actionMode.finish() }
     }
 
     override fun onDestroyGroupActionMode() {

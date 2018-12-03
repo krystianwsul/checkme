@@ -16,6 +16,12 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_check_box_outline_blank_white_24dp"/>
     <item
+        android:id="@+id/action_group_mark_not_done"
+        android:title="@string/mark_done"
+        android:orderInCategory="700"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_check_box_white_24dp"/>
+    <item
         android:id="@+id/action_group_open"
         android:title="@string/open"
         android:orderInCategory="800"

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui
 
 import android.support.v7.view.ActionMode
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -88,6 +89,7 @@ abstract class SelectionCallback : ActionMode.Callback {
     }
 
     fun incrementSelected(x: TreeViewAdapter.Placeholder) {
+        Log.e("asdf", "test incrementing to " + (selected + 1))
         selected++
 
         when (selected) {
@@ -107,6 +109,7 @@ abstract class SelectionCallback : ActionMode.Callback {
     }
 
     fun decrementSelected(x: TreeViewAdapter.Placeholder) {
+        Log.e("asdf", "test decrementing to " + (selected - 1), Exception())
         check(selected > 0)
         checkNotNull(actionMode)
 

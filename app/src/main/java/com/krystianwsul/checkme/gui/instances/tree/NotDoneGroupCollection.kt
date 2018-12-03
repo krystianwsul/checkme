@@ -7,7 +7,7 @@ import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
-class NotDoneGroupCollection(private val indentation: Int, val nodeCollection: NodeCollection, private val nodeContainer: NodeContainer, private val selectable: Boolean) {
+class NotDoneGroupCollection(private val indentation: Int, val nodeCollection: NodeCollection, private val nodeContainer: NodeContainer) {
 
     private val notDoneGroupNodes = mutableListOf<NotDoneGroupNode>()
 
@@ -43,7 +43,7 @@ class NotDoneGroupCollection(private val indentation: Int, val nodeCollection: N
     private fun newNotDoneGroupNode(notDoneGroupCollection: NotDoneGroupCollection, instanceDatas: MutableList<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>?, expandedInstances: Map<InstanceKey, Boolean>?, selectedNodes: List<InstanceKey>?): TreeNode {
         check(!instanceDatas.isEmpty())
 
-        val notDoneGroupNode = NotDoneGroupNode(indentation, notDoneGroupCollection, instanceDatas, selectable)
+        val notDoneGroupNode = NotDoneGroupNode(indentation, notDoneGroupCollection, instanceDatas)
 
         val notDoneGroupTreeNode = notDoneGroupNode.initialize(expandedGroups, expandedInstances, selectedNodes, nodeContainer)
 

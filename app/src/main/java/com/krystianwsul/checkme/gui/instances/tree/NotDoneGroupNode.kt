@@ -341,7 +341,9 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         }
     }
 
-    override val id: Any = if (singleInstance()) singleInstanceData.InstanceKey else exactTimeStamp
+    override val id: Any = if (singleInstance()) Id(singleInstanceData.InstanceKey) else exactTimeStamp
+
+    data class Id(val instanceKey: InstanceKey)
 
     class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode, override val isSelectable: Boolean) : GroupHolderNode(indentation), NodeCollectionParent {
 

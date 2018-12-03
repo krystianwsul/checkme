@@ -240,10 +240,15 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         check(!instanceDatas.isEmpty())
         if (instanceDatas.size == 1) {
             val notDoneInstanceNode1 = notDoneInstanceNodes.single()
+            notDoneInstanceNodes.remove(notDoneInstanceNode1)
 
             val childTreeNode1 = notDoneInstanceNode1.treeNode
+            val selected1 = childTreeNode1.isSelected
 
-            notDoneInstanceNodes.remove(notDoneInstanceNode1)
+            if (selected1) {
+                treeNode.select(x)
+                childTreeNode1.deselect(x)
+            }
 
             treeNode.remove(childTreeNode1, x)
 
@@ -252,9 +257,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
             val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, selectable, null, false, null)
 
             childTreeNodes.forEach { treeNode.add(it, x) }
-
-            if (selected)
-                treeNode.select(x)
         }
     }
 

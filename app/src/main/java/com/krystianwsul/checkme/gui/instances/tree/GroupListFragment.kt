@@ -36,13 +36,17 @@ import kotlinx.android.synthetic.main.empty_text.view.*
 import kotlinx.android.synthetic.main.fragment_group_list.view.*
 import java.util.*
 
-class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = 0) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes), FabUser {
+class GroupListFragment @JvmOverloads constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0, defStyleRes: Int = 0) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes), FabUser {
 
     companion object {
 
         private const val SUPER_STATE_KEY = "superState"
         private const val EXPANSION_STATE_KEY = "expansionState"
-        private const val SELECTED_NODES_KEY = "selectedNodes"
+        private const val SELECTED_INSTANCES_KEY = "selectedInstances"
+        private const val SELECTED_GROUPS_KEY = "selectedGroups"
 
         private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
             check(position >= 0)
@@ -66,16 +70,17 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             return Date(calendar)
         }
 
-        private fun nodesToInstanceDatas(treeNodes: List<TreeNode>): List<InstanceData> {
+        private fun nodesToInstanceDatas(treeNodes: List<TreeNode>, includeGroups: Boolean): List<InstanceData> {
             val instanceDatas = ArrayList<InstanceData>()
-            for (treeNode in treeNodes) {
-                treeNode.modelNode.let {
-                    when (it) {
-                        is NotDoneGroupNode -> instanceDatas.addAll(it.instanceDatas)
-                        is NotDoneGroupNode.NotDoneInstanceNode -> instanceDatas.add(it.instanceData)
-                        is DoneInstanceNode -> instanceDatas.add(it.instanceData)
-                        else -> throw IllegalArgumentException()
+            treeNodes.map { it.modelNode }.forEach {
+                when (it) {
+                    is NotDoneGroupNode -> {
+                        if (includeGroups || it.singleInstance())
+                            instanceDatas.addAll(it.instanceDatas)
                     }
+                    is NotDoneGroupNode.NotDoneInstanceNode -> instanceDatas.add(it.instanceData)
+                    is DoneInstanceNode -> instanceDatas.add(it.instanceData)
+                    else -> throw IllegalArgumentException()
                 }
             }
 
@@ -103,7 +108,8 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
     val parameters get() = parametersRelay.value!!
 
     private var expansionState: ExpansionState? = null
-    private var selectedNodes: ArrayList<InstanceKey>? = null
+    private var selectedInstances: List<InstanceKey>? = null
+    private var selectedGroups: List<Long>? = null
 
     val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
@@ -158,7 +164,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
         override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
             val treeNodes = treeViewAdapter.selectedNodes
 
-            val instanceDatas = nodesToInstanceDatas(treeNodes)
+            val instanceDatas = nodesToInstanceDatas(treeNodes, true)
             check(instanceDatas.isNotEmpty())
 
             when (menuItem.itemId) {
@@ -401,7 +407,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
             val menu = actionMode!!.menu!!
 
-            val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
+            val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes, true)
             check(instanceDatas.isNotEmpty())
 
             val modelNodes = treeViewAdapter.selectedNodes.map { it.modelNode }
@@ -545,9 +551,15 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             state.takeIf { it.containsKey(EXPANSION_STATE_KEY) }?.apply {
                 expansionState = getParcelable(EXPANSION_STATE_KEY)
 
-                if (containsKey(SELECTED_NODES_KEY)) {
-                    selectedNodes = getParcelableArrayList(SELECTED_NODES_KEY)
-                    check(selectedNodes!!.isNotEmpty())
+                if (containsKey(SELECTED_INSTANCES_KEY)) {
+                    check(containsKey(SELECTED_GROUPS_KEY))
+
+                    selectedInstances = getParcelableArrayList(SELECTED_INSTANCES_KEY)
+                    selectedGroups = getLongArray(SELECTED_GROUPS_KEY)!!.toList()
+
+                    check(selectedInstances!!.isNotEmpty() || selectedGroups!!.isNotEmpty())
+                } else {
+                    check(!containsKey(SELECTED_GROUPS_KEY))
                 }
             }
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -599,36 +611,52 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState)
 
                 if (selectionCallback.hasActionMode) {
-                    val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
-                    check(instanceDatas.isNotEmpty())
+                    val (instanceKeys, exactTimeStamps) = getSelectedData()
 
-                    val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
-                    check(instanceKeys.isNotEmpty())
-
-                    putParcelableArrayList(SELECTED_NODES_KEY, instanceKeys)
+                    putParcelableArrayList(SELECTED_INSTANCES_KEY, ArrayList(instanceKeys))
+                    putLongArray(SELECTED_GROUPS_KEY, exactTimeStamps.toLongArray())
                 }
             }
         }
+    }
+
+    private fun getSelectedData(): Pair<List<InstanceKey>, List<Long>> {
+        val selectedNodes = treeViewAdapter.selectedNodes
+
+        val instanceKeys = nodesToInstanceDatas(selectedNodes, false).map { it.InstanceKey }
+        val exactTimeStamps = selectedNodes
+                .map { it.modelNode }
+                .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
+                .map { it.exactTimeStamp.long }
+        check(instanceKeys.isNotEmpty() || exactTimeStamps.isNotEmpty())
+
+        return Pair(instanceKeys, exactTimeStamps)
     }
 
     private fun initialize() {
         if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage == false) {
             expansionState = (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState
 
-            val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes)
+            val (instanceKeys, exactTimeStamps) = getSelectedData()
 
-            val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
-
-            selectedNodes = if (instanceKeys.isEmpty()) {
+            selectedInstances = if (instanceKeys.isEmpty()) {
                 check(!selectionCallback.hasActionMode)
                 null
             } else {
                 check(selectionCallback.hasActionMode)
                 instanceKeys
             }
+
+            selectedGroups = if (exactTimeStamps.isEmpty()) {
+                check(!selectionCallback.hasActionMode)
+                null
+            } else {
+                check(selectionCallback.hasActionMode)
+                exactTimeStamps
+            }
         }
 
-        treeViewAdapter = GroupAdapter.getAdapter(this, parameters.dataId, parameters.dataWrapper.CustomTimeDatas, useGroups(), showPadding(), parameters.dataWrapper.instanceDatas.values, expansionState, selectedNodes, parameters.dataWrapper.TaskDatas, parameters.dataWrapper.mNote)
+        treeViewAdapter = GroupAdapter.getAdapter(this, parameters.dataId, parameters.dataWrapper.CustomTimeDatas, useGroups(), showPadding(), parameters.dataWrapper.instanceDatas.values, expansionState, selectedInstances, selectedGroups, parameters.dataWrapper.TaskDatas, parameters.dataWrapper.mNote)
         groupListRecycler.adapter = treeViewAdapter
 
         treeViewAdapter.updateDisplayedNodes {
@@ -717,10 +745,10 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
             const val TYPE_GROUP = 0
 
-            fun getAdapter(groupListFragment: GroupListFragment, dataId: Int, customTimeDatas: List<CustomTimeData>, useGroups: Boolean, showFab: Boolean, instanceDatas: Collection<InstanceData>, expansionState: GroupListFragment.ExpansionState?, selectedNodes: ArrayList<InstanceKey>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
+            fun getAdapter(groupListFragment: GroupListFragment, dataId: Int, customTimeDatas: List<CustomTimeData>, useGroups: Boolean, showFab: Boolean, instanceDatas: Collection<InstanceData>, expansionState: GroupListFragment.ExpansionState?, selectedInstances: List<InstanceKey>?, selectedGroups: List<Long>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
                 val groupAdapter = GroupAdapter(groupListFragment, dataId, customTimeDatas, showFab)
 
-                return groupAdapter.initialize(useGroups, instanceDatas, expansionState, selectedNodes, taskDatas, note)
+                return groupAdapter.initialize(useGroups, instanceDatas, expansionState, selectedInstances, selectedGroups, taskDatas, note)
             }
         }
 
@@ -747,7 +775,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 return ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys)
             }
 
-        private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>, expansionState: GroupListFragment.ExpansionState?, selectedNodes: ArrayList<InstanceKey>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
+        private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>, expansionState: GroupListFragment.ExpansionState?, selectedInstances: List<InstanceKey>?, selectedGroups: List<Long>?, taskDatas: List<TaskData>?, note: String?): TreeViewAdapter {
             treeViewAdapter = TreeViewAdapter(this, if (mShowFab) R.layout.row_group_list_fab_padding else null)
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
@@ -773,7 +801,7 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
                 unscheduledExpanded = false
             }
 
-            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedNodes, taskDatas, unscheduledExpanded, expandedTaskKeys)
+            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedInstances, selectedGroups, taskDatas, unscheduledExpanded, expandedTaskKeys)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
             return treeViewAdapter

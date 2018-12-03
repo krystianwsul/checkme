@@ -19,8 +19,7 @@ class DoneInstanceNode(
     public override lateinit var treeNode: TreeNode
         private set
 
-    lateinit var nodeCollection: NodeCollection
-        private set
+    private lateinit var nodeCollection: NodeCollection
 
     private val parentNodeCollection get() = dividerNode.nodeCollection
 
@@ -40,7 +39,7 @@ class DoneInstanceNode(
         treeNode = TreeNode(this, dividerTreeNode, expanded, false)
 
         nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, this.treeNode, null)
-        treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, null, null, false, null))
+        treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, null, null, null, false, null))
 
         return treeNode
     }

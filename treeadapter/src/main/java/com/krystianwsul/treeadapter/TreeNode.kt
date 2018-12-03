@@ -48,11 +48,10 @@ class TreeNode(
             if (childTreeNodes == null)
                 throw SetChildTreeNodesNotCalledException()
 
-            check(!selected || modelNode.isSelectable)
-
             val selectedTreeNodes = ArrayList<TreeNode>()
 
             if (selected) {
+                check(modelNode.isSelectable)
                 check(modelNode.isVisibleDuringActionMode)
                 selectedTreeNodes.add(this)
             }

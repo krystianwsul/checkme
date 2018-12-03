@@ -628,7 +628,6 @@ class GroupListFragment @JvmOverloads constructor(
                 .map { it.modelNode }
                 .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
                 .map { it.exactTimeStamp.long }
-        check(instanceKeys.isNotEmpty() || exactTimeStamps.isNotEmpty())
 
         return Pair(instanceKeys, exactTimeStamps)
     }

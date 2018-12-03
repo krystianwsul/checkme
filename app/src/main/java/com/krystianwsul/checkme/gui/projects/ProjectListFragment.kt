@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.projects
 
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
@@ -265,8 +264,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             override val isSelectable = true
 
             override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
-
-            override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
             override fun onClick() = activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 

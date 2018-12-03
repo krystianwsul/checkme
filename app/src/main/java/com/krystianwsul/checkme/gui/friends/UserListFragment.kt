@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.friends
 
 
-import android.graphics.Color
 import android.os.Bundle
 import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
@@ -319,8 +318,6 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         public override lateinit var treeNode: TreeNode
             private set
-
-        override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT // todo move to GroupHolderNode
 
         override val id = userListData.id
 

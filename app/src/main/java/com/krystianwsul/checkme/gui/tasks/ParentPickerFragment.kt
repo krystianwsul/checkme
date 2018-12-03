@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.tasks
 
 
 import android.app.Dialog
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -223,8 +222,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 return treeNode
             }
-
-            override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
             override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 

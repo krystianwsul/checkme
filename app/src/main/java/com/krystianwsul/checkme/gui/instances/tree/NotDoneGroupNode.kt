@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -195,8 +194,6 @@ class NotDoneGroupNode(
 
                 groupAdapter.mGroupListFragment.updateSelectAll()
         }
-
-    override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
     override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder): Boolean {
         val groupListFragment = groupAdapter.mGroupListFragment
@@ -452,16 +449,6 @@ class NotDoneGroupNode(
                             }
 
                     groupAdapter.mGroupListFragment.updateSelectAll()
-            }
-
-        override val backgroundColor
-            get(): Int {
-                check(parentNotDoneGroupNode.treeNode.isExpanded)
-
-                return if (treeNode.isSelected)
-                    colorSelected
-                else
-                    Color.TRANSPARENT
             }
 
         override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()

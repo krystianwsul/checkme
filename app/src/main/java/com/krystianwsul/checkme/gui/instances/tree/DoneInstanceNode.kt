@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -114,6 +113,4 @@ class DoneInstanceNode(
     fun removeFromParent(x: TreeViewAdapter.Placeholder) = dividerNode.remove(this, x)
 
     override val id = instanceData.InstanceKey
-
-    override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 }

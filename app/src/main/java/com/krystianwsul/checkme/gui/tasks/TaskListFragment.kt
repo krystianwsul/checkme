@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
@@ -614,8 +613,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override val name get() = Triple(childTaskData.name, colorPrimary, true)
 
-            override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
-
             override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = if (taskListFragment.taskKey != null && treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
                 taskListFragment.dragHelper.startDrag(viewHolder)
                 true
@@ -691,8 +688,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 return treeNode
             }
-
-            override val backgroundColor = Color.TRANSPARENT
 
             override val name get() = Triple(note, colorPrimary, false)
 

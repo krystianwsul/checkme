@@ -46,20 +46,17 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open fun checkBoxOnClickListener() = Unit
 
-    protected open val backgroundColor = Color.TRANSPARENT
-
     protected abstract fun onLongClickListener(viewHolder: RecyclerView.ViewHolder): Boolean
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
-    final override val state get() = State(id, name, details, children, backgroundColor, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxVisibility, checkBoxChecked)
+    final override val state get() = State(id, name, details, children, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxVisibility, checkBoxChecked)
 
     data class State(
             val id: Any,
             val name: Triple<String, Int, Boolean>?,
             val details: Pair<String, Int>?,
             val children: Pair<String, Int>?,
-            val backgroundColor: Int,
             val indentation: Int,
             val expandVisible: Boolean,
             val isExpanded: Boolean,
@@ -130,7 +127,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {
-                setBackgroundColor(backgroundColor)
+                setBackgroundColor(if (treeNode.isSelected) colorSelected else Color.TRANSPARENT)
                 setOnLongClickListener { onLongClickListener(viewHolder) }
                 setOnClickListener { treeNode.onClickListener() }
             }

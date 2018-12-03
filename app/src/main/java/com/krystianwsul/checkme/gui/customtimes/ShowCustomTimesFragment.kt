@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.customtimes
 
 
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
@@ -252,8 +251,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         }
 
         override val name get() = Triple(customTimeData.name, colorPrimary, true)
-
-        override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
         override val isSelectable = true
 

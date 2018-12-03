@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.friends
 
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
@@ -234,8 +233,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override val name = Triple(userListData.name, colorPrimary, true)
 
         override val details = Pair(userListData.email, colorSecondary)
-
-        override val backgroundColor get() = if (treeNode.isSelected) colorSelected else Color.TRANSPARENT
 
         public override lateinit var treeNode: TreeNode
             private set

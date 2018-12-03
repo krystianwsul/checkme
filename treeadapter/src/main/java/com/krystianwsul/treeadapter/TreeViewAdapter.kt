@@ -2,6 +2,7 @@ package com.krystianwsul.treeadapter
 
 import android.support.annotation.LayoutRes
 import android.support.v7.util.DiffUtil
+import android.support.v7.util.ListUpdateCallback
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -106,7 +107,19 @@ class TreeViewAdapter @JvmOverloads constructor(
 
                 return oldState.modelState == newState.modelState
             }
-        }).dispatchUpdatesTo(this)
+        }).dispatchUpdatesTo(object : ListUpdateCallback {
+
+            override fun onInserted(position: Int, count: Int) = notifyItemRangeInserted(position, count)
+
+            override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
+
+            override fun onMoved(fromPosition: Int, toPosition: Int) {
+                notifyItemRemoved(fromPosition)
+                notifyItemInserted(toPosition)
+            }
+
+            override fun onChanged(position: Int, count: Int, payload: Any?) = notifyItemRangeChanged(position, count, payload)
+        })
     }
 
     fun unselect(x: TreeViewAdapter.Placeholder) {

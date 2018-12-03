@@ -52,7 +52,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
-    final override val state get() = State(id, name, details, children, backgroundColor, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxChecked)
+    final override val state get() = State(id, name, details, children, backgroundColor, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxVisibility, checkBoxChecked)
 
     data class State(
             val id: Any,
@@ -63,6 +63,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             val indentation: Int,
             val expandVisible: Boolean,
             val isExpanded: Boolean,
+            val checkboxVisibility: Int,
             val checkboxChecked: Boolean) : ModelState {
 
         override fun same(other: ModelState) = (other as State).id == id

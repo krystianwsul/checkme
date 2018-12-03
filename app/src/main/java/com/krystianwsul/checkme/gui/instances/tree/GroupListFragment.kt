@@ -304,7 +304,10 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
 
                             it.removeFromParent(x)
 
-                            it.nodeCollection.notDoneGroupCollection.add(instanceData, x)
+                            it.dividerNode
+                                    .nodeCollection
+                                    .notDoneGroupCollection
+                                    .add(instanceData, x)
                         }
 
                         decrementSelected(x)

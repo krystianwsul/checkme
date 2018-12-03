@@ -1,7 +1,6 @@
 package com.krystianwsul.treeadapter
 
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import java.util.*
 
 class TreeNode(
@@ -348,8 +347,6 @@ class TreeNode(
     }
 
     override fun add(treeNode: TreeNode, x: TreeViewAdapter.Placeholder) {
-        Log.e("asdf", "nodes present: " + childTreeNodes!!.map { it.modelNode })
-
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 

@@ -424,7 +424,7 @@ class GroupListFragment @JvmOverloads constructor(
                 val instanceData = instanceDatas.single()
 
                 menu.apply {
-                    findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance
+                    findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance && allNotDone
                     findItem(R.id.action_group_open).isVisible = true
                 }
 
@@ -439,7 +439,7 @@ class GroupListFragment @JvmOverloads constructor(
                 check(instanceDatas.size > 1)
 
                 menu.apply {
-                    findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance }
+                    findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance } && allNotDone
                     findItem(R.id.action_group_open).isVisible = false
                 }
 

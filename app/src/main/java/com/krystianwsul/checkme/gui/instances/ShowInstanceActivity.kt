@@ -69,9 +69,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             findItem(R.id.instance_menu_uncheck).isVisible = instanceData?.done == true
             findItem(R.id.instance_menu_edit_instance).isVisible = instanceData?.run { !done && isRootInstance } == true
             findItem(R.id.instance_menu_share).isVisible = instanceData != null
-            findItem(R.id.instance_menu_show_task).isVisible = instanceData?.run { !done && taskCurrent } == true
-            findItem(R.id.instance_menu_edit_task).isVisible = instanceData?.run { !done && taskCurrent } == true
-            findItem(R.id.instance_menu_delete_task).isVisible = instanceData?.run { !done && taskCurrent } == true
+            findItem(R.id.instance_menu_show_task).isVisible = instanceData?.taskCurrent == true
+            findItem(R.id.instance_menu_edit_task).isVisible = instanceData?.taskCurrent == true
+            findItem(R.id.instance_menu_delete_task).isVisible = instanceData?.taskCurrent == true
             findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
         }
 

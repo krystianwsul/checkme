@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Color
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
@@ -245,7 +244,7 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
 
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
-            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, selectable, null, false, null)
+            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, null, false, null)
 
             childTreeNodes.forEach { treeNode.add(it, x) }
         }

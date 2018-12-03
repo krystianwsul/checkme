@@ -66,8 +66,8 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
             return Date(calendar)
         }
 
-        private fun nodesToInstanceDatas(treeNodes: List<TreeNode>): Set<InstanceData> {
-            val instanceDatas = hashSetOf<InstanceData>()
+        private fun nodesToInstanceDatas(treeNodes: List<TreeNode>): List<InstanceData> {
+            val instanceDatas = ArrayList<InstanceData>()
             for (treeNode in treeNodes) {
                 treeNode.modelNode.let {
                     when (it) {

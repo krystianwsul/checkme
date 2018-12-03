@@ -214,7 +214,6 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
     private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.mCustomTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
 
     private fun remove(notDoneInstanceNode: NotDoneInstanceNode, x: TreeViewAdapter.Placeholder) {
-        Log.e("asdf", "test removing " + notDoneInstanceNode.instanceData.name)
         check(instanceDatas.contains(notDoneInstanceNode.instanceData))
         instanceDatas.remove(notDoneInstanceNode.instanceData)
 
@@ -224,42 +223,31 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         val childTreeNode = notDoneInstanceNode.treeNode
         val selected = childTreeNode.isSelected
 
-        if (selected) {
-            Log.e("asdf", "test deselecting " + notDoneInstanceNode.instanceData.name)
+        if (selected)
             childTreeNode.deselect(x)
-        }
 
         treeNode.remove(childTreeNode, x)
 
         check(!instanceDatas.isEmpty())
         if (instanceDatas.size == 1) {
             val notDoneInstanceNode1 = notDoneInstanceNodes.single()
-            Log.e("asdf", "test last " + notDoneInstanceNode1.instanceData.name)
             notDoneInstanceNodes.remove(notDoneInstanceNode1)
 
             val childTreeNode1 = notDoneInstanceNode1.treeNode
             val selected1 = childTreeNode1.isSelected
 
             if (selected1) {
-                Log.e("asdf", "test deselecting " + notDoneInstanceNode1.instanceData.name)
+                treeNode.select(x)
                 childTreeNode1.deselect(x)
             }
 
+            treeNode.remove(childTreeNode1, x)
+
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
-            Log.e("asdf", "test creating collection for " + instanceDatas[0].name)
+            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, selectable, null, false, null)
 
-            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, null, null, false, null, null, false, null)
-
-            childTreeNodes.forEach {
-                Log.e("asdf", "test adding child node " + it.modelNode)
-                treeNode.add(it, x)
-            }
-
-            if (selected1) {
-                Log.e("asdf", "test selecting " + notDoneInstanceNode1.instanceData.name)
-                treeNode.select(x)
-            }
+            childTreeNodes.forEach { treeNode.add(it, x) }
         }
     }
 
@@ -346,7 +334,9 @@ class NotDoneGroupNode(indentation: Int, private val notDoneGroupCollection: Not
         }
     }
 
-    override val id: Any = if (singleInstance()) singleInstanceData.InstanceKey else exactTimeStamp
+    override val id: Any = if (singleInstance()) Id(singleInstanceData.InstanceKey) else exactTimeStamp
+
+    data class Id(val instanceKey: InstanceKey)
 
     class NotDoneInstanceNode(indentation: Int, val instanceData: GroupListFragment.InstanceData, private val parentNotDoneGroupNode: NotDoneGroupNode) : GroupHolderNode(indentation), NodeCollectionParent {
 

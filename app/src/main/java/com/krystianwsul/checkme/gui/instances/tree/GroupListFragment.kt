@@ -149,9 +149,8 @@ class GroupListFragment @JvmOverloads constructor(context: Context?, attrs: Attr
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            MaterialCab.destroy()
-
             super.onDestroyActionMode(mode)
+            MaterialCab.destroy()
         }
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)

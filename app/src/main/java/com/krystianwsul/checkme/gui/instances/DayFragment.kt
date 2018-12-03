@@ -110,9 +110,19 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
 
         key.switchMap { key -> (context as Host).hostEvents.map { Pair(key, it) } }
                 .subscribe { (key, event) ->
-                    if (event is Event.PageVisible && event.position == key.second)
+                    if (event is Event.PageVisible && event.position == key.second) {
                         setFab(event.floatingActionButton)
-                    else {
+
+                        activity.selectAllRelay
+                                .subscribe {
+                                    groupListFragment
+                                            .treeViewAdapter
+                                            .updateDisplayedNodes {
+                                                selectAll(TreeViewAdapter.Placeholder)
+                                            }
+                                }
+                                .addTo(compositeDisposable)
+                    } else {
                         clearFab()
                         saveState()
                     }

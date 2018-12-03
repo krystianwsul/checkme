@@ -33,6 +33,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -59,12 +60,10 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_day.view.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
-import java.lang.ref.WeakReference
 
 class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, TaskListFragment.TaskListListener, DayFragment.Host {
 
@@ -148,6 +147,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
         private set
 
+    val selectAllRelay = PublishRelay.create<Unit>()
+
     override val search by lazy {
         mainActivitySearch.textChanges()
                 .map { it.toString() }
@@ -221,17 +222,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 invalidateOptionsMenu()
             }
             R.id.action_select_all -> when (visibleTab.value!!) {
-                MainActivity.Tab.INSTANCES -> {
-                    val myFragmentStatePagerAdapter = mainDaysPager.adapter as MyFragmentStatePagerAdapter
-                    myFragmentStatePagerAdapter.currentItem.let {
-                        // todo do same as for fab
-                        it.groupListFragment
-                                .treeViewAdapter
-                                .updateDisplayedNodes {
-                                    it.selectAll(TreeViewAdapter.Placeholder)
-                                }
-                    }
-                }
+                MainActivity.Tab.INSTANCES -> selectAllRelay.accept(Unit)
                 MainActivity.Tab.TASKS -> {
                     val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
                     taskListFragment.treeViewAdapter.updateDisplayedNodes {
@@ -957,15 +948,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     private inner class MyFragmentStatePagerAdapter : RecyclerView.Adapter<Holder>() {
-
-        private var currentItemRef: WeakReference<DayFragment>? = null
-
-        val currentItem: DayFragment
-            get() {
-                checkNotNull(currentItemRef)
-
-                return currentItemRef!!.get()!!
-            }
 
         override fun getItemCount() = Integer.MAX_VALUE
 

@@ -9,7 +9,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import com.krystianwsul.checkme.R
@@ -60,7 +59,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             var selected = treeViewAdapter.selectedNodes
             check(!selected.isEmpty())
 
@@ -70,7 +69,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             val taskKeys = ArrayList(childTaskDatas.map { it.taskKey })
 
-            when (menuItem.itemId) {
+            when (itemId) {
                 R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
                 R.id.action_task_edit -> {
                     check(selected.size == 1)

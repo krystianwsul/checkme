@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
@@ -53,11 +52,11 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val selectedUserDataEmails = treeViewAdapter.selectedNodes
             check(!selectedUserDataEmails.isEmpty())
 
-            when (menuItem.itemId) {
+            when (itemId) {
                 R.id.action_custom_times_delete -> {
                     (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
 

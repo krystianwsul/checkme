@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import com.krystianwsul.checkme.R
@@ -52,8 +51,8 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
-            check(menuItem.itemId == R.id.action_custom_times_delete)
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
+            check(itemId == R.id.action_custom_times_delete)
 
             (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
         }

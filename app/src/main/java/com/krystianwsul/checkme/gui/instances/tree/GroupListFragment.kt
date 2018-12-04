@@ -9,7 +9,10 @@ import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.View
+import android.view.ViewGroup
 import android.widget.RelativeLayout
 import com.afollestad.materialcab.MaterialCab
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -134,7 +137,7 @@ class GroupListFragment @JvmOverloads constructor(
                 // todo animations androidx
 
                 onSelection {
-                    actionItemClicked(it)
+                    actionItemClicked(it.itemId)
                     true
                 }
 
@@ -161,13 +164,13 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val treeNodes = treeViewAdapter.selectedNodes
 
             val instanceDatas = nodesToInstanceDatas(treeNodes, true)
             check(instanceDatas.isNotEmpty())
 
-            when (menuItem.itemId) {
+            when (itemId) {
                 R.id.action_group_edit_instance -> {
                     check(instanceDatas.isNotEmpty())
 

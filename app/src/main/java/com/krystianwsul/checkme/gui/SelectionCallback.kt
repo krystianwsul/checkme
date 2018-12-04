@@ -26,9 +26,9 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
 
-    protected fun actionItemClicked(item: MenuItem) {
+    protected fun actionItemClicked(itemId: Int) {
         getTreeViewAdapter().updateDisplayedNodes {
-            onMenuClick(item, TreeViewAdapter.Placeholder)
+            onMenuClick(itemId, TreeViewAdapter.Placeholder)
 
             check(!removingLast)
             check(!menuClick)
@@ -40,7 +40,7 @@ abstract class SelectionCallback : ActionMode.Callback {
     }
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-        actionItemClicked(item)
+        actionItemClicked(item.itemId)
 
         return true
     }
@@ -132,7 +132,7 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     protected abstract fun unselect(x: TreeViewAdapter.Placeholder)
 
-    protected abstract fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) // todo id instead of menuItem
+    protected abstract fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder)
 
     protected abstract fun onFirstAdded(x: TreeViewAdapter.Placeholder)
 

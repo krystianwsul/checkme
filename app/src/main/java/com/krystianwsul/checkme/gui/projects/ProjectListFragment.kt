@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
@@ -52,7 +51,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override fun onMenuClick(menuItem: MenuItem, x: TreeViewAdapter.Placeholder) {
+        override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val selected = treeViewAdapter.selectedNodes
             check(!selected.isEmpty())
 
@@ -62,7 +61,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                     .map { it.projectData.id }
                     .toSet()
 
-            when (menuItem.itemId) {
+            when (itemId) {
                 R.id.action_project_delete -> {
                     check(dataId != null)
 

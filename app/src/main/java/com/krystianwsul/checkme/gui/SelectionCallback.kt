@@ -1,8 +1,15 @@
 package com.krystianwsul.checkme.gui
 
+import android.support.annotation.LayoutRes
+import android.support.annotation.MenuRes
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
+import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import com.afollestad.materialcab.MaterialCab
+import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.getPrivateField
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
@@ -15,18 +22,55 @@ abstract class SelectionCallback : ActionMode.Callback {
     private var menuClick = false
     private var removingLast = false
 
+    protected var bottomMenu: Menu? = null
+        private set
+
     protected abstract fun getTreeViewAdapter(): TreeViewAdapter
+
+    protected open val bottomData: BottomData? = null
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         check(actionMode == null)
 
         actionMode = mode
+
+        var cab: MaterialCab? = null
+
+        bottomData?.let {
+            MaterialCab.attach(it.activity, it.layoutId) {
+                cab = this
+
+                backgroundColorRes(R.color.actionModeBackground)
+                closeDrawableRes = R.drawable.empty
+                menuRes = it.menuId
+
+                // todo animations androidx
+
+                onSelection {
+                    actionItemClicked(it.itemId)
+                    true
+                }
+
+                onDestroy {
+                    checkNotNull(bottomMenu)
+
+                    bottomMenu = null
+
+                    true
+                }
+            }
+
+            check(bottomMenu == null)
+
+            bottomMenu = cab!!.getPrivateField<MaterialCab, Toolbar>("toolbar").menu
+        }
+
         return true
     }
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
 
-    protected fun actionItemClicked(itemId: Int) {
+    private fun actionItemClicked(itemId: Int) {
         getTreeViewAdapter().updateDisplayedNodes {
             onMenuClick(itemId, TreeViewAdapter.Placeholder)
 
@@ -55,6 +99,8 @@ abstract class SelectionCallback : ActionMode.Callback {
                 countdown()
             }
         }
+
+        bottomData?.let { MaterialCab.destroy() }
     }
 
     private fun countdown() {
@@ -145,4 +191,9 @@ abstract class SelectionCallback : ActionMode.Callback {
     protected abstract fun onSecondToLastRemoved()
 
     protected abstract fun onOtherRemoved()
+
+    protected class BottomData(
+            val activity: AppCompatActivity,
+            @LayoutRes val layoutId: Int,
+            @MenuRes val menuId: Int)
 }

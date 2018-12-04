@@ -7,7 +7,6 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.Menu
@@ -24,7 +23,10 @@ import com.krystianwsul.checkme.gui.instances.EditInstancesActivity
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.treeadapter.TreeModelAdapter
@@ -118,48 +120,14 @@ class GroupListFragment @JvmOverloads constructor(
 
     val selectionCallback = object : SelectionCallback() {
 
-        private var bottomMenu: Menu? = null
+        override val bottomData by lazy { BottomData(activity, listener.bottomActionModeId, R.menu.menu_edit_groups_bottom) }
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             super.onCreateActionMode(mode, menu)
 
-            var cab: MaterialCab? = null
-
-            MaterialCab.attach(activity, listener.bottomActionModeId) {
-                cab = this
-
-                backgroundColorRes(R.color.actionModeBackground)
-                closeDrawableRes = R.drawable.empty
-                menuRes = R.menu.menu_edit_groups_bottom
-
-                // todo animations androidx
-
-                onSelection {
-                    actionItemClicked(it.itemId)
-                    true
-                }
-
-                onDestroy {
-                    checkNotNull(bottomMenu)
-
-                    bottomMenu = null
-
-                    true
-                }
-            }
-
-            check(bottomMenu == null)
-
-            bottomMenu = cab!!.getPrivateField<MaterialCab, Toolbar>("toolbar").menu
-
             return true
-        }
-
-        override fun onDestroyActionMode(mode: ActionMode) {
-            super.onDestroyActionMode(mode)
-            MaterialCab.destroy()
         }
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)

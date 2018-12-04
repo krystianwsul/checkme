@@ -60,6 +60,10 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
                     updateSelectAll()
                 }
+                R.id.action_custom_times_open -> treeViewAdapter.selectedNodes
+                        .single()
+                        .modelNode
+                        .onClick()
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -74,7 +78,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             (activity as CustomTimesListListener).onCreateCustomTimesActionMode(actionMode!!)
         }
 
-        override fun onSecondAdded() = Unit
+        override fun onSecondAdded() = updateMenu()
 
         override fun onOtherAdded() = Unit
 
@@ -84,9 +88,15 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             (activity as CustomTimesListListener).onDestroyCustomTimesActionMode()
         }
 
-        override fun onSecondToLastRemoved() = Unit
+        override fun onSecondToLastRemoved() = updateMenu()
 
         override fun onOtherRemoved() = Unit
+
+        private fun updateMenu() {
+            actionMode!!.menu
+                    .findItem(R.id.action_custom_times_open)
+                    .isVisible = treeViewAdapter.selectedNodes.size == 1
+        }
     }
 
     private var showTimesFab: FloatingActionButton? = null

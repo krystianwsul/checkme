@@ -57,7 +57,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
             check(!selectedUserDataEmails.isEmpty())
 
             when (itemId) {
-                R.id.action_custom_times_delete -> {
+                R.id.action_friends_delete -> {
                     (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
 
                     updateSelectAll()
@@ -69,7 +69,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            actionMode!!.menuInflater.inflate(R.menu.menu_custom_times, actionMode!!.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_friends, actionMode!!.menu)
 
             updateFabVisibility()
 

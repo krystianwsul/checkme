@@ -3,15 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_custom_times_delete"
+        android:id="@+id/action_friends_delete"
         android:title="@string/delete"
         android:orderInCategory="200"
         android:icon="@drawable/ic_delete_white_24dp"
         app:showAsAction="always"/>
-    <item
-        android:id="@+id/action_custom_times_open"
-        android:title="@string/open"
-        android:orderInCategory="800"
-        app:showAsAction="always"
-        android:icon="@drawable/ic_keyboard_arrow_right_white_24dp"/>
 </menu>

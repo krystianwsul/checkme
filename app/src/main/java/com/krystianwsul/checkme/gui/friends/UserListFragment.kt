@@ -52,7 +52,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
-            check(itemId == R.id.action_custom_times_delete)
+            check(itemId == R.id.action_friends_delete)
 
             (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
         }
@@ -60,7 +60,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            actionMode!!.menuInflater.inflate(R.menu.menu_custom_times, actionMode!!.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_friends, actionMode!!.menu)
 
             updateFabVisibility()
         }

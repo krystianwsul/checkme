@@ -13,7 +13,6 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
-import com.afollestad.materialcab.MaterialCab
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -119,8 +118,6 @@ class GroupListFragment @JvmOverloads constructor(
     val dragHelper by lazy { DragHelper(treeViewAdapter) }
 
     val selectionCallback = object : SelectionCallback() {
-
-        override val bottomData by lazy { BottomData(activity, listener.bottomActionModeId, R.menu.menu_edit_groups_bottom) }
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
@@ -292,9 +289,6 @@ class GroupListFragment @JvmOverloads constructor(
 
                     updateSelectAll()
                 }
-                R.id.action_group_open -> treeNodes.single()
-                        .modelNode
-                        .onClick()
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -396,10 +390,6 @@ class GroupListFragment @JvmOverloads constructor(
 
                 menu.apply {
                     findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance && allNotDone
-                    findItem(R.id.action_group_open).isVisible = true
-                }
-
-                bottomMenu!!.apply {
                     findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_join).isVisible = false
@@ -411,10 +401,6 @@ class GroupListFragment @JvmOverloads constructor(
 
                 menu.apply {
                     findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance } && allNotDone
-                    findItem(R.id.action_group_open).isVisible = false
-                }
-
-                bottomMenu!!.apply {
                     findItem(R.id.action_group_show_task).isVisible = false
                     findItem(R.id.action_group_edit_task).isVisible = false
                     findItem(R.id.action_group_add_task).isVisible = false
@@ -549,8 +535,6 @@ class GroupListFragment @JvmOverloads constructor(
 
     override fun onDetachedFromWindow() {
         compositeDisposable.clear()
-
-        MaterialCab.destroy()
 
         super.onDetachedFromWindow()
     }

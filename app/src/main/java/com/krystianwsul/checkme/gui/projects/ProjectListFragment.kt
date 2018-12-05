@@ -75,9 +75,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                         DomainFactory.getKotlinDomainFactory().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                     }
                 }
-                R.id.action_project_open -> selected.single()
-                        .modelNode
-                        .onClick()
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -90,21 +87,15 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
         }
 
-        override fun onSecondAdded() = updateMenu()
+        override fun onSecondAdded() = Unit
 
         override fun onOtherAdded() = Unit
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = updateFabVisibility()
 
-        override fun onSecondToLastRemoved() = updateMenu()
+        override fun onSecondToLastRemoved() = Unit
 
         override fun onOtherRemoved() = Unit
-
-        private fun updateMenu() {
-            actionMode!!.menu
-                    .findItem(R.id.action_project_open)
-                    .isVisible = treeViewAdapter.selectedNodes.size == 1
-        }
     }
 
     private var selectedProjectIds: Set<String> = setOf()

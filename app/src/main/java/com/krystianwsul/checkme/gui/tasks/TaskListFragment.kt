@@ -107,7 +107,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                     startActivity(CreateTaskActivity.getCreateIntent(childTaskData.taskKey))
                 }
-                R.id.action_task_open -> taskWrappers.single().onClick()
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -140,7 +139,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 findItem(R.id.action_task_edit).isVisible = false
                 findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
                 findItem(R.id.action_task_add).isVisible = false
-                findItem(R.id.action_task_open).isVisible = false
             }
 
             dragHelper.attachToRecyclerView(null)
@@ -177,7 +175,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 findItem(R.id.action_task_edit).isVisible = true
                 findItem(R.id.action_task_delete).isVisible = true
                 findItem(R.id.action_task_add).isVisible = true
-                findItem(R.id.action_task_open).isVisible = true
             }
 
             dragHelper.attachToRecyclerView(taskListRecycler)

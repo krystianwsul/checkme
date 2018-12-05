@@ -9,36 +9,23 @@ class DragHelper(
         private val treeViewAdapter: TreeViewAdapter,
         private val callback: MyCallback = MyCallback(treeViewAdapter)) : ItemTouchHelper(callback) {
 
-    private var startPosition: Int? = null
-
-    init {
-        callback.listener = { endPosition ->
-            checkNotNull(startPosition)
-
-            if (startPosition != endPosition)
-                treeViewAdapter.setNewItemPosition(endPosition)
-
-            startPosition = null
-        }
-    }
-
     override fun startDrag(viewHolder: RecyclerView.ViewHolder) {
-        MyCrashlytics.logMethod(this, "startPosition before: $startPosition")
-        check(startPosition == null)
+        MyCrashlytics.logMethod(this, "startPosition before: " + callback.startPosition)
+        check(callback.startPosition == null)
         check(callback.endPosition == null)
 
-        startPosition = viewHolder.adapterPosition
-        MyCrashlytics.logMethod(this, "startPosition after: $startPosition")
+        callback.startPosition = viewHolder.adapterPosition
+        MyCrashlytics.logMethod(this, "startPosition after: " + callback.startPosition)
 
         super.startDrag(viewHolder)
     }
 
     class MyCallback(private val treeViewAdapter: TreeViewAdapter) : SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
 
+        var startPosition: Int? = null
+
         var endPosition: Int? = null
             private set
-
-        lateinit var listener: (Int) -> Unit
 
         override fun isLongPressDragEnabled() = false
 
@@ -64,7 +51,16 @@ class DragHelper(
 
         override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
             MyCrashlytics.logMethod(this, "endPosition: $endPosition")
-            endPosition?.let { listener(it) }
+
+            endPosition?.let {
+                checkNotNull(startPosition)
+
+                if (startPosition != endPosition)
+                    treeViewAdapter.setNewItemPosition(it)
+
+            }
+
+            startPosition = null
             endPosition = null
 
             super.clearView(recyclerView, viewHolder)

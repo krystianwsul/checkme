@@ -465,6 +465,8 @@ class NotDoneGroupNode(
 
         fun removeFromParent(x: TreeViewAdapter.Placeholder) = parentNotDoneGroupNode.remove(this, x)
 
-        override val id = instanceData.InstanceKey
+        override val id = Id(instanceData.InstanceKey)
+
+        data class Id(val instanceKey: InstanceKey)
     }
 }

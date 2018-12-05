@@ -46,7 +46,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open fun checkBoxOnClickListener() = Unit
 
-    protected abstract fun onLongClickListener(viewHolder: RecyclerView.ViewHolder): Boolean
+    protected open fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 

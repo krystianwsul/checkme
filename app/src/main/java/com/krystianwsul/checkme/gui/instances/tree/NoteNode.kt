@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.support.v7.widget.RecyclerView
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -30,8 +29,6 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
     }
 
     override val name get() = Triple(note, colorPrimary, false)
-
-    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     override val isSelectable = false
 

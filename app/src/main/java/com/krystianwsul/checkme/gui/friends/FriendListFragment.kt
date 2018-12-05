@@ -248,8 +248,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override fun onClick() = Unit
 
-        override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
-
         override fun compareTo(other: ModelNode) = userListData.id.compareTo((other as FriendNode).userListData.id)
 
         fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {

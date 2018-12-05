@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
@@ -81,8 +80,6 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
 
             Pair(text, color)
         }
-
-    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     override val isSelectable = false
 

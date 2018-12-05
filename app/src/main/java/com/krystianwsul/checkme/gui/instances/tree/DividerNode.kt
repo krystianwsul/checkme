@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.InstanceKey
@@ -59,8 +58,6 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     override val name get() = Triple(groupListFragment.activity.getString(R.string.done), colorPrimary, true)
 
     override val checkBoxVisibility = View.INVISIBLE
-
-    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     fun remove(doneInstanceNode: DoneInstanceNode, x: TreeViewAdapter.Placeholder) {
         check(doneInstanceNodes.contains(doneInstanceNode))

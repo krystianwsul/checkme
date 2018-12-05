@@ -262,8 +262,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val isSelectable = true
 
-            override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
-
             override fun onClick() = activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 
             override val isVisibleWhenEmpty = true

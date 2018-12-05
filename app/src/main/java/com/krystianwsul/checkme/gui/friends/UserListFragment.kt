@@ -6,7 +6,6 @@ import android.os.Parcelable
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -329,8 +328,6 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val isVisibleWhenEmpty = true
 
         override fun onClick() = Unit
-
-        override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
         override fun compareTo(other: ModelNode) = userListData.id.compareTo((other as UserNode).userListData.id)
 

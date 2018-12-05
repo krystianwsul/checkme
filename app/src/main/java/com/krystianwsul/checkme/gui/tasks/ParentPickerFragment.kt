@@ -223,8 +223,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return treeNode
             }
 
-            override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
-
             override val name get() = Triple(parentTreeData.name, colorPrimary, true)
 
             override val details: Pair<String, Int>?

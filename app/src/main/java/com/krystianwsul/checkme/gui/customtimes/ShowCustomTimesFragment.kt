@@ -261,8 +261,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override fun onClick() = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
-        override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
-
         override fun compareTo(other: ModelNode) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
     }
 

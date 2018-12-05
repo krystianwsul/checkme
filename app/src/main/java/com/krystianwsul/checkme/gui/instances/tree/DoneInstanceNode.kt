@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -88,8 +87,6 @@ class DoneInstanceNode(
 
         groupAdapter.mGroupListFragment.updateSelectAll()
     }
-
-    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
 
     override fun compareTo(other: ModelNode): Int {
         checkNotNull(instanceData.Done)

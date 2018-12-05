@@ -451,8 +451,6 @@ class NotDoneGroupNode(
                     groupAdapter.mGroupListFragment.updateSelectAll()
             }
 
-        override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
-
         override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
         override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)

@@ -158,7 +158,7 @@ class NotDoneGroupNode(
 
     override val checkBoxVisibility
         get() = if (singleInstance()) {
-            if (groupListFragment.selectionCallback.hasActionMode) {
+            if (groupListFragment.selectionCallback.hasActionMode || treeNode.isSelected/* drag hack */) {
                 View.INVISIBLE
             } else {
                 View.VISIBLE
@@ -199,14 +199,12 @@ class NotDoneGroupNode(
         val groupListFragment = groupAdapter.mGroupListFragment
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
-        return if (groupListFragment.parameters.dataWrapper.TaskEditable != false && treeNode.isSelected && treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && (groupListFragment.parameters !is GroupListFragment.Parameters.InstanceKeys) && (groupListFragment.parameters !is GroupListFragment.Parameters.TaskKey)) {
-                check(singleInstance())
-
+        if (singleInstance() && groupListFragment.parameters.dataWrapper.TaskEditable != false && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && (groupListFragment.parameters !is GroupListFragment.Parameters.InstanceKeys) && (groupListFragment.parameters !is GroupListFragment.Parameters.TaskKey))
                 groupListFragment.dragHelper.startDrag(viewHolder)
-                true
-            } else {
-                treeNode.onLongClickListener()
-            }
+
+        treeNode.onLongClick2(viewHolder)
+
+        return true
     }
 
     override fun onClick() {

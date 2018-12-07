@@ -115,7 +115,14 @@ class GroupListFragment @JvmOverloads constructor(
     private var selectedInstances: List<InstanceKey>? = null
     private var selectedGroups: List<Long>? = null
 
-    val dragHelper by lazy { DragHelper(treeViewAdapter) }
+    val dragHelper by lazy {
+        DragHelper(treeViewAdapter, object : DragHelper.MyCallback(treeViewAdapter) {
+
+            override fun getTreeViewAdapter() = treeViewAdapter
+
+            override fun onSetNewItemPosition() = selectionCallback.actionMode!!.finish()
+        })
+    }
 
     val selectionCallback = object : SelectionCallback() {
 
@@ -339,15 +346,9 @@ class GroupListFragment @JvmOverloads constructor(
             (activity as GroupListListener).onCreateGroupActionMode(actionMode!!, treeViewAdapter)
 
             updateMenu()
-
-            dragHelper.attachToRecyclerView(groupListRecycler)
         }
 
-        override fun onSecondAdded() {
-            updateMenu()
-
-            dragHelper.attachToRecyclerView(null)
-        }
+        override fun onSecondAdded() = updateMenu()
 
         override fun onOtherAdded() = updateMenu()
 
@@ -355,15 +356,9 @@ class GroupListFragment @JvmOverloads constructor(
             updateFabVisibility()
 
             listener.onDestroyGroupActionMode()
-
-            dragHelper.attachToRecyclerView(null)
         }
 
-        override fun onSecondToLastRemoved() {
-            updateMenu()
-
-            dragHelper.attachToRecyclerView(groupListRecycler)
-        }
+        override fun onSecondToLastRemoved() = updateMenu()
 
         override fun onOtherRemoved() = updateMenu()
 
@@ -612,6 +607,8 @@ class GroupListFragment @JvmOverloads constructor(
 
         treeViewAdapter = GroupAdapter.getAdapter(this, parameters.dataId, parameters.dataWrapper.CustomTimeDatas, useGroups(), showPadding(), parameters.dataWrapper.instanceDatas.values, expansionState, selectedInstances, selectedGroups, parameters.dataWrapper.TaskDatas, parameters.dataWrapper.mNote)
         groupListRecycler.adapter = treeViewAdapter
+
+        dragHelper.attachToRecyclerView(groupListRecycler)
 
         treeViewAdapter.updateDisplayedNodes {
             selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)

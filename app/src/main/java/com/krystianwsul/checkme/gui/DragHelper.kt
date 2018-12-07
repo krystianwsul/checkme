@@ -20,7 +20,7 @@ class DragHelper(
         super.startDrag(viewHolder)
     }
 
-    class MyCallback(private val treeViewAdapter: TreeViewAdapter) : SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+    open class MyCallback(private val treeViewAdapter: TreeViewAdapter) : SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
 
         var startPosition: Int? = null
 
@@ -55,9 +55,10 @@ class DragHelper(
             endPosition?.let {
                 checkNotNull(startPosition)
 
-                if (startPosition != endPosition)
+                if (startPosition != endPosition) {
                     treeViewAdapter.setNewItemPosition(it)
-
+                    onSetNewItemPosition()
+                }
             }
 
             startPosition = null
@@ -65,5 +66,8 @@ class DragHelper(
 
             super.clearView(recyclerView, viewHolder)
         }
+
+        protected open fun getTreeViewAdapter(): TreeViewAdapter? = null
+        protected open fun onSetNewItemPosition() = Unit
     }
 }

@@ -10,7 +10,8 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     private var selected = 0
 
-    protected var actionMode: ActionMode? = null
+    var actionMode: ActionMode? = null
+        private set
 
     private var menuClick = false
     private var removingLast = false

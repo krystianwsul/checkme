@@ -171,6 +171,23 @@ class TreeNode(
         }
     }
 
+    fun onLongClick2(viewHolder: RecyclerView.ViewHolder) {
+        if (!modelNode.isSelectable)
+            return
+
+        selected = !selected
+
+        modelNode.onBindViewHolder(viewHolder)
+
+        treeViewAdapter.updateDisplayedNodes {
+            if (selected) {
+                incrementSelected(TreeViewAdapter.Placeholder)
+            } else {
+                decrementSelected(TreeViewAdapter.Placeholder)
+            }
+        }
+    }
+
     private fun hasActionMode() = treeViewAdapter.hasActionMode()
 
     private fun incrementSelected(x: TreeViewAdapter.Placeholder) = treeViewAdapter.incrementSelected(x)

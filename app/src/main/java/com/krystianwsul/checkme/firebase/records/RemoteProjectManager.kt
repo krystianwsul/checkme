@@ -16,7 +16,7 @@ class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<Data
 
     init {
         for (child in children) {
-            child.key.let {
+            child.key!!.let {
                 check(it.isNotEmpty())
 
                 remoteProjectRecords[it] = RemoteProjectRecord(domainFactory, it, child.getValue(JsonWrapper::class.java)!!)

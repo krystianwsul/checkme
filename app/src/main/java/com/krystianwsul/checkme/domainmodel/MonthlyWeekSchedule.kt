@@ -23,7 +23,7 @@ class MonthlyWeekSchedule(
     override val scheduleType get() = ScheduleType.MONTHLY_WEEK
 
     override fun getScheduleText(): String {
-        val context = MyApplication.context
+        val context = MyApplication.instance
         val day = monthlyWeekScheduleBridge.dayOfMonth.toString() + " " + dayOfWeek + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (monthlyWeekScheduleBridge.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day: $time"

@@ -21,7 +21,7 @@ class MonthlyDaySchedule(
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
     override fun getScheduleText(): String {
-        val context = MyApplication.context
+        val context = MyApplication.instance
         val day = monthlyDayScheduleBridge.dayOfMonth.toString() + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (monthlyDayScheduleBridge.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day: $time"

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.text.TextUtils
 import com.google.firebase.auth.FirebaseUser
-import com.krystianwsul.checkme.MyFirebaseInstanceIdService
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.utils.Utils
 
@@ -14,7 +14,7 @@ class UserInfo(firebaseUser: FirebaseUser) {
 
     val name = firebaseUser.displayName!!
 
-    val token = MyFirebaseInstanceIdService.token
+    val token = MyApplication.instance.token
 
     val key by lazy { UserData.getKey(email) }
 

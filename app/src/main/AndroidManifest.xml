@@ -129,14 +129,6 @@
         </service>
 
         <service
-            android:name=".MyFirebaseInstanceIdService"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-            </intent-filter>
-        </service>
-
-        <service
             android:name=".notifications.FirebaseTickService"
             android:exported="false">
             <intent-filter>

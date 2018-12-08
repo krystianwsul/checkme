@@ -101,7 +101,6 @@ dependencies {
     implementation project(path: ':treeadapter')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation 'com.code-troopers.betterpickers:library:3.1.0'
     //noinspection GradleDependency
     implementation 'com.google.guava:guava:20.0'
 

@@ -12,8 +12,6 @@ import android.widget.*
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.internal.MDButton
-import com.codetroopers.betterpickers.numberpicker.NumberPickerBuilder
-import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.DatePickerDialogFragment
@@ -26,24 +24,20 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
-import java.math.BigDecimal
 import java.util.*
 
 class ScheduleDialogFragment : AbstractDialogFragment() {
 
     companion object {
 
-        private val SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData"
-        private val SHOW_DELETE_KEY = "showDelete"
+        private const val SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData"
+        private const val SHOW_DELETE_KEY = "showDelete"
 
-        private val DATE_FRAGMENT_TAG = "dateFragment"
-        private val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
-        private val TIME_PICKER_TAG = "timePicker"
-
-        private val DAY_NUMBER_PICKER_TAG = "day_number_dialog"
+        private const val DATE_FRAGMENT_TAG = "dateFragment"
+        private const val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
+        private const val TIME_PICKER_TAG = "timePicker"
 
         fun newInstance(scheduleDialogData: ScheduleDialogData, showDelete: Boolean) = ScheduleDialogFragment().apply {
             arguments = Bundle().apply {
@@ -61,10 +55,10 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private lateinit var mScheduleDialogDayLayout: LinearLayout
     private val mScheduleDialogDays = mutableMapOf<DayOfWeek, CheckBox>()
 
-    private lateinit var mScheduleDialogMonthLayout: LinearLayout
+    private lateinit var mScheduleDialogMonthLayout: RadioGroup
 
     private lateinit var mScheduleDialogMonthDayRadio: RadioButton
-    private lateinit var mScheduleDialogMonthDayNumber: TextView
+    private lateinit var mScheduleDialogMonthDayNumber: Spinner
     private lateinit var mScheduleDialogMonthDayLabel: TextView
 
     private lateinit var mScheduleDialogMonthWeekRadio: RadioButton
@@ -114,14 +108,6 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         check(mCustomTimeDatas != null)
 
         mScheduleDialogData.timePairPersist.hourMinute = hourMinute
-        updateFields()
-    }
-
-    private val mDayNumberPickerDialogHandlerV2 = NumberPickerDialogFragment.NumberPickerDialogHandlerV2 { _, _, _, _, fullNumber ->
-        mScheduleDialogData.monthDayNumber = fullNumber.toInt()
-        check(mScheduleDialogData.monthDayNumber > 0)
-        check(mScheduleDialogData.monthDayNumber < 29)
-
         updateFields()
     }
 
@@ -320,19 +306,21 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             isChecked = mScheduleDialogData.monthlyDay
         }
 
-        mScheduleDialogMonthDayNumber.setOnClickListener {
-            NumberPickerBuilder()
-                    .setPlusMinusVisibility(View.GONE)
-                    .setDecimalVisibility(View.GONE)
-                    .setMinNumber(BigDecimal.ONE)
-                    .setMaxNumber(BigDecimal(28))
-                    .setStyleResId(R.style.BetterPickersDialogFragment_Light)
-                    .setFragmentManager(childFragmentManager)
-                    .addNumberPickerDialogHandler(mDayNumberPickerDialogHandlerV2)
-                    .show()
-        }
+        mScheduleDialogMonthDayNumber.apply {
+            adapter = ArrayAdapter(requireContext(), R.layout.spinner_no_padding, (1..28).map { Utils.ordinal(it) }).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            setSelection(mScheduleDialogData.monthDayNumber - 1)
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
-        (childFragmentManager.findFragmentByTag(DAY_NUMBER_PICKER_TAG) as? NumberPickerDialogFragment)?.setNumberPickerDialogHandlersV2(Vector<NumberPickerDialogFragment.NumberPickerDialogHandlerV2>(listOf(mDayNumberPickerDialogHandlerV2)))
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    check(position >= 0)
+                    check(position < 28)
+
+                    mScheduleDialogData.monthDayNumber = position + 1
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+            }
+        }
 
         mScheduleDialogMonthWeekRadio.run {
             setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
@@ -359,6 +347,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             adapter = ArrayAdapter(requireContext(), R.layout.spinner_no_padding, listOf(1, 2, 3, 4).map { Utils.ordinal(it) }).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
             setSelection(mScheduleDialogData.monthWeekNumber - 1)
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     check(position >= 0)
                     check(position <= 3)
@@ -519,8 +508,6 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogData.timePairPersist.hourMinute.toString()
             }
             ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
-                mScheduleDialogMonthDayNumber.text = Utils.ordinal(mScheduleDialogData.monthDayNumber)
-
                 mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
                     mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!.name
                 } else {

@@ -174,48 +174,46 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         recordQuery = DatabaseWrapper.getTaskRecordsQuery(newUserInfo)
         recordListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot?) {
-                Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: " + dataSnapshot!!)
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: $dataSnapshot")
 
                 setRemoteTaskRecords(dataSnapshot, source)
             }
 
-            override fun onCancelled(databaseError: DatabaseError?) {
-                check(databaseError != null)
+            override fun onCancelled(databaseError: DatabaseError) {
                 Log.e("asdf", "DomainFactory.getMRecordListener().onCancelled", databaseError.toException())
 
                 MyCrashlytics.logException(databaseError.toException())
 
-                if (tickData != null) {
-                    tickData!!.release()
-                    tickData = null
-                }
+                tickData?.release()
+                tickData = null
 
                 notTickFirebaseListeners.clear()
                 RemoteFriendFactory.clearFriendListeners()
             }
         }
-        recordQuery!!.addValueEventListener(recordListener)
+        recordQuery!!.addValueEventListener(recordListener!!)
 
         RemoteFriendFactory.setListener(userInfo!!)
 
         userQuery = DatabaseWrapper.getUserQuery(newUserInfo)
         userListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot?) {
-                Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: " + dataSnapshot!!)
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: $dataSnapshot")
 
                 setUserRecord(dataSnapshot)
             }
 
-            override fun onCancelled(databaseError: DatabaseError?) {
-                check(databaseError != null)
+            override fun onCancelled(databaseError: DatabaseError) {
                 Log.e("asdf", "DomainFactory.getMUserListener().onCancelled", databaseError.toException())
 
                 MyCrashlytics.logException(databaseError.toException())
             }
         }
 
-        userQuery!!.addValueEventListener(userListener)
+        userQuery!!.addValueEventListener(userListener!!)
     }
 
     @Synchronized
@@ -2269,7 +2267,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             updateInstances.forEach { updateInstance(it, now) }
         }
 
-        val sharedPreferences = MyApplication.context.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)!!
+        val sharedPreferences = MyApplication.instance.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)!!
 
         val tickLog = sharedPreferences.getString(TickJobIntentService.TICK_LOG, "")!!
         val tickLogArr = tickLog.split('\n')

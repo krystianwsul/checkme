@@ -7,6 +7,7 @@ import com.google.firebase.messaging.RemoteMessage
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.checkme.notifications.InstanceDoneService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 
 
@@ -40,6 +41,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }
+    }
+
+    override fun onNewToken(token: String) {
+        Log.e("asdf", "onTokenRefresh $token")
+
+        MyApplication.instance.token = token
+
+        val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
+
+        val userInfo = UserInfo(firebaseUser)
+
+        InstanceDoneService.throttleFirebase(true) { it.updateUserInfo(SaveService.Source.SERVICE, userInfo) }
     }
 
     private class UnknownMessageException(data: Map<String, String>) : Exception(getMessage(data)) {

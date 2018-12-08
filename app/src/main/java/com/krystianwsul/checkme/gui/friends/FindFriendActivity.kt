@@ -136,7 +136,7 @@ class FindFriendActivity : AppCompatActivity() {
 
         databaseReference = DatabaseWrapper.getUserDataDatabaseReference(key)
 
-        databaseReference!!.addValueEventListener(valueEventListener)
+        databaseReference!!.addValueEventListener(valueEventListener!!)
     }
 
     private fun updateLayout() {

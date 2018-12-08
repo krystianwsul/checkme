@@ -39,7 +39,7 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
         tomorrowCalendar.add(Calendar.DATE, 1)
         val tomorrowDate = Date(tomorrowCalendar)
 
-        val context = MyApplication.context
+        val context = MyApplication.instance
 
         return when (this) {
             todayDate -> context.getString(R.string.today)

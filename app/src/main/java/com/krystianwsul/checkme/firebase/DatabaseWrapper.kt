@@ -26,7 +26,7 @@ object DatabaseWrapper {
         root = myApplication.resources.getString(R.string.firebase_root)
         check(!TextUtils.isEmpty(root))
 
-        rootReference = FirebaseDatabase.getInstance().reference.child(root)!!
+        rootReference = FirebaseDatabase.getInstance().reference.child(root)
     }
 
     fun setUserInfo(userInfo: UserInfo, uuid: String) {
@@ -35,7 +35,7 @@ object DatabaseWrapper {
         rootReference.child("$USERS_KEY/$key/userData").updateChildren(userInfo.getValues(uuid))
     }
 
-    fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")!!
+    fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 
     fun addFriend(userInfo: UserInfo, friendUserData: UserData) {
         val myKey = userInfo.key
@@ -47,7 +47,7 @@ object DatabaseWrapper {
     fun getFriendsQuery(userInfo: UserInfo): Query {
         val key = userInfo.key
 
-        return rootReference.child(USERS_KEY).orderByChild("friendOf/$key").equalTo(true)!!
+        return rootReference.child(USERS_KEY).orderByChild("friendOf/$key").equalTo(true)
     }
 
     fun getScheduleRecordId(projectId: String, taskId: String): String {
@@ -91,17 +91,17 @@ object DatabaseWrapper {
 
         return rootReference.child(RECORDS_KEY)
                 .orderByChild("recordOf/$key")
-                .equalTo(true)!!
+                .equalTo(true)
     }
 
-    fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)!!
+    fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)
 
-    fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)!!
+    fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
     fun getUserQuery(userInfo: UserInfo): Query {
         val key = userInfo.key
         check(!TextUtils.isEmpty(key))
 
-        return rootReference.child("$USERS_KEY/$key")!!
+        return rootReference.child("$USERS_KEY/$key")
     }
 }

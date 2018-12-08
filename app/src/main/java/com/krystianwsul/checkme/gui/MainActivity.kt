@@ -857,7 +857,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 firebaseAuth.signInWithCredential(credential)
                         .addOnCompleteListener(this) { task ->
                             if (task.isSuccessful) {
-                                Toast.makeText(this, getString(R.string.signInAs) + " " + task.result.user.displayName, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, getString(R.string.signInAs) + " " + task.result!!.user.displayName, Toast.LENGTH_SHORT).show()
                             } else {
                                 val exception = task.exception!!
 

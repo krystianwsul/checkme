@@ -11,6 +11,7 @@ abstract class NotificationWrapper {
 
         val instance: NotificationWrapper = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> NotificationWrapperImplO()
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> NotificationWrapperImplM()
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> NotificationWrapperImplN()
             else -> NotificationWrapperImpl()
         }

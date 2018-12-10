@@ -15,7 +15,7 @@ class TreeNode(
 
     val itemViewType = modelNode.itemViewType
 
-    val onLongClickListener
+    val onLongClickListener // todo function
         get() = {
             treeViewAdapter.updateDisplayedNodes {
                 this@TreeNode.onLongClick(TreeViewAdapter.Placeholder)
@@ -23,7 +23,7 @@ class TreeNode(
             true
         }
 
-    val onClickListener
+    val onClickListener // todo funciton
         get() = {
             if (hasActionMode()) {
                 treeViewAdapter.updateDisplayedNodes {
@@ -171,7 +171,7 @@ class TreeNode(
         }
     }
 
-    fun onLongClick2(viewHolder: RecyclerView.ViewHolder) {
+    fun onLongClickSelect(viewHolder: RecyclerView.ViewHolder) {
         if (!modelNode.isSelectable)
             return
 

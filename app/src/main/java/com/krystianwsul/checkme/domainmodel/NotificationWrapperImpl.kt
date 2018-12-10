@@ -1,13 +1,14 @@
 package com.krystianwsul.checkme.domainmodel
 
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.app.NotificationCompat
-import com.firebase.jobdispatcher.*
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -21,7 +22,6 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimeStamp
-
 import java.util.*
 
 open class NotificationWrapperImpl : NotificationWrapper() {
@@ -46,6 +46,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val scheduleKey = ScheduleKey(instanceKey.scheduleKey.scheduleDate, TimePair(customTimeKey))
             return InstanceKey(instanceKey.taskKey, scheduleKey)
         }
+
+        val alarmManager by lazy { MyApplication.instance.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
+
+        private const val TAG = "tickService"
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -209,24 +213,30 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
-        val tag = "tickService"
-
         if (nextAlarm != null) {
-            val now = ExactTimeStamp.now
 
+            val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 0, Intent(MyApplication.instance, AlarmReceiver::class.java), PendingIntent.FLAG_UPDATE_CURRENT)!!
+            alarmManager.cancel(pendingIntent)
+            setExact(nextAlarm.long, pendingIntent)
+
+            /*
+
+            val now = ExactTimeStamp.now
             val delay = ((nextAlarm.long - now.long) / 1000).toInt()
 
-            val dispatcher = FirebaseJobDispatcher(GooglePlayDriver(MyApplication.instance))
+            FirebaseJobDispatcher(GooglePlayDriver(MyApplication.instance)).apply {
+                mustSchedule(newJobBuilder().setService(FirebaseTickService::class.java)
+                        .setTag(TAG)
+                        .setRecurring(false)
+                        .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                        .setTrigger(Trigger.executionWindow(delay, delay + 5))
+                        .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                        .setReplaceCurrent(true)
+                        .build())
 
-            dispatcher.mustSchedule(dispatcher.newJobBuilder()
-                    .setService(FirebaseTickService::class.java)
-                    .setTag(tag)
-                    .setRecurring(false)
-                    .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
-                    .setTrigger(Trigger.executionWindow(delay, delay + 5))
-                    .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                    .setReplaceCurrent(true)
-                    .build())
+            }*/
         }
     }
+
+    override fun setExact(time: Long, pendingIntent: PendingIntent) = alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent)
 }

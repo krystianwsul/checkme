@@ -100,6 +100,10 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".notifications.AlarmReceiver"
+            android:enabled="true"/>
+
         <service
             android:name=".notifications.TickJobIntentService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>

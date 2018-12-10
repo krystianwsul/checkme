@@ -15,24 +15,21 @@ class TreeNode(
 
     val itemViewType = modelNode.itemViewType
 
-    val onLongClickListener // todo function
-        get() = {
-            treeViewAdapter.updateDisplayedNodes {
-                this@TreeNode.onLongClick(TreeViewAdapter.Placeholder)
-            }
-            true
+    fun onLongClick() {
+        treeViewAdapter.updateDisplayedNodes {
+            toggleSelected(TreeViewAdapter.Placeholder)
         }
+    }
 
-    val onClickListener // todo funciton
-        get() = {
-            if (hasActionMode()) {
-                treeViewAdapter.updateDisplayedNodes {
-                    onLongClick(TreeViewAdapter.Placeholder)
-                }
-            } else {
-                modelNode.onClick()
+    fun onClick() {
+        if (hasActionMode()) {
+            treeViewAdapter.updateDisplayedNodes {
+                toggleSelected(TreeViewAdapter.Placeholder)
             }
+        } else {
+            modelNode.onClick()
         }
+    }
 
     private val treeViewAdapter by lazy { treeNodeCollection.treeViewAdapter }
 
@@ -158,7 +155,7 @@ class TreeNode(
 
     override fun compareTo(other: TreeNode) = modelNode.compareTo(other.modelNode)
 
-    private fun onLongClick(x: TreeViewAdapter.Placeholder) {
+    private fun toggleSelected(x: TreeViewAdapter.Placeholder) {
         if (!modelNode.isSelectable)
             return
 
@@ -399,14 +396,14 @@ class TreeNode(
         if (!modelNode.isSelectable)
             throw NotSelectableSelectedException()
 
-        onLongClick(x)
+        toggleSelected(x)
     }
 
     fun deselect(x: TreeViewAdapter.Placeholder) {
         if (!selected)
             throw NotSelectedException()
 
-        onLongClick(x)
+        toggleSelected(x)
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")

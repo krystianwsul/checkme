@@ -195,7 +195,7 @@ class NotDoneGroupNode(
                 groupAdapter.mGroupListFragment.updateSelectAll()
         }
 
-    override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder): Boolean {
+    override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
         val groupListFragment = groupAdapter.mGroupListFragment
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
@@ -203,8 +203,6 @@ class NotDoneGroupNode(
                 groupListFragment.dragHelper.startDrag(viewHolder)
 
         treeNode.onLongClickSelect(viewHolder)
-
-        return true
     }
 
     override fun onClick() {

@@ -39,7 +39,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open fun checkBoxOnClickListener() = Unit
 
-    protected open fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
+    protected open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
@@ -121,8 +121,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
             itemView.run {
                 setBackgroundColor(if (treeNode.isSelected) colorSelected else Color.TRANSPARENT)
-                setOnLongClickListener { onLongClickListener(viewHolder) }
-                setOnClickListener { treeNode.onClickListener() }
+                setOnLongClickListener {
+                    onLongClick(viewHolder)
+                    true
+                }
+                setOnClickListener { treeNode.onClick() }
             }
         }
     }

@@ -256,6 +256,7 @@ class GroupListFragment @JvmOverloads constructor(
                             }
                         }
 
+                        decrementSelected(x)
                         selectedTreeNodes = treeViewAdapter.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 

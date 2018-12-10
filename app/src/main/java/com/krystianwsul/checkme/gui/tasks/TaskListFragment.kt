@@ -101,7 +101,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         taskWrapper.removeFromParent(x)
 
                         decrementSelected(x)
-
                         selectedNodes = treeViewAdapter.selectedNodes
                     } while (selectedNodes.isNotEmpty())
 

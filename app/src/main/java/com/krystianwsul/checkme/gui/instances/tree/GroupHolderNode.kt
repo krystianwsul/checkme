@@ -19,17 +19,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
         private fun getColor(@ColorRes color: Int) = ContextCompat.getColor(MyApplication.instance, color)
 
-        @JvmStatic
-        protected val colorPrimary by lazy { getColor(R.color.textPrimary) }
-
-        @JvmStatic
-        protected val colorSecondary by lazy { getColor(R.color.textSecondary) }
-
-        @JvmStatic
-        protected val colorDisabled by lazy { getColor(R.color.textDisabled) }
-
-        @JvmStatic
-        protected val colorSelected by lazy { getColor(R.color.selected) }
+        val colorPrimary by lazy { getColor(R.color.textPrimary) }
+        val colorSecondary by lazy { getColor(R.color.textSecondary) }
+        val colorDisabled by lazy { getColor(R.color.textDisabled) }
+        val colorSelected by lazy { getColor(R.color.selected) }
     }
 
     protected abstract val treeNode: TreeNode

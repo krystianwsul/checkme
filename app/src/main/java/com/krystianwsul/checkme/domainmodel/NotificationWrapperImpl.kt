@@ -5,10 +5,10 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.app.NotificationCompat
+import com.firebase.jobdispatcher.*
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -215,11 +215,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     override fun updateAlarm(nextAlarm: TimeStamp?) {
         if (nextAlarm != null) {
 
-            val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 0, Intent(MyApplication.instance, AlarmReceiver::class.java), PendingIntent.FLAG_UPDATE_CURRENT)!!
-            alarmManager.cancel(pendingIntent)
-            setExact(nextAlarm.long, pendingIntent)
-
-            /*
+            setExact(nextAlarm.long)
 
             val now = ExactTimeStamp.now
             val delay = ((nextAlarm.long - now.long) / 1000).toInt()
@@ -234,9 +230,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                         .setReplaceCurrent(true)
                         .build())
 
-            }*/
+            }
         }
     }
 
-    override fun setExact(time: Long, pendingIntent: PendingIntent) = alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+    protected open fun setExact(time: Long) {
+        val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 0, AlarmReceiver.newIntent("setExact"), PendingIntent.FLAG_UPDATE_CURRENT)!!
+        alarmManager.cancel(pendingIntent)
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+    }
 }

@@ -269,14 +269,14 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
 
         if (tickData == null && notTickFirebaseListeners.isEmpty()) {
-            updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf())
+            updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "other")
 
             save(0, source)
         } else {
             skipSave = true
 
             if (tickData == null) {
-                updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf())
+                updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "other")
             } else {
                 updateNotificationsTick(source, tickData!!.silent, tickData!!.source)
 
@@ -1455,8 +1455,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         return task.taskKey
     }
 
-    fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean): Irrelevant {
-        updateNotifications(silent, now, listOf())
+    fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean, sourceName: String): Irrelevant {
+        updateNotifications(silent, now, listOf(), sourceName)
 
         val irrelevant = setIrrelevant(now)
 
@@ -1474,7 +1474,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         val now = ExactTimeStamp.now
 
-        updateNotificationsTick(now, source, silent)
+        updateNotificationsTick(now, source, silent, sourceName)
     }
 
     @Synchronized
@@ -1818,7 +1818,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         updateNotifications(true, now, localToRemoteConversion.localTasks
                 .values
-                .map { it.first.taskKey })
+                .map { it.first.taskKey }, "other")
 
         val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
 
@@ -2125,7 +2125,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     private fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(setOf(remoteProject), userInfo!!, userKeys)
 
-    private fun updateNotifications(now: ExactTimeStamp) = updateNotifications(true, now, mutableListOf())
+    private fun updateNotifications(now: ExactTimeStamp) = updateNotifications(true, now, mutableListOf(), "other")
 
     private val taskKeys
         get() = localFactory.taskIds
@@ -2133,7 +2133,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .toMutableSet()
                 .apply { remoteProjectFactory?.let { addAll(it.taskKeys) } }
 
-    private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>) {
+    private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String) {
         val rootInstances = getRootInstances(null, now.plusOne(), now) // 24 hack
 
         val notificationInstances = rootInstances.filter { it.done == null && !it.notified && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !removedTaskKeys.contains(it.taskKey) }.associateBy { it.instanceKey }
@@ -2272,7 +2272,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val tickLog = sharedPreferences.getString(TickJobIntentService.TICK_LOG, "")!!
         val tickLogArr = tickLog.split('\n')
         val tickLogArrTrimmed = ArrayList(tickLogArr.subList(Math.max(tickLogArr.size - 20, 0), tickLogArr.size))
-        tickLogArrTrimmed.add(now.toString() + " s? " + (if (silent) "t" else "f") + message)
+        tickLogArrTrimmed.add(now.toString() + "from: " + sourceName + " s? " + (if (silent) "t" else "f") + message)
 
         val editor = sharedPreferences.edit()
 

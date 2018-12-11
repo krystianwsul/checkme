@@ -51,7 +51,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
     lateinit var treeViewAdapter: TreeViewAdapter
         private set
 
-    private val dragHelper by lazy { DragHelper(treeViewAdapter) }
+    private val dragHelper by lazy {
+        DragHelper(object : DragHelper.MyCallback() {
+
+            override fun getTreeViewAdapter() = treeViewAdapter
+
+            override fun onSetNewItemPosition() = selectionCallback.actionMode!!.finish()
+        })
+    }
 
     private val selectionCallback = object : SelectionCallback() {
 
@@ -94,7 +101,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         taskWrapper.removeFromParent(x)
 
                         decrementSelected(x)
-
                         selectedNodes = treeViewAdapter.selectedNodes
                     } while (selectedNodes.isNotEmpty())
 
@@ -119,8 +125,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
 
             (activity as TaskListListener).onCreateTaskActionMode(actionMode!!, treeViewAdapter)
-
-            dragHelper.attachToRecyclerView(taskListRecycler)
         }
 
         override fun onSecondAdded() {
@@ -140,8 +144,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
                 findItem(R.id.action_task_add).isVisible = false
             }
-
-            dragHelper.attachToRecyclerView(null)
         }
 
         override fun onOtherAdded() {
@@ -165,8 +167,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
 
             (activity as TaskListListener).onDestroyTaskActionMode()
-
-            dragHelper.attachToRecyclerView(null)
         }
 
         override fun onSecondToLastRemoved() {
@@ -176,8 +176,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 findItem(R.id.action_task_delete).isVisible = true
                 findItem(R.id.action_task_add).isVisible = true
             }
-
-            dragHelper.attachToRecyclerView(taskListRecycler)
         }
 
         override fun onOtherRemoved() {
@@ -346,8 +344,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
 
         treeViewAdapter = TaskAdapter.getAdapter(this, taskData!!, selectedTaskKeys, expandedTaskIds)
-
         taskListRecycler.adapter = treeViewAdapter
+        dragHelper.attachToRecyclerView(taskListRecycler)
 
         treeViewAdapter.updateDisplayedNodes {
             selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
@@ -613,11 +611,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override val name get() = Triple(childTaskData.name, colorPrimary, true)
 
-            override fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = if (taskListFragment.taskKey != null && treeNode.isSelected && taskAdapter.treeNodeCollection.selectedChildren.size == 1 && indentation == 0 && taskAdapter.treeNodeCollection.nodes.none { it.isExpanded }) {
-                taskListFragment.dragHelper.startDrag(viewHolder)
-                true
-            } else {
-                treeNode.onLongClickListener()
+            override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
+                val treeNodeCollection = taskAdapter.treeNodeCollection
+
+                if (taskListFragment.taskKey != null && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded })
+                    taskListFragment.dragHelper.startDrag(viewHolder)
+
+                treeNode.onLongClickSelect(viewHolder)
             }
 
             override val itemViewType = TYPE_TASK

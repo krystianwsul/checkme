@@ -39,7 +39,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open fun checkBoxOnClickListener() = Unit
 
-    protected open fun onLongClickListener(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClickListener()
+    protected open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
@@ -105,7 +105,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             rowExpand.run {
                 visibility = if (treeNode.expandVisible) View.VISIBLE else View.INVISIBLE
                 setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
-                setOnClickListener { treeNode.expandListener() }
+                setOnClickListener { treeNode.onExpandClick() }
             }
 
             rowCheckBox.run {
@@ -121,8 +121,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
             itemView.run {
                 setBackgroundColor(if (treeNode.isSelected) colorSelected else Color.TRANSPARENT)
-                setOnLongClickListener { onLongClickListener(viewHolder) }
-                setOnClickListener { treeNode.onClickListener() }
+                setOnLongClickListener {
+                    onLongClick(viewHolder)
+                    true
+                }
+                setOnClickListener { treeNode.onClick() }
             }
         }
     }

@@ -15,24 +15,21 @@ class TreeNode(
 
     val itemViewType = modelNode.itemViewType
 
-    val onLongClickListener
-        get() = {
-            treeViewAdapter.updateDisplayedNodes {
-                this@TreeNode.onLongClick(TreeViewAdapter.Placeholder)
-            }
-            true
+    fun onLongClick() {
+        treeViewAdapter.updateDisplayedNodes {
+            toggleSelected(TreeViewAdapter.Placeholder)
         }
+    }
 
-    val onClickListener
-        get() = {
-            if (hasActionMode()) {
-                treeViewAdapter.updateDisplayedNodes {
-                    onLongClick(TreeViewAdapter.Placeholder)
-                }
-            } else {
-                modelNode.onClick()
+    fun onClick() {
+        if (hasActionMode()) {
+            treeViewAdapter.updateDisplayedNodes {
+                toggleSelected(TreeViewAdapter.Placeholder)
             }
+        } else {
+            modelNode.onClick()
         }
+    }
 
     private val treeViewAdapter by lazy { treeNodeCollection.treeViewAdapter }
 
@@ -72,40 +69,30 @@ class TreeNode(
             if (childTreeNodes!!.none { it.canBeShown() })
                 return false
 
-            return !(hasActionMode() && hasSelectedDescendants())
+            return true
         }
 
     val state get() = State(isExpanded, isSelected, expandVisible, separatorVisible, modelNode.state)
 
     // hiding
     // showing
-    val expandListener: () -> Unit
-        get() {
-            if (childTreeNodes == null)
-                throw SetChildTreeNodesNotCalledException()
+    fun onExpandClick() {
+        if (childTreeNodes == null)
+            throw SetChildTreeNodesNotCalledException()
 
-            return {
-                if (childTreeNodes!!.isEmpty())
-                    throw EmptyExpandedException()
+        if (childTreeNodes!!.isEmpty())
+            throw EmptyExpandedException()
 
-                if (hasSelectedDescendants() && hasActionMode())
-                    throw DescendantSelectedException()
+        treeViewAdapter.updateDisplayedNodes {
+            expanded = if (expanded) {
+                childTreeNodes!!.forEach { it.deselectRecursive(TreeViewAdapter.Placeholder) }
 
-                val position = treeNodeCollection.getPosition(this@TreeNode)
-                check(position >= 0)
-
-                treeViewAdapter.updateDisplayedNodes {
-                    expanded = if (expanded) {
-                        if (hasSelectedDescendants())
-                            throw SelectedChildrenException()
-
-                        false
-                    } else {
-                        true
-                    }
-                }
+                false
+            } else {
+                true
             }
         }
+    }
 
     val separatorVisible: Boolean
         get() {
@@ -158,7 +145,7 @@ class TreeNode(
 
     override fun compareTo(other: TreeNode) = modelNode.compareTo(other.modelNode)
 
-    private fun onLongClick(x: TreeViewAdapter.Placeholder) {
+    private fun toggleSelected(x: TreeViewAdapter.Placeholder) {
         if (!modelNode.isSelectable)
             return
 
@@ -171,7 +158,7 @@ class TreeNode(
         }
     }
 
-    fun onLongClick2(viewHolder: RecyclerView.ViewHolder) {
+    fun onLongClickSelect(viewHolder: RecyclerView.ViewHolder) {
         if (!modelNode.isSelectable)
             return
 
@@ -381,13 +368,6 @@ class TreeNode(
             return childTreeNodes!!.filter { it.isSelected }
         }
 
-    private fun hasSelectedDescendants(): Boolean {
-        if (childTreeNodes == null)
-            throw SetChildTreeNodesNotCalledException()
-
-        return childTreeNodes!!.any { it.isSelected || it.hasSelectedDescendants() }
-    }
-
     override val treeNodeCollection by lazy { parent.treeNodeCollection }
 
     override val indentation by lazy { parent.indentation + 1 }
@@ -399,14 +379,21 @@ class TreeNode(
         if (!modelNode.isSelectable)
             throw NotSelectableSelectedException()
 
-        onLongClick(x)
+        toggleSelected(x)
     }
 
     fun deselect(x: TreeViewAdapter.Placeholder) {
         if (!selected)
             throw NotSelectedException()
 
-        onLongClick(x)
+        toggleSelected(x)
+    }
+
+    private fun deselectRecursive(x: TreeViewAdapter.Placeholder) {
+        childTreeNodes!!.forEach { it.deselectRecursive(x) }
+
+        if (selected)
+            deselect(x)
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")
@@ -421,8 +408,6 @@ class TreeNode(
 
     class SelectAllException : UnsupportedOperationException("TreeViewAdapter.selectAll() can be called only if no nodes are selected.")
 
-    class SelectedChildrenException : UnsupportedOperationException("A TreeNode cannot be collapsed if it has selected children.")
-
     class NoSuchNodeException : IllegalArgumentException("The given node is not a direct descendant of this TreeNode.")
 
     class InvisibleNodeException : UnsupportedOperationException("This operation is meaningless if the node is not visible.")
@@ -432,8 +417,6 @@ class TreeNode(
     class SelectCalledTwiceException : UnsupportedOperationException("Can't select a node that is already selected.")
 
     class NotSelectedException : UnsupportedOperationException("Can't deselect a node that is not selected.")
-
-    class DescendantSelectedException : UnsupportedOperationException("Can't change a node's expansion state when it has selected descendants.")
 
     data class State(
             val isExpanded: Boolean,

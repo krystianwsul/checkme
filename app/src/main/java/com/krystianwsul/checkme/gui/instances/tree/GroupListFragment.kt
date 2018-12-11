@@ -501,6 +501,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     public override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is Bundle) {
+            state.classLoader = ExpansionState::class.java.classLoader
             state.takeIf { it.containsKey(EXPANSION_STATE_KEY) }?.apply {
                 expansionState = getParcelable(EXPANSION_STATE_KEY)
 
@@ -515,6 +516,7 @@ class GroupListFragment @JvmOverloads constructor(
                     check(!containsKey(SELECTED_GROUPS_KEY))
                 }
             }
+
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
         } else {
             super.onRestoreInstanceState(state)

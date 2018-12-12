@@ -53,7 +53,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
             val silent = oldTickData.silent && newTickData.silent
 
-            val source = "merged ($oldTickData, $newTickData)"
+            val source = "merged (${oldTickData.source}, ${newTickData.source})"
 
             oldTickData.releaseWakelock()
             newTickData.releaseWakelock()
@@ -2272,7 +2272,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val tickLog = sharedPreferences.getString(TickJobIntentService.TICK_LOG, "")!!
         val tickLogArr = tickLog.split('\n')
         val tickLogArrTrimmed = ArrayList(tickLogArr.subList(Math.max(tickLogArr.size - 20, 0), tickLogArr.size))
-        tickLogArrTrimmed.add(now.toString() + " s? " + (if (silent) "t" else "f") + message)
+        tickLogArrTrimmed.add(now.toString())
+        tickLogArrTrimmed.add("silent? " + (if (silent) "t" else "f") + message)
 
         val editor = sharedPreferences.edit()
 
@@ -2297,7 +2298,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         if (nextAlarm != null)
             tickLogArrTrimmed.add("next tick: $nextAlarm")
 
-        editor.putString(TickJobIntentService.TICK_LOG, tickLogArrTrimmed.joinToString("\n"))
+        editor.putString(TickJobIntentService.TICK_LOG, tickLogArrTrimmed.joinToString("\n") + "\n")
         editor.apply()
     }
 

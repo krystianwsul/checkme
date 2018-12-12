@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -559,6 +560,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             if (this@GroupListFragment::treeViewAdapter.isInitialized) {
                 putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState)
+                Log.e("asdf", "save expansion" + (treeViewAdapter.treeModelAdapter as GroupAdapter).expansionState)
 
                 if (selectionCallback.hasActionMode) {
                     val (instanceKeys, exactTimeStamps) = getSelectedData()
@@ -723,6 +725,9 @@ class GroupListFragment @JvmOverloads constructor(
 
                 val expandedTaskKeys = nodeCollection.expandedTaskKeys
 
+                // todo unscheduled task with doubly nested children (task, a, 1) has separator below when expanded
+                // todo instances should have recursive expanded state (with done)
+
                 return ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys)
             }
 
@@ -771,7 +776,7 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     @Parcelize
-    class ExpansionState(
+    data class ExpansionState(
             val DoneExpanded: Boolean,
             val ExpandedGroups: List<TimeStamp>,
             val ExpandedInstances: HashMap<InstanceKey, Boolean>,

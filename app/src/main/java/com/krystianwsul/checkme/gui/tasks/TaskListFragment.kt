@@ -689,6 +689,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
+            override val textSelectable = true
+
             override val name get() = Triple(note, colorPrimary, false)
 
             override val itemViewType = TYPE_NOTE

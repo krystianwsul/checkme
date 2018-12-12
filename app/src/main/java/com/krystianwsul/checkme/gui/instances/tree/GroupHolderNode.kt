@@ -43,6 +43,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
+    protected open val textSelectable = false
+
     final override val state get() = State(id, name, details, children, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxVisibility, checkBoxChecked)
 
     data class State(
@@ -75,6 +77,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     } else {
                         visibility = View.INVISIBLE
                     }
+
+                    setTextIsSelectable(textSelectable)
                 }
             }
 

@@ -40,6 +40,8 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
+    override val textSelectable = true
+
     override fun compareTo(other: ModelNode): Int {
         check(other is NotDoneGroupNode || other is UnscheduledNode || other is DividerNode)
 

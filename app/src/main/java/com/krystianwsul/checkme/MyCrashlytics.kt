@@ -31,13 +31,21 @@ object MyCrashlytics {
             Crashlytics.logException(throwable)
     }
 
-    fun logMethod(obj: Any, message: String? = null) {
+    fun logMethod(obj: Any) {
         val stackTraceElements = Thread.currentThread().stackTrace
         val caller = stackTraceElements[3]
 
         val method = caller.methodName
 
-        val suffix = if (message.isNullOrEmpty()) "" else ": $message"
-        log(obj.javaClass.simpleName + "." + method + " " + obj.hashCode() + suffix)
+        log(obj.javaClass.simpleName + "." + method + " " + obj.hashCode())
+    }
+
+    fun logMethod(obj: Any, message: String) {
+        val stackTraceElements = Thread.currentThread().stackTrace
+        val caller = stackTraceElements[3]
+
+        val method = caller.methodName
+
+        log(obj.javaClass.simpleName + "." + method + " " + obj.hashCode() + ": $message")
     }
 }

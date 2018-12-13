@@ -52,6 +52,7 @@ class GroupListFragment @JvmOverloads constructor(
         private const val EXPANSION_STATE_KEY = "expansionState"
         private const val SELECTED_INSTANCES_KEY = "selectedInstances"
         private const val SELECTED_GROUPS_KEY = "selectedGroups"
+        private const val LAYOUT_MANAGER_STATE = "layoutManagerState"
 
         private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
             check(position >= 0)
@@ -499,21 +500,25 @@ class GroupListFragment @JvmOverloads constructor(
         groupListRecycler.layoutManager = LinearLayoutManager(context)
     }
 
-    public override fun onRestoreInstanceState(state: Parcelable?) {
+    public override fun onRestoreInstanceState(state: Parcelable) {
         if (state is Bundle) {
-            state.takeIf { it.containsKey(EXPANSION_STATE_KEY) }?.apply {
-                expansionState = getParcelable(EXPANSION_STATE_KEY)
+            state.apply {
+                if (containsKey(EXPANSION_STATE_KEY)) {
+                    expansionState = getParcelable(EXPANSION_STATE_KEY)
 
-                if (containsKey(SELECTED_INSTANCES_KEY)) {
-                    check(containsKey(SELECTED_GROUPS_KEY))
+                    if (containsKey(SELECTED_INSTANCES_KEY)) {
+                        check(containsKey(SELECTED_GROUPS_KEY))
 
-                    selectedInstances = getParcelableArrayList(SELECTED_INSTANCES_KEY)!!
-                    selectedGroups = getLongArray(SELECTED_GROUPS_KEY)!!.toList()
+                        selectedInstances = getParcelableArrayList(SELECTED_INSTANCES_KEY)!!
+                        selectedGroups = getLongArray(SELECTED_GROUPS_KEY)!!.toList()
 
-                    check(selectedInstances.isNotEmpty() || selectedGroups.isNotEmpty())
-                } else {
-                    check(!containsKey(SELECTED_GROUPS_KEY))
+                        check(selectedInstances.isNotEmpty() || selectedGroups.isNotEmpty())
+                    } else {
+                        check(!containsKey(SELECTED_GROUPS_KEY))
+                    }
                 }
+
+                groupListRecycler.layoutManager!!.onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
             }
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
         } else {
@@ -569,6 +574,8 @@ class GroupListFragment @JvmOverloads constructor(
                     putLongArray(SELECTED_GROUPS_KEY, exactTimeStamps.toLongArray())
                 }
             }
+
+            putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
         }
     }
 

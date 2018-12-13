@@ -21,11 +21,11 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
 
     val unscheduledExpanded get() = unscheduledNode?.expanded() ?: false
 
-    val expandedTaskKeys: List<TaskKey>? get() = unscheduledNode?.expandedTaskKeys
+    val expandedTaskKeys: List<TaskKey> get() = unscheduledNode?.expandedTaskKeys ?: listOf()
 
     val doneExpanded get() = dividerNode.expanded()
 
-    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>?, expandedInstances: Map<InstanceKey, Boolean>?, doneExpanded: Boolean, selectedInstances: List<InstanceKey>?, selectedGroups: List<Long>?, taskDatas: List<GroupListFragment.TaskData>?, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>?): List<TreeNode> {
+    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, doneExpanded: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, taskDatas: List<GroupListFragment.TaskData>, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>): List<TreeNode> {
         val notDoneInstanceDatas = instanceDatas.filter { it.Done == null }
         val doneInstanceDatas = instanceDatas.filter { it.Done != null }
 
@@ -40,8 +40,8 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
 
             addAll(notDoneGroupCollection.initialize(notDoneInstanceDatas, expandedGroups, expandedInstances, selectedInstances, selectedGroups))
 
-            check(indentation == 0 || taskDatas == null)
-            if (taskDatas?.isEmpty() == false) {
+            check(indentation == 0 || taskDatas.isEmpty())
+            if (taskDatas.isNotEmpty()) {
                 unscheduledNode = UnscheduledNode(this@NodeCollection)
 
                 add(unscheduledNode!!.initialize(unscheduledExpanded, nodeContainer, taskDatas, expandedTaskKeys))
@@ -53,7 +53,7 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
         }
     }
 
-    fun addExpandedInstances(expandedInstances: Map<InstanceKey, Boolean>) {
+    fun addExpandedInstances(expandedInstances: MutableMap<InstanceKey, Boolean>) {
         notDoneGroupCollection.addExpandedInstances(expandedInstances)
         dividerNode.addExpandedInstances(expandedInstances)
     }

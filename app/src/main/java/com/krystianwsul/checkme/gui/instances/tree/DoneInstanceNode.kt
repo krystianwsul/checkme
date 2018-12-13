@@ -23,10 +23,10 @@ class DoneInstanceNode(
 
     private val groupListFragment get() = groupAdapter.mGroupListFragment
 
-    fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>?): TreeNode {
+    fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>): TreeNode {
         val expanded: Boolean
         val doneExpanded: Boolean
-        if (expandedInstances != null && expandedInstances.containsKey(instanceData.InstanceKey) && !instanceData.children.isEmpty()) {
+        if (expandedInstances.containsKey(instanceData.InstanceKey) && !instanceData.children.isEmpty()) {
             expanded = true
             doneExpanded = expandedInstances[instanceData.InstanceKey]!!
         } else {
@@ -37,22 +37,21 @@ class DoneInstanceNode(
         treeNode = TreeNode(this, dividerTreeNode, expanded, false)
 
         nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, this.treeNode, null)
-        treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, null, expandedInstances, doneExpanded, null, null, null, false, null))
+        treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, listOf(), expandedInstances, doneExpanded, listOf(), listOf(), listOf(), false, listOf()))
 
         return treeNode
     }
 
     private fun expanded() = treeNode.isExpanded
 
-    fun addExpandedInstances(expandedInstances: Map<InstanceKey, Boolean>) {
+    fun addExpandedInstances(expandedInstances: MutableMap<InstanceKey, Boolean>) {
         if (!expanded())
             return
 
         check(!expandedInstances.containsKey(instanceData.InstanceKey))
 
-        nodeCollection.addExpandedInstances(expandedInstances.toMutableMap().also {
-            it[instanceData.InstanceKey] = nodeCollection.doneExpanded
-        })
+        expandedInstances[instanceData.InstanceKey] = nodeCollection.doneExpanded
+        nodeCollection.addExpandedInstances(expandedInstances)
     }
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }

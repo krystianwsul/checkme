@@ -100,12 +100,6 @@ class DoneInstanceNode(
 
     override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
-    override val isVisibleWhenEmpty = true
-
-    override val isVisibleDuringActionMode = true
-
-    override val isSeparatorVisibleWhenNotExpanded = false
-
     fun removeFromParent(x: TreeViewAdapter.Placeholder) = dividerNode.remove(this, x)
 
     override val id = instanceData.InstanceKey

@@ -30,12 +30,6 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
 
     override val name get() = Triple(note, colorPrimary, false)
 
-    override val isSelectable = false
-
-    override fun onClick() = Unit
-
-    override val isVisibleWhenEmpty = true
-
     override val isVisibleDuringActionMode = false
 
     override val isSeparatorVisibleWhenNotExpanded = true

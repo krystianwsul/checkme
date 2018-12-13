@@ -81,17 +81,9 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
             Pair(text, color)
         }
 
-    override val isSelectable = false
-
     override fun onClick() {
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))
     }
-
-    override val isVisibleWhenEmpty = true
-
-    override val isVisibleDuringActionMode = true
-
-    override val isSeparatorVisibleWhenNotExpanded = false
 
     override val checkBoxVisibility = View.INVISIBLE
 }

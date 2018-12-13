@@ -56,15 +56,9 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val name get() = Triple(groupListFragment.activity.getString(R.string.noReminder), colorPrimary, true)
 
-    override val isSelectable = false
-
-    override fun onClick() = Unit
-
     override val isVisibleWhenEmpty = false
 
     override val isVisibleDuringActionMode = false
-
-    override val isSeparatorVisibleWhenNotExpanded = false
 
     override val checkBoxVisibility = View.INVISIBLE
 }

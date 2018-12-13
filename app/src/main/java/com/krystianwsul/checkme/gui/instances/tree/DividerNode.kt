@@ -68,18 +68,10 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, mapOf()), x)
 
-    override val isSelectable = false
-
-    override fun onClick() = Unit
-
     override fun compareTo(other: ModelNode): Int {
         check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode)
         return 1
     }
 
     override val isVisibleWhenEmpty = false
-
-    override val isVisibleDuringActionMode = true
-
-    override val isSeparatorVisibleWhenNotExpanded = false
 }

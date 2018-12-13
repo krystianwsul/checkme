@@ -313,12 +313,6 @@ class NotDoneGroupNode(
 
     override val isSelectable = true
 
-    override val isVisibleWhenEmpty = true
-
-    override val isVisibleDuringActionMode = true
-
-    override val isSeparatorVisibleWhenNotExpanded = false
-
     fun removeFromParent(x: TreeViewAdapter.Placeholder) = notDoneGroupCollection.remove(this, x)
 
     override fun getOrdinal() = singleInstanceData.run { hierarchyData?.ordinal ?: ordinal }
@@ -450,12 +444,6 @@ class NotDoneGroupNode(
         override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
         override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
-
-        override val isVisibleWhenEmpty = true
-
-        override val isVisibleDuringActionMode = true
-
-        override val isSeparatorVisibleWhenNotExpanded = false
 
         fun removeFromParent(x: TreeViewAdapter.Placeholder) = parentNotDoneGroupNode.remove(this, x)
 

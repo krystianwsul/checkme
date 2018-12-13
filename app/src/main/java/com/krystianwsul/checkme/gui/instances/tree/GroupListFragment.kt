@@ -725,7 +725,6 @@ class GroupListFragment @JvmOverloads constructor(
 
                 val expandedTaskKeys = nodeCollection.expandedTaskKeys
 
-                // todo unscheduled task with doubly nested children (task, a, 1) has separator below when expanded
                 // todo instances should have recursive expanded state (with done)
 
                 return ExpansionState(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys)

@@ -8,7 +8,6 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.app.NotificationCompat
-import com.firebase.jobdispatcher.*
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -217,6 +216,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
             setExact(nextAlarm.long)
 
+            /*
             val now = ExactTimeStamp.now
             val delay = ((nextAlarm.long - now.long) / 1000).toInt()
 
@@ -229,8 +229,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                         .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                         .setReplaceCurrent(true)
                         .build())
-
             }
+            */
         }
     }
 

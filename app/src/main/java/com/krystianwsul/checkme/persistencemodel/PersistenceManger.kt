@@ -127,7 +127,7 @@ class PersistenceManger(
     constructor() : this(mutableListOf(), 0, mutableListOf(), 0, mutableListOf(), 0, mutableListOf(), 0, mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableListOf(), 0, mutableListOf(), 0, UuidRecord(true, UuidRecord.newUuid()))
 
     @Synchronized
-    fun reset() {
+    fun reset() { // todo this should be static, and the getter should be synchronized
         sInstance = null
     }
 

@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.notifications.AlarmReceiver
 open class NotificationWrapperImplM : NotificationWrapperImpl() {
 
     override fun setExact(time: Long) {
-        //super.setExact(time)
+        super.setExact(time)
 
         val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 1, AlarmReceiver.newIntent("setIdle"), PendingIntent.FLAG_UPDATE_CURRENT)!!
         alarmManager.cancel(pendingIntent)

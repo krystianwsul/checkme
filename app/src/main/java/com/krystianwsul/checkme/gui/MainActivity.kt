@@ -13,6 +13,7 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.PagerSnapHelper
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.util.Log
@@ -48,6 +49,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.currentPosition
 import com.krystianwsul.checkme.utils.pageSelections
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
@@ -264,6 +266,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         setContentView(R.layout.activity_main)
         setSupportActionBar(mainActivityToolbar)
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        PagerSnapHelper().attachToRecyclerView(mainDaysPager)
 
         hostEvents = Observables.combineLatest(visibleTab, daysPosition) { tab: Tab, position: Int ->
             if (tab == Tab.INSTANCES) {

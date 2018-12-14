@@ -73,11 +73,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <com.lsjwzh.widget.recyclerviewpager.RecyclerViewPager
+                <android.support.v7.widget.RecyclerView
                     android:id="@+id/mainDaysPager"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:rvp_singlePageFling="true"/>
+                    android:layout_height="match_parent"/>
 
                 <FrameLayout
                     android:id="@+id/mainTaskListFrame"

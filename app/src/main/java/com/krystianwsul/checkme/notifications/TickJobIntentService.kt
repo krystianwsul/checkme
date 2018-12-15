@@ -24,10 +24,6 @@ class TickJobIntentService : JobIntentService() {
         private const val SILENT_KEY = "silent"
         private const val SOURCE_KEY = "source"
 
-        const val TICK_PREFERENCES = "tickPreferences"
-        const val LAST_TICK_KEY = "lastTick"
-        const val TICK_LOG = "tickLog"
-
         // DON'T HOLD STATE IN STATIC VARIABLES
 
         fun startServiceRegister(context: Context, source: String) {

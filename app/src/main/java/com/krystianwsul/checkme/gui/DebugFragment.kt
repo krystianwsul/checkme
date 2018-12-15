@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui
 
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -37,9 +36,8 @@ class DebugFragment : AbstractFragment() {
 
         debugLoad.setOnClickListener {
             debugData.text = StringBuilder().apply {
-                val sharedPreferences = activity!!.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)
-                val lastTick = sharedPreferences.getLong(TickJobIntentService.LAST_TICK_KEY, -1)
-                val tickLog = sharedPreferences.getString(TickJobIntentService.TICK_LOG, "")
+                val lastTick = Preferences.lastTick
+                val tickLog = Preferences.tickLog
 
                 val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
 

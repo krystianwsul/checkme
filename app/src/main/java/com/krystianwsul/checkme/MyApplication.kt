@@ -21,7 +21,8 @@ class MyApplication : Application() {
             private set
     }
 
-    private lateinit var sharedPreferences: SharedPreferences
+    lateinit var sharedPreferences: SharedPreferences
+        private set
 
     var token: String?
         get() = sharedPreferences.getString(TOKEN_KEY, null)

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.content.Context
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
@@ -9,7 +8,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
@@ -21,6 +19,7 @@ import com.krystianwsul.checkme.firebase.json.UserWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
+import com.krystianwsul.checkme.gui.Preferences
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
@@ -1455,7 +1454,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         return task.taskKey
     }
 
-    fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean, sourceName: String): Irrelevant {
+    private fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean, sourceName: String): Irrelevant {
         updateNotifications(silent, now, listOf(), sourceName)
 
         val irrelevant = setIrrelevant(now)
@@ -2267,17 +2266,13 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             updateInstances.forEach { updateInstance(it, now) }
         }
 
-        val sharedPreferences = MyApplication.instance.getSharedPreferences(TickJobIntentService.TICK_PREFERENCES, Context.MODE_PRIVATE)!!
-
-        val tickLog = sharedPreferences.getString(TickJobIntentService.TICK_LOG, "")!!
+        val tickLog = Preferences.tickLog
         val tickLogArr = tickLog.split('\n')
         val tickLogArrTrimmed = ArrayList(tickLogArr.subList(Math.max(tickLogArr.size - 20, 0), tickLogArr.size))
         tickLogArrTrimmed.add(now.toString() + "from: " + sourceName + " s? " + (if (silent) "t" else "f") + message)
 
-        val editor = sharedPreferences.edit()
-
         if (!silent)
-            editor.putLong(TickJobIntentService.LAST_TICK_KEY, now.long)
+            Preferences.lastTick = now.long
 
         var nextAlarm = getExistingInstances().map { it.instanceDateTime.timeStamp }
                 .filter { it.toExactTimeStamp() > now }
@@ -2297,8 +2292,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         if (nextAlarm != null)
             tickLogArrTrimmed.add("next tick: $nextAlarm")
 
-        editor.putString(TickJobIntentService.TICK_LOG, tickLogArrTrimmed.joinToString("\n"))
-        editor.apply()
+        Preferences.tickLog = tickLogArrTrimmed.joinToString("\n")
     }
 
     private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {

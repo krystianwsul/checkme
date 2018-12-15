@@ -5,9 +5,7 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
-class DragHelper(
-        private val treeViewAdapter: TreeViewAdapter,
-        private val callback: MyCallback = MyCallback(treeViewAdapter)) : ItemTouchHelper(callback) {
+class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
 
     override fun startDrag(viewHolder: RecyclerView.ViewHolder) {
         MyCrashlytics.logMethod(this, "startPosition before: " + callback.startPosition)
@@ -20,7 +18,7 @@ class DragHelper(
         super.startDrag(viewHolder)
     }
 
-    open class MyCallback(private val treeViewAdapter: TreeViewAdapter) : SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+    abstract class MyCallback : SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
 
         var startPosition: Int? = null
 
@@ -38,8 +36,8 @@ class DragHelper(
 
             MyCrashlytics.logMethod(this, "endPosition after: $endPosition")
 
-            treeViewAdapter.updateDisplayedNodes {
-                treeViewAdapter.moveItem(from, endPosition!!, TreeViewAdapter.Placeholder)
+            getTreeViewAdapter().updateDisplayedNodes {
+                getTreeViewAdapter().moveItem(from, endPosition!!, TreeViewAdapter.Placeholder)
             }
 
             return true
@@ -56,7 +54,7 @@ class DragHelper(
                 checkNotNull(startPosition)
 
                 if (startPosition != endPosition) {
-                    treeViewAdapter.setNewItemPosition(it)
+                    getTreeViewAdapter().setNewItemPosition(it)
                     onSetNewItemPosition()
                 }
             }
@@ -67,7 +65,7 @@ class DragHelper(
             super.clearView(recyclerView, viewHolder)
         }
 
-        protected open fun getTreeViewAdapter(): TreeViewAdapter? = null
-        protected open fun onSetNewItemPosition() = Unit
+        abstract fun getTreeViewAdapter(): TreeViewAdapter
+        abstract fun onSetNewItemPosition()
     }
 }

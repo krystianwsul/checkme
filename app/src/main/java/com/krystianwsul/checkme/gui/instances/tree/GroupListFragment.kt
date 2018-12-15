@@ -116,7 +116,7 @@ class GroupListFragment @JvmOverloads constructor(
     private var selectedGroups: List<Long>? = null
 
     val dragHelper by lazy {
-        DragHelper(treeViewAdapter, object : DragHelper.MyCallback(treeViewAdapter) {
+        DragHelper(object : DragHelper.MyCallback() {
 
             override fun getTreeViewAdapter() = treeViewAdapter
 
@@ -256,6 +256,7 @@ class GroupListFragment @JvmOverloads constructor(
                             }
                         }
 
+                        decrementSelected(x)
                         selectedTreeNodes = treeViewAdapter.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
@@ -500,6 +501,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     public override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is Bundle) {
+            state.classLoader = ExpansionState::class.java.classLoader
             state.takeIf { it.containsKey(EXPANSION_STATE_KEY) }?.apply {
                 expansionState = getParcelable(EXPANSION_STATE_KEY)
 
@@ -514,6 +516,7 @@ class GroupListFragment @JvmOverloads constructor(
                     check(!containsKey(SELECTED_GROUPS_KEY))
                 }
             }
+
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
         } else {
             super.onRestoreInstanceState(state)

@@ -4,6 +4,7 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
@@ -29,14 +30,22 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
 
             if (kotlinDomainFactory.getIsConnected()) {
                 if (kotlinDomainFactory.getIsConnectedAndSaved()) {
+                    Log.e("asdf", "InstanceHourService.throttle a")
+
                     queueFirebase(kotlinDomainFactory, firebaseListener)
                 } else {
+                    Log.e("asdf", "InstanceHourService.throttle b")
+
                     firebaseListener(kotlinDomainFactory)
                 }
             } else {
                 if (needsFirebase) {
+                    Log.e("asdf", "InstanceHourService.throttle c")
+
                     queueFirebase(kotlinDomainFactory, firebaseListener)
                 } else {
+                    Log.e("asdf", "InstanceHourService.throttle d")
+
                     firebaseListener(kotlinDomainFactory)
                 }
             }
@@ -57,6 +66,8 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
     }
 
     override fun onHandleIntent(intent: Intent) {
+        Log.e("asdf", "InstanceDoneService.start")
+
         check(intent.hasExtra(INSTANCE_KEY))
         check(intent.hasExtra(NOTIFICATION_ID_KEY))
 
@@ -69,6 +80,8 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         notificationWrapper.cleanGroup(notificationId) // todo uodpornić na podwójne kliknięcie
 
         throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceNotificationDone(it, instanceKey) }
+
+        Log.e("asdf", "InstanceDoneService.done")
     }
 
     private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)

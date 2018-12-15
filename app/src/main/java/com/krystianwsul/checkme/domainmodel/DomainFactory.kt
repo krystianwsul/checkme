@@ -2133,6 +2133,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .apply { remoteProjectFactory?.let { addAll(it.taskKeys) } }
 
     private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String) {
+        Log.e("asdf", "updateNotifications start $sourceName")
         val rootInstances = getRootInstances(null, now.plusOne(), now) // 24 hack
 
         val notificationInstances = rootInstances.filter { it.done == null && !it.notified && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !removedTaskKeys.contains(it.taskKey) }.associateBy { it.instanceKey }
@@ -2293,6 +2294,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             tickLogArrTrimmed.add("next tick: $nextAlarm")
 
         Preferences.tickLog = tickLogArrTrimmed.joinToString("\n")
+        Log.e("asdf", "updateNotifications stop $sourceName")
     }
 
     private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {

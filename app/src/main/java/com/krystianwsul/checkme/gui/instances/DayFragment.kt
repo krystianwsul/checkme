@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.LinearLayoutCompat
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
@@ -36,9 +37,10 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
     init {
         check(context is Host)
 
-        View.inflate(context, R.layout.fragment_day, this)
-
+        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         orientation = LinearLayoutCompat.VERTICAL
+
+        View.inflate(context, R.layout.fragment_day, this)
     }
 
     fun saveState() {

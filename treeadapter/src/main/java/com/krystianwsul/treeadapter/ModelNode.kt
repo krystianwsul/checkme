@@ -6,17 +6,17 @@ interface ModelNode : Comparable<ModelNode> {
 
     val itemViewType: Int
 
-    val isSelectable: Boolean
+    val isSelectable get() = false
 
-    val isVisibleWhenEmpty: Boolean
+    val isVisibleWhenEmpty get() = true
 
-    val isVisibleDuringActionMode: Boolean
+    val isVisibleDuringActionMode get() = true
 
-    val isSeparatorVisibleWhenNotExpanded: Boolean
+    val isSeparatorVisibleWhenNotExpanded get() = false
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder)
 
-    fun onClick()
+    fun onClick() = Unit
 
     fun getOrdinal(): Double = throw UnsupportedOperationException()
 

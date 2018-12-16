@@ -227,6 +227,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
             val selectedCustomTimeWrappers = customTimeWrappers.filter { it.treeNode.isSelected }
 
+            selectedCustomTimeWrappers.forEach { treeNodeCollection.remove(it.treeNode, x) }
+
             selectedCustomTimeWrappers.map { customTimeWrappers.indexOf(it) }.forEach { customTimeWrappers.removeAt(it) }
 
             val selectedCustomTimeIds = selectedCustomTimeWrappers.map { it.customTimeData.id }

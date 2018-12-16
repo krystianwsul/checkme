@@ -32,8 +32,8 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
             }
         }
 
-    fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>?): TreeNode {
-        val expanded = expandedTaskKeys?.contains(taskData.taskKey) == true && !taskData.children.isEmpty()
+    fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>): TreeNode {
+        val expanded = expandedTaskKeys.contains(taskData.taskKey) && taskData.children.isNotEmpty()
 
         treeNode = TreeNode(this, parentTreeNode, expanded, false)
 
@@ -42,7 +42,7 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>?) = TaskNode(indentation + 1, taskData, this).let {
+    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>) = TaskNode(indentation + 1, taskData, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys)
@@ -81,17 +81,9 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
             Pair(text, color)
         }
 
-    override val isSelectable = false
-
     override fun onClick() {
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))
     }
-
-    override val isVisibleWhenEmpty = true
-
-    override val isVisibleDuringActionMode = true
-
-    override val isSeparatorVisibleWhenNotExpanded = false
 
     override val checkBoxVisibility = View.INVISIBLE
 }

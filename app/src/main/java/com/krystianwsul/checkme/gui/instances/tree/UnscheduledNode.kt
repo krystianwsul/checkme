@@ -24,7 +24,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     private val groupListFragment by lazy { groupAdapter.mGroupListFragment }
 
-    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>?): TreeNode {
+    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>): TreeNode {
         check(!expanded || !taskDatas.isEmpty())
 
         this.taskDatas = taskDatas
@@ -36,7 +36,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>?) = TaskNode(0, taskData, this).let {
+    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>) = TaskNode(0, taskData, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys)
@@ -56,15 +56,9 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val name get() = Triple(groupListFragment.activity.getString(R.string.noReminder), colorPrimary, true)
 
-    override val isSelectable = false
-
-    override fun onClick() = Unit
-
     override val isVisibleWhenEmpty = false
 
     override val isVisibleDuringActionMode = false
-
-    override val isSeparatorVisibleWhenNotExpanded = false
 
     override val checkBoxVisibility = View.INVISIBLE
 }

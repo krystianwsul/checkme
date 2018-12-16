@@ -52,7 +52,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
             val silent = oldTickData.silent && newTickData.silent
 
-            val source = "merged ($oldTickData, $newTickData)"
+            val source = "merged (${oldTickData.source}, ${newTickData.source})"
 
             oldTickData.releaseWakelock()
             newTickData.releaseWakelock()
@@ -467,11 +467,12 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
 
-        var taskDatas: List<GroupListFragment.TaskData>? = null
-        if (position == 0) {
-            taskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
+        val taskDatas = if (position == 0) {
+            getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
                     .map { GroupListFragment.TaskData(it.taskKey, it.name, getGroupListChildTaskDatas(it, now), it.startExactTimeStamp, it.note) }
                     .toList()
+        } else {
+            listOf()
         }
 
         val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
@@ -544,7 +545,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             it.instanceKey to GroupListFragment.InstanceData(it.done, it.instanceKey, it.getDisplayText(now), it.name, it.instanceDateTime.timeStamp, task.current(now), it.isRootInstance(now), isRootTask, it.exists(), it.instanceDateTime.time.timePair, task.note, children, hierarchyData, it.ordinal)
         }.toMutableMap()
 
-        return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, null, instanceDatas))
+        return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(customTimeDatas, task.current(now), listOf(), null, instanceDatas))
     }
 
     @Synchronized
@@ -572,7 +573,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             instance.instanceKey to instanceData
         }.toMutableMap()
 
-        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, null, null, instanceDatas)
+        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, listOf(), null, instanceDatas)
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 
@@ -2271,7 +2272,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val tickLog = Preferences.tickLog
         val tickLogArr = tickLog.split('\n')
         val tickLogArrTrimmed = ArrayList(tickLogArr.subList(Math.max(tickLogArr.size - 20, 0), tickLogArr.size))
-        tickLogArrTrimmed.add(now.toString() + "from: " + sourceName + " s? " + (if (silent) "t" else "f") + message)
+        tickLogArrTrimmed.add(now.toString() + "from: " + sourceName)
+        tickLogArrTrimmed.add("silent? " + (if (silent) "t" else "f") + message)
 
         if (!silent)
             Preferences.lastTick = now.long
@@ -2296,7 +2298,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         if (nextAlarm != null)
             tickLogArrTrimmed.add("next tick: $nextAlarm")
 
-        Preferences.tickLog = tickLogArrTrimmed.joinToString("\n")
+        Preferences.tickLog = tickLogArrTrimmed.joinToString("\n") + "\n"
         Log.e("asdf", "updateNotifications stop $sourceName")
     }
 
@@ -2406,7 +2408,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             instanceDatas[instance.instanceKey] = instanceData
         }
 
-        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, null, null, instanceDatas)
+        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, listOf(), null, instanceDatas)
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 
@@ -2430,7 +2432,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .toMap()
                 .toMutableMap()
 
-        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, task.current(now), null, task.note, instanceDatas)
+        val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, task.current(now), listOf(), task.note, instanceDatas)
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 

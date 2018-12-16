@@ -219,6 +219,9 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
             val selectedUserDataWrappers = userDataWrappers.filter { it.treeNode.isSelected }
+
+            selectedUserDataWrappers.forEach { treeNodeCollection.remove(it.treeNode, x) }
+
             selectedUserDataWrappers.forEach { userDataWrappers.remove(it) }
 
             DomainFactory.getKotlinDomainFactory().removeFriends(selectedUserDataWrappers.asSequence()

@@ -1,6 +1,6 @@
-package com.krystianwsul.checkme.gui
+package com.krystianwsul.checkme
 
-import com.krystianwsul.checkme.MyApplication
+import android.util.Log
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -19,6 +19,16 @@ object Preferences {
                 .apply()
 
     var tickLog by ReadWriteStrPref(TICK_LOG)
+
+    fun logLine(line: String) {
+        Log.e("asdf", "Preferences.logLine: $line")
+
+        tickLog = tickLog.split('\n')
+                .takeLast(100)
+                .toMutableList()
+                .apply { add(line) }
+                .joinToString("\n")
+    }
 
     open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 

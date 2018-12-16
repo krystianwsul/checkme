@@ -9,6 +9,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.Query
 import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
@@ -19,7 +20,6 @@ import com.krystianwsul.checkme.firebase.json.UserWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.Preferences
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
@@ -2134,7 +2134,10 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .apply { remoteProjectFactory?.let { addAll(it.taskKeys) } }
 
     private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String) {
-        Log.e("asdf", "updateNotifications start $sourceName")
+        Preferences.logLine("\n" + ExactTimeStamp.now.toString() + " updateNotifications start $sourceName")
+
+        val logLine = fun(line: String) = Preferences.logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+
         val rootInstances = getRootInstances(null, now.plusOne(), now) // 24 hack
 
         val notificationInstances = rootInstances.filter { it.done == null && !it.notified && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !removedTaskKeys.contains(it.taskKey) }.associateBy { it.instanceKey }
@@ -2265,20 +2268,16 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
             message += ", u " + updateInstances.size
-            Log.e("asdf", "updateNotifications update")
+            logLine("updateNotifications update")
             updateInstances.forEach { updateInstance(it, now) }
         }
 
-        val tickLog = Preferences.tickLog
-        val tickLogArr = tickLog.split('\n')
-        val tickLogArrTrimmed = ArrayList(tickLogArr.subList(Math.max(tickLogArr.size - 20, 0), tickLogArr.size))
-        tickLogArrTrimmed.add(now.toString() + "from: " + sourceName)
-        tickLogArrTrimmed.add("silent? " + (if (silent) "t" else "f") + message)
+        logLine("s? " + (if (silent) "t" else "f") + message)
 
         if (!silent)
             Preferences.lastTick = now.long
 
-        Log.e("asdf", "updateNotifications getExistingInstances")
+        logLine("updateNotifications getExistingInstances")
         var nextAlarm = getExistingInstances().map { it.instanceDateTime.timeStamp }
                 .filter { it.toExactTimeStamp() > now }
                 .min()
@@ -2292,14 +2291,13 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         if (minSchedulesTimeStamp != null && (nextAlarm == null || nextAlarm > minSchedulesTimeStamp))
             nextAlarm = minSchedulesTimeStamp
 
-        Log.e("asdf", "updateNotifications updateAlarm")
-        NotificationWrapper.instance.updateAlarm(nextAlarm)
+        logLine("updateNotifications updateAlarm")
+        NotificationWrapper.instance.updateAlarm(nextAlarm, logLine)
 
         if (nextAlarm != null)
-            tickLogArrTrimmed.add("next tick: $nextAlarm")
+            logLine("next tick: $nextAlarm")
 
-        Preferences.tickLog = tickLogArrTrimmed.joinToString("\n") + "\n"
-        Log.e("asdf", "updateNotifications stop $sourceName")
+        logLine("updateNotifications stop $sourceName")
     }
 
     private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {

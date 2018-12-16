@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.notifications.TickJobIntentService
@@ -48,7 +49,7 @@ class DebugFragment : AbstractFragment() {
                 append("\ntick log:\n")
                 append(tickLog)
 
-                append("\ndata load time: ")
+                append("\n\ndata load time: ")
                 append(kotlinDomainFactory.readMillis + kotlinDomainFactory.instantiateMillis)
                 append("ms (")
                 append(kotlinDomainFactory.readMillis)

@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.app.NotificationCompat
+import android.util.Log
 import com.firebase.jobdispatcher.*
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
@@ -213,24 +214,32 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
+        Log.e("asdf", "updateAlarm start")
         if (nextAlarm != null) {
 
+            Log.e("asdf", "updateAlarm setExact")
             setExact(nextAlarm.long)
 
             val now = ExactTimeStamp.now
             val delay = ((nextAlarm.long - now.long) / 1000).toInt()
 
+            Log.e("asdf", "updateAlarm dispatcher")
             FirebaseJobDispatcher(GooglePlayDriver(MyApplication.instance)).apply {
-                mustSchedule(newJobBuilder().setService(FirebaseTickService::class.java)
+                Log.e("asdf", "updateAlarm job")
+                val job = newJobBuilder().setService(FirebaseTickService::class.java)
                         .setTag(TAG)
                         .setRecurring(false)
                         .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                         .setTrigger(Trigger.executionWindow(delay, delay + 5))
                         .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                         .setReplaceCurrent(true)
-                        .build())
+                        .build()
+
+                Log.e("asdf", "updateAlarm mustSchedule")
+                mustSchedule(job)
             }
         }
+        Log.e("asdf", "updateAlarm end")
     }
 
     protected open fun setExact(time: Long) {

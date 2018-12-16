@@ -1,14 +1,15 @@
 package com.krystianwsul.checkme
 
 import android.util.Log
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 object Preferences {
 
-    const val LAST_TICK_KEY = "lastTick"
-    const val TICK_LOG = "tickLog"
+    private const val LAST_TICK_KEY = "lastTick"
+    private const val TICK_LOG = "tickLog"
 
     private val sharedPreferences by lazy { MyApplication.instance.sharedPreferences }
 
@@ -20,7 +21,11 @@ object Preferences {
 
     var tickLog by ReadWriteStrPref(TICK_LOG)
 
-    fun logLine(line: String) {
+    fun logLineDate(line: String) = logLine("\n" + ExactTimeStamp.now.toString() + " " + line)
+
+    fun logLineHour(line: String) = logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+
+    private fun logLine(line: String) {
         Log.e("asdf", "Preferences.logLine: $line")
 
         tickLog = tickLog.split('\n')

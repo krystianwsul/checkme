@@ -2134,9 +2134,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 .apply { remoteProjectFactory?.let { addAll(it.taskKeys) } }
 
     private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String) {
-        Preferences.logLine("\n" + ExactTimeStamp.now.toString() + " updateNotifications start $sourceName")
-
-        val logLine = fun(line: String) = Preferences.logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+        Preferences.logLineDate("updateNotifications start $sourceName")
 
         val rootInstances = getRootInstances(null, now.plusOne(), now) // 24 hack
 
@@ -2268,16 +2266,16 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
             message += ", u " + updateInstances.size
-            logLine("updateNotifications update")
+            Preferences.logLineHour("updateNotifications update")
             updateInstances.forEach { updateInstance(it, now) }
         }
 
-        logLine("s? " + (if (silent) "t" else "f") + message)
+        Preferences.logLineHour("s? " + (if (silent) "t" else "f") + message)
 
         if (!silent)
             Preferences.lastTick = now.long
 
-        logLine("updateNotifications getExistingInstances")
+        Preferences.logLineHour("updateNotifications getExistingInstances")
         var nextAlarm = getExistingInstances().map { it.instanceDateTime.timeStamp }
                 .filter { it.toExactTimeStamp() > now }
                 .min()
@@ -2291,13 +2289,13 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         if (minSchedulesTimeStamp != null && (nextAlarm == null || nextAlarm > minSchedulesTimeStamp))
             nextAlarm = minSchedulesTimeStamp
 
-        logLine("updateNotifications updateAlarm")
-        NotificationWrapper.instance.updateAlarm(nextAlarm, logLine)
+        Preferences.logLineHour("updateNotifications updateAlarm")
+        NotificationWrapper.instance.updateAlarm(nextAlarm)
 
         if (nextAlarm != null)
-            logLine("next tick: $nextAlarm")
+            Preferences.logLineHour("next tick: $nextAlarm")
 
-        logLine("updateNotifications stop $sourceName")
+        Preferences.logLineHour("updateNotifications stop $sourceName")
     }
 
     private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {

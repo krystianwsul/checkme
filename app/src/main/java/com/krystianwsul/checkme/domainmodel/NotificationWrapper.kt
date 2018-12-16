@@ -24,5 +24,5 @@ abstract class NotificationWrapper {
 
     abstract fun cleanGroup(lastNotificationId: Int?)
 
-    abstract fun updateAlarm(nextAlarm: TimeStamp?, logLine: (String) -> Unit)
+    abstract fun updateAlarm(nextAlarm: TimeStamp?)
 }

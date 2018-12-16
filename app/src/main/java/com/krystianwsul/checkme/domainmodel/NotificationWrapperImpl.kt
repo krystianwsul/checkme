@@ -11,6 +11,7 @@ import android.support.v4.app.NotificationCompat
 import com.firebase.jobdispatcher.*
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
@@ -212,19 +213,18 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             cancelNotification(lastNotificationId)
     }
 
-    override fun updateAlarm(nextAlarm: TimeStamp?, logLine: (String) -> Unit) {
-        logLine("updateAlarm start")
+    override fun updateAlarm(nextAlarm: TimeStamp?) {
+        Preferences.logLineHour("updateAlarm start")
         if (nextAlarm != null) {
-
-            logLine("updateAlarm setExact")
+            Preferences.logLineHour("updateAlarm setExact")
             setExact(nextAlarm.long)
 
             val now = ExactTimeStamp.now
             val delay = ((nextAlarm.long - now.long) / 1000).toInt()
 
-            logLine("updateAlarm dispatcher")
+            Preferences.logLineHour("updateAlarm dispatcher")
             FirebaseJobDispatcher(GooglePlayDriver(MyApplication.instance)).apply {
-                logLine("updateAlarm job")
+                Preferences.logLineHour("updateAlarm job")
                 val job = newJobBuilder().setService(FirebaseTickService::class.java)
                         .setTag(TAG)
                         .setRecurring(false)
@@ -234,11 +234,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                         .setReplaceCurrent(true)
                         .build()
 
-                logLine("updateAlarm mustSchedule")
+                Preferences.logLineHour("updateAlarm mustSchedule")
                 mustSchedule(job)
             }
         }
-        logLine("updateAlarm end")
+        Preferences.logLineHour("updateAlarm end")
     }
 
     protected open fun setExact(time: Long) {

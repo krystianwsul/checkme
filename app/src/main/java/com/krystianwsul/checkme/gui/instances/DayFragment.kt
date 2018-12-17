@@ -2,11 +2,11 @@ package com.krystianwsul.checkme.gui.instances
 
 
 import android.content.Context
-import android.support.design.widget.FloatingActionButton
-import android.support.v7.widget.LinearLayoutCompat
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.LinearLayoutCompat
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity

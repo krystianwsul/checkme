@@ -6,15 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.util.ArrayMap
-import android.support.v4.view.GravityCompat
-import android.support.v4.view.ViewCompat
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.PagerSnapHelper
-import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.util.Log
 import android.view.Menu
@@ -26,9 +17,18 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.view.ActionMode
+import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -108,19 +108,15 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var timeRange = TimeRange.DAY
 
-    private val groupSelectAllVisible = ArrayMap<Int, Boolean>()
+    private val groupSelectAllVisible = mutableMapOf<Int, Boolean>()
     private var taskSelectAllVisible = false
     private var customTimesSelectAllVisible = false
     private var userSelectAllVisible = false
 
-    private lateinit var googleApiClient: GoogleApiClient
-
     private lateinit var headerName: TextView
     private lateinit var headerEmail: TextView
 
-    private lateinit var firebaseAuth: FirebaseAuth
-
-    private val mAuthStateListener = { firebaseAuth: FirebaseAuth ->
+    private val authStateListener = { firebaseAuth: FirebaseAuth ->
         val firebaseUser = firebaseAuth.currentUser
         if (firebaseUser != null) {
             userInfo = UserInfo(firebaseUser)
@@ -156,6 +152,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 .map { it.toString() }
                 .share()!!
     }
+
+    private lateinit var googleSigninClient: GoogleSignInClient
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
@@ -423,17 +421,16 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         }
                         R.id.main_drawer_friends -> showTab(Tab.FRIENDS)
                         R.id.main_drawer_sign_in -> if (userInfo != null) {
-                            Auth.GoogleSignInApi.signOut(googleApiClient)
+                            googleSigninClient.signOut()
 
-                            firebaseAuth.signOut()
+                            FirebaseAuth.getInstance().signOut()
 
                             if (visibleTab.value!! == Tab.FRIENDS || visibleTab.value!! == Tab.PROJECTS) {
                                 mainActivityNavigation.setCheckedItem(R.id.main_drawer_instances)
                                 showTab(Tab.INSTANCES)
                             }
                         } else {
-                            // todo add spinner to grouplistfragment padding
-                            startActivityForResult(Auth.GoogleSignInApi.getSignInIntent(googleApiClient), RC_SIGN_IN)
+                            startActivityForResult(googleSigninClient.signInIntent, RC_SIGN_IN)
                         }
                         R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newIntent())
                         R.id.main_drawer_debug -> {
@@ -481,17 +478,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         TickJobIntentService.startServiceRegister(this, "MainActivity: TickJobIntentService.startServiceRegister")
 
-        val googleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        googleSigninClient = GoogleSignIn.getClient(this@MainActivity, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
-                .build()
-
-        googleApiClient = GoogleApiClient.Builder(this)
-                .enableAutoManage(this) { mainActivityNavigation.menu.findItem(R.id.main_drawer_sign_in).isVisible = false }
-                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
-                .build()
-
-        firebaseAuth = FirebaseAuth.getInstance()
+                .build())
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {
@@ -525,13 +515,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun onStart() {
         super.onStart()
 
-        firebaseAuth.addAuthStateListener(mAuthStateListener)
+        FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
     }
 
     override fun onStop() {
         super.onStop()
 
-        firebaseAuth.removeAuthStateListener(mAuthStateListener)
+        FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
     }
 
     override fun onBackPressed() {
@@ -857,7 +847,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                 val credential = GoogleAuthProvider.getCredential(googleSignInAccount.idToken, null)
 
-                firebaseAuth.signInWithCredential(credential)
+                FirebaseAuth.getInstance()
+                        .signInWithCredential(credential)
                         .addOnCompleteListener(this) { task ->
                             if (task.isSuccessful) {
                                 Toast.makeText(this, getString(R.string.signInAs) + " " + task.result!!.user.displayName, Toast.LENGTH_SHORT).show()
@@ -868,7 +859,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
                                 MyCrashlytics.logException(exception)
 
-                                Auth.GoogleSignInApi.signOut(googleApiClient)
+                                googleSigninClient.signOut()
                             }
                         }
             } else {

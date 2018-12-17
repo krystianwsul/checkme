@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui
 
 import android.content.Context
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 
 import com.krystianwsul.checkme.MyCrashlytics
 import io.reactivex.disposables.CompositeDisposable

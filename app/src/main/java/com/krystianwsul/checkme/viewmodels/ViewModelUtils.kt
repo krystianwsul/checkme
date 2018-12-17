@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.viewmodels
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProviders
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProviders
 
 
 inline fun <reified T : ViewModel> FragmentActivity.getViewModel() = ViewModelProviders.of(this)[T::class.java]

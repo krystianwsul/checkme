@@ -5,13 +5,13 @@ import android.app.Dialog
 import android.content.*
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.design.widget.TextInputLayout
-import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.*
+import androidx.core.content.ContextCompat
 import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.internal.MDButton
+import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.DatePickerDialogFragment
@@ -535,7 +535,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
     }
 
-    override fun onCancel(dialog: DialogInterface?) {
+    override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
 
         check(mScheduleDialogListener != null)

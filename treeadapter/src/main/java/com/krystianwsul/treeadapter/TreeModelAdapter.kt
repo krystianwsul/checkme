@@ -1,7 +1,7 @@
 package com.krystianwsul.treeadapter
 
-import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 
 interface TreeModelAdapter {
 

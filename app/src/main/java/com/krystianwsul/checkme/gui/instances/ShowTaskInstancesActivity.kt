@@ -3,9 +3,9 @@ package com.krystianwsul.checkme.gui.instances
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -16,7 +16,6 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_notification_group.*
-
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupListListener {

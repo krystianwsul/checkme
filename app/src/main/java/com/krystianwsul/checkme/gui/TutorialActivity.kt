@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui
 import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.v4.app.FragmentStatePagerAdapter
+import androidx.fragment.app.FragmentStatePagerAdapter
 import com.jakewharton.rxbinding2.view.clicks
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R

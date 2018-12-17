@@ -6,8 +6,8 @@ import android.app.PendingIntent
 import android.os.Build
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
-import android.support.v4.app.NotificationCompat
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R

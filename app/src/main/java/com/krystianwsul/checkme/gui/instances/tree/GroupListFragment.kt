@@ -3,10 +3,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.design.widget.FloatingActionButton
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.LinearLayoutManager
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,6 +10,10 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory

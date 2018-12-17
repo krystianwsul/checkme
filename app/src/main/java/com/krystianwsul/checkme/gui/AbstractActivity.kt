@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import io.reactivex.disposables.CompositeDisposable

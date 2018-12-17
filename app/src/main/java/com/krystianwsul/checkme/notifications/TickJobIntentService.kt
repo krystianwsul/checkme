@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.notifications
 
 import android.content.Context
 import android.content.Intent
-import android.support.v4.app.JobIntentService
 import android.text.TextUtils
+import androidx.core.app.JobIntentService
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory

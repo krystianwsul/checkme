@@ -3,11 +3,11 @@ package com.krystianwsul.checkme.gui.instances
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.v7.app.ActionBar
-import android.support.v7.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.view.ActionMode
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
@@ -18,7 +18,6 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_group.*
-
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener {

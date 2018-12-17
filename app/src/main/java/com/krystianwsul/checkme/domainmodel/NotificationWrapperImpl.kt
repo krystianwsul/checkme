@@ -8,7 +8,6 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
-import com.firebase.jobdispatcher.*
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -219,6 +218,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             Preferences.logLineHour("updateAlarm setExact")
             setExact(nextAlarm.long)
 
+            /*
             val now = ExactTimeStamp.now
             val delay = ((nextAlarm.long - now.long) / 1000).toInt()
 
@@ -237,6 +237,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 Preferences.logLineHour("updateAlarm mustSchedule")
                 mustSchedule(job)
             }
+            */
         }
         Preferences.logLineHour("updateAlarm end")
     }

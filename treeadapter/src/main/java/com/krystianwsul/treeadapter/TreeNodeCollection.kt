@@ -126,7 +126,7 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
 
     override val indentation = 0
 
-    fun moveItem(fromPosition: Int, toPosition: Int, x: TreeViewAdapter.Placeholder) {
+    fun moveItem(fromPosition: Int, toPosition: Int, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         if (!this::treeNodes.isInitialized)
             throw SetTreeNodesNotCalledException()
 

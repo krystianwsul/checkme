@@ -560,16 +560,24 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun initialize() {
-        if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage == false)
+        if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage == false) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
 
-        treeViewAdapter = GroupAdapter.getAdapter(this, parameters.dataId, parameters.dataWrapper.customTimeDatas, useGroups(), showPadding(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
-        groupListRecycler.adapter = treeViewAdapter
+            treeViewAdapter.updateDisplayedNodes {
+                (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, showPadding(), useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            }
+        } else {
+            val groupAdapter = GroupAdapter(this)
+            groupAdapter.initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, showPadding(), useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
+            treeViewAdapter = groupAdapter.treeViewAdapter
+            groupListRecycler.adapter = treeViewAdapter
 
-        dragHelper.attachToRecyclerView(groupListRecycler)
+            dragHelper.attachToRecyclerView(groupListRecycler)
 
-        treeViewAdapter.updateDisplayedNodes {
-            selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            treeViewAdapter.updateDisplayedNodes {
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            }
         }
 
         updateFabVisibility()
@@ -646,24 +654,14 @@ class GroupListFragment @JvmOverloads constructor(
         floatingActionButton = null
     }
 
-    class GroupAdapter private constructor(
-            val groupListFragment: GroupListFragment,
-            val dataId: Int,
-            val customTimeDatas: List<CustomTimeData>,
-            private val showFab: Boolean) : TreeModelAdapter, NodeCollectionParent {
+    class GroupAdapter(val groupListFragment: GroupListFragment) : TreeModelAdapter, NodeCollectionParent {
 
         companion object {
 
             const val TYPE_GROUP = 0
-
-            fun getAdapter(groupListFragment: GroupListFragment, dataId: Int, customTimeDatas: List<CustomTimeData>, useGroups: Boolean, showFab: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?): TreeViewAdapter {
-                val groupAdapter = GroupAdapter(groupListFragment, dataId, customTimeDatas, showFab)
-
-                return groupAdapter.initialize(useGroups, instanceDatas, state, taskDatas, note)
-            }
         }
 
-        private lateinit var treeViewAdapter: TreeViewAdapter
+        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
 
         lateinit var treeNodeCollection: TreeNodeCollection
             private set
@@ -690,16 +688,23 @@ class GroupListFragment @JvmOverloads constructor(
                 return State(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys, selectedInstances, selectedGroups)
             }
 
-        private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?): TreeViewAdapter {
-            treeViewAdapter = TreeViewAdapter(this, if (showFab) R.layout.row_group_list_fab_padding else null)
+        var dataId = -1
+            private set
+
+        lateinit var customTimeDatas: List<CustomTimeData>
+            private set
+
+        fun initialize(dataId: Int, customTimeDatas: List<CustomTimeData>, showFab: Boolean, useGroups: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?) {
+            this.dataId = dataId
+            this.customTimeDatas = customTimeDatas
+
+            treeViewAdapter.showPadding = showFab
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 
             treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, state.expandedGroups, state.expandedInstances, state.doneExpanded, state.selectedInstances, state.selectedGroups, taskDatas, state.unscheduledExpanded, state.expandedTaskKeys)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
-
-            return treeViewAdapter
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))

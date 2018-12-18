@@ -485,6 +485,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         private fun initialize(taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?): TreeViewAdapter {
             treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
+            treeViewAdapter.showPadding = true
 
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 

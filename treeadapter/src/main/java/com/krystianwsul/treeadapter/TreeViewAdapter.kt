@@ -7,7 +7,7 @@ import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
-class TreeViewAdapter @JvmOverloads constructor(
+class TreeViewAdapter(
         val treeModelAdapter: TreeModelAdapter,
         @param:LayoutRes @field:LayoutRes private val paddingLayout: Int? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -15,6 +15,8 @@ class TreeViewAdapter @JvmOverloads constructor(
 
         private const val TYPE_PADDING = 1000
     }
+
+    var showPadding = false
 
     private var treeNodeCollection: TreeNodeCollection? = null
 
@@ -31,9 +33,6 @@ class TreeViewAdapter @JvmOverloads constructor(
     private var updating = false
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection) {
-        if (this.treeNodeCollection != null)
-            throw SetTreeNodeCollectionCalledTwiceException()
-
         this.treeNodeCollection = treeNodeCollection
     }
 
@@ -41,7 +40,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        return treeNodeCollection!!.displayedSize + if (paddingLayout != null) 1 else 0
+        return treeNodeCollection!!.displayedSize + if (showPadding) 1 else 0
     }
 
     fun hasActionMode() = treeModelAdapter.hasActionMode
@@ -67,7 +66,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                if (paddingLayout != null) {
+                if (showPadding) {
                     if (oldItemPosition == oldStates.size && newItemPosition == newStates.size)
                         return true
                     else if (oldItemPosition == oldStates.size || newItemPosition == newStates.size)
@@ -77,12 +76,12 @@ class TreeViewAdapter @JvmOverloads constructor(
                 return oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
             }
 
-            override fun getOldListSize() = oldStates.size + (paddingLayout?.let { 1 } ?: 0)
+            override fun getOldListSize() = oldStates.size + (if (showPadding) 1 else 0)
 
-            override fun getNewListSize() = newStates.size + (paddingLayout?.let { 1 } ?: 0)
+            override fun getNewListSize() = newStates.size + (if (showPadding) 1 else 0)
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                if (paddingLayout != null) {
+                if (showPadding) {
                     if (oldItemPosition == oldStates.size && newItemPosition == newStates.size)
                         return true
                     else if (oldItemPosition == oldStates.size || newItemPosition == newStates.size)
@@ -151,7 +150,7 @@ class TreeViewAdapter @JvmOverloads constructor(
             treeNode.onBindViewHolder(holder)
         } else {
             check(position == displayedSize)
-            checkNotNull(paddingLayout != null)
+            check(showPadding)
             check(position == itemCount - 1)
         }
     }
@@ -160,7 +159,7 @@ class TreeViewAdapter @JvmOverloads constructor(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        return if (paddingLayout != null && position == treeNodeCollection!!.displayedSize)
+        return if (showPadding && position == treeNodeCollection!!.displayedSize)
             TYPE_PADDING
         else
             treeNodeCollection!!.getItemViewType(position)

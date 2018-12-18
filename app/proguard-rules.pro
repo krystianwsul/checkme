@@ -31,6 +31,7 @@
 -dontwarn javax.annotation.**
 -dontwarn javax.inject.**
 -dontwarn sun.misc.Unsafe
+-dontwarn javax.lang.model.element.Modifier
 
 -keep class com.google.j2objc.annotations.** { *; }
 -dontwarn   com.google.j2objc.annotations.**
@@ -43,12 +44,4 @@
 -dontwarn com.google.errorprone.annotations.concurrent.LazyInit
 -dontwarn com.google.errorprone.annotations.ForOverride
 
--keep class com.crashlytics.** { *; }
--keep class com.google.firebase.** { *; }
-
 -keep class android.arch.lifecycle.** {*;}
-
--dontwarn com.android.support.v4.media.**
-
--keep class com.lsjwzh.widget.recyclerviewpager.**
--dontwarn com.lsjwzh.widget.recyclerviewpager.**

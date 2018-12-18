@@ -22,7 +22,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     private val groupAdapter get() = nodeCollection.groupAdapter
 
-    private val groupListFragment get() = groupAdapter.mGroupListFragment
+    private val groupListFragment get() = groupAdapter.groupListFragment
 
     fun initialize(expanded: Boolean, nodeContainer: NodeContainer, doneInstanceDatas: List<GroupListFragment.InstanceData>, expandedInstances: Map<InstanceKey, Boolean>): TreeNode {
         check(!expanded || !doneInstanceDatas.isEmpty())

@@ -111,7 +111,7 @@ class GroupListFragment @JvmOverloads constructor(
     private val parametersRelay = BehaviorRelay.create<Parameters>()
     val parameters get() = parametersRelay.value!!
 
-    private var state: State? = null
+    private var state = State()
 
     val dragHelper by lazy {
         DragHelper(object : DragHelper.MyCallback() {
@@ -188,7 +188,7 @@ class GroupListFragment @JvmOverloads constructor(
                         selectedTreeNodes = treeViewAdapter.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
-                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).mDataId, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).dataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -502,7 +502,7 @@ class GroupListFragment @JvmOverloads constructor(
             state.apply {
                 classLoader = State::class.java.classLoader
                 if (containsKey(EXPANSION_STATE_KEY))
-                    this@GroupListFragment.state = getParcelable(EXPANSION_STATE_KEY)
+                    this@GroupListFragment.state = getParcelable(EXPANSION_STATE_KEY)!!
 
                 groupListRecycler.layoutManager!!.onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
             }
@@ -646,13 +646,17 @@ class GroupListFragment @JvmOverloads constructor(
         floatingActionButton = null
     }
 
-    class GroupAdapter private constructor(val mGroupListFragment: GroupListFragment, val mDataId: Int, val mCustomTimeDatas: List<CustomTimeData>, private val mShowFab: Boolean) : TreeModelAdapter, NodeCollectionParent {
+    class GroupAdapter private constructor(
+            val groupListFragment: GroupListFragment,
+            val dataId: Int,
+            val customTimeDatas: List<CustomTimeData>,
+            private val showFab: Boolean) : TreeModelAdapter, NodeCollectionParent {
 
         companion object {
 
             const val TYPE_GROUP = 0
 
-            fun getAdapter(groupListFragment: GroupListFragment, dataId: Int, customTimeDatas: List<CustomTimeData>, useGroups: Boolean, showFab: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State?, taskDatas: List<TaskData>, note: String?): TreeViewAdapter {
+            fun getAdapter(groupListFragment: GroupListFragment, dataId: Int, customTimeDatas: List<CustomTimeData>, useGroups: Boolean, showFab: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?): TreeViewAdapter {
                 val groupAdapter = GroupAdapter(groupListFragment, dataId, customTimeDatas, showFab)
 
                 return groupAdapter.initialize(useGroups, instanceDatas, state, taskDatas, note)
@@ -686,31 +690,13 @@ class GroupListFragment @JvmOverloads constructor(
                 return State(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys, selectedInstances, selectedGroups)
             }
 
-        private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State?, taskDatas: List<TaskData>, note: String?): TreeViewAdapter {
-            treeViewAdapter = TreeViewAdapter(this, if (mShowFab) R.layout.row_group_list_fab_padding else null)
+        private fun initialize(useGroups: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?): TreeViewAdapter {
+            treeViewAdapter = TreeViewAdapter(this, if (showFab) R.layout.row_group_list_fab_padding else null)
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 
-            var expandedGroups = listOf<TimeStamp>()
-            var expandedInstances = mapOf<InstanceKey, Boolean>()
-            var doneExpanded = false
-            var unscheduledExpanded = false
-            var expandedTaskKeys = listOf<TaskKey>()
-            var selectedInstances = listOf<InstanceKey>()
-            var selectedGroups = listOf<Long>()
-
-            if (state != null) {
-                expandedGroups = state.expandedGroups
-                expandedInstances = state.expandedInstances
-                doneExpanded = state.doneExpanded
-                unscheduledExpanded = state.unscheduledExpanded
-                expandedTaskKeys = state.expandedTaskKeys
-                selectedInstances = state.selectedInstances
-                selectedGroups = state.selectedGroups
-            }
-
-            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, expandedGroups, expandedInstances, doneExpanded, selectedInstances, selectedGroups, taskDatas, unscheduledExpanded, expandedTaskKeys)
+            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, state.expandedGroups, state.expandedInstances, state.doneExpanded, state.selectedInstances, state.selectedGroups, taskDatas, state.unscheduledExpanded, state.expandedTaskKeys)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
             return treeViewAdapter
@@ -718,11 +704,11 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))
 
-        override val hasActionMode get() = mGroupListFragment.selectionCallback.hasActionMode
+        override val hasActionMode get() = groupListFragment.selectionCallback.hasActionMode
 
-        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = mGroupListFragment.selectionCallback.incrementSelected(x)
+        override fun incrementSelected(x: TreeViewAdapter.Placeholder) = groupListFragment.selectionCallback.incrementSelected(x)
 
-        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = mGroupListFragment.selectionCallback.decrementSelected(x)
+        override fun decrementSelected(x: TreeViewAdapter.Placeholder) = groupListFragment.selectionCallback.decrementSelected(x)
 
         override val groupAdapter = this
 
@@ -730,13 +716,13 @@ class GroupListFragment @JvmOverloads constructor(
 
     @Parcelize
     data class State(
-            val doneExpanded: Boolean,
-            val expandedGroups: List<TimeStamp>,
-            val expandedInstances: Map<InstanceKey, Boolean>,
-            val unscheduledExpanded: Boolean,
-            val expandedTaskKeys: List<TaskKey>,
-            val selectedInstances: List<InstanceKey>,
-            val selectedGroups: List<Long>) : Parcelable
+            val doneExpanded: Boolean = false,
+            val expandedGroups: List<TimeStamp> = listOf(),
+            val expandedInstances: Map<InstanceKey, Boolean> = mapOf(),
+            val unscheduledExpanded: Boolean = false,
+            val expandedTaskKeys: List<TaskKey> = listOf(),
+            val selectedInstances: List<InstanceKey> = listOf(),
+            val selectedGroups: List<Long> = listOf()) : Parcelable
 
     interface GroupListListener {
 

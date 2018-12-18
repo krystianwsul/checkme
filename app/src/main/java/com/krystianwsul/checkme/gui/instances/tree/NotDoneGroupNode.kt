@@ -35,7 +35,7 @@ class NotDoneGroupNode(
 
     val nodeCollection get() = notDoneGroupCollection.nodeCollection
 
-    private val groupListFragment get() = groupAdapter.mGroupListFragment
+    private val groupListFragment get() = groupAdapter.groupListFragment
 
     init {
         check(!instanceDatas.isEmpty())
@@ -177,12 +177,12 @@ class NotDoneGroupNode(
 
             check(singleInstance())
 
-            check(!groupAdapter.mGroupListFragment.selectionCallback.hasActionMode)
+        check(!groupAdapter.groupListFragment.selectionCallback.hasActionMode)
 
                 groupAdapter.treeNodeCollection
                         .treeViewAdapter
                         .updateDisplayedNodes {
-                            singleInstanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
+                            singleInstanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
 
                             GroupListFragment.recursiveExists(singleInstanceData)
 
@@ -191,11 +191,11 @@ class NotDoneGroupNode(
                             notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
                         }
 
-                groupAdapter.mGroupListFragment.updateSelectAll()
+        groupAdapter.groupListFragment.updateSelectAll()
         }
 
     override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
-        val groupListFragment = groupAdapter.mGroupListFragment
+        val groupListFragment = groupAdapter.groupListFragment
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
         if (singleInstance() && groupListFragment.parameters.dataWrapper.taskEditable != false && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && (groupListFragment.parameters !is GroupListFragment.Parameters.All) && (groupListFragment.parameters !is GroupListFragment.Parameters.InstanceKeys) && (groupListFragment.parameters !is GroupListFragment.Parameters.TaskKey))
@@ -212,7 +212,7 @@ class NotDoneGroupNode(
         })
     }
 
-    private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.mCustomTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
+    private fun getCustomTimeData(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = groupAdapter.customTimeDatas.firstOrNull { it.HourMinutes[dayOfWeek] === hourMinute }
 
     private fun remove(notDoneInstanceNode: NotDoneInstanceNode, x: TreeViewAdapter.Placeholder) {
         check(instanceDatas.contains(notDoneInstanceNode.instanceData))
@@ -369,7 +369,7 @@ class NotDoneGroupNode(
 
         val parentNodeCollection get() = parentNotDoneGroupCollection.nodeCollection
 
-        private val groupListFragment get() = groupAdapter.mGroupListFragment
+        private val groupListFragment get() = groupAdapter.groupListFragment
 
         fun initialize(expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, notDoneGroupTreeNode: TreeNode): TreeNode {
             val selected = selectedInstances.contains(instanceData.InstanceKey)
@@ -422,12 +422,12 @@ class NotDoneGroupNode(
                 check(notDoneGroupTreeNode.isExpanded)
 
                 val groupAdapter = parentNodeCollection.groupAdapter
-                check(!groupAdapter.mGroupListFragment.selectionCallback.hasActionMode)
+            check(!groupAdapter.groupListFragment.selectionCallback.hasActionMode)
 
                     groupAdapter.treeNodeCollection
                             .treeViewAdapter
                             .updateDisplayedNodes {
-                                instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
+                                instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
 
                                 GroupListFragment.recursiveExists(instanceData)
 
@@ -436,7 +436,7 @@ class NotDoneGroupNode(
                                 parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
                             }
 
-                    groupAdapter.mGroupListFragment.updateSelectAll()
+            groupAdapter.groupListFragment.updateSelectAll()
             }
 
         override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))

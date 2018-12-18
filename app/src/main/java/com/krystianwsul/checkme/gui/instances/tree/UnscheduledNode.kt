@@ -22,7 +22,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     val expandedTaskKeys get() = taskNodes.flatMap { it.expandedTaskKeys }
 
-    private val groupListFragment by lazy { groupAdapter.mGroupListFragment }
+    private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
     fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>): TreeNode {
         check(!expanded || !taskDatas.isEmpty())

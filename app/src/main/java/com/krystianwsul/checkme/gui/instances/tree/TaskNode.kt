@@ -16,7 +16,7 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
 
     private val taskNodes = mutableListOf<TaskNode>()
 
-    private val groupListFragment by lazy { groupAdapter.mGroupListFragment }
+    private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
     val expandedTaskKeys: List<TaskKey>
         get() = if (taskNodes.isEmpty()) {

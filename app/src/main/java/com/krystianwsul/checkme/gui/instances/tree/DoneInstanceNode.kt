@@ -21,7 +21,7 @@ class DoneInstanceNode(
 
     private val parentNodeCollection get() = dividerNode.nodeCollection
 
-    private val groupListFragment get() = groupAdapter.mGroupListFragment
+    private val groupListFragment get() = groupAdapter.groupListFragment
 
     fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>): TreeNode {
         val expanded: Boolean
@@ -82,14 +82,14 @@ class DoneInstanceNode(
         groupAdapter.treeNodeCollection
                 .treeViewAdapter
                 .updateDisplayedNodes {
-                    instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.mDataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
+                    instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
 
                     dividerNode.remove(this, TreeViewAdapter.Placeholder)
 
                     nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
                 }
 
-        groupAdapter.mGroupListFragment.updateSelectAll()
+        groupAdapter.groupListFragment.updateSelectAll()
     }
 
     override fun compareTo(other: ModelNode): Int {

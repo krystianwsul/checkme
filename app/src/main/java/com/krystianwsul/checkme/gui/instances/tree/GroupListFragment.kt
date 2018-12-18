@@ -387,7 +387,7 @@ class GroupListFragment @JvmOverloads constructor(
                 val instanceData = instanceDatas.single()
 
                 menu.apply {
-                    findItem(R.id.action_group_edit_instance).isVisible = instanceData.IsRootInstance && allNotDone
+                    findItem(R.id.action_group_edit_instance).isVisible = instanceData.let { it.IsRootInstance && it.Done == null }
                     findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_join).isVisible = false

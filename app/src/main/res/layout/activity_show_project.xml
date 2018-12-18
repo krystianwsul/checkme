@@ -14,7 +14,7 @@
 
         <include layout="@layout/toolbar_edit_text"/>
 
-        <android.support.v4.widget.NestedScrollView
+        <androidx.core.widget.NestedScrollView
             android:id="@+id/show_project_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

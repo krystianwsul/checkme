@@ -77,7 +77,6 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:1.1.0-alpha01"
     implementation "com.google.android.material:material:1.1.0-alpha02"
-    implementation "androidx.legacy:legacy-support-v4:1.0.0"
 
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"

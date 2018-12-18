@@ -398,7 +398,7 @@ class GroupListFragment @JvmOverloads constructor(
                 check(instanceDatas.size > 1)
 
                 menu.apply {
-                    findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance } && allNotDone
+                    findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
                     findItem(R.id.action_group_show_task).isVisible = false
                     findItem(R.id.action_group_edit_task).isVisible = false
                     findItem(R.id.action_group_add_task).isVisible = false

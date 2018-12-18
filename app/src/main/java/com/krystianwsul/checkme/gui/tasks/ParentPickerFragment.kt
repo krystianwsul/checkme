@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
@@ -40,36 +42,31 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private var expandedParentKeys: List<CreateTaskViewModel.ParentKey>? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        if (savedInstanceState != null) {
-            if (savedInstanceState.containsKey(EXPANDED_TASK_KEYS_KEY)) {
-                expandedParentKeys = savedInstanceState.getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
-                check(!expandedParentKeys!!.isEmpty())
-            }
-        }
-
-        val builder = MaterialDialog.Builder(requireActivity())
-                .title(R.string.parent_dialog_title)
-                .customView(R.layout.fragment_parent_picker, false)
-                .negativeText(android.R.string.cancel)
-
         check(arguments!!.containsKey(SHOW_DELETE_KEY))
 
-        val showDelete = arguments!!.getBoolean(SHOW_DELETE_KEY)
+        savedInstanceState?.takeIf { it.containsKey(EXPANDED_TASK_KEYS_KEY) }?.apply {
+            expandedParentKeys = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
+            check(!expandedParentKeys!!.isEmpty())
+        }
 
-        if (showDelete)
-            builder.neutralText(R.string.delete).onNeutral { _, _ -> listener.onTaskDeleted() }
+        return MaterialDialog(requireActivity()).apply {
+            title(R.string.parent_dialog_title)
+            customView(R.layout.fragment_parent_picker)
+            negativeButton(android.R.string.cancel)
 
-        val materialDialog = builder.build()
+            @Suppress("DEPRECATION")
+            if (arguments!!.getBoolean(SHOW_DELETE_KEY))
+                neutralButton(R.string.delete) { listener.onTaskDeleted() }
 
-        recyclerView = materialDialog.customView as RecyclerView
-
-        return materialDialog
+            recyclerView = getCustomView() as RecyclerView
+        }
     }
 
     fun initialize(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, listener: Listener) {
         this.taskDatas = taskDatas
         this.listener = listener
-        if (activity != null)
+
+        if (this::recyclerView.isInitialized)
             initialize()
     }
 

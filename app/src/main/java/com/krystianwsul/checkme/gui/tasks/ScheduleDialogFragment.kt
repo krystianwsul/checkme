@@ -8,9 +8,12 @@ import android.os.Parcelable
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
-import com.afollestad.materialdialogs.DialogAction
 import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.internal.MDButton
+import com.afollestad.materialdialogs.WhichButton
+import com.afollestad.materialdialogs.actions.getActionButton
+import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
+import com.afollestad.materialdialogs.internal.button.DialogActionButton
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
@@ -72,7 +75,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private lateinit var mScheduleDialogTimeLayout: TextInputLayout
     private lateinit var mScheduleDialogTime: TextView
 
-    private lateinit var mButton: MDButton
+    private lateinit var mButton: DialogActionButton
 
     private var mCustomTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>? = null
     private var mScheduleDialogListener: ScheduleDialogListener? = null
@@ -140,16 +143,12 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        check(arguments!!.containsKey(SHOW_DELETE_KEY))
+        return MaterialDialog(activity!!).apply {
+            check(arguments!!.containsKey(SHOW_DELETE_KEY))
 
-        val showDelete = arguments!!.getBoolean(SHOW_DELETE_KEY)
-
-        val builder = MaterialDialog.Builder(activity!!)
-                .customView(R.layout.fragment_schedule_dialog, false)
-                .negativeText(android.R.string.cancel)
-                .positiveText(android.R.string.ok)
-                .onNegative { dialog, _ -> dialog.cancel() }
-                .onPositive { _, _ ->
+            customView(R.layout.fragment_schedule_dialog)
+            negativeButton(android.R.string.cancel) { it.cancel() }
+            positiveButton(android.R.string.ok) {
                     check(mCustomTimeDatas != null)
                     check(mScheduleDialogListener != null)
                     check(isValid)
@@ -157,11 +156,11 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                     mScheduleDialogListener!!.onScheduleDialogResult(mScheduleDialogData)
                 }
 
-        if (showDelete)
-            builder.neutralText(R.string.delete).onNeutral { _, _ -> mScheduleDialogListener!!.onScheduleDialogDelete() }
+            @Suppress("DEPRECATION")
+            if (arguments!!.getBoolean(SHOW_DELETE_KEY))
+                neutralButton(R.string.delete) { mScheduleDialogListener!!.onScheduleDialogDelete() }
 
-        return builder.build().apply {
-            customView!!.run {
+            getCustomView()!!.run {
                 mScheduleType = scheduleType
                 mScheduleDialogDateLayout = scheduleDialogDateLayout
                 mScheduleDialogDate = scheduleDialogDate
@@ -190,7 +189,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogTime = scheduleDialogTime
             }
 
-            mButton = getActionButton(DialogAction.POSITIVE)!!
+            mButton = getActionButton(WhichButton.POSITIVE)
         }
     }
 
@@ -409,7 +408,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         mCustomTimeDatas = customTimeDatas
         mScheduleDialogListener = scheduleDialogListener
 
-        if (activity != null)
+        if (this::mScheduleDialogData.isInitialized)
             initialize()
     }
 

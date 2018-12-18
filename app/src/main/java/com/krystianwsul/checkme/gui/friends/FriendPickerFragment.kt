@@ -1,20 +1,21 @@
 package com.krystianwsul.checkme.gui.friends
 
 
-import android.app.Dialog
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.utils.animateVisibility
+import kotlinx.android.synthetic.main.fragment_friend_picker.view.*
 
 
 class FriendPickerFragment : AbstractDialogFragment() {
@@ -31,23 +32,17 @@ class FriendPickerFragment : AbstractDialogFragment() {
 
     private lateinit var listener: (String) -> Unit
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val materialDialog = MaterialDialog.Builder(requireActivity())
-                .title(R.string.friend_dialog_title)
-                .customView(R.layout.fragment_friend_picker, false)
-                .negativeText(android.R.string.cancel)
-                .onNegative { dialog, _ -> dialog.cancel() }
-                .build()
+    override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialDialog(requireActivity()).apply {
+        title(R.string.friend_dialog_title)
+        customView(R.layout.fragment_friend_picker)
+        negativeButton(android.R.string.cancel) { it.cancel() }
 
-        val linearLayout = materialDialog.customView as LinearLayout
-
-        friendPickerProgress = linearLayout.findViewById<View>(R.id.friendPickerProgress) as ProgressBar
-
-        friendPickerRecycler = linearLayout.findViewById<View>(R.id.friendPickerRecycler) as RecyclerView
-
-        friendPickerRecycler.layoutManager = LinearLayoutManager(activity)
-
-        return materialDialog
+        getCustomView()!!.also {
+            friendPickerProgress = it.friendPickerProgress
+            friendPickerRecycler = it.friendPickerRecycler.apply {
+                layoutManager = LinearLayoutManager(activity)
+            }
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

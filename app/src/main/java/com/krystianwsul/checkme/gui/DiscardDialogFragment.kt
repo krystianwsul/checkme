@@ -13,10 +13,9 @@ class DiscardDialogFragment : AbstractDialogFragment() {
 
     lateinit var discardDialogListener: () -> Unit
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialDialog.Builder(requireActivity())
-            .content(R.string.discard_changes)
-            .negativeText(android.R.string.cancel)
-            .positiveText(R.string.discard)
-            .onPositive { _, _ -> discardDialogListener() }
-            .show()!!
+    override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialDialog(requireActivity()).show {
+        message(R.string.discard_changes)
+        negativeButton(android.R.string.cancel)
+        positiveButton(R.string.discard) { discardDialogListener() }
+    }
 }

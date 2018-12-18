@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItems
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.CustomTimeKey
 
@@ -35,26 +36,25 @@ class TimeDialogFragment : AbstractDialogFragment() {
         names.add(getString(R.string.other))
         names.add(getString(R.string.add))
 
-        return MaterialDialog.Builder(requireActivity())
-                .title(R.string.time_dialog_title)
-                .items(names)
-                .itemsCallback { _, _, which, _ ->
-                    check(which < names.size)
-                    check(which < customTimeDatas.size + 2)
+        return MaterialDialog(requireActivity()).show {
+            title(R.string.time_dialog_title)
+            listItems(items = names) { _, which, _ ->
+                check(which < names.size)
+                check(which < customTimeDatas.size + 2)
 
-                    when {
-                        which < customTimeDatas.size -> {
-                            val customTimeKey = customTimeDatas[which].customTimeKey
-                            timeDialogListener.onCustomTimeSelected(customTimeKey)
-                        }
-                        which == customTimeDatas.size -> timeDialogListener.onOtherSelected()
-                        else -> {
-                            check(which == customTimeDatas.size + 1)
-                            timeDialogListener.onAddSelected()
-                        }
+                when {
+                    which < customTimeDatas.size -> {
+                        val customTimeKey = customTimeDatas[which].customTimeKey
+                        timeDialogListener.onCustomTimeSelected(customTimeKey)
+                    }
+                    which == customTimeDatas.size -> timeDialogListener.onOtherSelected()
+                    else -> {
+                        check(which == customTimeDatas.size + 1)
+                        timeDialogListener.onAddSelected()
                     }
                 }
-                .show()
+            }
+        }
     }
 
     interface TimeDialogListener {

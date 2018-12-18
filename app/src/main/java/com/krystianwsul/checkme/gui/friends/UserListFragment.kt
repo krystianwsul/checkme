@@ -136,13 +136,20 @@ class UserListFragment : AbstractFragment(), FabUser {
         this.projectId = projectId
         this.data = data
 
-        if (this::treeViewAdapter.isInitialized)
+        if (this::treeViewAdapter.isInitialized) {
             saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
-        else if (saveState == null)
+
+            treeViewAdapter.updateDisplayedNodes {
+                (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize(data.userListDatas, saveState!!)
+            }
+        } else if (saveState == null) {
             saveState = SaveState(HashSet(), HashSet(), HashSet())
 
-        treeViewAdapter = FriendListAdapter(data.userListDatas, saveState!!).initialize()
-        friendListRecycler.adapter = treeViewAdapter
+            val friendListAdapter = FriendListAdapter()
+            friendListAdapter.initialize(data.userListDatas, saveState!!)
+            treeViewAdapter = friendListAdapter.treeViewAdapter
+            friendListRecycler.adapter = treeViewAdapter
+        }
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
@@ -235,11 +242,16 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private fun getSelected() = treeViewAdapter.selectedNodes.map { (it.modelNode as UserNode) }
 
-    inner class FriendListAdapter(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) : TreeModelAdapter {
+    inner class FriendListAdapter : TreeModelAdapter {
 
-        val userNodes: MutableList<UserNode>
+        lateinit var userNodes: MutableList<UserNode>
+            private set
 
-        init {
+        val treeViewAdapter = TreeViewAdapter(this)
+        lateinit var treeNodeCollection: TreeNodeCollection
+            private set
+
+        fun initialize(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) {
             check(data != null)
 
             val userListMap = userListDatas.associateBy { it.id }.toMutableMap()
@@ -256,21 +268,11 @@ class UserListFragment : AbstractFragment(), FabUser {
                     .sortedBy { it.id }
                     .map { UserNode(it, saveState.selectedIds) }
                     .toMutableList()
-        }
-
-        private lateinit var treeViewAdapter: TreeViewAdapter
-        lateinit var treeNodeCollection: TreeNodeCollection
-            private set
-
-        fun initialize(): TreeViewAdapter {
-            treeViewAdapter = TreeViewAdapter(this)
 
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
             treeNodeCollection.nodes = userNodes.map { it.initialize(treeNodeCollection) }
-
-            return treeViewAdapter
         }
 
         fun getSaveState(): SaveState {

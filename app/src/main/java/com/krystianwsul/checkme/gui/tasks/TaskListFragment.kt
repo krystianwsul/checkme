@@ -341,16 +341,26 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val expanded = (treeViewAdapter.treeModelAdapter as TaskAdapter).expandedTaskKeys
 
             expandedTaskIds = if (expanded.isEmpty()) null else expanded
-        }
 
-        treeViewAdapter = TaskAdapter.getAdapter(this, taskData!!, selectedTaskKeys, expandedTaskIds)
-        taskListRecycler.adapter = treeViewAdapter
-        dragHelper.attachToRecyclerView(taskListRecycler)
+            treeViewAdapter.updateDisplayedNodes {
+                (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(taskData!!, selectedTaskKeys, expandedTaskIds)
 
-        treeViewAdapter.updateDisplayedNodes {
-            selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
-            query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
+                query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
+            }
+        } else {
+            val taskAdapter = TaskAdapter(this)
+            taskAdapter.initialize(taskData!!, selectedTaskKeys, expandedTaskIds)
+            treeViewAdapter = taskAdapter.treeViewAdapter
+            taskListRecycler.adapter = treeViewAdapter
+            dragHelper.attachToRecyclerView(taskListRecycler)
+
+            treeViewAdapter.updateDisplayedNodes {
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+
+                query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
+            }
         }
 
         (context as TaskListListener).search
@@ -460,31 +470,25 @@ class TaskListFragment : AbstractFragment(), FabUser {
         initializeDisposable.clear()
     }
 
-    private class TaskAdapter private constructor(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {
+    private class TaskAdapter(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {
 
         companion object {
 
             private const val TYPE_TASK = 0
             private const val TYPE_NOTE = 1
-
-            fun getAdapter(taskListFragment: TaskListFragment, taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?): TreeViewAdapter {
-                val taskAdapter = TaskAdapter(taskListFragment)
-
-                return taskAdapter.initialize(taskData, selectedTaskKeys, expandedTaskKeys)
-            }
         }
 
-        val taskWrappers = mutableListOf<TaskWrapper>()
+        lateinit var taskWrappers: MutableList<TaskWrapper>
+            private set
 
-        private lateinit var treeViewAdapter: TreeViewAdapter
+        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
         private lateinit var treeNodeCollection: TreeNodeCollection
 
         override val taskAdapter = this
 
         val expandedTaskKeys get() = taskWrappers.flatMap { it.expandedTaskKeys }
 
-        private fun initialize(taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?): TreeViewAdapter {
-            treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
+        fun initialize(taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?) {
             treeViewAdapter.showPadding = true
 
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
@@ -499,6 +503,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 treeNodes.add(noteNode.initialize(treeNodeCollection))
             }
 
+            taskWrappers = mutableListOf()
             for (childTaskData in taskData.childTaskDatas) {
                 val taskWrapper = TaskWrapper(0, this, childTaskData)
 
@@ -508,8 +513,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             treeNodeCollection.nodes = treeNodes
-
-            return treeViewAdapter
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(taskListFragment.activity!!.layoutInflater.inflate(R.layout.row_list, parent, false))

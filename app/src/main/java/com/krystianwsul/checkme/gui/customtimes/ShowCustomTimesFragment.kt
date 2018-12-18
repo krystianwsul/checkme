@@ -126,15 +126,22 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     private fun onLoadFinished(data: ShowCustomTimesViewModel.Data) {
         this.data = data
 
-        if (this::treeViewAdapter.isInitialized)
+        if (this::treeViewAdapter.isInitialized) {
             selectedCustomTimeIds = treeViewAdapter.selectedNodes
                     .asSequence()
                     .map { (it.modelNode as CustomTimeNode).customTimeData.id }
                     .toList()
                     .takeIf { it.isNotEmpty() }
 
-        treeViewAdapter = CustomTimesAdapter().initialize()
-        showTimesList.adapter = treeViewAdapter
+            treeViewAdapter.updateDisplayedNodes {
+                (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).initialize()
+            }
+        } else {
+            val customTimesAdapter = CustomTimesAdapter()
+            customTimesAdapter.initialize()
+            treeViewAdapter = customTimesAdapter.treeViewAdapter
+            showTimesList.adapter = treeViewAdapter
+        }
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
@@ -196,24 +203,24 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private inner class CustomTimesAdapter : TreeModelAdapter {
 
-        private val dataId = data.dataId
+        private val dataId get() = data.dataId
 
-        val customTimeWrappers = data.entries
-                .asSequence()
-                .map { CustomTimeNode(it) }
-                .toMutableList()
+        lateinit var customTimeWrappers: MutableList<CustomTimeNode>
+            private set
 
-        private lateinit var treeViewAdapter: TreeViewAdapter
+        val treeViewAdapter = TreeViewAdapter(this)
         private lateinit var treeNodeCollection: TreeNodeCollection
 
-        fun initialize(): TreeViewAdapter {
-            treeViewAdapter = TreeViewAdapter(this)
+        fun initialize() {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
-            treeNodeCollection.nodes = customTimeWrappers.map { it.initialize(treeNodeCollection) }
+            customTimeWrappers = data.entries
+                    .asSequence()
+                    .map { CustomTimeNode(it) }
+                    .toMutableList()
 
-            return treeViewAdapter
+            treeNodeCollection.nodes = customTimeWrappers.map { it.initialize(treeNodeCollection) }
         }
 
         override val hasActionMode get() = selectionCallback.hasActionMode

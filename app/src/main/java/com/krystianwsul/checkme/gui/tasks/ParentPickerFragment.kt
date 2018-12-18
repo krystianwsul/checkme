@@ -87,11 +87,16 @@ class ParentPickerFragment : AbstractDialogFragment() {
             val expanded = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expandedParentKeys
 
             expandedParentKeys = if (expanded.isEmpty()) null else expanded
+
+            treeViewAdapter!!.updateDisplayedNodes {
+                (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(taskDatas!!, expandedParentKeys)
+            }
+        } else {
+            val taskAdapter = TaskAdapter(this)
+            taskAdapter.initialize(taskDatas!!, expandedParentKeys)
+            treeViewAdapter = taskAdapter.treeViewAdapter
+            recyclerView.adapter = treeViewAdapter
         }
-
-        treeViewAdapter = TaskAdapter.getAdapter(this, taskDatas!!, expandedParentKeys)
-
-        recyclerView.adapter = treeViewAdapter
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -105,28 +110,17 @@ class ParentPickerFragment : AbstractDialogFragment() {
         }
     }
 
-    private class TaskAdapter private constructor(private val parentPickerFragment: ParentPickerFragment) : TreeModelAdapter, TaskParent {
+    private class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) : TreeModelAdapter, TaskParent {
 
-        companion object {
+        private lateinit var taskWrappers: MutableList<TaskWrapper>
 
-            fun getAdapter(parentPickerFragment: ParentPickerFragment, taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, expandedParentKeys: List<CreateTaskViewModel.ParentKey>?): TreeViewAdapter {
-                val taskAdapter = TaskAdapter(parentPickerFragment)
-
-                return taskAdapter.initialize(taskDatas, expandedParentKeys)
-            }
-        }
-
-        private lateinit var taskWrappers: ArrayList<TaskWrapper>
-
-        private lateinit var treeViewAdapter: TreeViewAdapter
+        val treeViewAdapter = TreeViewAdapter(this)
 
         override val taskAdapter = this
 
         val expandedParentKeys get() = taskWrappers.flatMap { it.expandedParentKeys }
 
-        private fun initialize(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, expandedParentKeys: List<CreateTaskViewModel.ParentKey>?): TreeViewAdapter {
-            treeViewAdapter = TreeViewAdapter(this)
-
+        fun initialize(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, expandedParentKeys: List<CreateTaskViewModel.ParentKey>?) {
             val treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
@@ -144,8 +138,6 @@ class ParentPickerFragment : AbstractDialogFragment() {
             }
 
             treeNodeCollection.nodes = treeNodes
-
-            return treeViewAdapter
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false))

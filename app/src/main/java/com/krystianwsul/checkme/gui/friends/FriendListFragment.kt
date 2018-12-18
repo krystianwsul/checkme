@@ -123,11 +123,18 @@ class FriendListFragment : AbstractFragment(), FabUser {
     private fun onLoadFinished(data: FriendListViewModel.Data) {
         this.data = data
 
-        if (this::treeViewAdapter.isInitialized)
+        if (this::treeViewAdapter.isInitialized) {
             selectedIds = getSelectedIds()
 
-        treeViewAdapter = FriendListAdapter().initialize()
-        friendListRecycler.adapter = treeViewAdapter
+            treeViewAdapter.updateDisplayedNodes {
+                (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize()
+            }
+        } else {
+            val friendListAdapter = FriendListAdapter()
+            friendListAdapter.initialize()
+            treeViewAdapter = friendListAdapter.treeViewAdapter
+            friendListRecycler.adapter = treeViewAdapter
+        }
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
@@ -190,23 +197,22 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private inner class FriendListAdapter : TreeModelAdapter {
 
-        val userDataWrappers = data!!.userListDatas
-                .asSequence()
-                .sortedBy { it.id }
-                .map { FriendNode(it) }
-                .toMutableList()
+        lateinit var userDataWrappers: MutableList<FriendNode>
 
-        private lateinit var treeViewAdapter: TreeViewAdapter
+        val treeViewAdapter = TreeViewAdapter(this)
         private lateinit var treeNodeCollection: TreeNodeCollection
 
-        fun initialize(): TreeViewAdapter {
-            treeViewAdapter = TreeViewAdapter(this)
+        fun initialize() {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
-            treeNodeCollection.nodes = userDataWrappers.map { it.initialize(treeNodeCollection) }
+            userDataWrappers = data!!.userListDatas
+                    .asSequence()
+                    .sortedBy { it.id }
+                    .map { FriendNode(it) }
+                    .toMutableList()
 
-            return treeViewAdapter
+            treeNodeCollection.nodes = userDataWrappers.map { it.initialize(treeNodeCollection) }
         }
 
         override val hasActionMode get() = selectionCallback.hasActionMode

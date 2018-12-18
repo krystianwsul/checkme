@@ -154,16 +154,24 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         animateVisibility(listOf(show), hide)
 
-        if (this::treeViewAdapter.isInitialized)
+        if (this::treeViewAdapter.isInitialized) {
             selectedProjectIds = treeViewAdapter.selectedNodes
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toSet()
 
-        treeViewAdapter = ProjectListAdapter().initialize(data.projectDatas)
-        projectListRecycler.adapter = treeViewAdapter
+            treeViewAdapter.updateDisplayedNodes {
+                (treeViewAdapter.treeModelAdapter as ProjectListAdapter).initialize(data.projectDatas)
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            }
+        } else {
+            val projectListAdapter = ProjectListAdapter()
+            projectListAdapter.initialize(data.projectDatas)
+            treeViewAdapter = projectListAdapter.treeViewAdapter
+            projectListRecycler.adapter = treeViewAdapter
 
-        treeViewAdapter.updateDisplayedNodes {
-            selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            treeViewAdapter.updateDisplayedNodes {
+                selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
+            }
         }
 
         updateFabVisibility()
@@ -205,22 +213,20 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private inner class ProjectListAdapter : TreeModelAdapter {
 
+        val treeViewAdapter = TreeViewAdapter(this)
+
         private lateinit var projectNodes: MutableList<ProjectNode>
-        private lateinit var treeViewAdapter: TreeViewAdapter
         private lateinit var treeNodeCollection: TreeNodeCollection
 
-        fun initialize(projectDatas: SortedMap<String, ProjectListViewModel.ProjectData>): TreeViewAdapter {
+        fun initialize(projectDatas: SortedMap<String, ProjectListViewModel.ProjectData>) {
             projectNodes = projectDatas.values
                     .map { ProjectNode(this, it) }
                     .toMutableList()
 
-            treeViewAdapter = TreeViewAdapter(this)
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
             treeNodeCollection.nodes = projectNodes.map { it.initialize(treeNodeCollection) }
-
-            return treeViewAdapter
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false)!!)

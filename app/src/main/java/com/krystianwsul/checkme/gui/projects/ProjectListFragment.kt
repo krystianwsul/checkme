@@ -159,7 +159,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toSet()
 
-            treeViewAdapter.updateDisplayedNodes {
+            treeViewAdapter.updateDisplayedNodes(true) {
                 (treeViewAdapter.treeModelAdapter as ProjectListAdapter).initialize(data.projectDatas)
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }

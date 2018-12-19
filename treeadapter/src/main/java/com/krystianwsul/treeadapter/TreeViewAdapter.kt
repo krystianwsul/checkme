@@ -4,8 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 
 class TreeViewAdapter(
         val treeModelAdapter: TreeModelAdapter,
@@ -49,7 +48,9 @@ class TreeViewAdapter(
 
     fun decrementSelected(x: TreeViewAdapter.Placeholder) = treeModelAdapter.decrementSelected(x)
 
-    fun updateDisplayedNodes(action: () -> Unit) {
+    fun updateDisplayedNodes(action: () -> Unit) = updateDisplayedNodes(false, action)
+
+    fun updateDisplayedNodes(forceChange: Boolean, action: () -> Unit) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
@@ -62,6 +63,92 @@ class TreeViewAdapter(
         updating = false
 
         val newStates = treeNodeCollection!!.displayedNodes.map { it.state }
+
+        val target = if (forceChange) {
+            val listUpdateCallback = object : ListUpdateCallback {
+
+                val states = BooleanArray(oldStates.size) { false }.toMutableList()
+
+                override fun onChanged(position: Int, count: Int, payload: Any?) {
+                    for (i in 0 until count)
+                        states[position + i] = true
+
+                    notifyItemRangeChanged(position, count)
+                }
+
+                override fun onMoved(fromPosition: Int, toPosition: Int) {
+                    states.removeAt(fromPosition)
+                    states.add(toPosition, true)
+
+                    notifyItemMoved(fromPosition, toPosition)
+                }
+
+                override fun onInserted(position: Int, count: Int) {
+                    for (i in 0 until count)
+                        states.add(position, true)
+
+                    notifyItemRangeInserted(position, count)
+                }
+
+                override fun onRemoved(position: Int, count: Int) {
+                    for (i in 0 until count)
+                        states.removeAt(position)
+
+                    notifyItemRangeRemoved(position, count)
+                }
+
+                fun done() {
+                    BatchingListUpdateCallback(AdapterListUpdateCallback(this@TreeViewAdapter)).apply {
+                        states.mapIndexed { index, value -> Pair(index, value) }
+                                .filterNot { it.second }
+                                .map { it.first }
+                                .forEach {
+                                    onChanged(it, 1, null)
+                                }
+
+                        dispatchLastEvent()
+                    }
+                }
+            }
+
+            object : BatchingListUpdateCallback(listUpdateCallback) {
+
+                private var me = false
+
+                override fun onChanged(position: Int, count: Int, payload: Any?) {
+                    me = true
+                    super.onChanged(position, count, payload)
+                    me = false
+                }
+
+                override fun onInserted(position: Int, count: Int) {
+                    me = true
+                    super.onInserted(position, count)
+                    me = false
+                }
+
+                override fun onMoved(fromPosition: Int, toPosition: Int) {
+                    me = true
+                    super.onMoved(fromPosition, toPosition)
+                    me = false
+                }
+
+                override fun onRemoved(position: Int, count: Int) {
+                    me = true
+                    super.onRemoved(position, count)
+                    me = false
+                }
+
+                override fun dispatchLastEvent() {
+                    super.dispatchLastEvent()
+
+                    if (!me)
+                        listUpdateCallback.done()
+                }
+            }
+        } else {
+            AdapterListUpdateCallback(this@TreeViewAdapter)
+        }
 
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
@@ -105,7 +192,7 @@ class TreeViewAdapter(
 
                 return oldState.modelState == newState.modelState
             }
-        }).dispatchUpdatesTo(this)
+        }).dispatchUpdatesTo(target)
     }
 
     fun unselect(x: TreeViewAdapter.Placeholder) {
@@ -180,8 +267,6 @@ class TreeViewAdapter(
     }
 
     class SetTreeNodeCollectionNotCalledException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has not been called.")
-
-    class SetTreeNodeCollectionCalledTwiceException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has already been called.")
 
     private class PaddingHolder(view: View) : RecyclerView.ViewHolder(view)
 

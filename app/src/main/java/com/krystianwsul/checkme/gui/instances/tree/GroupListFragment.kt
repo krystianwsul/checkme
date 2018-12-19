@@ -563,7 +563,7 @@ class GroupListFragment @JvmOverloads constructor(
         if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage == false) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
 
-            treeViewAdapter.updateDisplayedNodes {
+            treeViewAdapter.updateDisplayedNodes(true) {
                 (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, showPadding(), useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }

@@ -342,7 +342,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             expandedTaskIds = if (expanded.isEmpty()) null else expanded
 
-            treeViewAdapter.updateDisplayedNodes {
+            treeViewAdapter.updateDisplayedNodes(true) {
                 (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(taskData!!, selectedTaskKeys, expandedTaskIds)
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)

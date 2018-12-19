@@ -126,7 +126,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         if (this::treeViewAdapter.isInitialized) {
             selectedIds = getSelectedIds()
 
-            treeViewAdapter.updateDisplayedNodes {
+            treeViewAdapter.updateDisplayedNodes(true) {
                 (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize()
             }
         } else {

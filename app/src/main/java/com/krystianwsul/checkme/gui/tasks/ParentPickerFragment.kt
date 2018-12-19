@@ -88,7 +88,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             expandedParentKeys = if (expanded.isEmpty()) null else expanded
 
-            treeViewAdapter!!.updateDisplayedNodes {
+            treeViewAdapter!!.updateDisplayedNodes(true) {
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(taskDatas!!, expandedParentKeys)
             }
         } else {

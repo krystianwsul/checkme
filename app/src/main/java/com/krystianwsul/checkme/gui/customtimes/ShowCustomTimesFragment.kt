@@ -133,7 +133,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                     .toList()
                     .takeIf { it.isNotEmpty() }
 
-            treeViewAdapter.updateDisplayedNodes {
+            treeViewAdapter.updateDisplayedNodes(true) {
                 (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).initialize()
             }
         } else {

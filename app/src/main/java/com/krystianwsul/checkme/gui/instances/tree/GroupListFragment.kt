@@ -74,7 +74,7 @@ class GroupListFragment @JvmOverloads constructor(
             return Date(calendar)
         }
 
-        private fun nodesToInstanceDatas(treeNodes: List<TreeNode>, includeGroups: Boolean): List<InstanceData> {
+        private fun nodesToInstanceDatas(treeNodes: List<TreeNode>, includeGroups: Boolean): Set<InstanceData> {
             val instanceDatas = ArrayList<InstanceData>()
             treeNodes.map { it.modelNode }.forEach {
                 when (it) {
@@ -88,7 +88,7 @@ class GroupListFragment @JvmOverloads constructor(
                 }
             }
 
-            return instanceDatas
+            return instanceDatas.toSet()
         }
 
         fun recursiveExists(instanceData: InstanceData) {
@@ -442,6 +442,8 @@ class GroupListFragment @JvmOverloads constructor(
             parents.add(parent)
             addParents(parents, parent)
         }
+
+        override fun getTitleCount() = nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).size
     }
 
     private var floatingActionButton: FloatingActionButton? = null

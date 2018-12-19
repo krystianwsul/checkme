@@ -84,11 +84,14 @@ class TreeNode(
             throw EmptyExpandedException()
 
         treeViewAdapter.updateDisplayedNodes {
-            expanded = if (expanded) {
+            expanded = if (expanded) { // collapsing
                 childTreeNodes!!.forEach { it.deselectRecursive(TreeViewAdapter.Placeholder) }
 
                 false
-            } else {
+            } else { // expanding
+                if (selected)
+                    propagateSelection(true, TreeViewAdapter.Placeholder)
+
                 true
             }
         }
@@ -145,17 +148,36 @@ class TreeNode(
 
     override fun compareTo(other: TreeNode) = modelNode.compareTo(other.modelNode)
 
-    private fun toggleSelected(x: TreeViewAdapter.Placeholder) {
+    private fun toggleSelected(x: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
+        if (childTreeNodes == null)
+            throw SetChildTreeNodesNotCalledException()
+
         if (!modelNode.isSelectable)
             return
 
         selected = !selected
 
+        updateSelect(x, recursive)
+    }
+
+    private fun updateSelect(x: TreeViewAdapter.Placeholder, recursive: Boolean) {
         if (selected) {
             incrementSelected(x)
         } else {
             decrementSelected(x)
         }
+
+        if (recursive && expanded)
+            propagateSelection(selected, x)
+
+        if (recursive && !selected && modelNode.deselectParent) {
+            (parent as TreeNode).takeIf { it.selected }?.toggleSelected(x, false)
+        }
+    }
+
+    private fun propagateSelection(selected: Boolean, x: TreeViewAdapter.Placeholder) {
+        if (modelNode.toggleDescendants)
+            childTreeNodes!!.filter { it.selected != selected }.forEach { it.toggleSelected(x, false) }
     }
 
     fun onLongClickSelect(viewHolder: RecyclerView.ViewHolder) {
@@ -167,11 +189,7 @@ class TreeNode(
         modelNode.onBindViewHolder(viewHolder)
 
         treeViewAdapter.updateDisplayedNodes {
-            if (selected) {
-                incrementSelected(TreeViewAdapter.Placeholder)
-            } else {
-                decrementSelected(TreeViewAdapter.Placeholder)
-            }
+            updateSelect(TreeViewAdapter.Placeholder, true)
         }
     }
 
@@ -382,18 +400,18 @@ class TreeNode(
         toggleSelected(x)
     }
 
-    fun deselect(x: TreeViewAdapter.Placeholder) {
+    fun deselect(x: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
         if (!selected)
             throw NotSelectedException()
 
-        toggleSelected(x)
+        toggleSelected(x, recursive)
     }
 
     private fun deselectRecursive(x: TreeViewAdapter.Placeholder) {
         childTreeNodes!!.forEach { it.deselectRecursive(x) }
 
         if (selected)
-            deselect(x)
+            deselect(x, false)
     }
 
     class SetChildTreeNodesNotCalledException : InitializationException("TreeNode.setChildTreeNodes() has not been called.")

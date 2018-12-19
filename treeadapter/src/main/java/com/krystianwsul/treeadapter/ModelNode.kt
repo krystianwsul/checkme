@@ -22,9 +22,13 @@ interface ModelNode : Comparable<ModelNode> {
 
     fun setOrdinal(ordinal: Double): Unit = throw UnsupportedOperationException()
 
-    fun matchesSearch(query: String): Boolean = true
+    fun matchesSearch(query: String) = true
 
     val state: ModelState
 
     val id: Any
+
+    val toggleDescendants get() = false
+
+    val deselectParent get() = false
 }

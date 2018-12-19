@@ -102,6 +102,8 @@ abstract class SelectionCallback : ActionMode.Callback {
                 onOtherAdded()
             }
         }
+
+        updateTitle()
     }
 
     fun decrementSelected(x: TreeViewAdapter.Placeholder) {
@@ -111,7 +113,10 @@ abstract class SelectionCallback : ActionMode.Callback {
         selected--
 
         when (selected) {
-            1 -> onSecondToLastRemoved()
+            1 -> {
+                onSecondToLastRemoved()
+                updateTitle()
+            }
             0 -> {
                 check(!removingLast)
                 check(!menuClick)
@@ -122,9 +127,18 @@ abstract class SelectionCallback : ActionMode.Callback {
 
                 onLastRemoved(x)
             }
-            else -> onOtherRemoved()
+            else -> {
+                onOtherRemoved()
+                updateTitle()
+            }
         }
     }
+
+    fun updateTitle() {
+        actionMode!!.title = getTitleCount().toString()
+    }
+
+    open fun getTitleCount() = selected
 
     val hasActionMode get() = actionMode != null
 

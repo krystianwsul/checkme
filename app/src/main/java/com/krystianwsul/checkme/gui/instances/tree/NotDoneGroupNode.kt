@@ -331,6 +331,8 @@ class NotDoneGroupNode(
 
     override val id: Any = if (singleInstance()) Id(singleInstanceData.InstanceKey) else exactTimeStamp
 
+    override val toggleDescendants get() = !singleInstance()
+
     data class Id(val instanceKey: InstanceKey)
 
     class NotDoneInstanceNode(
@@ -446,6 +448,8 @@ class NotDoneGroupNode(
         fun removeFromParent(x: TreeViewAdapter.Placeholder) = parentNotDoneGroupNode.remove(this, x)
 
         override val id = Id(instanceData.InstanceKey)
+
+        override val deselectParent get() = true
 
         data class Id(val instanceKey: InstanceKey)
     }

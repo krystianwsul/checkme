@@ -390,14 +390,14 @@ class TreeNode(
 
     override val indentation by lazy { parent.indentation + 1 }
 
-    fun select(x: TreeViewAdapter.Placeholder) {
+    fun select(x: TreeViewAdapter.Placeholder, recursive: Boolean = true) {
         if (selected)
             throw SelectCalledTwiceException()
 
         if (!modelNode.isSelectable)
             throw NotSelectableSelectedException()
 
-        toggleSelected(x)
+        toggleSelected(x, recursive)
     }
 
     fun deselect(x: TreeViewAdapter.Placeholder, recursive: Boolean = true) {

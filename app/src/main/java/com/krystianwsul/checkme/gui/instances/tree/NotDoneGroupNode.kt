@@ -225,7 +225,7 @@ class NotDoneGroupNode(
         val selected = childTreeNode.isSelected
 
         if (selected)
-            childTreeNode.deselect(x)
+            childTreeNode.deselect(x, false)
 
         treeNode.remove(childTreeNode, x)
 
@@ -238,8 +238,10 @@ class NotDoneGroupNode(
             val selected1 = childTreeNode1.isSelected
 
             if (selected1) {
-                treeNode.select(x)
-                childTreeNode1.deselect(x)
+                if (!treeNode.isSelected)
+                    treeNode.select(x, false)
+
+                childTreeNode1.deselect(x, false)
             }
 
             treeNode.remove(childTreeNode1, x)

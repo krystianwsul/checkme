@@ -231,17 +231,23 @@ class GroupListFragment @JvmOverloads constructor(
 
                         treeNode.modelNode.let {
                             if (it is NotDoneGroupNode) {
-                                check(it.singleInstance())
-
-                                val instanceData = it.singleInstanceData
-                                instanceData.Done = done
-
-                                recursiveExists(instanceData)
-
                                 val nodeCollection = it.nodeCollection
 
-                                nodeCollection.dividerNode.add(instanceData, x)
                                 nodeCollection.notDoneGroupCollection.remove(it, x)
+
+                                if (!it.expanded()) {
+                                    it.instanceDatas.forEach {
+                                        it.Done = done
+
+                                        recursiveExists(it)
+
+                                        nodeCollection.dividerNode.add(it, x)
+                                    }
+                                } else {
+                                    check(it.treeNode.allChildren.all { it.isSelected })
+                                }
+
+                                decrementSelected(x)
                             } else {
                                 val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
                                 instanceData.Done = done
@@ -254,7 +260,6 @@ class GroupListFragment @JvmOverloads constructor(
                             }
                         }
 
-                        decrementSelected(x)
                         selectedTreeNodes = treeViewAdapter.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
@@ -369,21 +374,16 @@ class GroupListFragment @JvmOverloads constructor(
             val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes, true)
             check(instanceDatas.isNotEmpty())
 
-            val modelNodes = treeViewAdapter.selectedNodes.map { it.modelNode }
-
-            val allNotDone = modelNodes.all { (it is NotDoneGroupNode && it.singleInstance()) || it is NotDoneGroupNode.NotDoneInstanceNode }
-            val allDone = modelNodes.all { it is DoneInstanceNode }
-
             menu.apply {
-                findItem(R.id.action_group_mark_done).isVisible = allNotDone
-                findItem(R.id.action_group_mark_not_done).isVisible = allDone
+                findItem(R.id.action_group_mark_done).isVisible = instanceDatas.all { it.Done == null }
+                findItem(R.id.action_group_mark_not_done).isVisible = instanceDatas.all { it.Done != null }
+                findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
             }
 
             if (instanceDatas.size == 1) {
                 val instanceData = instanceDatas.single()
 
                 menu.apply {
-                    findItem(R.id.action_group_edit_instance).isVisible = instanceData.let { it.IsRootInstance && it.Done == null }
                     findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
                     findItem(R.id.action_group_join).isVisible = false
@@ -394,7 +394,6 @@ class GroupListFragment @JvmOverloads constructor(
                 check(instanceDatas.size > 1)
 
                 menu.apply {
-                    findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
                     findItem(R.id.action_group_show_task).isVisible = false
                     findItem(R.id.action_group_edit_task).isVisible = false
                     findItem(R.id.action_group_add_task).isVisible = false

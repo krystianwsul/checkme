@@ -20,7 +20,7 @@ class DayViewModel : ViewModel() {
 
     private val entries = mutableMapOf<Pair<MainActivity.TimeRange, Int>, Entry>()
 
-    private val kotlinDomainFactory = DomainFactory.getKotlinDomainFactory()
+    private val kotlinDomainFactory = DomainFactory.getInstance()
 
     fun getEntry(timeRange: MainActivity.TimeRange, position: Int): Entry {
         val key = Pair(timeRange, position)

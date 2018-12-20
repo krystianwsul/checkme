@@ -189,7 +189,7 @@ class GroupListFragment @JvmOverloads constructor(
                         selectedTreeNodes = treeViewAdapter.selectedNodes
                     } while (selectedTreeNodes.isNotEmpty())
 
-                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).dataId, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getInstance().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).dataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -220,7 +220,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, true)
+                    val done = DomainFactory.getInstance().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, true)
 
                     var selectedTreeNodes = treeViewAdapter.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())
@@ -271,7 +271,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    DomainFactory.getKotlinDomainFactory().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
+                    DomainFactory.getInstance().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
 
                     var selectedTreeNodes = treeViewAdapter.selectedNodes
                     check(selectedTreeNodes.isNotEmpty())

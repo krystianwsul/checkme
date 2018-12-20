@@ -240,7 +240,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             val selectedCustomTimeIds = selectedCustomTimeWrappers.map { it.customTimeData.id }
 
-            DomainFactory.getKotlinDomainFactory().setCustomTimeCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds)
+            DomainFactory.getInstance().setCustomTimeCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds)
         }
     }
 

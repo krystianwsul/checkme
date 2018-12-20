@@ -203,9 +203,9 @@ class UserListFragment : AbstractFragment(), FabUser {
         if (projectId.isNullOrEmpty()) {
             check(saveState.removedIds.isEmpty())
 
-            DomainFactory.getKotlinDomainFactory().createProject(data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
+            DomainFactory.getInstance().createProject(data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
         } else {
-            DomainFactory.getKotlinDomainFactory().updateProject(data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
+            DomainFactory.getInstance().updateProject(data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
         }
     }
 

@@ -230,7 +230,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             selectedUserDataWrappers.forEach { userDataWrappers.remove(it) }
 
-            DomainFactory.getKotlinDomainFactory().removeFriends(selectedUserDataWrappers.asSequence()
+            DomainFactory.getInstance().removeFriends(selectedUserDataWrappers.asSequence()
                     .map { it.userListData.id }
                     .toSet())
         }

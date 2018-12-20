@@ -104,7 +104,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         selectedNodes = treeViewAdapter.selectedNodes
                     } while (selectedNodes.isNotEmpty())
 
-                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                    DomainFactory.getInstance().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
                 }
@@ -669,7 +669,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun setOrdinal(ordinal: Double) {
                 childTaskData.hierarchyData!!.ordinal = ordinal
 
-                DomainFactory.getKotlinDomainFactory().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
+                DomainFactory.getInstance().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
             }
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)

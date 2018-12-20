@@ -126,7 +126,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
             R.id.task_menu_delete -> {
                 showTaskViewModel.stop()
 
-                DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
+                DomainFactory.getInstance().setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
 
                 finish()
             }

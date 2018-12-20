@@ -26,7 +26,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         }
 
         fun throttleFirebase(needsFirebase: Boolean, firebaseListener: (DomainFactory) -> Unit) {
-            val kotlinDomainFactory = DomainFactory.getKotlinDomainFactory()
+            val kotlinDomainFactory = DomainFactory.getInstance()
 
             if (kotlinDomainFactory.getIsConnected()) {
                 if (kotlinDomainFactory.getIsConnectedAndSaved()) {

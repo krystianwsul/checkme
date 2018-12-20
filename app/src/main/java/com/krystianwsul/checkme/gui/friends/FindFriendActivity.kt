@@ -15,9 +15,9 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.UserData
-import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.animateVisibility
 import kotlinx.android.synthetic.main.activity_find_friend.*
 
@@ -68,9 +68,7 @@ class FindFriendActivity : AppCompatActivity() {
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            val myUserInfo = MainActivity.userInfo!!
-
-            DatabaseWrapper.addFriend(myUserInfo, userData!!)
+            DatabaseWrapper.addFriend(DomainFactory.getInstance().userInfo!!, userData!!)
 
             finish()
         }

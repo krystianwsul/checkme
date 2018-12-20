@@ -182,7 +182,7 @@ class NotDoneGroupNode(
                 groupAdapter.treeNodeCollection
                         .treeViewAdapter
                         .updateDisplayedNodes {
-                            singleInstanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
+                            singleInstanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
 
                             GroupListFragment.recursiveExists(singleInstanceData)
 
@@ -322,11 +322,11 @@ class NotDoneGroupNode(
             if (it.hierarchyData != null) {
                 it.hierarchyData.ordinal = ordinal
 
-                DomainFactory.getKotlinDomainFactory().setTaskHierarchyOrdinal(groupListFragment.parameters.dataId, it.hierarchyData)
+                DomainFactory.getInstance().setTaskHierarchyOrdinal(groupListFragment.parameters.dataId, it.hierarchyData)
             } else {
                 it.ordinal = ordinal
 
-                DomainFactory.getKotlinDomainFactory().setInstanceOrdinal(groupListFragment.parameters.dataId, it.InstanceKey, ordinal)
+                DomainFactory.getInstance().setInstanceOrdinal(groupListFragment.parameters.dataId, it.InstanceKey, ordinal)
             }
         }
     }
@@ -429,7 +429,7 @@ class NotDoneGroupNode(
                     groupAdapter.treeNodeCollection
                             .treeViewAdapter
                             .updateDisplayedNodes {
-                                instanceData.Done = DomainFactory.getKotlinDomainFactory().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
+                                instanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
 
                                 GroupListFragment.recursiveExists(instanceData)
 

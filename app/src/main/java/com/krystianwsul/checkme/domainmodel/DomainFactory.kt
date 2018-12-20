@@ -43,7 +43,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         var _domainFactory: DomainFactory? = null
 
         @Synchronized
-        fun getKotlinDomainFactory(persistenceManager: PersistenceManger? = null): DomainFactory {
+        fun getInstance(persistenceManager: PersistenceManger? = null): DomainFactory {
             if (_domainFactory == null)
                 _domainFactory = DomainFactory(persistenceManager)
             return _domainFactory!!
@@ -71,6 +71,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     val instantiateMillis get() = stop.long - read.long
 
     var userInfo: UserInfo? = null
+        private set
 
     private var recordQuery: Query? = null
     private var recordListener: ValueEventListener? = null

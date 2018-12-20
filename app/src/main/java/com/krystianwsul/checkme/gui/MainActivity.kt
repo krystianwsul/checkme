@@ -39,7 +39,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment
@@ -47,7 +46,6 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.currentPosition
 import com.krystianwsul.checkme.utils.pageSelections
@@ -83,9 +81,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         private const val NORMAL_ELEVATION = 6f
         private const val INSTANCES_ELEVATION = 0f
 
-        var userInfo: UserInfo? = null
-            private set
-
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
     }
 
@@ -116,20 +111,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private lateinit var headerName: TextView
     private lateinit var headerEmail: TextView
 
-    private val authStateListener = { firebaseAuth: FirebaseAuth ->
-        val firebaseUser = firebaseAuth.currentUser
-        if (firebaseUser != null) {
-            userInfo = UserInfo(firebaseUser)
-
-            DomainFactory.getKotlinDomainFactory().setUserInfo(SaveService.Source.GUI, userInfo!!)
-        } else {
-            userInfo = null
-
-            DomainFactory.getKotlinDomainFactory().clearUserInfo()
-        }
-
-        updateSignInState(firebaseUser)
-    }
+    private val authStateListener = { firebaseAuth: FirebaseAuth -> updateSignInState(firebaseAuth.currentUser) }
 
     private var debug = false
 
@@ -420,7 +402,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             showTab(Tab.CUSTOM_TIMES)
                         }
                         R.id.main_drawer_friends -> showTab(Tab.FRIENDS)
-                        R.id.main_drawer_sign_in -> if (userInfo != null) {
+                        R.id.main_drawer_sign_in -> if (DomainFactory.getInstance().userInfo != null) {
                             googleSigninClient.signOut()
 
                             FirebaseAuth.getInstance().signOut()
@@ -638,7 +620,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 calendarOpen = false
             }
             MainActivity.Tab.FRIENDS -> {
-                checkNotNull(userInfo)
+                checkNotNull(DomainFactory.getInstance().userInfo)
 
                 supportActionBar!!.setTitle(R.string.friends)
                 mainDaysPager.visibility = View.GONE

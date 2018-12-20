@@ -42,7 +42,7 @@ class DebugFragment : AbstractFragment() {
 
                 val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
 
-                val kotlinDomainFactory = DomainFactory.getKotlinDomainFactory()
+                val kotlinDomainFactory = DomainFactory.getInstance()
 
                 append("last beeping tick: ")
                 append(lastTickExactTimeStamp.toString())
@@ -67,7 +67,7 @@ class DebugFragment : AbstractFragment() {
                 append(kotlinDomainFactory.instanceShownCount)
 
                 val t1 = ExactTimeStamp.now
-                DomainFactory.getKotlinDomainFactory().getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
+                DomainFactory.getInstance().getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
                 val t2 = ExactTimeStamp.now
 
                 append("\ntoday: ")

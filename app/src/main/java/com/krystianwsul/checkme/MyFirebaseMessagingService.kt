@@ -32,7 +32,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             if (firebaseUser != null) {
                 val userInfo = UserInfo(firebaseUser)
 
-                DomainFactory.getKotlinDomainFactory().let {
+                DomainFactory.getInstance().let {
                     it.setUserInfo(SaveService.Source.SERVICE, userInfo)
 
                     it.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(false, "MyFirebaseMessagingService", listOf()))

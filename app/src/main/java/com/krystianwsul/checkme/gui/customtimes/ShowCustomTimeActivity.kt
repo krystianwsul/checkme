@@ -103,9 +103,9 @@ class ShowCustomTimeActivity : AbstractActivity() {
                     showCustomTimeViewModel?.stop()
 
                     if (data != null) {
-                        DomainFactory.getKotlinDomainFactory().updateCustomTime(data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
+                        DomainFactory.getInstance().updateCustomTime(data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
                     } else {
-                        val customTimeId = DomainFactory.getKotlinDomainFactory().createCustomTime(SaveService.Source.GUI, name, hourMinutes)
+                        val customTimeId = DomainFactory.getInstance().createCustomTime(SaveService.Source.GUI, name, hourMinutes)
                         check(customTimeId > 0)
 
                         setResult(customTimeId)

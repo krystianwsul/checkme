@@ -30,7 +30,7 @@ object SaveService {
                 sqLiteDatabase.endTransaction()
             }
         } catch (e: Exception) {
-            DomainFactory.getKotlinDomainFactory().reset(source)
+            DomainFactory.getInstance().reset(source)
             throw e
         }
     }

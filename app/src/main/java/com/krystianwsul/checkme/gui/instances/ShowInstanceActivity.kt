@@ -125,7 +125,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     if (!it.exists)
                         showInstanceViewModel.stop()
 
-                    DomainFactory.getKotlinDomainFactory().setTaskEndTimeStamp(dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                    DomainFactory.getInstance().setTaskEndTimeStamp(dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
                     if (!it.exists)
                         finish()
@@ -180,7 +180,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
                 first = false
 
-                DomainFactory.getKotlinDomainFactory().let {
+                DomainFactory.getInstance().let {
                     val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
                     it.setInstanceNotified(data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
@@ -199,7 +199,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     }
 
     private fun setDone(done: Boolean) {
-        DomainFactory.getKotlinDomainFactory().setInstanceDone(dataId, SaveService.Source.GUI, instanceKey, done)
+        DomainFactory.getInstance().setInstanceDone(dataId, SaveService.Source.GUI, instanceKey, done)
         instanceData!!.done = done
 
         invalidateOptionsMenu()

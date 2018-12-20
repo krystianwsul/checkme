@@ -49,7 +49,7 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
 
             dividerNode = DividerNode(indentation, this@NodeCollection)
 
-            add(dividerNode.initialize(doneExpanded && !doneInstanceDatas.isEmpty(), nodeContainer, doneInstanceDatas, expandedInstances))
+            add(dividerNode.initialize(doneExpanded && !doneInstanceDatas.isEmpty(), nodeContainer, doneInstanceDatas, expandedInstances, selectedInstances))
         }
     }
 

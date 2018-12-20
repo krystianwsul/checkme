@@ -24,24 +24,24 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
-    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, doneInstanceDatas: List<GroupListFragment.InstanceData>, expandedInstances: Map<InstanceKey, Boolean>): TreeNode {
+    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, doneInstanceDatas: List<GroupListFragment.InstanceData>, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
         check(!expanded || !doneInstanceDatas.isEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
 
-        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, expandedInstances) }
+        val childTreeNodes = doneInstanceDatas.map { newChildTreeNode(it, expandedInstances, selectedInstances) }
 
         treeNode.setChildTreeNodes(childTreeNodes)
 
         return treeNode
     }
 
-    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>): TreeNode {
+    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
         checkNotNull(instanceData.Done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
 
-        val childTreeNode = doneInstanceNode.initialize(treeNode, expandedInstances)
+        val childTreeNode = doneInstanceNode.initialize(treeNode, expandedInstances, selectedInstances)
 
         doneInstanceNodes.add(doneInstanceNode)
 
@@ -66,7 +66,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
         treeNode.remove(doneInstanceNode.treeNode, x)
     }
 
-    fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, mapOf()), x)
+    fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), x)
 
     override fun compareTo(other: ModelNode): Int {
         check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode)

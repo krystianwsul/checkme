@@ -23,7 +23,9 @@ class DoneInstanceNode(
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
-    fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>): TreeNode {
+    fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
+        val selected = selectedInstances.contains(instanceData.InstanceKey)
+
         val expanded: Boolean
         val doneExpanded: Boolean
         if (expandedInstances.containsKey(instanceData.InstanceKey) && !instanceData.children.isEmpty()) {
@@ -34,7 +36,7 @@ class DoneInstanceNode(
             doneExpanded = false
         }
 
-        treeNode = TreeNode(this, dividerTreeNode, expanded, false)
+        treeNode = TreeNode(this, dividerTreeNode, expanded, selected)
 
         nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, this.treeNode, null)
         treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, listOf(), expandedInstances, doneExpanded, listOf(), listOf(), listOf(), false, listOf()))

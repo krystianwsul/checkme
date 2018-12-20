@@ -48,7 +48,6 @@ class MyApplication : Application() {
         FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 
         FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth: FirebaseAuth ->
-            // move this to application
             val firebaseUser = firebaseAuth.currentUser
             if (firebaseUser != null) {
                 DomainFactory.getInstance().setUserInfo(SaveService.Source.GUI, UserInfo(firebaseUser))

@@ -78,7 +78,10 @@ class NotDoneGroupNode(
 
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf()))
         } else {
-            val notDoneInstanceTreeNodes = instanceDatas.map { newChildTreeNode(it, expandedInstances, selectedInstances, selectedGroups) }
+            val notDoneInstanceTreeNodes = instanceDatas.map {
+                val childSelected = selected || selectedInstances.contains(it.InstanceKey)
+                newChildTreeNode(it, expandedInstances, childSelected, selectedInstances, selectedGroups)
+            }
 
             treeNode.setChildTreeNodes(notDoneInstanceTreeNodes)
         }
@@ -288,18 +291,18 @@ class NotDoneGroupNode(
             val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData1, this@NotDoneGroupNode)
             notDoneInstanceNodes.add(notDoneInstanceNode)
 
-            treeNode.add(notDoneInstanceNode.initialize(mapOf(), listOf(), listOf(), treeNode), x)
+            treeNode.add(notDoneInstanceNode.initialize(mapOf(), false, listOf(), listOf(), treeNode), x)
         }
 
         instanceDatas.add(instanceData)
 
-        treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf(), listOf()), x)
+        treeNode.add(newChildTreeNode(instanceData, mapOf(), false, listOf(), listOf()), x)
     }
 
-    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>): TreeNode {
+    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>, selected: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>): TreeNode {
         val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData, this)
 
-        val childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selectedInstances, selectedGroups, treeNode)
+        val childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selected, selectedInstances, selectedGroups, treeNode)
 
         notDoneInstanceNodes.add(notDoneInstanceNode)
 
@@ -372,9 +375,7 @@ class NotDoneGroupNode(
 
         private val groupListFragment get() = groupAdapter.groupListFragment
 
-        fun initialize(expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, notDoneGroupTreeNode: TreeNode): TreeNode {
-            val selected = selectedInstances.contains(instanceData.InstanceKey)
-
+        fun initialize(expandedInstances: Map<InstanceKey, Boolean>, selected: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, notDoneGroupTreeNode: TreeNode): TreeNode {
             val expanded: Boolean
             val doneExpanded: Boolean
             if (expandedInstances.containsKey(instanceData.InstanceKey) && instanceData.children.isNotEmpty()) {

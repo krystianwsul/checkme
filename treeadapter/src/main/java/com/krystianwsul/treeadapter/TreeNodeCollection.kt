@@ -148,16 +148,17 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
         val node = visibleNodes[position]
         val nextNode = position.takeIf { it < visibleNodes.size - 1 }?.let { visibleNodes[position + 1] }
 
-        val previousOrdinal = previousNode?.modelNode?.getOrdinal() ?: -Double.MAX_VALUE
+        val previousOrdinal = (previousNode?.modelNode as? Sortable)?.getOrdinal()
+                ?: -Double.MAX_VALUE
 
         val lastOrdinal = if (previousOrdinal.toInt() == Math.ceil(previousOrdinal).toInt())
             previousOrdinal + 1
         else
             Math.ceil(previousOrdinal)
 
-        val nextOrdinal = nextNode?.modelNode?.getOrdinal() ?: lastOrdinal
+        val nextOrdinal = (nextNode?.modelNode as? Sortable)?.getOrdinal() ?: lastOrdinal
 
-        node.modelNode.setOrdinal((previousOrdinal + nextOrdinal) / 2)
+        (node.modelNode as Sortable).setOrdinal((previousOrdinal + nextOrdinal) / 2)
     }
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")

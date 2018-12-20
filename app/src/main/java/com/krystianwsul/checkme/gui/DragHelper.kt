@@ -1,8 +1,10 @@
 package com.krystianwsul.checkme.gui
 
+import android.util.Log
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
@@ -67,5 +69,14 @@ class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
 
         abstract fun getTreeViewAdapter(): TreeViewAdapter
         abstract fun onSetNewItemPosition()
+
+        override fun canDropOver(recyclerView: RecyclerView, current: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            val treeNodeCollection = (recyclerView.adapter as TreeViewAdapter).getTreeNodeCollection()
+
+            val position = target.adapterPosition.let { if (it == treeNodeCollection.displayedSize) it - 1 else it }
+            Log.e("asdf", "position: " + position)
+
+            return treeNodeCollection.getNode(position).modelNode is Sortable
+        }
     }
 }

@@ -562,7 +562,7 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun initialize() {
-        if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage == false) {
+        if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage != true) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
 
             treeViewAdapter.updateDisplayedNodes(true) {

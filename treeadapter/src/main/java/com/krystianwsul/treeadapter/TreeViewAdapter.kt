@@ -266,6 +266,9 @@ class TreeViewAdapter(
         treeNodeCollection!!.setNewItemPosition(position)
     }
 
+    fun getTreeNodeCollection() = treeNodeCollection
+            ?: throw SetTreeNodeCollectionNotCalledException()
+
     class SetTreeNodeCollectionNotCalledException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has not been called.")
 
     private class PaddingHolder(view: View) : RecyclerView.ViewHolder(view)

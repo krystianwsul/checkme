@@ -18,10 +18,6 @@ interface ModelNode : Comparable<ModelNode> {
 
     fun onClick() = Unit
 
-    fun getOrdinal(): Double = throw UnsupportedOperationException()
-
-    fun setOrdinal(ordinal: Double): Unit = throw UnsupportedOperationException()
-
     fun matchesSearch(query: String) = true
 
     val state: ModelState

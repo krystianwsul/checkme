@@ -40,7 +40,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     companion object {
 
-        var _domainFactory: DomainFactory? = null
+        private var _domainFactory: DomainFactory? = null
 
         @Synchronized
         fun getInstance(persistenceManager: PersistenceManger? = null): DomainFactory {

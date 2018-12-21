@@ -46,6 +46,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.currentPosition
 import com.krystianwsul.checkme.utils.pageSelections
@@ -402,17 +403,23 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             showTab(Tab.CUSTOM_TIMES)
                         }
                         R.id.main_drawer_friends -> showTab(Tab.FRIENDS)
-                        R.id.main_drawer_sign_in -> if (DomainFactory.getInstance().userInfo != null) {
-                            googleSigninClient.signOut()
+                        R.id.main_drawer_sign_in -> {
+                            val domainFactory = DomainFactory.getInstance()
+                            val userInfo = domainFactory.userInfo
+                            if (userInfo != null) {
+                                domainFactory.setUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
 
-                            FirebaseAuth.getInstance().signOut()
+                                googleSigninClient.signOut()
 
-                            if (visibleTab.value!! == Tab.FRIENDS || visibleTab.value!! == Tab.PROJECTS) {
-                                mainActivityNavigation.setCheckedItem(R.id.main_drawer_instances)
-                                showTab(Tab.INSTANCES)
+                                FirebaseAuth.getInstance().signOut()
+
+                                if (visibleTab.value!! == Tab.FRIENDS || visibleTab.value!! == Tab.PROJECTS) {
+                                    mainActivityNavigation.setCheckedItem(R.id.main_drawer_instances)
+                                    showTab(Tab.INSTANCES)
+                                }
+                            } else {
+                                startActivityForResult(googleSigninClient.signInIntent, RC_SIGN_IN)
                             }
-                        } else {
-                            startActivityForResult(googleSigninClient.signInIntent, RC_SIGN_IN)
                         }
                         R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newIntent())
                         R.id.main_drawer_debug -> {

@@ -10,7 +10,7 @@ class UuidRecord(created: Boolean, val uuid: String) : Record(created) {
 
     companion object {
 
-        val TABLE_UUID = "uuid"
+        const val TABLE_UUID = "uuid"
 
         private const val COLUMN_UUID = "uuid"
 

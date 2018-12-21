@@ -22,7 +22,7 @@ class RemoteProject(
         private val domainFactory: DomainFactory,
         private val remoteProjectRecord: RemoteProjectRecord,
         userInfo: UserInfo,
-        uuid: String,
+        val uuid: String,
         now: ExactTimeStamp) {
 
     private val remoteTasks: MutableMap<String, RemoteTask>

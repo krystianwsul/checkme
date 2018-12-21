@@ -63,9 +63,14 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
     }
 
     override fun setOldestVisible(date: Date) {
-        taskRecord.oldestVisibleYear = date.year
-        taskRecord.oldestVisibleMonth = date.month
-        taskRecord.oldestVisibleDay = date.day
+        if (taskRecord.oldestVisibleYear != date.year)
+            taskRecord.oldestVisibleYear = date.year
+
+        if (taskRecord.oldestVisibleMonth != date.month)
+            taskRecord.oldestVisibleMonth = date.month
+
+        if (taskRecord.oldestVisibleDay != date.day)
+            taskRecord.oldestVisibleDay = date.day
     }
 
     override fun delete() {

@@ -159,9 +159,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
             oldestVisible = now.date
         }
 
-        val oldOldestVisible = getOldestVisible()
-        if (oldOldestVisible == null || oldOldestVisible != oldestVisible)
-            setOldestVisible(oldestVisible)
+        setOldestVisible(oldestVisible)
     }
 
     fun correctOldestVisible(date: Date) {

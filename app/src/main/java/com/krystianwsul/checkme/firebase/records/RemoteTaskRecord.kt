@@ -182,28 +182,42 @@ class RemoteTaskRecord : RemoteRecord {
         addValue("$key/endTime", endTime)
     }
 
-    fun setOldestVisibleYear(oldestVisibleYear: Int) {
-        if (oldestVisibleYear == taskJson.oldestVisibleYear)
-            return
+    private fun oldestVisible(uuid: String) = taskJson.oldestVisible[uuid]
 
-        taskJson.oldestVisibleYear = oldestVisibleYear
-        addValue("$key/oldestVisibleYear", oldestVisibleYear)
+    fun setOldestVisibleYear(oldestVisibleYear: Int, uuid: String) {
+        if (oldestVisibleYear != taskJson.oldestVisibleYear) {
+            taskJson.oldestVisibleYear = oldestVisibleYear
+            addValue("$key/oldestVisibleYear", oldestVisibleYear)
+        }
+
+        oldestVisible(uuid).takeIf { it?.year != oldestVisibleYear }?.let {
+            it.year = oldestVisibleYear
+            addValue("$key/oldestVisible/$uuid/year", oldestVisibleYear)
+        }
     }
 
-    fun setOldestVisibleMonth(oldestVisibleMonth: Int) {
-        if (oldestVisibleMonth == taskJson.oldestVisibleMonth)
-            return
+    fun setOldestVisibleMonth(oldestVisibleMonth: Int, uuid: String) {
+        if (oldestVisibleMonth != taskJson.oldestVisibleMonth) {
+            taskJson.oldestVisibleMonth = oldestVisibleMonth
+            addValue("$key/oldestVisibleMonth", oldestVisibleMonth)
+        }
 
-        taskJson.oldestVisibleMonth = oldestVisibleMonth
-        addValue("$key/oldestVisibleMonth", oldestVisibleMonth)
+        oldestVisible(uuid).takeIf { it?.month != oldestVisibleMonth }?.let {
+            it.month = oldestVisibleMonth
+            addValue("$key/oldestVisible/$uuid/month", oldestVisibleMonth)
+        }
     }
 
-    fun setOldestVisibleDay(oldestVisibleDay: Int) {
-        if (oldestVisibleDay == taskJson.oldestVisibleDay)
-            return
+    fun setOldestVisibleDay(oldestVisibleDay: Int, uuid: String) {
+        if (oldestVisibleDay != taskJson.oldestVisibleDay) {
+            taskJson.oldestVisibleDay = oldestVisibleDay
+            addValue("$key/oldestVisibleDay", oldestVisibleDay)
+        }
 
-        taskJson.oldestVisibleDay = oldestVisibleDay
-        addValue("$key/oldestVisibleDay", oldestVisibleDay)
+        oldestVisible(uuid).takeIf { it?.day != oldestVisibleDay }?.let {
+            it.day = oldestVisibleDay
+            addValue("$key/oldestVisible/$uuid/day", oldestVisibleDay)
+        }
     }
 
     override fun getValues(values: MutableMap<String, Any?>) {

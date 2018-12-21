@@ -154,9 +154,9 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         taskListFragment.setTaskKey(taskKey, data.dataId, data.taskData)
     }
 
-    override fun onCreateTaskActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
+    override fun onCreateActionMode(actionMode: ActionMode) = Unit
 
-    override fun onDestroyTaskActionMode() = Unit
+    override fun onDestroyActionMode() = Unit
 
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible

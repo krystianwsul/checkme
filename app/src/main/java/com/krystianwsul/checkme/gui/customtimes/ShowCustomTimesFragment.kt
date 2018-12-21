@@ -8,13 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
+import com.krystianwsul.checkme.gui.ActionModeListener
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
@@ -71,7 +71,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             updateFabVisibility()
 
-            (activity as CustomTimesListListener).onCreateCustomTimesActionMode(actionMode!!)
+            (activity as CustomTimesListListener).onCreateActionMode(actionMode!!)
         }
 
         override fun onSecondAdded() = Unit
@@ -81,7 +81,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
-            (activity as CustomTimesListListener).onDestroyCustomTimesActionMode()
+            (activity as CustomTimesListListener).onDestroyActionMode()
         }
 
         override fun onSecondToLastRemoved() = Unit
@@ -273,10 +273,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override fun compareTo(other: ModelNode) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
     }
 
-    interface CustomTimesListListener {
+    interface CustomTimesListListener : ActionModeListener {
 
-        fun onCreateCustomTimesActionMode(actionMode: ActionMode)
-        fun onDestroyCustomTimesActionMode()
         fun setCustomTimesSelectAllVisibility(selectAllVisible: Boolean)
     }
 }

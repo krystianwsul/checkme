@@ -90,11 +90,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private lateinit var showCustomTimesFragment: ShowCustomTimesFragment
     private lateinit var friendListFragment: FriendListFragment
 
-    private var drawerTaskListener: DrawerLayout.DrawerListener? = null
-    private var drawerGroupListener: DrawerLayout.DrawerListener? = null
     private var onPageChangeDisposable: Disposable? = null
-    private var drawerCustomTimesListener: DrawerLayout.DrawerListener? = null
-    private var drawerUsersListener: DrawerLayout.DrawerListener? = null
 
     private val visibleTab = BehaviorRelay.createDefault(Tab.INSTANCES)
     private val daysPosition = BehaviorRelay.create<Int>()
@@ -137,6 +133,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     private lateinit var googleSigninClient: GoogleSignInClient
+
+    private var actionMode: ActionMode? = null
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
@@ -332,6 +330,20 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         mainActivityDrawer.addDrawerListener(toggle)
         toggle.syncState()
 
+        mainActivityDrawer.addDrawerListener(object : DrawerLayout.DrawerListener {
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
+
+            override fun onDrawerOpened(drawerView: View) = Unit
+
+            override fun onDrawerClosed(drawerView: View) = Unit
+
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_DRAGGING)
+                    actionMode?.finish()
+            }
+        })
+
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {
             taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
@@ -372,36 +384,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             setNavigationItemSelectedListener {
                 mainActivityDrawer.run {
                     when (it.itemId) {
-                        R.id.main_drawer_instances -> {
-                            drawerTaskListener?.let { removeDrawerListener(it) }
-                            drawerTaskListener = null
-
-                            showTab(Tab.INSTANCES)
-                        }
-                        R.id.main_drawer_tasks -> {
-                            drawerGroupListener?.let { removeDrawerListener(it) }
-                            drawerGroupListener = null
-
-                            showTab(Tab.TASKS)
-                        }
-                        R.id.main_drawer_projects -> {
-                            drawerTaskListener?.let { removeDrawerListener(it) }
-                            drawerTaskListener = null
-
-                            drawerGroupListener?.let { removeDrawerListener(it) }
-                            drawerGroupListener = null
-
-                            showTab(Tab.PROJECTS)
-                        }
-                        R.id.main_drawer_custom_times -> {
-                            drawerTaskListener?.let { removeDrawerListener(it) }
-                            drawerTaskListener = null
-
-                            drawerGroupListener?.let { mainActivityDrawer.removeDrawerListener(it) }
-                            drawerGroupListener = null
-
-                            showTab(Tab.CUSTOM_TIMES)
-                        }
+                        R.id.main_drawer_instances -> showTab(Tab.INSTANCES)
+                        R.id.main_drawer_tasks -> showTab(Tab.TASKS)
+                        R.id.main_drawer_projects -> showTab(Tab.PROJECTS)
+                        R.id.main_drawer_custom_times -> showTab(Tab.CUSTOM_TIMES)
                         R.id.main_drawer_friends -> showTab(Tab.FRIENDS)
                         R.id.main_drawer_sign_in -> {
                             val domainFactory = DomainFactory.getInstance()
@@ -422,15 +408,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             }
                         }
                         R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newIntent())
-                        R.id.main_drawer_debug -> {
-                            drawerTaskListener?.let { removeDrawerListener(it) }
-                            drawerTaskListener = null
-
-                            drawerGroupListener?.let { removeDrawerListener(it) }
-                            drawerGroupListener = null
-
-                            showTab(Tab.DEBUG)
-                        }
+                        R.id.main_drawer_debug -> showTab(Tab.DEBUG)
                         else -> throw IndexOutOfBoundsException()
                     }
 
@@ -677,37 +655,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         updateCalendarHeight()
     }
 
-    override fun onCreateTaskActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
-        check(drawerTaskListener == null)
-
-        drawerTaskListener = object : DrawerLayout.DrawerListener {
-
-            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
-
-            override fun onDrawerOpened(drawerView: View) = Unit
-
-            override fun onDrawerClosed(drawerView: View) = Unit
-
-            override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING)
-                    actionMode.finish()
-            }
-        }
-        mainActivityDrawer.addDrawerListener(drawerTaskListener!!)
-    }
-
     override fun onDestroy() {
         onPageChangeDisposable?.dispose()
         onPageChangeDisposable = null
 
         super.onDestroy()
-    }
-
-    override fun onDestroyTaskActionMode() {
-        checkNotNull(drawerTaskListener)
-
-        mainActivityDrawer.removeDrawerListener(drawerTaskListener!!)
-        drawerTaskListener = null
     }
 
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
@@ -717,23 +669,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
-        check(drawerGroupListener == null)
+        onCreateActionMode(actionMode)
+
         check(onPageChangeDisposable == null)
-
-        drawerGroupListener = object : DrawerLayout.DrawerListener {
-
-            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
-
-            override fun onDrawerOpened(drawerView: View) = Unit
-
-            override fun onDrawerClosed(drawerView: View) = Unit
-
-            override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING)
-                    actionMode.finish()
-            }
-        }
-        mainActivityDrawer.addDrawerListener(drawerGroupListener!!)
 
         onPageChangeDisposable = mainDaysPager.pageSelections()
                 .skip(1)
@@ -741,11 +679,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onDestroyGroupActionMode() {
-        checkNotNull(drawerGroupListener)
-        checkNotNull(onPageChangeDisposable)
+        onDestroyActionMode()
 
-        mainActivityDrawer.removeDrawerListener(drawerGroupListener!!)
-        drawerGroupListener = null
+        checkNotNull(onPageChangeDisposable)
 
         onPageChangeDisposable!!.dispose()
         onPageChangeDisposable = null
@@ -761,62 +697,22 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     override val bottomActionModeId = R.id.mainBottomActionBar
 
-    override fun onCreateCustomTimesActionMode(actionMode: ActionMode) {
-        check(drawerCustomTimesListener == null)
+    override fun onCreateActionMode(actionMode: ActionMode) {
+        check(this.actionMode == null)
 
-        drawerCustomTimesListener = object : DrawerLayout.DrawerListener {
-
-            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
-
-            override fun onDrawerOpened(drawerView: View) = Unit
-
-            override fun onDrawerClosed(drawerView: View) = Unit
-
-            override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING)
-                    actionMode.finish()
-            }
-        }
-        mainActivityDrawer.addDrawerListener(drawerCustomTimesListener!!)
+        this.actionMode = actionMode
     }
 
-    override fun onDestroyCustomTimesActionMode() {
-        checkNotNull(drawerCustomTimesListener)
+    override fun onDestroyActionMode() {
+        checkNotNull(actionMode)
 
-        mainActivityDrawer.removeDrawerListener(drawerCustomTimesListener!!)
-        drawerCustomTimesListener = null
+        actionMode = null
     }
 
     override fun setCustomTimesSelectAllVisibility(selectAllVisible: Boolean) {
         customTimesSelectAllVisible = selectAllVisible
 
         invalidateOptionsMenu()
-    }
-
-    fun onCreateUserActionMode(actionMode: ActionMode) {
-        check(drawerUsersListener == null)
-
-        drawerUsersListener = object : DrawerLayout.DrawerListener {
-
-            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
-
-            override fun onDrawerOpened(drawerView: View) = Unit
-
-            override fun onDrawerClosed(drawerView: View) = Unit
-
-            override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING)
-                    actionMode.finish()
-            }
-        }
-        mainActivityDrawer.addDrawerListener(drawerUsersListener!!)
-    }
-
-    fun onDestroyUserActionMode() {
-        checkNotNull(drawerUsersListener)
-
-        mainActivityDrawer.removeDrawerListener(drawerUsersListener!!)
-        drawerUsersListener = null
     }
 
     fun setUserSelectAllVisibility(selectAllVisible: Boolean) {

@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -124,7 +123,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             updateFabVisibility()
 
-            (activity as TaskListListener).onCreateTaskActionMode(actionMode!!, treeViewAdapter)
+            (activity as TaskListListener).onCreateActionMode(actionMode!!)
         }
 
         override fun onSecondAdded() {
@@ -166,7 +165,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
-            (activity as TaskListListener).onDestroyTaskActionMode()
+            (activity as TaskListListener).onDestroyActionMode()
         }
 
         override fun onSecondToLastRemoved() {
@@ -753,10 +752,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    interface TaskListListener {
+    interface TaskListListener : ActionModeListener {
 
-        fun onCreateTaskActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter)
-        fun onDestroyTaskActionMode()
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 
         val search: Observable<String>

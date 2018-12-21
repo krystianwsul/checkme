@@ -73,7 +73,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             updateFabVisibility()
 
-            (activity as MainActivity).onCreateUserActionMode(actionMode!!)
+            (activity as MainActivity).onCreateActionMode(actionMode!!)
         }
 
         override fun onSecondAdded() = Unit
@@ -83,7 +83,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
-            (activity as MainActivity).onDestroyUserActionMode()
+            (activity as MainActivity).onDestroyActionMode()
         }
 
         override fun onSecondToLastRemoved() = Unit

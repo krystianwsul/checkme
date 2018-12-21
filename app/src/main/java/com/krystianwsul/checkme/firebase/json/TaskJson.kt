@@ -9,4 +9,5 @@ class TaskJson(
         var oldestVisibleDay: Int? = null,
         var note: String? = null,
         var instances: MutableMap<String, InstanceJson> = mutableMapOf(),
-        var schedules: MutableMap<String, ScheduleWrapper> = mutableMapOf())
+        var schedules: MutableMap<String, ScheduleWrapper> = mutableMapOf(),
+        val oldestVisible: MutableMap<String, OldestVisibleJson> = mutableMapOf())

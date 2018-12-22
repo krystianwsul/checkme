@@ -524,129 +524,103 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private fun showTab(tab: Tab) {
         val density = resources.displayMetrics.density
 
+        if (tab == Tab.INSTANCES) {
+            mainDaysPager.visibility = View.VISIBLE
+            ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
+            mainActivitySpinner.visibility = View.VISIBLE
+        } else {
+            mainDaysPager.visibility = View.GONE
+            ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
+            mainActivitySpinner.visibility = View.GONE
+            calendarOpen = false
+        }
+
+        if (tab == Tab.TASKS) {
+            mainTaskListFrame.visibility = View.VISIBLE
+        } else {
+            mainTaskListFrame.visibility = View.GONE
+            closeSearch()
+        }
+
+        if (tab == Tab.PROJECTS) {
+            checkNotNull(DomainFactory.getInstance().userInfo)
+
+            mainProjectListFrame.visibility = View.VISIBLE
+        } else {
+            mainProjectListFrame.visibility = View.GONE
+        }
+
+        if (tab == Tab.CUSTOM_TIMES) {
+            mainCustomTimesFrame.visibility = View.VISIBLE
+        } else {
+            mainCustomTimesFrame.visibility = View.GONE
+        }
+
+        if (tab == Tab.FRIENDS) {
+            checkNotNull(DomainFactory.getInstance().userInfo)
+
+            mainFriendListFrame.visibility = View.VISIBLE
+        } else {
+            mainFriendListFrame.visibility = View.GONE
+        }
+
+        if (tab == Tab.DEBUG) {
+            mainDebugFrame.visibility = View.VISIBLE
+        } else {
+            mainDebugFrame.visibility = View.GONE
+        }
+
+        supportActionBar!!.title = when (tab) {
+            MainActivity.Tab.INSTANCES -> null
+            MainActivity.Tab.TASKS -> getString(R.string.tasks)
+            MainActivity.Tab.PROJECTS -> getString(R.string.projects)
+            MainActivity.Tab.CUSTOM_TIMES -> getString(R.string.times)
+            MainActivity.Tab.FRIENDS -> getString(R.string.friends)
+            MainActivity.Tab.DEBUG -> "Debug"
+        }
+
         when (tab) {
             MainActivity.Tab.INSTANCES -> {
-                supportActionBar!!.title = null
-                mainDaysPager.visibility = View.VISIBLE
-                mainTaskListFrame.visibility = View.GONE
-                mainProjectListFrame.visibility = View.GONE
-                mainCustomTimesFrame.visibility = View.GONE
-                mainDebugFrame.visibility = View.GONE
-                ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
-                mainActivitySpinner.visibility = View.VISIBLE
-                mainFriendListFrame.visibility = View.GONE
-
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
-
-                closeSearch()
             }
             MainActivity.Tab.TASKS -> {
-                supportActionBar!!.title = getString(R.string.tasks)
-                mainDaysPager.visibility = View.GONE
-                mainTaskListFrame.visibility = View.VISIBLE
-                mainProjectListFrame.visibility = View.GONE
-                mainCustomTimesFrame.visibility = View.GONE
-                mainDebugFrame.visibility = View.GONE
-                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
-                mainActivitySpinner.visibility = View.GONE
-                mainFriendListFrame.visibility = View.GONE
-
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
                 taskListFragment.setFab(mainFab)
-
-                calendarOpen = false
             }
             MainActivity.Tab.PROJECTS -> {
-                supportActionBar!!.title = getString(R.string.projects)
-                mainDaysPager.visibility = View.GONE
-                mainTaskListFrame.visibility = View.GONE
-                mainProjectListFrame.visibility = View.VISIBLE
-                mainCustomTimesFrame.visibility = View.GONE
-                mainDebugFrame.visibility = View.GONE
-                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
-                mainActivitySpinner.visibility = View.GONE
-                mainFriendListFrame.visibility = View.GONE
-
                 taskListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
                 projectListFragment.setFab(mainFab)
-
-                closeSearch()
-
-                calendarOpen = false
             }
             MainActivity.Tab.CUSTOM_TIMES -> {
-                supportActionBar!!.title = getString(R.string.times)
-                mainDaysPager.visibility = View.GONE
-                mainTaskListFrame.visibility = View.GONE
-                mainProjectListFrame.visibility = View.GONE
-                mainCustomTimesFrame.visibility = View.VISIBLE
-                mainDebugFrame.visibility = View.GONE
-                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
-                mainActivitySpinner.visibility = View.GONE
-                mainFriendListFrame.visibility = View.GONE
-
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 friendListFragment.clearFab()
 
                 showCustomTimesFragment.setFab(mainFab)
-
-                closeSearch()
-
-                calendarOpen = false
             }
             MainActivity.Tab.FRIENDS -> {
-                checkNotNull(DomainFactory.getInstance().userInfo)
-
-                supportActionBar!!.setTitle(R.string.friends)
-                mainDaysPager.visibility = View.GONE
-                mainTaskListFrame.visibility = View.GONE
-                mainProjectListFrame.visibility = View.GONE
-                mainCustomTimesFrame.visibility = View.GONE
-                mainDebugFrame.visibility = View.GONE
-                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
-                mainActivitySpinner.visibility = View.GONE
-                mainFriendListFrame.visibility = View.VISIBLE
-
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
 
                 friendListFragment.setFab(mainFab)
-
-                closeSearch()
-
-                calendarOpen = false
             }
             MainActivity.Tab.DEBUG -> {
-                supportActionBar!!.title = "Debug"
-                mainDaysPager.visibility = View.GONE
-                mainTaskListFrame.visibility = View.GONE
-                mainProjectListFrame.visibility = View.GONE
-                mainCustomTimesFrame.visibility = View.GONE
-                mainDebugFrame.visibility = View.VISIBLE
-                ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
-                mainActivitySpinner.visibility = View.GONE
-                mainFriendListFrame.visibility = View.GONE
-
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
+
                 mainFab.hide()
-
-                closeSearch()
-
-                calendarOpen = false
             }
         }
 

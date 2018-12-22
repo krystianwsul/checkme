@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
+import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
@@ -44,6 +45,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     private lateinit var treeViewAdapter: TreeViewAdapter
 
     private var dataId: Int? = null
+
+    private val mainActivity get() = activity as MainActivity
 
     private val selectionCallback = object : SelectionCallback() {
 
@@ -85,13 +88,19 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             actionMode!!.menuInflater.inflate(R.menu.menu_projects, actionMode!!.menu)
 
             updateFabVisibility()
+
+            mainActivity.onCreateActionMode(actionMode!!)
         }
 
         override fun onSecondAdded() = Unit
 
         override fun onOtherAdded() = Unit
 
-        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = updateFabVisibility()
+        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
+            updateFabVisibility()
+
+            mainActivity.onDestroyActionMode()
+        }
 
         override fun onSecondToLastRemoved() = Unit
 

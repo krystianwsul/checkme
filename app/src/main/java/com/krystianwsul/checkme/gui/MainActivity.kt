@@ -393,7 +393,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             val domainFactory = DomainFactory.getInstance()
                             val userInfo = domainFactory.userInfo
                             if (userInfo != null) {
-                                domainFactory.setUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
+                                domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
 
                                 googleSigninClient.signOut()
 

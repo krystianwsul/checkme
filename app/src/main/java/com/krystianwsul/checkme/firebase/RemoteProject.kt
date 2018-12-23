@@ -6,10 +6,7 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy
-import com.krystianwsul.checkme.firebase.json.CustomTimeJson
-import com.krystianwsul.checkme.firebase.json.InstanceJson
-import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
-import com.krystianwsul.checkme.firebase.json.TaskJson
+import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
@@ -123,7 +120,10 @@ class RemoteProject(
             RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey) to instanceJson
         }.toMutableMap()
 
-        val taskJson = TaskJson(task.name, task.startExactTimeStamp.long, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, task.note, instanceJsons)
+        val oldestVisibleMap = oldestVisible?.let { mapOf(uuid to OldestVisibleJson(it.year, it.month, it.day)) }
+                ?: mapOf()
+
+        val taskJson = TaskJson(task.name, task.startExactTimeStamp.long, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, task.note, instanceJsons, oldestVisible = oldestVisibleMap.toMutableMap())
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
 
         val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)

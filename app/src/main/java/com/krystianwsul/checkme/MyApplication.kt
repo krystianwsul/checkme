@@ -39,6 +39,8 @@ class MyApplication : Application() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         instance = this
 
+        Preferences.logLineDate("MyApplication.onCreate")
+
         JodaTimeAndroid.init(this)
 
         MyCrashlytics.initialize(this)

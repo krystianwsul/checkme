@@ -37,6 +37,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
@@ -240,6 +241,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Preferences.logLineDate("MainModel.onCreate")
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
@@ -480,9 +482,15 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onStart() {
+        Preferences.logLineHour("MainModel.onStart")
         super.onStart()
 
         FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        Preferences.logLineHour("MainModel.onPostCreate")
+        super.onPostCreate(savedInstanceState)
     }
 
     override fun onStop() {

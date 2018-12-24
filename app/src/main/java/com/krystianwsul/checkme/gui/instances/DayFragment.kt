@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.LinearLayoutCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.Date
@@ -132,7 +133,10 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
                 .addTo(compositeDisposable)
 
         key.switchMap { key -> entry!!.data.map { Pair(key, it) } }
-                .subscribe { (key, data) -> groupListFragment.setAll(key.first, key.second, data.dataId, data.dataWrapper) }
+                .subscribe { (key, data) ->
+                    Preferences.logLineHour("DayFragment.data.subscribe")
+                    groupListFragment.setAll(key.first, key.second, data.dataId, data.dataWrapper)
+                }
                 .addTo(compositeDisposable)
     }
 

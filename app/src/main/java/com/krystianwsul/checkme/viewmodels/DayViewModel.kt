@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
@@ -73,10 +74,15 @@ class DayViewModel : ViewModel() {
         }
 
         fun load() {
-            Single.fromCallable { getData() }
+            Preferences.logLineDate("DayViewModel.load")
+            Single.fromCallable {
+                Preferences.logLineHour("DayViewModel.getData")
+                getData()
+            }
                     .subscribeOn(Schedulers.single())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { loaded ->
+                        Preferences.logLineHour("DayViewModel.subscribe, continuing? " + (data.value != loaded))
                         if (data.value != loaded)
                             data.accept(loaded)
                     }

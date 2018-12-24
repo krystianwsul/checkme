@@ -15,6 +15,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
@@ -518,7 +519,9 @@ class GroupListFragment @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        Observables.combineLatest(parametersRelay, activity.onPostCreate) { _, _ -> Unit }
+        Observables.combineLatest(
+                parametersRelay.doOnNext { Preferences.logLineHour("GroupListFragment.parametersRelay") },
+                activity.onPostCreate.doOnNext { Preferences.logLineHour("GroupListFragment.onPostCreate") })
                 .subscribe { initialize() }
                 .addTo(compositeDisposable)
     }
@@ -562,6 +565,8 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun initialize() {
+        Preferences.logLineHour("GroupListFragment.initialize")
+
         if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage != true) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
 
@@ -821,7 +826,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    sealed class Parameters(var dataId: Int, var dataWrapper: DataWrapper) {
+    sealed class Parameters(val dataId: Int, val dataWrapper: DataWrapper) {
 
         class All(dataId: Int, dataWrapper: DataWrapper, val position: Int, val timeRange: MainActivity.TimeRange, val differentPage: Boolean) : Parameters(dataId, dataWrapper)
 

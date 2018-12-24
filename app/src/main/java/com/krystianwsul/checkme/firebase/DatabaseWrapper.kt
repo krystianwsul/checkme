@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
 import com.krystianwsul.checkme.MyApplication
@@ -15,19 +14,19 @@ object DatabaseWrapper {
     private const val USERS_KEY = "users"
     private const val RECORDS_KEY = "records"
 
-    lateinit var root: String
-        private set
+    val root: String by lazy {
+        MyApplication.instance
+                .resources
+                .getString(R.string.firebase_root)
+    }
 
-    private lateinit var rootReference: DatabaseReference
+    private val rootReference by lazy {
+        FirebaseDatabase.getInstance()
+                .reference
+                .child(root)
+    }
 
     fun getRootRecordId() = rootReference.child(RECORDS_KEY).push().key!!
-
-    fun initialize(myApplication: MyApplication) {
-        root = myApplication.resources.getString(R.string.firebase_root)
-        check(!TextUtils.isEmpty(root))
-
-        rootReference = FirebaseDatabase.getInstance().reference.child(root)
-    }
 
     fun setUserInfo(userInfo: UserInfo, uuid: String) {
         val key = userInfo.key

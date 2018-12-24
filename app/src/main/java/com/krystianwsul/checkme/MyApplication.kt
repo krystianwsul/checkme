@@ -10,7 +10,6 @@ import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import net.danlew.android.joda.JodaTimeAndroid
 
@@ -44,19 +43,21 @@ class MyApplication : Application() {
 
         MyCrashlytics.initialize(this)
 
-        FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG)
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        FirebaseDatabase.getInstance().apply {
+            setLogLevel(Logger.Level.DEBUG)
+            setPersistenceEnabled(true)
+        }
 
         FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth: FirebaseAuth ->
             val firebaseUser = firebaseAuth.currentUser
-            if (firebaseUser != null) {
-                DomainFactory.getInstance().setUserInfo(SaveService.Source.GUI, UserInfo(firebaseUser))
-            } else {
-                DomainFactory.getInstance().clearUserInfo()
+            DomainFactory.getInstance().apply {
+                if (firebaseUser != null) {
+                    setUserInfo(SaveService.Source.GUI, UserInfo(firebaseUser))
+                } else {
+                    clearUserInfo()
+                }
             }
         }
-
-        DatabaseWrapper.initialize(this)
 
         if (token == null)
             FirebaseInstanceId.getInstance()

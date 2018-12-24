@@ -269,14 +269,14 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
 
         if (tickData == null && notTickFirebaseListeners.isEmpty()) {
-            updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "other")
+            updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
 
             save(0, source)
         } else {
             skipSave = true
 
             if (tickData == null) {
-                updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "other")
+                updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
             } else {
                 updateNotificationsTick(source, tickData!!.silent, tickData!!.source)
 

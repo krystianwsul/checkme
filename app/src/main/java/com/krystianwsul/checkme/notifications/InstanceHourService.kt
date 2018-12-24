@@ -4,7 +4,6 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -26,8 +25,6 @@ class InstanceHourService : IntentService("InstanceHourService") {
     }
 
     override fun onHandleIntent(intent: Intent) {
-        Preferences.logLineDate("InstanceHourService.start")
-
         check(intent.hasExtra(INSTANCE_KEY))
         check(intent.hasExtra(NOTIFICATION_ID_KEY))
 
@@ -40,8 +37,6 @@ class InstanceHourService : IntentService("InstanceHourService") {
         notificationWrapper.cleanGroup(notificationId)
 
         InstanceDoneService.throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceAddHour(it, instanceKey) }
-
-        Preferences.logLineHour("InstanceHourService.done")
     }
 
     private fun setInstanceAddHour(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)

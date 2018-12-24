@@ -2267,7 +2267,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
             message += ", u " + updateInstances.size
-            Preferences.logLineHour("updateNotifications update")
             updateInstances.forEach { updateInstance(it, now) }
         }
 
@@ -2276,7 +2275,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         if (!silent)
             Preferences.lastTick = now.long
 
-        Preferences.logLineHour("updateNotifications getExistingInstances")
         var nextAlarm = getExistingInstances().map { it.instanceDateTime.timeStamp }
                 .filter { it.toExactTimeStamp() > now }
                 .min()
@@ -2290,7 +2288,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         if (minSchedulesTimeStamp != null && (nextAlarm == null || nextAlarm > minSchedulesTimeStamp))
             nextAlarm = minSchedulesTimeStamp
 
-        Preferences.logLineHour("updateNotifications updateAlarm")
         NotificationWrapper.instance.updateAlarm(nextAlarm)
 
         if (nextAlarm != null)

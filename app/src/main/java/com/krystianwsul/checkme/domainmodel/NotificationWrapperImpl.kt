@@ -10,7 +10,6 @@ import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
@@ -213,33 +212,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
-        Preferences.logLineHour("updateAlarm start")
-        if (nextAlarm != null) {
-            Preferences.logLineHour("updateAlarm setExact")
-            setExact(nextAlarm.long)
-
-            /*
-            val now = ExactTimeStamp.now
-            val delay = ((nextAlarm.long - now.long) / 1000).toInt()
-
-            Preferences.logLineHour("updateAlarm dispatcher")
-            FirebaseJobDispatcher(GooglePlayDriver(MyApplication.instance)).apply {
-                Preferences.logLineHour("updateAlarm job")
-                val job = newJobBuilder().setService(FirebaseTickService::class.java)
-                        .setTag(TAG)
-                        .setRecurring(false)
-                        .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
-                        .setTrigger(Trigger.executionWindow(delay, delay + 5))
-                        .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                        .setReplaceCurrent(true)
-                        .build()
-
-                Preferences.logLineHour("updateAlarm mustSchedule")
-                mustSchedule(job)
-            }
-            */
-        }
-        Preferences.logLineHour("updateAlarm end")
+        nextAlarm?.let { setExact(it.long) }
     }
 
     protected open fun setExact(time: Long) {

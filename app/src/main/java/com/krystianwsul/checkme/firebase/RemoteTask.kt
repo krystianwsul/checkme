@@ -98,11 +98,11 @@ class RemoteTask(
 
     override fun setOldestVisible(date: Date) {
         remoteTaskRecord.apply {
-            val uuid = remoteProject.uuid
+            setOldestVisible(date, remoteProject.uuid)
 
-            setOldestVisibleYear(date.year, uuid)
-            setOldestVisibleMonth(date.month, uuid)
-            setOldestVisibleDay(date.day, uuid)
+            setOldestVisibleYear(date.year)
+            setOldestVisibleMonth(date.month)
+            setOldestVisibleDay(date.day)
         }
     }
 

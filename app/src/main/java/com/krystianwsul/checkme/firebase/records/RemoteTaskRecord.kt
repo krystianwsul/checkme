@@ -5,9 +5,11 @@ import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.InstanceJson
+import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.utils.ScheduleKey
+import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
 
 class RemoteTaskRecord : RemoteRecord {
@@ -184,39 +186,41 @@ class RemoteTaskRecord : RemoteRecord {
 
     private fun oldestVisible(uuid: String) = taskJson.oldestVisible[uuid]
 
-    fun setOldestVisibleYear(oldestVisibleYear: Int, uuid: String) {
+    fun setOldestVisible(date: Date, uuid: String) {
+        val newOldestVisibleJson = OldestVisibleJson(date.year, date.month, date.day)
+
+        val oldOldestVisibleJson = oldestVisible(uuid)
+
+        taskJson.oldestVisible[uuid] = newOldestVisibleJson
+
+        if (oldOldestVisibleJson?.year != newOldestVisibleJson.year)
+            addValue("$key/oldestVisible/$uuid/year", newOldestVisibleJson.year)
+
+        if (oldOldestVisibleJson?.month != newOldestVisibleJson.month)
+            addValue("$key/oldestVisible/$uuid/month", newOldestVisibleJson.month)
+
+        if (oldOldestVisibleJson?.day != newOldestVisibleJson.day)
+            addValue("$key/oldestVisible/$uuid/day", newOldestVisibleJson.day)
+    }
+
+    fun setOldestVisibleYear(oldestVisibleYear: Int) {
         if (oldestVisibleYear != taskJson.oldestVisibleYear) {
             taskJson.oldestVisibleYear = oldestVisibleYear
             addValue("$key/oldestVisibleYear", oldestVisibleYear)
         }
-
-        oldestVisible(uuid).takeIf { it?.year != oldestVisibleYear }?.let {
-            it.year = oldestVisibleYear
-            addValue("$key/oldestVisible/$uuid/year", oldestVisibleYear)
-        }
     }
 
-    fun setOldestVisibleMonth(oldestVisibleMonth: Int, uuid: String) {
+    fun setOldestVisibleMonth(oldestVisibleMonth: Int) {
         if (oldestVisibleMonth != taskJson.oldestVisibleMonth) {
             taskJson.oldestVisibleMonth = oldestVisibleMonth
             addValue("$key/oldestVisibleMonth", oldestVisibleMonth)
         }
-
-        oldestVisible(uuid).takeIf { it?.month != oldestVisibleMonth }?.let {
-            it.month = oldestVisibleMonth
-            addValue("$key/oldestVisible/$uuid/month", oldestVisibleMonth)
-        }
     }
 
-    fun setOldestVisibleDay(oldestVisibleDay: Int, uuid: String) {
+    fun setOldestVisibleDay(oldestVisibleDay: Int) {
         if (oldestVisibleDay != taskJson.oldestVisibleDay) {
             taskJson.oldestVisibleDay = oldestVisibleDay
             addValue("$key/oldestVisibleDay", oldestVisibleDay)
-        }
-
-        oldestVisible(uuid).takeIf { it?.day != oldestVisibleDay }?.let {
-            it.day = oldestVisibleDay
-            addValue("$key/oldestVisible/$uuid/day", oldestVisibleDay)
         }
     }
 

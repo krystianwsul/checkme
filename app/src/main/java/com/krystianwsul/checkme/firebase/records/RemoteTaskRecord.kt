@@ -12,20 +12,18 @@ import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
 
-class RemoteTaskRecord : RemoteRecord {
+class RemoteTaskRecord private constructor(
+        create: Boolean,
+        val domainFactory: DomainFactory,
+        val id: String,
+        private val remoteProjectRecord: RemoteProjectRecord,
+        private val taskJson: TaskJson
+) : RemoteRecord(create) {
 
     companion object {
 
         const val TASKS = "tasks"
     }
-
-    private val domainFactory: DomainFactory
-
-    val id: String
-
-    private val remoteProjectRecord: RemoteProjectRecord
-
-    private val taskJson: TaskJson
 
     private val _remoteInstanceRecords = HashMap<ScheduleKey, RemoteInstanceRecord>()
 
@@ -106,25 +104,21 @@ class RemoteTaskRecord : RemoteRecord {
 
     val remoteInstanceRecords: Map<ScheduleKey, RemoteInstanceRecord> get() = _remoteInstanceRecords
 
-    constructor(domainFactory: DomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : super(false) {
-        this.domainFactory = domainFactory
-        this.id = id
-        this.remoteProjectRecord = remoteProjectRecord
-        this.taskJson = taskJson
+    constructor(domainFactory: DomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : this(
+            false,
+            domainFactory,
+            id,
+            remoteProjectRecord,
+            taskJson)
 
-        initialize()
-    }
+    constructor(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : this(
+            true,
+            domainFactory,
+            DatabaseWrapper.getTaskRecordId(remoteProjectRecord.id),
+            remoteProjectRecord,
+            taskJson)
 
-    constructor(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : super(true) {
-        this.domainFactory = domainFactory
-        id = DatabaseWrapper.getTaskRecordId(remoteProjectRecord.id)
-        this.remoteProjectRecord = remoteProjectRecord
-        this.taskJson = taskJson
-
-        initialize()
-    }
-
-    private fun initialize() {
+    init {
         for ((key, instanceJson) in taskJson.instances) {
             check(!TextUtils.isEmpty(key))
 

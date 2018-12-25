@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -133,7 +132,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 .share()!!
     }
 
-    private lateinit var googleSigninClient: GoogleSignInClient
+    private val googleSigninClient by lazy {
+        GoogleSignIn.getClient(this@MainActivity, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build())
+    }
 
     private var actionMode: ActionMode? = null
 
@@ -446,11 +450,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         showTab(visibleTab.value!!)
 
         TickJobIntentService.startServiceRegister(this, "MainActivity: TickJobIntentService.startServiceRegister")
-
-        googleSigninClient = GoogleSignIn.getClient(this@MainActivity, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build())
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {

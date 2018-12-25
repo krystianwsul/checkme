@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.utils.ScheduleKey
-import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
 
 class RemoteTaskRecord private constructor(
@@ -181,9 +180,7 @@ class RemoteTaskRecord private constructor(
 
     private val oldestVisibleJson get() = taskJson.oldestVisible[uuid]
 
-    fun setOldestVisible(date: Date) {
-        val newOldestVisibleJson = OldestVisibleJson(date.year, date.month, date.day)
-
+    fun setOldestVisible(newOldestVisibleJson: OldestVisibleJson) {
         val oldOldestVisibleJson = oldestVisibleJson
 
         taskJson.oldestVisible[uuid] = newOldestVisibleJson

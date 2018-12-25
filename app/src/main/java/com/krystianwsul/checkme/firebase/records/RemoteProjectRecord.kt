@@ -7,16 +7,17 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.*
 import java.util.*
 
-class RemoteProjectRecord : RemoteRecord {
+class RemoteProjectRecord(
+        create: Boolean,
+        domainFactory: DomainFactory,
+        val id: String,
+        private val jsonWrapper: JsonWrapper) : RemoteRecord(create) {
 
     companion object {
 
         const val PROJECT_JSON = "projectJson"
     }
 
-    val id: String
-
-    private val jsonWrapper: JsonWrapper
 
     val remoteTaskRecords = HashMap<String, RemoteTaskRecord>()
 
@@ -69,21 +70,19 @@ class RemoteProjectRecord : RemoteRecord {
 
     val endTime get() = projectJson.endTime
 
-    constructor(domainFactory: DomainFactory, id: String, jsonWrapper: JsonWrapper) : super(false) {
-        this.id = id
-        this.jsonWrapper = jsonWrapper
+    constructor(domainFactory: DomainFactory, id: String, jsonWrapper: JsonWrapper) : this(
+            false,
+            domainFactory,
+            id,
+            jsonWrapper)
 
-        initialize(domainFactory)
-    }
+    constructor(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) : this(
+            true,
+            domainFactory,
+            DatabaseWrapper.getRootRecordId(),
+            jsonWrapper)
 
-    constructor(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) : super(true) {
-        id = DatabaseWrapper.getRootRecordId()
-        this.jsonWrapper = jsonWrapper
-
-        initialize(domainFactory)
-    }
-
-    private fun initialize(domainFactory: DomainFactory) {
+    init {
         for ((id, taskJson) in projectJson.tasks) {
             check(!TextUtils.isEmpty(id))
 

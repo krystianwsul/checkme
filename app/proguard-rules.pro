@@ -45,3 +45,5 @@
 -dontwarn com.google.errorprone.annotations.ForOverride
 
 -keep class android.arch.lifecycle.** {*;}
+
+-keep class com.google.firebase.** { *; }

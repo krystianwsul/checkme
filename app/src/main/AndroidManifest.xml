@@ -30,7 +30,7 @@
 
         <activity
             android:name=".gui.MainActivity"
-            android:theme="@style/AppTheme.NavDrawer"
+            android:theme="@style/AppTheme.Toolbar"
             android:launchMode="singleTask"/>
 
         <activity

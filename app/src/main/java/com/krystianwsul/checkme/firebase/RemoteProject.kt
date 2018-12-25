@@ -57,7 +57,7 @@ class RemoteProject(
 
             remoteCustomTimes[remoteCustomTime.customTimeKey.remoteCustomTimeId] = remoteCustomTime
 
-            if (remoteCustomTimeRecord.ownerId == domainFactory.localFactory.uuid && domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
+            if (remoteCustomTimeRecord.ownerId == domainFactory.uuid && domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
                 val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
 
                 localCustomTime.addRemoteCustomTimeRecord(remoteCustomTimeRecord)

@@ -119,6 +119,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     val instanceShownCount get() = localFactory.instanceShownRecords.size
 
+    val uuid by lazy { localFactory.uuid }
+
     fun save(dataId: Int, source: SaveService.Source) = save(listOf(dataId), source)
 
     fun save(dataIds: List<Int>, source: SaveService.Source) {
@@ -264,7 +266,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         localFactory.clearRemoteCustomTimeRecords()
 
         val firstThereforeSilent = remoteProjectFactory == null
-        remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo!!, localFactory.uuid, now)
+        remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo!!, now)
 
         RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
 

@@ -17,8 +17,7 @@ class RemoteTaskRecord private constructor(
         val domainFactory: DomainFactory,
         val id: String,
         private val remoteProjectRecord: RemoteProjectRecord,
-        private val taskJson: TaskJson
-) : RemoteRecord(create) {
+        private val taskJson: TaskJson) : RemoteRecord(create) {
 
     companion object {
 
@@ -178,12 +177,14 @@ class RemoteTaskRecord private constructor(
         addValue("$key/endTime", endTime)
     }
 
-    private fun oldestVisible(uuid: String) = taskJson.oldestVisible[uuid]
+    private val uuid by lazy { domainFactory.uuid }
 
-    fun setOldestVisible(date: Date, uuid: String) {
+    private val oldestVisibleJson get() = taskJson.oldestVisible[uuid]
+
+    fun setOldestVisible(date: Date) {
         val newOldestVisibleJson = OldestVisibleJson(date.year, date.month, date.day)
 
-        val oldOldestVisibleJson = oldestVisible(uuid)
+        val oldOldestVisibleJson = oldestVisibleJson
 
         taskJson.oldestVisible[uuid] = newOldestVisibleJson
 

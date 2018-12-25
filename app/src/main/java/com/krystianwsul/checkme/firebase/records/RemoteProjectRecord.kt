@@ -18,7 +18,6 @@ class RemoteProjectRecord(
         const val PROJECT_JSON = "projectJson"
     }
 
-
     val remoteTaskRecords = HashMap<String, RemoteTaskRecord>()
 
     val remoteTaskHierarchyRecords = HashMap<String, RemoteTaskHierarchyRecord>()

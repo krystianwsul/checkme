@@ -3,7 +3,10 @@ package com.krystianwsul.checkme
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.preference.PreferenceManager
+import android.util.Base64
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
@@ -12,6 +15,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import net.danlew.android.joda.JodaTimeAndroid
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 
 class MyApplication : Application() {
 
@@ -65,5 +70,36 @@ class MyApplication : Application() {
             FirebaseInstanceId.getInstance()
                     .instanceId
                     .addOnSuccessListener { token = it.token }
+
+        writeHashes()
+    }
+
+    @Suppress("DEPRECATION")
+    @SuppressLint("PackageManagerGetSignatures")
+    private fun writeHashes() {
+        try {
+            Log.e("asdf", "getting hash for $packageName")
+            val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+            for (signature in info.signatures) {
+                val md = MessageDigest.getInstance("SHA")
+                md.update(signature.toByteArray())
+
+                val digest = md.digest()
+
+                fun byteArrayToHex(a: ByteArray): String {
+                    val sb = StringBuilder(a.size * 2)
+                    for (b in a)
+                        sb.append(String.format("%02x", b))
+                    return sb.toString()
+                }
+
+                Log.e("asdf", "google hash: " + byteArrayToHex(digest).toUpperCase().chunked(2).joinToString(":"))
+                Log.e("asdf", "facebook hash: " + Base64.encodeToString(digest, Base64.DEFAULT))
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e("asdf", "hash error", e)
+        } catch (e: NoSuchAlgorithmException) {
+            Log.e("asdf", "hash error", e)
+        }
     }
 }

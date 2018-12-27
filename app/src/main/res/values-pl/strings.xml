@@ -73,4 +73,6 @@
     <string name="tutorial4">Zaloguj się do konta Google żeby dzielić się zadaniami z innymi użytkownikami.  Zacznij od wyszukania użytkowników po adresie e-mailowym, żeby dodać ich jako znajomych.  Następnie, utwórz projekt, i dodaj do niegogo znajomych.  Potem, przy tworzeniu zadania, ustaw że to zadanie należy do danego projektu.</string>
     <string name="tutorial">Przewodnik</string>
     <string name="open">Otwórz</string>
+    <string name="snackbar">Usunięto %1$s</string>
+    <string name="undo">cofnij</string>
 </resources>

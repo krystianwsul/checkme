@@ -13,10 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.AbstractFragment
-import com.krystianwsul.checkme.gui.ActionModeListener
-import com.krystianwsul.checkme.gui.FabUser
-import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -94,6 +91,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     private lateinit var data: ShowCustomTimesViewModel.Data
 
     private lateinit var showCustomTimesViewModel: ShowCustomTimesViewModel
+
+    private val customTimesListListener get() = activity as CustomTimesListListener
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -236,11 +235,19 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             selectedCustomTimeWrappers.forEach { treeNodeCollection.remove(it.treeNode, x) }
 
-            selectedCustomTimeWrappers.map { customTimeWrappers.indexOf(it) }.forEach { customTimeWrappers.removeAt(it) }
+            selectedCustomTimeWrappers.map { customTimeWrappers.indexOf(it) }.forEach {
+                data.entries.removeAt(it)
+                customTimeWrappers.removeAt(it)
+            }
 
             val selectedCustomTimeIds = selectedCustomTimeWrappers.map { it.customTimeData.id }
 
-            DomainFactory.getInstance().setCustomTimeCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds)
+            DomainFactory.getInstance().setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, false)
+
+            customTimesListListener.showSnackbar(selectedCustomTimeIds.size) {
+                // todo dataId plus manual add nodes
+                DomainFactory.getInstance().setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeIds, true)
+            }
         }
     }
 
@@ -273,7 +280,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override fun compareTo(other: ModelNode) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
     }
 
-    interface CustomTimesListListener : ActionModeListener {
+    interface CustomTimesListListener : ActionModeListener, SnackbarListener {
 
         fun setCustomTimesSelectAllVisibility(selectAllVisible: Boolean)
     }

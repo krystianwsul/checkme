@@ -11,7 +11,7 @@
     android:id="@+id/mainActivityDrawer">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/main_coordinator"
+        android:id="@+id/mainCoordinator"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 

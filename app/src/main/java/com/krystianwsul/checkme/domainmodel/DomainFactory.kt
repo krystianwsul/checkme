@@ -416,7 +416,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     fun getShowCustomTimesData(): ShowCustomTimesViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowCustomTimesData")
 
-        val entries = getCurrentCustomTimes().map { ShowCustomTimesViewModel.CustomTimeData(it.id, it.name) }
+        val entries = getCurrentCustomTimes().map { ShowCustomTimesViewModel.CustomTimeData(it.id, it.name) }.toMutableList()
 
         return ShowCustomTimesViewModel.Data(entries)
     }
@@ -1355,14 +1355,14 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
-    fun setCustomTimeCurrent(dataId: Int, source: SaveService.Source, localCustomTimeIds: List<Int>) {
-        MyCrashlytics.log("DomainFactory.setCustomTimeCurrent")
+    fun setCustomTimesCurrent(dataId: Int, source: SaveService.Source, localCustomTimeIds: List<Int>, current: Boolean) {
+        MyCrashlytics.log("DomainFactory.setCustomTimesCurrent")
         check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
         check(!localCustomTimeIds.isEmpty())
 
         for (localCustomTimeId in localCustomTimeIds)
-            localFactory.getLocalCustomTime(localCustomTimeId).setCurrent()
+            localFactory.getLocalCustomTime(localCustomTimeId).current = current
 
         save(dataId, source)
     }

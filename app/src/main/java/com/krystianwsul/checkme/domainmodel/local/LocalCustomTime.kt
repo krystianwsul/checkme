@@ -19,7 +19,11 @@ class LocalCustomTime(
 
     val id get() = localCustomTimeRecord.id
 
-    val current get() = localCustomTimeRecord.current
+    var current
+        get() = localCustomTimeRecord.current
+        set(value) {
+            localCustomTimeRecord.current = value
+        }
 
     private val customTimeRecords get() = mutableListOf<CustomTimeRecord>(localCustomTimeRecord).apply { addAll(remoteCustomTimeRecords.values) }
 
@@ -44,8 +48,8 @@ class LocalCustomTime(
 
     override val hourMinutes
         get() = TreeMap<DayOfWeek, HourMinute>().apply {
-        putAll(DayOfWeek.values().map { Pair(it, getHourMinute(it)) })
-    }
+            putAll(DayOfWeek.values().map { Pair(it, getHourMinute(it)) })
+        }
 
     fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
         when (dayOfWeek) {
@@ -95,10 +99,6 @@ class LocalCustomTime(
     }
 
     override fun toString() = name
-
-    fun setCurrent() {
-        localCustomTimeRecord.current = false
-    }
 
     override val timePair by lazy { TimePair(CustomTimeKey.LocalCustomTimeKey(localCustomTimeRecord.id), null) }
 

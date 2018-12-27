@@ -25,12 +25,12 @@
             android:id="@+id/showProjectFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fabMargin"
             android:src="@android:drawable/ic_input_add"
             android:tint="@android:color/white"
             android:visibility="invisible"
             app:layout_anchor="@id/show_project_frame"
-            app:layout_anchorGravity="bottom|right|end"
-            app:useCompatPadding="true"/>
+            app:layout_anchorGravity="bottom|end" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

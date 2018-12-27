@@ -25,7 +25,7 @@
         android:id="@+id/tutorialFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:useCompatPadding="true"
+        android:layout_margin="@dimen/fabMargin"
         android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
         android:tint="@android:color/white"
         android:layout_alignParentBottom="true"

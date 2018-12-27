@@ -1,24 +1,22 @@
 package com.krystianwsul.checkme
 
-import android.text.TextUtils
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
 
 object MyCrashlytics {
 
-    var enabled = false
-        private set
+    val enabled = MyApplication.instance
+            .resources
+            .getBoolean(R.bool.crashlytics_enabled)
 
-    fun initialize(myApplication: MyApplication) {
-        enabled = myApplication.resources.getBoolean(R.bool.crashlytics_enabled)
-
+    init {
         if (enabled)
-            Fabric.with(myApplication, Crashlytics())
+            Fabric.with(MyApplication.instance, Crashlytics())
     }
 
     fun log(message: String) {
-        check(!TextUtils.isEmpty(message))
+        check(message.isNotEmpty())
 
         Log.e("asdf", "MyCrashLytics.log: $message")
         if (enabled)

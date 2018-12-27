@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme
 
-import android.util.Log
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -29,7 +28,7 @@ object Preferences {
     fun logLineHour(line: String) = logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
 
     private fun logLine(line: String) {
-        Log.e("asdf", "Preferences.logLine: $line")
+        MyCrashlytics.log("Preferences.logLine: $line")
 
         tickLog = tickLog.split('\n')
                 .takeLast(100)
@@ -45,10 +44,8 @@ object Preferences {
 
     class ReadWriteStrPref(key: String) : ReadOnlyStrPref(key), ReadWriteProperty<Any, String> {
 
-        override fun setValue(thisRef: Any, property: KProperty<*>, value: String) {
-            sharedPreferences.edit()
-                    .putString(key, value)
-                    .apply()
-        }
+        override fun setValue(thisRef: Any, property: KProperty<*>, value: String) = sharedPreferences.edit()
+                .putString(key, value)
+                .apply()
     }
 }

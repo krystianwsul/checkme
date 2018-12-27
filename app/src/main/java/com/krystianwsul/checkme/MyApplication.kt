@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.preference.PreferenceManager
 import android.util.Base64
 import android.util.Log
+import com.github.anrwatchdog.ANRWatchDog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
@@ -72,6 +73,10 @@ class MyApplication : Application() {
                     .addOnSuccessListener { token = it.token }
 
         writeHashes()
+
+        ANRWatchDog().setReportMainThreadOnly()
+                .setANRListener { MyCrashlytics.logException(it) }
+                .start()
     }
 
     @Suppress("DEPRECATION")

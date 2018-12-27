@@ -232,21 +232,26 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
             val selectedCustomTimeWrappers = customTimeWrappers.filter { it.treeNode.isSelected }
+            customTimeWrappers.removeAll(selectedCustomTimeWrappers)
 
-            selectedCustomTimeWrappers.forEach { treeNodeCollection.remove(it.treeNode, x) }
+            selectedCustomTimeWrappers.map { it.treeNode }.forEach { treeNodeCollection.remove(it, x) }
 
-            selectedCustomTimeWrappers.map { customTimeWrappers.indexOf(it) }.forEach {
-                data.entries.removeAt(it)
-                customTimeWrappers.removeAt(it)
-            }
+            val customTimeDatas = selectedCustomTimeWrappers.map { it.customTimeData }
+            data.entries.removeAll(customTimeDatas)
 
-            val selectedCustomTimeIds = selectedCustomTimeWrappers.map { it.customTimeData.id }
+            val selectedCustomTimeIds = customTimeDatas.map { it.id }
 
             DomainFactory.getInstance().setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, false)
 
             customTimesListListener.showSnackbar(selectedCustomTimeIds.size) {
-                // todo dataId plus manual add nodes
-                DomainFactory.getInstance().setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeIds, true)
+                onLoadFinished(data.apply {
+                    entries.apply {
+                        addAll(customTimeDatas)
+                        sortBy { it.id }
+                    }
+                })
+
+                DomainFactory.getInstance().setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, true)
             }
         }
     }

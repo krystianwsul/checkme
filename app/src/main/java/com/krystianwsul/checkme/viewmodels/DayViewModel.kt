@@ -38,7 +38,7 @@ class DayViewModel : ViewModel() {
         val data = BehaviorRelay.create<DayData>()
         private var observer: Observer? = null
 
-        private val firebaseListener = { _: DomainFactory ->
+        private val firebaseListener: (DomainFactory) -> Unit = {
             check(kotlinDomainFactory.getIsConnected())
 
             load()

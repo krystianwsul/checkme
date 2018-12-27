@@ -193,6 +193,8 @@ class GroupListFragment @JvmOverloads constructor(
                     DomainFactory.getInstance().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).dataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
+
+                    // todo snackbar
                 }
                 R.id.action_group_add_task -> {
                     val instanceData = instanceDatas.single()

@@ -14,7 +14,7 @@
     <string name="done">Done</string>
     <string name="more">more</string>
     <string name="hour">In an hour</string>
-    <string name="delete">Delete</string>
+    <string name="delete">Remove</string>
     <string name="edit">Edit</string>
     <string name="expand">Expand</string>
     <string name="list">List</string>
@@ -27,7 +27,7 @@
     <string name="name_hint">Name</string>
     <string name="time_dialog_title">Pick a time</string>
     <string name="edit_task">Edit task</string>
-    <string name="delete_task">Delete task</string>
+    <string name="delete_task">Remove task</string>
     <string name="error_date">Date is in the past</string>
     <string name="error_time">Time is in the past</string>
     <string name="discard_changes">Discard changes?</string>

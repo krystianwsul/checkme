@@ -106,6 +106,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     DomainFactory.getInstance().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
+
+                    // todo snackbar
                 }
                 R.id.action_task_add -> {
                     val childTaskData = childTaskDatas.single()

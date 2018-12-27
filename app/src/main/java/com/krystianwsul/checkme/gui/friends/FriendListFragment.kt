@@ -61,6 +61,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
                     (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
 
                     updateSelectAll()
+
+                    // todo snackbar
                 }
                 else -> throw UnsupportedOperationException()
             }

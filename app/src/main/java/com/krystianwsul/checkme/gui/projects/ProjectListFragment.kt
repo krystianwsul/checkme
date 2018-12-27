@@ -77,6 +77,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
                         DomainFactory.getInstance().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                     }
+
+                    // todo snackbar
                 }
                 else -> throw UnsupportedOperationException()
             }

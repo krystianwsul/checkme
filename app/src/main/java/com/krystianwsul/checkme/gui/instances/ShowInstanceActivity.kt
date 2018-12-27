@@ -129,6 +129,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
                     if (!it.exists)
                         finish()
+
+                    // todo snackbar
                 }
                 R.id.instance_menu_select_all -> {
                     groupListFragment.treeViewAdapter.updateDisplayedNodes {

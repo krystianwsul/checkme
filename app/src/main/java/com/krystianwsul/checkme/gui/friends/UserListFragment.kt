@@ -54,6 +54,8 @@ class UserListFragment : AbstractFragment(), FabUser {
             check(itemId == R.id.action_friends_delete)
 
             (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
+
+            // todo snackbar
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {

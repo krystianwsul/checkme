@@ -129,6 +129,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
                 DomainFactory.getInstance().setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
 
                 finish()
+
+                // todo snackbar
             }
             R.id.task_menu_select_all -> {
                 taskListFragment.treeViewAdapter.updateDisplayedNodes {

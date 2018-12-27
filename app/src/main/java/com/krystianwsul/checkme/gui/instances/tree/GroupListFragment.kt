@@ -743,8 +743,6 @@ class GroupListFragment @JvmOverloads constructor(
         fun onDestroyGroupActionMode()
 
         fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean)
-
-        val bottomActionModeId: Int
     }
 
     data class DataWrapper(

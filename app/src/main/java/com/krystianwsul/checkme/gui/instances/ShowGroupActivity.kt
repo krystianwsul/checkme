@@ -89,8 +89,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
         invalidateOptionsMenu()
     }
 
-    override val bottomActionModeId = R.id.showGroupBottomActionBar
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_select_all, menu)
         return true

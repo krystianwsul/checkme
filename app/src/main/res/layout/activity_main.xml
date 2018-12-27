@@ -126,13 +126,7 @@
             android:tint="@android:color/white"
             android:visibility="invisible"
             app:layout_anchor="@id/main_frame"
-            app:layout_anchorGravity="bottom|right|end"/>
-
-        <ViewStub
-            android:id="@+id/mainBottomActionBar"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:layout_gravity="bottom"/>
+            app:layout_anchorGravity="bottom|end" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

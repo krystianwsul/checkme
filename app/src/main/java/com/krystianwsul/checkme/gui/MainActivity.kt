@@ -676,8 +676,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         invalidateOptionsMenu()
     }
 
-    override val bottomActionModeId = R.id.mainBottomActionBar
-
     override fun onCreateActionMode(actionMode: ActionMode) {
         check(this.actionMode == null)
 

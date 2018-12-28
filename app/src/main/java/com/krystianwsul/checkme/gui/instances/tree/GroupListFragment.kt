@@ -301,35 +301,36 @@ class GroupListFragment @JvmOverloads constructor(
 
         private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: TreeViewAdapter.Placeholder) {
             treeNode.modelNode.let {
-                val instanceData1 = when (it) {
+                val instanceData = when (it) {
                     is NotDoneGroupNode -> it.singleInstanceData
                     is NotDoneGroupNode.NotDoneInstanceNode -> it.instanceData
                     is DoneInstanceNode -> it.instanceData
-                    else -> {
-                        check(it is DividerNode)
-
+                    is DividerNode -> {
                         treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
 
                         return
                     }
+                    else -> throw IllegalArgumentException()
                 }
 
-                if (instanceData1.Exists || !root) {
-                    instanceData1.TaskCurrent = false
-                    instanceData1.IsRootTask = null
-                } else {
-                    instanceData1.instanceDataParent.remove(instanceData1.InstanceKey)
-                }
+                if (instanceData.Exists || !root) {
+                    check(instanceData.TaskCurrent)
+                    checkNotNull(instanceData.IsRootTask)
 
-                if (instanceData1.Exists || !root) {
+                    instanceData.TaskCurrent = false
+                    instanceData.IsRootTask = null
+
                     treeNode.unselect(x)
 
                     treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
                 } else {
+                    instanceData.instanceDataParent.remove(instanceData.InstanceKey)
+
                     when (it) {
                         is NotDoneGroupNode -> it.removeFromParent(x)
                         is NotDoneGroupNode.NotDoneInstanceNode -> it.removeFromParent(x)
-                        else -> (it as DoneInstanceNode).removeFromParent(x)
+                        is DoneInstanceNode -> it.removeFromParent(x)
+                        else -> throw IllegalArgumentException()
                     }
                 }
             }

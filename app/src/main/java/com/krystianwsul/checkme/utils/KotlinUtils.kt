@@ -28,16 +28,14 @@ fun Set<DayOfWeek>.prettyPrint(): String {
     } + ": "
 }
 
-fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.run {
-    addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
 
-        override fun onGlobalLayout() {
-            removeOnGlobalLayoutListener(this)
+    override fun onGlobalLayout() {
+        viewTreeObserver.removeOnGlobalLayoutListener(this)
 
-            action()
-        }
-    })
-}
+        action()
+    }
+})
 
 fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
     check(x.ordinal < y.ordinal)

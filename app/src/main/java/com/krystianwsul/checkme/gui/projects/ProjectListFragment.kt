@@ -44,7 +44,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private lateinit var treeViewAdapter: TreeViewAdapter
 
-    private var dataId: Int? = null
+    private var data: ProjectListViewModel.Data? = null
 
     private val mainActivity get() = activity as MainActivity
 
@@ -59,14 +59,15 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             check(!selected.isEmpty())
 
             val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
+            val projectDatas = projectNodes.map { it.projectData }
 
-            val projectIds = projectNodes.asSequence()
-                    .map { it.projectData.id }
-                    .toSet()
+            val projectIds = projectDatas.map { it.id }.toSet()
 
             when (itemId) {
                 R.id.action_project_delete -> {
-                    check(dataId != null)
+                    check(data != null)
+
+                    projectIds.forEach { data!!.projectDatas.remove(it) }
 
                     for (treeNode in selected) {
                         val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
@@ -74,11 +75,17 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                         projectNode.remove(x)
 
                         decrementSelected(x)
-
-                        DomainFactory.getInstance().setProjectEndTimeStamps(dataId!!, SaveService.Source.GUI, projectIds)
                     }
 
-                    // todo snackbar
+                    val projectUndoData = DomainFactory.getInstance().setProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectIds)
+
+                    mainActivity.showSnackbar(selected.size) {
+                        onLoadFinished(data!!.also {
+                            it.projectDatas.putAll(projectDatas.map { it.id to it })
+                        })
+
+                        DomainFactory.getInstance().clearProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectUndoData)
+                    }
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -148,7 +155,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     }
 
     private fun onLoadFinished(data: ProjectListViewModel.Data) {
-        dataId = data.dataId
+        this.data = data
 
         val hide = mutableListOf<View>(projectListProgress)
         val show: View
@@ -210,7 +217,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private fun updateFabVisibility() {
         projectListFab?.run {
-            if (dataId != null && !selectionCallback.hasActionMode) {
+            if (data != null && !selectionCallback.hasActionMode) {
                 show()
             } else {
                 hide()

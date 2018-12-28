@@ -67,7 +67,15 @@ class RemoteProjectRecord(
 
     val startTime get() = projectJson.startTime
 
-    val endTime get() = projectJson.endTime
+    var endTime
+        get() = projectJson.endTime
+        set(value) {
+            if (value == projectJson.endTime)
+                return
+
+            projectJson.endTime = value
+            addValue("$id/$PROJECT_JSON/endTime", value)
+        }
 
     constructor(domainFactory: DomainFactory, id: String, jsonWrapper: JsonWrapper) : this(
             false,
@@ -119,16 +127,6 @@ class RemoteProjectRecord(
         for (removedFriend in removedFriends) {
             addValue("$id/recordOf/$removedFriend", null)
         }
-    }
-
-    fun setEndTime(endTime: Long) {
-        check(projectJson.endTime == null)
-
-        if (endTime == projectJson.endTime)
-            return
-
-        projectJson.endTime = endTime
-        addValue("$id/$PROJECT_JSON/endTime", endTime)
     }
 
     override fun getValues(values: MutableMap<String, Any?>) {

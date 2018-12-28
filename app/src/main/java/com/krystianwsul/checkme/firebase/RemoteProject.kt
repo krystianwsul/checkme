@@ -264,14 +264,22 @@ class RemoteProject(
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp) {
+    fun setEndExactTimeStamp(now: ExactTimeStamp, projectUndoData: DomainFactory.ProjectUndoData? = null) {
         check(current(now))
 
         remoteTasks.values
                 .filter { it.current(now) }
-                .forEach { it.setEndExactTimeStamp(now) }
+                .forEach { it.setEndExactTimeStamp(now, projectUndoData?.taskUndoData) }
 
-        remoteProjectRecord.setEndTime(now.long)
+        projectUndoData?.projectIds?.add(id)
+
+        remoteProjectRecord.endTime = now.long
+    }
+
+    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+        check(!current(now))
+
+        remoteProjectRecord.endTime = null
     }
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchies.getById(id)

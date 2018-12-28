@@ -1327,13 +1327,28 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         val now = ExactTimeStamp.now
 
-        val tasks = taskUndoData.taskKeys.map { getTaskForce(it) }
+        processTaskUndoData(taskUndoData, now)
 
-        tasks.forEach {
-            check(!it.current(now))
+        updateNotifications(now)
 
-            it.clearEndExactTimeStamp(now)
-        }
+        save(dataId, source)
+
+        val remoteProjects = taskUndoData.taskKeys
+                .map { getTaskForce(it) }
+                .mapNotNull { it.remoteNullableProject }
+                .toSet()
+
+        notifyCloud(remoteProjects)
+    }
+
+    private fun processTaskUndoData(taskUndoData: TaskUndoData, now: ExactTimeStamp) {
+        taskUndoData.taskKeys
+                .map { getTaskForce(it) }
+                .forEach {
+                    check(!it.current(now))
+
+                    it.clearEndExactTimeStamp(now)
+                }
 
         val localTaskHierarchyKeys = taskUndoData.taskHierarchyKeys.filterIsInstance<TaskHierarchyKey.LocalTaskHierarchyKey>()
         val remoteTaskHierarchyKeys = taskUndoData.taskHierarchyKeys.filterIsInstance<TaskHierarchyKey.RemoteTaskHierarchyKey>()
@@ -1364,14 +1379,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
             it.clearEndExactTimeStamp(now)
         }
-
-        val remoteProjects = tasks.mapNotNull { it.remoteNullableProject }.toSet()
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(remoteProjects)
     }
 
     @Synchronized
@@ -1630,7 +1637,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
-    fun setProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectIds: Set<String>) {
+    fun setProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectIds: Set<String>): ProjectUndoData {
         MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
         check(remoteProjectFactory != null)
@@ -1642,7 +1649,35 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val remoteProjects = projectIds.map { remoteProjectFactory!!.getRemoteProjectForce(it) }.toSet()
         check(remoteProjects.all { it.current(now) })
 
-        remoteProjects.forEach { it.setEndExactTimeStamp(now) }
+        val projectUndoData = ProjectUndoData()
+
+        remoteProjects.forEach { it.setEndExactTimeStamp(now, projectUndoData) }
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(remoteProjects)
+
+        return projectUndoData
+    }
+
+    @Synchronized
+    fun clearProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectUndoData: ProjectUndoData) {
+        MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
+        check(remoteProjectFactory != null)
+        check(userInfo != null)
+
+        val now = ExactTimeStamp.now
+
+        val remoteProjects = projectUndoData.projectIds
+                .map { remoteProjectFactory!!.getRemoteProjectForce(it) }
+                .toSet()
+        check(remoteProjects.none { it.current(now) })
+
+        remoteProjects.forEach { it.clearEndExactTimeStamp(now) }
+
+        processTaskUndoData(projectUndoData.taskUndoData, now)
 
         updateNotifications(now)
 
@@ -2508,6 +2543,12 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String) = localFactory.getLocalCustomTime(remoteProjectId, remoteCustomTimeId)?.customTimeKey
             ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)
+
+    class ProjectUndoData {
+
+        val projectIds = mutableSetOf<String>()
+        val taskUndoData = TaskUndoData()
+    }
 
     class TaskUndoData {
 

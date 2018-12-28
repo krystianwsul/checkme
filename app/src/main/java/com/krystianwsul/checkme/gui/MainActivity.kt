@@ -28,7 +28,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -701,13 +700,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         invalidateOptionsMenu()
     }
 
-    override fun showSnackbar(count: Int, action: () -> Unit) {
-        Snackbar.make(mainCoordinator, getString(R.string.snackbar, count.toString()), Snackbar.LENGTH_LONG).apply {
-            setAction(R.string.undo) { action() }
-
-            show()
-        }
-    }
+    override val snackbarParent get() = mainCoordinator!!
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

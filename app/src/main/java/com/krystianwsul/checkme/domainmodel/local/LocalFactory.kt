@@ -14,13 +14,13 @@ class LocalFactory {
 
     companion object {
 
-        private var sLocalFactory: LocalFactory? = null
+        private var _localFactory: LocalFactory? = null
 
         val instance: LocalFactory
             get() {
-                if (sLocalFactory == null)
-                    sLocalFactory = LocalFactory()
-                return sLocalFactory!!
+                if (_localFactory == null)
+                    _localFactory = LocalFactory()
+                return _localFactory!!
             }
     }
 
@@ -67,7 +67,7 @@ class LocalFactory {
     }
 
     fun reset() {
-        sLocalFactory = null
+        _localFactory = null
 
         persistenceManager.reset()
     }
@@ -375,4 +375,13 @@ class LocalFactory {
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey) = localTaskHierarchies.getByChildTaskKey(childTaskKey)
 
     fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey) = localTaskHierarchies.getByParentTaskKey(parentTaskKey)
+
+    fun getSchedule(scheduleId: ScheduleId.Local): Schedule {
+        for (localTask in localTasks.values)
+            for (schedule in localTask.schedules)
+                if (schedule.scheduleId == scheduleId)
+                    return schedule
+
+        throw IllegalArgumentException()
+    }
 }

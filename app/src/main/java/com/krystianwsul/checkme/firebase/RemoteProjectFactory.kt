@@ -9,9 +9,7 @@ import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import com.krystianwsul.checkme.firebase.json.ProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemoteProjectManager
-import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
@@ -184,4 +182,10 @@ class RemoteProjectFactory(
         check(remoteProjects.containsKey(projectId))
         remoteProjects.remove(projectId)
     }
+
+    fun getTaskHierarchy(remoteTaskHierarchyKey: TaskHierarchyKey.RemoteTaskHierarchyKey) = remoteProjects[remoteTaskHierarchyKey.projectId]!!.getTaskHierarchy(remoteTaskHierarchyKey.taskHierarchyId)
+
+    fun getSchedule(scheduleId: ScheduleId.Remote) = remoteProjects[scheduleId.projectId]!!.getRemoteTaskForce(scheduleId.taskId)
+            .schedules
+            .single { it.scheduleId == scheduleId }
 }

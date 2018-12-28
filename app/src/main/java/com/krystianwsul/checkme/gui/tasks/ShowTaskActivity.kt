@@ -166,6 +166,8 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         invalidateOptionsMenu()
     }
 
+    override val snackbarParent get() = showTaskCoordinator!!
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 

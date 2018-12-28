@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
 
 
-
 class RemoteTaskHierarchyRecord : RemoteRecord {
 
     companion object {
@@ -22,7 +21,15 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
 
     val startTime get() = createObject.startTime
 
-    val endTime get() = createObject.endTime
+    var endTime
+        get() = createObject.endTime
+        set(value) {
+            if (value == createObject.endTime)
+                return
+
+            createObject.endTime = value
+            addValue("$key/endTime", value)
+        }
 
     val parentTaskId get() = createObject.parentTaskId
 
@@ -40,16 +47,6 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
         id = DatabaseWrapper.getTaskHierarchyRecordId(remoteProjectRecord.id)
         this.remoteProjectRecord = remoteProjectRecord
         createObject = taskHierarchyJson
-    }
-
-    fun setEndTime(endTime: Long) {
-        check(createObject.endTime == null)
-
-        if (endTime == createObject.endTime)
-            return
-
-        createObject.endTime = endTime
-        addValue("$key/endTime", endTime)
     }
 
     fun setOrdinal(ordinal: Double) {

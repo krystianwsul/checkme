@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.local
 
 import com.krystianwsul.checkme.domainmodel.ScheduleBridge
 import com.krystianwsul.checkme.persistencemodel.ScheduleRecord
+import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 
 abstract class LocalScheduleBridge(val scheduleRecord: ScheduleRecord) : ScheduleBridge {
@@ -12,9 +13,11 @@ abstract class LocalScheduleBridge(val scheduleRecord: ScheduleRecord) : Schedul
 
     override val remoteCustomTimeKey: Pair<String, String>? = null
 
-    override fun getEndTime() = scheduleRecord.endTime
+    override var endTime
+        get() = scheduleRecord.endTime
+        set(value) {
+            scheduleRecord.endTime = value
+        }
 
-    override fun setEndTime(endTime: Long) {
-        scheduleRecord.endTime = endTime
-    }
+    override val scheduleId by lazy { ScheduleId.Local(scheduleRecord.id) }
 }

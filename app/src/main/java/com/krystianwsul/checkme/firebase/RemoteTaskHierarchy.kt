@@ -37,7 +37,13 @@ class RemoteTaskHierarchy(domainFactory: DomainFactory, private val remoteProjec
     override fun setEndExactTimeStamp(now: ExactTimeStamp) {
         check(current(now))
 
-        remoteTaskHierarchyRecord.setEndTime(now.long)
+        remoteTaskHierarchyRecord.endTime = now.long
+    }
+
+    override fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+        check(!current(now))
+
+        remoteTaskHierarchyRecord.endTime = null
     }
 
     override fun delete() {

@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.persistencemodel.ScheduleRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 
-internal class LocalDailyScheduleBridge(scheduleRecord: ScheduleRecord, private val mDailyScheduleRecord: DailyScheduleRecord) : LocalScheduleBridge(scheduleRecord), WeeklyScheduleBridge {
+class LocalDailyScheduleBridge(scheduleRecord: ScheduleRecord, private val mDailyScheduleRecord: DailyScheduleRecord) : LocalScheduleBridge(scheduleRecord), WeeklyScheduleBridge {
 
     override val customTimeKey get() = mDailyScheduleRecord.customTimeId?.let { CustomTimeKey.LocalCustomTimeKey(it) }
 

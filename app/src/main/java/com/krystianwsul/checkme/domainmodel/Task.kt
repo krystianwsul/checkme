@@ -101,22 +101,30 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         return getParentTask(exactTimeStamp) == null
     }
 
-    protected abstract fun setMyEndExactTimeStamp(now: ExactTimeStamp)
+    protected abstract fun setMyEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp?)
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp, recursive: Boolean = false) {
+    fun setEndExactTimeStamp(now: ExactTimeStamp, taskUndoData: DomainFactory.TaskUndoData? = null, recursive: Boolean = false) {
         check(current(now))
+
+        taskUndoData?.taskKeys?.add(taskKey)
 
         val schedules = getCurrentSchedules(now)
         if (isRootTask(now)) {
             check(schedules.all { it.current(now) })
 
-            schedules.forEach { it.setEndExactTimeStamp(now) }
+            schedules.forEach {
+                taskUndoData?.scheduleIds?.add(it.scheduleId)
+
+                it.setEndExactTimeStamp(now)
+            }
         } else {
             check(schedules.isEmpty())
         }
 
         getChildTaskHierarchies(now).forEach {
-            it.childTask.setEndExactTimeStamp(now, true)
+            it.childTask.setEndExactTimeStamp(now, taskUndoData, true)
+
+            taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
 
             it.setEndExactTimeStamp(now)
         }
@@ -125,11 +133,19 @@ abstract class Task(protected val domainFactory: DomainFactory) {
             domainFactory.getParentTaskHierarchy(this, now)?.let {
                 check(it.current(now))
 
+                taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
+
                 it.setEndExactTimeStamp(now)
             }
         }
 
         setMyEndExactTimeStamp(now)
+    }
+
+    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+        check(!current(now))
+
+        setMyEndExactTimeStamp(null)
     }
 
     abstract fun createChildTask(now: ExactTimeStamp, name: String, note: String?): Task

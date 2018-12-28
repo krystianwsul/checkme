@@ -37,5 +37,7 @@ abstract class TaskHierarchy(protected val domainFactory: DomainFactory) {
 
     abstract fun setEndExactTimeStamp(now: ExactTimeStamp)
 
+    abstract fun clearEndExactTimeStamp(now: ExactTimeStamp)
+
     abstract fun delete()
 }

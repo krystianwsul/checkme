@@ -44,6 +44,12 @@ class LocalTaskHierarchy(
         taskHierarchyRecord.endTime = now.long
     }
 
+    override fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+        check(!current(now))
+
+        taskHierarchyRecord.endTime = null
+    }
+
     override fun delete() {
         domainFactory.localFactory.deleteTaskHierarchy(this)
 

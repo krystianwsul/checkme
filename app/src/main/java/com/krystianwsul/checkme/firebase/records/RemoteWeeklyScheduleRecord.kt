@@ -9,7 +9,15 @@ class RemoteWeeklyScheduleRecord : RemoteScheduleRecord {
 
     override val startTime by lazy { weeklyScheduleJson.startTime }
 
-    override val endTime get() = weeklyScheduleJson.endTime
+    override var endTime
+        get() = weeklyScheduleJson.endTime
+        set(value) {
+            if (value == weeklyScheduleJson.endTime)
+                return
+
+            weeklyScheduleJson.endTime = value
+            addValue("$key/weeklyScheduleJson/endTime", value)
+        }
 
     val dayOfWeek by lazy { weeklyScheduleJson.dayOfWeek }
 
@@ -22,14 +30,4 @@ class RemoteWeeklyScheduleRecord : RemoteScheduleRecord {
     constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper) {}
 
     constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper) {}
-
-    fun setEndTime(endTime: Long) {
-        check(weeklyScheduleJson.endTime == null)
-
-        if (endTime == weeklyScheduleJson.endTime)
-            return
-
-        weeklyScheduleJson.endTime = endTime
-        addValue("$key/weeklyScheduleJson/endTime", endTime)
-    }
 }

@@ -80,3 +80,12 @@ private fun <T> getNextRange(list: List<T>, shouldSplit: (T, T) -> Boolean): Lis
 }
 
 fun View.setIndent(indent: Int) = setPadding((indent * 48 * context.resources.displayMetrics.density + 0.5f).toInt(), 0, 0, 0)
+
+fun <T> removeFromGetter(getter: () -> List<T>, action: (T) -> Unit) {
+    var list = getter()
+
+    do {
+        action(list.first())
+        list = getter()
+    } while (list.isNotEmpty())
+}

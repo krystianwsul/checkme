@@ -9,7 +9,15 @@ class RemoteSingleScheduleRecord : RemoteScheduleRecord {
 
     override val startTime by lazy { singleScheduleJson.startTime }
 
-    override val endTime get() = singleScheduleJson.endTime
+    override var endTime
+        get() = singleScheduleJson.endTime
+        set(value) {
+            if (value == singleScheduleJson.endTime)
+                return
+
+            singleScheduleJson.endTime = value
+            addValue("$key/singleScheduleJson/endTime", value)
+        }
 
     val year by lazy { singleScheduleJson.year }
 
@@ -26,14 +34,4 @@ class RemoteSingleScheduleRecord : RemoteScheduleRecord {
     constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
 
     constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
-
-    fun setEndTime(endTime: Long) {
-        check(singleScheduleJson.endTime == null)
-
-        if (endTime == singleScheduleJson.endTime)
-            return
-
-        singleScheduleJson.endTime = endTime
-        addValue("$key/singleScheduleJson/endTime", endTime)
-    }
 }

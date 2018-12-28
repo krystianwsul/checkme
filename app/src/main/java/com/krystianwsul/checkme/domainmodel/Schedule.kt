@@ -12,9 +12,9 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
 
     val startTime by lazy { scheduleBridge.startTime }
 
-    protected fun getEndExactTimeStamp() = scheduleBridge.getEndTime()?.let { ExactTimeStamp(it) }
+    protected fun getEndExactTimeStamp() = scheduleBridge.endTime?.let { ExactTimeStamp(it) }
 
-    val endTime get() = scheduleBridge.getEndTime()
+    val endTime get() = scheduleBridge.endTime
 
     val customTimeKey get() = scheduleBridge.customTimeKey
 
@@ -36,7 +36,13 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
         check(current(endExactTimeStamp))
 
-        scheduleBridge.setEndTime(endExactTimeStamp.long)
+        scheduleBridge.endTime = endExactTimeStamp.long
+    }
+
+    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+        check(!current(now))
+
+        scheduleBridge.endTime = null
     }
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -58,4 +64,6 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
         domainFactory.getTaskForce(scheduleBridge.rootTaskKey).deleteSchedule(this)
         scheduleBridge.delete()
     }
+
+    val scheduleId get() = scheduleBridge.scheduleId
 }

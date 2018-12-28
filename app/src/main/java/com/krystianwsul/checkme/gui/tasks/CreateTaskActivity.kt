@@ -65,23 +65,23 @@ class CreateTaskActivity : AbstractActivity() {
 
         fun getCreateIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable) }
 
-        fun getJoinIntent(joinTaskKeys: ArrayList<TaskKey>) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+        fun getJoinIntent(joinTaskKeys: List<TaskKey>) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             check(joinTaskKeys.size > 1)
 
-            putParcelableArrayListExtra(TASK_KEYS_KEY, joinTaskKeys)
+            putParcelableArrayListExtra(TASK_KEYS_KEY, ArrayList(joinTaskKeys))
         }
 
-        fun getJoinIntent(joinTaskKeys: ArrayList<TaskKey>, parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+        fun getJoinIntent(joinTaskKeys: List<TaskKey>, parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             check(joinTaskKeys.size > 1)
 
-            putParcelableArrayListExtra(TASK_KEYS_KEY, joinTaskKeys)
+            putParcelableArrayListExtra(TASK_KEYS_KEY, ArrayList(joinTaskKeys))
             putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable)
         }
 
-        fun getJoinIntent(joinTaskKeys: ArrayList<TaskKey>, scheduleHint: ScheduleHint) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+        fun getJoinIntent(joinTaskKeys: List<TaskKey>, scheduleHint: ScheduleHint) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             check(joinTaskKeys.size > 1)
 
-            putParcelableArrayListExtra(TASK_KEYS_KEY, joinTaskKeys)
+            putParcelableArrayListExtra(TASK_KEYS_KEY, ArrayList(joinTaskKeys))
             putExtra(SCHEDULE_HINT_KEY, scheduleHint)
         }
 

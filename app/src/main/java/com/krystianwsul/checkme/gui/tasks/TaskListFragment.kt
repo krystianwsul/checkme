@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.removeFromGetter
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
@@ -70,10 +71,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             check(!selected.isEmpty())
 
             val taskWrappers = selected.map { it.modelNode as TaskAdapter.TaskWrapper }
-
             val childTaskDatas = taskWrappers.map { it.childTaskData }
-
-            val taskKeys = ArrayList(childTaskDatas.map { it.taskKey })
+            val taskKeys = childTaskDatas.map { it.taskKey }
 
             when (itemId) {
                 R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
@@ -91,23 +90,33 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 R.id.action_task_delete -> {
                     checkNotNull(dataId)
 
-                    var selectedNodes = selected
-                    do {
-                        val treeNode = selectedNodes.first()
-
-                        val taskWrapper = treeNode.modelNode as TaskAdapter.TaskWrapper
+                    removeFromGetter({ treeViewAdapter.selectedNodes }) {
+                        val taskWrapper = it.modelNode as TaskAdapter.TaskWrapper
 
                         taskWrapper.removeFromParent(x)
 
                         decrementSelected(x)
-                        selectedNodes = treeViewAdapter.selectedNodes
-                    } while (selectedNodes.isNotEmpty())
+                    }
 
-                    DomainFactory.getInstance().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                    val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                    taskData!!.childTaskDatas.removeAll(childTaskDatas)
 
                     updateSelectAll()
 
-                    // todo snackbar
+                    taskListListener.showSnackbar(taskKeys.size) {
+                        DomainFactory.getInstance().clearTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskUndoData)
+
+                        taskData!!.childTaskDatas.apply {
+                            addAll(childTaskDatas)
+
+                            if (taskKey != null)
+                                sort()
+                            else
+                                sortDescending()
+                        }
+
+                        initialize()
+                    }
                 }
                 R.id.action_task_add -> {
                     val childTaskData = childTaskDatas.single()
@@ -237,6 +246,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private var query: String = ""
 
     private val initializeDisposable = CompositeDisposable()
+
+    private val taskListListener get() = activity as TaskListListener
 
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(!childTaskDatas.isEmpty())
@@ -724,7 +735,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         fun remove(taskWrapper: TaskAdapter.TaskWrapper, x: TreeViewAdapter.Placeholder)
     }
 
-    data class TaskData(val childTaskDatas: List<ChildTaskData>, val note: String?)
+    data class TaskData(val childTaskDatas: MutableList<ChildTaskData>, val note: String?)
 
     data class ChildTaskData(
             val name: String,
@@ -754,7 +765,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    interface TaskListListener : ActionModeListener {
+    interface TaskListListener : ActionModeListener, SnackbarListener {
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

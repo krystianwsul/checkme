@@ -44,8 +44,8 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
 
     override fun getEndExactTimeStamp() = taskRecord.endTime?.let { ExactTimeStamp(it) }
 
-    override fun setMyEndExactTimeStamp(now: ExactTimeStamp) {
-        taskRecord.endTime = now.long
+    override fun setMyEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp?) {
+        taskRecord.endTime = endExactTimeStamp?.long
     }
 
     override fun getOldestVisible(): Date? {

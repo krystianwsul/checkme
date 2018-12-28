@@ -3,27 +3,32 @@ package com.krystianwsul.checkme.firebase
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.WeeklyScheduleBridge
 import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord
+import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 
-class RemoteWeeklyScheduleBridge(private val domainFactory: DomainFactory, private val mRemoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord) : WeeklyScheduleBridge {
+class RemoteWeeklyScheduleBridge(private val domainFactory: DomainFactory, private val remoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord) : WeeklyScheduleBridge {
 
-    override val daysOfWeek get() = setOf(mRemoteWeeklyScheduleRecord.dayOfWeek)
+    override val daysOfWeek get() = setOf(remoteWeeklyScheduleRecord.dayOfWeek)
 
-    override val customTimeKey get() = mRemoteWeeklyScheduleRecord.run { customTimeId?.let { domainFactory.getCustomTimeKey(projectId, it) } }
+    override val customTimeKey get() = remoteWeeklyScheduleRecord.run { customTimeId?.let { domainFactory.getCustomTimeKey(projectId, it) } }
 
-    override val hour get() = mRemoteWeeklyScheduleRecord.hour
+    override val hour get() = remoteWeeklyScheduleRecord.hour
 
-    override val minute get() = mRemoteWeeklyScheduleRecord.minute
+    override val minute get() = remoteWeeklyScheduleRecord.minute
 
-    override val startTime by lazy { mRemoteWeeklyScheduleRecord.startTime }
+    override val startTime by lazy { remoteWeeklyScheduleRecord.startTime }
 
-    override fun getEndTime() = mRemoteWeeklyScheduleRecord.endTime
+    override var endTime
+        get() = remoteWeeklyScheduleRecord.endTime
+        set(value) {
+            remoteWeeklyScheduleRecord.endTime = value
+        }
 
-    override fun setEndTime(endTime: Long) = mRemoteWeeklyScheduleRecord.setEndTime(endTime)
+    override val rootTaskKey get() = remoteWeeklyScheduleRecord.run { TaskKey(projectId, taskId) }
 
-    override val rootTaskKey get() = mRemoteWeeklyScheduleRecord.run { TaskKey(projectId, taskId) }
+    override fun delete() = remoteWeeklyScheduleRecord.delete()
 
-    override fun delete() = mRemoteWeeklyScheduleRecord.delete()
+    override val remoteCustomTimeKey get() = remoteWeeklyScheduleRecord.run { customTimeId?.let { Pair(projectId, it) } }
 
-    override val remoteCustomTimeKey get() = mRemoteWeeklyScheduleRecord.run { customTimeId?.let { Pair(projectId, it) } }
+    override val scheduleId get() = ScheduleId.Remote(remoteWeeklyScheduleRecord.projectId, remoteWeeklyScheduleRecord.taskId, remoteWeeklyScheduleRecord.id)
 }

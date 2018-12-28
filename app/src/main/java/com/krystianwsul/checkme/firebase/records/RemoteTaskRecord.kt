@@ -82,7 +82,15 @@ class RemoteTaskRecord private constructor(
 
     val startTime get() = taskJson.startTime
 
-    val endTime get() = taskJson.endTime
+    var endTime
+        get() = taskJson.endTime
+        set(value) {
+            if (value == taskJson.endTime)
+                return
+
+            taskJson.endTime = value
+            addValue("$key/endTime", value)
+        }
 
     var note
         get() = taskJson.note
@@ -164,16 +172,6 @@ class RemoteTaskRecord private constructor(
                 }
             }
         }
-    }
-
-    fun setEndTime(endTime: Long) {
-        check(taskJson.endTime == null)
-
-        if (endTime == taskJson.endTime)
-            return
-
-        taskJson.endTime = endTime
-        addValue("$key/endTime", endTime)
     }
 
     private val uuid by lazy { domainFactory.uuid }

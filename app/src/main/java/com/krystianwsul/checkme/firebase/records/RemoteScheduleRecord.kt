@@ -20,7 +20,7 @@ abstract class RemoteScheduleRecord : RemoteRecord {
 
     abstract val startTime: Long
 
-    abstract val endTime: Long?
+    abstract var endTime: Long?
 
     val projectId get() = remoteTaskRecord.projectId
 

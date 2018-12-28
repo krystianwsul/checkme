@@ -23,15 +23,13 @@ class RemoteMonthlyDayScheduleRecord : RemoteScheduleRecord {
 
     override val startTime by lazy { monthlyDayScheduleJson.startTime }
 
-    override val endTime get() = monthlyDayScheduleJson.endTime
+    override var endTime
+        get() = monthlyDayScheduleJson.endTime
+        set(value) {
+            if (value == monthlyDayScheduleJson.endTime)
+                return
 
-    fun setEndTime(endTime: Long) {
-        check(monthlyDayScheduleJson.endTime == null)
-
-        if (endTime == monthlyDayScheduleJson.endTime)
-            return
-
-        monthlyDayScheduleJson.endTime = endTime
-        addValue("$key/monthlyDayScheduleJson/endTime", endTime)
-    }
+            monthlyDayScheduleJson.endTime = value
+            addValue("$key/monthlyDayScheduleJson/endTime", value)
+        }
 }

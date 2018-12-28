@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.MonthlyWeekScheduleBridge
 import com.krystianwsul.checkme.firebase.records.RemoteMonthlyWeekScheduleRecord
+import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 
 class RemoteMonthlyWeekScheduleBridge(private val domainFactory: DomainFactory, private val remoteMonthlyWeekScheduleRecord: RemoteMonthlyWeekScheduleRecord) : MonthlyWeekScheduleBridge {
@@ -29,9 +30,13 @@ class RemoteMonthlyWeekScheduleBridge(private val domainFactory: DomainFactory, 
         Pair(remoteMonthlyWeekScheduleRecord.projectId, it)
     }
 
-    override fun getEndTime() = remoteMonthlyWeekScheduleRecord.endTime
-
-    override fun setEndTime(endTime: Long) = remoteMonthlyWeekScheduleRecord.setEndTime(endTime)
+    override var endTime
+        get() = remoteMonthlyWeekScheduleRecord.endTime
+        set(value) {
+            remoteMonthlyWeekScheduleRecord.endTime = value
+        }
 
     override fun delete() = remoteMonthlyWeekScheduleRecord.delete()
+
+    override val scheduleId get() = ScheduleId.Remote(remoteMonthlyWeekScheduleRecord.projectId, remoteMonthlyWeekScheduleRecord.taskId, remoteMonthlyWeekScheduleRecord.id)
 }

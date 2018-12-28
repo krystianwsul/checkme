@@ -73,7 +73,9 @@ class RemoteTask(
 
     override fun getEndExactTimeStamp() = remoteTaskRecord.endTime?.let { ExactTimeStamp(it) }
 
-    override fun setMyEndExactTimeStamp(now: ExactTimeStamp) = remoteTaskRecord.setEndTime(now.long)
+    override fun setMyEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp?) {
+        remoteTaskRecord.endTime = endExactTimeStamp?.long
+    }
 
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?): Task {
         val taskJson = TaskJson(name, now.long, null, null, null, null, note)

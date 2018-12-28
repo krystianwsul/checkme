@@ -26,10 +26,7 @@ import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManger
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskHierarchyKey
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.*
@@ -749,7 +746,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 }
                 .sorted()
 
-        return ShowTaskViewModel.Data(task.name, task.getScheduleText(now), TaskListFragment.TaskData(childTaskDatas, task.note), !task.existingInstances.isEmpty())
+        return ShowTaskViewModel.Data(task.name, task.getScheduleText(now), TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note), !task.existingInstances.isEmpty())
     }
 
     @Synchronized
@@ -1233,7 +1230,9 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val task = getTaskForce(taskKey)
         check(task.current(now))
 
-        task.setEndExactTimeStamp(now)
+        val taskUndoData = TaskUndoData()
+
+        task.setEndExactTimeStamp(now, taskUndoData)
 
         updateNotifications(now)
 
@@ -1295,7 +1294,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
-    fun setTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskKeys: ArrayList<TaskKey>) {
+    fun setTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskKeys: List<TaskKey>): TaskUndoData {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
         check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
@@ -1306,7 +1305,65 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val tasks = taskKeys.map { getTaskForce(it) }
         check(tasks.all { it.current(now) })
 
-        tasks.forEach { it.setEndExactTimeStamp(now) }
+        val taskUndoData = TaskUndoData()
+
+        tasks.forEach { it.setEndExactTimeStamp(now, taskUndoData) }
+
+        val remoteProjects = tasks.mapNotNull { it.remoteNullableProject }.toSet()
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(remoteProjects)
+
+        return taskUndoData
+    }
+
+    @Synchronized
+    fun clearTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskUndoData: TaskUndoData) {
+        MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
+        check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
+
+        val now = ExactTimeStamp.now
+
+        val tasks = taskUndoData.taskKeys.map { getTaskForce(it) }
+
+        tasks.forEach {
+            check(!it.current(now))
+
+            it.clearEndExactTimeStamp(now)
+        }
+
+        val localTaskHierarchyKeys = taskUndoData.taskHierarchyKeys.filterIsInstance<TaskHierarchyKey.LocalTaskHierarchyKey>()
+        val remoteTaskHierarchyKeys = taskUndoData.taskHierarchyKeys.filterIsInstance<TaskHierarchyKey.RemoteTaskHierarchyKey>()
+
+        val localScheduleIds = taskUndoData.scheduleIds.filterIsInstance<ScheduleId.Local>()
+        val remoteScheduleIds = taskUndoData.scheduleIds.filterIsInstance<ScheduleId.Remote>()
+
+        localTaskHierarchyKeys.map { localFactory.getTaskHierarchy(it) }.forEach {
+            check(!it.current(now))
+
+            it.clearEndExactTimeStamp(now)
+        }
+
+        remoteTaskHierarchyKeys.map { remoteProjectFactory!!.getTaskHierarchy(it) }.forEach {
+            check(!it.current(now))
+
+            it.clearEndExactTimeStamp(now)
+        }
+
+        localScheduleIds.map { localFactory.getSchedule(it) }.forEach {
+            check(!it.current(now))
+
+            it.clearEndExactTimeStamp(now)
+        }
+
+        remoteScheduleIds.map { remoteProjectFactory!!.getSchedule(it) }.forEach {
+            check(!it.current(now))
+
+            it.clearEndExactTimeStamp(now)
+        }
 
         val remoteProjects = tasks.mapNotNull { it.remoteNullableProject }.toSet()
 
@@ -2451,4 +2508,11 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String) = localFactory.getLocalCustomTime(remoteProjectId, remoteCustomTimeId)?.customTimeKey
             ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)
+
+    class TaskUndoData {
+
+        val taskKeys = mutableSetOf<TaskKey>()
+        val scheduleIds = mutableSetOf<ScheduleId>()
+        val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
+    }
 }

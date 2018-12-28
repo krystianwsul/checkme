@@ -24,10 +24,7 @@ import com.krystianwsul.checkme.gui.instances.EditInstancesActivity
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.treeadapter.TreeModelAdapter
@@ -174,21 +171,15 @@ class GroupListFragment @JvmOverloads constructor(
                     activity.startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
                 }
                 R.id.action_group_delete_task -> {
-                    val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
+                    val taskKeys = instanceDatas.map { it.InstanceKey.taskKey }
                     check(taskKeys.isNotEmpty())
                     check(instanceDatas.all { it.TaskCurrent })
 
-                    var selectedTreeNodes = treeViewAdapter.selectedNodes
-                    check(selectedTreeNodes.isNotEmpty())
-
-                    do {
-                        val treeNode = selectedTreeNodes.first()
-
+                    removeFromGetter({ treeViewAdapter.selectedNodes }) { treeNode ->
                         recursiveDelete(treeNode, true, x)
 
                         decrementSelected(x)
-                        selectedTreeNodes = treeViewAdapter.selectedNodes
-                    } while (selectedTreeNodes.isNotEmpty())
+                    }
 
                     DomainFactory.getInstance().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).dataId, SaveService.Source.GUI, taskKeys)
 

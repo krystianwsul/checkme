@@ -36,11 +36,17 @@ object DatabaseWrapper {
 
     fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 
-    fun addFriend(userInfo: UserInfo, friendUserData: UserData) {
+    fun addFriend(userInfo: UserInfo, friendKey: String) {
         val myKey = userInfo.key
-        val friendKey = friendUserData.key
 
         rootReference.child("$USERS_KEY/$friendKey/friendOf/$myKey").setValue(true)
+    }
+
+    fun addFriends(userInfo: UserInfo, friendKeys: Set<String>) {
+        val myKey = userInfo.key
+
+        val values = friendKeys.map { "$it/friendOf/$myKey" to true }.toMap()
+        rootReference.child(USERS_KEY).updateChildren(values)
     }
 
     fun getFriendsQuery(userInfo: UserInfo): Query {

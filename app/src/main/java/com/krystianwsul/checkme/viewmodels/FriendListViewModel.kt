@@ -6,7 +6,7 @@ class FriendListViewModel : DomainViewModel<FriendListViewModel.Data>() {
 
     override fun getData() = kotlinDomainFactory.getFriendListData()
 
-    data class Data(val userListDatas: Set<UserListData>) : DomainData()
+    data class Data(val userListDatas: MutableSet<UserListData>) : DomainData()
 
     data class UserListData(val name: String, val email: String, val id: String) {
 

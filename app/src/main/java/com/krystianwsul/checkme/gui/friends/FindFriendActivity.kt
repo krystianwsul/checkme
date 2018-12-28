@@ -3,25 +3,30 @@ package com.krystianwsul.checkme.gui.friends
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.jakewharton.rxbinding2.view.keys
+import com.jakewharton.rxbinding2.widget.editorActionEvents
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.UserData
+import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.utils.animateVisibility
+import io.reactivex.functions.Predicate
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_find_friend.*
 
-class FindFriendActivity : AppCompatActivity() {
+class FindFriendActivity : AbstractActivity() {
 
     companion object {
 
@@ -57,18 +62,30 @@ class FindFriendActivity : AppCompatActivity() {
 
         setSupportActionBar(findFriendToolbar)
 
-        findFriendEmail.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                startSearch()
-                return@setOnEditorActionListener true
-            }
-            false
+        findFriendEmail.apply {
+            createDisposable += editorActionEvents(Predicate {
+                if (it.actionId() == EditorInfo.IME_ACTION_SEARCH) {
+                    startSearch()
+                    true
+                } else {
+                    false
+                }
+            }).subscribe()
+
+            createDisposable += keys(Predicate {
+                if (it.action == KeyEvent.ACTION_DOWN && it.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    startSearch()
+                    true
+                } else {
+                    false
+                }
+            }).subscribe()
         }
 
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            DatabaseWrapper.addFriend(DomainFactory.getInstance().userInfo!!, userData!!)
+            DatabaseWrapper.addFriend(DomainFactory.getInstance().userInfo!!, userData!!.key)
 
             finish()
         }

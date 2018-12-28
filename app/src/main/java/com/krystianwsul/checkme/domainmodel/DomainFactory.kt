@@ -335,7 +335,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         }
     }
 
-    @Synchronized
+    // @Synchronized deadlock with RemoteFriendFactory
     fun getIsConnected(): Boolean = remoteProjectFactory != null
 
     @Synchronized
@@ -787,7 +787,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         val userListDatas = RemoteFriendFactory.getFriends()
                 .map { FriendListViewModel.UserListData(it.name, it.email, it.id) }
-                .toSet()
+                .toMutableSet()
 
         return FriendListViewModel.Data(userListDatas)
     }

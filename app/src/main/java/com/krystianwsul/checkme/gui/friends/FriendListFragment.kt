@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.MainActivity
@@ -61,8 +62,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
                     (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
 
                     updateSelectAll()
-
-                    // todo snackbar
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -96,6 +95,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
     private var friendListFab: FloatingActionButton? = null
 
     private lateinit var friendListViewModel: FriendListViewModel
+
+    private val mainActivity get() = activity as MainActivity
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
 
@@ -232,9 +233,20 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             selectedUserDataWrappers.forEach { userDataWrappers.remove(it) }
 
-            DomainFactory.getInstance().removeFriends(selectedUserDataWrappers.asSequence()
-                    .map { it.userListData.id }
-                    .toSet())
+            val userListDatas = selectedUserDataWrappers.map { it.userListData }
+            data!!.userListDatas.removeAll(userListDatas)
+
+            val friendIds = userListDatas.map { it.id }.toSet()
+
+            DomainFactory.getInstance().removeFriends(friendIds)
+
+            mainActivity.showSnackbar(userListDatas.size) {
+                onLoadFinished(data!!.copy(userListDatas = data!!.userListDatas
+                        .toMutableSet()
+                        .apply { addAll(userListDatas) }))
+
+                DatabaseWrapper.addFriends(DomainFactory.getInstance().userInfo!!, friendIds)
+            }
         }
     }
 

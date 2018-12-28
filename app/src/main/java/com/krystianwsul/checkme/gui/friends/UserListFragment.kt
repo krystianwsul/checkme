@@ -29,7 +29,6 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     companion object {
 
-        private const val PROJECT_ID_KEY = "projectId"
         private const val SAVE_STATE_KEY = "saveState"
         private const val FRIEND_PICKER_TAG = "friendPicker"
 
@@ -78,17 +77,6 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private var friendListFab: FloatingActionButton? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            check(it.containsKey(PROJECT_ID_KEY))
-
-            projectId = it.getString(PROJECT_ID_KEY)!!
-            check(projectId.isNullOrEmpty())
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
 

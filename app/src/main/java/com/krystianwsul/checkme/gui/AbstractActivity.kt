@@ -4,9 +4,22 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import io.reactivex.disposables.CompositeDisposable
 
 abstract class AbstractActivity : AppCompatActivity() {
+
+    companion object {
+
+        private var snackbarData: SnackbarData? = null
+
+        fun setSnackbar(snackbarData: SnackbarData) {
+            check(this.snackbarData == null)
+
+            this.snackbarData = snackbarData
+        }
+    }
 
     protected val createDisposable = CompositeDisposable()
 
@@ -30,6 +43,11 @@ abstract class AbstractActivity : AppCompatActivity() {
         MyCrashlytics.logMethod(this)
 
         super.onResume()
+
+        snackbarData?.let {
+            (this as SnackbarListener).showSnackbar(1) { it.undo() }
+        }
+        snackbarData = null
     }
 
     override fun onPause() {
@@ -50,5 +68,15 @@ abstract class AbstractActivity : AppCompatActivity() {
         createDisposable.dispose()
 
         super.onDestroy()
+    }
+
+    interface SnackbarData {
+
+        fun undo()
+    }
+
+    class TaskSnackbarData(private val taskUndoData: DomainFactory.TaskUndoData) : SnackbarData {
+
+        override fun undo() = DomainFactory.getInstance().clearTaskEndTimeStamps(0, SaveService.Source.GUI, taskUndoData)
     }
 }

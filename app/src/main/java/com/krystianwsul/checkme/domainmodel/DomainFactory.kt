@@ -1221,7 +1221,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
-    fun setTaskEndTimeStamp(dataId: Int, source: SaveService.Source, taskKey: TaskKey) {
+    fun setTaskEndTimeStamp(dataId: Int, source: SaveService.Source, taskKey: TaskKey): TaskUndoData {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp")
         check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
@@ -1239,6 +1239,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         save(dataId, source)
 
         notifyCloud(task.remoteNullableProject)
+
+        return taskUndoData
     }
 
     @Synchronized

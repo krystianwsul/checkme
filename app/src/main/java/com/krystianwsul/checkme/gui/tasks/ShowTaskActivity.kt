@@ -30,6 +30,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         const val TASK_KEY_KEY = "taskKey"
 
         const val REQUEST_EDIT_TASK = 1
+        const val RESULT_DELETE = 65
 
         fun newIntent(taskKey: TaskKey) = Intent(MyApplication.instance, ShowTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
     }
@@ -126,11 +127,13 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
             R.id.task_menu_delete -> {
                 showTaskViewModel.stop()
 
-                DomainFactory.getInstance().setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
+                val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
+
+                setResult(RESULT_DELETE)
 
                 finish()
 
-                // todo snackbar
+                setSnackbar(TaskSnackbarData(taskUndoData))
             }
             R.id.task_menu_select_all -> {
                 taskListFragment.treeViewAdapter.updateDisplayedNodes {

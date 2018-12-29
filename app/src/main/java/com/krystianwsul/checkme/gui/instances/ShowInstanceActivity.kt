@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBar
@@ -173,6 +174,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         NotificationWrapper.instance.cleanGroup(null)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        Log.e("asdf", "test onResume " + this.javaClass.simpleName)
+    }
+
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         if (data.instanceData == null) {
             finish()
@@ -228,6 +235,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
 
             instanceKey = InstanceKey(taskKey, instanceKey.scheduleKey.scheduleDate, TimePair(instanceKey.scheduleKey.scheduleTimePair.customTimeKey, instanceKey.scheduleKey.scheduleTimePair.hourMinute))
+        } else if (resultCode == ShowTaskActivity.RESULT_DELETE) {
+            if (!instanceData!!.exists) {
+                finish()
+                return
+            }
         }
 
         showInstanceViewModel.start(instanceKey)

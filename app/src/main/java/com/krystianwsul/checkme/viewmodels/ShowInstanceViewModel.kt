@@ -24,7 +24,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             var done: Boolean,
             var taskCurrent: Boolean,
             val isRootInstance: Boolean,
-            val exists: Boolean,
+            var exists: Boolean,
             val dataWrapper: GroupListFragment.DataWrapper) {
 
         init {

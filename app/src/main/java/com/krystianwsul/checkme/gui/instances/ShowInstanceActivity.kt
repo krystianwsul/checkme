@@ -224,7 +224,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     private fun setDone(done: Boolean) {
         DomainFactory.getInstance().setInstanceDone(dataId, SaveService.Source.GUI, instanceKey, done)
-        instanceData!!.done = done
+
+        instanceData!!.let {
+            it.done = done
+
+            if (done)
+                it.exists = true
+        }
 
         invalidateOptionsMenu()
     }

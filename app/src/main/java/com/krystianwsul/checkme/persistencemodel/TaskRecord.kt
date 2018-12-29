@@ -62,9 +62,8 @@ class TaskRecord(created: Boolean, val id: Int, _name: String, val startTime: Lo
         changed = true
     }
 
-    var endTime by observable(_endTime) { _, oldValue, newValue ->
-        check(oldValue == null)
-        check(startTime <= newValue!!)
+    var endTime by observable(_endTime) { _, _, newValue ->
+        newValue?.let { check(startTime <= it) }
 
         changed = true
     }

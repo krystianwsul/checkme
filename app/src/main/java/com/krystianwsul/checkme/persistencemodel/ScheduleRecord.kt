@@ -44,9 +44,8 @@ class ScheduleRecord(created: Boolean, val id: Int, val rootTaskId: Int, val sta
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = Record.getMaxId(sqLiteDatabase, TABLE_SCHEDULES, COLUMN_ID)
     }
 
-    var endTime by Delegates.observable(_endTime) { _, oldValue, newValue ->
-        check(oldValue == null)
-        check(startTime <= newValue!!)
+    var endTime by Delegates.observable(_endTime) { _, _, newValue ->
+        newValue?.let { check(startTime <= it) }
 
         changed = true
     }

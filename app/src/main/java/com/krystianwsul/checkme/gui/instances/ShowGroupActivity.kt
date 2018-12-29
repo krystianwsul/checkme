@@ -39,6 +39,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
 
     private lateinit var showGroupViewModel: ShowGroupViewModel
 
+    override val snackbarParent get() = showGroupCoordinator!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_group)

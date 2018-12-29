@@ -35,6 +35,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
 
     private lateinit var showTaskInstancesViewModel: ShowTaskInstancesViewModel
 
+    override val snackbarParent get() = showNotificationGroupCoordinator!!
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_notification_group)

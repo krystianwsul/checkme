@@ -58,6 +58,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     private lateinit var showInstanceViewModel: ShowInstanceViewModel
 
+    override val snackbarParent get() = showInstanceCoordinator!!
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.show_instance_menu, menu)
         return true

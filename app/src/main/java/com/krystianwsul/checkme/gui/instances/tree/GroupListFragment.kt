@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.common.collect.HashMultimap
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
@@ -175,17 +176,51 @@ class GroupListFragment @JvmOverloads constructor(
                     check(taskKeys.isNotEmpty())
                     check(instanceDatas.all { it.TaskCurrent })
 
+                    val undoAll = UndoAll()
+
                     removeFromGetter({ treeViewAdapter.selectedNodes }) { treeNode ->
-                        recursiveDelete(treeNode, true, x)
+                        recursiveDelete(treeNode, true, x, undoAll)
 
                         decrementSelected(x)
                     }
 
-                    DomainFactory.getInstance().setTaskEndTimeStamps((treeViewAdapter.treeModelAdapter as GroupAdapter).dataId, SaveService.Source.GUI, taskKeys)
+                    val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
+                    val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys)
 
                     updateSelectAll()
 
-                    // todo snackbar
+                    groupListListener.showSnackbar(instanceDatas.size) {
+                        fun InstanceData.flatten() = listOf(
+                                listOf(this),
+                                children.values).flatten()
+
+                        val allInstanceDatas = parameters.dataWrapper
+                                .instanceDatas
+                                .map { it.value.flatten() }
+                                .flatten()
+                                .associateBy { it.InstanceKey }
+
+                        undoAll.undos.forEach {
+                            allInstanceDatas[it.key]!!.let { instanceData ->
+                                instanceData.TaskCurrent = it.value.taskCurrent
+                                instanceData.IsRootTask = it.value.isRootTask
+                            }
+                        }
+
+                        parameters.dataWrapper
+                                .instanceDatas
+                                .putAll(undoAll.removedRoots.map { it.InstanceKey to it })
+
+                        undoAll.removedChildren
+                                .asMap()
+                                .forEach { (instanceKey, instanceDatas) ->
+                                    allInstanceDatas[instanceKey]!!.children.putAll(instanceDatas.map { it.InstanceKey to it })
+                                }
+
+                        initialize()
+
+                        DomainFactory.getInstance().clearTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskUndoData)
+                    }
                 }
                 R.id.action_group_add_task -> {
                     val instanceData = instanceDatas.single()
@@ -299,32 +334,36 @@ class GroupListFragment @JvmOverloads constructor(
             }
         }
 
-        private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: TreeViewAdapter.Placeholder) {
+        private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: TreeViewAdapter.Placeholder, undoAll: UndoAll) {
             treeNode.modelNode.let {
                 val instanceData = when (it) {
                     is NotDoneGroupNode -> it.singleInstanceData
                     is NotDoneGroupNode.NotDoneInstanceNode -> it.instanceData
                     is DoneInstanceNode -> it.instanceData
                     is DividerNode -> {
-                        treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
+                        treeNode.allChildren.forEach { recursiveDelete(it, false, x, undoAll) }
 
                         return
                     }
                     else -> throw IllegalArgumentException()
                 }
 
-                if (instanceData.Exists || !root) {
+                if (!root || instanceData.Exists) {
                     check(instanceData.TaskCurrent)
                     checkNotNull(instanceData.IsRootTask)
+
+                    check(!undoAll.undos.containsKey(instanceData.InstanceKey))
+
+                    undoAll.undos[instanceData.InstanceKey] = Undo(instanceData.TaskCurrent, instanceData.IsRootTask!!)
 
                     instanceData.TaskCurrent = false
                     instanceData.IsRootTask = null
 
                     treeNode.unselect(x)
 
-                    treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
+                    treeNode.allChildren.forEach { recursiveDelete(it, false, x, undoAll) }
                 } else {
-                    instanceData.instanceDataParent.remove(instanceData.InstanceKey)
+                    instanceData.instanceDataParent.remove(instanceData, undoAll)
 
                     when (it) {
                         is NotDoneGroupNode -> it.removeFromParent(x)
@@ -459,6 +498,8 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
     private val compositeDisposable = CompositeDisposable()
+
+    private val groupListListener get() = activity as GroupListListener
 
     private fun getShareData(instanceDatas: Collection<InstanceData>): String {
         check(instanceDatas.isNotEmpty())
@@ -730,7 +771,7 @@ class GroupListFragment @JvmOverloads constructor(
             val selectedInstances: List<InstanceKey> = listOf(),
             val selectedGroups: List<Long> = listOf()) : Parcelable
 
-    interface GroupListListener {
+    interface GroupListListener : SnackbarListener {
 
         fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter)
 
@@ -746,10 +787,13 @@ class GroupListFragment @JvmOverloads constructor(
             val note: String?,
             val instanceDatas: MutableMap<InstanceKey, InstanceData>) : InstanceDataParent {
 
-        override fun remove(instanceKey: InstanceKey) {
+        override fun remove(instanceData: InstanceData, undoAll: UndoAll) {
+            val instanceKey = instanceData.InstanceKey
             check(instanceDatas.containsKey(instanceKey))
 
             instanceDatas.remove(instanceKey)
+
+            undoAll.removedRoots.add(instanceData)
         }
     }
 
@@ -775,10 +819,13 @@ class GroupListFragment @JvmOverloads constructor(
             check(name.isNotEmpty())
         }
 
-        override fun remove(instanceKey: InstanceKey) {
+        override fun remove(instanceData: InstanceData, undoAll: UndoAll) {
+            val instanceKey = instanceData.InstanceKey
             check(children.containsKey(instanceKey))
 
             children.remove(instanceKey)
+
+            undoAll.removedChildren.put(InstanceKey, instanceData)
         }
 
         override fun compareTo(other: InstanceData): Int {
@@ -808,7 +855,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     interface InstanceDataParent {
 
-        fun remove(instanceKey: InstanceKey)
+        fun remove(instanceData: InstanceData, undoAll: UndoAll)
     }
 
     data class TaskData(val taskKey: TaskKey, val Name: String, val children: List<TaskData>, val mStartExactTimeStamp: ExactTimeStamp, val mNote: String?) {
@@ -829,5 +876,15 @@ class GroupListFragment @JvmOverloads constructor(
         class InstanceKeys(dataId: Int, dataWrapper: DataWrapper) : Parameters(dataId, dataWrapper)
 
         class TaskKey(dataId: Int, dataWrapper: DataWrapper, val taskKey: com.krystianwsul.checkme.utils.TaskKey) : Parameters(dataId, dataWrapper)
+    }
+
+    class Undo(val taskCurrent: Boolean, val isRootTask: Boolean)
+
+    class UndoAll {
+
+        val undos = mutableMapOf<InstanceKey, Undo>()
+
+        val removedChildren = HashMultimap.create<InstanceKey, InstanceData>()!!
+        val removedRoots = mutableListOf<InstanceData>()
     }
 }

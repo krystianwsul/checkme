@@ -12,12 +12,12 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     companion object {
 
-        private var snackbarData: SnackbarData? = null
+        private var taskUndoData: DomainFactory.TaskUndoData? = null
 
-        fun setSnackbar(snackbarData: SnackbarData) {
-            check(this.snackbarData == null)
+        fun setSnackbar(taskUndoData: DomainFactory.TaskUndoData) {
+            check(this.taskUndoData == null)
 
-            this.snackbarData = snackbarData
+            this.taskUndoData = taskUndoData
         }
     }
 
@@ -44,10 +44,12 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         super.onResume()
 
-        snackbarData?.let {
-            (this as SnackbarListener).showSnackbar(1) { it.undo() }
+        taskUndoData?.let {
+            (this as SnackbarListener).showSnackbar(1) {
+                DomainFactory.getInstance().clearTaskEndTimeStamps(0, SaveService.Source.GUI, it)
+            }
         }
-        snackbarData = null
+        taskUndoData = null
     }
 
     override fun onPause() {
@@ -68,15 +70,5 @@ abstract class AbstractActivity : AppCompatActivity() {
         createDisposable.dispose()
 
         super.onDestroy()
-    }
-
-    interface SnackbarData {
-
-        fun undo()
-    }
-
-    class TaskSnackbarData(private val taskUndoData: DomainFactory.TaskUndoData) : SnackbarData {
-
-        override fun undo() = DomainFactory.getInstance().clearTaskEndTimeStamps(0, SaveService.Source.GUI, taskUndoData)
     }
 }

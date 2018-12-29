@@ -22,7 +22,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             val name: String,
             val displayText: String?,
             var done: Boolean,
-            val taskCurrent: Boolean,
+            var taskCurrent: Boolean,
             val isRootInstance: Boolean,
             val exists: Boolean,
             val dataWrapper: GroupListFragment.DataWrapper) {

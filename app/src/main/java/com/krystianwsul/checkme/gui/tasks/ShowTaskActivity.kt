@@ -133,7 +133,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
                 finish()
 
-                setSnackbar(TaskSnackbarData(taskUndoData))
+                setSnackbar(taskUndoData)
             }
             R.id.task_menu_select_all -> {
                 taskListFragment.treeViewAdapter.updateDisplayedNodes {

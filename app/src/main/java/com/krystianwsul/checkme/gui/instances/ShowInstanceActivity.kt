@@ -128,12 +128,25 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     if (!it.exists)
                         showInstanceViewModel.stop()
 
-                    DomainFactory.getInstance().setTaskEndTimeStamp(dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                    val todoTaskData = DomainFactory.getInstance().setTaskEndTimeStamp(dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
-                    if (!it.exists)
+                    if (it.exists) {
+                        instanceData!!.taskCurrent = false
+
+                        invalidateOptionsMenu()
+
+                        showSnackbar(1) {
+                            instanceData!!.taskCurrent = true
+
+                            invalidateOptionsMenu()
+
+                            DomainFactory.getInstance().clearTaskEndTimeStamps(dataId, SaveService.Source.GUI, todoTaskData)
+                        }
+                    } else {
+                        setSnackbar(todoTaskData)
+
                         finish()
-
-                    // todo snackbar
+                    }
                 }
                 R.id.instance_menu_select_all -> {
                     groupListFragment.treeViewAdapter.updateDisplayedNodes {

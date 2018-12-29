@@ -50,8 +50,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     private lateinit var instanceKey: InstanceKey
 
-    private var dataId = -1
-    private var instanceData: ShowInstanceViewModel.InstanceData? = null
+    private var data: ShowInstanceViewModel.Data? = null
 
     private var first = false
 
@@ -68,13 +67,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.run {
-            findItem(R.id.instance_menu_check).isVisible = instanceData?.done == false
-            findItem(R.id.instance_menu_uncheck).isVisible = instanceData?.done == true
-            findItem(R.id.instance_menu_edit_instance).isVisible = instanceData?.run { !done && isRootInstance } == true
-            findItem(R.id.instance_menu_share).isVisible = instanceData != null
-            findItem(R.id.instance_menu_show_task).isVisible = instanceData?.taskCurrent == true
-            findItem(R.id.instance_menu_edit_task).isVisible = instanceData?.taskCurrent == true
-            findItem(R.id.instance_menu_delete_task).isVisible = instanceData?.taskCurrent == true
+            findItem(R.id.instance_menu_check).isVisible = data?.done == false
+            findItem(R.id.instance_menu_uncheck).isVisible = data?.done == true
+            findItem(R.id.instance_menu_edit_instance).isVisible = data?.run { !done && isRootInstance } == true
+            findItem(R.id.instance_menu_share).isVisible = data != null
+            findItem(R.id.instance_menu_show_task).isVisible = data?.taskCurrent == true
+            findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
+            findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
         }
 
@@ -82,7 +81,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        instanceData!!.let {
+        data!!.let {
             when (item.itemId) {
                 R.id.instance_menu_check -> {
                     if (!it.done)
@@ -128,19 +127,19 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     if (!it.exists)
                         showInstanceViewModel.stop()
 
-                    val todoTaskData = DomainFactory.getInstance().setTaskEndTimeStamp(dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                    val todoTaskData = DomainFactory.getInstance().setTaskEndTimeStamp(it.dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
                     if (it.exists) {
-                        instanceData!!.taskCurrent = false
+                        it.taskCurrent = false
 
                         invalidateOptionsMenu()
 
                         showSnackbar(1) {
-                            instanceData!!.taskCurrent = true
+                            it.taskCurrent = true
 
                             invalidateOptionsMenu()
 
-                            DomainFactory.getInstance().clearTaskEndTimeStamps(dataId, SaveService.Source.GUI, todoTaskData)
+                            DomainFactory.getInstance().clearTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, todoTaskData)
                         }
                     } else {
                         setSnackbar(todoTaskData)
@@ -194,38 +193,32 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
-        if (data.instanceData == null) {
-            finish()
-            return
+        this.data = data
+
+        if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
+            first = false
+
+            DomainFactory.getInstance().let {
+                val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
+
+                it.setInstanceNotified(data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
+            }
         }
 
-        dataId = data.dataId
-        instanceData = data.instanceData.also {
-            if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
-                first = false
-
-                DomainFactory.getInstance().let {
-                    val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
-
-                    it.setInstanceNotified(data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
-                }
-            }
-
-            actionBar.run {
-                title = it.name
-                subtitle = it.displayText
-            }
-
-            invalidateOptionsMenu()
-
-            groupListFragment.setInstanceKey(instanceKey, data.dataId, it.dataWrapper)
+        actionBar.run {
+            title = data.name
+            subtitle = data.displayText
         }
+
+        invalidateOptionsMenu()
+
+        groupListFragment.setInstanceKey(instanceKey, data.dataId, data.dataWrapper)
     }
 
     private fun setDone(done: Boolean) {
-        DomainFactory.getInstance().setInstanceDone(dataId, SaveService.Source.GUI, instanceKey, done)
+        DomainFactory.getInstance().setInstanceDone(data!!.dataId, SaveService.Source.GUI, instanceKey, done)
 
-        instanceData!!.let {
+        data!!.let {
             it.done = done
 
             if (done)
@@ -255,7 +248,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
             instanceKey = InstanceKey(taskKey, instanceKey.scheduleKey.scheduleDate, TimePair(instanceKey.scheduleKey.scheduleTimePair.customTimeKey, instanceKey.scheduleKey.scheduleTimePair.hourMinute))
         } else if (resultCode == ShowTaskActivity.RESULT_DELETE) {
-            if (!instanceData!!.exists) {
+            if (!this.data!!.exists) {
                 finish()
                 return
             }

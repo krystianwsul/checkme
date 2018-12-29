@@ -598,13 +598,12 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     fun getShowInstanceData(instanceKey: InstanceKey): ShowInstanceViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowInstanceData")
 
-        val task = getTaskIfPresent(instanceKey.taskKey)
-                ?: return ShowInstanceViewModel.Data(null)
+        val task = getTaskForce(instanceKey.taskKey)
 
         val now = ExactTimeStamp.now
 
         val instance = getInstance(instanceKey)
-        return if (!task.current(now) && !instance.exists()) ShowInstanceViewModel.Data(null) else ShowInstanceViewModel.Data(ShowInstanceViewModel.InstanceData(instance.name, instance.getDisplayText(now), instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now)))
+        return ShowInstanceViewModel.Data(instance.name, instance.getDisplayText(now), instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now))
     }
 
     fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {

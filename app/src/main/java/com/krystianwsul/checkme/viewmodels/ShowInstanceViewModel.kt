@@ -16,16 +16,14 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
 
     override fun getData() = kotlinDomainFactory.getShowInstanceData(instanceKey)
 
-    data class Data(val instanceData: InstanceData?) : DomainData()
-
-    data class InstanceData(
+    data class Data(
             val name: String,
             val displayText: String?,
             var done: Boolean,
             var taskCurrent: Boolean,
             val isRootInstance: Boolean,
             var exists: Boolean,
-            val dataWrapper: GroupListFragment.DataWrapper) {
+            val dataWrapper: GroupListFragment.DataWrapper) : DomainData() {
 
         init {
             check(name.isNotEmpty())

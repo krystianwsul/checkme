@@ -62,9 +62,7 @@ class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
                 }
             }
 
-            getTreeViewAdapter().getNode(viewHolder.adapterPosition)
-                    .modelNode
-                    .onBindViewHolder(viewHolder)
+            getTreeViewAdapter().notifyItemChanged(viewHolder.adapterPosition)
 
             startPosition = null
             endPosition = null

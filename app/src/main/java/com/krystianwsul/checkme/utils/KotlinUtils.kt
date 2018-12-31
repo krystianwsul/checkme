@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.utils
 
+import android.content.Context
 import android.view.View
 import android.view.ViewTreeObserver
 import com.krystianwsul.checkme.MyApplication
@@ -86,4 +87,9 @@ fun <T> removeFromGetter(getter: () -> List<T>, action: (T) -> Unit) {
         action(list.first())
         list = getter()
     } while (list.isNotEmpty())
+}
+
+fun Context.dpToPx(dp: Int): Float {
+    val density = resources.displayMetrics.density
+    return dp * density
 }

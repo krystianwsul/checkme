@@ -42,6 +42,13 @@ class TreeViewAdapter(
         return treeNodeCollection!!.displayedSize + if (showPadding) 1 else 0
     }
 
+    fun getNode(position: Int): TreeNode {
+        if (treeNodeCollection == null)
+            throw SetTreeNodeCollectionNotCalledException()
+
+        return treeNodeCollection!!.getNode(position)
+    }
+
     fun hasActionMode() = treeModelAdapter.hasActionMode
 
     fun incrementSelected(x: TreeViewAdapter.Placeholder) = treeModelAdapter.incrementSelected(x)

@@ -1,8 +1,10 @@
 package com.krystianwsul.checkme.gui
 
+import android.graphics.Canvas
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.treeadapter.Sortable
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
@@ -60,6 +62,10 @@ class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
                 }
             }
 
+            getTreeViewAdapter().getNode(viewHolder.adapterPosition)
+                    .modelNode
+                    .onBindViewHolder(viewHolder)
+
             startPosition = null
             endPosition = null
 
@@ -75,6 +81,16 @@ class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
             val position = target.adapterPosition.let { if (it == treeNodeCollection.displayedSize) it - 1 else it }
 
             return treeNodeCollection.getNode(position).modelNode is Sortable
+        }
+
+        override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+
+            viewHolder.itemView.apply {
+                translationX = dX
+                translationY = dY
+
+                elevation = if (isCurrentlyActive) context.dpToPx(6) else 0f
+            }
         }
     }
 }

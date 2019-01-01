@@ -1,8 +1,10 @@
 package com.krystianwsul.checkme.gui
 
+import android.animation.ValueAnimator
 import android.graphics.Canvas
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.utils.dpToPx
 import com.krystianwsul.treeadapter.Sortable
@@ -23,10 +25,22 @@ class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
 
     abstract class MyCallback : SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
 
+        companion object {
+
+            val animationTime by lazy {
+                MyApplication.instance
+                        .resources
+                        .getInteger(android.R.integer.config_shortAnimTime)
+                        .toLong()
+            }
+        }
+
         var startPosition: Int? = null
 
         var endPosition: Int? = null
             private set
+
+        private var valueAnimator: ValueAnimator? = null
 
         override fun isLongPressDragEnabled() = false
 
@@ -87,7 +101,15 @@ class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
                 translationX = dX
                 translationY = dY
 
-                elevation = if (isCurrentlyActive) context.dpToPx(6) else 0f
+                valueAnimator?.cancel()
+
+                valueAnimator = ValueAnimator.ofFloat(elevation, if (isCurrentlyActive) context.dpToPx(6) else 0f).apply {
+                    duration = animationTime
+                    addUpdateListener { elevation = it.animatedValue as Float }
+                    start()
+                }
+
+                //elevation = if (isCurrentlyActive) context.dpToPx(6) else 0f
             }
         }
     }

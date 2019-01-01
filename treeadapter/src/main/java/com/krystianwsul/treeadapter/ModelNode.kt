@@ -14,7 +14,7 @@ interface ModelNode : Comparable<ModelNode> {
 
     val isSeparatorVisibleWhenNotExpanded get() = false
 
-    fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder)
+    fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean = false)
 
     fun onClick() = Unit
 

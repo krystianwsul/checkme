@@ -180,13 +180,13 @@ class TreeNode(
             childTreeNodes!!.filter { it.selected != selected }.forEach { it.toggleSelected(x, false) }
     }
 
-    fun onLongClickSelect(viewHolder: RecyclerView.ViewHolder) {
+    fun onLongClickSelect(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         if (!modelNode.isSelectable)
             return
 
         selected = !selected
 
-        modelNode.onBindViewHolder(viewHolder)
+        modelNode.onBindViewHolder(viewHolder, startingDrag)
 
         treeViewAdapter.updateDisplayedNodes {
             updateSelect(TreeViewAdapter.Placeholder, true)

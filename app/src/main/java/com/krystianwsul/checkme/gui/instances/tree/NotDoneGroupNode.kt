@@ -198,10 +198,12 @@ class NotDoneGroupNode(
         val groupListFragment = groupAdapter.groupListFragment
         val treeNodeCollection = groupAdapter.treeNodeCollection
 
-        if (singleInstance() && groupListFragment.parameters.dataWrapper.taskEditable != false && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && (groupListFragment.parameters !is GroupListFragment.Parameters.All) && (groupListFragment.parameters !is GroupListFragment.Parameters.InstanceKeys) && (groupListFragment.parameters !is GroupListFragment.Parameters.TaskKey))
-                groupListFragment.dragHelper.startDrag(viewHolder)
-
-        treeNode.onLongClickSelect(viewHolder)
+        if (singleInstance() && groupListFragment.parameters.dataWrapper.taskEditable != false && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded } && (groupListFragment.parameters !is GroupListFragment.Parameters.All) && (groupListFragment.parameters !is GroupListFragment.Parameters.InstanceKeys) && (groupListFragment.parameters !is GroupListFragment.Parameters.TaskKey)) {
+            groupListFragment.dragHelper.startDrag(viewHolder)
+            treeNode.onLongClickSelect(viewHolder, true)
+        } else {
+            treeNode.onLongClickSelect(viewHolder, false)
+        }
     }
 
     override fun onClick() {

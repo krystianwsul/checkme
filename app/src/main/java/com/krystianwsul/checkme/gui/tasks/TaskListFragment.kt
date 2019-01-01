@@ -630,10 +630,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
                 val treeNodeCollection = taskAdapter.treeNodeCollection
 
-                if (taskListFragment.taskKey != null && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded })
+                if (taskListFragment.taskKey != null && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded }) {
                     taskListFragment.dragHelper.startDrag(viewHolder)
-
-                treeNode.onLongClickSelect(viewHolder)
+                    treeNode.onLongClickSelect(viewHolder, true)
+                } else {
+                    treeNode.onLongClickSelect(viewHolder, false)
+                }
             }
 
             override val itemViewType = TYPE_TASK

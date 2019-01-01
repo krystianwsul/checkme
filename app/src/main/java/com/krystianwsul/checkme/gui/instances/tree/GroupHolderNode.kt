@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
+import android.widget.LinearLayout
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -60,7 +61,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         override fun same(other: ModelState) = (other as State).id == id
     }
 
-    final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) {
+    final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         val groupHolder = viewHolder as NodeHolder
 
         groupHolder.run {
@@ -123,7 +124,21 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {
-                setBackgroundColor(if (treeNode.isSelected && !isPressed) colorSelected else colorBackground)
+                //setBackgroundColor(colorBackground)
+
+                setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
+
+                /*
+                ValueAnimator.ofArgb((background as? ColorDrawable)?.color ?: Color.TRANSPARENT, targetColor).apply {
+                    duration = DragHelper.MyCallback.animationTime
+                    addUpdateListener {
+                        setBackgroundColor(it.animatedValue as Int)
+                    }
+                    start()
+                }*/
+
+                @SuppressWarnings("TargetApi")
+                (this as LinearLayout).foreground = if (isPressed) null else ContextCompat.getDrawable(context, R.drawable.item_background_material)
 
                 setOnLongClickListener {
                     onLongClick(viewHolder)

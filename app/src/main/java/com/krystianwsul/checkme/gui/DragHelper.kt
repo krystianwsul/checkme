@@ -103,13 +103,15 @@ class DragHelper(private val callback: MyCallback) : ItemTouchHelper(callback) {
 
                 valueAnimator?.cancel()
 
-                valueAnimator = ValueAnimator.ofFloat(elevation, if (isCurrentlyActive) context.dpToPx(6) else 0f).apply {
-                    duration = animationTime
-                    addUpdateListener { elevation = it.animatedValue as Float }
-                    start()
+                if (isCurrentlyActive) {
+                    elevation = context.dpToPx(6)
+                } else {
+                    valueAnimator = ValueAnimator.ofFloat(elevation, 0f).apply {
+                        duration = animationTime
+                        addUpdateListener { elevation = it.animatedValue as Float }
+                        start()
+                    }
                 }
-
-                //elevation = if (isCurrentlyActive) context.dpToPx(6) else 0f
             }
         }
     }

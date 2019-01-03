@@ -72,7 +72,7 @@ class MyApplication : Application() {
 
         writeHashes()
 
-        ANRWatchDog().setReportMainThreadOnly()
+        ANRWatchDog()//.setReportMainThreadOnly()
                 .setANRListener { MyCrashlytics.logException(it) }
                 .start()
     }

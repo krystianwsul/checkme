@@ -17,6 +17,8 @@ class DoneInstanceNode(
     public override lateinit var treeNode: TreeNode
         private set
 
+    override val ripple = true
+
     private lateinit var nodeCollection: NodeCollection
 
     private val parentNodeCollection get() = dividerNode.nodeCollection

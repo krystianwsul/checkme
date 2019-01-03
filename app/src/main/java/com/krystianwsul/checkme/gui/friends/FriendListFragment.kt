@@ -252,6 +252,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private inner class FriendNode(val userListData: FriendListViewModel.UserListData) : GroupHolderNode(0) {
 
+        override val ripple = true
+
         override val name = Triple(userListData.name, colorPrimary, true)
 
         override val details = Pair(userListData.email, colorSecondary)

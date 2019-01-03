@@ -265,6 +265,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
 
+            override val ripple = true
+
             override val id = projectData.id
 
             public override lateinit var treeNode: TreeNode

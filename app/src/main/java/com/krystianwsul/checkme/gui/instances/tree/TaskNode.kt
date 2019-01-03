@@ -14,6 +14,8 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
 
     override val id = taskData.taskKey
 
+    override val ripple = true
+
     private val taskNodes = mutableListOf<TaskNode>()
 
     private val groupListFragment by lazy { groupAdapter.groupListFragment }

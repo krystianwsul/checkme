@@ -554,6 +554,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             public override lateinit var treeNode: TreeNode
                 private set
 
+            override val ripple = true
+
             private val taskWrappers = mutableListOf<TaskWrapper>()
 
             override val taskAdapter get() = taskParent.taskAdapter

@@ -22,6 +22,8 @@ class NotDoneGroupNode(
     public override lateinit var treeNode: TreeNode
         private set
 
+    override val ripple = true
+
     private val notDoneInstanceNodes = ArrayList<NotDoneInstanceNode>()
 
     private var singleInstanceNodeCollection: NodeCollection? = null
@@ -363,6 +365,8 @@ class NotDoneGroupNode(
                         }
                     }
         }
+
+        override val ripple = true
 
         override val isSelectable = true
 

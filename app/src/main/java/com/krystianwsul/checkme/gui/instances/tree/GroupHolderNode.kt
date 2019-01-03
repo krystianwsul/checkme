@@ -45,6 +45,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val textSelectable = false
 
+    open val ripple = false
+
     final override val state get() = State(id, name, details, children, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxVisibility, checkBoxChecked)
 
     data class State(
@@ -124,18 +126,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {
-                //setBackgroundColor(colorBackground)
-
                 setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
-
-                /*
-                ValueAnimator.ofArgb((background as? ColorDrawable)?.color ?: Color.TRANSPARENT, targetColor).apply {
-                    duration = DragHelper.MyCallback.animationTime
-                    addUpdateListener {
-                        setBackgroundColor(it.animatedValue as Int)
-                    }
-                    start()
-                }*/
 
                 @SuppressWarnings("TargetApi")
                 (this as LinearLayout).foreground = if (isPressed) null else ContextCompat.getDrawable(context, R.drawable.item_background_material)
@@ -145,6 +136,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     true
                 }
                 setOnClickListener { treeNode.onClick() }
+
+                @SuppressWarnings("TargetApi")
+                foreground = if (ripple) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
             }
         }
     }

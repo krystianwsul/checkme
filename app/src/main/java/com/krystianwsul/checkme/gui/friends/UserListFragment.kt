@@ -300,6 +300,8 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     inner class UserNode(val userListData: ShowProjectViewModel.UserListData, private val selectedIds: Set<String>) : GroupHolderNode(0) {
 
+        override val ripple = true
+
         override val name = Triple(userListData.name, colorPrimary, true)
 
         override val details = Pair(userListData.email, colorSecondary)

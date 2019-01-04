@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.26.1'
+        classpath 'io.fabric.tools:gradle:1.27.0'
     }
 }
 apply plugin: 'com.android.application'
@@ -25,8 +25,8 @@ android {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 22
         targetSdkVersion 28
-        versionCode 99
-        versionName "0.8.5"
+        versionCode 100
+        versionName "0.9.0"
     }
     buildTypes {
         release {

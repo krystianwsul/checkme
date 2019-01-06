@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme
 
+import android.util.Log
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
 import java.util.*
@@ -14,6 +15,8 @@ object DataDiff {
         sDiff = ArrayList()
 
         diffMap("", oldData.instanceDatas, newData.instanceDatas)
+
+        Log.e("asdf", "diff:\n$diff")
     }
 
     private fun diffMap(indent: String, oldInstanceDatas: Map<InstanceKey, GroupListFragment.InstanceData>, newInstanceDatas: Map<InstanceKey, GroupListFragment.InstanceData>) {

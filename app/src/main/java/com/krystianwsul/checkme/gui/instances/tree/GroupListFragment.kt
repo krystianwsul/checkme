@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.common.collect.HashMultimap
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -558,6 +559,13 @@ class GroupListFragment @JvmOverloads constructor(
                 parametersRelay.doOnNext { Preferences.logLineHour("GroupListFragment.parametersRelay") },
                 activity.onPostCreate.doOnNext { Preferences.logLineHour("GroupListFragment.onPostCreate") })
                 .subscribe { initialize() }
+                .addTo(compositeDisposable)
+
+        parametersRelay.reduce { one, two ->
+            DataDiff.diffData(one.dataWrapper, two.dataWrapper)
+            two
+        }
+                .subscribe()
                 .addTo(compositeDisposable)
     }
 

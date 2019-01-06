@@ -190,14 +190,18 @@ class GroupListFragment @JvmOverloads constructor(
                     val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys)
 
                     listener.showSnackbar(instanceDatas.size) {
-                        fun InstanceData.flatten() = listOf(
-                                listOf(this),
-                                children.values).flatten()
+                        fun Map<InstanceKey, InstanceData>.flattenMap(): List<InstanceData> = map {
+                            listOf(
+                                    listOf(it.value),
+                                    it.value
+                                            .children
+                                            .flattenMap()
+                            ).flatten()
+                        }.flatten()
 
                         val allInstanceDatas = parameters.dataWrapper
                                 .instanceDatas
-                                .map { it.value.flatten() }
-                                .flatten()
+                                .flattenMap()
                                 .associateBy { it.InstanceKey }
 
                         undoAll.undos.forEach {

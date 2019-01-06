@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
-import android.widget.LinearLayout
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -128,9 +127,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             itemView.run {
                 setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
 
-                @SuppressWarnings("TargetApi")
-                (this as LinearLayout).foreground = if (isPressed) null else ContextCompat.getDrawable(context, R.drawable.item_background_material)
-
                 setOnLongClickListener {
                     onLongClick(viewHolder)
                     true
@@ -138,7 +134,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 setOnClickListener { treeNode.onClick() }
 
                 @SuppressWarnings("TargetApi")
-                foreground = if (ripple) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
+                foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
             }
         }
     }

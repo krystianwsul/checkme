@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.time.DateTime
 
 class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
 
@@ -18,7 +19,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
 
     data class Data(
             val name: String,
-            val displayText: String?,
+            val instanceDateTime: DateTime,
             var done: Boolean,
             var taskCurrent: Boolean,
             val isRootInstance: Boolean,
@@ -28,5 +29,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
         init {
             check(name.isNotEmpty())
         }
+
+        val displayText = instanceDateTime.takeIf { isRootInstance }?.getDisplayText()
     }
 }

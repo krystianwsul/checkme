@@ -9,4 +9,6 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
     override fun toString() = date.toString() + " " + time.toString()
 
     fun getDisplayText() = date.getDisplayText() + ", " + time.toString()
+
+    fun toExactTimeStamp() = time
 }

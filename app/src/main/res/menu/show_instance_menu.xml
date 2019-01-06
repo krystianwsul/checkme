@@ -58,4 +58,10 @@
         android:orderInCategory="600"
         android:icon="@drawable/ic_select_all_white_24dp"
         app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/instance_menu_add_task"
+        android:title="@string/add_task_this_time"
+        android:orderInCategory="700"
+        android:icon="@drawable/ic_add_white_24dp"
+        app:showAsAction="ifRoom" />
 </menu>

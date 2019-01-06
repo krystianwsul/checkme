@@ -88,45 +88,45 @@ class CreateTaskActivity : AbstractActivity() {
         fun getEditIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
     }
 
-    private var mSavedInstanceState: Bundle? = null
+    private var savedInstanceState: Bundle? = null
 
-    private val mDiscardDialogListener = this::finish
+    private val discardDialogListener = this::finish
 
-    private var mTaskKey: TaskKey? = null
-    private var mTaskKeys: List<TaskKey>? = null
+    private var taskKey: TaskKey? = null
+    private var taskKeys: List<TaskKey>? = null
 
-    private var mScheduleHint: CreateTaskActivity.ScheduleHint? = null
-    private var mParentTaskKeyHint: TaskKey? = null
-    private var mNameHint: String? = null
+    private var scheduleHint: CreateTaskActivity.ScheduleHint? = null
+    private var parentTaskKeyHint: TaskKey? = null
+    private var nameHint: String? = null
 
-    private var mData: CreateTaskViewModel.Data? = null
+    private var data: CreateTaskViewModel.Data? = null
 
-    private var mParent: CreateTaskViewModel.ParentTreeData? = null
+    private var parent: CreateTaskViewModel.ParentTreeData? = null
 
-    private lateinit var mCreateTaskAdapter: CreateTaskAdapter
+    private lateinit var createTaskAdapter: CreateTaskAdapter
 
-    private var mHourMinutePickerPosition: Int? = null
+    private var hourMinutePickerPosition: Int? = null
 
-    private lateinit var mScheduleEntries: MutableList<ScheduleEntry>
+    private lateinit var scheduleEntries: MutableList<ScheduleEntry>
 
-    private var mFirst = true
+    private var first = true
 
-    private val mParentFragmentListener = object : ParentPickerFragment.Listener {
+    private val parentFragmentListener = object : ParentPickerFragment.Listener {
         override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
             if (parentTreeData.parentKey.type == CreateTaskViewModel.ParentType.TASK)
                 clearSchedules()
 
-            mParent = parentTreeData
+            parent = parentTreeData
 
             updateParentView()
         }
 
         override fun onTaskDeleted() {
-            checkNotNull(mParent)
+            checkNotNull(parent)
 
-            mParent = null
+            parent = null
 
-            val view = scheduleRecycler.getChildAt(mCreateTaskAdapter.elementsBeforeSchedules() - 1)!!
+            val view = scheduleRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)!!
 
             val scheduleHolder = scheduleRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
 
@@ -134,9 +134,9 @@ class CreateTaskActivity : AbstractActivity() {
         }
     }
 
-    private val mScheduleDialogListener = object : ScheduleDialogFragment.ScheduleDialogListener {
+    private val scheduleDialogListener = object : ScheduleDialogFragment.ScheduleDialogListener {
         override fun onScheduleDialogResult(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-            checkNotNull(mData)
+            checkNotNull(data)
 
             if (scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
                 check(scheduleDialogData.monthlyDay)
@@ -144,50 +144,50 @@ class CreateTaskActivity : AbstractActivity() {
                 check(!scheduleDialogData.monthlyDay)
             }
 
-            if (mHourMinutePickerPosition == null) {
+            if (hourMinutePickerPosition == null) {
                 clearParent()
 
-                mCreateTaskAdapter.addScheduleEntry(ScheduleEntry.fromScheduleDialogData(scheduleDialogData))
+                createTaskAdapter.addScheduleEntry(ScheduleEntry.fromScheduleDialogData(scheduleDialogData))
             } else {
-                mHourMinutePickerPosition!!.let {
-                    check(it >= mCreateTaskAdapter.elementsBeforeSchedules())
+                hourMinutePickerPosition!!.let {
+                    check(it >= createTaskAdapter.elementsBeforeSchedules())
 
-                    mScheduleEntries[it - mCreateTaskAdapter.elementsBeforeSchedules()] = ScheduleEntry.fromScheduleDialogData(scheduleDialogData)
+                    scheduleEntries[it - createTaskAdapter.elementsBeforeSchedules()] = ScheduleEntry.fromScheduleDialogData(scheduleDialogData)
 
-                    mCreateTaskAdapter.notifyItemChanged(it)
+                    createTaskAdapter.notifyItemChanged(it)
 
-                    mHourMinutePickerPosition = null
+                    hourMinutePickerPosition = null
                 }
             }
         }
 
         override fun onScheduleDialogDelete() {
-            mHourMinutePickerPosition!!.let {
-                check(it >= mCreateTaskAdapter.elementsBeforeSchedules())
-                checkNotNull(mData)
+            hourMinutePickerPosition!!.let {
+                check(it >= createTaskAdapter.elementsBeforeSchedules())
+                checkNotNull(data)
 
-                mScheduleEntries.removeAt(it - mCreateTaskAdapter.elementsBeforeSchedules())
+                scheduleEntries.removeAt(it - createTaskAdapter.elementsBeforeSchedules())
 
-                mCreateTaskAdapter.notifyItemRemoved(it)
+                createTaskAdapter.notifyItemRemoved(it)
 
-                mHourMinutePickerPosition = null
+                hourMinutePickerPosition = null
             }
         }
 
         override fun onScheduleDialogCancel() {
-            mHourMinutePickerPosition?.let {
-                check(it >= mCreateTaskAdapter.elementsBeforeSchedules())
+            hourMinutePickerPosition?.let {
+                check(it >= createTaskAdapter.elementsBeforeSchedules())
 
-                mHourMinutePickerPosition = null
+                hourMinutePickerPosition = null
             }
         }
     }
 
-    private var mNote: String? = null
+    private var note: String? = null
 
-    private var mNoteHasFocus = false // keyboard hack
+    private var noteHasFocus = false // keyboard hack
 
-    private val mOnChildAttachStateChangeListener = object : RecyclerView.OnChildAttachStateChangeListener { // keyboard hack
+    private val onChildAttachStateChangeListener = object : RecyclerView.OnChildAttachStateChangeListener { // keyboard hack
         override fun onChildViewAttachedToWindow(view: View) {
             view.noteText?.let {
                 removeListenerHelper()
@@ -204,7 +204,7 @@ class CreateTaskActivity : AbstractActivity() {
         override fun onChildViewDetachedFromWindow(view: View) = Unit
     }
 
-    private val scheduleDatas get() = mScheduleEntries.map { it.scheduleData }.apply { check(!isEmpty()) }
+    private val scheduleDatas get() = scheduleEntries.map { it.scheduleData }.apply { check(!isEmpty()) }
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
@@ -214,7 +214,7 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.action_save).isVisible = mData != null
+        menu.findItem(R.id.action_save).isVisible = data != null
 
         return true
     }
@@ -224,7 +224,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         when (item.itemId) {
             R.id.action_save -> {
-                checkNotNull(mData)
+                checkNotNull(data)
                 checkNotNull(toolbarEditText)
 
                 if (!updateError()) {
@@ -237,81 +237,81 @@ class CreateTaskActivity : AbstractActivity() {
                     if (hasValueSchedule()) {
                         check(!hasValueParentTask())
 
-                        val projectId = if (hasValueParentInGeneral()) (mParent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
+                        val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
 
-                        if (mTaskKey != null) {
-                            checkNotNull(mData!!.taskData)
-                            check(mTaskKeys == null)
+                        if (taskKey != null) {
+                            checkNotNull(data!!.taskData)
+                            check(taskKeys == null)
 
-                            val taskKey = DomainFactory.getInstance().updateScheduleTask(mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, scheduleDatas, mNote, projectId)
+                            val taskKey = DomainFactory.getInstance().updateScheduleTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, scheduleDatas, note, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
                             finish()
-                        } else if (mTaskKeys != null) {
-                            check(mData!!.taskData == null)
-                            check(mTaskKeys!!.size > 1)
+                        } else if (taskKeys != null) {
+                            check(data!!.taskData == null)
+                            check(taskKeys!!.size > 1)
 
-                            DomainFactory.getInstance().createScheduleJoinRootTask(ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mTaskKeys!!, mNote, projectId)
+                            DomainFactory.getInstance().createScheduleJoinRootTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, taskKeys!!, note, projectId)
 
                             finish()
                         } else {
-                            check(mData!!.taskData == null)
+                            check(data!!.taskData == null)
 
-                            DomainFactory.getInstance().createScheduleRootTask(mData!!.dataId, SaveService.Source.GUI, name, scheduleDatas, mNote, projectId)
+                            DomainFactory.getInstance().createScheduleRootTask(data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, note, projectId)
 
                             finish()
                         }
                     } else if (hasValueParentTask()) {
-                        checkNotNull(mParent)
+                        checkNotNull(parent)
 
-                        val parentTaskKey = (mParent!!.parentKey as CreateTaskViewModel.ParentKey.TaskParentKey).taskKey
+                        val parentTaskKey = (parent!!.parentKey as CreateTaskViewModel.ParentKey.TaskParentKey).taskKey
 
-                        if (mTaskKey != null) {
-                            checkNotNull(mData!!.taskData)
-                            check(mTaskKeys == null)
+                        if (taskKey != null) {
+                            checkNotNull(data!!.taskData)
+                            check(taskKeys == null)
 
-                            val taskKey = DomainFactory.getInstance().updateChildTask(ExactTimeStamp.now, mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, parentTaskKey, mNote)
+                            val taskKey = DomainFactory.getInstance().updateChildTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, taskKey!!, name, parentTaskKey, note)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
                             finish()
-                        } else if (mTaskKeys != null) {
-                            check(mData!!.taskData == null)
-                            check(mTaskKeys!!.size > 1)
+                        } else if (taskKeys != null) {
+                            check(data!!.taskData == null)
+                            check(taskKeys!!.size > 1)
 
-                            DomainFactory.getInstance().createJoinChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mTaskKeys!!, mNote)
+                            DomainFactory.getInstance().createJoinChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, taskKeys!!, note)
 
                             finish()
                         } else {
-                            check(mData!!.taskData == null)
+                            check(data!!.taskData == null)
 
-                            DomainFactory.getInstance().createChildTask(mData!!.dataId, SaveService.Source.GUI, parentTaskKey, name, mNote)
+                            DomainFactory.getInstance().createChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, note)
 
                             finish()
                         }
                     } else {  // no reminder
-                        val projectId = if (hasValueParentInGeneral()) (mParent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
+                        val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
 
-                        if (mTaskKey != null) {
-                            checkNotNull(mData!!.taskData)
-                            check(mTaskKeys == null)
+                        if (taskKey != null) {
+                            checkNotNull(data!!.taskData)
+                            check(taskKeys == null)
 
-                            val taskKey = DomainFactory.getInstance().updateRootTask(mData!!.dataId, SaveService.Source.GUI, mTaskKey!!, name, mNote, projectId)
+                            val taskKey = DomainFactory.getInstance().updateRootTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, note, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
                             finish()
-                        } else if (mTaskKeys != null) {
-                            check(mData!!.taskData == null)
+                        } else if (taskKeys != null) {
+                            check(data!!.taskData == null)
 
-                            DomainFactory.getInstance().createJoinRootTask(mData!!.dataId, SaveService.Source.GUI, name, mTaskKeys!!, mNote, projectId)
+                            DomainFactory.getInstance().createJoinRootTask(data!!.dataId, SaveService.Source.GUI, name, taskKeys!!, note, projectId)
 
                             finish()
                         } else {
-                            check(mData!!.taskData == null)
+                            check(data!!.taskData == null)
 
-                            DomainFactory.getInstance().createRootTask(mData!!.dataId, SaveService.Source.GUI, name, mNote, projectId)
+                            DomainFactory.getInstance().createRootTask(data!!.dataId, SaveService.Source.GUI, name, note, projectId)
 
                             finish()
                         }
@@ -338,7 +338,7 @@ class CreateTaskActivity : AbstractActivity() {
             setHomeAsUpIndicator(R.drawable.ic_close_white_24dp)
         }
 
-        mSavedInstanceState = savedInstanceState
+        this.savedInstanceState = savedInstanceState
 
         scheduleRecycler.layoutManager = LinearLayoutManager(this)
 
@@ -348,42 +348,42 @@ class CreateTaskActivity : AbstractActivity() {
                 check(!hasExtra(PARENT_TASK_KEY_HINT_KEY))
                 check(!hasExtra(SCHEDULE_HINT_KEY))
 
-                mTaskKey = getParcelableExtra(TASK_KEY_KEY)!!
+                taskKey = getParcelableExtra(TASK_KEY_KEY)!!
             } else if (action == Intent.ACTION_SEND) {
                 check(type == "text/plain")
 
-                mNameHint = getStringExtra(Intent.EXTRA_TEXT)!!
-                check(!mNameHint.isNullOrEmpty())
+                nameHint = getStringExtra(Intent.EXTRA_TEXT)!!
+                check(!nameHint.isNullOrEmpty())
             } else {
                 if (hasExtra(TASK_KEYS_KEY))
-                    mTaskKeys = getParcelableArrayListExtra<TaskKey>(TASK_KEYS_KEY)!!.apply { check(size > 1) }
+                    taskKeys = getParcelableArrayListExtra<TaskKey>(TASK_KEYS_KEY)!!.apply { check(size > 1) }
 
                 if (hasExtra(PARENT_TASK_KEY_HINT_KEY)) {
                     check(!hasExtra(SCHEDULE_HINT_KEY))
 
-                    mParentTaskKeyHint = getParcelableExtra(PARENT_TASK_KEY_HINT_KEY)!!
+                    parentTaskKeyHint = getParcelableExtra(PARENT_TASK_KEY_HINT_KEY)!!
                 } else if (hasExtra(SCHEDULE_HINT_KEY)) {
-                    mScheduleHint = getParcelableExtra(SCHEDULE_HINT_KEY)!!
+                    scheduleHint = getParcelableExtra(SCHEDULE_HINT_KEY)!!
                 }
             }
         }
 
         savedInstanceState?.run {
             if (containsKey(SCHEDULE_ENTRIES_KEY)) {
-                mScheduleEntries = getParcelableArrayList(SCHEDULE_ENTRIES_KEY)!!
+                scheduleEntries = getParcelableArrayList(SCHEDULE_ENTRIES_KEY)!!
 
                 if (containsKey(HOUR_MINUTE_PICKER_POSITION_KEY))
-                    mHourMinutePickerPosition = getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -1).also { check(it > 0) }
+                    hourMinutePickerPosition = getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -1).also { check(it > 0) }
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = mDiscardDialogListener
+        (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 
-        if (!mNoteHasFocus)// keyboard hack
+        if (!noteHasFocus)// keyboard hack
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         createTaskViewModel = getViewModel<CreateTaskViewModel>().apply {
-            start(mTaskKey, mTaskKeys)
+            start(taskKey, taskKeys)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -393,29 +393,29 @@ class CreateTaskActivity : AbstractActivity() {
         super.onSaveInstanceState(outState)
 
         outState.run {
-            if (mData != null) {
-                putParcelableArrayList(SCHEDULE_ENTRIES_KEY, ArrayList(mScheduleEntries))
+            if (data != null) {
+                putParcelableArrayList(SCHEDULE_ENTRIES_KEY, ArrayList(scheduleEntries))
 
-                mHourMinutePickerPosition?.let {
-                    check(it >= mCreateTaskAdapter.elementsBeforeSchedules())
+                hourMinutePickerPosition?.let {
+                    check(it >= createTaskAdapter.elementsBeforeSchedules())
 
                     putInt(HOUR_MINUTE_PICKER_POSITION_KEY, it)
                 }
 
-                if (mParent != null) {
-                    putParcelable(PARENT_KEY_KEY, mParent!!.parentKey)
+                if (parent != null) {
+                    putParcelable(PARENT_KEY_KEY, parent!!.parentKey)
                 }
 
-                if (!mNote.isNullOrEmpty())
-                    putString(NOTE_KEY, mNote)
+                if (!note.isNullOrEmpty())
+                    putString(NOTE_KEY, note)
 
-                putBoolean(NOTE_HAS_FOCUS_KEY, mNoteHasFocus)
+                putBoolean(NOTE_HAS_FOCUS_KEY, noteHasFocus)
             }
         }
     }
 
     private fun onLoadFinished(data: CreateTaskViewModel.Data) {
-        mData = data
+        this.data = data
 
         toolbarLayout.run {
             visibility = View.VISIBLE
@@ -423,24 +423,24 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         toolbarEditText.run {
-            if (mSavedInstanceState == null) {
-                if (mData!!.taskData != null) {
-                    checkNotNull(mTaskKey)
+            if (savedInstanceState == null) {
+                if (this@CreateTaskActivity.data!!.taskData != null) {
+                    checkNotNull(taskKey)
 
-                    setText(mData!!.taskData!!.name)
-                } else if (!TextUtils.isEmpty(mNameHint)) {
-                    check(mTaskKey == null)
-                    check(mTaskKeys == null)
-                    check(mParentTaskKeyHint == null)
-                    check(mScheduleHint == null)
+                    setText(this@CreateTaskActivity.data!!.taskData!!.name)
+                } else if (!TextUtils.isEmpty(nameHint)) {
+                    check(taskKey == null)
+                    check(taskKeys == null)
+                    check(parentTaskKeyHint == null)
+                    check(scheduleHint == null)
 
-                    setText(mNameHint)
+                    setText(nameHint)
                 }
             }
 
             toolbarEditText.addTextChangedListener(object : TextWatcher {
 
-                private var mSkip = mSavedInstanceState != null
+                private var mSkip = savedInstanceState != null
 
                 override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) = Unit
 
@@ -457,56 +457,56 @@ class CreateTaskActivity : AbstractActivity() {
             })
         }
 
-        if (mSavedInstanceState?.containsKey(SCHEDULE_ENTRIES_KEY) == true) {
-            mSavedInstanceState!!.run {
+        if (savedInstanceState?.containsKey(SCHEDULE_ENTRIES_KEY) == true) {
+            savedInstanceState!!.run {
                 if (containsKey(PARENT_KEY_KEY)) {
                     val parentKey = getParcelable<CreateTaskViewModel.ParentKey>(PARENT_KEY_KEY)!!
 
-                    mParent = findTaskData(parentKey)
+                    parent = findTaskData(parentKey)
                 }
 
                 if (containsKey(NOTE_KEY)) {
-                    mNote = getString(NOTE_KEY)!!
-                    check(!mNote.isNullOrEmpty())
+                    note = getString(NOTE_KEY)!!
+                    check(!note.isNullOrEmpty())
                 }
 
                 check(containsKey(NOTE_HAS_FOCUS_KEY))
 
-                mNoteHasFocus = getBoolean(NOTE_HAS_FOCUS_KEY)
+                noteHasFocus = getBoolean(NOTE_HAS_FOCUS_KEY)
             }
         } else {
-            mData!!.run {
+            this.data!!.run {
                 if (taskData?.taskParentKey != null) {
-                    check(mParentTaskKeyHint == null)
-                    check(mTaskKeys == null)
-                    checkNotNull(mTaskKey)
+                    check(parentTaskKeyHint == null)
+                    check(taskKeys == null)
+                    checkNotNull(taskKey)
 
-                    mParent = findTaskData(taskData.taskParentKey)
-                } else if (mParentTaskKeyHint != null) {
-                    check(mTaskKey == null)
+                    parent = findTaskData(taskData.taskParentKey)
+                } else if (parentTaskKeyHint != null) {
+                    check(taskKey == null)
 
-                    mParent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(mParentTaskKeyHint!!))
+                    parent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(parentTaskKeyHint!!))
                 }
 
-                taskData?.let { mNote = it.note }
+                taskData?.let { note = it.note }
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(mData!!.parentTreeDatas, mParentFragmentListener)
+        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(this.data!!.parentTreeDatas, parentFragmentListener)
 
         invalidateOptionsMenu()
 
-        if (mFirst && (mSavedInstanceState == null || !mSavedInstanceState!!.containsKey(SCHEDULE_ENTRIES_KEY))) {
-            mFirst = false
+        if (first && (savedInstanceState == null || !savedInstanceState!!.containsKey(SCHEDULE_ENTRIES_KEY))) {
+            first = false
 
-            mScheduleEntries = ArrayList()
+            scheduleEntries = ArrayList()
 
-            mData!!.run {
+            this.data!!.run {
                 if (taskData != null) {
                     if (taskData.scheduleDatas != null) {
                         check(!taskData.scheduleDatas.isEmpty())
 
-                        mScheduleEntries = taskData.scheduleDatas
+                        scheduleEntries = taskData.scheduleDatas
                                 .asSequence()
                                 .map { scheduleData ->
                                     when (scheduleData) {
@@ -519,21 +519,21 @@ class CreateTaskActivity : AbstractActivity() {
                                 .toMutableList()
                     }
                 } else {
-                    if (mParentTaskKeyHint == null)
-                        mScheduleEntries.add(firstScheduleEntry())
+                    if (parentTaskKeyHint == null)
+                        scheduleEntries.add(firstScheduleEntry())
                 }
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(mData!!.customTimeDatas, mScheduleDialogListener)
+        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(this.data!!.customTimeDatas, scheduleDialogListener)
 
-        mCreateTaskAdapter = CreateTaskAdapter()
-        scheduleRecycler.adapter = mCreateTaskAdapter
+        createTaskAdapter = CreateTaskAdapter()
+        scheduleRecycler.adapter = createTaskAdapter
 
-        if (mNoteHasFocus) { // keyboard hack
-            val notePosition = mScheduleEntries.size + 1 + mCreateTaskAdapter.elementsBeforeSchedules()
+        if (noteHasFocus) { // keyboard hack
+            val notePosition = scheduleEntries.size + 1 + createTaskAdapter.elementsBeforeSchedules()
 
-            scheduleRecycler.addOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener)
+            scheduleRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
 
             (scheduleRecycler.layoutManager as LinearLayoutManager).scrollToPosition(notePosition)
         }
@@ -551,7 +551,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         return if (dataChanged()) {
             DiscardDialogFragment.newInstance().let {
-                it.discardDialogListener = mDiscardDialogListener
+                it.discardDialogListener = discardDialogListener
                 it.show(supportFragmentManager, DISCARD_TAG)
             }
 
@@ -562,7 +562,7 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     private fun updateError(): Boolean {
-        checkNotNull(mData)
+        checkNotNull(data)
 
         var hasError = false
 
@@ -574,13 +574,13 @@ class CreateTaskActivity : AbstractActivity() {
             toolbarLayout.error = null
         }
 
-        for (scheduleEntry in mScheduleEntries) {
+        for (scheduleEntry in scheduleEntries) {
             if (scheduleEntry.scheduleType != ScheduleType.SINGLE)
                 continue
 
             val singleScheduleEntry = scheduleEntry as SingleScheduleEntry
 
-            if (mData!!.taskData != null && mData!!.taskData!!.scheduleDatas != null && mData!!.taskData!!.scheduleDatas!!.contains(scheduleEntry.scheduleData))
+            if (data!!.taskData != null && data!!.taskData!!.scheduleDatas != null && data!!.taskData!!.scheduleDatas!!.contains(scheduleEntry.scheduleData))
                 continue
 
             if (singleScheduleEntry.mDate > Date.today())
@@ -597,7 +597,7 @@ class CreateTaskActivity : AbstractActivity() {
             val hourMinute = if (timePair.customTimeKey != null) {
                 check(timePair.hourMinute == null)
 
-                mData!!.customTimeDatas[timePair.customTimeKey]!!.hourMinutes[singleScheduleEntry.mDate.dayOfWeek]
+                data!!.customTimeDatas[timePair.customTimeKey]!!.hourMinutes[singleScheduleEntry.mDate.dayOfWeek]
             } else {
                 checkNotNull(timePair.hourMinute)
 
@@ -618,38 +618,38 @@ class CreateTaskActivity : AbstractActivity() {
         scheduleEntry.error = getString(stringId)
         check(!TextUtils.isEmpty(scheduleEntry.error))
 
-        val index = mScheduleEntries.indexOf(scheduleEntry)
+        val index = scheduleEntries.indexOf(scheduleEntry)
         check(index >= 0)
 
-        scheduleRecycler.getChildAt(index + mCreateTaskAdapter.elementsBeforeSchedules())?.let {
+        scheduleRecycler.getChildAt(index + createTaskAdapter.elementsBeforeSchedules())?.let {
             (scheduleRecycler.getChildViewHolder(it) as CreateTaskAdapter.ScheduleHolder).mScheduleLayout.error = scheduleEntry.error
         }
     }
 
     private fun dataChanged(): Boolean {
-        if (mData == null)
+        if (data == null)
             return false
 
         check(!hasValueParentTask() || !hasValueSchedule())
 
-        if (mTaskKey != null) {
-            checkNotNull(mData!!.taskData)
-            check(mTaskKeys == null)
-            check(mParentTaskKeyHint == null)
-            check(mScheduleHint == null)
+        if (taskKey != null) {
+            checkNotNull(data!!.taskData)
+            check(taskKeys == null)
+            check(parentTaskKeyHint == null)
+            check(scheduleHint == null)
 
-            if (toolbarEditText.text.toString() != mData!!.taskData!!.name)
+            if (toolbarEditText.text.toString() != data!!.taskData!!.name)
                 return true
 
-            if (!Utils.stringEquals(mNote, mData!!.taskData!!.note))
+            if (!Utils.stringEquals(note, data!!.taskData!!.note))
                 return true
 
-            if (mData!!.taskData!!.taskParentKey != null) {
+            if (data!!.taskData!!.taskParentKey != null) {
                 if (!hasValueParentInGeneral())
                     return true
 
-                return mParent!!.parentKey != mData!!.taskData!!.taskParentKey
-            } else if (mData!!.taskData!!.scheduleDatas != null) {
+                return parent!!.parentKey != data!!.taskData!!.taskParentKey
+            } else if (data!!.taskData!!.scheduleDatas != null) {
                 if (!hasValueSchedule())
                     return true
 
@@ -661,16 +661,16 @@ class CreateTaskActivity : AbstractActivity() {
             if (!TextUtils.isEmpty(toolbarEditText.text))
                 return true
 
-            if (!TextUtils.isEmpty(mNote))
+            if (!TextUtils.isEmpty(note))
                 return true
 
-            if (mParentTaskKeyHint != null) {
-                check(mScheduleHint == null)
+            if (parentTaskKeyHint != null) {
+                check(scheduleHint == null)
 
                 if (!hasValueParentTask())
                     return true
 
-                return mParent == null || mParent!!.parentKey != CreateTaskViewModel.ParentKey.TaskParentKey(mParentTaskKeyHint!!)
+                return parent == null || parent!!.parentKey != CreateTaskViewModel.ParentKey.TaskParentKey(parentTaskKeyHint!!)
             } else {
                 if (!hasValueSchedule())
                     return true
@@ -681,9 +681,9 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     private fun findTaskData(parentKey: CreateTaskViewModel.ParentKey): CreateTaskViewModel.ParentTreeData {
-        checkNotNull(mData)
+        checkNotNull(data)
 
-        return findTaskDataHelper(mData!!.parentTreeDatas, parentKey).single()
+        return findTaskDataHelper(data!!.parentTreeDatas, parentKey).single()
     }
 
     private fun findTaskDataHelper(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, parentKey: CreateTaskViewModel.ParentKey): Iterable<CreateTaskViewModel.ParentTreeData> {
@@ -696,63 +696,63 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     private fun clearParent() {
-        if (mParent == null || mParent!!.parentKey.type == CreateTaskViewModel.ParentType.PROJECT)
+        if (parent == null || parent!!.parentKey.type == CreateTaskViewModel.ParentType.PROJECT)
             return
 
-        mParent = null
+        parent = null
 
         updateParentView()
     }
 
     private fun updateParentView() {
-        val view = scheduleRecycler.getChildAt(mCreateTaskAdapter.elementsBeforeSchedules() - 1) ?: return
+        val view = scheduleRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)
+                ?: return
 
         val scheduleHolder = scheduleRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
 
-        scheduleHolder.mScheduleText.setText(if (mParent != null) mParent!!.name else null)
+        scheduleHolder.mScheduleText.setText(if (parent != null) parent!!.name else null)
     }
 
-    private fun hasValueParentInGeneral() = mParent != null
+    private fun hasValueParentInGeneral() = parent != null
 
-    private fun hasValueParentTask() = mParent?.parentKey?.type == CreateTaskViewModel.ParentType.TASK
+    private fun hasValueParentTask() = parent?.parentKey?.type == CreateTaskViewModel.ParentType.TASK
 
-    private fun hasValueSchedule() = !mScheduleEntries.isEmpty()
+    private fun hasValueSchedule() = !scheduleEntries.isEmpty()
 
-    private fun firstScheduleEntry() = SingleScheduleEntry(mScheduleHint)
+    private fun firstScheduleEntry() = SingleScheduleEntry(scheduleHint)
 
     private fun scheduleDataChanged(): Boolean {
-        if (mData == null)
+        if (data == null)
             return false
 
-        val oldScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(if (mData!!.taskData != null) {
-            mData!!.taskData!!.scheduleDatas ?: listOf()
+        val oldScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(if (data!!.taskData != null) {
+            data!!.taskData!!.scheduleDatas ?: listOf()
         } else {
             listOf(firstScheduleEntry().scheduleData)
         })
 
-        val newScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(mScheduleEntries.map { it.scheduleData })
+        val newScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(scheduleEntries.map { it.scheduleData })
 
         return oldScheduleDatas != newScheduleDatas
     }
 
     private fun clearSchedules() {
-        val scheduleCount = mScheduleEntries.size
+        val scheduleCount = scheduleEntries.size
 
-        mScheduleEntries = ArrayList()
-        mCreateTaskAdapter.notifyItemRangeRemoved(mCreateTaskAdapter.elementsBeforeSchedules(), scheduleCount)
+        scheduleEntries = ArrayList()
+        createTaskAdapter.notifyItemRangeRemoved(createTaskAdapter.elementsBeforeSchedules(), scheduleCount)
     }
 
     private fun removeListenerHelper() { // keyboard hack
         checkNotNull(scheduleRecycler)
 
-        scheduleRecycler.removeOnChildAttachStateChangeListener(mOnChildAttachStateChangeListener)
+        scheduleRecycler.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
     }
 
     @Parcelize
     class ScheduleHint(val date: Date, val timePair: TimePair? = null) : Parcelable {
 
         constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
-
     }
 
     @Suppress("PrivatePropertyName")
@@ -768,17 +768,17 @@ class CreateTaskActivity : AbstractActivity() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable) {
-                mNote = s.toString()
+                note = s.toString()
             }
         }
 
         private val mProjectName: String?
 
         init {
-            checkNotNull(mData)
+            checkNotNull(data)
 
-            mProjectName = if (mData!!.taskData != null && !TextUtils.isEmpty(mData!!.taskData!!.projectName)) {
-                mData!!.taskData!!.projectName
+            mProjectName = if (data!!.taskData != null && !TextUtils.isEmpty(data!!.taskData!!.projectName)) {
+                data!!.taskData!!.projectName
             } else {
                 null
             }
@@ -825,21 +825,21 @@ class CreateTaskActivity : AbstractActivity() {
                     }
 
                     mScheduleText.run {
-                        setText(mParent?.name)
+                        setText(this@CreateTaskActivity.parent?.name)
 
                         isEnabled = true
 
                         setOnClickListener {
-                            ParentPickerFragment.newInstance(mParent != null).let {
+                            ParentPickerFragment.newInstance(parent != null).let {
                                 it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                                it.initialize(mData!!.parentTreeDatas, mParentFragmentListener)
+                                it.initialize(data!!.parentTreeDatas, parentFragmentListener)
                             }
                         }
                     }
                 }
-            } else if (position < elementsBeforeSchedules() + mScheduleEntries.size) {
+            } else if (position < elementsBeforeSchedules() + scheduleEntries.size) {
                 (holder as ScheduleHolder).run {
-                    val scheduleEntry = mScheduleEntries[position - elementsBeforeSchedules()]
+                    val scheduleEntry = scheduleEntries[position - elementsBeforeSchedules()]
 
                     mScheduleMargin.visibility = View.GONE
 
@@ -850,12 +850,12 @@ class CreateTaskActivity : AbstractActivity() {
                     }
 
                     mScheduleText.run {
-                        setText(scheduleEntry.getText(mData!!.customTimeDatas, this@CreateTaskActivity))
+                        setText(scheduleEntry.getText(data!!.customTimeDatas, this@CreateTaskActivity))
                         isEnabled = true
                         setOnClickListener { onTextClick() }
                     }
                 }
-            } else if (position == elementsBeforeSchedules() + mScheduleEntries.size) {
+            } else if (position == elementsBeforeSchedules() + scheduleEntries.size) {
                 (holder as ScheduleHolder).run {
                     mScheduleMargin.visibility = View.GONE
 
@@ -869,26 +869,26 @@ class CreateTaskActivity : AbstractActivity() {
                         text = null
                         isEnabled = true
                         setOnClickListener {
-                            check(mHourMinutePickerPosition == null)
+                            check(hourMinutePickerPosition == null)
 
-                            ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), mScheduleHint), false).let {
-                                it.initialize(mData!!.customTimeDatas, mScheduleDialogListener)
+                            ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), scheduleHint), false).let {
+                                it.initialize(data!!.customTimeDatas, scheduleDialogListener)
                                 it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                             }
                         }
                     }
                 }
             } else {
-                check(position == elementsBeforeSchedules() + mScheduleEntries.size + 1)
+                check(position == elementsBeforeSchedules() + scheduleEntries.size + 1)
 
                 (holder as NoteHolder).run {
-                    mNoteLayout.isHintAnimationEnabled = mData != null
+                    mNoteLayout.isHintAnimationEnabled = data != null
 
                     mNoteText.run {
-                        setText(mNote)
+                        setText(note)
                         removeTextChangedListener(mNameListener)
                         addTextChangedListener(mNameListener)
-                        setOnFocusChangeListener { _, hasFocus -> mNoteHasFocus = hasFocus }
+                        setOnFocusChangeListener { _, hasFocus -> noteHasFocus = hasFocus }
                     }
                 }
             }
@@ -896,26 +896,26 @@ class CreateTaskActivity : AbstractActivity() {
 
         fun elementsBeforeSchedules() = if (TextUtils.isEmpty(mProjectName)) 1 else 2
 
-        override fun getItemCount() = elementsBeforeSchedules() + mScheduleEntries.size + 1 + 1
+        override fun getItemCount() = elementsBeforeSchedules() + scheduleEntries.size + 1 + 1
 
         override fun getItemViewType(position: Int) = if (position == 0) {
             TYPE_SCHEDULE
         } else if (position < elementsBeforeSchedules()) {
             TYPE_SCHEDULE
-        } else if (position < elementsBeforeSchedules() + mScheduleEntries.size) {
+        } else if (position < elementsBeforeSchedules() + scheduleEntries.size) {
             TYPE_SCHEDULE
-        } else if (position == elementsBeforeSchedules() + mScheduleEntries.size) {
+        } else if (position == elementsBeforeSchedules() + scheduleEntries.size) {
             TYPE_SCHEDULE
         } else {
-            check(position == elementsBeforeSchedules() + mScheduleEntries.size + 1)
+            check(position == elementsBeforeSchedules() + scheduleEntries.size + 1)
 
             TYPE_NOTE
         }
 
         fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
-            val position = elementsBeforeSchedules() + mScheduleEntries.size
+            val position = elementsBeforeSchedules() + scheduleEntries.size
 
-            mScheduleEntries.add(scheduleEntry)
+            scheduleEntries.add(scheduleEntry)
             notifyItemInserted(position)
         }
 
@@ -928,15 +928,15 @@ class CreateTaskActivity : AbstractActivity() {
             val mScheduleText = itemView.schedule_text!!
 
             fun onTextClick() {
-                checkNotNull(mData)
-                check(mHourMinutePickerPosition == null)
+                checkNotNull(data)
+                check(hourMinutePickerPosition == null)
 
-                mHourMinutePickerPosition = adapterPosition
+                hourMinutePickerPosition = adapterPosition
 
-                val scheduleEntry = mScheduleEntries[mHourMinutePickerPosition!! - mCreateTaskAdapter.elementsBeforeSchedules()]
+                val scheduleEntry = scheduleEntries[hourMinutePickerPosition!! - createTaskAdapter.elementsBeforeSchedules()]
 
-                ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), mScheduleHint), true).let {
-                    it.initialize(mData!!.customTimeDatas, mScheduleDialogListener)
+                ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), scheduleHint), true).let {
+                    it.initialize(data!!.customTimeDatas, scheduleDialogListener)
                     it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                 }
             }

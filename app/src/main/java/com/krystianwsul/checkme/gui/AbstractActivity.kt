@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -29,6 +30,12 @@ abstract class AbstractActivity : AppCompatActivity() {
         MyCrashlytics.logMethod(this)
 
         super.onCreate(savedInstanceState)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        MyCrashlytics.logMethod(this)
+
+        super.onNewIntent(intent)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {

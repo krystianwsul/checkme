@@ -6,10 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -36,17 +34,21 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     companion object {
 
         private const val INSTANCE_KEY = "instanceKey"
-        private const val SET_NOTIFIED_KEY = "setNotified"
+        private const val NOTIFICATION_ID_KEY = "notificationId"
 
         fun getIntent(context: Context, instanceKey: InstanceKey) = Intent(context, ShowInstanceActivity::class.java).apply { putExtra(INSTANCE_KEY, instanceKey as Parcelable) }
 
-        fun getNotificationIntent(context: Context, instanceKey: InstanceKey) = Intent(context, ShowInstanceActivity::class.java).apply {
+        fun getNotificationIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, ShowInstanceActivity::class.java).apply {
             putExtra(INSTANCE_KEY, instanceKey as Parcelable)
-            putExtra(SET_NOTIFIED_KEY, true)
+            putExtra(NOTIFICATION_ID_KEY, notificationId)
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+
+        fun getForwardIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, ShowInstanceActivity::class.java).apply {
+            putExtra(INSTANCE_KEY, instanceKey as Parcelable)
+            putExtra(NOTIFICATION_ID_KEY, notificationId)
         }
     }
-
-    private lateinit var actionBar: ActionBar
 
     private lateinit var instanceKey: InstanceKey
 
@@ -164,48 +166,66 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         setContentView(R.layout.activity_show_instance)
 
         setSupportActionBar(toolbar)
-
-        actionBar = supportActionBar!!
-
-        actionBar.title = null
+        supportActionBar!!.title = null
 
         if (savedInstanceState == null)
             first = true
 
+        groupListFragment.setFab(showInstanceFab)
+
         check(intent.hasExtra(INSTANCE_KEY))
         instanceKey = intent.getParcelableExtra(INSTANCE_KEY)!!
 
-        groupListFragment.setFab(showInstanceFab)
+        cancelNotification()
 
         showInstanceViewModel = getViewModel<ShowInstanceViewModel>().apply {
             start(instanceKey)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
-
-        NotificationWrapper.instance.cleanGroup(null)
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
 
-        Log.e("asdf", "test onResume " + this.javaClass.simpleName)
+        val instanceKey = intent!!.getParcelableExtra<InstanceKey>(INSTANCE_KEY)
+        if (instanceKey == this.instanceKey) {
+            setIntent(intent)
+            cancelNotification()
+            setInstanceNotified()
+        } else {
+            startActivity(getForwardIntent(this, instanceKey, intent.getIntExtra(NOTIFICATION_ID_KEY, -1)))
+        }
+    }
+
+    private fun cancelNotification() {
+        val notificationId = intent.takeIf { it.hasExtra(NOTIFICATION_ID_KEY) }?.getIntExtra(NOTIFICATION_ID_KEY, -1)
+
+        NotificationWrapper.instance.run {
+            notificationId?.let { cancelNotification(it) }
+
+            cleanGroup(null)
+        }
+    }
+
+    private fun setInstanceNotified() {
+        DomainFactory.getInstance().let {
+            val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
+
+            it.setInstanceNotified(data!!.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
+        }
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
 
-        if (intent.getBooleanExtra(SET_NOTIFIED_KEY, false) && first) {
+        if (first) {
             first = false
 
-            DomainFactory.getInstance().let {
-                val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
-
-                it.setInstanceNotified(data.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
-            }
+            setInstanceNotified()
         }
 
-        actionBar.run {
+        supportActionBar!!.run {
             title = data.name
             subtitle = data.displayText
         }

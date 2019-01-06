@@ -68,7 +68,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val deleteIntent = InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey)
         val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val contentIntent = ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey)
+        val contentIntent = ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId)
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         val actions = ArrayList<NotificationCompat.Action>()

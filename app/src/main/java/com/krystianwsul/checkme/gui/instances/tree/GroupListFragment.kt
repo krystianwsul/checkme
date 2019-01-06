@@ -628,6 +628,10 @@ class GroupListFragment @JvmOverloads constructor(
             treeViewAdapter = groupAdapter.treeViewAdapter
             groupListRecycler.adapter = treeViewAdapter
 
+            treeViewAdapter.updates
+                    .subscribe { updateSelectAll() }
+                    .addTo(compositeDisposable)
+
             dragHelper.attachToRecyclerView(groupListRecycler)
 
             treeViewAdapter.updateDisplayedNodes {
@@ -669,7 +673,11 @@ class GroupListFragment @JvmOverloads constructor(
         updateSelectAll()
     }
 
-    fun updateSelectAll() = (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, parameters.dataWrapper.instanceDatas.values.any { it.Done == null })
+    fun updateSelectAll() {
+        val x = treeViewAdapter.displayedNodes
+        Log.e("asdf", "selectable nodes: " + x.filter { it.modelNode.isSelectable }.count() + "/" + x.size)
+        (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
+    }
 
     fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 

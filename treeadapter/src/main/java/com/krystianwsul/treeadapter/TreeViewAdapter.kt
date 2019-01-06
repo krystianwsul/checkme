@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.*
+import com.jakewharton.rxrelay2.PublishRelay
 
 class TreeViewAdapter(
         val treeModelAdapter: TreeModelAdapter,
@@ -19,17 +20,18 @@ class TreeViewAdapter(
 
     private var treeNodeCollection: TreeNodeCollection? = null
 
-    val selectedNodes: List<TreeNode>
-        get() {
-            if (treeNodeCollection == null)
-                throw SetTreeNodeCollectionNotCalledException()
+    val displayedNodes
+        get() = treeNodeCollection?.displayedNodes
+                ?: throw SetTreeNodeCollectionNotCalledException()
 
-            return treeNodeCollection!!.selectedNodes
-        }
+    val selectedNodes
+        get() = treeNodeCollection?.selectedNodes ?: throw SetTreeNodeCollectionNotCalledException()
 
     var query: String = ""
 
     private var updating = false
+
+    val updates = PublishRelay.create<Unit>()
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection) {
         this.treeNodeCollection = treeNodeCollection
@@ -40,13 +42,6 @@ class TreeViewAdapter(
             throw SetTreeNodeCollectionNotCalledException()
 
         return treeNodeCollection!!.displayedSize + if (showPadding) 1 else 0
-    }
-
-    fun getNode(position: Int): TreeNode {
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
-
-        return treeNodeCollection!!.getNode(position)
     }
 
     fun hasActionMode() = treeModelAdapter.hasActionMode
@@ -200,6 +195,8 @@ class TreeViewAdapter(
                 return oldState.modelState == newState.modelState
             }
         }).dispatchUpdatesTo(target)
+
+        updates.accept(Unit)
     }
 
     fun unselect(x: TreeViewAdapter.Placeholder) {

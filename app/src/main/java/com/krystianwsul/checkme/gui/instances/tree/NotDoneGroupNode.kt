@@ -175,26 +175,26 @@ class NotDoneGroupNode(
     override val checkBoxChecked = false
 
     override fun checkBoxOnClickListener() {
-            val groupAdapter = nodeCollection.groupAdapter
+        val groupAdapter = nodeCollection.groupAdapter
 
-            check(singleInstance())
+        check(singleInstance())
 
         check(!groupAdapter.groupListFragment.selectionCallback.hasActionMode)
 
-                groupAdapter.treeNodeCollection
-                        .treeViewAdapter
-                        .updateDisplayedNodes {
-                            singleInstanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
+        groupAdapter.treeNodeCollection
+                .treeViewAdapter
+                .updateDisplayedNodes {
+                    singleInstanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
 
-                            GroupListFragment.recursiveExists(singleInstanceData)
+                    GroupListFragment.recursiveExists(singleInstanceData)
 
-                            nodeCollection.dividerNode.add(singleInstanceData, TreeViewAdapter.Placeholder)
+                    nodeCollection.dividerNode.add(singleInstanceData, TreeViewAdapter.Placeholder)
 
-                            notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
-                        }
+                    notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
+                }
 
         groupAdapter.groupListFragment.updateSelectAll()
-        }
+    }
 
     override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
         val groupListFragment = groupAdapter.groupListFragment
@@ -426,26 +426,26 @@ class NotDoneGroupNode(
         override val checkBoxChecked = false
 
         override fun checkBoxOnClickListener() {
-                val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
-                check(notDoneGroupTreeNode.isExpanded)
+            val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
+            check(notDoneGroupTreeNode.isExpanded)
 
-                val groupAdapter = parentNodeCollection.groupAdapter
+            val groupAdapter = parentNodeCollection.groupAdapter
             check(!groupAdapter.groupListFragment.selectionCallback.hasActionMode)
 
-                    groupAdapter.treeNodeCollection
-                            .treeViewAdapter
-                            .updateDisplayedNodes {
-                                instanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
+            groupAdapter.treeNodeCollection
+                    .treeViewAdapter
+                    .updateDisplayedNodes {
+                        instanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
 
-                                GroupListFragment.recursiveExists(instanceData)
+                        GroupListFragment.recursiveExists(instanceData)
 
-                                parentNotDoneGroupNode.remove(this, TreeViewAdapter.Placeholder)
+                        parentNotDoneGroupNode.remove(this, TreeViewAdapter.Placeholder)
 
-                                parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
-                            }
+                        parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
+                    }
 
             groupAdapter.groupListFragment.updateSelectAll()
-            }
+        }
 
         override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 

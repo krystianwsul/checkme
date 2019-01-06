@@ -2,7 +2,10 @@ package com.krystianwsul.checkme.gui.tasks
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
@@ -24,6 +27,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
@@ -398,7 +402,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onResume() {
         super.onResume()
 
-        activity!!.registerReceiver(mBroadcastReceiver, IntentFilter(Intent.ACTION_TIME_TICK))
+        requireActivity().startTicks(mBroadcastReceiver!!)
 
         if (mCustomTimeDatas != null)
             updateFields()

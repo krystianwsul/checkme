@@ -1,6 +1,9 @@
 package com.krystianwsul.checkme.utils
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.view.View
 import android.view.ViewTreeObserver
 import com.krystianwsul.checkme.MyApplication
@@ -93,3 +96,5 @@ fun Context.dpToPx(dp: Int): Float {
     val density = resources.displayMetrics.density
     return dp * density
 }
+
+fun Context.startTicks(receiver: BroadcastReceiver) = registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))

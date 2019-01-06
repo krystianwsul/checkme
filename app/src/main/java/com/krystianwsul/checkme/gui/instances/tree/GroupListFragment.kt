@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
@@ -582,10 +581,8 @@ class GroupListFragment @JvmOverloads constructor(
         return Bundle().apply {
             putParcelable(SUPER_STATE_KEY, super.onSaveInstanceState())
 
-            if (this@GroupListFragment::treeViewAdapter.isInitialized) {
+            if (this@GroupListFragment::treeViewAdapter.isInitialized)
                 putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).state)
-                Log.e("asdf", "save expansion" + (treeViewAdapter.treeModelAdapter as GroupAdapter).state)
-            }
 
             putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
         }

@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.tasks
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -470,7 +469,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     private fun search(query: String, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
-        Log.e("asdf", "search: $query")
         this.query = query
 
         treeViewAdapter.query = query

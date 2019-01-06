@@ -1,16 +1,14 @@
 package com.krystianwsul.checkme.gui
 
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.treeadapter.TreeViewAdapter
-import kotlin.properties.Delegates
 
 
 abstract class SelectionCallback : ActionMode.Callback {
 
-    private var selected by Delegates.observable(0) { _, _, value -> Log.e("asdf", "mark selected $value") }
+    private var selected = 0
 
     var actionMode: ActionMode? = null
         private set

@@ -33,9 +33,10 @@ import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.view.*
 import kotlinx.android.synthetic.main.fragment_group_list.view.*
@@ -555,13 +556,17 @@ class GroupListFragment @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        Observables.combineLatest(
-                parametersRelay.doOnNext { Preferences.logLineHour("GroupListFragment.parametersRelay") },
-                activity.onPostCreate.doOnNext { Preferences.logLineHour("GroupListFragment.onPostCreate") })
-                .subscribe { initialize() }
-                .addTo(compositeDisposable)
+        val observable = activity.started.switchMap {
+            if (it) {
+                parametersRelay.doOnNext { Preferences.logLineHour("GroupListFragment.parametersRelay") }
+            } else {
+                Observable.never()
+            }
+        }
 
-        parametersRelay.reduce { one, two ->
+        compositeDisposable += observable.subscribe { initialize() }
+
+        observable.reduce { one, two ->
             DataDiff.diffData(one.dataWrapper, two.dataWrapper)
             two
         }

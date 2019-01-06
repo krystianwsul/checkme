@@ -24,7 +24,7 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     protected val createDisposable = CompositeDisposable()
 
-    val onPostCreate = BehaviorRelay.create<Unit>()
+    val started = BehaviorRelay.createDefault(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         MyCrashlytics.logMethod(this)
@@ -38,12 +38,12 @@ abstract class AbstractActivity : AppCompatActivity() {
         super.onNewIntent(intent)
     }
 
-    override fun onPostCreate(savedInstanceState: Bundle?) {
+    override fun onStart() {
         MyCrashlytics.logMethod(this)
 
-        super.onPostCreate(savedInstanceState)
+        super.onStart()
 
-        onPostCreate.accept(Unit)
+        started.accept(true)
     }
 
     override fun onResume() {
@@ -63,6 +63,14 @@ abstract class AbstractActivity : AppCompatActivity() {
         MyCrashlytics.logMethod(this)
 
         super.onPause()
+    }
+
+    override fun onStop() {
+        MyCrashlytics.logMethod(this)
+
+        started.accept(false)
+
+        super.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

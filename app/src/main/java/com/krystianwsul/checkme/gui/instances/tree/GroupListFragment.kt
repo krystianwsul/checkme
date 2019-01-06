@@ -189,8 +189,6 @@ class GroupListFragment @JvmOverloads constructor(
                     val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
                     val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys)
 
-                    updateSelectAll()
-
                     groupListListener.showSnackbar(instanceDatas.size) {
                         fun InstanceData.flatten() = listOf(
                                 listOf(this),
@@ -253,14 +251,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val done = DomainFactory.getInstance().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, true)
 
-                    var selectedTreeNodes = treeViewAdapter.selectedNodes
-                    check(selectedTreeNodes.isNotEmpty())
-
-                    do {
-                        check(selectedTreeNodes.isNotEmpty())
-
-                        val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
-
+                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) { treeNode ->
                         treeNode.modelNode.let {
                             if (it is NotDoneGroupNode) {
                                 val nodeCollection = it.nodeCollection
@@ -291,11 +282,7 @@ class GroupListFragment @JvmOverloads constructor(
                                 it.parentNodeCollection.dividerNode.add(instanceData, x)
                             }
                         }
-
-                        selectedTreeNodes = treeViewAdapter.selectedNodes
-                    } while (selectedTreeNodes.isNotEmpty())
-
-                    updateSelectAll()
+                    }
                 }
                 R.id.action_group_mark_not_done -> {
                     check(instanceDatas.all { it.Done != null })
@@ -304,14 +291,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     DomainFactory.getInstance().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
 
-                    var selectedTreeNodes = treeViewAdapter.selectedNodes
-                    check(selectedTreeNodes.isNotEmpty())
-
-                    do {
-                        check(selectedTreeNodes.isNotEmpty())
-
-                        val treeNode = selectedTreeNodes.maxBy { it.indentation }!!
-
+                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) { treeNode ->
                         treeNode.modelNode.let {
                             val instanceData = (it as DoneInstanceNode).instanceData
                             instanceData.Done = null
@@ -327,10 +307,7 @@ class GroupListFragment @JvmOverloads constructor(
                         }
 
                         decrementSelected(x)
-                        selectedTreeNodes = treeViewAdapter.selectedNodes
-                    } while (selectedTreeNodes.isNotEmpty())
-
-                    updateSelectAll()
+                    }
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -629,7 +606,9 @@ class GroupListFragment @JvmOverloads constructor(
             groupListRecycler.adapter = treeViewAdapter
 
             treeViewAdapter.updates
-                    .subscribe { updateSelectAll() }
+                    .subscribe {
+                        (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
+                    }
                     .addTo(compositeDisposable)
 
             dragHelper.attachToRecyclerView(groupListRecycler)
@@ -669,14 +648,6 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         animateVisibility(show, hide)
-
-        updateSelectAll()
-    }
-
-    fun updateSelectAll() {
-        val x = treeViewAdapter.displayedNodes
-        Log.e("asdf", "selectable nodes: " + x.filter { it.modelNode.isSelectable }.count() + "/" + x.size)
-        (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
     }
 
     fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)

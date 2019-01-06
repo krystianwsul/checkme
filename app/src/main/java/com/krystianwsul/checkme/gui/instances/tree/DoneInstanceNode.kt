@@ -92,8 +92,6 @@ class DoneInstanceNode(
 
                     nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
                 }
-
-        groupAdapter.groupListFragment.updateSelectAll()
     }
 
     override fun compareTo(other: ModelNode): Int {

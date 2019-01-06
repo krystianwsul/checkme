@@ -192,8 +192,6 @@ class NotDoneGroupNode(
 
                     notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
                 }
-
-        groupAdapter.groupListFragment.updateSelectAll()
     }
 
     override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
@@ -443,8 +441,6 @@ class NotDoneGroupNode(
 
                         parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
                     }
-
-            groupAdapter.groupListFragment.updateSelectAll()
         }
 
         override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))

@@ -104,8 +104,8 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    val activity = context as AbstractActivity
-    val listener = context as GroupListListener
+    val activity get() = context as AbstractActivity
+    val listener get() = context as GroupListListener
 
     lateinit var treeViewAdapter: TreeViewAdapter
         private set
@@ -189,7 +189,7 @@ class GroupListFragment @JvmOverloads constructor(
                     val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
                     val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys)
 
-                    groupListListener.showSnackbar(instanceDatas.size) {
+                    listener.showSnackbar(instanceDatas.size) {
                         fun InstanceData.flatten() = listOf(
                                 listOf(this),
                                 children.values).flatten()
@@ -361,7 +361,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             updateFabVisibility()
 
-            (activity as GroupListListener).onCreateGroupActionMode(actionMode!!, treeViewAdapter)
+            listener.onCreateGroupActionMode(actionMode!!, treeViewAdapter)
 
             updateMenu()
         }
@@ -477,8 +477,6 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
     private val compositeDisposable = CompositeDisposable()
-
-    private val groupListListener get() = activity as GroupListListener
 
     private fun getShareData(instanceDatas: Collection<InstanceData>): String {
         check(instanceDatas.isNotEmpty())
@@ -607,7 +605,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeViewAdapter.updates
                     .subscribe {
-                        (activity as GroupListListener).setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
+                        listener.setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
                     }
                     .addTo(compositeDisposable)
 

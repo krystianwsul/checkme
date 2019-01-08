@@ -2,6 +2,7 @@ package com.krystianwsul.checkme
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.preference.PreferenceManager
@@ -28,10 +29,13 @@ class MyApplication : Application() {
         @SuppressLint("StaticFieldLeak")
         lateinit var instance: MyApplication
             private set
-    }
 
-    lateinit var sharedPreferences: SharedPreferences
-        private set
+        // for unit tests
+        @SuppressLint("StaticFieldLeak")
+        lateinit var context: Context
+
+        lateinit var sharedPreferences: SharedPreferences
+    }
 
     var token: String?
         get() = sharedPreferences.getString(TOKEN_KEY, null)
@@ -42,8 +46,9 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         instance = this
+        context = this
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         JodaTimeAndroid.init(this)
 

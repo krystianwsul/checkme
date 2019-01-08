@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Resources
 import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Log
@@ -56,13 +57,16 @@ class DomainFactoryTest {
     }
 
     @Mock
-    private val mContext: Context? = null
+    private lateinit var mContext: Context
 
     @Mock
-    private val mSharedPreferences: SharedPreferences? = null
+    private lateinit var mSharedPreferences: SharedPreferences
 
     @Mock
-    private val mEditor: SharedPreferences.Editor? = null
+    private lateinit var mResources: Resources
+
+    @Mock
+    private lateinit var mEditor: SharedPreferences.Editor
 
     private fun newPersistenceManger() = PersistenceManger()
 
@@ -88,14 +92,16 @@ class DomainFactoryTest {
             override fun answer(invocation: InvocationOnMock) = mCounter++
         })
 
-        Mockito.`when`(mContext!!.getSharedPreferences(anyString(), anyInt())).thenReturn(mSharedPreferences)
+        Mockito.`when`(mContext.resources).thenReturn(mResources)
 
-        Mockito.`when`(mSharedPreferences!!.getString(anyString(), anyString())).thenAnswer { invocation -> invocation.arguments[1] }
+        Mockito.`when`(mSharedPreferences.getString(anyString(), anyString())).thenAnswer { invocation -> invocation.arguments[1] }
 
         Mockito.`when`(mSharedPreferences.edit()).thenReturn(mEditor)
-        Mockito.`when`(mEditor!!.putLong(anyString(), anyLong())).thenReturn(mEditor)
+        Mockito.`when`(mEditor.putLong(anyString(), anyLong())).thenReturn(mEditor)
+        Mockito.`when`(mEditor.putString(anyString(), anyString())).thenReturn(mEditor)
 
         MyApplication.context = mContext
+        MyApplication.sharedPreferences = mSharedPreferences
     }
 
     @After
@@ -446,7 +452,7 @@ class DomainFactoryTest {
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().Exists)
 
         run {
-            val irrelevant = domainFactory.updateNotificationsTick(ExactTimeStamp(day1, hour12.toHourMilli()), SaveService.Source.GUI, false)
+            val irrelevant = domainFactory.updateNotificationsTick(ExactTimeStamp(day1, hour12.toHourMilli()), SaveService.Source.GUI, false, "test")
             Assert.assertTrue(irrelevant.tasks.isEmpty())
             Assert.assertTrue(irrelevant.instances.isEmpty())
         }
@@ -495,7 +501,7 @@ class DomainFactoryTest {
         }
 
         run {
-            val irrelevant = domainFactory.updateNotificationsTick(ExactTimeStamp(day2, hour16.toHourMilli()), SaveService.Source.GUI, false)
+            val irrelevant = domainFactory.updateNotificationsTick(ExactTimeStamp(day2, hour16.toHourMilli()), SaveService.Source.GUI, false, "test")
             Assert.assertTrue(irrelevant.tasks.isEmpty())
             Assert.assertTrue(irrelevant.instances.size == 2)
         }
@@ -541,7 +547,7 @@ class DomainFactoryTest {
         val parentInstanceKey = dataWrapper.instanceDatas.keys.iterator().next()
         Assert.assertTrue(dataWrapper.instanceDatas[parentInstanceKey]!!.children.isEmpty())
 
-        domainFactory.updateNotificationsTick(ExactTimeStamp(date, hour3.toHourMilli()), SaveService.Source.GUI, false)
+        domainFactory.updateNotificationsTick(ExactTimeStamp(date, hour3.toHourMilli()), SaveService.Source.GUI, false, "test")
 
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(date, hour3.toHourMilli()), range, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(date, hour3.toHourMilli()), range, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas[parentInstanceKey]!!.children.isEmpty())
@@ -584,7 +590,7 @@ class DomainFactoryTest {
         val splitScheduleData = CreateTaskViewModel.ScheduleData.SingleScheduleData(date, TimePair(hour2))
         val splitTask = domainFactory.createScheduleRootTask(ExactTimeStamp(date, hour1.toHourMilli()), dataId, SaveService.Source.GUI, "split", listOf(splitScheduleData), null, null)
 
-        domainFactory.updateNotificationsTick(ExactTimeStamp(date, hour2.toHourMilli()), SaveService.Source.GUI, false)
+        domainFactory.updateNotificationsTick(ExactTimeStamp(date, hour2.toHourMilli()), SaveService.Source.GUI, false, "test")
 
         val (dataWrapper1) = domainFactory.getGroupListData(ExactTimeStamp(date, hour2.toHourMilli()), range, MainActivity.TimeRange.DAY)
         Assert.assertTrue(dataWrapper1.instanceDatas.size == 1)

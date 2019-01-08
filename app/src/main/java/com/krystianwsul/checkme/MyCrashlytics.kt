@@ -6,7 +6,7 @@ import io.fabric.sdk.android.Fabric
 
 object MyCrashlytics {
 
-    val enabled = MyApplication.instance
+    val enabled = MyApplication.context
             .resources
             .getBoolean(R.bool.crashlytics_enabled)
 

@@ -10,7 +10,7 @@ object Preferences {
     private const val LAST_TICK_KEY = "lastTick"
     private const val TICK_LOG = "tickLog"
 
-    private val sharedPreferences by lazy { MyApplication.instance.sharedPreferences }
+    private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
     var lastTick
         get() = sharedPreferences.getLong(LAST_TICK_KEY, -1)

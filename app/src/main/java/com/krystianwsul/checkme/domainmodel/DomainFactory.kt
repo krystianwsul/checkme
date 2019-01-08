@@ -1538,7 +1538,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         return task.taskKey
     }
 
-    private fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean, sourceName: String): Irrelevant {
+    fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean, sourceName: String): Irrelevant {
         updateNotifications(silent, now, listOf(), sourceName)
 
         val irrelevant = setIrrelevant(now)

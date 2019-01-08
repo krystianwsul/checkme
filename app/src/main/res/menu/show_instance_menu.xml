@@ -39,29 +39,29 @@
         android:icon="@drawable/ic_assignment_white_24dp"
         android:visible="false"/>
     <item
-        android:id="@+id/instance_menu_check"
-        android:title="@string/mark_done"
-        android:orderInCategory="400"
-        app:showAsAction="always"
-        android:icon="@drawable/ic_check_box_outline_blank_white_24dp"
-        android:visible="false"/>
-    <item
-        android:id="@+id/instance_menu_uncheck"
-        android:title="@string/mark_not_done"
-        android:orderInCategory="500"
-        app:showAsAction="always"
-        android:icon="@drawable/ic_check_box_white_24dp"
-        android:visible="false"/>
-    <item
         android:id="@+id/instance_menu_select_all"
         android:title="@string/selectAll"
         android:orderInCategory="600"
         android:icon="@drawable/ic_select_all_white_24dp"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/instance_menu_add_task"
         android:title="@string/add_task_this_time"
         android:orderInCategory="700"
         android:icon="@drawable/ic_add_white_24dp"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/instance_menu_check"
+        android:title="@string/mark_done"
+        android:orderInCategory="1000"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_check_box_outline_blank_white_24dp"
+        android:visible="false"/>
+    <item
+        android:id="@+id/instance_menu_uncheck"
+        android:title="@string/mark_not_done"
+        android:orderInCategory="1000"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_check_box_white_24dp"
+        android:visible="false"/>
 </menu>

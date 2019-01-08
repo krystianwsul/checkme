@@ -21,12 +21,12 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
         val taskKey = task.taskKey
 
         // mark parents relevant
-        task.getTaskHierarchiesByChildTaskKey(taskKey)
+        task.getTaskHierarchiesByChildTaskKey(taskKey) // todo filter current?
                 .map { taskRelevances[it.parentTaskKey]!! }
                 .forEach { it.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
 
         // mark children relevant
-        task.getTaskHierarchiesByParentTaskKey(taskKey)
+        task.getTaskHierarchiesByParentTaskKey(taskKey) // todo filter current?
                 .map { taskRelevances[it.childTaskKey]!! }
                 .forEach { it.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
 

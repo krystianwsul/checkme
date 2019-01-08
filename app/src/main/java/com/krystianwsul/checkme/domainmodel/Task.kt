@@ -286,8 +286,8 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     protected fun checkOnlyHierarchy(name: String) {
         if (onlyHierarchy)
-            MyCrashlytics.logException(OnlyHierarchyException(name))
+            MyCrashlytics.logException(HierarchyException(name))
     }
 
-    private inner class OnlyHierarchyException(name: String) : Exception("task $name $taskKey")
+    private inner class HierarchyException(name: String) : Exception("task $name $taskKey")
 }

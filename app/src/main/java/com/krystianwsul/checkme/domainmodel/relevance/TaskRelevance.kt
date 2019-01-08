@@ -13,12 +13,14 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
     var relevant = false
         private set
 
-    var notOnlyHierarchy = false // todo begining to log on 08-01-2019. If nothing by 08-02-2019, start deleting these tasks
+    var onlyHierarchy = true // todo begining to log on 08-01-2019. If nothing by 08-02-2019, start deleting these tasks
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, LocalCustomTimeRelevance>, now: ExactTimeStamp, notOnlyHierarchy: Boolean = true) {
-        this.notOnlyHierarchy = this.notOnlyHierarchy || notOnlyHierarchy
-        if (relevant) return
+    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, LocalCustomTimeRelevance>, now: ExactTimeStamp, onlyHierarchy: Boolean = false) {
+        val settingNotOnlyHierarchy = this.onlyHierarchy && !onlyHierarchy
+        if (relevant && !settingNotOnlyHierarchy) return
+
+        this.onlyHierarchy = this.onlyHierarchy && onlyHierarchy
 
         relevant = true
 
@@ -27,7 +29,9 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
         // mark parents and children relevant
         (task.getTaskHierarchiesByChildTaskKey(taskKey).map { Pair(it, it.parentTaskKey) } + task.getTaskHierarchiesByParentTaskKey(taskKey).map { Pair(it, it.childTaskKey) })
                 .forEach { (taskHierarchy, taskKey) ->
-                    taskRelevances[taskKey]!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now, notOnlyHierarchy && taskHierarchy.notDeleted(now))
+                    val childOnlyHierarchy = onlyHierarchy || !taskHierarchy.notDeleted(now)
+
+                    taskRelevances[taskKey]!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now, childOnlyHierarchy)
                 }
 
         val oldestVisible = task.getOldestVisible()!!

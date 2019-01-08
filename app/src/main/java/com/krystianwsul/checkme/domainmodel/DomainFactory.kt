@@ -2087,7 +2087,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     fun setIrrelevant(now: ExactTimeStamp): Irrelevant {
-        val tasks = getTasks()
+        val tasks = getTasks() // todo move now back by delete timout
 
         for (task in tasks)
             task.updateOldestVisible(now)
@@ -2125,7 +2125,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         getCurrentCustomTimes().map { localCustomTimeRelevances[it.id]!! }.forEach { it.setRelevant() }
 
         val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
-        relevantTaskRelevances.forEach { it.task.onlyHierarchy = !it.notOnlyHierarchy }
+        relevantTaskRelevances.forEach { it.task.onlyHierarchy = it.onlyHierarchy }
 
         val relevantTasks = relevantTaskRelevances.map { it.task }
 

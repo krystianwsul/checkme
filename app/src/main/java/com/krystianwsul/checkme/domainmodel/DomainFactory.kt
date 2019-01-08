@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.firebase.json.UserWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
+import com.krystianwsul.checkme.gui.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
@@ -2087,7 +2088,10 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     fun setIrrelevant(now: ExactTimeStamp): Irrelevant {
-        val tasks = getTasks() // todo move now back by delete timout
+        if (SnackbarListener.deleting)
+            return Irrelevant(listOf(), listOf(), listOf(), listOf(), listOf())
+
+        val tasks = getTasks()
 
         for (task in tasks)
             task.updateOldestVisible(now)
@@ -2154,9 +2158,9 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         check(irrelevantLocalCustomTimes.none { it.current })
 
-        irrelevantExistingInstances.forEach { it.delete() }
-        irrelevantTasks.forEach { it.delete() }
-        irrelevantLocalCustomTimes.forEach { it.delete() }
+        irrelevantExistingInstances.let { Log.e("asdf", "irrelevant instances " + it.size); it }.forEach { it.delete() }
+        irrelevantTasks.let { Log.e("asdf", "irrelevant tasks " + it.size); it }.forEach { it.delete() }
+        irrelevantLocalCustomTimes.let { Log.e("asdf", "irrelevant times " + it.size); it }.forEach { it.delete() }
 
         val irrelevantRemoteCustomTimes: MutableList<RemoteCustomTime>?
         val irrelevantRemoteProjects: MutableList<RemoteProject>?

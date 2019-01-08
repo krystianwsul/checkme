@@ -2425,6 +2425,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             check(realtime > then)
 
             if (realtime - then < 5000) {
+                MyCrashlytics.logException(UpdateInstanceException(instance.name)) // todo if no errors after a month, remove after 08-02-2019
                 Log.e("asdf", "skipping notification update for " + instance.name)
 
                 return
@@ -2549,4 +2550,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val scheduleIds = mutableSetOf<ScheduleId>()
         val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
     }
+
+    private class UpdateInstanceException(message: String) : Exception(message)
 }

@@ -603,7 +603,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val now = ExactTimeStamp.now
 
         val instance = getInstance(instanceKey)
-        return ShowInstanceViewModel.Data(instance.name, instance.getDisplayText(now), instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now))
+        return ShowInstanceViewModel.Data(instance.name, instance.instanceDateTime, instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now))
     }
 
     fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {

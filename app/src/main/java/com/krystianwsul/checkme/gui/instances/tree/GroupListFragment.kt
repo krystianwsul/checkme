@@ -362,8 +362,6 @@ class GroupListFragment @JvmOverloads constructor(
 
             actionMode!!.menuInflater.inflate(R.menu.menu_edit_groups, actionMode!!.menu)
 
-            updateFabVisibility()
-
             listener.onCreateGroupActionMode(actionMode!!, treeViewAdapter)
 
             updateMenu()
@@ -373,11 +371,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun onOtherAdded() = updateMenu()
 
-        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
-            updateFabVisibility()
-
-            listener.onDestroyGroupActionMode()
-        }
+        override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
 
         override fun onSecondToLastRemoved() = updateMenu()
 
@@ -607,6 +601,7 @@ class GroupListFragment @JvmOverloads constructor(
             treeViewAdapter.updates
                     .subscribe {
                         listener.setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
+                        updateFabVisibility()
                     }
                     .addTo(compositeDisposable)
 
@@ -616,8 +611,6 @@ class GroupListFragment @JvmOverloads constructor(
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }
         }
-
-        updateFabVisibility()
 
         val emptyTextId = when (val parameters = parameters) {
             is Parameters.All -> R.string.instances_empty_root
@@ -655,8 +648,25 @@ class GroupListFragment @JvmOverloads constructor(
         this.floatingActionButton = floatingActionButton
 
         floatingActionButton.setOnClickListener {
+            check(showPadding())
+
             when (val parameters = parameters) {
-                is Parameters.All -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
+                is Parameters.All -> {
+                    val actionMode = selectionCallback.actionMode
+
+                    if (actionMode != null) {
+                        nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).let {
+                            (it.firstOrNull { it.InstanceTimePair.customTimeKey != null }
+                                    ?: it.first()).let {
+                                activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(it.InstanceTimeStamp.date, it.InstanceTimePair)))
+                            }
+                        }
+
+                        actionMode.finish()
+                    } else {
+                        activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
+                    }
+                }
                 is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
                 is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
                 else -> throw IllegalStateException()
@@ -667,15 +677,25 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun showPadding() = when (val parameters = parameters) {
-        is Parameters.All -> true
-        is Parameters.TimeStamp -> parameters.timeStamp > TimeStamp.now
-        is Parameters.InstanceKey -> parameters.dataWrapper.taskEditable!!
+        is Parameters.All -> {
+            if (selectionCallback.hasActionMode) {
+                nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).filter { it.IsRootInstance }
+                        .map { it.InstanceTimeStamp }
+                        .distinct()
+                        .singleOrNull()
+                        ?.takeIf { it > TimeStamp.now } != null
+            } else {
+                true
+            }
+        }
+        is Parameters.TimeStamp -> (parameters.timeStamp > TimeStamp.now) && !selectionCallback.hasActionMode
+        is Parameters.InstanceKey -> parameters.dataWrapper.taskEditable!! && !selectionCallback.hasActionMode
         else -> false
     }
 
     private fun updateFabVisibility() {
         floatingActionButton?.apply {
-            if (parametersRelay.hasValue() && !selectionCallback.hasActionMode && showPadding()) {
+            if (parametersRelay.hasValue() && showPadding()) {
                 show()
             } else {
                 hide()

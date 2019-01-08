@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -21,7 +22,9 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -62,6 +65,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     override val snackbarParent get() = showInstanceCoordinator!!
 
+    private val broadcastReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) = invalidateOptionsMenu()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.show_instance_menu, menu)
         return true
@@ -77,6 +85,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
+            findItem(R.id.instance_menu_add_task).isVisible = data?.run { isRootInstance && instanceDateTime.timeStamp > TimeStamp.now } == true
+            // todo ticks
         }
 
         return true
@@ -154,6 +164,11 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                         groupListFragment.selectAll(TreeViewAdapter.Placeholder)
                     }
                 }
+                R.id.instance_menu_add_task -> {
+                    data!!.instanceDateTime.let {
+                        startActivity(CreateTaskActivity.getCreateIntent(this, CreateTaskActivity.ScheduleHint(it.date, it.time.timePair)))
+                    }
+                }
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -196,6 +211,19 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         } else {
             startActivity(getForwardIntent(this, instanceKey, intent.getIntExtra(NOTIFICATION_ID_KEY, -1)))
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        startTicks(broadcastReceiver)
+        // todo group list action mode
+    }
+
+    override fun onStop() {
+        unregisterReceiver(broadcastReceiver)
+
+        super.onStop()
     }
 
     private fun cancelNotification() {

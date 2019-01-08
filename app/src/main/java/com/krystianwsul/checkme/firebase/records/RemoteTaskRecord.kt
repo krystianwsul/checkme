@@ -2,14 +2,16 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import android.util.Log
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.RemoteTask
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.utils.ScheduleKey
-import java.util.*
+import com.krystianwsul.checkme.utils.time.Date
 
 class RemoteTaskRecord private constructor(
         create: Boolean,
@@ -35,7 +37,8 @@ class RemoteTaskRecord private constructor(
 
     val remoteMonthlyWeekScheduleRecords: MutableMap<String, RemoteMonthlyWeekScheduleRecord> = HashMap()
 
-    override val createObject: TaskJson// because of duplicate functionality when converting local task
+    override val createObject: TaskJson
+        // because of duplicate functionality when converting local task
         get() {
             if (!create)
                 taskJson.instances = _remoteInstanceRecords.entries
@@ -102,11 +105,20 @@ class RemoteTaskRecord private constructor(
             addValue("$key/note", note)
         }
 
-    val oldestVisibleYear get() = taskJson.oldestVisibleYear
-
-    val oldestVisibleMonth get() = taskJson.oldestVisibleMonth
-
-    val oldestVisibleDay get() = taskJson.oldestVisibleDay
+    val oldestVisible
+        get() = taskJson.oldestVisible
+                .values
+                .map { it.toDate() }
+                .toMutableList()
+                .apply {
+                    if (taskJson.oldestVisibleYear != null && taskJson.oldestVisibleMonth != null && taskJson.oldestVisibleDay != null) {
+                        add(Date(taskJson.oldestVisibleYear!!, taskJson.oldestVisibleMonth!!, taskJson.oldestVisibleDay!!))
+                    } else {
+                        if (taskJson.oldestVisibleYear != null || taskJson.oldestVisibleMonth != null || taskJson.oldestVisibleDay != null)
+                            MyCrashlytics.logException(RemoteTask.MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
+                    }
+                }
+                .min()
 
     val remoteInstanceRecords: Map<ScheduleKey, RemoteInstanceRecord> get() = _remoteInstanceRecords
 

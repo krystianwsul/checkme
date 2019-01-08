@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
@@ -87,16 +86,7 @@ class RemoteTask(
         return childTask
     }
 
-    override fun getOldestVisible(): Date? {
-        return if (remoteTaskRecord.oldestVisibleYear != null && remoteTaskRecord.oldestVisibleMonth != null && remoteTaskRecord.oldestVisibleDay != null) {
-            Date(remoteTaskRecord.oldestVisibleYear!!, remoteTaskRecord.oldestVisibleMonth!!, remoteTaskRecord.oldestVisibleDay!!)
-        } else {
-            if (remoteTaskRecord.oldestVisibleYear != null || remoteTaskRecord.oldestVisibleMonth != null || remoteTaskRecord.oldestVisibleDay != null)
-                MyCrashlytics.logException(MissingDayException("projectId: ${remoteProject.id}, taskId: $id, oldestVisibleYear: ${remoteTaskRecord.oldestVisibleYear}, oldestVisibleMonth: ${remoteTaskRecord.oldestVisibleMonth}, oldestVisibleDay: ${remoteTaskRecord.oldestVisibleDay}"))
-
-            null
-        }
-    }
+    override fun getOldestVisible() = remoteTaskRecord.oldestVisible
 
     override fun setOldestVisible(date: Date) {
         remoteTaskRecord.apply {
@@ -268,5 +258,5 @@ class RemoteTask(
         return this
     }
 
-    private class MissingDayException(message: String) : Exception(message)
+    class MissingDayException(message: String) : Exception(message)
 }

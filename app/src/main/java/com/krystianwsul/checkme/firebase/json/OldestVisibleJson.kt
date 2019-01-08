@@ -8,4 +8,6 @@ class OldestVisibleJson(
         var day: Int = 0) {
 
     constructor(date: Date) : this(date.year, date.month, date.day)
+
+    fun toDate() = Date(year, month, day)
 }

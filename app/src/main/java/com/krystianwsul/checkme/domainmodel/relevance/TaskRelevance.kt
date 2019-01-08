@@ -13,22 +13,22 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
     var relevant = false
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, LocalCustomTimeRelevance>, now: ExactTimeStamp) {
+    var notOnlyHierarchy = false // todo begining to log on 08-01-2019. If nothing by 08-02-2019, start deleting these tasks
+        private set
+
+    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, LocalCustomTimeRelevance>, now: ExactTimeStamp, notOnlyHierarchy: Boolean = true) {
+        this.notOnlyHierarchy = this.notOnlyHierarchy || notOnlyHierarchy
         if (relevant) return
 
         relevant = true
 
         val taskKey = task.taskKey
 
-        // mark parents relevant
-        task.getTaskHierarchiesByChildTaskKey(taskKey) // todo filter current?
-                .map { taskRelevances[it.parentTaskKey]!! }
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
-
-        // mark children relevant
-        task.getTaskHierarchiesByParentTaskKey(taskKey) // todo filter current?
-                .map { taskRelevances[it.childTaskKey]!! }
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
+        // mark parents and children relevant
+        (task.getTaskHierarchiesByChildTaskKey(taskKey).map { Pair(it, it.parentTaskKey) } + task.getTaskHierarchiesByParentTaskKey(taskKey).map { Pair(it, it.childTaskKey) })
+                .forEach { (taskHierarchy, taskKey) ->
+                    taskRelevances[taskKey]!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now, notOnlyHierarchy && taskHierarchy.notDeleted(now))
+                }
 
         val oldestVisible = task.getOldestVisible()!!
 

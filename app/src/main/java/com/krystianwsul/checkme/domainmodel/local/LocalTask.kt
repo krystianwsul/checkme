@@ -15,7 +15,7 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
 
     private val mSchedules = ArrayList<Schedule>()
 
-    override val name get() = taskRecord.name
+    override val name get() = taskRecord.name.apply { checkOnlyHierarchy(this) }
 
     val id get() = taskRecord.id
 

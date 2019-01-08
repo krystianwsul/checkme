@@ -29,7 +29,7 @@ class RemoteTask(
 
     private val remoteSchedules = ArrayList<Schedule>()
 
-    override val name get() = remoteTaskRecord.name
+    override val name get() = remoteTaskRecord.name.apply { checkOnlyHierarchy(this) }
 
     private val remoteFactory get() = domainFactory.remoteProjectFactory!!
 

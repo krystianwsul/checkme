@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.notifications
 import android.content.Context
 import android.content.Intent
 import android.text.TextUtils
+import android.util.Log
 import androidx.core.app.JobIntentService
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
@@ -46,6 +47,8 @@ class TickJobIntentService : JobIntentService() {
         fun tick(intent: Intent) {
             check(intent.hasExtra(SILENT_KEY))
             check(intent.hasExtra(SOURCE_KEY))
+
+            Log.e("asdf", "relevant ticking")
 
             val silent = intent.getBooleanExtra(SILENT_KEY, false)
 

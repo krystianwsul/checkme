@@ -2028,17 +2028,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         remoteProjectFactory!!.getTaskForce(taskKey)
     }
 
-    private fun getTaskIfPresent(taskKey: TaskKey) = if (taskKey.localTaskId != null) {
-        check(taskKey.remoteTaskId.isNullOrEmpty())
-
-        localFactory.getTaskIfPresent(taskKey.localTaskId)
-    } else {
-        check(!taskKey.remoteTaskId.isNullOrEmpty())
-        checkNotNull(remoteProjectFactory)
-
-        remoteProjectFactory!!.getTaskIfPresent(taskKey)
-    }
-
     fun getChildTaskHierarchies(parentTask: Task, exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
         check(parentTask.current(exactTimeStamp))
 
@@ -2135,9 +2124,10 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         getCurrentCustomTimes().map { localCustomTimeRelevances[it.id]!! }.forEach { it.setRelevant() }
 
-        val relevantTasks = taskRelevances.values
-                .filter { it.relevant }
-                .map { it.task }
+        val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
+        relevantTaskRelevances.forEach { it.task.onlyHierarchy = !it.notOnlyHierarchy }
+
+        val relevantTasks = relevantTaskRelevances.map { it.task }
 
         val irrelevantTasks = tasks.toMutableList()
         irrelevantTasks.removeAll(relevantTasks)

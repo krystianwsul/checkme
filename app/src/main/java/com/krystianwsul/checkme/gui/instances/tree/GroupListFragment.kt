@@ -648,8 +648,25 @@ class GroupListFragment @JvmOverloads constructor(
         this.floatingActionButton = floatingActionButton
 
         floatingActionButton.setOnClickListener {
+            check(showPadding())
+
             when (val parameters = parameters) {
-                is Parameters.All -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
+                is Parameters.All -> {
+                    val actionMode = selectionCallback.actionMode
+
+                    if (actionMode != null) {
+                        nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).let {
+                            (it.firstOrNull { it.InstanceTimePair.customTimeKey != null }
+                                    ?: it.first()).let {
+                                activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(it.InstanceTimeStamp.date, it.InstanceTimePair)))
+                            }
+                        }
+
+                        actionMode.finish()
+                    } else {
+                        activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
+                    }
+                }
                 is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
                 is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
                 else -> throw IllegalStateException()
@@ -662,7 +679,8 @@ class GroupListFragment @JvmOverloads constructor(
     private fun showPadding() = when (val parameters = parameters) {
         is Parameters.All -> {
             if (selectionCallback.hasActionMode) {
-                nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).map { it.InstanceTimeStamp }
+                nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).filter { it.IsRootInstance }
+                        .map { it.InstanceTimeStamp }
                         .distinct()
                         .singleOrNull()
                         ?.takeIf { it > TimeStamp.now } != null

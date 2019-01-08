@@ -414,12 +414,7 @@ class NotDoneGroupNode(
 
         override val children get() = getChildrenNew(treeNode, instanceData)
 
-        override val checkBoxVisibility
-            get() = if (groupListFragment.selectionCallback.hasActionMode) {
-                View.INVISIBLE
-            } else {
-                View.VISIBLE
-            }
+        override val checkBoxVisibility get() = if (groupListFragment.selectionCallback.hasActionMode) View.INVISIBLE else View.VISIBLE
 
         override val checkBoxChecked = false
 

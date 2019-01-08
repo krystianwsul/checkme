@@ -59,17 +59,19 @@ class TreeViewAdapter(
         check(!updating)
 
         val oldStates = treeNodeCollection!!.displayedNodes.map { it.state }
+        val oldShowPadding = showPadding
 
         updating = true
         action()
         updating = false
 
         val newStates = treeNodeCollection!!.displayedNodes.map { it.state }
+        val newShowPadding = showPadding
 
         val target = if (forceChange) {
             val listUpdateCallback = object : ListUpdateCallback {
 
-                val states = BooleanArray(oldStates.size) { false }.toMutableList()
+                val states = BooleanArray(oldStates.size + (if (oldShowPadding) 1 else 0)) { false }.toMutableList()
 
                 override fun onChanged(position: Int, count: Int, payload: Any?) {
                     for (i in 0 until count)
@@ -154,28 +156,31 @@ class TreeViewAdapter(
 
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
+            private fun paddingComparison(oldItemPosition: Int, newItemPosition: Int): Boolean? {
+                val oldIsPadding = oldShowPadding && oldItemPosition == oldStates.size
+                val newIsPadding = newShowPadding && newItemPosition == newStates.size
+
+                if (oldIsPadding && newIsPadding)
+                    return true
+
+                if (oldIsPadding != newIsPadding)
+                    return false
+
+                return null
+            }
+
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                if (showPadding) {
-                    if (oldItemPosition == oldStates.size && newItemPosition == newStates.size)
-                        return true
-                    else if (oldItemPosition == oldStates.size || newItemPosition == newStates.size)
-                        return false
-                }
+                paddingComparison(oldItemPosition, newItemPosition)?.let { return it }
 
                 return oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
             }
 
-            override fun getOldListSize() = oldStates.size + (if (showPadding) 1 else 0)
+            override fun getOldListSize() = oldStates.size + (if (oldShowPadding) 1 else 0)
 
-            override fun getNewListSize() = newStates.size + (if (showPadding) 1 else 0)
+            override fun getNewListSize() = newStates.size + (if (newShowPadding) 1 else 0)
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                if (showPadding) {
-                    if (oldItemPosition == oldStates.size && newItemPosition == newStates.size)
-                        return true
-                    else if (oldItemPosition == oldStates.size || newItemPosition == newStates.size)
-                        return false
-                }
+                paddingComparison(oldItemPosition, newItemPosition)?.let { return it }
 
                 val oldState = oldStates[oldItemPosition]
                 val newState = newStates[newItemPosition]

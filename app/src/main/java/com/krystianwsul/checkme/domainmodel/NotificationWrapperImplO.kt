@@ -16,11 +16,14 @@ import com.krystianwsul.checkme.notifications.TickJobIntentService
 @SuppressLint("NewApi")
 class NotificationWrapperImplO : NotificationWrapperImplN() {
 
-    private val CHANNEL_ID = "channel"
-    private val CHANNEL = NotificationChannel(CHANNEL_ID, "Reminders", NotificationManager.IMPORTANCE_HIGH)
+    companion object {
 
-    private val SILENT_CHANNEL_ID = "silentChannel"
-    private val SILENT_CHANNEL = NotificationChannel(SILENT_CHANNEL_ID, "Silent reminders", NotificationManager.IMPORTANCE_LOW)
+        private const val CHANNEL_ID = "channel"
+        private val CHANNEL = NotificationChannel(CHANNEL_ID, "Reminders", NotificationManager.IMPORTANCE_HIGH)
+
+        private const val SILENT_CHANNEL_ID = "silentChannel"
+        private val SILENT_CHANNEL = NotificationChannel(SILENT_CHANNEL_ID, "Silent reminders", NotificationManager.IMPORTANCE_LOW)
+    }
 
     init {
         CHANNEL.enableVibration(true)

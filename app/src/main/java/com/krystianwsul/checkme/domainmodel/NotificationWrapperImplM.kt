@@ -12,7 +12,10 @@ open class NotificationWrapperImplM : NotificationWrapperImpl() {
 
     override fun setExact(time: Long) {
         val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 1, AlarmReceiver.newIntent("setIdle"), PendingIntent.FLAG_UPDATE_CURRENT)!!
-        alarmManager.cancel(pendingIntent)
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+
+        alarmManager.run {
+            cancel(pendingIntent)
+            setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
+        }
     }
 }

@@ -73,7 +73,7 @@ class NotificationWrapperImplO : NotificationWrapperImplN() {
         if (!silent)
             notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
 
-        MyCrashlytics.log("NotificationManager.notify " + notificationId)
+        MyCrashlytics.log("NotificationManager.notify $notificationId")
         notificationManager.notify(notificationId, notification)
     }
 }

@@ -2396,14 +2396,16 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {
-        var reallySilent = silent
-        val realtime = SystemClock.elapsedRealtime()
+        val reallySilent = if (silent) {
+            true
+        } else {
+            lastNotificationBeeps.values.max()
+                    ?.takeIf { SystemClock.elapsedRealtime() - it < 5000 }
+                    ?.let {
+                        Log.e("asdf", "skipping notification sound for " + instance.name)
 
-        val optional = lastNotificationBeeps.values.max()
-        if (optional?.let { realtime - it < 5000 } == true) {
-            Log.e("asdf", "skipping notification sound for " + instance.name)
-
-            reallySilent = true
+                        true
+                    } ?: false
         }
 
         NotificationWrapper.instance.notifyInstance(this, instance, reallySilent, now)

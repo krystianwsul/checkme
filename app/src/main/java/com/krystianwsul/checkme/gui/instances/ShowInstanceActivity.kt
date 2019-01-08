@@ -217,7 +217,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         super.onStart()
 
         startTicks(broadcastReceiver)
-        // todo group list action mode
     }
 
     override fun onStop() {
@@ -226,22 +225,21 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         super.onStop()
     }
 
-    private fun cancelNotification() {
-        val notificationId = intent.takeIf { it.hasExtra(NOTIFICATION_ID_KEY) }?.getIntExtra(NOTIFICATION_ID_KEY, -1)
+    private fun cancelNotification() = NotificationWrapper.instance.run {
+        intent.getIntExtra(NOTIFICATION_ID_KEY, -1)
+                .takeIf { it != -1 }
+                ?.let(this::cancelNotification)
 
-        NotificationWrapper.instance.run {
-            notificationId?.let { cancelNotification(it) }
-
-            cleanGroup(null)
-        }
+        cleanGroup(null)
     }
 
     private fun setInstanceNotified() {
-        DomainFactory.getInstance().let {
-            val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
+        if (intent.hasExtra(NOTIFICATION_ID_KEY))
+            DomainFactory.getInstance().let {
+                val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
-            it.setInstanceNotified(data!!.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
-        }
+                it.setInstanceNotified(data!!.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
+            }
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {

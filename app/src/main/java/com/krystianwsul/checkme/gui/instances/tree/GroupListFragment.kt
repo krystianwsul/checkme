@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -475,6 +477,11 @@ class GroupListFragment @JvmOverloads constructor(
 
     private val compositeDisposable = CompositeDisposable()
 
+    private val receiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) = updateFabVisibility()
+    }
+
     private fun getShareData(instanceDatas: Collection<InstanceData>): String {
         check(instanceDatas.isNotEmpty())
 
@@ -544,10 +551,14 @@ class GroupListFragment @JvmOverloads constructor(
         }
                 .subscribe()
                 .addTo(compositeDisposable)
+
+        activity.startTicks(receiver)
     }
 
     override fun onDetachedFromWindow() {
         compositeDisposable.clear()
+
+        activity.unregisterReceiver(receiver)
 
         super.onDetachedFromWindow()
     }

@@ -107,7 +107,11 @@ class DoneInstanceNode(
 
     override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
 
-    fun removeFromParent(x: TreeViewAdapter.Placeholder) = dividerNode.remove(this, x)
+    fun removeFromParent(x: TreeViewAdapter.Placeholder) {
+        dividerNode.remove(this, x)
+
+        treeNode.deselect(x)
+    }
 
     override val id = instanceData.InstanceKey
 }

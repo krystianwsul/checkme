@@ -315,7 +315,11 @@ class NotDoneGroupNode(
 
     override val isSelectable = true
 
-    fun removeFromParent(x: TreeViewAdapter.Placeholder) = notDoneGroupCollection.remove(this, x)
+    fun removeFromParent(x: TreeViewAdapter.Placeholder) {
+        notDoneGroupCollection.remove(this, x)
+
+        treeNode.deselect(x)
+    }
 
     override fun getOrdinal() = singleInstanceData.run { hierarchyData?.ordinal ?: ordinal }
 

@@ -181,10 +181,8 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val undoAll = UndoAll()
 
-                    removeFromGetter({ treeViewAdapter.selectedNodes }) { treeNode ->
-                        recursiveDelete(treeNode, true, x, undoAll)
-
-                        decrementSelected(x)
+                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) {
+                        recursiveDelete(it, true, x, undoAll)
                     }
 
                     val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
@@ -310,8 +308,6 @@ class GroupListFragment @JvmOverloads constructor(
                                     .notDoneGroupCollection
                                     .add(instanceData, x)
                         }
-
-                        decrementSelected(x)
                     }
                 }
                 else -> throw UnsupportedOperationException()
@@ -319,12 +315,28 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: TreeViewAdapter.Placeholder, undoAll: UndoAll) {
+            check(root == treeNode.isSelected)
+
             treeNode.modelNode.let {
                 val instanceData = when (it) {
-                    is NotDoneGroupNode -> it.singleInstanceData
+                    is NotDoneGroupNode -> {
+                        check(root)
+
+                        if (it.singleInstance()) {
+                            it.singleInstanceData
+                        } else {
+                            treeNode.allChildren
+                                    .first()
+                                    .let { recursiveDelete(it, false, x, undoAll) }
+
+                            return
+                        }
+                    }
                     is NotDoneGroupNode.NotDoneInstanceNode -> it.instanceData
                     is DoneInstanceNode -> it.instanceData
                     is DividerNode -> {
+                        check(!root)
+
                         treeNode.allChildren.forEach { recursiveDelete(it, false, x, undoAll) }
 
                         return
@@ -332,21 +344,27 @@ class GroupListFragment @JvmOverloads constructor(
                     else -> throw IllegalArgumentException()
                 }
 
-                if (!root || instanceData.Exists) {
-                    check(instanceData.TaskCurrent)
-                    checkNotNull(instanceData.IsRootTask)
+                if (instanceData.Exists) {
+                    if (instanceData.TaskCurrent) {
+                        check(instanceData.TaskCurrent)
+                        checkNotNull(instanceData.IsRootTask)
 
-                    check(!undoAll.undos.containsKey(instanceData.InstanceKey))
+                        check(!undoAll.undos.containsKey(instanceData.InstanceKey))
 
-                    undoAll.undos[instanceData.InstanceKey] = Undo(instanceData.TaskCurrent, instanceData.IsRootTask!!)
+                        // mark gray
+                        undoAll.undos[instanceData.InstanceKey] = Undo(instanceData.TaskCurrent, instanceData.IsRootTask!!)
 
-                    instanceData.TaskCurrent = false
-                    instanceData.IsRootTask = null
+                        instanceData.TaskCurrent = false
+                        instanceData.IsRootTask = null
 
-                    treeNode.unselect(x)
+                        treeNode.deselect(x)
+                    } else {
+                        check(!root)
+                    }
 
                     treeNode.allChildren.forEach { recursiveDelete(it, false, x, undoAll) }
                 } else {
+                    // remove from tree
                     instanceData.instanceDataParent.remove(instanceData, undoAll)
 
                     when (it) {

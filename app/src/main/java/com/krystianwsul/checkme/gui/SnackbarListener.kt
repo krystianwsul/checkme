@@ -3,34 +3,34 @@ package com.krystianwsul.checkme.gui
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 
 interface SnackbarListener {
 
     companion object {
 
-        val DURATION = 5000
+        private var count = 0
 
-        var deleting = false
-            private set
+        val deleting get() = count > 0
     }
 
     val snackbarParent: CoordinatorLayout
 
     fun showSnackbar(count: Int, action: () -> Unit) {
-        check(!deleting)
+        MyCrashlytics.logMethod(this)
 
-        Snackbar.make(snackbarParent, snackbarParent.context.getString(R.string.snackbar, count.toString()), DURATION).apply {
+        check(++SnackbarListener.count > 0)
+
+        Snackbar.make(snackbarParent, snackbarParent.context.getString(R.string.snackbar, count.toString()), 5000).apply {
             setAction(R.string.undo) { action() }
-
-            deleting = true
 
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
 
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    check(deleting)
+                    MyCrashlytics.logMethod(this)
 
-                    deleting = false
+                    check(SnackbarListener.count-- > 0)
                 }
             })
 

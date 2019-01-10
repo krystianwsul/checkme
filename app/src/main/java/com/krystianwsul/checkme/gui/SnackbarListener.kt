@@ -27,8 +27,12 @@ interface SnackbarListener {
 
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
 
+                override fun onShown(transientBottomBar: Snackbar?) {
+                    MyCrashlytics.logMethod(this@apply)
+                }
+
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                    MyCrashlytics.logMethod(this)
+                    MyCrashlytics.logMethod(this@apply)
 
                     check(SnackbarListener.count-- > 0)
                 }

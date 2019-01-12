@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
-import android.os.SystemClock
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -89,8 +88,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     var tickData: TickData? = null
 
     private var skipSave = false
-
-    private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
     init {
         start = ExactTimeStamp.now
@@ -2399,28 +2396,9 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         Preferences.logLineHour("updateNotifications stop $sourceName")
     }
 
-    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {
-        val reallySilent = if (silent) {
-            true
-        } else {
-            lastNotificationBeeps.values.max()
-                    ?.takeIf { SystemClock.elapsedRealtime() - it < 5000 }
-                    ?.let {
-                        Log.e("asdf", "skipping notification sound for " + instance.name)
+    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, silent, now)
 
-                        true
-                    } ?: false
-        }
-
-        NotificationWrapper.instance.notifyInstance(this, instance, reallySilent, now)
-
-        if (!reallySilent)
-            lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
-    }
-
-    private fun updateInstance(instance: Instance, now: ExactTimeStamp) {
-        NotificationWrapper.instance.notifyInstance(this, instance, true, now)
-    }
+    private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, true, now)
 
     private fun setInstanceNotified(instanceKey: InstanceKey, now: ExactTimeStamp) {
         if (instanceKey.type === TaskKey.Type.LOCAL) {

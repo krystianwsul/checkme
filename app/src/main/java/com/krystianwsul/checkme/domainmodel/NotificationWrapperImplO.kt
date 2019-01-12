@@ -14,7 +14,7 @@ import com.krystianwsul.checkme.notifications.TickJobIntentService
 
 
 @SuppressLint("NewApi")
-class NotificationWrapperImplO : NotificationWrapperImplN() {
+open class NotificationWrapperImplO : NotificationWrapperImplN() {
 
     companion object {
 

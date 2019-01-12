@@ -7,7 +7,9 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.SystemClock
 import android.provider.Settings
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
@@ -54,12 +56,33 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
+    private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
+
     override fun cancelNotification(id: Int) {
         MyCrashlytics.log("NotificationManager.cancel $id")
         notificationManager.cancel(id)
     }
 
     override fun notifyInstance(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
+        val reallySilent = if (silent) {
+            true
+        } else {
+            lastNotificationBeeps.values.max()
+                    ?.takeIf { SystemClock.elapsedRealtime() - it < 5000 }
+                    ?.let {
+                        Log.e("asdf", "skipping notification sound for " + instance.name)
+
+                        true
+                    } ?: false
+        }
+
+        notifyInstanceHelper(domainFactory, instance, reallySilent, now)
+
+        if (!reallySilent)
+            lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
+    }
+
+    protected fun notifyInstanceHelper(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
         val task = instance.task
         val notificationId = instance.notificationId
 

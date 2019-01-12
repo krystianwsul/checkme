@@ -481,15 +481,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onStart() {
-        Preferences.logLineHour("MainModel.onStart")
         super.onStart()
 
         FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        Preferences.logLineHour("MainModel.onPostCreate")
-        super.onPostCreate(savedInstanceState)
     }
 
     override fun onStop() {

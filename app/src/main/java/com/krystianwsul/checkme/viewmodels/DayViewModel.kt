@@ -76,13 +76,11 @@ class DayViewModel : ViewModel() {
         fun load() {
             Preferences.logLineDate("DayViewModel.load")
             Single.fromCallable {
-                Preferences.logLineHour("DayViewModel.getData")
                 getData()
             }
                     .subscribeOn(Schedulers.single())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { loaded ->
-                        Preferences.logLineHour("DayViewModel.subscribe, continuing? " + (data.value != loaded))
                         if (data.value != loaded)
                             data.accept(loaded)
                     }

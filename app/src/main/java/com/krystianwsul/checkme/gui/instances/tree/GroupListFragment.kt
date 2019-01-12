@@ -18,7 +18,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.common.collect.HashMultimap
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.DataDiff
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
@@ -555,9 +554,9 @@ class GroupListFragment @JvmOverloads constructor(
 
         val observable = activity.started.switchMap {
             if (it) {
-                parametersRelay.doOnNext { Preferences.logLineHour("GroupListFragment.parametersRelay") }
+                parametersRelay
             } else {
-                Observable.never()
+                Observable.never<Parameters>()
             }
         }
 
@@ -612,8 +611,6 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     private fun initialize() {
-        Preferences.logLineHour("GroupListFragment.initialize")
-
         if (this::treeViewAdapter.isInitialized && (parameters as? Parameters.All)?.differentPage != true) {
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
 

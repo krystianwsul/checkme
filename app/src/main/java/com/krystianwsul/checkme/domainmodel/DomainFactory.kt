@@ -419,7 +419,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     @Synchronized
     fun getGroupListData(now: ExactTimeStamp, position: Int, timeRange: MainActivity.TimeRange): DayViewModel.DayData {
         MyCrashlytics.log("DomainFactory.getGroupListData")
-        Preferences.logLineHour("getGroupListData a $position $timeRange")
 
         check(position >= 0)
 
@@ -446,8 +445,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             startExactTimeStamp = ExactTimeStamp(Date(startCalendar), HourMilli(0, 0, 0, 0))
         }
 
-        Preferences.logLineHour("getGroupListData b")
-
         val endCalendar = now.calendar
 
         when (timeRange) {
@@ -464,15 +461,9 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         endExactTimeStamp = ExactTimeStamp(Date(endCalendar), HourMilli(0, 0, 0, 0))
 
-        Preferences.logLineHour("getGroupListData c")
-
         val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
 
-        Preferences.logLineHour("getGroupListData d")
-
         val customTimeDatas = getCurrentCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
-
-        Preferences.logLineHour("getGroupListData e")
 
         val taskDatas = if (position == 0) {
             getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
@@ -481,8 +472,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         } else {
             listOf()
         }
-
-        Preferences.logLineHour("getGroupListData f")
 
         val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
         for (instance in currentInstances) {
@@ -496,14 +485,11 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             instanceDatas[instanceData.InstanceKey] = instanceData
         }
 
-        Preferences.logLineHour("getGroupListData g")
-
         val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas)
         val data = DayViewModel.DayData(dataWrapper)
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 
-        Preferences.logLineHour("getGroupListData h $position $timeRange")
         Log.e("asdf", "getGroupListData returning $data")
         return data
     }
@@ -2392,8 +2378,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         if (nextAlarm != null)
             Preferences.logLineHour("next tick: $nextAlarm")
-
-        Preferences.logLineHour("updateNotifications stop $sourceName")
     }
 
     private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, silent, now)

@@ -5,8 +5,11 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
@@ -47,8 +50,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
 
         val alarmManager by lazy { MyApplication.instance.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
-
-        private const val TAG = "tickService"
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -65,36 +66,32 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val instanceKey = instance.instanceKey
         val remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(domainFactory, instanceKey)
 
-        val deleteIntent = InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey)
-        val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        fun pending(intent: Intent) = PendingIntent.getService(MyApplication.instance, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val contentIntent = ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId)
-        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, notificationId, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val pendingDeleteIntent = pending(InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey))
+        val pendingContentIntent = pending(ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId))
+        val pendingDoneIntent = pending(InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId))
+        val pendingHourIntent = pending(InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId))
 
-        val actions = ArrayList<NotificationCompat.Action>()
+        fun action(@DrawableRes icon: Int, @StringRes text: Int, pendingIntent: PendingIntent) = NotificationCompat.Action
+                .Builder(icon, MyApplication.instance.getString(text), pendingIntent)
+                .build()
 
-        val doneIntent = InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId)
-        val pendingDoneIntent = PendingIntent.getService(MyApplication.instance, notificationId, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        actions.add(NotificationCompat.Action.Builder(R.drawable.ic_done_white_24dp, MyApplication.instance.getString(R.string.done), pendingDoneIntent).build())
-
-        val hourIntent = InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId)
-        val pendingHourIntent = PendingIntent.getService(MyApplication.instance, notificationId, hourIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        actions.add(NotificationCompat.Action.Builder(R.drawable.ic_alarm_white_24dp, MyApplication.instance.getString(R.string.hour), pendingHourIntent).build())
+        val actions = listOf(
+                action(R.drawable.ic_done_white_24dp, R.string.done, pendingDoneIntent),
+                action(R.drawable.ic_alarm_white_24dp, R.string.hour, pendingHourIntent)
+        )
 
         val childNames = getChildNames(instance, now)
 
         val text: String?
         val style: NotificationCompat.Style?
-        if (!childNames.isEmpty()) {
+        if (childNames.isNotEmpty()) {
             text = childNames.joinToString(", ")
             style = getInboxStyle(childNames, false)
         } else if (!task.note.isNullOrEmpty()) {
             text = task.note
-
-            val bigTextStyle = NotificationCompat.BigTextStyle()
-            bigTextStyle.bigText(task.note)
-
-            style = bigTextStyle
+            style = NotificationCompat.BigTextStyle().also { it.bigText(text) }
         } else {
             text = null
             style = null
@@ -106,7 +103,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {
         val childNames = getChildNames(instance, now)
 
-        return if (!childNames.isEmpty()) {
+        return if (childNames.isNotEmpty()) {
             " (" + childNames.joinToString(", ") + ")"
         } else {
             val note = instance.task.note

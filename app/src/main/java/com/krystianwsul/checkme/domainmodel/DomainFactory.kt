@@ -82,7 +82,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
     var remoteProjectFactory: RemoteProjectFactory? = null
 
-    var remoteRootUser: RemoteRootUser? = null
+    private var remoteRootUser: RemoteRootUser? = null
 
     val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
@@ -2419,23 +2419,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     private fun updateInstance(instance: Instance, now: ExactTimeStamp) {
-        val instanceKey = instance.instanceKey
-
-        val realtime = SystemClock.elapsedRealtime()
-
-        if (lastNotificationBeeps.containsKey(instanceKey)) {
-            val then = lastNotificationBeeps[instanceKey]!!
-
-            check(realtime > then)
-
-            if (realtime - then < 5000) {
-                MyCrashlytics.logException(UpdateInstanceException(instance.name)) // todo if no errors after a month, remove after 08-02-2019
-                Log.e("asdf", "skipping notification update for " + instance.name)
-
-                return
-            }
-        }
-
         NotificationWrapper.instance.notifyInstance(this, instance, true, now)
     }
 
@@ -2554,6 +2537,4 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val scheduleIds = mutableSetOf<ScheduleId>()
         val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
     }
-
-    private class UpdateInstanceException(message: String) : Exception(message)
 }

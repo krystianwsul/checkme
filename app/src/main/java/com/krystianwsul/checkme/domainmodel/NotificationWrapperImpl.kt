@@ -89,12 +89,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val instanceKey = instance.instanceKey
         val remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(domainFactory, instanceKey)
 
-        fun pending(intent: Intent) = PendingIntent.getService(MyApplication.instance, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+        fun pendingService(intent: Intent) = PendingIntent.getService(MyApplication.instance, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val pendingDeleteIntent = pending(InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey))
-        val pendingContentIntent = pending(ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId))
-        val pendingDoneIntent = pending(InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId))
-        val pendingHourIntent = pending(InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId))
+        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, notificationId, ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId), PendingIntent.FLAG_CANCEL_CURRENT)
+
+        val pendingDeleteIntent = pendingService(InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey))
+
+        val pendingDoneIntent = pendingService(InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId))
+        val pendingHourIntent = pendingService(InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId))
 
         fun action(@DrawableRes icon: Int, @StringRes text: Int, pendingIntent: PendingIntent) = NotificationCompat.Action
                 .Builder(icon, MyApplication.instance.getString(text), pendingIntent)

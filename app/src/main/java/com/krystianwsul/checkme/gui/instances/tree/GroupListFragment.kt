@@ -115,13 +115,13 @@ class GroupListFragment @JvmOverloads constructor(
 
     private var state = State()
 
-    val dragHelper by lazy {
-        DragHelper(object : DragHelper.MyCallback() {
+    val dragHelper: DragHelper by lazy {
+        object : DragHelper() {
 
             override fun getTreeViewAdapter() = treeViewAdapter
 
             override fun onSetNewItemPosition() = selectionCallback.actionMode!!.finish()
-        })
+        }
     }
 
     val selectionCallback = object : SelectionCallback() {

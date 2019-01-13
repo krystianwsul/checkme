@@ -51,12 +51,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
         private set
 
     private val dragHelper by lazy {
-        DragHelper(object : DragHelper.MyCallback() {
+        object : DragHelper() {
 
             override fun getTreeViewAdapter() = treeViewAdapter
 
             override fun onSetNewItemPosition() = selectionCallback.actionMode!!.finish()
-        })
+        }
     }
 
     private val selectionCallback = object : SelectionCallback() {

@@ -34,6 +34,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
     private lateinit var instanceKeys: Set<InstanceKey>
 
     private var selectAllVisible = false
+    private var addHourVisible = false
 
     private lateinit var showNotificationGroupViewModel: ShowNotificationGroupViewModel
 
@@ -65,27 +66,43 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
 
     override fun onDestroyGroupActionMode() = Unit
 
-    override fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean) {
-        this.selectAllVisible = selectAllVisible
+    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
+        val invalidate = (this.selectAllVisible != selectAllVisible) || (this.addHourVisible != addHourVisible)
 
-        invalidateOptionsMenu()
+        this.selectAllVisible = selectAllVisible
+        this.addHourVisible = addHourVisible
+
+        if (invalidate)
+            invalidateOptionsMenu()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_select_all, menu)
+        menuInflater.inflate(R.menu.menu_show_notification_group, menu)
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.action_select_all).isVisible = selectAllVisible
+        menu.apply {
+            findItem(R.id.action_notification_group_select_all).isVisible = selectAllVisible
+            findItem(R.id.action_notification_group_hour).isVisible = addHourVisible
+        }
+
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        check(item.itemId == R.id.action_select_all)
-
-        groupListFragment.treeViewAdapter.updateDisplayedNodes {
-            groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+        when (item.itemId) {
+            R.id.action_notification_group_hour -> {
+                groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                    groupListFragment.addHour(TreeViewAdapter.Placeholder)
+                }
+            }
+            R.id.action_notification_group_select_all -> {
+                groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                    groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+                }
+            }
+            else -> throw IllegalArgumentException()
         }
 
         return true

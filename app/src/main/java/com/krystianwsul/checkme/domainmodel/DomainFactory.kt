@@ -897,7 +897,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     @Synchronized
-    fun setInstancesAddHourActivity(dataId: Int, source: SaveService.Source, instanceKeys: Collection<InstanceKey>) {
+    fun setInstancesAddHourActivity(dataId: Int, source: SaveService.Source, instanceKeys: Collection<InstanceKey>): DateTime {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
         check(remoteProjectFactory == null || !remoteProjectFactory!!.isSaved)
 
@@ -906,10 +906,11 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
 
         val date = Date(calendar)
         val hourMinute = HourMinute(calendar)
+        val timePair = TimePair(hourMinute)
 
         val instances = instanceKeys.map(this::getInstance)
 
-        instances.forEach { it.setInstanceDateTime(date, TimePair(hourMinute), now) }
+        instances.forEach { it.setInstanceDateTime(date, timePair, now) }
 
         updateNotifications(now)
 
@@ -918,6 +919,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         val remoteProjects = instances.mapNotNull { it.remoteNullableProject }.toSet()
 
         notifyCloud(remoteProjects)
+
+        return getDateTime(date, timePair)
     }
 
     @Synchronized

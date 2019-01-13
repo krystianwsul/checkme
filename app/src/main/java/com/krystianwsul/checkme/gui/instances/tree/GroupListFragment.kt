@@ -237,9 +237,9 @@ class GroupListFragment @JvmOverloads constructor(
                     if (parameters is Parameters.InstanceKey) {
                         activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, (parameters as Parameters.InstanceKey).instanceKey.taskKey))
                     } else {
-                        val firstInstanceData = instanceDatas.minBy { it.InstanceTimeStamp }!!
+                        val firstInstanceData = instanceDatas.minBy { it.instanceTimeStamp }!!
 
-                        val date = firstInstanceData.InstanceTimeStamp.date
+                        val date = firstInstanceData.instanceTimeStamp.date
 
                         val timePair = firstInstanceData.InstanceTimePair
 
@@ -496,7 +496,10 @@ class GroupListFragment @JvmOverloads constructor(
 
     private val receiver = object : BroadcastReceiver() {
 
-        override fun onReceive(context: Context?, intent: Intent?) = updateFabVisibility()
+        override fun onReceive(context: Context?, intent: Intent?) {
+            setGroupMenuItemVisibility()
+            updateFabVisibility()
+        }
     }
 
     private fun getShareData(instanceDatas: Collection<InstanceData>): String {
@@ -626,7 +629,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             treeViewAdapter.updates
                     .subscribe {
-                        listener.setGroupSelectAllVisibility((parameters as? Parameters.All)?.position, treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
+                        setGroupMenuItemVisibility()
                         updateFabVisibility()
                     }
                     .addTo(compositeDisposable)
@@ -668,6 +671,39 @@ class GroupListFragment @JvmOverloads constructor(
         animateVisibility(show, hide)
     }
 
+    private fun setGroupMenuItemVisibility() = listener.setGroupMenuItemVisibility(
+            (parameters as? Parameters.All)?.position,
+            treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable },
+            canAddHour())
+
+    private fun canAddHour(): Boolean {
+        val now = ExactTimeStamp.now
+        return parameters.dataWrapper
+                .instanceDatas
+                .values
+                .all { it.instanceTimeStamp.toExactTimeStamp() < now }
+    }
+
+    fun addHour(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+        check(canAddHour())
+
+        parameters.dataWrapper
+                .instanceDatas
+                .run {
+                    val instanceDateTime = DomainFactory.getInstance().setInstancesAddHourActivity(parameters.dataId, SaveService.Source.GUI, keys)
+                    val instanceTimeStamp = instanceDateTime.timeStamp
+                    val displayText = instanceDateTime.getDisplayText()
+
+                    values.forEach {
+                        it.instanceTimeStamp = instanceTimeStamp
+                        if (it.IsRootInstance)
+                            it.displayText = displayText
+                    }
+
+                    setGroupMenuItemVisibility()
+                }
+    }
+
     fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
@@ -684,7 +720,7 @@ class GroupListFragment @JvmOverloads constructor(
                         nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).let {
                             (it.firstOrNull { it.InstanceTimePair.customTimeKey != null }
                                     ?: it.first()).let {
-                                activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(it.InstanceTimeStamp.date, it.InstanceTimePair)))
+                                activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(it.instanceTimeStamp.date, it.InstanceTimePair)))
                             }
                         }
 
@@ -706,7 +742,7 @@ class GroupListFragment @JvmOverloads constructor(
         is Parameters.All -> {
             if (selectionCallback.hasActionMode) {
                 nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).filter { it.IsRootInstance }
-                        .map { it.InstanceTimeStamp }
+                        .map { it.instanceTimeStamp }
                         .distinct()
                         .singleOrNull()
                         ?.takeIf { it > TimeStamp.now } != null
@@ -814,7 +850,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         fun onDestroyGroupActionMode()
 
-        fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean)
+        fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean)
     }
 
     data class DataWrapper(
@@ -837,9 +873,9 @@ class GroupListFragment @JvmOverloads constructor(
     data class InstanceData(
             var Done: ExactTimeStamp?,
             val InstanceKey: InstanceKey,
-            val DisplayText: String?,
+            var displayText: String?,
             val name: String,
-            val InstanceTimeStamp: TimeStamp,
+            var instanceTimeStamp: TimeStamp,
             var TaskCurrent: Boolean,
             val IsRootInstance: Boolean,
             var IsRootTask: Boolean?,
@@ -866,7 +902,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         override fun compareTo(other: InstanceData): Int {
-            val timeStampComparison = InstanceTimeStamp.compareTo(other.InstanceTimeStamp)
+            val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)
             if (timeStampComparison != 0)
                 return timeStampComparison
 

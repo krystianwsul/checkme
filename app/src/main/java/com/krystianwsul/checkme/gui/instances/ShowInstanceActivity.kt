@@ -278,7 +278,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     override fun onDestroyGroupActionMode() = Unit
 
-    override fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean) {
+    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
 
         invalidateOptionsMenu()

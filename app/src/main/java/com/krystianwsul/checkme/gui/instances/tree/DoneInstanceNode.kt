@@ -63,7 +63,7 @@ class DoneInstanceNode(
     override val name get() = Triple(instanceData.name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
 
     override val details
-        get() = instanceData.DisplayText
+        get() = instanceData.displayText
                 .takeUnless { it.isNullOrEmpty() }
                 ?.let { Pair(it, if (!instanceData.TaskCurrent) colorDisabled else colorSecondary) }
 

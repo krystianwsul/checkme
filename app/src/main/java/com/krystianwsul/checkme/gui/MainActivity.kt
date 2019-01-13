@@ -660,7 +660,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         onPageChangeDisposable = null
     }
 
-    override fun setGroupSelectAllVisibility(position: Int?, selectAllVisible: Boolean) {
+    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
         checkNotNull(position)
 
         groupSelectAllVisible[position] = selectAllVisible

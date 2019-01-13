@@ -56,14 +56,14 @@ object DataDiff {
         if (oldInstanceData.Done != newInstanceData.Done)
             sDiff.add(indent + "oldInstanceData.done == " + oldInstanceData.Done + ", newInstanceData.done == " + newInstanceData.Done)
 
-        if (oldInstanceData.DisplayText != newInstanceData.DisplayText)
-            sDiff.add(indent + "oldInstanceData.displayText == " + oldInstanceData.DisplayText + ", newInstanceData.displayText == " + newInstanceData.DisplayText)
+        if (oldInstanceData.displayText != newInstanceData.displayText)
+            sDiff.add(indent + "oldInstanceData.displayText == " + oldInstanceData.displayText + ", newInstanceData.displayText == " + newInstanceData.displayText)
 
         if (oldInstanceData.name != newInstanceData.name)
             sDiff.add(indent + "oldInstanceData.name == " + oldInstanceData.name + ", newInstanceData.name == " + newInstanceData.name)
 
-        if (oldInstanceData.InstanceTimeStamp != newInstanceData.InstanceTimeStamp)
-            sDiff.add(indent + "oldInstanceData.InstanceTimeStamp == " + oldInstanceData.InstanceTimeStamp + ", newInstanceData.InstanceTimeStamp == " + newInstanceData.InstanceTimeStamp)
+        if (oldInstanceData.instanceTimeStamp != newInstanceData.instanceTimeStamp)
+            sDiff.add(indent + "oldInstanceData.instanceTimeStamp == " + oldInstanceData.instanceTimeStamp + ", newInstanceData.instanceTimeStamp == " + newInstanceData.instanceTimeStamp)
 
         if (oldInstanceData.TaskCurrent != newInstanceData.TaskCurrent)
             sDiff.add(indent + "oldInstanceData.taskCurrent == " + oldInstanceData.TaskCurrent + ", newInstanceData.taskCurrent == " + newInstanceData.TaskCurrent)

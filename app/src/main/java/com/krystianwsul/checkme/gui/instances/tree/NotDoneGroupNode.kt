@@ -39,12 +39,12 @@ class NotDoneGroupNode(
     init {
         check(!instanceDatas.isEmpty())
 
-        exactTimeStamp = instanceDatas.map { it.InstanceTimeStamp }
+        exactTimeStamp = instanceDatas.map { it.instanceTimeStamp }
                 .distinct()
                 .single()
                 .toExactTimeStamp()
 
-        check(instanceDatas.all { it.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp })
+        check(instanceDatas.all { it.instanceTimeStamp.toExactTimeStamp() == exactTimeStamp })
     }
 
     fun initialize(expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, nodeContainer: NodeContainer): TreeNode {
@@ -129,10 +129,10 @@ class NotDoneGroupNode(
     override val details
         get(): Pair<String, Int>? {
             if (singleInstance()) {
-                return if (singleInstanceData.DisplayText.isNullOrEmpty()) {
+                return if (singleInstanceData.displayText.isNullOrEmpty()) {
                     null
                 } else {
-                    Pair(singleInstanceData.DisplayText!!, if (!singleInstanceData.TaskCurrent) colorDisabled else colorSecondary)
+                    Pair(singleInstanceData.displayText!!, if (!singleInstanceData.TaskCurrent) colorDisabled else colorSecondary)
                 }
             } else {
                 val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
@@ -279,7 +279,7 @@ class NotDoneGroupNode(
     }
 
     fun addInstanceData(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) {
-        check(instanceData.InstanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
+        check(instanceData.instanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
 
         check(!instanceDatas.isEmpty())
         if (instanceDatas.size == 1) {

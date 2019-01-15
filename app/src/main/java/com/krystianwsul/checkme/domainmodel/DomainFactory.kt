@@ -744,12 +744,11 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     fun getProjectListData(): ProjectListViewModel.Data {
         MyCrashlytics.log("DomainFactory.getProjectListData")
 
-        check(remoteProjectFactory != null)
+        val remoteProjects = remoteProjectFactory?.remoteProjects ?: mutableMapOf()
 
         val now = ExactTimeStamp.now
 
-        val projectDatas = remoteProjectFactory!!.remoteProjects
-                .values
+        val projectDatas = remoteProjects.values
                 .filter { it.current(now) }
                 .associate {
                     val users = it.users.joinToString(", ") { it.name }

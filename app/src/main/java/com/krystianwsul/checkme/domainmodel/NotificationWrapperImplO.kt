@@ -43,6 +43,10 @@ open class NotificationWrapperImplO : NotificationWrapperImplN() {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setSortKey(sortKey)
                 .setOnlyAlertOnce(true)
+                .setGroup(TickJobIntentService.GROUP_KEY)
+
+        if (summary)
+            builder.setGroupSummary(true)
 
         if (!text.isNullOrEmpty())
             builder.setContentText(text)
@@ -62,11 +66,6 @@ open class NotificationWrapperImplO : NotificationWrapperImplN() {
 
         if (autoCancel)
             builder.setAutoCancel(true)
-
-        builder.setGroup(TickJobIntentService.GROUP_KEY)
-
-        if (summary)
-            builder.setGroupSummary(true)
 
         val notification = builder.build()
 

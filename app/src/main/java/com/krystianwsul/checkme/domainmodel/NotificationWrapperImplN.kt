@@ -81,6 +81,10 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setSortKey(sortKey)
                 .setOnlyAlertOnce(true)
+                .setGroup(TickJobIntentService.GROUP_KEY)
+
+        if (summary)
+            builder.setGroupSummary(true)
 
         if (!text.isNullOrEmpty())
             builder.setContentText(text)
@@ -101,18 +105,13 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
         if (autoCancel)
             builder.setAutoCancel(true)
 
-        builder.setGroup(TickJobIntentService.GROUP_KEY)
-
-        if (summary)
-            builder.setGroupSummary(true)
-
         val notification = builder.build()
 
         @Suppress("Deprecation")
         if (!silent)
             notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
 
-        MyCrashlytics.log("NotificationManager.notify " + notificationId)
+        MyCrashlytics.log("NotificationManager.notify $notificationId")
         notificationManager.notify(notificationId, notification)
     }
 

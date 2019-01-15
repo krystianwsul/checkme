@@ -164,7 +164,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     @Suppress("DEPRECATION")
     protected open fun newBuilder(silent: Boolean) = NotificationCompat.Builder(MyApplication.instance)
 
-    protected open fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
+    protected open fun getNotificationBuilder(title: String, text: String?, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String): NotificationCompat.Builder {
         check(title.isNotEmpty())
 
         val builder = newBuilder(silent)
@@ -196,7 +196,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (autoCancel)
             builder.setAutoCancel(true)
 
-        val notification = builder.build()
+        return builder
+    }
+
+    protected open fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
+        val notification = getNotificationBuilder(title, text, deleteIntent, contentIntent, silent, actions, time, style, autoCancel, summary, sortKey).build()
 
         @Suppress("Deprecation")
         if (!silent)

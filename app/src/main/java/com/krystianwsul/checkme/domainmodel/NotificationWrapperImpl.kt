@@ -176,6 +176,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setSortKey(sortKey)
                 .setOnlyAlertOnce(true)
+                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
 
         if (!text.isNullOrEmpty())
             builder.setContentText(text)
@@ -210,7 +211,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.notify(notificationId, notification)
     }
 
-    override fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp) {
+    override fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean /* not needed >= 24 */, now: ExactTimeStamp) {
         val names = ArrayList<String>()
         val instanceKeys = ArrayList<InstanceKey>()
         val remoteCustomTimeFixInstanceKeys = ArrayList<InstanceKey>()
@@ -230,7 +231,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .sortedWith(compareBy({ it.instanceDateTime.timeStamp }, { it.task.startExactTimeStamp }))
                 .map { it.name + getInstanceText(it, now) }, true)
 
-        notify(instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, ArrayList(), null, inboxStyle, false, true, "0")
+        notify(instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, listOf(), null, inboxStyle, false, true, "0")
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {

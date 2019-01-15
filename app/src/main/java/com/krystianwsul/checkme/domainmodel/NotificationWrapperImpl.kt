@@ -207,7 +207,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (!silent)
             notification.defaults = notification.defaults or Notification.DEFAULT_VIBRATE
 
-        MyCrashlytics.log("NotificationManager.notify $notificationId")
+        MyCrashlytics.log("NotificationManager.notify $notificationId silent? $silent")
         notificationManager.notify(notificationId, notification)
     }
 

@@ -229,7 +229,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
             check(userListener != null)
 
             localFactory.clearRemoteCustomTimeRecords()
-            Log.e("asdf", "clearing getMRemoteProjectFactory()", Exception())
 
             remoteProjectFactory = null
             RemoteFriendFactory.setInstance(null)
@@ -766,11 +765,9 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     fun getFriendListData(): FriendListViewModel.Data {
         MyCrashlytics.log("DomainFactory.getFriendListData")
 
-        check(RemoteFriendFactory.hasFriends())
+        val friends = if (RemoteFriendFactory.hasFriends()) RemoteFriendFactory.getFriends() else listOf()
 
-        val userListDatas = RemoteFriendFactory.getFriends()
-                .map { FriendListViewModel.UserListData(it.name, it.email, it.id) }
-                .toMutableSet()
+        val userListDatas = friends.map { FriendListViewModel.UserListData(it.name, it.email, it.id) }.toMutableSet()
 
         return FriendListViewModel.Data(userListDatas)
     }

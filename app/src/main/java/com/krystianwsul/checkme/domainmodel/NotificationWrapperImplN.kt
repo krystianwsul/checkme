@@ -71,8 +71,7 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
     override fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
         check(title.isNotEmpty())
 
-        @Suppress("Deprecation")
-        val builder = NotificationCompat.Builder(MyApplication.instance)
+        val builder = newBuilder(silent)
                 .setContentTitle(title)
                 .setSmallIcon(R.drawable.ikona_bez)
                 .setDeleteIntent(deleteIntent)

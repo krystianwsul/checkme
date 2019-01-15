@@ -161,11 +161,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return inboxStyle
     }
 
+    @Suppress("DEPRECATION")
+    protected open fun newBuilder(silent: Boolean) = NotificationCompat.Builder(MyApplication.instance)
+
     protected open fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
         check(title.isNotEmpty())
 
-        @Suppress("DEPRECATION")
-        val builder = NotificationCompat.Builder(MyApplication.instance)
+        val builder = newBuilder(silent)
                 .setContentTitle(title)
                 .setSmallIcon(R.drawable.ikona_bez)
                 .setDeleteIntent(deleteIntent)

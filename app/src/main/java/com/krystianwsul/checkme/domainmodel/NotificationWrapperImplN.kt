@@ -79,7 +79,8 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
                 .setContentIntent(contentIntent)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setSortKey(sortKey) as NotificationCompat.Builder
+                .setSortKey(sortKey)
+                .setOnlyAlertOnce(true)
 
         if (!text.isNullOrEmpty())
             builder.setContentText(text)

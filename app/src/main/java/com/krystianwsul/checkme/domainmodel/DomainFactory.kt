@@ -2321,12 +2321,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                         }
                     }
 
-                    for (showInstanceKey in showInstanceKeys)
-                        notifyInstance(notificationInstances[showInstanceKey]!!, silent, now)
-
-                    notificationInstances.values
-                            .filter { !showInstanceKeys.contains(it.instanceKey) }
-                            .forEach { updateInstance(it, now) }
+                    notificationInstances.values.forEach { notifyInstance(it, silent, now) }
                 }
             }
         } else {
@@ -2335,7 +2330,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 NotificationWrapper.instance.cancelNotification(0)
             } else {
                 message += ", sg"
-                NotificationWrapper.instance.notifyGroup(this, notificationInstances.values, true, now)
+                NotificationWrapper.instance.notifyGroup(this, notificationInstances.values, true, now) // todo group magic
             }
 
             message += ", hiding " + hideInstanceKeys.size
@@ -2349,14 +2344,8 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
                 }
             }
 
-            message += ", s " + showInstanceKeys.size
-            for (showInstanceKey in showInstanceKeys)
-                notifyInstance(notificationInstances[showInstanceKey]!!, silent, now)
-
-            val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
-
-            message += ", u " + updateInstances.size
-            updateInstances.forEach { updateInstance(it, now) }
+            message += ", s/u " + notificationInstances.size
+            notificationInstances.values.forEach { notifyInstance(it, silent, now) }
         }
 
         Preferences.logLineHour("s? " + (if (silent) "t" else "f") + message)
@@ -2384,8 +2373,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     }
 
     private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, silent, now)
-
-    private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, true, now)
 
     private fun setInstanceNotified(instanceKey: InstanceKey, now: ExactTimeStamp) {
         if (instanceKey.type === TaskKey.Type.LOCAL) {

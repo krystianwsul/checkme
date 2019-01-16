@@ -2,16 +2,14 @@ package com.krystianwsul.checkme.gui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.google.android.gms.auth.api.Auth
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.jakewharton.rxbinding2.view.clicks
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.viewmodels.TutorialViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.activity_tutorial.*
 
@@ -26,6 +24,8 @@ class TutorialActivity : AbstractActivity() {
         fun newLoginIntent() = Intent(MyApplication.instance, TutorialActivity::class.java)
         fun newHelpIntent() = newLoginIntent().apply { putExtra(HELP_KEY, true) }
     }
+
+    private val tutorialViewModel by lazy { getViewModel<TutorialViewModel>() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,10 +59,30 @@ class TutorialActivity : AbstractActivity() {
         tutorialSignIn.clicks()
                 .subscribe { startSignIn() }
                 .addTo(createDisposable)
+
+        tutorialViewModel.state
+                .subscribe {
+                    when (it) {
+                        TutorialViewModel.State.Initial -> {
+                        }
+                        TutorialViewModel.State.Progress -> { // todo animation
+                        }
+                        is TutorialViewModel.State.Success -> {
+                            Toast.makeText(this, getString(R.string.signInAs) + " " + it.displayName, Toast.LENGTH_SHORT).show()
+
+                            startMain()
+                        }
+                        TutorialViewModel.State.Error -> Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .addTo(createDisposable)
     }
 
     // todo move to viewModel
-    private fun startSignIn() = startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
+    private fun startSignIn() {
+        tutorialViewModel.startSignIn()
+        startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
+    }
 
     private fun startMain() {
         startActivity(MainActivity.newIntent())
@@ -72,42 +92,8 @@ class TutorialActivity : AbstractActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == RC_SIGN_IN) {
-            val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
+        check(requestCode == RC_SIGN_IN)
 
-            if (googleSignInResult.isSuccess) {
-                val googleSignInAccount = googleSignInResult.signInAccount!!
-
-                val credential = GoogleAuthProvider.getCredential(googleSignInAccount.idToken, null)
-
-                FirebaseAuth.getInstance()
-                        .signInWithCredential(credential)
-                        .addOnCompleteListener {
-                            if (it.isSuccessful) {
-                                Toast.makeText(this, getString(R.string.signInAs) + " " + it.result!!.user.displayName, Toast.LENGTH_SHORT).show()
-
-                                startMain()
-                            } else {
-                                val exception = it.exception!!
-
-                                Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
-
-                                MyCrashlytics.logException(exception)
-
-                                MyApplication.instance.googleSigninClient.signOut()
-                            }
-                        }
-            } else {
-                val message = "google signin error: $googleSignInResult"
-
-                Log.e("asdf", message)
-
-                Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
-
-                MyCrashlytics.logException(GoogleSignInException("isSuccess: " + googleSignInResult.isSuccess + ", status: " + googleSignInResult.status))
-            }
-        }
+        tutorialViewModel.onActivityResult(data)
     }
-
-    private class GoogleSignInException(message: String) : Exception(message)
 }

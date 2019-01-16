@@ -14,9 +14,7 @@ class TutorialViewModel : ViewModel() {
 
     val state = BehaviorRelay.createDefault<State>(State.Initial)
 
-    fun startSignIn() {
-        state.accept(State.Progress)
-    }
+    fun startSignIn() = state.accept(State.Progress)
 
     fun onActivityResult(data: Intent?) {
         val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!

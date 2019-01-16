@@ -2,15 +2,18 @@ package com.krystianwsul.checkme.gui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding2.view.clicks
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.TutorialViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_tutorial.*
 
 class TutorialActivity : AbstractActivity() {
@@ -30,7 +33,9 @@ class TutorialActivity : AbstractActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!intent.hasExtra(HELP_KEY) && FirebaseAuth.getInstance().currentUser != null) {
+        val help = intent.hasExtra(HELP_KEY)
+
+        if (!help && FirebaseAuth.getInstance().currentUser != null) {
             startMain()
             return
         }
@@ -47,7 +52,10 @@ class TutorialActivity : AbstractActivity() {
         tutorialFab.clicks()
                 .subscribe {
                     if (tutorialPager.currentItem == tutorialPager.adapter!!.count - 1) {
-                        startSignIn()
+                        if (help)
+                            finish()
+                        else
+                            startSignIn()
                     } else {
                         tutorialPager.currentItem += 1
                     }
@@ -56,17 +64,20 @@ class TutorialActivity : AbstractActivity() {
 
         tutorialDots.setupWithViewPager(tutorialPager)
 
-        tutorialSignIn.clicks()
-                .subscribe { startSignIn() }
-                .addTo(createDisposable)
+        tutorialSignIn.apply {
+            visibility = if (help) {
+                View.GONE
+            } else {
+                createDisposable += clicks().subscribe { startSignIn() }
+                View.VISIBLE
+            }
+        }
 
         tutorialViewModel.state
                 .subscribe {
                     when (it) {
-                        TutorialViewModel.State.Initial -> {
-                        }
-                        TutorialViewModel.State.Progress -> { // todo animation
-                        }
+                        TutorialViewModel.State.Initial -> animateVisibility(tutorialLayout, tutorialProgress)
+                        TutorialViewModel.State.Progress -> animateVisibility(tutorialProgress, tutorialLayout)
                         is TutorialViewModel.State.Success -> {
                             Toast.makeText(this, getString(R.string.signInAs) + " " + it.displayName, Toast.LENGTH_SHORT).show()
 
@@ -78,7 +89,6 @@ class TutorialActivity : AbstractActivity() {
                 .addTo(createDisposable)
     }
 
-    // todo move to viewModel
     private fun startSignIn() {
         tutorialViewModel.startSignIn()
         startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)

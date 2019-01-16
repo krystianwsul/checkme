@@ -127,7 +127,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
             R.id.task_menu_delete -> {
                 showTaskViewModel.stop()
 
-                val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
+                val taskUndoData = DomainFactory.instance.setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
 
                 setResult(RESULT_DELETE)
 

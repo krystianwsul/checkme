@@ -86,7 +86,7 @@ class DoneInstanceNode(
         groupAdapter.treeNodeCollection
                 .treeViewAdapter
                 .updateDisplayedNodes {
-                    instanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
+                    instanceData.Done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
 
                     dividerNode.remove(this, TreeViewAdapter.Placeholder)
 

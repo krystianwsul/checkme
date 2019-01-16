@@ -185,7 +185,7 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
-                    val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys)
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys)
 
                     listener.showSnackbar(instanceDatas.size) {
                         fun Map<InstanceKey, InstanceData>.flattenMap(): List<InstanceData> = map {
@@ -221,7 +221,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                         initialize()
 
-                        DomainFactory.getInstance().clearTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskUndoData)
+                        DomainFactory.instance.clearTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskUndoData)
                     }
                 }
                 R.id.action_group_add_task -> {
@@ -251,7 +251,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    val done = DomainFactory.getInstance().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, true)
+                    val done = DomainFactory.instance.setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, true)
 
                     removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) { treeNode ->
                         treeNode.modelNode.let {
@@ -291,7 +291,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = instanceDatas.map { it.InstanceKey }
 
-                    DomainFactory.getInstance().setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
+                    DomainFactory.instance.setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
 
                     removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) { treeNode ->
                         treeNode.modelNode.let {
@@ -690,7 +690,7 @@ class GroupListFragment @JvmOverloads constructor(
         parameters.dataWrapper
                 .instanceDatas
                 .run {
-                    val instanceDateTime = DomainFactory.getInstance().setInstancesAddHourActivity(parameters.dataId, SaveService.Source.GUI, keys)
+                    val instanceDateTime = DomainFactory.instance.setInstancesAddHourActivity(parameters.dataId, SaveService.Source.GUI, keys)
                     val instanceTimeStamp = instanceDateTime.timeStamp
                     val displayText = instanceDateTime.getDisplayText()
 

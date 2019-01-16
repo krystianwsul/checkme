@@ -10,21 +10,7 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
 @SuppressLint("UseSparseArrays")
-class LocalFactory {
-
-    companion object {
-
-        private var _localFactory: LocalFactory? = null
-
-        val instance: LocalFactory
-            get() {
-                if (_localFactory == null)
-                    _localFactory = LocalFactory()
-                return _localFactory!!
-            }
-    }
-
-    private val persistenceManager: PersistenceManger
+class LocalFactory(private val persistenceManager: PersistenceManager = PersistenceManager.instance) {
 
     private val _localCustomTimes = HashMap<Int, LocalCustomTime>()
 
@@ -57,20 +43,6 @@ class LocalFactory {
     val uuid get() = persistenceManager.uuid
 
     private lateinit var domainFactory: DomainFactory
-
-    private constructor() {
-        persistenceManager = PersistenceManger.instance
-    }
-
-    constructor(persistenceManger: PersistenceManger) {
-        persistenceManager = persistenceManger
-    }
-
-    fun reset() {
-        _localFactory = null
-
-        persistenceManager.reset()
-    }
 
     fun initialize(domainFactory: DomainFactory) {
         this.domainFactory = domainFactory

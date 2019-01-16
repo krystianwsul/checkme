@@ -238,14 +238,14 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             val friendIds = userListDatas.map { it.id }.toSet()
 
-            DomainFactory.getInstance().removeFriends(friendIds)
+            DomainFactory.instance.removeFriends(friendIds)
 
             mainActivity.showSnackbar(userListDatas.size) {
                 onLoadFinished(data!!.copy(userListDatas = data!!.userListDatas
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))
 
-                DatabaseWrapper.addFriends(DomainFactory.getInstance().userInfo!!, friendIds)
+                DatabaseWrapper.addFriends(DomainFactory.instance.userInfo!!, friendIds)
             }
         }
     }

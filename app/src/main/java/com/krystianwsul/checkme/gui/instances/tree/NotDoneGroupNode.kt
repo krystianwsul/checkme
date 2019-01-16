@@ -184,7 +184,7 @@ class NotDoneGroupNode(
         groupAdapter.treeNodeCollection
                 .treeViewAdapter
                 .updateDisplayedNodes {
-                    singleInstanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
+                    singleInstanceData.Done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
 
                     GroupListFragment.recursiveExists(singleInstanceData)
 
@@ -328,11 +328,11 @@ class NotDoneGroupNode(
             if (it.hierarchyData != null) {
                 it.hierarchyData.ordinal = ordinal
 
-                DomainFactory.getInstance().setTaskHierarchyOrdinal(groupListFragment.parameters.dataId, it.hierarchyData)
+                DomainFactory.instance.setTaskHierarchyOrdinal(groupListFragment.parameters.dataId, it.hierarchyData)
             } else {
                 it.ordinal = ordinal
 
-                DomainFactory.getInstance().setInstanceOrdinal(groupListFragment.parameters.dataId, it.InstanceKey, ordinal)
+                DomainFactory.instance.setInstanceOrdinal(groupListFragment.parameters.dataId, it.InstanceKey, ordinal)
             }
         }
     }
@@ -432,7 +432,7 @@ class NotDoneGroupNode(
             groupAdapter.treeNodeCollection
                     .treeViewAdapter
                     .updateDisplayedNodes {
-                        instanceData.Done = DomainFactory.getInstance().setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
+                        instanceData.Done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
 
                         GroupListFragment.recursiveExists(instanceData)
 

@@ -18,9 +18,6 @@ object ObserverHolder {
     }
 
     @Synchronized
-    fun clear() = observers.clear()
-
-    @Synchronized
     fun notifyDomainObservers(dataIds: List<Int>) {
         val remove = observers.filter { it.get() == null }
 

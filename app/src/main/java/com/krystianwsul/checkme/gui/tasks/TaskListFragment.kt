@@ -97,13 +97,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         decrementSelected(x)
                     }
 
-                    val taskUndoData = DomainFactory.getInstance().setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
                     taskData!!.childTaskDatas.removeAll(childTaskDatas)
 
                     updateSelectAll()
 
                     taskListListener.showSnackbar(taskKeys.size) {
-                        DomainFactory.getInstance().clearTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskUndoData)
+                        DomainFactory.instance.clearTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskUndoData)
 
                         taskData!!.childTaskDatas.apply {
                             addAll(childTaskDatas)
@@ -683,7 +683,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun setOrdinal(ordinal: Double) {
                 childTaskData.hierarchyData!!.ordinal = ordinal
 
-                DomainFactory.getInstance().setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
+                DomainFactory.instance.setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
             }
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)

@@ -139,7 +139,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     if (!it.exists)
                         showInstanceViewModel.stop()
 
-                    val todoTaskData = DomainFactory.getInstance().setTaskEndTimeStamp(it.dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                    val todoTaskData = DomainFactory.instance.setTaskEndTimeStamp(it.dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
                     if (it.exists) {
                         it.taskCurrent = false
@@ -151,7 +151,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
                             invalidateOptionsMenu()
 
-                            DomainFactory.getInstance().clearTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, todoTaskData)
+                            DomainFactory.instance.clearTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, todoTaskData)
                         }
                     } else {
                         setSnackbar(todoTaskData)
@@ -235,7 +235,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     private fun setInstanceNotified() {
         if (intent.hasExtra(NOTIFICATION_ID_KEY))
-            DomainFactory.getInstance().let {
+            DomainFactory.instance.let {
                 val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
 
                 it.setInstanceNotified(data!!.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
@@ -262,7 +262,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     }
 
     private fun setDone(done: Boolean) {
-        DomainFactory.getInstance().setInstanceDone(data!!.dataId, SaveService.Source.GUI, instanceKey, done)
+        DomainFactory.instance.setInstanceDone(data!!.dataId, SaveService.Source.GUI, instanceKey, done)
 
         data!!.let {
             it.done = done

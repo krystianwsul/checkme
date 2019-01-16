@@ -123,7 +123,7 @@ class EditInstanceActivity : AbstractActivity() {
 
                 editInstanceViewModel.stop()
 
-                DomainFactory.getInstance().setInstanceAddHourActivity(data!!.dataId, SaveService.Source.GUI, data!!.instanceKey)
+                DomainFactory.instance.setInstanceAddHourActivity(data!!.dataId, SaveService.Source.GUI, data!!.instanceKey)
 
                 finish()
             }
@@ -134,7 +134,7 @@ class EditInstanceActivity : AbstractActivity() {
                 if (isValidDateTime) {
                     editInstanceViewModel.stop()
 
-                    DomainFactory.getInstance().setInstanceDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceKey, date!!, timePairPersist!!.timePair)
+                    DomainFactory.instance.setInstanceDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceKey, date!!, timePairPersist!!.timePair)
                     finish()
                 }
             }

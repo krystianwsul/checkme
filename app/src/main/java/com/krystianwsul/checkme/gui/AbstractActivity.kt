@@ -53,7 +53,7 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         taskUndoData?.let {
             (this as SnackbarListener).showSnackbar(1) {
-                DomainFactory.getInstance().clearTaskEndTimeStamps(0, SaveService.Source.GUI, it)
+                DomainFactory.instance.clearTaskEndTimeStamps(0, SaveService.Source.GUI, it)
             }
         }
         taskUndoData = null

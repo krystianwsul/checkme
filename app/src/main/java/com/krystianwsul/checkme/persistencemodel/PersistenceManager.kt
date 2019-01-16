@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 
 
-class PersistenceManger(
+class PersistenceManager(
         private val _customTimeRecords: MutableList<LocalCustomTimeRecord>,
         private var customTimeMaxId: Int,
         private val _taskRecords: MutableList<TaskRecord>,
@@ -25,68 +25,60 @@ class PersistenceManger(
         private var instanceMaxId: Int,
         private val _instanceShownRecords: MutableList<InstanceShownRecord>,
         private var instanceShownMaxId: Int,
-        private val uuidRecord: UuidRecord
-) {
+        private val uuidRecord: UuidRecord) {
 
     companion object {
 
-        private var sInstance: PersistenceManger? = null
+        val instance by lazy {
+            val sqLiteDatabase = MySQLiteHelper.database
 
-        val instance: PersistenceManger
-            get() {
-                if (sInstance == null) {
-                    val sqLiteDatabase = MySQLiteHelper.database
+            val customTimeRecords = LocalCustomTimeRecord.getCustomTimeRecords(sqLiteDatabase)
+            val customTimeMaxId = LocalCustomTimeRecord.getMaxId(sqLiteDatabase)
 
-                    val customTimeRecords = LocalCustomTimeRecord.getCustomTimeRecords(sqLiteDatabase)
-                    val customTimeMaxId = LocalCustomTimeRecord.getMaxId(sqLiteDatabase)
+            val taskRecords = TaskRecord.getTaskRecords(sqLiteDatabase)
+            val taskMaxId = TaskRecord.getMaxId(sqLiteDatabase)
 
-                    val taskRecords = TaskRecord.getTaskRecords(sqLiteDatabase)
-                    val taskMaxId = TaskRecord.getMaxId(sqLiteDatabase)
+            val taskHierarchyRecords = if (taskRecords.isEmpty())
+                mutableListOf()
+            else
+                TaskHierarchyRecord.getTaskHierarchyRecords(sqLiteDatabase)
 
-                    val taskHierarchyRecords = if (taskRecords.isEmpty())
-                        mutableListOf()
-                    else
-                        TaskHierarchyRecord.getTaskHierarchyRecords(sqLiteDatabase)
+            val taskHierarchyMaxId = TaskHierarchyRecord.getMaxId(sqLiteDatabase)
 
-                    val taskHierarchyMaxId = TaskHierarchyRecord.getMaxId(sqLiteDatabase)
+            val scheduleRecords = ScheduleRecord.getScheduleRecords(sqLiteDatabase)
+            val scheduleMaxId = ScheduleRecord.getMaxId(sqLiteDatabase)
 
-                    val scheduleRecords = ScheduleRecord.getScheduleRecords(sqLiteDatabase)
-                    val scheduleMaxId = ScheduleRecord.getMaxId(sqLiteDatabase)
+            val singleScheduleRecords = SingleScheduleRecord.getSingleScheduleRecords(sqLiteDatabase)
+                    .associateBy { it.scheduleId }
+                    .toMutableMap()
 
-                    val singleScheduleRecords = SingleScheduleRecord.getSingleScheduleRecords(sqLiteDatabase)
-                            .associateBy { it.scheduleId }
-                            .toMutableMap()
+            val dailyScheduleRecords = DailyScheduleRecord.getDailyScheduleRecords(sqLiteDatabase)
+                    .associateBy { it.scheduleId }
+                    .toMutableMap()
 
-                    val dailyScheduleRecords = DailyScheduleRecord.getDailyScheduleRecords(sqLiteDatabase)
-                            .associateBy { it.scheduleId }
-                            .toMutableMap()
+            val weeklyScheduleRecords = WeeklyScheduleRecord.getWeeklyScheduleRecords(sqLiteDatabase)
+                    .associateBy { it.scheduleId }
+                    .toMutableMap()
 
-                    val weeklyScheduleRecords = WeeklyScheduleRecord.getWeeklyScheduleRecords(sqLiteDatabase)
-                            .associateBy { it.scheduleId }
-                            .toMutableMap()
+            val monthlyDayScheduleRecords = MonthlyDayScheduleRecord.getMonthlyDayScheduleRecords(sqLiteDatabase)
+                    .associateBy { it.scheduleId }
+                    .toMutableMap()
 
-                    val monthlyDayScheduleRecords = MonthlyDayScheduleRecord.getMonthlyDayScheduleRecords(sqLiteDatabase)
-                            .associateBy { it.scheduleId }
-                            .toMutableMap()
+            val monthlyWeekScheduleRecords = MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(sqLiteDatabase)
+                    .associateBy { it.scheduleId }
+                    .toMutableMap()
 
-                    val monthlyWeekScheduleRecords = MonthlyWeekScheduleRecord.getMonthlyWeekScheduleRecords(sqLiteDatabase)
-                            .associateBy { it.scheduleId }
-                            .toMutableMap()
+            val instanceRecords = LocalInstanceRecord.getInstanceRecords(sqLiteDatabase)
+            val instanceMaxId = LocalInstanceRecord.getMaxId(sqLiteDatabase)
 
-                    val instanceRecords = LocalInstanceRecord.getInstanceRecords(sqLiteDatabase)
-                    val instanceMaxId = LocalInstanceRecord.getMaxId(sqLiteDatabase)
+            val instanceShownRecords = InstanceShownRecord.getInstancesShownRecords(sqLiteDatabase)
+            val instanceShownMaxId = InstanceShownRecord.getMaxId(sqLiteDatabase)
 
-                    val instanceShownRecords = InstanceShownRecord.getInstancesShownRecords(sqLiteDatabase)
-                    val instanceShownMaxId = InstanceShownRecord.getMaxId(sqLiteDatabase)
+            val uuidRecord = UuidRecord.getUuidRecord(sqLiteDatabase)
 
-                    val uuidRecord = UuidRecord.getUuidRecord(sqLiteDatabase)
-
-                    sInstance = PersistenceManger(customTimeRecords, customTimeMaxId, taskRecords, taskMaxId, taskHierarchyRecords, taskHierarchyMaxId, scheduleRecords, scheduleMaxId, singleScheduleRecords, dailyScheduleRecords, weeklyScheduleRecords, monthlyDayScheduleRecords, monthlyWeekScheduleRecords, instanceRecords, instanceMaxId, instanceShownRecords, instanceShownMaxId, uuidRecord)
-                }
-            return sInstance!!
+            PersistenceManager(customTimeRecords, customTimeMaxId, taskRecords, taskMaxId, taskHierarchyRecords, taskHierarchyMaxId, scheduleRecords, scheduleMaxId, singleScheduleRecords, dailyScheduleRecords, weeklyScheduleRecords, monthlyDayScheduleRecords, monthlyWeekScheduleRecords, instanceRecords, instanceMaxId, instanceShownRecords, instanceShownMaxId, uuidRecord)
         }
     }
-
 
     val customTimeRecords: MutableCollection<LocalCustomTimeRecord>
         get() = _customTimeRecords
@@ -125,11 +117,6 @@ class PersistenceManger(
 
     @SuppressLint("UseSparseArrays")
     constructor() : this(mutableListOf(), 0, mutableListOf(), 0, mutableListOf(), 0, mutableListOf(), 0, mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableMapOf(), mutableListOf(), 0, mutableListOf(), 0, UuidRecord(true, UuidRecord.newUuid()))
-
-    @Synchronized
-    fun reset() { // todo this should be static, and the getter should be synchronized
-        sInstance = null
-    }
 
     fun getScheduleRecords(localTaskId: Int) = _scheduleRecords.filter { it.rootTaskId == localTaskId }
 

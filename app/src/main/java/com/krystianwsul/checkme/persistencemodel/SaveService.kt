@@ -1,37 +1,31 @@
 package com.krystianwsul.checkme.persistencemodel
 
 import android.util.Log
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
 object SaveService {
 
-    private fun save(insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>, source: Source) {
+    private fun save(insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>) {
         Log.e("asdf", "SaveService.save")
 
+        val sqLiteDatabase = MySQLiteHelper.database
+
+        sqLiteDatabase.beginTransaction()
+
         try {
-            val sqLiteDatabase = MySQLiteHelper.database
+            for (insertCommand in insertCommands)
+                insertCommand.execute(sqLiteDatabase)
 
-            sqLiteDatabase.beginTransaction()
+            for (updateCommand in updateCommands)
+                updateCommand.execute(sqLiteDatabase)
 
-            try {
-                for (insertCommand in insertCommands)
-                    insertCommand.execute(sqLiteDatabase)
+            for (deleteCommand in deleteCommands)
+                deleteCommand.execute(sqLiteDatabase)
 
-                for (updateCommand in updateCommands)
-                    updateCommand.execute(sqLiteDatabase)
-
-                for (deleteCommand in deleteCommands)
-                    deleteCommand.execute(sqLiteDatabase)
-
-                sqLiteDatabase.setTransactionSuccessful()
-            } finally {
-                sqLiteDatabase.endTransaction()
-            }
-        } catch (e: Exception) {
-            DomainFactory.getInstance().reset(source)
-            throw e
+            sqLiteDatabase.setTransactionSuccessful()
+        } finally {
+            sqLiteDatabase.endTransaction()
         }
     }
 
@@ -42,23 +36,23 @@ object SaveService {
             var instance: Factory = FactoryImpl()
         }
 
-        abstract fun startService(persistenceManger: PersistenceManger, source: Source)
+        abstract fun startService(persistenceManager: PersistenceManager, source: Source)
 
         private class FactoryImpl : Factory() {
 
-            override fun startService(persistenceManger: PersistenceManger, source: Source) {
+            override fun startService(persistenceManager: PersistenceManager, source: Source) {
                 val collections = listOf(
-                        persistenceManger.customTimeRecords,
-                        persistenceManger.taskRecords,
-                        persistenceManger.taskHierarchyRecords,
-                        persistenceManger.scheduleRecords,
-                        persistenceManger.singleScheduleRecords,
-                        persistenceManger.dailyScheduleRecords,
-                        persistenceManger.weeklyScheduleRecords,
-                        persistenceManger.monthlyDayScheduleRecords,
-                        persistenceManger.monthlyWeekScheduleRecords,
-                        persistenceManger.localInstanceRecords,
-                        persistenceManger.instanceShownRecords)
+                        persistenceManager.customTimeRecords,
+                        persistenceManager.taskRecords,
+                        persistenceManager.taskHierarchyRecords,
+                        persistenceManager.scheduleRecords,
+                        persistenceManager.singleScheduleRecords,
+                        persistenceManager.dailyScheduleRecords,
+                        persistenceManager.weeklyScheduleRecords,
+                        persistenceManager.monthlyDayScheduleRecords,
+                        persistenceManager.monthlyWeekScheduleRecords,
+                        persistenceManager.localInstanceRecords,
+                        persistenceManager.instanceShownRecords)
 
                 val insertCommands = collections.flatten()
                         .asSequence()
@@ -79,10 +73,10 @@ object SaveService {
                         .toMutableList()
 
                 when (source) {
-                    Source.GUI -> Observable.fromCallable { save(insertCommands, updateCommands, deleteCommands, source) }
+                    Source.GUI -> Observable.fromCallable { save(insertCommands, updateCommands, deleteCommands) }
                             .subscribeOn(Schedulers.io())
                             .subscribe()
-                    Source.SERVICE -> save(insertCommands, updateCommands, deleteCommands, source)
+                    Source.SERVICE -> save(insertCommands, updateCommands, deleteCommands)
                 }
             }
 

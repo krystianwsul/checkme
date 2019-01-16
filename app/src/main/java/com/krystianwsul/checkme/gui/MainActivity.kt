@@ -381,7 +381,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         R.id.main_drawer_custom_times -> showTab(Tab.CUSTOM_TIMES)
                         R.id.main_drawer_friends -> showTab(Tab.FRIENDS)
                         R.id.main_drawer_sign_in -> {
-                            val domainFactory = DomainFactory.getInstance()
+                            val domainFactory = DomainFactory.instance
                             val userInfo = domainFactory.userInfo
                             if (userInfo != null) {
                                 domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
@@ -528,7 +528,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
 
         if (tab == Tab.PROJECTS) {
-            checkNotNull(DomainFactory.getInstance().userInfo)
+            checkNotNull(DomainFactory.instance.userInfo)
 
             mainProjectListFrame.visibility = View.VISIBLE
         } else {
@@ -542,7 +542,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
 
         if (tab == Tab.FRIENDS) {
-            checkNotNull(DomainFactory.getInstance().userInfo)
+            checkNotNull(DomainFactory.instance.userInfo)
 
             mainFriendListFrame.visibility = View.VISIBLE
         } else {

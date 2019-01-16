@@ -191,9 +191,9 @@ class UserListFragment : AbstractFragment(), FabUser {
         if (projectId.isNullOrEmpty()) {
             check(saveState.removedIds.isEmpty())
 
-            DomainFactory.getInstance().createProject(data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
+            DomainFactory.instance.createProject(data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
         } else {
-            DomainFactory.getInstance().updateProject(data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
+            DomainFactory.instance.updateProject(data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
         }
     }
 

@@ -22,7 +22,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private var observer: Observer? = null
 
-    protected val kotlinDomainFactory = DomainFactory.getInstance()
+    protected val kotlinDomainFactory = DomainFactory.instance
 
     private val firebaseListener: (DomainFactory) -> Unit = {
         check(kotlinDomainFactory.getIsConnected())

@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
-import com.krystianwsul.checkme.persistencemodel.PersistenceManger
+import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
@@ -33,18 +33,11 @@ import com.krystianwsul.checkme.viewmodels.*
 import java.util.*
 
 @Suppress("LeakingThis")
-open class DomainFactory(persistenceManager: PersistenceManger?) {
+open class DomainFactory(persistenceManager: PersistenceManager = PersistenceManager.instance) {
 
     companion object {
 
-        private var _domainFactory: DomainFactory? = null
-
-        @Synchronized
-        fun getInstance(persistenceManager: PersistenceManger? = null): DomainFactory {
-            if (_domainFactory == null)
-                _domainFactory = DomainFactory(persistenceManager)
-            return _domainFactory!!
-        }
+        val instance by lazy { DomainFactory() }
 
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
             val silent = oldTickData.silent && newTickData.silent
@@ -92,7 +85,7 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
     init {
         start = ExactTimeStamp.now
 
-        localFactory = persistenceManager?.let { LocalFactory(it) } ?: LocalFactory.instance
+        localFactory = LocalFactory(persistenceManager)
 
         read = ExactTimeStamp.now
 
@@ -126,21 +119,6 @@ open class DomainFactory(persistenceManager: PersistenceManger?) {
         remoteProjectFactory?.save()
 
         ObserverHolder.notifyDomainObservers(dataIds)
-    }
-
-    @Synchronized
-    fun reset(source: SaveService.Source) {
-        val userInfo = userInfo
-        clearUserInfo()
-
-        _domainFactory = null
-        localFactory.reset()
-
-        userInfo?.let { setUserInfo(source, it) }
-
-        ObserverHolder.notifyDomainObservers(ArrayList())
-
-        ObserverHolder.clear()
     }
 
     // firebase

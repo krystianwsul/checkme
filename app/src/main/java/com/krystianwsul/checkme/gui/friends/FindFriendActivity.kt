@@ -85,7 +85,7 @@ class FindFriendActivity : AbstractActivity() {
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            DatabaseWrapper.addFriend(DomainFactory.getInstance().userInfo!!, userData!!.key)
+            DatabaseWrapper.addFriend(DomainFactory.instance.userInfo!!, userData!!.key)
 
             finish()
         }

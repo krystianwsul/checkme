@@ -243,7 +243,7 @@ class CreateTaskActivity : AbstractActivity() {
                             checkNotNull(data!!.taskData)
                             check(taskKeys == null)
 
-                            val taskKey = DomainFactory.getInstance().updateScheduleTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, scheduleDatas, note, projectId)
+                            val taskKey = DomainFactory.instance.updateScheduleTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, scheduleDatas, note, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -252,13 +252,13 @@ class CreateTaskActivity : AbstractActivity() {
                             check(data!!.taskData == null)
                             check(taskKeys!!.size > 1)
 
-                            DomainFactory.getInstance().createScheduleJoinRootTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, taskKeys!!, note, projectId)
+                            DomainFactory.instance.createScheduleJoinRootTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, taskKeys!!, note, projectId)
 
                             finish()
                         } else {
                             check(data!!.taskData == null)
 
-                            DomainFactory.getInstance().createScheduleRootTask(data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, note, projectId)
+                            DomainFactory.instance.createScheduleRootTask(data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, note, projectId)
 
                             finish()
                         }
@@ -271,7 +271,7 @@ class CreateTaskActivity : AbstractActivity() {
                             checkNotNull(data!!.taskData)
                             check(taskKeys == null)
 
-                            val taskKey = DomainFactory.getInstance().updateChildTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, taskKey!!, name, parentTaskKey, note)
+                            val taskKey = DomainFactory.instance.updateChildTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, taskKey!!, name, parentTaskKey, note)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -280,13 +280,13 @@ class CreateTaskActivity : AbstractActivity() {
                             check(data!!.taskData == null)
                             check(taskKeys!!.size > 1)
 
-                            DomainFactory.getInstance().createJoinChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, taskKeys!!, note)
+                            DomainFactory.instance.createJoinChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, taskKeys!!, note)
 
                             finish()
                         } else {
                             check(data!!.taskData == null)
 
-                            DomainFactory.getInstance().createChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, note)
+                            DomainFactory.instance.createChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, note)
 
                             finish()
                         }
@@ -297,7 +297,7 @@ class CreateTaskActivity : AbstractActivity() {
                             checkNotNull(data!!.taskData)
                             check(taskKeys == null)
 
-                            val taskKey = DomainFactory.getInstance().updateRootTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, note, projectId)
+                            val taskKey = DomainFactory.instance.updateRootTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, note, projectId)
 
                             setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
@@ -305,13 +305,13 @@ class CreateTaskActivity : AbstractActivity() {
                         } else if (taskKeys != null) {
                             check(data!!.taskData == null)
 
-                            DomainFactory.getInstance().createJoinRootTask(data!!.dataId, SaveService.Source.GUI, name, taskKeys!!, note, projectId)
+                            DomainFactory.instance.createJoinRootTask(data!!.dataId, SaveService.Source.GUI, name, taskKeys!!, note, projectId)
 
                             finish()
                         } else {
                             check(data!!.taskData == null)
 
-                            DomainFactory.getInstance().createRootTask(data!!.dataId, SaveService.Source.GUI, name, note, projectId)
+                            DomainFactory.instance.createRootTask(data!!.dataId, SaveService.Source.GUI, name, note, projectId)
 
                             finish()
                         }

@@ -241,7 +241,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             val selectedCustomTimeIds = customTimeDatas.map { it.id }
 
-            DomainFactory.getInstance().setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, false)
+            DomainFactory.instance.setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, false)
 
             customTimesListListener.showSnackbar(selectedCustomTimeIds.size) {
                 onLoadFinished(data.apply {
@@ -251,7 +251,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                     }
                 })
 
-                DomainFactory.getInstance().setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, true)
+                DomainFactory.instance.setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, true)
             }
         }
     }

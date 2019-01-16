@@ -70,7 +70,7 @@ class MyApplication : Application() {
 
         FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth: FirebaseAuth ->
             val firebaseUser = firebaseAuth.currentUser
-            DomainFactory.getInstance().apply {
+            DomainFactory.instance.apply {
                 if (firebaseUser != null) {
                     setUserInfo(SaveService.Source.GUI, UserInfo(firebaseUser))
                 } else {

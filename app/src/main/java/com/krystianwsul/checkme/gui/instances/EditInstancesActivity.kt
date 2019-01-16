@@ -128,7 +128,7 @@ class EditInstancesActivity : AbstractActivity() {
 
                 editInstancesViewModel.stop()
 
-                DomainFactory.getInstance().setInstancesAddHourActivity(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
+                DomainFactory.instance.setInstancesAddHourActivity(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys)
 
                 finish()
             }
@@ -137,7 +137,7 @@ class EditInstancesActivity : AbstractActivity() {
                 checkNotNull(mData)
 
                 if (isValidDateTime) {
-                    DomainFactory.getInstance().setInstancesDateTime(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
+                    DomainFactory.instance.setInstancesDateTime(mData!!.dataId, SaveService.Source.GUI, mData!!.instanceDatas.keys, mDate!!, mTimePairPersist!!.timePair)
 
                     finish()
                 }

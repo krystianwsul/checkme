@@ -77,14 +77,14 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                         decrementSelected(x)
                     }
 
-                    val projectUndoData = DomainFactory.getInstance().setProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectIds)
+                    val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectIds)
 
                     mainActivity.showSnackbar(selected.size) {
                         onLoadFinished(data!!.also {
                             it.projectDatas.putAll(projectDatas.map { it.id to it })
                         })
 
-                        DomainFactory.getInstance().clearProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectUndoData)
+                        DomainFactory.instance.clearProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectUndoData)
                     }
                 }
                 else -> throw UnsupportedOperationException()

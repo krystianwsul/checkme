@@ -10,7 +10,7 @@ import android.text.TextUtils
 import android.util.Log
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.persistencemodel.PersistenceManger
+import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
@@ -51,7 +51,7 @@ class DomainFactoryTest {
 
             SaveService.Factory.instance = object : SaveService.Factory() {
 
-                override fun startService(persistenceManger: PersistenceManger, source: SaveService.Source) = Unit
+                override fun startService(persistenceManager: PersistenceManager, source: SaveService.Source) = Unit
             }
         }
     }
@@ -68,7 +68,7 @@ class DomainFactoryTest {
     @Mock
     private lateinit var mEditor: SharedPreferences.Editor
 
-    private fun newPersistenceManger() = PersistenceManger()
+    private fun newPersistenceManger() = PersistenceManager()
 
     @SuppressLint("CommitPrefEdits")
     @Before

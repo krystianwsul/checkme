@@ -30,8 +30,6 @@ class TutorialActivity : AbstractActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // todo add login button at bottom of screen
-
         if (!intent.hasExtra(HELP_KEY) && FirebaseAuth.getInstance().currentUser != null) {
             startMain()
             return
@@ -49,7 +47,7 @@ class TutorialActivity : AbstractActivity() {
         tutorialFab.clicks()
                 .subscribe {
                     if (tutorialPager.currentItem == tutorialPager.adapter!!.count - 1) {
-                        startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
+                        startSignIn()
                     } else {
                         tutorialPager.currentItem += 1
                     }
@@ -57,7 +55,13 @@ class TutorialActivity : AbstractActivity() {
                 .addTo(createDisposable)
 
         tutorialDots.setupWithViewPager(tutorialPager)
+
+        tutorialSignIn.clicks()
+                .subscribe { startSignIn() }
+                .addTo(createDisposable)
     }
+
+    private fun startSignIn() = startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
 
     private fun startMain() {
         startActivity(MainActivity.newIntent())
@@ -77,13 +81,13 @@ class TutorialActivity : AbstractActivity() {
 
                 FirebaseAuth.getInstance()
                         .signInWithCredential(credential)
-                        .addOnCompleteListener(this) { task ->
-                            if (task.isSuccessful) {
-                                Toast.makeText(this, getString(R.string.signInAs) + " " + task.result!!.user.displayName, Toast.LENGTH_SHORT).show()
+                        .addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                Toast.makeText(this, getString(R.string.signInAs) + " " + it.result!!.user.displayName, Toast.LENGTH_SHORT).show()
 
                                 startMain()
                             } else {
-                                val exception = task.exception!!
+                                val exception = it.exception!!
 
                                 Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
 

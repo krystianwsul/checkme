@@ -61,6 +61,7 @@ class TutorialActivity : AbstractActivity() {
                 .addTo(createDisposable)
     }
 
+    // todo move to viewModel
     private fun startSignIn() = startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
 
     private fun startMain() {

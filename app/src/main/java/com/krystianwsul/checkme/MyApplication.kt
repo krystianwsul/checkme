@@ -9,6 +9,8 @@ import android.preference.PreferenceManager
 import android.util.Base64
 import android.util.Log
 import com.github.anrwatchdog.ANRWatchDog
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
@@ -42,6 +44,13 @@ class MyApplication : Application() {
         set(value) = sharedPreferences.edit()
                 .putString(TOKEN_KEY, value)
                 .apply()
+
+    val googleSigninClient by lazy {
+        GoogleSignIn.getClient(this, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build())
+    }
 
     override fun onCreate() {
         super.onCreate()

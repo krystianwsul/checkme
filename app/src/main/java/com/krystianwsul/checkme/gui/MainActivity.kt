@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -16,7 +15,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.view.ActionMode
 import androidx.core.view.GravityCompat
@@ -25,12 +23,8 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
@@ -129,13 +123,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         mainActivitySearch.textChanges()
                 .map { it.toString() }
                 .share()!!
-    }
-
-    private val googleSigninClient by lazy {
-        GoogleSignIn.getClient(this@MainActivity, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build())
     }
 
     private var actionMode: ActionMode? = null
@@ -399,19 +386,18 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                             if (userInfo != null) {
                                 domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
 
-                                googleSigninClient.signOut()
+                                MyApplication.instance.googleSigninClient.signOut()
 
                                 FirebaseAuth.getInstance().signOut()
 
-                                if (visibleTab.value!! == Tab.FRIENDS || visibleTab.value!! == Tab.PROJECTS) {
-                                    mainActivityNavigation.setCheckedItem(R.id.main_drawer_instances)
-                                    showTab(Tab.INSTANCES)
-                                }
+                                finish()
+
+                                startActivity(TutorialActivity.newLoginIntent())
                             } else {
-                                startActivityForResult(googleSigninClient.signInIntent, RC_SIGN_IN)
+                                startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
                             }
                         }
-                        R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newIntent())
+                        R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newHelpIntent())
                         R.id.main_drawer_debug -> showTab(Tab.DEBUG)
                         else -> throw IndexOutOfBoundsException()
                     }
@@ -694,44 +680,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     override val snackbarParent get() = mainCoordinator!!
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_SIGN_IN) {
-            val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
-
-            if (googleSignInResult.isSuccess) {
-                val googleSignInAccount = googleSignInResult.signInAccount!!
-
-                val credential = GoogleAuthProvider.getCredential(googleSignInAccount.idToken, null)
-
-                FirebaseAuth.getInstance()
-                        .signInWithCredential(credential)
-                        .addOnCompleteListener(this) { task ->
-                            if (task.isSuccessful) {
-                                Toast.makeText(this, getString(R.string.signInAs) + " " + task.result!!.user.displayName, Toast.LENGTH_SHORT).show()
-                            } else {
-                                val exception = task.exception!!
-
-                                Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
-
-                                MyCrashlytics.logException(exception)
-
-                                googleSigninClient.signOut()
-                            }
-                        }
-            } else {
-                val message = "google signin error: $googleSignInResult"
-
-                Log.e("asdf", message)
-
-                Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
-
-                MyCrashlytics.logException(GoogleSignInException("isSuccess: " + googleSignInResult.isSuccess + ", status: " + googleSignInResult.status))
-            }
-        }
-    }
-
     private fun updateSignInState(firebaseUser: FirebaseUser?) {
         mainActivityNavigation.menu.run {
             if (firebaseUser != null) {
@@ -809,8 +757,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     private class Holder(val dayFragment: DayFragment) : RecyclerView.ViewHolder(dayFragment)
-
-    private class GoogleSignInException(message: String) : Exception(message)
 
     private enum class Tab {
         INSTANCES,

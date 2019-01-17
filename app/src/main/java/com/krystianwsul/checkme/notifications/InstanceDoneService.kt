@@ -4,10 +4,8 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
@@ -45,13 +43,6 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         private fun queueFirebase(domainFactory: DomainFactory, firebaseListener: (DomainFactory) -> Unit) {
             check(!domainFactory.getIsConnected() || domainFactory.getIsConnectedAndSaved())
 
-            if (!domainFactory.getIsConnected()) {
-                val firebaseUser = FirebaseAuth.getInstance().currentUser
-                        ?: throw NeedsFirebaseException()
-
-                domainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
-            }
-
             domainFactory.addFirebaseListener(firebaseListener)
         }
     }
@@ -72,6 +63,4 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
     }
 
     private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)
-
-    private class NeedsFirebaseException : RuntimeException()
 }

@@ -1,13 +1,11 @@
 package com.krystianwsul.checkme.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -45,35 +43,23 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
             FirebaseLevel.WANT -> {
                 load()
 
-                val firebaseUser = FirebaseAuth.getInstance().currentUser
-                if (firebaseUser != null && !kotlinDomainFactory.getIsConnected()) {
-                    val userInfo = UserInfo(firebaseUser)
-
-                    kotlinDomainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
+                if (MyApplication.instance.hasUserInfo && !kotlinDomainFactory.getIsConnected())
                     kotlinDomainFactory.addFirebaseListener(firebaseListener)
-                }
             }
             FirebaseLevel.NEED -> {
                 if (kotlinDomainFactory.getIsConnected()) {
                     load()
                 } else {
-                    val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
-                    val userInfo = UserInfo(firebaseUser)
-
-                    kotlinDomainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
-                    kotlinDomainFactory.addFirebaseListener(firebaseListener)
+                    if (MyApplication.instance.hasUserInfo)
+                        kotlinDomainFactory.addFirebaseListener(firebaseListener)
                 }
             }
             FirebaseLevel.FRIEND -> {
                 if (kotlinDomainFactory.getIsConnected() && RemoteFriendFactory.hasFriends()) {
                     load()
                 } else {
-                    FirebaseAuth.getInstance().currentUser?.let {
-                        val userInfo = UserInfo(it)
-
-                        kotlinDomainFactory.setUserInfo(SaveService.Source.GUI, userInfo)
+                    if (MyApplication.instance.hasUserInfo)
                         RemoteFriendFactory.addFriendListener { firebaseListener(kotlinDomainFactory) }
-                    }
                 }
             }
         }

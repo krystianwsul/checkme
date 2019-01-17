@@ -28,16 +28,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             check(refresh.isNotEmpty())
             check(data[REFRESH_KEY] == "true")
 
-            val firebaseUser = FirebaseAuth.getInstance().currentUser
-            if (firebaseUser != null) {
-                val userInfo = UserInfo(firebaseUser)
-
-                DomainFactory.instance.let {
-                    it.setUserInfo(SaveService.Source.SERVICE, userInfo)
-
-                    it.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(false, "MyFirebaseMessagingService", listOf()))
-                }
-            }
+            if (MyApplication.instance.hasUserInfo)
+                DomainFactory.instance.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(false, "MyFirebaseMessagingService", listOf()))
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }

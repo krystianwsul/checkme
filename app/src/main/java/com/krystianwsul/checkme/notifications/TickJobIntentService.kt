@@ -4,11 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.text.TextUtils
 import androidx.core.app.JobIntentService
-import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
 
 
@@ -72,10 +70,7 @@ class TickJobIntentService : JobIntentService() {
             } else {
                 kotlinDomainFactory.updateNotificationsTick(SaveService.Source.SERVICE, silent, sourceName)
 
-                val firebaseUser = FirebaseAuth.getInstance().currentUser
-                return if (firebaseUser != null) {
-                    kotlinDomainFactory.setUserInfo(SaveService.Source.SERVICE, UserInfo(firebaseUser))
-
+                return if (MyApplication.instance.hasUserInfo) {
                     kotlinDomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
 
                     true

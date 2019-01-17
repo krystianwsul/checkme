@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.preference.PreferenceManager
 import android.util.Base64
 import android.util.Log
+import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -15,9 +16,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import net.danlew.android.joda.JodaTimeAndroid
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -52,6 +55,11 @@ class MyApplication : Application() {
                 .build())
     }
 
+    val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<UserInfo>())
+
+    val hasUserInfo get() = userInfoRelay.value!!.value != null
+
+    @SuppressLint("CheckResult")
     override fun onCreate() {
         super.onCreate()
 
@@ -68,14 +76,17 @@ class MyApplication : Application() {
             setPersistenceEnabled(true)
         }
 
-        FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth: FirebaseAuth ->
-            val firebaseUser = firebaseAuth.currentUser
+        FirebaseAuth.getInstance()
+                .authStateChanges()
+                .map { NullableWrapper(it.currentUser?.let { UserInfo(it) }) }
+                .subscribe(userInfoRelay)
+
+        userInfoRelay.subscribe {
             DomainFactory.instance.apply {
-                if (firebaseUser != null) {
-                    setUserInfo(SaveService.Source.GUI, UserInfo(firebaseUser))
-                } else {
+                if (it.value != null)
+                    setUserInfo(SaveService.Source.GUI, it.value)
+                else
                     clearUserInfo()
-                }
             }
         }
 

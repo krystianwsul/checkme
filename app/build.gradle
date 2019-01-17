@@ -113,6 +113,8 @@ dependencies {
     implementation 'com.androidhuman.rxfirebase2:firebase-core:16.0.5.0'
     implementation 'com.androidhuman.rxfirebase2:firebase-database:16.0.3.0'
     implementation 'com.androidhuman.rxfirebase2:firebase-database-kotlin:16.0.3.0'
+    implementation 'com.androidhuman.rxfirebase2:firebase-auth:16.1.0.0'
+    implementation 'com.androidhuman.rxfirebase2:firebase-auth-kotlin:16.1.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

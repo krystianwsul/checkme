@@ -44,38 +44,50 @@ class DebugFragment : AbstractFragment() {
 
                 val kotlinDomainFactory = DomainFactory.instance
 
-                append("last beeping tick: ")
-                append(lastTickExactTimeStamp.toString())
-                append("\ntick log:\n")
-                append(tickLog)
-
-                append("\n\ndata load time: ")
-                append(kotlinDomainFactory.readMillis + kotlinDomainFactory.instantiateMillis)
+                append("local load time: ")
+                append(kotlinDomainFactory.localReadMillis + kotlinDomainFactory.localInstantiateMillis)
                 append("ms (")
-                append(kotlinDomainFactory.readMillis)
+                append(kotlinDomainFactory.localReadMillis)
                 append(" + ")
-                append(kotlinDomainFactory.instantiateMillis)
+                append(kotlinDomainFactory.localInstantiateMillis)
                 append(")")
 
-                append("\ntasks: ")
-                append(kotlinDomainFactory.taskCount)
-                append(", instances: ")
-                append(kotlinDomainFactory.instanceCount)
-                append(", custom times: ")
+                append("\nremote load time: ")
+                append(kotlinDomainFactory.remoteReadMillis + kotlinDomainFactory.remoteInstantiateMillis)
+                append("ms (")
+                append(kotlinDomainFactory.remoteReadMillis)
+                append(" + ")
+                append(kotlinDomainFactory.remoteInstantiateMillis)
+                append(")")
+
+                append("\n\ntasks: ")
+                append(kotlinDomainFactory.localTaskCount)
+                append("/")
+                append(kotlinDomainFactory.remoteTaskCount)
+                append("\ninstances: ")
+                append(kotlinDomainFactory.localInstanceCount)
+                append("/")
+                append(kotlinDomainFactory.remoteInstanceCount)
+                append("\ncustom times: ")
                 append(kotlinDomainFactory.customTimeCount)
-                append(", instance shown: ")
+                append("\ninstance shown: ")
                 append(kotlinDomainFactory.instanceShownCount)
 
                 val t1 = ExactTimeStamp.now
                 DomainFactory.instance.getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)
                 val t2 = ExactTimeStamp.now
 
-                append("\ntoday: ")
+                append("\n\ntoday: ")
                 append(t2.long - t1.long)
                 append(" ms")
 
                 append("\ncrashlytics enabled: ")
                 append(MyCrashlytics.enabled)
+
+                append("\n\nlast beeping tick: ")
+                append(lastTickExactTimeStamp.toString())
+                append("\n\ntick log:\n")
+                append(tickLog)
             }
         }
 

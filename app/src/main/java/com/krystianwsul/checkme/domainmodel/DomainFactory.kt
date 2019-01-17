@@ -53,12 +53,19 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         }
     }
 
-    private var start: ExactTimeStamp
-    private var read: ExactTimeStamp
-    private var stop: ExactTimeStamp
+    private val localStart: ExactTimeStamp
+    private val localRead: ExactTimeStamp
+    private val localStop: ExactTimeStamp
 
-    val readMillis get() = read.long - start.long
-    val instantiateMillis get() = stop.long - read.long
+    private lateinit var remoteStart: ExactTimeStamp
+    private lateinit var remoteRead: ExactTimeStamp
+    private lateinit var remoteStop: ExactTimeStamp
+
+    val localReadMillis get() = localRead.long - localStart.long
+    val localInstantiateMillis get() = localStop.long - localRead.long
+
+    val remoteReadMillis get() = remoteRead.long - remoteStart.long
+    val remoteInstantiateMillis get() = remoteStop.long - remoteRead.long
 
     var userInfo: UserInfo? = null
         private set
@@ -83,25 +90,26 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     private var skipSave = false
 
     init {
-        start = ExactTimeStamp.now
+        localStart = ExactTimeStamp.now
 
         localFactory = LocalFactory(persistenceManager)
 
-        read = ExactTimeStamp.now
+        localRead = ExactTimeStamp.now
 
         localFactory.initialize(this)
 
-        stop = ExactTimeStamp.now
+        localStop = ExactTimeStamp.now
     }
 
     // misc
 
     val isHoldingWakeLock get() = tickData?.wakelock?.isHeld == true
 
-    val taskCount get() = localFactory.taskCount + (remoteProjectFactory?.taskCount ?: 0)
+    val localTaskCount get() = localFactory.taskCount
+    val remoteTaskCount get() = remoteProjectFactory!!.taskCount
 
-    val instanceCount
-        get() = localFactory.instanceCount + (remoteProjectFactory?.instanceCount ?: 0)
+    val localInstanceCount get() = localFactory.instanceCount
+    val remoteInstanceCount get() = remoteProjectFactory!!.instanceCount
 
     val customTimeCount get() = customTimes.size
 
@@ -147,13 +155,22 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
         DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
 
+        if (!this::remoteStart.isInitialized)
+            remoteStart = ExactTimeStamp.now
+
         recordQuery = DatabaseWrapper.getTaskRecordsQuery(newUserInfo)
         recordListener = object : ValueEventListener {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: $dataSnapshot")
 
+                if (!this@DomainFactory::remoteRead.isInitialized)
+                    remoteRead = ExactTimeStamp.now
+
                 setRemoteTaskRecords(dataSnapshot, source)
+
+                if (!this@DomainFactory::remoteStop.isInitialized)
+                    remoteStop = ExactTimeStamp.now
             }
 
             override fun onCancelled(databaseError: DatabaseError) {

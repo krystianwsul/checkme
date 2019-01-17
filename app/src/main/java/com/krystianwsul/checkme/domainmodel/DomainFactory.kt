@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
@@ -94,6 +95,12 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         localFactory.initialize(this)
 
         localStop = ExactTimeStamp.now
+
+        MyApplication.instance
+                .userInfoRelay
+                .subscribe {
+                    it.value?.let { setUserInfo(SaveService.Source.GUI, it) } ?: clearUserInfo()
+                }
     }
 
     // misc
@@ -127,7 +134,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     // firebase
 
     @Synchronized
-    fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
+    private fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
         if (userInfo != null) {
             if (userInfo == newUserInfo)
                 return
@@ -170,7 +177,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     }
 
     @Synchronized
-    fun clearUserInfo() {
+    private fun clearUserInfo() {
         val now = ExactTimeStamp.now
 
         if (userInfo != null) {

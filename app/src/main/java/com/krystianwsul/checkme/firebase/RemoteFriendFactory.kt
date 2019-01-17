@@ -52,8 +52,8 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
         fun clearListener() = compositeDisposable.clear()
 
         @Synchronized
-        fun setListener(mUserInfo: UserInfo) {
-            DatabaseWrapper.friends(mUserInfo)
+        fun setListener(userInfo: UserInfo) {
+            DatabaseWrapper.friends(userInfo)
                     .subscribe {
                         Log.e("asdf", "RemoteFriendFactory.onDataChange, dataSnapshot: $it")
 

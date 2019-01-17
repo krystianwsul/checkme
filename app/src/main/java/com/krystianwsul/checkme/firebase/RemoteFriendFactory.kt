@@ -5,7 +5,6 @@ import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.UserJson
 import com.krystianwsul.checkme.firebase.records.RemoteFriendManager
 import io.reactivex.disposables.CompositeDisposable
@@ -52,8 +51,8 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
         fun clearListener() = compositeDisposable.clear()
 
         @Synchronized
-        fun setListener(userInfo: UserInfo) {
-            DatabaseWrapper.friends(userInfo)
+        fun setListener() {
+            DatabaseWrapper.friends
                     .subscribe {
                         Log.e("asdf", "RemoteFriendFactory.onDataChange, dataSnapshot: $it")
 

@@ -149,7 +149,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         if (!this::remoteStart.isInitialized)
             remoteStart = ExactTimeStamp.now
 
-        DatabaseWrapper.taskRecords(newUserInfo)
+        DatabaseWrapper.tasks
                 .subscribe {
                     Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: $it")
 
@@ -163,9 +163,9 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
                 }
                 .addTo(firebaseDisposable)
 
-        RemoteFriendFactory.setListener(userInfo!!)
+        RemoteFriendFactory.setListener()
 
-        DatabaseWrapper.user(newUserInfo)
+        DatabaseWrapper.user
                 .subscribe {
                     Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: $it")
 

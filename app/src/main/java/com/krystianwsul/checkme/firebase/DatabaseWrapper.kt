@@ -7,6 +7,8 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.records.*
+import com.krystianwsul.checkme.utils.filterNotNull
+import io.reactivex.Observable
 
 
 object DatabaseWrapper {
@@ -49,10 +51,20 @@ object DatabaseWrapper {
         rootReference.child(USERS_KEY).updateChildren(values)
     }
 
-    fun friends(userInfo: UserInfo) = rootReference.child(USERS_KEY)
-            .orderByChild("friendOf/${userInfo.key}")
-            .equalTo(true)
-            .dataChanges()
+    private fun <T> mapUserInfo(action: (String) -> Observable<T>) = MyApplication.instance
+            .userInfoRelay
+            .filterNotNull()
+            .map { it.key }
+            .switchMap(action)!!
+
+    val friends by lazy {
+        mapUserInfo {
+            rootReference.child(USERS_KEY)
+                    .orderByChild("friendOf/$it")
+                    .equalTo(true)
+                    .dataChanges()
+        }
+    }
 
     fun getScheduleRecordId(projectId: String, taskId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
@@ -90,14 +102,22 @@ object DatabaseWrapper {
         return id
     }
 
-    fun taskRecords(userInfo: UserInfo) = rootReference.child(RECORDS_KEY)
-            .orderByChild("recordOf/${userInfo.key}")
-            .equalTo(true)
-            .dataChanges()
+    val tasks by lazy {
+        mapUserInfo {
+            rootReference.child(RECORDS_KEY)
+                    .orderByChild("recordOf/$it")
+                    .equalTo(true)
+                    .dataChanges()
+        }
+    }
 
     fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
-    fun user(userInfo: UserInfo) = rootReference.child("$USERS_KEY/${userInfo.key}").dataChanges()
+    val user by lazy {
+        mapUserInfo {
+            rootReference.child("$USERS_KEY/$it").dataChanges()
+        }
+    }
 }

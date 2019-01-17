@@ -9,6 +9,8 @@ import android.view.ViewTreeObserver
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.time.DayOfWeek
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import io.reactivex.Observable
 
 fun Set<DayOfWeek>.prettyPrint(): String {
     check(isNotEmpty())
@@ -98,3 +100,5 @@ fun Context.dpToPx(dp: Int): Float {
 }
 
 fun Context.startTicks(receiver: BroadcastReceiver) = registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
+
+fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }

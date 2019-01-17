@@ -9,16 +9,10 @@ class AlarmReceiver : BroadcastReceiver() {
 
     companion object {
 
-        private const val SOURCE_KEY = "source"
-
-        fun newIntent(source: String) = Intent(MyApplication.instance, AlarmReceiver::class.java).apply {
-            putExtra(SOURCE_KEY, source)
-        }
+        fun newIntent() = Intent(MyApplication.instance, AlarmReceiver::class.java)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        val source = intent.getStringExtra(SOURCE_KEY)
-
-        TickJobIntentService.start(TickJobIntentService.getIntent(context, false, "AlarmReceiver: $source"))
+        TickJobIntentService.start(TickJobIntentService.getIntent(context, false, "AlarmReceiver"))
     }
 }

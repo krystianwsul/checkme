@@ -4,7 +4,7 @@ import android.os.Build
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
-import com.krystianwsul.checkme.MyApplication
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
@@ -37,7 +37,11 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
     companion object {
 
-        val instance by lazy { DomainFactory() }
+        val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())
+
+        val nullableInstance get() = instanceRelay.value!!.value
+
+        val instance get() = instanceRelay.value!!.value!!
 
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
             val silent = oldTickData.silent && newTickData.silent
@@ -95,12 +99,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         localFactory.initialize(this)
 
         localStop = ExactTimeStamp.now
-
-        MyApplication.instance
-                .userInfoRelay
-                .subscribe {
-                    it.value?.let { setUserInfo(SaveService.Source.GUI, it) } ?: clearUserInfo()
-                }
     }
 
     // misc
@@ -134,7 +132,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     // firebase
 
     @Synchronized
-    private fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
+    fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
         if (userInfo != null) {
             if (userInfo == newUserInfo)
                 return
@@ -177,7 +175,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     }
 
     @Synchronized
-    private fun clearUserInfo() {
+    fun clearUserInfo() {
         val now = ExactTimeStamp.now
 
         if (userInfo != null) {
@@ -192,7 +190,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
             RemoteFriendFactory.clearListener()
 
-            updateNotifications(now)
+            updateNotifications(now, true)
 
             ObserverHolder.notifyDomainObservers(ArrayList())
         }
@@ -2158,7 +2156,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
     private fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(setOf(remoteProject), userInfo!!, userKeys)
 
-    private fun updateNotifications(now: ExactTimeStamp) = updateNotifications(true, now, mutableListOf(), "other")
+    private fun updateNotifications(now: ExactTimeStamp, clear: Boolean = false) = updateNotifications(true, now, mutableListOf(), "other", clear)
 
     private val taskKeys
         get() = localFactory.taskIds
@@ -2166,12 +2164,10 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
                 .toMutableSet()
                 .apply { remoteProjectFactory?.let { addAll(it.taskKeys) } }
 
-    private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String) {
+    private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String, clear: Boolean = false) {
         Preferences.logLineDate("updateNotifications start $sourceName")
 
-        val rootInstances = getRootInstances(null, now.plusOne(), now) // 24 hack
-
-        val notificationInstances = rootInstances.filter { it.done == null && !it.notified && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !removedTaskKeys.contains(it.taskKey) }.associateBy { it.instanceKey }
+        val notificationInstances = if (clear) mapOf() else getRootInstances(null, now.plusOne(), now /* 24 hack */).filter { it.done == null && !it.notified && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !removedTaskKeys.contains(it.taskKey) }.associateBy { it.instanceKey }
 
         val shownInstanceKeys = getExistingInstances().filter { it.notificationShown }
                 .map { it.instanceKey }
@@ -2310,6 +2306,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         var nextAlarm = getExistingInstances().map { it.instanceDateTime.timeStamp }
                 .filter { it.toExactTimeStamp() > now }
                 .min()
+                .takeUnless { clear }
 
         val minSchedulesTimeStamp = getTasks().filter { it.current(now) && it.isRootTask(now) }
                 .toList()

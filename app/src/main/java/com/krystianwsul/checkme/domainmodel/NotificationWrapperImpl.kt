@@ -242,12 +242,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun updateAlarm(nextAlarm: TimeStamp?) {
-        nextAlarm?.let { setExact(it.long) }
+        val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 0, AlarmReceiver.newIntent(), PendingIntent.FLAG_UPDATE_CURRENT)!!
+        alarmManager.cancel(pendingIntent)
+        nextAlarm?.let { setExact(it.long, pendingIntent) }
     }
 
-    protected open fun setExact(time: Long) {
-        val pendingIntent = PendingIntent.getBroadcast(MyApplication.instance, 0, AlarmReceiver.newIntent("setExact"), PendingIntent.FLAG_UPDATE_CURRENT)!!
-        alarmManager.cancel(pendingIntent)
+    protected open fun setExact(time: Long, pendingIntent: PendingIntent) {
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent)
     }
 }

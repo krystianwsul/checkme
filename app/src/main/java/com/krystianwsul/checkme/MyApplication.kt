@@ -17,7 +17,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import net.danlew.android.joda.JodaTimeAndroid
 import java.security.MessageDigest
@@ -76,8 +78,21 @@ class MyApplication : Application() {
 
         FirebaseAuth.getInstance()
                 .authStateChanges()
-                .map { NullableWrapper(it.currentUser?.let { UserInfo(it) }) }
+                .map { NullableWrapper(it.currentUser) }
+                .startWith(NullableWrapper(FirebaseAuth.getInstance().currentUser))
+                .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
                 .subscribe(userInfoRelay)
+
+        userInfoRelay.subscribe {
+            if (it.value != null) {
+                if (DomainFactory.nullableInstance == null)
+                    DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory()))
+                DomainFactory.instance.setUserInfo(SaveService.Source.GUI, it.value)
+            } else {
+                DomainFactory.nullableInstance?.clearUserInfo()
+                DomainFactory.instanceRelay.accept(NullableWrapper())
+            }
+        }
 
         if (token == null)
             FirebaseInstanceId.getInstance()

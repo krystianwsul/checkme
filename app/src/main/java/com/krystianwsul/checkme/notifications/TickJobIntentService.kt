@@ -55,6 +55,9 @@ class TickJobIntentService : JobIntentService() {
 
         // still running?
         fun tick(silent: Boolean, sourceName: String, listener: (() -> Unit)? = null): Boolean {
+            if (!MyApplication.instance.hasUserInfo)
+                return false
+
             val kotlinDomainFactory = DomainFactory.instance
 
             val listeners = listOfNotNull(listener)

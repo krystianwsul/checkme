@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
+import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Query
 import com.krystianwsul.checkme.MyApplication
@@ -91,13 +92,10 @@ object DatabaseWrapper {
         return id
     }
 
-    fun getTaskRecordsQuery(userInfo: UserInfo): Query {
-        val key = userInfo.key
-
-        return rootReference.child(RECORDS_KEY)
-                .orderByChild("recordOf/$key")
-                .equalTo(true)
-    }
+    fun taskRecords(userInfo: UserInfo) = rootReference.child(RECORDS_KEY)
+            .orderByChild("recordOf/${userInfo.key}")
+            .equalTo(true)
+            .dataChanges()
 
     fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)
 

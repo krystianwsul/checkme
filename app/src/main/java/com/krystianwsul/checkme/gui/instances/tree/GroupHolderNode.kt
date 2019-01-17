@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.graphics.Color
 import android.view.View
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -21,7 +22,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         val colorSecondary by lazy { getColor(R.color.textSecondary) }
         val colorDisabled by lazy { getColor(R.color.textDisabled) }
         val colorSelected by lazy { getColor(R.color.selected) }
-        val colorBackground by lazy { getColor(R.color.listBackground) }
     }
 
     protected abstract val treeNode: TreeNode
@@ -125,7 +125,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {
-                setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
+                setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else Color.TRANSPARENT)
 
                 setOnLongClickListener {
                     onLongClick(viewHolder)

@@ -30,6 +30,8 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.*
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import java.util.*
 
 @Suppress("LeakingThis")
@@ -70,8 +72,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     var userInfo: UserInfo? = null
         private set
 
-    private var recordQuery: Query? = null
-    private var recordListener: ValueEventListener? = null
+    private var firebaseDisposable = CompositeDisposable()
 
     private var userQuery: Query? = null
     private var userListener: ValueEventListener? = null
@@ -134,7 +135,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     @Synchronized
     fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
         if (userInfo != null) {
-            checkNotNull(recordQuery)
             checkNotNull(userQuery)
 
             if (userInfo == newUserInfo)
@@ -144,9 +144,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         }
 
         check(userInfo == null)
-
-        check(recordQuery == null)
-        check(recordListener == null)
 
         check(userQuery == null)
         check(userListener == null)
@@ -158,34 +155,19 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         if (!this::remoteStart.isInitialized)
             remoteStart = ExactTimeStamp.now
 
-        recordQuery = DatabaseWrapper.getTaskRecordsQuery(newUserInfo)
-        recordListener = object : ValueEventListener {
+        DatabaseWrapper.taskRecords(newUserInfo)
+                .subscribe {
+                    Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: $it")
 
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: $dataSnapshot")
+                    if (!this@DomainFactory::remoteRead.isInitialized)
+                        remoteRead = ExactTimeStamp.now
 
-                if (!this@DomainFactory::remoteRead.isInitialized)
-                    remoteRead = ExactTimeStamp.now
+                    setRemoteTaskRecords(it, source)
 
-                setRemoteTaskRecords(dataSnapshot, source)
-
-                if (!this@DomainFactory::remoteStop.isInitialized)
-                    remoteStop = ExactTimeStamp.now
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                Log.e("asdf", "DomainFactory.getMRecordListener().onCancelled", databaseError.toException())
-
-                MyCrashlytics.logException(databaseError.toException())
-
-                tickData?.release()
-                tickData = null
-
-                notTickFirebaseListeners.clear()
-                RemoteFriendFactory.clearFriendListeners()
-            }
-        }
-        recordQuery!!.addValueEventListener(recordListener!!)
+                    if (!this@DomainFactory::remoteStop.isInitialized)
+                        remoteStop = ExactTimeStamp.now
+                }
+                .addTo(firebaseDisposable)
 
         RemoteFriendFactory.setListener(userInfo!!)
 
@@ -213,13 +195,9 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         val now = ExactTimeStamp.now
 
         if (userInfo == null) {
-            check(recordQuery == null)
-            check(recordListener == null)
             check(userQuery == null)
             check(userListener == null)
         } else {
-            check(recordQuery != null)
-            check(recordListener != null)
             check(userQuery != null)
             check(userListener != null)
 
@@ -230,9 +208,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
             userInfo = null
 
-            recordQuery!!.removeEventListener(recordListener!!)
-            recordQuery = null
-            recordListener = null
+            firebaseDisposable.clear()
 
             RemoteFriendFactory.clearListener()
 

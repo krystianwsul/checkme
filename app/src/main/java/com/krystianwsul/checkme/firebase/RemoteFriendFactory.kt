@@ -3,15 +3,13 @@ package com.krystianwsul.checkme.firebase
 import android.text.TextUtils
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.Query
-import com.google.firebase.database.ValueEventListener
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.UserJson
 import com.krystianwsul.checkme.firebase.records.RemoteFriendManager
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import java.util.*
 
 class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
@@ -20,7 +18,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
         private var instance: RemoteFriendFactory? = null
 
-        private var database: Pair<Query, ValueEventListener>? = null
+        private var compositeDisposable = CompositeDisposable()
 
         private val friendListeners = mutableListOf<() -> Unit>()
 
@@ -51,27 +49,17 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
         fun getUserJsons(friendIds: Set<String>) = instance!!.getUserJsons(friendIds)
 
         @Synchronized
-        fun clearListener() {
-            database!!.apply { first.removeEventListener(second) }
-            database = null
-        }
+        fun clearListener() = compositeDisposable.clear()
 
         @Synchronized
         fun setListener(mUserInfo: UserInfo) {
-            database = Pair(DatabaseWrapper.getFriendsQuery(mUserInfo), object : ValueEventListener {
+            DatabaseWrapper.friends(mUserInfo)
+                    .subscribe {
+                        Log.e("asdf", "RemoteFriendFactory.onDataChange, dataSnapshot: $it")
 
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    Log.e("asdf", "RemoteFriendFactory.onDataChange, dataSnapshot: $dataSnapshot")
-
-                    setFriendRecords(dataSnapshot)
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    Log.e("asdf", "RemoteFriendFactory.onCancelled", databaseError.toException())
-
-                    MyCrashlytics.logException(databaseError.toException())
-                }
-            }).apply { first.addValueEventListener(second) }
+                        setFriendRecords(it)
+                    }
+                    .addTo(compositeDisposable)
         }
 
         @Synchronized
@@ -94,9 +82,6 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
             friendListeners.forEach { it() }
             friendListeners.clear()
         }
-
-        @Synchronized
-        fun clearFriendListeners() = friendListeners.clear()
 
         @Synchronized
         fun addFriendListener(friendListener: () -> Unit) = friendListeners.add(friendListener)

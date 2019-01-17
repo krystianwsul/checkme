@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase
 import android.text.TextUtils
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.Query
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.UserInfo
@@ -50,11 +49,10 @@ object DatabaseWrapper {
         rootReference.child(USERS_KEY).updateChildren(values)
     }
 
-    fun getFriendsQuery(userInfo: UserInfo): Query {
-        val key = userInfo.key
-
-        return rootReference.child(USERS_KEY).orderByChild("friendOf/$key").equalTo(true)
-    }
+    fun friends(userInfo: UserInfo) = rootReference.child(USERS_KEY)
+            .orderByChild("friendOf/${userInfo.key}")
+            .equalTo(true)
+            .dataChanges()
 
     fun getScheduleRecordId(projectId: String, taskId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
@@ -101,10 +99,5 @@ object DatabaseWrapper {
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
-    fun getUserQuery(userInfo: UserInfo): Query {
-        val key = userInfo.key
-        check(!TextUtils.isEmpty(key))
-
-        return rootReference.child("$USERS_KEY/$key")
-    }
+    fun user(userInfo: UserInfo) = rootReference.child("$USERS_KEY/${userInfo.key}").dataChanges()
 }

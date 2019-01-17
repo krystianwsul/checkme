@@ -4,9 +4,6 @@ import android.os.Build
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.Query
-import com.google.firebase.database.ValueEventListener
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
@@ -74,9 +71,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
     private var firebaseDisposable = CompositeDisposable()
 
-    private var userQuery: Query? = null
-    private var userListener: ValueEventListener? = null
-
     @JvmField
     var localFactory: LocalFactory
 
@@ -135,8 +129,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     @Synchronized
     fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
         if (userInfo != null) {
-            checkNotNull(userQuery)
-
             if (userInfo == newUserInfo)
                 return
 
@@ -144,9 +136,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         }
 
         check(userInfo == null)
-
-        check(userQuery == null)
-        check(userListener == null)
 
         userInfo = newUserInfo
 
@@ -171,36 +160,20 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
         RemoteFriendFactory.setListener(userInfo!!)
 
-        userQuery = DatabaseWrapper.getUserQuery(newUserInfo)
-        userListener = object : ValueEventListener {
+        DatabaseWrapper.user(newUserInfo)
+                .subscribe {
+                    Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: $it")
 
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: $dataSnapshot")
-
-                setUserRecord(dataSnapshot)
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                Log.e("asdf", "DomainFactory.getMUserListener().onCancelled", databaseError.toException())
-
-                MyCrashlytics.logException(databaseError.toException())
-            }
-        }
-
-        userQuery!!.addValueEventListener(userListener!!)
+                    setUserRecord(it)
+                }
+                .addTo(firebaseDisposable)
     }
 
     @Synchronized
     fun clearUserInfo() {
         val now = ExactTimeStamp.now
 
-        if (userInfo == null) {
-            check(userQuery == null)
-            check(userListener == null)
-        } else {
-            check(userQuery != null)
-            check(userListener != null)
-
+        if (userInfo != null) {
             localFactory.clearRemoteCustomTimeRecords()
 
             remoteProjectFactory = null
@@ -211,10 +184,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
             firebaseDisposable.clear()
 
             RemoteFriendFactory.clearListener()
-
-            userQuery!!.removeEventListener(userListener!!)
-            userQuery = null
-            userListener = null
 
             updateNotifications(now)
 

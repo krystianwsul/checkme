@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimePair
 
-
 class RemoteInstance : Instance {
 
     private val remoteProject: RemoteProject

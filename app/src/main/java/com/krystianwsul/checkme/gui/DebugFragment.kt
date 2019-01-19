@@ -45,19 +45,19 @@ class DebugFragment : AbstractFragment() {
                 val kotlinDomainFactory = DomainFactory.instance
 
                 append("local load time: ")
-                append(kotlinDomainFactory.localReadMillis + kotlinDomainFactory.localInstantiateMillis)
+                append(kotlinDomainFactory.localReadTimes.readMillis + kotlinDomainFactory.localReadTimes.instantiateMillis)
                 append("ms (")
-                append(kotlinDomainFactory.localReadMillis)
+                append(kotlinDomainFactory.localReadTimes.readMillis)
                 append(" + ")
-                append(kotlinDomainFactory.localInstantiateMillis)
+                append(kotlinDomainFactory.localReadTimes.instantiateMillis)
                 append(")")
 
                 append("\nremote load time: ")
-                append(kotlinDomainFactory.remoteReadMillis + kotlinDomainFactory.remoteInstantiateMillis)
+                append(kotlinDomainFactory.remoteReadTimes.readMillis + kotlinDomainFactory.remoteReadTimes.instantiateMillis)
                 append("ms (")
-                append(kotlinDomainFactory.remoteReadMillis)
+                append(kotlinDomainFactory.remoteReadTimes.readMillis)
                 append(" + ")
-                append(kotlinDomainFactory.remoteInstantiateMillis)
+                append(kotlinDomainFactory.remoteReadTimes.instantiateMillis)
                 append(")")
 
                 append("\n\ntasks: ")

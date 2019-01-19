@@ -55,19 +55,10 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         }
     }
 
-    private val localStart: ExactTimeStamp
-    private val localRead: ExactTimeStamp
-    private val localStop: ExactTimeStamp
+    val localReadTimes: ReadTimes
 
-    private lateinit var remoteStart: ExactTimeStamp
-    private lateinit var remoteRead: ExactTimeStamp
-    private lateinit var remoteStop: ExactTimeStamp
-
-    val localReadMillis get() = localRead.long - localStart.long
-    val localInstantiateMillis get() = localStop.long - localRead.long
-
-    val remoteReadMillis get() = remoteRead.long - remoteStart.long
-    val remoteInstantiateMillis get() = remoteStop.long - remoteRead.long
+    lateinit var remoteReadTimes: ReadTimes
+        private set
 
     @JvmField
     var localFactory: LocalFactory
@@ -89,18 +80,17 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     private var skipSave = false
 
     init {
-        localStart = ExactTimeStamp.now
+        val start = ExactTimeStamp.now
 
         localFactory = LocalFactory(persistenceManager)
 
-        localRead = ExactTimeStamp.now
+        val read = ExactTimeStamp.now
 
         localFactory.initialize(this)
 
-        localStop = ExactTimeStamp.now
+        val stop = ExactTimeStamp.now
 
-        if (!this::remoteStart.isInitialized)
-            remoteStart = ExactTimeStamp.now
+        localReadTimes = ReadTimes(start, read, stop)
 
         setUserHelper()
     }
@@ -165,8 +155,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     @Synchronized
     fun setRemoteTaskRecords(dataSnapshot: DataSnapshot) {
-        if (!this@DomainFactory::remoteRead.isInitialized)
-            remoteRead = ExactTimeStamp.now
+        val read = ExactTimeStamp.now
 
         val now = ExactTimeStamp.now
 
@@ -205,8 +194,10 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         save(0, SaveService.Source.GUI)
 
-        if (!this@DomainFactory::remoteStop.isInitialized)
-            remoteStop = ExactTimeStamp.now
+        val stop = ExactTimeStamp.now
+
+        if (!this::remoteReadTimes.isInitialized)
+            remoteReadTimes = ReadTimes(localReadTimes.start, read, stop)
     }
 
     @Synchronized
@@ -2428,5 +2419,11 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         val taskKeys = mutableSetOf<TaskKey>()
         val scheduleIds = mutableSetOf<ScheduleId>()
         val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
+    }
+
+    class ReadTimes(val start: ExactTimeStamp, val read: ExactTimeStamp, val stop: ExactTimeStamp) {
+
+        val readMillis get() = read.long - start.long
+        val instantiateMillis get() = stop.long - read.long
     }
 }

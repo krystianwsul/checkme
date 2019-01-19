@@ -23,19 +23,19 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         }
 
         fun throttleFirebase(needsFirebase: Boolean, firebaseListener: (DomainFactory) -> Unit) {
-            val kotlinDomainFactory = DomainFactory.instance
+            val domainFactory = DomainFactory.instance
 
-            if (kotlinDomainFactory.getIsConnected()) {
-                if (kotlinDomainFactory.getIsConnectedAndSaved()) {
-                    queueFirebase(kotlinDomainFactory, firebaseListener)
+            if (domainFactory.getIsConnected()) {
+                if (domainFactory.getIsConnectedAndSaved()) {
+                    queueFirebase(domainFactory, firebaseListener)
                 } else {
-                    firebaseListener(kotlinDomainFactory)
+                    firebaseListener(domainFactory)
                 }
             } else {
                 if (needsFirebase) {
-                    queueFirebase(kotlinDomainFactory, firebaseListener)
+                    queueFirebase(domainFactory, firebaseListener)
                 } else {
-                    firebaseListener(kotlinDomainFactory)
+                    firebaseListener(domainFactory)
                 }
             }
         }

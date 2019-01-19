@@ -40,6 +40,8 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         private var tickData: TickData? = null
 
+        private val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
+
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
             val silent = oldTickData.silent && newTickData.silent
 
@@ -71,6 +73,18 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
                 }
             }
         }
+
+        @Synchronized
+        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
+            check(nullableInstance?.remoteProjectFactory?.isSaved != false)
+
+            notTickFirebaseListeners.add(firebaseListener)
+        }
+
+        @Synchronized
+        fun removeFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
+            notTickFirebaseListeners.remove(firebaseListener)
+        }
     }
 
     val localReadTimes: ReadTimes
@@ -83,8 +97,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     var remoteProjectFactory: RemoteProjectFactory? = null
         private set
-
-    private val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
     private var remoteRootUser: RemoteRootUser? = null
 
@@ -220,18 +232,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         ObserverHolder.notifyDomainObservers(listOf())
 
         tryNotifyFriendListeners()
-    }
-
-    @Synchronized
-    fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
-        check(remoteProjectFactory?.isSaved != false)
-
-        notTickFirebaseListeners.add(firebaseListener)
-    }
-
-    @Synchronized
-    fun removeFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
-        notTickFirebaseListeners.remove(firebaseListener)
     }
 
     @Synchronized

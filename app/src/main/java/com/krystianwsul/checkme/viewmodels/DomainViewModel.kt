@@ -43,14 +43,14 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                 load()
 
                 if (MyApplication.instance.hasUserInfo && !domainFactory.getIsConnected())
-                    domainFactory.addFirebaseListener(firebaseListener)
+                    DomainFactory.addFirebaseListener(firebaseListener)
             }
             FirebaseLevel.NEED -> {
                 if (domainFactory.getIsConnected()) {
                     load()
                 } else {
                     if (MyApplication.instance.hasUserInfo)
-                        domainFactory.addFirebaseListener(firebaseListener)
+                        DomainFactory.addFirebaseListener(firebaseListener)
                 }
             }
             FirebaseLevel.FRIEND -> {
@@ -65,7 +65,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
     }
 
     fun stop() {
-        domainFactory.removeFirebaseListener(firebaseListener)
+        DomainFactory.removeFirebaseListener(firebaseListener)
 
         observer?.let { ObserverHolder.removeDomainObserver(it) }
         observer = null

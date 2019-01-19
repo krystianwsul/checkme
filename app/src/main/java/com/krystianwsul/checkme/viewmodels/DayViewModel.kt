@@ -18,7 +18,7 @@ class DayViewModel : ViewModel() {
 
     private val entries = mutableMapOf<Pair<MainActivity.TimeRange, Int>, Entry>()
 
-    private val kotlinDomainFactory = DomainFactory.instance
+    private val domainFactory = DomainFactory.instance
 
     fun getEntry(timeRange: MainActivity.TimeRange, position: Int): Entry {
         val key = Pair(timeRange, position)
@@ -36,7 +36,7 @@ class DayViewModel : ViewModel() {
         private var observer: Observer? = null
 
         private val firebaseListener: (DomainFactory) -> Unit = {
-            check(kotlinDomainFactory.getIsConnected())
+            check(domainFactory.getIsConnected())
 
             load()
         }
@@ -49,8 +49,8 @@ class DayViewModel : ViewModel() {
 
             load()
 
-            if (MyApplication.instance.hasUserInfo && !kotlinDomainFactory.getIsConnected())
-                kotlinDomainFactory.addFirebaseListener(firebaseListener)
+            if (MyApplication.instance.hasUserInfo && !domainFactory.getIsConnected())
+                DomainFactory.addFirebaseListener(firebaseListener)
         }
 
         private val compositeDisposable = CompositeDisposable()
@@ -79,12 +79,12 @@ class DayViewModel : ViewModel() {
         }
 
         fun stop() {
-            kotlinDomainFactory.removeFirebaseListener(firebaseListener)
+            DomainFactory.removeFirebaseListener(firebaseListener)
             observer = null
             compositeDisposable.clear()
         }
 
-        fun getData() = kotlinDomainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)
+        fun getData() = domainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)
     }
 
     data class DayData(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()

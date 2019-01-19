@@ -43,7 +43,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         private fun queueFirebase(domainFactory: DomainFactory, firebaseListener: (DomainFactory) -> Unit) {
             check(!domainFactory.getIsConnected() || domainFactory.getIsConnectedAndSaved())
 
-            domainFactory.addFirebaseListener(firebaseListener)
+            DomainFactory.addFirebaseListener(firebaseListener)
         }
     }
 

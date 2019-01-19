@@ -99,6 +99,9 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         localFactory.initialize(this)
 
         localStop = ExactTimeStamp.now
+
+        if (!this::remoteStart.isInitialized)
+            remoteStart = ExactTimeStamp.now
     }
 
     // misc
@@ -132,7 +135,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     // firebase
 
     @Synchronized
-    fun setUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
+    fun setUser(newUserInfo: UserInfo) {
         if (userInfo != null) {
             if (userInfo == newUserInfo)
                 return
@@ -145,23 +148,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         userInfo = newUserInfo
 
         DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
-
-        if (!this::remoteStart.isInitialized)
-            remoteStart = ExactTimeStamp.now
-
-        DatabaseWrapper.tasks
-                .subscribe {
-                    Log.e("asdf", "DomainFactory.getMRecordListener().onDataChange, dataSnapshot: $it")
-
-                    if (!this@DomainFactory::remoteRead.isInitialized)
-                        remoteRead = ExactTimeStamp.now
-
-                    setRemoteTaskRecords(it, source)
-
-                    if (!this@DomainFactory::remoteStop.isInitialized)
-                        remoteStop = ExactTimeStamp.now
-                }
-                .addTo(firebaseDisposable)
 
         RemoteFriendFactory.setListener()
 
@@ -197,8 +183,11 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     }
 
     @Synchronized
-    fun setRemoteTaskRecords(dataSnapshot: DataSnapshot, source: SaveService.Source) {
+    fun setRemoteTaskRecords(dataSnapshot: DataSnapshot) {
         check(userInfo != null)
+
+        if (!this@DomainFactory::remoteRead.isInitialized)
+            remoteRead = ExactTimeStamp.now
 
         val now = ExactTimeStamp.now
 
@@ -211,15 +200,13 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
         if (tickData == null && notTickFirebaseListeners.isEmpty()) {
             updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
-
-            save(0, source)
         } else {
             skipSave = true
 
             if (tickData == null) {
                 updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
             } else {
-                updateNotificationsTick(source, tickData!!.silent, tickData!!.source)
+                updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
 
                 if (!firstThereforeSilent) {
                     Log.e("asdf", "not first, clearing getMTickData()")
@@ -235,9 +222,12 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
             notTickFirebaseListeners.clear()
 
             skipSave = false
-
-            save(0, source)
         }
+
+        save(0, SaveService.Source.GUI)
+
+        if (!this@DomainFactory::remoteStop.isInitialized)
+            remoteStop = ExactTimeStamp.now
     }
 
     @Synchronized

@@ -19,8 +19,9 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -83,16 +84,20 @@ class MyApplication : Application() {
                 .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
                 .subscribe(userInfoRelay)
 
-        userInfoRelay.subscribe {
+        userInfoRelay.switchMap {
             if (it.value != null) {
                 if (DomainFactory.nullableInstance == null)
                     DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory()))
-                DomainFactory.instance.setUserInfo(SaveService.Source.GUI, it.value)
+                DomainFactory.instance.setUser(it.value)
+
+                DatabaseWrapper.tasks
             } else {
                 DomainFactory.nullableInstance?.clearUserInfo()
                 DomainFactory.instanceRelay.accept(NullableWrapper())
+
+                Observable.never()
             }
-        }
+        }.subscribe { DomainFactory.instance.setRemoteTaskRecords(it) }
 
         if (token == null)
             FirebaseInstanceId.getInstance()

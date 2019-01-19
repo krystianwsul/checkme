@@ -20,6 +20,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
@@ -58,6 +59,8 @@ class MyApplication : Application() {
 
     val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<UserInfo>())
 
+    val userInfo get() = userInfoRelay.value!!.value!!
+
     val hasUserInfo get() = userInfoRelay.value!!.value != null
 
     @SuppressLint("CheckResult")
@@ -87,7 +90,7 @@ class MyApplication : Application() {
         userInfoRelay.switchMap {
             if (it.value != null) {
                 if (DomainFactory.nullableInstance == null)
-                    DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory()))
+                    DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, it.value)))
                 DomainFactory.instance.setUser(it.value)
 
                 DatabaseWrapper.tasks

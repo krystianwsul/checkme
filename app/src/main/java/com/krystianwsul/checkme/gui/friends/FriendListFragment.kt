@@ -245,7 +245,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))
 
-                DatabaseWrapper.addFriends(DomainFactory.instance.userInfo!!, friendIds)
+                DatabaseWrapper.addFriends(friendIds)
             }
         }
     }

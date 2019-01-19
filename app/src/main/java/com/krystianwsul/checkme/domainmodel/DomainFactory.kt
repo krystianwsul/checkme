@@ -33,7 +33,7 @@ import io.reactivex.rxkotlin.addTo
 import java.util.*
 
 @Suppress("LeakingThis")
-open class DomainFactory(persistenceManager: PersistenceManager = PersistenceManager.instance) {
+open class DomainFactory(persistenceManager: PersistenceManager, private var userInfo: UserInfo) {
 
     companion object {
 
@@ -71,9 +71,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     val remoteReadMillis get() = remoteRead.long - remoteStart.long
     val remoteInstantiateMillis get() = remoteStop.long - remoteRead.long
 
-    var userInfo: UserInfo? = null
-        private set
-
     private var firebaseDisposable = CompositeDisposable()
 
     @JvmField
@@ -102,6 +99,8 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
         if (!this::remoteStart.isInitialized)
             remoteStart = ExactTimeStamp.now
+
+        afterSetUser()
     }
 
     // misc
@@ -134,20 +133,8 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
     // firebase
 
-    @Synchronized
-    fun setUser(newUserInfo: UserInfo) {
-        if (userInfo != null) {
-            if (userInfo == newUserInfo)
-                return
-
-            clearUserInfo()
-        }
-
-        check(userInfo == null)
-
-        userInfo = newUserInfo
-
-        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
+    private fun afterSetUser() {
+        DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid)
 
         RemoteFriendFactory.setListener()
 
@@ -161,31 +148,37 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     }
 
     @Synchronized
+    fun setUser(newUserInfo: UserInfo) {
+        if (userInfo == newUserInfo)
+            return
+
+        clearUserInfo()
+
+        userInfo = newUserInfo
+
+        afterSetUser()
+    }
+
+    @Synchronized
     fun clearUserInfo() {
         val now = ExactTimeStamp.now
 
-        if (userInfo != null) {
-            localFactory.clearRemoteCustomTimeRecords()
+        localFactory.clearRemoteCustomTimeRecords()
 
-            remoteProjectFactory = null
-            RemoteFriendFactory.setInstance(null)
+        remoteProjectFactory = null
+        RemoteFriendFactory.setInstance(null)
 
-            userInfo = null
+        firebaseDisposable.clear()
 
-            firebaseDisposable.clear()
+        RemoteFriendFactory.clearListener()
 
-            RemoteFriendFactory.clearListener()
+        updateNotifications(now, true)
 
-            updateNotifications(now, true)
-
-            ObserverHolder.notifyDomainObservers(ArrayList())
-        }
+        ObserverHolder.notifyDomainObservers(ArrayList())
     }
 
     @Synchronized
     fun setRemoteTaskRecords(dataSnapshot: DataSnapshot) {
-        check(userInfo != null)
-
         if (!this@DomainFactory::remoteRead.isInitialized)
             remoteRead = ExactTimeStamp.now
 
@@ -194,7 +187,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         localFactory.clearRemoteCustomTimeRecords()
 
         val firstThereforeSilent = remoteProjectFactory == null
-        remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo!!, now) // todo move to MyApplication
+        remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo, now) // todo move to MyApplication
 
         RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
 
@@ -711,7 +704,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
         check(remoteProjectFactory != null)
-        check(userInfo != null)
         check(RemoteFriendFactory.hasFriends())
 
         val friendDatas = RemoteFriendFactory.getFriends()
@@ -726,7 +718,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
             name = remoteProject.name
 
             userListDatas = remoteProject.users
-                    .filterNot { it.id == userInfo!!.key }
+                    .filterNot { it.id == userInfo.key }
                     .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
                     .toSet()
         } else {
@@ -1028,7 +1020,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
         val newParentTask = if (!finalProjectId.isNullOrEmpty()) {
             check(remoteProjectFactory != null)
-            check(userInfo != null)
 
             remoteProjectFactory!!.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId)
         } else {
@@ -1408,7 +1399,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
         val newParentTask = if (!finalProjectId.isNullOrEmpty()) {
             check(remoteProjectFactory != null)
-            check(userInfo != null)
 
             remoteProjectFactory!!.createRemoteTaskHelper(now, name, note, finalProjectId)
         } else {
@@ -1481,12 +1471,11 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     fun removeFriends(keys: Set<String>) {
         MyCrashlytics.log("DomainFactory.removeFriends")
 
-        check(userInfo != null)
         check(remoteProjectFactory != null)
         check(RemoteFriendFactory.hasFriends())
         check(!RemoteFriendFactory.isSaved())
 
-        keys.forEach { RemoteFriendFactory.removeFriend(userInfo!!.key, it) }
+        keys.forEach { RemoteFriendFactory.removeFriend(userInfo.key, it) }
 
         RemoteFriendFactory.save()
     }
@@ -1494,7 +1483,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     @Synchronized
     fun updateUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
         MyCrashlytics.log("DomainFactory.updateUserInfo")
-        check(userInfo != null)
         check(remoteProjectFactory != null)
 
         if (userInfo == newUserInfo)
@@ -1537,14 +1525,13 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
 
         check(name.isNotEmpty())
         check(remoteProjectFactory != null)
-        check(userInfo != null)
         check(remoteRootUser != null)
 
         val now = ExactTimeStamp.now
 
         val recordOf = HashSet(friends)
 
-        val key = userInfo!!.key
+        val key = userInfo.key
         check(!recordOf.contains(key))
         recordOf.add(key)
 
@@ -1560,7 +1547,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
         check(remoteProjectFactory != null)
-        check(userInfo != null)
         check(!projectIds.isEmpty())
 
         val now = ExactTimeStamp.now
@@ -1585,7 +1571,6 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
     fun clearProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectUndoData: ProjectUndoData) {
         MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
         check(remoteProjectFactory != null)
-        check(userInfo != null)
 
         val now = ExactTimeStamp.now
 
@@ -2140,11 +2125,11 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         if (!remoteProjects.isEmpty()) {
             checkNotNull(userInfo)
 
-            BackendNotifier.notify(remoteProjects, userInfo!!, listOf())
+            BackendNotifier.notify(remoteProjects, userInfo, listOf())
         }
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(setOf(remoteProject), userInfo!!, userKeys)
+    private fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(setOf(remoteProject), userInfo, userKeys)
 
     private fun updateNotifications(now: ExactTimeStamp, clear: Boolean = false) = updateNotifications(true, now, mutableListOf(), "other", clear)
 

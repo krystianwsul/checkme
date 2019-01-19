@@ -22,6 +22,8 @@ object DatabaseWrapper {
                 .getString(R.string.firebase_root)
     }
 
+    private val userInfo get() = MyApplication.instance.userInfo
+
     private val rootReference by lazy {
         FirebaseDatabase.getInstance()
                 .reference
@@ -38,13 +40,13 @@ object DatabaseWrapper {
 
     fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 
-    fun addFriend(userInfo: UserInfo, friendKey: String) {
+    fun addFriend(friendKey: String) {
         val myKey = userInfo.key
 
         rootReference.child("$USERS_KEY/$friendKey/friendOf/$myKey").setValue(true)
     }
 
-    fun addFriends(userInfo: UserInfo, friendKeys: Set<String>) {
+    fun addFriends(friendKeys: Set<String>) {
         val myKey = userInfo.key
 
         val values = friendKeys.map { "$it/friendOf/$myKey" to true }.toMap()

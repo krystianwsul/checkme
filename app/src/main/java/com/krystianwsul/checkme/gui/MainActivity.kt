@@ -380,22 +380,19 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         R.id.main_drawer_projects -> showTab(Tab.PROJECTS)
                         R.id.main_drawer_custom_times -> showTab(Tab.CUSTOM_TIMES)
                         R.id.main_drawer_friends -> showTab(Tab.FRIENDS)
-                        R.id.main_drawer_sign_in -> {
+                        R.id.main_drawer_sign_out -> {
                             val domainFactory = DomainFactory.instance
-                            val userInfo = domainFactory.userInfo
-                            if (userInfo != null) {
-                                domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
+                            val userInfo = MyApplication.instance.userInfo
 
-                                MyApplication.instance.googleSigninClient.signOut()
+                            domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
 
-                                FirebaseAuth.getInstance().signOut()
+                            MyApplication.instance.googleSigninClient.signOut()
 
-                                finish()
+                            FirebaseAuth.getInstance().signOut()
 
-                                startActivity(TutorialActivity.newLoginIntent())
-                            } else {
-                                startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
-                            }
+                            finish()
+
+                            startActivity(TutorialActivity.newLoginIntent())
                         }
                         R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newHelpIntent())
                         R.id.main_drawer_debug -> showTab(Tab.DEBUG)
@@ -520,20 +517,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             calendarOpen = false
         }
 
-        if (tab == Tab.TASKS) {
-            mainTaskListFrame.visibility = View.VISIBLE
+        mainTaskListFrame.visibility = if (tab == Tab.TASKS) {
+            View.VISIBLE
         } else {
-            mainTaskListFrame.visibility = View.GONE
             closeSearch()
+            View.GONE
         }
 
-        if (tab == Tab.PROJECTS) {
-            checkNotNull(DomainFactory.instance.userInfo)
-
-            mainProjectListFrame.visibility = View.VISIBLE
-        } else {
-            mainProjectListFrame.visibility = View.GONE
-        }
+        mainProjectListFrame.visibility = if (tab == Tab.PROJECTS) View.VISIBLE else View.GONE
 
         if (tab == Tab.CUSTOM_TIMES) {
             mainCustomTimesFrame.visibility = View.VISIBLE
@@ -541,13 +532,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             mainCustomTimesFrame.visibility = View.GONE
         }
 
-        if (tab == Tab.FRIENDS) {
-            checkNotNull(DomainFactory.instance.userInfo)
-
-            mainFriendListFrame.visibility = View.VISIBLE
-        } else {
-            mainFriendListFrame.visibility = View.GONE
-        }
+        mainFriendListFrame.visibility = if (tab == Tab.FRIENDS) View.VISIBLE else View.GONE
 
         if (tab == Tab.DEBUG) {
             mainDebugFrame.visibility = View.VISIBLE
@@ -692,14 +677,14 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 headerName.text = displayName
                 headerEmail.text = email
 
-                findItem(R.id.main_drawer_sign_in).setTitle(R.string.signOut)
+                findItem(R.id.main_drawer_sign_out).setTitle(R.string.signOut)
                 findItem(R.id.main_drawer_projects).isEnabled = true
                 findItem(R.id.main_drawer_friends).isEnabled = true
             } else {
                 headerName.text = null
                 headerEmail.text = null
 
-                findItem(R.id.main_drawer_sign_in).setTitle(R.string.signIn)
+                findItem(R.id.main_drawer_sign_out).setTitle(R.string.signIn)
                 findItem(R.id.main_drawer_projects).isEnabled = false
                 findItem(R.id.main_drawer_friends).isEnabled = false
             }

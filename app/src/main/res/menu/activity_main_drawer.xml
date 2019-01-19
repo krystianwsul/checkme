@@ -24,8 +24,8 @@
             android:title="@string/friends"
             android:icon="@drawable/ic_people_black_24dp"/>
         <item
-            android:id="@+id/main_drawer_sign_in"
-            android:title="@string/signIn"
+            android:id="@+id/main_drawer_sign_out"
+            android:title="@string/signOut"
             android:icon="@drawable/ic_account_circle_black_24dp"
             android:checkable="false"/>
         <item

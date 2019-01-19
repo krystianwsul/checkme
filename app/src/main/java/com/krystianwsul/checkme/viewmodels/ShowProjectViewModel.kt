@@ -7,7 +7,7 @@ class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
     fun start(projectId: String?) {
         this.projectId = projectId
 
-        internalStart(FirebaseLevel.FRIEND)
+        internalStart()
     }
 
     override fun getData() = domainFactory.getShowProjectData(projectId)

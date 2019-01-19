@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
@@ -16,7 +15,7 @@ class EditInstanceViewModel : DomainViewModel<EditInstanceViewModel.Data>() {
     fun start(instanceKey: InstanceKey) {
         this.instanceKey = instanceKey
 
-        internalStart(if (instanceKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING)
+        internalStart()
     }
 
     override fun getData() = domainFactory.getEditInstanceData(instanceKey)

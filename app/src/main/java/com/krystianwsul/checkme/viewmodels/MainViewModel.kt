@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 
 class MainViewModel : DomainViewModel<MainViewModel.Data>() {
 
-    fun start() = internalStart(FirebaseLevel.WANT)
+    fun start() = internalStart()
 
     override fun getData() = domainFactory.getMainData()
 

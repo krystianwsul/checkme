@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskKey
 
 
 class InstanceHourService : IntentService("InstanceHourService") {
@@ -36,7 +35,7 @@ class InstanceHourService : IntentService("InstanceHourService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId)
 
-        InstanceDoneService.throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceAddHour(it, instanceKey) }
+        DomainFactory.addFirebaseListener { setInstanceAddHour(it, instanceKey) }
     }
 
     private fun setInstanceAddHour(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)

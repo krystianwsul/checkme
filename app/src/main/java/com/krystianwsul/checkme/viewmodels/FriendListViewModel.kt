@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.viewmodels
 
 class FriendListViewModel : DomainViewModel<FriendListViewModel.Data>() {
 
-    fun start() = internalStart(FirebaseLevel.FRIEND)
+    fun start() = internalStart()
 
     override fun getData() = domainFactory.getFriendListData()
 

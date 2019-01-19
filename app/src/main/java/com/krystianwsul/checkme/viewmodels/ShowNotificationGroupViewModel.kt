@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskKey
 
 class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupViewModel.Data>() {
 
@@ -13,12 +12,7 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
 
         this.instanceKeys = instanceKeys
 
-        val firebaseLevel = if (instanceKeys.any { it.type == TaskKey.Type.REMOTE })
-            FirebaseLevel.NEED
-        else
-            FirebaseLevel.NOTHING
-
-        internalStart(firebaseLevel)
+        internalStart()
     }
 
     override fun getData() = domainFactory.getShowNotificationGroupData(instanceKeys)

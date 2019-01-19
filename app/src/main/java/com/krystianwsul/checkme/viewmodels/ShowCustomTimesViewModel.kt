@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.viewmodels
 
 class ShowCustomTimesViewModel : DomainViewModel<ShowCustomTimesViewModel.Data>() {
 
-    fun start() = internalStart(FirebaseLevel.NOTHING)
+    fun start() = internalStart()
 
     override fun getData() = domainFactory.getShowCustomTimesData()
 

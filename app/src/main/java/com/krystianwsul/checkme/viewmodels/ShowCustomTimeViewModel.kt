@@ -10,7 +10,7 @@ class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() 
     fun start(customTimeId: Int) {
         this.customTimeId = customTimeId
 
-        internalStart(FirebaseLevel.NOTHING)
+        internalStart()
     }
 
     override fun getData() = domainFactory.getShowCustomTimeData(customTimeId)

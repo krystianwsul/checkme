@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskKey
 
 class InstanceDoneService : IntentService("InstanceDoneService") {
 
@@ -20,30 +19,6 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         fun getIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, InstanceDoneService::class.java).apply {
             putExtra(INSTANCE_KEY, instanceKey as Parcelable)
             putExtra(NOTIFICATION_ID_KEY, notificationId)
-        }
-
-        fun throttleFirebase(needsFirebase: Boolean, firebaseListener: (DomainFactory) -> Unit) {
-            val domainFactory = DomainFactory.instance
-
-            if (domainFactory.getIsConnected()) {
-                if (domainFactory.getIsConnectedAndSaved()) {
-                    queueFirebase(domainFactory, firebaseListener)
-                } else {
-                    firebaseListener(domainFactory)
-                }
-            } else {
-                if (needsFirebase) {
-                    queueFirebase(domainFactory, firebaseListener)
-                } else {
-                    firebaseListener(domainFactory)
-                }
-            }
-        }
-
-        private fun queueFirebase(domainFactory: DomainFactory, firebaseListener: (DomainFactory) -> Unit) {
-            check(!domainFactory.getIsConnected() || domainFactory.getIsConnectedAndSaved())
-
-            DomainFactory.addFirebaseListener(firebaseListener)
         }
     }
 
@@ -59,7 +34,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId) // todo uodpornić na podwójne kliknięcie
 
-        throttleFirebase(instanceKey.type == TaskKey.Type.REMOTE) { setInstanceNotificationDone(it, instanceKey) }
+        DomainFactory.addFirebaseListener { setInstanceNotificationDone(it, instanceKey) }
     }
 
     private fun setInstanceNotificationDone(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey)

@@ -10,7 +10,7 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
     fun start(taskKey: TaskKey) {
         this.taskKey = taskKey
 
-        internalStart(if (taskKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING)
+        internalStart()
     }
 
     override fun getData() = domainFactory.getShowTaskData(taskKey)

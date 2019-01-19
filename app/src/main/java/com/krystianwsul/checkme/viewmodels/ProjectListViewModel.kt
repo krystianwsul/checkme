@@ -4,7 +4,7 @@ import java.util.*
 
 class ProjectListViewModel : DomainViewModel<ProjectListViewModel.Data>() {
 
-    fun start() = internalStart(FirebaseLevel.NEED)
+    fun start() = internalStart()
 
     override fun getData() = domainFactory.getProjectListData()
 

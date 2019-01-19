@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.gui.MainActivity
@@ -49,8 +48,7 @@ class DayViewModel : ViewModel() {
 
             load()
 
-            if (MyApplication.instance.hasUserInfo && !domainFactory.getIsConnected())
-                DomainFactory.addFirebaseListener(firebaseListener)
+            DomainFactory.addFirebaseListener(firebaseListener)
         }
 
         private val compositeDisposable = CompositeDisposable()
@@ -65,10 +63,7 @@ class DayViewModel : ViewModel() {
             }
         }
 
-        fun load() {
-            Single.fromCallable {
-                getData()
-            }
+        fun load() = Single.fromCallable { getData() }
                     .subscribeOn(Schedulers.single())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { loaded ->
@@ -76,7 +71,6 @@ class DayViewModel : ViewModel() {
                             data.accept(loaded)
                     }
                     .addTo(compositeDisposable)
-        }
 
         fun stop() {
             DomainFactory.removeFirebaseListener(firebaseListener)

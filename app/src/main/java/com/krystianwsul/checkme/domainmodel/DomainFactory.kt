@@ -40,7 +40,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         private var tickData: TickData? = null
 
-        private val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
+        private val firebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
             val silent = oldTickData.silent && newTickData.silent
@@ -76,14 +76,16 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         @Synchronized
         fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
-            check(nullableInstance?.remoteProjectFactory?.isSaved != false)
-
-            notTickFirebaseListeners.add(firebaseListener)
+            val domainFactory = nullableInstance
+            if (domainFactory?.remoteProjectFactory?.isSaved == false && domainFactory.remoteFriendFactory?.isSaved == false)
+                firebaseListener(domainFactory)
+            else
+                firebaseListeners.add(firebaseListener)
         }
 
         @Synchronized
         fun removeFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
-            notTickFirebaseListeners.remove(firebaseListener)
+            firebaseListeners.remove(firebaseListener)
         }
     }
 
@@ -102,8 +104,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     var remoteFriendFactory: RemoteFriendFactory? = null
         private set
-
-    private val friendListeners = mutableListOf<() -> Unit>()
 
     private var skipSave = false
 
@@ -188,36 +188,38 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         val firstThereforeSilent = this.remoteProjectFactory == null
         this.remoteProjectFactory = remoteProjectFactory
 
-        tryNotifyFriendListeners()
-
-        if (tickData == null)
-            updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
-
-        if (notTickFirebaseListeners.isNotEmpty()) {
-            skipSave = true
-
-            if (tickData != null) {
-                updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
-
-                if (!firstThereforeSilent) {
-                    Log.e("asdf", "not first, clearing getMTickData()")
-
-                    tickData!!.release()
-                    tickData = null
-                } else {
-                    Log.e("asdf", "first, keeping getMTickData()")
-                }
-            }
-
-            notTickFirebaseListeners.forEach { it.invoke(this) }
-            notTickFirebaseListeners.clear()
-
-            skipSave = false
-        }
-
-        save(0, SaveService.Source.GUI)
+        tryNotifyListeners(firstThereforeSilent)
 
         read?.let { remoteReadTimes = ReadTimes(localReadTimes.start, it, ExactTimeStamp.now) }
+    }
+
+    private fun tryNotifyListeners(firstThereforeSilent: Boolean) {
+        if (remoteProjectFactory?.isSaved != false || remoteFriendFactory?.isSaved != false)
+            return
+
+        skipSave = false
+
+        if (tickData == null) {
+            updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
+        } else {
+            updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
+
+            if (!firstThereforeSilent) {
+                Log.e("asdf", "not first, clearing getMTickData()")
+
+                tickData!!.release()
+                tickData = null
+            } else {
+                Log.e("asdf", "first, keeping getMTickData()")
+            }
+        }
+
+        firebaseListeners.forEach { it.invoke(this) }
+        firebaseListeners.clear()
+
+        skipSave = false
+
+        save(0, SaveService.Source.GUI)
     }
 
     @Synchronized
@@ -227,11 +229,12 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     @Synchronized
     fun setFriendRecords(remoteFriendFactory: RemoteFriendFactory) {
+        val firstThereforeSilent = this.remoteFriendFactory == null
         this.remoteFriendFactory = remoteFriendFactory
 
         ObserverHolder.notifyDomainObservers(listOf())
 
-        tryNotifyFriendListeners()
+        tryNotifyListeners(firstThereforeSilent)
     }
 
     @Synchronized
@@ -705,21 +708,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
     }
-
-    @Synchronized
-    fun tryNotifyFriendListeners() {
-        if (remoteProjectFactory == null)
-            return
-
-        if (remoteFriendFactory == null)
-            return
-
-        friendListeners.forEach { it() }
-        friendListeners.clear()
-    }
-
-    @Synchronized
-    fun addFriendListener(friendListener: () -> Unit) = friendListeners.add(friendListener)
 
     // sets
 

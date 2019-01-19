@@ -10,7 +10,7 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
     fun start(timeStamp: TimeStamp) {
         this.timeStamp = timeStamp
 
-        internalStart(FirebaseLevel.WANT)
+        internalStart()
     }
 
     override fun getData() = domainFactory.getShowGroupData(timeStamp)

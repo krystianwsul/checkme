@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import io.reactivex.Single
@@ -21,47 +20,15 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     protected val domainFactory = DomainFactory.instance
 
-    private val firebaseListener: (DomainFactory) -> Unit = {
-        check(domainFactory.getIsConnected())
+    private val firebaseListener: (DomainFactory) -> Unit = { load() }
 
-        load()
-    }
-
-    private lateinit var firebaseLevel: FirebaseLevel
-
-    protected fun internalStart(firebaseLevel: FirebaseLevel) {
-        this.firebaseLevel = firebaseLevel
-
+    protected fun internalStart() {
         if (observer == null) {
             observer = Observer()
             ObserverHolder.addDomainObserver(observer!!)
         }
 
-        when (firebaseLevel) {
-            FirebaseLevel.NOTHING -> load()
-            FirebaseLevel.WANT -> {
-                load()
-
-                if (MyApplication.instance.hasUserInfo && !domainFactory.getIsConnected())
-                    DomainFactory.addFirebaseListener(firebaseListener)
-            }
-            FirebaseLevel.NEED -> {
-                if (domainFactory.getIsConnected()) {
-                    load()
-                } else {
-                    if (MyApplication.instance.hasUserInfo)
-                        DomainFactory.addFirebaseListener(firebaseListener)
-                }
-            }
-            FirebaseLevel.FRIEND -> {
-                if (domainFactory.getIsConnected() && domainFactory.hasFriends()) {
-                    load()
-                } else {
-                    if (MyApplication.instance.hasUserInfo)
-                        DomainFactory.instance.addFriendListener { firebaseListener(domainFactory) }
-                }
-            }
-        }
+        DomainFactory.addFirebaseListener(firebaseListener)
     }
 
     fun stop() {
@@ -73,14 +40,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
         compositeDisposable.clear()
     }
 
-    private fun load() {
-        if (firebaseLevel == FirebaseLevel.NEED && !domainFactory.getIsConnected())
-            return
-
-        if (firebaseLevel == FirebaseLevel.FRIEND && !(domainFactory.getIsConnected() && domainFactory.hasFriends()))
-            return
-
-        Single.fromCallable { getData() }
+    private fun load() = Single.fromCallable { getData() }
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { loaded ->
@@ -88,7 +48,6 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                         data.accept(loaded)
                 }
                 .addTo(compositeDisposable)
-    }
 
     protected abstract fun getData(): D
 

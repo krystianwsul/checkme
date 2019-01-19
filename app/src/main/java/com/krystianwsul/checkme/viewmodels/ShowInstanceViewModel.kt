@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.DateTime
 
 class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
@@ -12,7 +11,7 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
     fun start(instanceKey: InstanceKey) {
         this.instanceKey = instanceKey
 
-        internalStart(if (instanceKey.type == TaskKey.Type.REMOTE) FirebaseLevel.NEED else FirebaseLevel.NOTHING)
+        internalStart()
     }
 
     override fun getData() = domainFactory.getShowInstanceData(instanceKey)

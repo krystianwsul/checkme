@@ -19,13 +19,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         this.taskKey = taskKey
         this.joinTaskKeys = joinTaskKeys
 
-        val firebaseLevel = if (taskKey?.type == TaskKey.Type.REMOTE) {
-            FirebaseLevel.NEED
-        } else {
-            FirebaseLevel.WANT
-        }
-
-        internalStart(firebaseLevel)
+        internalStart()
     }
 
     override fun getData() = domainFactory.getCreateTaskData(taskKey, joinTaskKeys)

@@ -13,6 +13,7 @@ import com.github.anrwatchdog.ANRWatchDog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
@@ -23,6 +24,7 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
+import io.reactivex.rxkotlin.Observables
 import net.danlew.android.joda.JodaTimeAndroid
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -93,14 +95,17 @@ class MyApplication : Application() {
                     DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, it.value)))
                 DomainFactory.instance.setUser(it.value)
 
-                DatabaseWrapper.tasks
+                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.friends) { tasks: DataSnapshot, friends: DataSnapshot -> Pair(tasks, friends) }
             } else {
                 DomainFactory.nullableInstance?.clearUserInfo()
                 DomainFactory.instanceRelay.accept(NullableWrapper())
 
                 Observable.never()
             }
-        }.subscribe { DomainFactory.instance.setRemoteTaskRecords(it) }
+        }.subscribe {
+            DomainFactory.instance.setRemoteTaskRecords(it.first)
+            DomainFactory.instance.setUserRecord(it.second)
+        }
 
         if (token == null)
             FirebaseInstanceId.getInstance()

@@ -28,8 +28,6 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.*
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
 import java.util.*
 
 @Suppress("LeakingThis")
@@ -71,8 +69,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     val remoteReadMillis get() = remoteRead.long - remoteStart.long
     val remoteInstantiateMillis get() = remoteStop.long - remoteRead.long
 
-    private var firebaseDisposable = CompositeDisposable()
-
     @JvmField
     var localFactory: LocalFactory
 
@@ -100,7 +96,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         if (!this::remoteStart.isInitialized)
             remoteStart = ExactTimeStamp.now
 
-        afterSetUser()
+        setUserHelper()
     }
 
     // misc
@@ -133,18 +129,10 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     // firebase
 
-    private fun afterSetUser() {
+    private fun setUserHelper() {
         DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid)
 
         RemoteFriendFactory.setListener()
-
-        DatabaseWrapper.user
-                .subscribe {
-                    Log.e("asdf", "DomainFactory.getMUserListener().onDataChange, dataSnapshot: $it")
-
-                    setUserRecord(it)
-                }
-                .addTo(firebaseDisposable)
     }
 
     @Synchronized
@@ -156,7 +144,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         userInfo = newUserInfo
 
-        afterSetUser()
+        setUserHelper()
     }
 
     @Synchronized
@@ -168,13 +156,11 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         remoteProjectFactory = null
         RemoteFriendFactory.setInstance(null)
 
-        firebaseDisposable.clear()
-
         RemoteFriendFactory.clearListener()
 
         updateNotifications(now, true)
 
-        ObserverHolder.notifyDomainObservers(ArrayList())
+        ObserverHolder.notifyDomainObservers(listOf())
     }
 
     @Synchronized

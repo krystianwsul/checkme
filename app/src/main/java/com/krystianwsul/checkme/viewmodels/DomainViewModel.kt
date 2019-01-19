@@ -3,61 +3,38 @@ package com.krystianwsul.checkme.viewmodels
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.ObserverHolder
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
-    private val compositeDisposable = CompositeDisposable()
-
     val data = BehaviorRelay.create<D>()
 
-    private var observer: Observer? = null
-
-    private val firebaseListener: (DomainFactory) -> Unit = { load(it) }
+    private var disposable: Disposable? = null
 
     protected fun internalStart() {
-        if (observer == null) {
-            observer = Observer()
-            ObserverHolder.addDomainObserver(observer!!)
-        }
+        if (disposable != null)
+            return
 
-        DomainFactory.addFirebaseListener(firebaseListener)
+        disposable = DomainFactory.instanceRelay
+                .filter { it.value != null }
+                .map { it.value }
+                .switchMap { domainFactory -> domainFactory.domainChanged.map { Pair(domainFactory, it) } }
+                .filter { (_, dataIds) -> !(data.value?.let { dataIds.contains(it.dataId) } == true) }
+                .subscribeOn(Schedulers.single())
+                .map { (domainFactory, _) -> getData(domainFactory) }
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter { data.value != it }
+                .subscribe(data)
     }
 
     fun stop() {
-        DomainFactory.removeFirebaseListener(firebaseListener)
-
-        observer?.let { ObserverHolder.removeDomainObserver(it) }
-        observer = null
-
-        compositeDisposable.clear()
+        disposable?.dispose()
+        disposable = null
     }
-
-    private fun load(domainFactory: DomainFactory) = Single.fromCallable { getData(domainFactory) }
-                .subscribeOn(Schedulers.single())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { loaded ->
-                    if (data.value != loaded)
-                        data.accept(loaded)
-                }
-                .addTo(compositeDisposable)
 
     protected abstract fun getData(domainFactory: DomainFactory): D
 
     override fun onCleared() = stop()
-
-    inner class Observer : DomainObserver {
-
-        override fun onDomainChanged(dataIds: List<Int>) {
-            if (data.value?.let { dataIds.contains(it.dataId) } == true)
-                return
-
-            load(DomainFactory.instance)
-        }
-    }
 }

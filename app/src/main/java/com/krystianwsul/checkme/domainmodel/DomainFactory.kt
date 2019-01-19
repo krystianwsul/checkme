@@ -111,6 +111,8 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     private var skipSave = false
 
+    val domainChanged = BehaviorRelay.createDefault(listOf<Int>())
+
     init {
         val start = ExactTimeStamp.now
 
@@ -152,7 +154,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         localFactory.save(source)
         remoteProjectFactory?.save()
 
-        ObserverHolder.notifyDomainObservers(dataIds)
+        domainChanged.accept(dataIds)
     }
 
     // firebase
@@ -181,8 +183,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         remoteFriendFactory = null
 
         updateNotifications(now, true)
-
-        ObserverHolder.notifyDomainObservers(listOf())
     }
 
     @Synchronized
@@ -235,8 +235,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     fun setFriendRecords(remoteFriendFactory: RemoteFriendFactory) {
         val firstThereforeSilent = this.remoteFriendFactory == null
         this.remoteFriendFactory = remoteFriendFactory
-
-        ObserverHolder.notifyDomainObservers(listOf())
 
         tryNotifyListeners(firstThereforeSilent)
     }

@@ -3,14 +3,11 @@ package com.krystianwsul.checkme.viewmodels
 import androidx.lifecycle.ViewModel
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.ObserverHolder
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class DayViewModel : ViewModel() {
@@ -30,44 +27,28 @@ class DayViewModel : ViewModel() {
     inner class Entry(private val timeRange: MainActivity.TimeRange, private val position: Int) {
 
         val data = BehaviorRelay.create<DayData>()
-        private var observer: Observer? = null
 
-        private val firebaseListener: (DomainFactory) -> Unit = { load(it) }
+        private var disposable: Disposable? = null
 
         fun start() {
-            if (observer == null) {
-                observer = Observer()
-                ObserverHolder.addDomainObserver(observer!!)
-            }
+            if (disposable != null)
+                return
 
-            DomainFactory.addFirebaseListener(firebaseListener)
-        }
-
-        private val compositeDisposable = CompositeDisposable()
-
-        inner class Observer : DomainObserver {
-
-            override fun onDomainChanged(dataIds: List<Int>) {
-                if (data.value?.let { dataIds.contains(it.dataId) } == true)
-                    return
-
-                load(DomainFactory.instance)
-            }
-        }
-
-        fun load(domainFactory: DomainFactory) = Single.fromCallable { getData(domainFactory) }
+            disposable = DomainFactory.instanceRelay
+                    .filter { it.value != null }
+                    .map { it.value }
+                    .switchMap { domainFactory -> domainFactory.domainChanged.map { Pair(domainFactory, it) } }
+                    .filter { (_, dataIds) -> !(data.value?.let { dataIds.contains(it.dataId) } == true) }
                     .subscribeOn(Schedulers.single())
+                    .map { (domainFactory, _) -> getData(domainFactory) }
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { loaded ->
-                        if (data.value != loaded)
-                            data.accept(loaded)
-                    }
-                    .addTo(compositeDisposable)
+                    .filter { data.value != it }
+                    .subscribe(data)
+        }
 
         fun stop() {
-            DomainFactory.removeFirebaseListener(firebaseListener)
-            observer = null
-            compositeDisposable.clear()
+            disposable?.dispose()
+            disposable = null
         }
 
         fun getData(domainFactory: DomainFactory) = domainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)

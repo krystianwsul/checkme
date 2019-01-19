@@ -28,8 +28,6 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.*
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
 import java.util.*
 
 @Suppress("LeakingThis")
@@ -84,8 +82,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     var remoteFriendFactory: RemoteFriendFactory? = null
         private set
 
-    private val friendDisposable = CompositeDisposable()
-
     private val friendListeners = mutableListOf<() -> Unit>()
 
     var tickData: TickData? = null
@@ -139,17 +135,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     // firebase
 
-    private fun setUserHelper() {
-        DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid)
-
-        DatabaseWrapper.friends
-                .subscribe {
-                    Log.e("asdf", "RemoteFriendFactory.onDataChange, dataSnapshot: $it")
-
-                    setFriendRecords(it)
-                }
-                .addTo(friendDisposable)
-    }
+    private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid)
 
     @Synchronized
     fun setUser(newUserInfo: UserInfo) {
@@ -171,8 +157,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         remoteProjectFactory = null
         remoteFriendFactory = null
-
-        friendDisposable.clear()
 
         updateNotifications(now, true)
 
@@ -271,7 +255,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         }
     }
 
-    // @Synchronized deadlock with RemoteFriendFactory todo?
+    @Synchronized
     fun getIsConnected() = remoteProjectFactory != null
 
     @Synchronized
@@ -745,7 +729,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     @Synchronized
     fun tryNotifyFriendListeners() {
-        if (!DomainFactory.instance.getIsConnected())
+        if (remoteProjectFactory == null)
             return
 
         if (remoteFriendFactory == null)

@@ -95,7 +95,7 @@ class MyApplication : Application() {
                     DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, it.value)))
                 DomainFactory.instance.setUser(it.value)
 
-                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.friends) { tasks: DataSnapshot, friends: DataSnapshot -> Pair(tasks, friends) }
+                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.user, DatabaseWrapper.friends) { tasks: DataSnapshot, user: DataSnapshot, friends: DataSnapshot -> Triple(tasks, user, friends) }
             } else {
                 DomainFactory.nullableInstance?.clearUserInfo()
                 DomainFactory.instanceRelay.accept(NullableWrapper())
@@ -105,7 +105,16 @@ class MyApplication : Application() {
         }.subscribe {
             DomainFactory.instance.setRemoteTaskRecords(it.first)
             DomainFactory.instance.setUserRecord(it.second)
+            DomainFactory.instance.setFriendRecords(it.third)
         }
+
+        fun ifDomain(observable: Observable<DataSnapshot>, setter: DomainFactory.(DataSnapshot) -> Unit) = DomainFactory.instanceRelay
+                .switchMap { if (it.value != null) observable.map { dataSnapshot -> Pair(it.value, dataSnapshot) } else Observable.never() }
+                .subscribe { it.first.setter(it.second) }
+
+        ifDomain(DatabaseWrapper.tasks, DomainFactory::setRemoteTaskRecords)
+        ifDomain(DatabaseWrapper.user, DomainFactory::setUserRecord)
+        ifDomain(DatabaseWrapper.friends, DomainFactory::setFriendRecords)
 
         if (token == null)
             FirebaseInstanceId.getInstance()

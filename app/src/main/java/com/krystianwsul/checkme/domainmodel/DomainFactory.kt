@@ -66,7 +66,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     var remoteProjectFactory: RemoteProjectFactory? = null
         private set
 
-    val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
+    private val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
     private var remoteRootUser: RemoteRootUser? = null
 
@@ -2421,9 +2421,9 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
     }
 
-    class ReadTimes(val start: ExactTimeStamp, val read: ExactTimeStamp, val stop: ExactTimeStamp) {
+    class ReadTimes(val start: ExactTimeStamp, read: ExactTimeStamp, val stop: ExactTimeStamp) {
 
-        val readMillis get() = read.long - start.long
-        val instantiateMillis get() = stop.long - read.long
+        val readMillis = read.long - start.long
+        val instantiateMillis = stop.long - read.long
     }
 }

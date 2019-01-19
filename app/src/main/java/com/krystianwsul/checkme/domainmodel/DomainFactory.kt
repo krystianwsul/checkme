@@ -205,7 +205,7 @@ open class DomainFactory(persistenceManager: PersistenceManager = PersistenceMan
         localFactory.clearRemoteCustomTimeRecords()
 
         val firstThereforeSilent = remoteProjectFactory == null
-        remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo!!, now)
+        remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo!!, now) // todo move to MyApplication
 
         RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
 

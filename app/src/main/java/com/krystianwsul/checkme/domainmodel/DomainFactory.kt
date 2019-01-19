@@ -2,9 +2,8 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
@@ -13,8 +12,6 @@ import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
-import com.krystianwsul.checkme.firebase.json.UserWrapper
-import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
@@ -41,6 +38,8 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         val instance get() = instanceRelay.value!!.value!!
 
+        private var tickData: TickData? = null
+
         fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
             val silent = oldTickData.silent && newTickData.silent
 
@@ -52,6 +51,25 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
             val listeners = oldTickData.listeners + newTickData.listeners
 
             return TickData(silent, source, listeners)
+        }
+
+        @Synchronized
+        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
+            check(MyApplication.instance.hasUserInfo)
+
+            val domainFactory = nullableInstance
+
+            if (domainFactory?.remoteProjectFactory?.isSaved == true && tickData == null) {
+                domainFactory.updateNotificationsTick(source, newTickData.silent, newTickData.source)
+
+                newTickData.release()
+            } else {
+                tickData = if (tickData != null) {
+                    mergeTickDatas(tickData!!, newTickData)
+                } else {
+                    newTickData
+                }
+            }
         }
     }
 
@@ -74,8 +92,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         private set
 
     private val friendListeners = mutableListOf<() -> Unit>()
-
-    var tickData: TickData? = null
 
     private var skipSave = false
 
@@ -154,26 +170,21 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     }
 
     @Synchronized
-    fun setRemoteTaskRecords(dataSnapshot: DataSnapshot) {
-        val read = ExactTimeStamp.now
-
-        val now = ExactTimeStamp.now
-
+    fun setRemoteTaskRecords(remoteProjectFactory: RemoteProjectFactory, read: ExactTimeStamp?) {
         localFactory.clearRemoteCustomTimeRecords()
 
-        val firstThereforeSilent = remoteProjectFactory == null
-        remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo, now) // todo move to MyApplication
+        val firstThereforeSilent = this.remoteProjectFactory == null
+        this.remoteProjectFactory = remoteProjectFactory
 
         tryNotifyFriendListeners()
 
-        if (tickData == null && notTickFirebaseListeners.isEmpty()) {
+        if (tickData == null)
             updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
-        } else {
+
+        if (notTickFirebaseListeners.isNotEmpty()) {
             skipSave = true
 
-            if (tickData == null) {
-                updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
-            } else {
+            if (tickData != null) {
                 updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
 
                 if (!firstThereforeSilent) {
@@ -194,23 +205,17 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         save(0, SaveService.Source.GUI)
 
-        val stop = ExactTimeStamp.now
-
-        if (!this::remoteReadTimes.isInitialized)
-            remoteReadTimes = ReadTimes(localReadTimes.start, read, stop)
+        read?.let { remoteReadTimes = ReadTimes(localReadTimes.start, it, ExactTimeStamp.now) }
     }
 
     @Synchronized
-    fun setUserRecord(dataSnapshot: DataSnapshot) {
-        val userWrapper = dataSnapshot.getValue(UserWrapper::class.java)!!
-
-        val remoteRootUserRecord = RemoteRootUserRecord(false, userWrapper)
-        remoteRootUser = RemoteRootUser(remoteRootUserRecord)
+    fun setUserRecord(remoteRootUser: RemoteRootUser) {
+        this.remoteRootUser = remoteRootUser
     }
 
     @Synchronized
-    fun setFriendRecords(dataSnapshot: DataSnapshot) {
-        remoteFriendFactory = RemoteFriendFactory(dataSnapshot.children)
+    fun setFriendRecords(remoteFriendFactory: RemoteFriendFactory) {
+        this.remoteFriendFactory = remoteFriendFactory
 
         ObserverHolder.notifyDomainObservers(listOf())
 
@@ -227,23 +232,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     @Synchronized
     fun removeFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
         notTickFirebaseListeners.remove(firebaseListener)
-    }
-
-    @Synchronized
-    fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
-        check(FirebaseAuth.getInstance().currentUser != null)
-
-        if (remoteProjectFactory != null && !remoteProjectFactory!!.isSaved && tickData == null) {
-            updateNotificationsTick(source, newTickData.silent, newTickData.source)
-
-            newTickData.release()
-        } else {
-            tickData = if (tickData != null) {
-                mergeTickDatas(tickData!!, newTickData)
-            } else {
-                newTickData
-            }
-        }
     }
 
     @Synchronized

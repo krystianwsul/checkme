@@ -28,7 +28,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             check(refresh.isNotEmpty())
             check(data[REFRESH_KEY] == "true")
 
-            DomainFactory.nullableInstance?.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(false, "MyFirebaseMessagingService", listOf()))
+            if (MyApplication.instance.hasUserInfo)
+                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(false, "MyFirebaseMessagingService", listOf()))
         } else {
             MyCrashlytics.logException(UnknownMessageException(data))
         }

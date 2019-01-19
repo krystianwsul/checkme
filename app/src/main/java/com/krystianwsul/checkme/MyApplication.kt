@@ -95,17 +95,14 @@ class MyApplication : Application() {
                 .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
                 .subscribe(userInfoRelay)
 
-        fun getRemoteProjectFactory(dataSnapshot: DataSnapshot, now: ExactTimeStamp) = RemoteProjectFactory(DomainFactory.instance, dataSnapshot.children, userInfo, now)
+        fun getRemoteProjectFactory(domainFactory: DomainFactory, dataSnapshot: DataSnapshot, now: ExactTimeStamp) = RemoteProjectFactory(domainFactory, dataSnapshot.children, userInfo, now)
         fun getRemoteRootUser(dataSnapshot: DataSnapshot) = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
         fun getRemoteFriendFactory(dataSnapshot: DataSnapshot) = RemoteFriendFactory(dataSnapshot.children)
 
         userInfoRelay.switchMap {
             if (it.value != null) {
-                if (DomainFactory.nullableInstance == null)
-                    DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, it.value)))
-                DomainFactory.instance.setUser(it.value)
-
-                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.user, DatabaseWrapper.friends) { tasks: DataSnapshot, user: DataSnapshot, friends: DataSnapshot -> Triple(tasks, user, friends) }
+                check(DomainFactory.nullableInstance == null)
+                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.user, DatabaseWrapper.friends) { tasks: DataSnapshot, user: DataSnapshot, friends: DataSnapshot -> Pair(it.value, Triple(tasks, user, friends)) }
             } else {
                 DomainFactory.nullableInstance?.clearUserInfo()
                 DomainFactory.instanceRelay.accept(NullableWrapper())
@@ -113,18 +110,23 @@ class MyApplication : Application() {
                 Observable.never()
             }
         }.subscribe {
+            val userInfo = it.first
+            val (tasks, user, friends) = it.second
             val now = ExactTimeStamp.now
 
-            DomainFactory.instance.setRemoteTaskRecords(getRemoteProjectFactory(it.first, now), now)
-            DomainFactory.instance.setUserRecord(getRemoteRootUser(it.second))
-            DomainFactory.instance.setFriendRecords(getRemoteFriendFactory(it.third))
+            DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, userInfo).apply {
+                setRemoteTaskRecords(getRemoteProjectFactory(this, tasks, now), now)
+                setUserRecord(getRemoteRootUser(user))
+                setFriendRecords(getRemoteFriendFactory(friends))
+            }))
         }
 
         fun ifDomain(observable: Observable<DataSnapshot>, setter: DomainFactory.(DataSnapshot) -> Unit) = DomainFactory.instanceRelay
                 .switchMap { if (it.value != null) observable.map { dataSnapshot -> Pair(it.value, dataSnapshot) } else Observable.never() }
+                .skip(1)
                 .subscribe { it.first.setter(it.second) }
 
-        ifDomain(DatabaseWrapper.tasks) { setRemoteTaskRecords(getRemoteProjectFactory(it, ExactTimeStamp.now), null) }
+        ifDomain(DatabaseWrapper.tasks) { setRemoteTaskRecords(getRemoteProjectFactory(DomainFactory.instance, it, ExactTimeStamp.now), null) }
         ifDomain(DatabaseWrapper.user) { setUserRecord(getRemoteRootUser(it)) }
         ifDomain(DatabaseWrapper.friends) { setFriendRecords(getRemoteFriendFactory(it)) }
 

@@ -58,29 +58,12 @@ class TickJobIntentService : JobIntentService() {
             if (!MyApplication.instance.hasUserInfo)
                 return false
 
-            val kotlinDomainFactory = DomainFactory.instance
-
             val listeners = listOfNotNull(listener)
 
-            if (kotlinDomainFactory.getIsConnected()) {
-                return if (kotlinDomainFactory.getIsConnectedAndSaved()) {
-                    DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
-                    true
-                } else {
-                    kotlinDomainFactory.updateNotificationsTick(SaveService.Source.SERVICE, silent, sourceName)
-                    false
-                }
-            } else {
-                kotlinDomainFactory.updateNotificationsTick(SaveService.Source.SERVICE, silent, sourceName)
+            if (!MyApplication.instance.hasUserInfo)
+                return false
 
-                return if (MyApplication.instance.hasUserInfo) {
-                    DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
-
-                    true
-                } else {
-                    false
-                }
-            }
+            return DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
         }
     }
 

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.TaskKey
 
@@ -13,7 +14,7 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
         internalStart()
     }
 
-    override fun getData() = domainFactory.getShowTaskData(taskKey)
+    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskData(taskKey)
 
     data class Data(
             val name: String,

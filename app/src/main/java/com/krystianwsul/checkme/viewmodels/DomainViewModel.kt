@@ -18,9 +18,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private var observer: Observer? = null
 
-    protected val domainFactory = DomainFactory.instance
-
-    private val firebaseListener: (DomainFactory) -> Unit = { load() }
+    private val firebaseListener: (DomainFactory) -> Unit = { load(it) }
 
     protected fun internalStart() {
         if (observer == null) {
@@ -40,7 +38,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
         compositeDisposable.clear()
     }
 
-    private fun load() = Single.fromCallable { getData() }
+    private fun load(domainFactory: DomainFactory) = Single.fromCallable { getData(domainFactory) }
                 .subscribeOn(Schedulers.single())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { loaded ->
@@ -49,7 +47,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                 }
                 .addTo(compositeDisposable)
 
-    protected abstract fun getData(): D
+    protected abstract fun getData(domainFactory: DomainFactory): D
 
     override fun onCleared() = stop()
 
@@ -59,7 +57,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
             if (data.value?.let { dataIds.contains(it.dataId) } == true)
                 return
 
-            load()
+            load(DomainFactory.instance)
         }
     }
 }

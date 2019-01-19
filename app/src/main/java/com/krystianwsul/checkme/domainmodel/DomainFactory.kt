@@ -56,21 +56,25 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         }
 
         @Synchronized
-        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
+        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData): Boolean {
             check(MyApplication.instance.hasUserInfo)
 
             val domainFactory = nullableInstance
 
-            if (domainFactory?.remoteProjectFactory?.isSaved == true && tickData == null) {
+            return if (domainFactory?.remoteProjectFactory?.isSaved == false && tickData == null) {
                 domainFactory.updateNotificationsTick(source, newTickData.silent, newTickData.source)
 
                 newTickData.release()
+
+                false
             } else {
                 tickData = if (tickData != null) {
                     mergeTickDatas(tickData!!, newTickData)
                 } else {
                     newTickData
                 }
+
+                true
             }
         }
 
@@ -236,15 +240,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         tryNotifyListeners(firstThereforeSilent)
     }
-
-    @Synchronized
-    fun getIsConnected() = remoteProjectFactory != null
-
-    @Synchronized
-    fun hasFriends() = remoteFriendFactory != null
-
-    @Synchronized
-    fun getIsConnectedAndSaved() = remoteProjectFactory!!.isSaved
 
     // gets
 

@@ -17,8 +17,6 @@ class DayViewModel : ViewModel() {
 
     private val entries = mutableMapOf<Pair<MainActivity.TimeRange, Int>, Entry>()
 
-    private val domainFactory = DomainFactory.instance
-
     fun getEntry(timeRange: MainActivity.TimeRange, position: Int): Entry {
         val key = Pair(timeRange, position)
 
@@ -34,19 +32,13 @@ class DayViewModel : ViewModel() {
         val data = BehaviorRelay.create<DayData>()
         private var observer: Observer? = null
 
-        private val firebaseListener: (DomainFactory) -> Unit = {
-            check(domainFactory.getIsConnected())
-
-            load()
-        }
+        private val firebaseListener: (DomainFactory) -> Unit = { load(it) }
 
         fun start() {
             if (observer == null) {
                 observer = Observer()
                 ObserverHolder.addDomainObserver(observer!!)
             }
-
-            load()
 
             DomainFactory.addFirebaseListener(firebaseListener)
         }
@@ -59,11 +51,11 @@ class DayViewModel : ViewModel() {
                 if (data.value?.let { dataIds.contains(it.dataId) } == true)
                     return
 
-                load()
+                load(DomainFactory.instance)
             }
         }
 
-        fun load() = Single.fromCallable { getData() }
+        fun load(domainFactory: DomainFactory) = Single.fromCallable { getData(domainFactory) }
                     .subscribeOn(Schedulers.single())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { loaded ->
@@ -78,7 +70,7 @@ class DayViewModel : ViewModel() {
             compositeDisposable.clear()
         }
 
-        fun getData() = domainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)
+        fun getData(domainFactory: DomainFactory) = domainFactory.getGroupListData(ExactTimeStamp.now, position, timeRange)
     }
 
     data class DayData(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()

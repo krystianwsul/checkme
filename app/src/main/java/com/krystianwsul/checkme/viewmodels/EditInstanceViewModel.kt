@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.viewmodels
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.Date
@@ -18,7 +19,7 @@ class EditInstanceViewModel : DomainViewModel<EditInstanceViewModel.Data>() {
         internalStart()
     }
 
-    override fun getData() = domainFactory.getEditInstanceData(instanceKey)
+    override fun getData(domainFactory: DomainFactory) = domainFactory.getEditInstanceData(instanceKey)
 
     data class Data(
             val instanceKey: InstanceKey,

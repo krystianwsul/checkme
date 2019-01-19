@@ -13,7 +13,7 @@ class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() 
         internalStart(FirebaseLevel.NOTHING)
     }
 
-    override fun getData() = kotlinDomainFactory.getShowCustomTimeData(customTimeId)
+    override fun getData() = domainFactory.getShowCustomTimeData(customTimeId)
 
     data class Data(val id: Int, val name: String, val hourMinutes: Map<DayOfWeek, HourMinute>) : DomainData() {
 

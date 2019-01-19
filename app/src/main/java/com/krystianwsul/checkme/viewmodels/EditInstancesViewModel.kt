@@ -25,7 +25,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
         internalStart(firebaseLevel)
     }
 
-    override fun getData() = kotlinDomainFactory.getEditInstancesData(instanceKeys)
+    override fun getData() = domainFactory.getEditInstancesData(instanceKeys)
 
     data class Data(
             val instanceDatas: Map<InstanceKey, InstanceData>,

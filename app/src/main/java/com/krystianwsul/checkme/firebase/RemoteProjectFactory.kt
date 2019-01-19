@@ -79,7 +79,7 @@ class RemoteProjectFactory(
         val friendIds = HashSet(recordOf)
         friendIds.remove(userInfo.key)
 
-        val userJsons = RemoteFriendFactory.getUserJsons(friendIds)
+        val userJsons = DomainFactory.instance.remoteFriendFactory!!.getUserJsons(friendIds)
         userJsons[userInfo.key] = remoteRootUser.userJson
 
         val projectJson = ProjectJson(name, now.long, users = userJsons)
@@ -151,14 +151,6 @@ class RemoteProjectFactory(
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId!!)
-    }
-
-    fun getTaskIfPresent(taskKey: TaskKey): RemoteTask? {
-        check(!TextUtils.isEmpty(taskKey.remoteTaskId))
-
-        val remoteProject = getRemoteProjectIfPresent(taskKey) ?: return null
-
-        return remoteProject.getRemoteTaskIfPresent(taskKey.remoteTaskId!!)
     }
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<RemoteTaskHierarchy> {

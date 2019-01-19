@@ -4,7 +4,7 @@ class FriendListViewModel : DomainViewModel<FriendListViewModel.Data>() {
 
     fun start() = internalStart(FirebaseLevel.FRIEND)
 
-    override fun getData() = kotlinDomainFactory.getFriendListData()
+    override fun getData() = domainFactory.getFriendListData()
 
     data class Data(val userListDatas: MutableSet<UserListData>) : DomainData()
 

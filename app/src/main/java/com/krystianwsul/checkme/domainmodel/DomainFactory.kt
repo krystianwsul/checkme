@@ -28,6 +28,8 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.*
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import java.util.*
 
 @Suppress("LeakingThis")
@@ -73,10 +75,18 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     var localFactory: LocalFactory
 
     var remoteProjectFactory: RemoteProjectFactory? = null
+        private set
+
+    val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
     private var remoteRootUser: RemoteRootUser? = null
 
-    val notTickFirebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
+    var remoteFriendFactory: RemoteFriendFactory? = null
+        private set
+
+    private val friendDisposable = CompositeDisposable()
+
+    private val friendListeners = mutableListOf<() -> Unit>()
 
     var tickData: TickData? = null
 
@@ -132,7 +142,13 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     private fun setUserHelper() {
         DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid)
 
-        RemoteFriendFactory.setListener()
+        DatabaseWrapper.friends
+                .subscribe {
+                    Log.e("asdf", "RemoteFriendFactory.onDataChange, dataSnapshot: $it")
+
+                    setFriendRecords(it)
+                }
+                .addTo(friendDisposable)
     }
 
     @Synchronized
@@ -154,9 +170,9 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         localFactory.clearRemoteCustomTimeRecords()
 
         remoteProjectFactory = null
-        RemoteFriendFactory.setInstance(null)
+        remoteFriendFactory = null
 
-        RemoteFriendFactory.clearListener()
+        friendDisposable.clear()
 
         updateNotifications(now, true)
 
@@ -175,7 +191,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         val firstThereforeSilent = remoteProjectFactory == null
         remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo, now) // todo move to MyApplication
 
-        RemoteFriendFactory.tryNotifyFriendListeners() // assuming they're all getters
+        tryNotifyFriendListeners()
 
         if (tickData == null && notTickFirebaseListeners.isEmpty()) {
             updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
@@ -218,6 +234,15 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     }
 
     @Synchronized
+    fun setFriendRecords(dataSnapshot: DataSnapshot) {
+        remoteFriendFactory = RemoteFriendFactory(dataSnapshot.children)
+
+        ObserverHolder.notifyDomainObservers(listOf())
+
+        tryNotifyFriendListeners()
+    }
+
+    @Synchronized
     fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
         check(remoteProjectFactory?.isSaved != false)
 
@@ -246,8 +271,11 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         }
     }
 
-    // @Synchronized deadlock with RemoteFriendFactory
-    fun getIsConnected(): Boolean = remoteProjectFactory != null
+    // @Synchronized deadlock with RemoteFriendFactory todo?
+    fun getIsConnected() = remoteProjectFactory != null
+
+    @Synchronized
+    fun hasFriends() = remoteFriendFactory != null
 
     @Synchronized
     fun getIsConnectedAndSaved() = remoteProjectFactory!!.isSaved
@@ -678,7 +706,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     fun getFriendListData(): FriendListViewModel.Data {
         MyCrashlytics.log("DomainFactory.getFriendListData")
 
-        val friends = if (RemoteFriendFactory.hasFriends()) RemoteFriendFactory.getFriends() else listOf()
+        val friends = remoteFriendFactory?.friends ?: listOf()
 
         val userListDatas = friends.map { FriendListViewModel.UserListData(it.name, it.email, it.id) }.toMutableSet()
 
@@ -690,9 +718,9 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
         check(remoteProjectFactory != null)
-        check(RemoteFriendFactory.hasFriends())
+        check(remoteFriendFactory != null)
 
-        val friendDatas = RemoteFriendFactory.getFriends()
+        val friendDatas = remoteFriendFactory!!.friends
                 .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
                 .associateBy { it.id }
 
@@ -714,6 +742,21 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
     }
+
+    @Synchronized
+    fun tryNotifyFriendListeners() {
+        if (!DomainFactory.instance.getIsConnected())
+            return
+
+        if (remoteFriendFactory == null)
+            return
+
+        friendListeners.forEach { it() }
+        friendListeners.clear()
+    }
+
+    @Synchronized
+    fun addFriendListener(friendListener: () -> Unit) = friendListeners.add(friendListener)
 
     // sets
 
@@ -1458,12 +1501,11 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         MyCrashlytics.log("DomainFactory.removeFriends")
 
         check(remoteProjectFactory != null)
-        check(RemoteFriendFactory.hasFriends())
-        check(!RemoteFriendFactory.isSaved())
+        check(remoteFriendFactory?.isSaved == false)
 
-        keys.forEach { RemoteFriendFactory.removeFriend(userInfo.key, it) }
+        keys.forEach { remoteFriendFactory!!.removeFriend(userInfo.key, it) }
 
-        RemoteFriendFactory.save()
+        remoteFriendFactory!!.save()
     }
 
     @Synchronized
@@ -1489,14 +1531,14 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         check(projectId.isNotEmpty())
         check(name.isNotEmpty())
         check(remoteProjectFactory != null)
-        check(RemoteFriendFactory.hasFriends())
+        check(remoteFriendFactory != null)
 
         val now = ExactTimeStamp.now
 
         val remoteProject = remoteProjectFactory!!.getRemoteProjectForce(projectId)
 
         remoteProject.name = name
-        remoteProject.updateRecordOf(addedFriends.map { RemoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
+        remoteProject.updateRecordOf(addedFriends.map { remoteFriendFactory!!.getFriend(it) }.toSet(), removedFriends)
 
         updateNotifications(now)
 

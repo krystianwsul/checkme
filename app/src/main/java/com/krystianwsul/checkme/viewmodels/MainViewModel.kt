@@ -6,7 +6,7 @@ class MainViewModel : DomainViewModel<MainViewModel.Data>() {
 
     fun start() = internalStart(FirebaseLevel.WANT)
 
-    override fun getData() = kotlinDomainFactory.getMainData()
+    override fun getData() = domainFactory.getMainData()
 
     data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
 }

@@ -6,7 +6,7 @@ class ProjectListViewModel : DomainViewModel<ProjectListViewModel.Data>() {
 
     fun start() = internalStart(FirebaseLevel.NEED)
 
-    override fun getData() = kotlinDomainFactory.getProjectListData()
+    override fun getData() = domainFactory.getProjectListData()
 
     data class Data(val projectDatas: SortedMap<String, ProjectData>) : DomainData()
 

@@ -5,7 +5,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ObserverHolder
-import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -20,10 +19,10 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
 
     private var observer: Observer? = null
 
-    protected val kotlinDomainFactory = DomainFactory.instance
+    protected val domainFactory = DomainFactory.instance
 
     private val firebaseListener: (DomainFactory) -> Unit = {
-        check(kotlinDomainFactory.getIsConnected())
+        check(domainFactory.getIsConnected())
 
         load()
     }
@@ -43,30 +42,30 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
             FirebaseLevel.WANT -> {
                 load()
 
-                if (MyApplication.instance.hasUserInfo && !kotlinDomainFactory.getIsConnected())
-                    kotlinDomainFactory.addFirebaseListener(firebaseListener)
+                if (MyApplication.instance.hasUserInfo && !domainFactory.getIsConnected())
+                    domainFactory.addFirebaseListener(firebaseListener)
             }
             FirebaseLevel.NEED -> {
-                if (kotlinDomainFactory.getIsConnected()) {
+                if (domainFactory.getIsConnected()) {
                     load()
                 } else {
                     if (MyApplication.instance.hasUserInfo)
-                        kotlinDomainFactory.addFirebaseListener(firebaseListener)
+                        domainFactory.addFirebaseListener(firebaseListener)
                 }
             }
             FirebaseLevel.FRIEND -> {
-                if (kotlinDomainFactory.getIsConnected() && RemoteFriendFactory.hasFriends()) {
+                if (domainFactory.getIsConnected() && domainFactory.hasFriends()) {
                     load()
                 } else {
                     if (MyApplication.instance.hasUserInfo)
-                        RemoteFriendFactory.addFriendListener { firebaseListener(kotlinDomainFactory) }
+                        DomainFactory.instance.addFriendListener { firebaseListener(domainFactory) }
                 }
             }
         }
     }
 
     fun stop() {
-        kotlinDomainFactory.removeFirebaseListener(firebaseListener)
+        domainFactory.removeFirebaseListener(firebaseListener)
 
         observer?.let { ObserverHolder.removeDomainObserver(it) }
         observer = null
@@ -75,10 +74,10 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
     }
 
     private fun load() {
-        if (firebaseLevel == FirebaseLevel.NEED && !kotlinDomainFactory.getIsConnected())
+        if (firebaseLevel == FirebaseLevel.NEED && !domainFactory.getIsConnected())
             return
 
-        if (firebaseLevel == FirebaseLevel.FRIEND && !(kotlinDomainFactory.getIsConnected() && RemoteFriendFactory.hasFriends()))
+        if (firebaseLevel == FirebaseLevel.FRIEND && !(domainFactory.getIsConnected() && domainFactory.hasFriends()))
             return
 
         Single.fromCallable { getData() }

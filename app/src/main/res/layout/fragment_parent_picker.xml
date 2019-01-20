@@ -18,7 +18,8 @@
         android:imeOptions="actionSearch"
         android:textSize="@dimen/textPrimary"
         android:importantForAutofill="no"
-        tools:targetApi="o" />
+        tools:targetApi="o"
+        android:drawableEnd="@drawable/ic_close_black_24dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/parentPickerRecycler"

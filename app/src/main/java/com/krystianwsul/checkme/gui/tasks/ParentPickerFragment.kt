@@ -4,18 +4,24 @@ package com.krystianwsul.checkme.gui.tasks
 import android.app.Dialog
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.MotionEvent
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
+import com.jakewharton.rxbinding2.view.touches
+import com.jakewharton.rxbinding2.widget.textChanges
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.treeadapter.*
+import io.reactivex.functions.Predicate
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_parent_picker.view.*
 import java.util.*
 
@@ -35,6 +41,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var search: EditText
 
     private var taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>? = null
     lateinit var listener: Listener
@@ -60,7 +67,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 neutralButton(R.string.delete) { listener.onTaskDeleted() }
 
             getCustomView()!!.apply {
-                recyclerView = getCustomView()!!.parentPickerRecycler as RecyclerView
+                recyclerView = parentPickerRecycler as RecyclerView
+
+                search = parentPickerSearch as EditText
             }
         }
     }
@@ -99,6 +108,28 @@ class ParentPickerFragment : AbstractDialogFragment() {
             taskAdapter.initialize(taskDatas!!, expandedParentKeys)
             treeViewAdapter = taskAdapter.treeViewAdapter
             recyclerView.adapter = treeViewAdapter
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        search.apply {
+            startDisposable += textChanges().subscribe {
+                val drawable = if (it.isNullOrEmpty()) R.drawable.ic_close_white_24dp else R.drawable.ic_close_black_24dp
+                setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0)
+            }
+
+            startDisposable += touches(Predicate {
+                if (it.x >= width - totalPaddingEnd) {
+                    if (it.action == MotionEvent.ACTION_UP)
+                        text.clear()
+
+                    true
+                } else {
+                    false
+                }
+            }).subscribe()
         }
     }
 

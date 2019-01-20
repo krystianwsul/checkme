@@ -21,7 +21,7 @@ abstract class DomainViewModel<D : DomainData> : ViewModel() {
                 .filter { it.value != null }
                 .map { it.value }
                 .switchMap { domainFactory -> domainFactory.domainChanged.map { Pair(domainFactory, it) } }
-                .filter { (_, dataIds) -> !(data.value?.let { dataIds.contains(it.dataId) } == true) }
+                .filter { (_, dataIds) -> !dataIds.contains(data.value?.dataId) }
                 .subscribeOn(Schedulers.single())
                 .map { (domainFactory, _) -> getData(domainFactory) }
                 .observeOn(AndroidSchedulers.mainThread())

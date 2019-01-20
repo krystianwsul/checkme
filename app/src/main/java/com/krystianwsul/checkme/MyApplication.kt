@@ -30,6 +30,7 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.rxkotlin.Observables
 import net.danlew.android.joda.JodaTimeAndroid
 import java.security.MessageDigest
@@ -99,15 +100,15 @@ class MyApplication : Application() {
         fun getRemoteRootUser(dataSnapshot: DataSnapshot) = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
         fun getRemoteFriendFactory(dataSnapshot: DataSnapshot) = RemoteFriendFactory(dataSnapshot.children)
 
-        userInfoRelay.switchMap {
+        userInfoRelay.switchMapSingle {
             if (it.value != null) {
                 check(DomainFactory.nullableInstance == null)
-                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.user, DatabaseWrapper.friends) { tasks: DataSnapshot, user: DataSnapshot, friends: DataSnapshot -> Pair(it.value, Triple(tasks, user, friends)) }
+                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.user, DatabaseWrapper.friends) { tasks: DataSnapshot, user: DataSnapshot, friends: DataSnapshot -> Pair(it.value, Triple(tasks, user, friends)) }.firstOrError()
             } else {
                 DomainFactory.nullableInstance?.clearUserInfo()
                 DomainFactory.instanceRelay.accept(NullableWrapper())
 
-                Observable.never()
+                Single.never()
             }
         }.subscribe {
             val userInfo = it.first

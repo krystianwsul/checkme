@@ -111,6 +111,8 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     val domainChanged = BehaviorRelay.createDefault(listOf<Int>())
 
+    private var firstTaskEvent = true
+
     init {
         val start = ExactTimeStamp.now
 
@@ -193,27 +195,30 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         localFactory.clearRemoteCustomTimeRecords()
 
-        val firstThereforeSilent = !this::remoteProjectFactory.isInitialized
         this.remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo, read)
 
-        tryNotifyListeners(firstThereforeSilent)
+        tryNotifyListeners()
 
-        if (firstThereforeSilent)
+        if (firstTaskEvent)
             remoteReadTimes = ReadTimes(localReadTimes.start, read, ExactTimeStamp.now)
     }
 
-    private fun tryNotifyListeners(firstThereforeSilent: Boolean) {
+    private fun tryNotifyListeners() {
         if (!this::remoteProjectFactory.isInitialized || remoteProjectFactory.isSaved || !this::remoteFriendFactory.isInitialized || remoteFriendFactory.isSaved)
             return
 
         skipSave = false
 
         if (tickData == null) {
-            updateNotifications(firstThereforeSilent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
+            Log.e("asdf", "tickData null")
+            updateNotifications(firstTaskEvent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
         } else {
             updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
 
-            if (!firstThereforeSilent) { // todo what is the logic here?
+            /*
+            From a cold start, there may be two firebase events: one cached, one live
+             */
+            if (firstTaskEvent) {
                 Log.e("asdf", "not first, clearing getMTickData()")
 
                 tickData!!.release()
@@ -228,8 +233,9 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         domainChanged.accept(listOf()) // todo make selective
 
-        skipSave = false
+        firstTaskEvent = false
 
+        skipSave = false
         save(0, SaveService.Source.GUI)
     }
 
@@ -246,10 +252,9 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
             return
         }
 
-        val firstThereforeSilent = !this::remoteFriendFactory.isInitialized
         this.remoteFriendFactory = RemoteFriendFactory(dataSnapshot.children)
 
-        tryNotifyListeners(firstThereforeSilent)
+        tryNotifyListeners()
     }
 
     // gets

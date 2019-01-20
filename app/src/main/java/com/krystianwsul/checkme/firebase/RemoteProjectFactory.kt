@@ -95,10 +95,10 @@ class RemoteProjectFactory(
         return remoteProject
     }
 
-    fun save() {
+    fun save(): Boolean {
         check(!remoteProjectManager.isSaved)
 
-        remoteProjectManager.save()
+        return remoteProjectManager.save()
     }
 
     fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey, remoteProject: RemoteProject): String {

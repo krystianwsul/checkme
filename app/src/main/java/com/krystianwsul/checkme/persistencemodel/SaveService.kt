@@ -36,11 +36,11 @@ object SaveService {
             var instance: Factory = FactoryImpl()
         }
 
-        abstract fun startService(persistenceManager: PersistenceManager, source: Source)
+        abstract fun startService(persistenceManager: PersistenceManager, source: Source): Boolean
 
         private class FactoryImpl : Factory() {
 
-            override fun startService(persistenceManager: PersistenceManager, source: Source) {
+            override fun startService(persistenceManager: PersistenceManager, source: Source): Boolean {
                 val collections = listOf(
                         persistenceManager.customTimeRecords,
                         persistenceManager.taskRecords,
@@ -72,12 +72,18 @@ object SaveService {
                         .flatten()
                         .toMutableList()
 
-                when (source) {
-                    Source.GUI -> Observable.fromCallable { save(insertCommands, updateCommands, deleteCommands) }
-                            .subscribeOn(Schedulers.io())
-                            .subscribe()
-                    Source.SERVICE -> save(insertCommands, updateCommands, deleteCommands)
+                val hasChanges = insertCommands.any() || updateCommands.any() || updateCommands.any()
+
+                if (hasChanges) {
+                    when (source) {
+                        Source.GUI -> Observable.fromCallable { save(insertCommands, updateCommands, deleteCommands) }
+                                .subscribeOn(Schedulers.io())
+                                .subscribe()
+                        Source.SERVICE -> save(insertCommands, updateCommands, deleteCommands)
+                    }
                 }
+
+                return hasChanges
             }
 
             private fun delete(collection: MutableCollection<out Record>): List<DeleteCommand> {
@@ -91,6 +97,7 @@ object SaveService {
     }
 
     enum class Source {
+
         GUI, SERVICE
     }
 }

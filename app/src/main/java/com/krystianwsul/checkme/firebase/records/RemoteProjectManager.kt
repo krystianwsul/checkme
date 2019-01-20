@@ -24,7 +24,7 @@ class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<Data
         }
     }
 
-    fun save() {
+    fun save(): Boolean {
         val values = HashMap<String, Any?>()
 
         remoteProjectRecords.values.forEach { it.getValues(values) }
@@ -35,6 +35,8 @@ class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<Data
             isSaved = true
             DatabaseWrapper.updateRecords(values)
         }
+
+        return isSaved
     }
 
     fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteProjectRecord(domainFactory, jsonWrapper).also {

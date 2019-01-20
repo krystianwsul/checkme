@@ -151,10 +151,11 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         if (skipSave)
             return
 
-        localFactory.save(source)
-        remoteProjectFactory?.save()
+        val localChanges = localFactory.save(source)
+        val remoteChanges = remoteProjectFactory?.save() ?: false
 
-        domainChanged.accept(dataIds)
+        if (localChanges || remoteChanges)
+            domainChanged.accept(dataIds)
     }
 
     // firebase

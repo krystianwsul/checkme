@@ -16,6 +16,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.treeadapter.*
+import kotlinx.android.synthetic.main.fragment_parent_picker.view.*
 import java.util.*
 
 class ParentPickerFragment : AbstractDialogFragment() {
@@ -58,7 +59,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
             if (arguments!!.getBoolean(SHOW_DELETE_KEY))
                 neutralButton(R.string.delete) { listener.onTaskDeleted() }
 
-            recyclerView = getCustomView() as RecyclerView
+            getCustomView()!!.apply {
+                recyclerView = getCustomView()!!.parentPickerRecycler as RecyclerView
+            }
         }
     }
 

@@ -1,8 +1,28 @@
-<androidx.recyclerview.widget.RecyclerView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gui.tasks.ParentPickerFragment">
+    tools:context=".gui.tasks.ParentPickerFragment"
+    android:orientation="vertical">
 
-</androidx.recyclerview.widget.RecyclerView>
+    <EditText
+        android:id="@+id/parentPickerSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="13dp"
+        android:layout_marginEnd="13dp"
+        android:singleLine="true"
+        android:inputType="text"
+        android:hint="@string/search"
+        android:imeOptions="actionSearch"
+        android:textSize="@dimen/textPrimary"
+        android:importantForAutofill="no"
+        tools:targetApi="o" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/parentPickerRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

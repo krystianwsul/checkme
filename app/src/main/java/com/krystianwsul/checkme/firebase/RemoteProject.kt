@@ -41,7 +41,7 @@ class RemoteProject(
 
     private val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
 
-    private val remoteFactory get() = domainFactory.remoteProjectFactory!!
+    private val remoteFactory get() = domainFactory.remoteProjectFactory
 
     val tasks get() = remoteTasks.values
 

@@ -29,7 +29,7 @@ class RemoteInstance : Instance {
             }
         }
 
-    private val remoteFactory get() = domainFactory.remoteProjectFactory!!
+    private val remoteFactory get() = domainFactory.remoteProjectFactory
 
     override val notified get() = instanceShownRecord?.notified == true
 

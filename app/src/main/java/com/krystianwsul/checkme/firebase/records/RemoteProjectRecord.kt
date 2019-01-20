@@ -130,35 +130,25 @@ class RemoteProjectRecord(
     }
 
     override fun getValues(values: MutableMap<String, Any?>) {
-        check(!deleted)
-        check(!created)
-        check(!updated)
+        if (delete) {
+            Log.e("asdf", "RemoteProjectRecord.getValues deleting " + this)
 
-        when {
-            delete -> {
-                Log.e("asdf", "RemoteProjectRecord.getValues deleting " + this)
+            check(update != null)
 
-                check(!create)
-                check(update != null)
-
-                deleted = true
-                values[key] = null
-            }
-            create -> {
+            values[key] = null
+            delete = false
+        } else {
+            if (update == null) {
                 Log.e("asdf", "RemoteProjectRecord.getValues creating " + this)
 
                 check(update == null)
 
-                created = true
-
                 values[key] = createObject
-            }
-            else -> {
+            } else {
                 if (!update!!.isEmpty()) {
                     Log.e("asdf", "RemoteProjectRecord.getValues updating " + this)
 
-                    updated = true
-                    values.putAll(update)
+                    values.putAll(update!!)
                 }
 
                 for (remoteTaskRecord in remoteTaskRecords.values)
@@ -173,6 +163,8 @@ class RemoteProjectRecord(
                 for (remoteProjectUserRecord in remoteUserRecords.values)
                     remoteProjectUserRecord.getValues(values)
             }
+
+            update = mutableMapOf()
         }
     }
 

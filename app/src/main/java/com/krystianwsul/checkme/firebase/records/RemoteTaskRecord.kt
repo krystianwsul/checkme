@@ -40,7 +40,7 @@ class RemoteTaskRecord private constructor(
     override val createObject: TaskJson
         // because of duplicate functionality when converting local task
         get() {
-            if (!create)
+            if (update != null)
                 taskJson.instances = _remoteInstanceRecords.entries
                         .associateBy({ RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, it.key) }, { it.value.createObject })
                         .toMutableMap()
@@ -227,35 +227,26 @@ class RemoteTaskRecord private constructor(
     }
 
     override fun getValues(values: MutableMap<String, Any?>) {
-        check(!deleted)
-        check(!created)
-        check(!updated)
+        if (delete) {
+            Log.e("asdf", "RemoteTaskRecord.getValues deleting " + this)
 
-        when {
-            delete -> {
-                Log.e("asdf", "RemoteTaskRecord.getValues deleting " + this)
+            check(update != null)
 
-                check(!create)
-                check(update != null)
-
-                deleted = true
-                values[key] = null
-            }
-            create -> {
+            values[key] = null
+            delete = false
+        } else {
+            if (update == null) {
                 Log.e("asdf", "RemoteTaskRecord.getValues creating " + this)
 
                 check(update == null)
 
-                created = true
-
                 values[key] = createObject
-            }
-            else -> {
+            } else {
                 if (update!!.isNotEmpty()) {
                     Log.e("asdf", "RemoteTaskRecord.getValues updating " + this)
 
-                    updated = true
-                    values.putAll(update)
+                    values.putAll(update!!)
+                    update = mutableMapOf()
                 }
 
                 for (remoteInstanceRecord in _remoteInstanceRecords.values)
@@ -276,6 +267,8 @@ class RemoteTaskRecord private constructor(
                 for (remoteMonthlyWeekScheduleRecord in remoteMonthlyWeekScheduleRecords.values)
                     remoteMonthlyWeekScheduleRecord.getValues(values)
             }
+
+            update = mutableMapOf()
         }
     }
 

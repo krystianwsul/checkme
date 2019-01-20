@@ -9,7 +9,6 @@ import java.util.*
 class RemoteFriendManager(children: Iterable<DataSnapshot>) {
 
     var isSaved = false
-        private set
 
     val remoteRootUserRecords = children.map { RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!) }.associateBy { it.id }
 

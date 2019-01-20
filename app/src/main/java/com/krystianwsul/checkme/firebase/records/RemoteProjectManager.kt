@@ -10,7 +10,6 @@ import java.util.*
 class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
     var isSaved = false
-        private set
 
     val remoteProjectRecords = mutableMapOf<String, RemoteProjectRecord>()
 

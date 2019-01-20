@@ -31,7 +31,11 @@ class RemoteProjectFactory(
             .associateBy { it.id }
             .toMutableMap()
 
-    val isSaved get() = remoteProjectManager.isSaved
+    var isSaved
+        get() = remoteProjectManager.isSaved
+        set(value) {
+            remoteProjectManager.isSaved = value
+        }
 
     val tasks get() = remoteProjects.values.flatMap { it.tasks }
 

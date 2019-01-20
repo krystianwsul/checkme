@@ -21,13 +21,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.checkme.firebase.RemoteFriendFactory
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory
-import com.krystianwsul.checkme.firebase.RemoteRootUser
-import com.krystianwsul.checkme.firebase.json.UserWrapper
-import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -96,10 +90,6 @@ class MyApplication : Application() {
                 .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
                 .subscribe(userInfoRelay)
 
-        fun getRemoteProjectFactory(domainFactory: DomainFactory, dataSnapshot: DataSnapshot, now: ExactTimeStamp) = RemoteProjectFactory(domainFactory, dataSnapshot.children, userInfo, now)
-        fun getRemoteRootUser(dataSnapshot: DataSnapshot) = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
-        fun getRemoteFriendFactory(dataSnapshot: DataSnapshot) = RemoteFriendFactory(dataSnapshot.children)
-
         userInfoRelay.switchMapSingle {
             if (it.value != null) {
                 check(DomainFactory.nullableInstance == null)
@@ -113,12 +103,11 @@ class MyApplication : Application() {
         }.subscribe {
             val userInfo = it.first
             val (tasks, user, friends) = it.second
-            val now = ExactTimeStamp.now
 
             DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, userInfo).apply {
-                setRemoteTaskRecords(getRemoteProjectFactory(this, tasks, now), now)
-                setUserRecord(getRemoteRootUser(user))
-                setFriendRecords(getRemoteFriendFactory(friends))
+                setRemoteTaskRecords(tasks)
+                setUserRecord(user)
+                setFriendRecords(friends)
             }))
         }
 
@@ -127,9 +116,9 @@ class MyApplication : Application() {
                 .skip(1)
                 .subscribe { it.first.setter(it.second) }
 
-        ifDomain(DatabaseWrapper.tasks) { setRemoteTaskRecords(getRemoteProjectFactory(DomainFactory.instance, it, ExactTimeStamp.now), null) }
-        ifDomain(DatabaseWrapper.user) { setUserRecord(getRemoteRootUser(it)) }
-        ifDomain(DatabaseWrapper.friends) { setFriendRecords(getRemoteFriendFactory(it)) }
+        ifDomain(DatabaseWrapper.tasks, DomainFactory::setRemoteTaskRecords)
+        ifDomain(DatabaseWrapper.user, DomainFactory::setUserRecord)
+        ifDomain(DatabaseWrapper.friends, DomainFactory::setFriendRecords)
 
         if (token == null)
             FirebaseInstanceId.getInstance()

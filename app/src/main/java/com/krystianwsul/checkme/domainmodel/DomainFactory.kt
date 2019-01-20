@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
 import android.util.Log
+import com.google.firebase.database.DataSnapshot
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
@@ -12,6 +13,8 @@ import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
+import com.krystianwsul.checkme.firebase.json.UserWrapper
+import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
@@ -187,15 +190,26 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     }
 
     @Synchronized
-    fun setRemoteTaskRecords(remoteProjectFactory: RemoteProjectFactory, read: ExactTimeStamp?) {
+    fun setRemoteTaskRecords(dataSnapshot: DataSnapshot) {
+        remoteProjectFactory?.let {
+            if (it.isSaved) {
+                it.isSaved = false
+                Log.e("asdf", "skipping remoteTaskRecords")
+                return
+            }
+        }
+
+        val read = ExactTimeStamp.now
+
         localFactory.clearRemoteCustomTimeRecords()
 
         val firstThereforeSilent = this.remoteProjectFactory == null
-        this.remoteProjectFactory = remoteProjectFactory
+        this.remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo, read)
 
         tryNotifyListeners(firstThereforeSilent)
 
-        read?.let { remoteReadTimes = ReadTimes(localReadTimes.start, it, ExactTimeStamp.now) }
+        if (firstThereforeSilent)
+            remoteReadTimes = ReadTimes(localReadTimes.start, read, ExactTimeStamp.now)
     }
 
     private fun tryNotifyListeners(firstThereforeSilent: Boolean) {
@@ -209,7 +223,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         } else {
             updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
 
-            if (!firstThereforeSilent) {
+            if (!firstThereforeSilent) { // todo what is the logic here?
                 Log.e("asdf", "not first, clearing getMTickData()")
 
                 tickData!!.release()
@@ -222,20 +236,30 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         firebaseListeners.forEach { it.invoke(this) }
         firebaseListeners.clear()
 
+        domainChanged.accept(listOf()) // todo make selective
+
         skipSave = false
 
         save(0, SaveService.Source.GUI)
     }
 
     @Synchronized
-    fun setUserRecord(remoteRootUser: RemoteRootUser) {
-        this.remoteRootUser = remoteRootUser
+    fun setUserRecord(dataSnapshot: DataSnapshot) {
+        this.remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
     }
 
     @Synchronized
-    fun setFriendRecords(remoteFriendFactory: RemoteFriendFactory) {
+    fun setFriendRecords(dataSnapshot: DataSnapshot) {
+        remoteFriendFactory?.let {
+            if (it.isSaved) {
+                it.isSaved = false
+                Log.e("asdf", "skipping setFriendRecords")
+                return
+            }
+        }
+
         val firstThereforeSilent = this.remoteFriendFactory == null
-        this.remoteFriendFactory = remoteFriendFactory
+        this.remoteFriendFactory = RemoteFriendFactory(dataSnapshot.children)
 
         tryNotifyListeners(firstThereforeSilent)
     }

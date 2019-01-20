@@ -15,7 +15,11 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
             .associateBy { it.id }
             .toMutableMap()
 
-    val isSaved get() = remoteFriendManager.isSaved
+    var isSaved
+        get() = remoteFriendManager.isSaved
+        set(value) {
+            remoteFriendManager.isSaved = value
+        }
 
     val friends: Collection<RemoteRootUser> get() = _friends.values
 

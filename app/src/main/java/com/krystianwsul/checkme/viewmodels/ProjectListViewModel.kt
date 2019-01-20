@@ -5,9 +5,12 @@ import java.util.*
 
 class ProjectListViewModel : DomainViewModel<ProjectListViewModel.Data>() {
 
-    fun start() = internalStart()
+    override val domainListener = object : DomainListener<Data>() {
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getProjectListData()
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getProjectListData()
+    }
+
+    fun start() = internalStart()
 
     data class Data(val projectDatas: SortedMap<String, ProjectData>) : DomainData()
 

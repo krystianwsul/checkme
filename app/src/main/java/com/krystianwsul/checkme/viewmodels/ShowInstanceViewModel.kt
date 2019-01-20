@@ -9,13 +9,16 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
 
     private lateinit var instanceKey: InstanceKey
 
+    override val domainListener = object : DomainListener<Data>() {
+
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowInstanceData(instanceKey)
+    }
+
     fun start(instanceKey: InstanceKey) {
         this.instanceKey = instanceKey
 
         internalStart()
     }
-
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowInstanceData(instanceKey)
 
     data class Data(
             val name: String,

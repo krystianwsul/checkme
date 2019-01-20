@@ -6,13 +6,16 @@ class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
 
     private var projectId: String? = null
 
+    override val domainListener = object : DomainListener<Data>() {
+
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowProjectData(projectId)
+    }
+
     fun start(projectId: String?) {
         this.projectId = projectId
 
         internalStart()
     }
-
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowProjectData(projectId)
 
     data class Data(
             val name: String?,

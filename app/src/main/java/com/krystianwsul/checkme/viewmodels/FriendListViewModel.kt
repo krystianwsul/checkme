@@ -4,9 +4,12 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 
 class FriendListViewModel : DomainViewModel<FriendListViewModel.Data>() {
 
-    fun start() = internalStart()
+    override val domainListener = object : DomainListener<Data>() {
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getFriendListData()
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getFriendListData()
+    }
+
+    fun start() = internalStart()
 
     data class Data(val userListDatas: MutableSet<UserListData>) : DomainData()
 

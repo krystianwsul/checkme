@@ -12,6 +12,11 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
 
     private lateinit var instanceKeys: List<InstanceKey>
 
+    override val domainListener = object : DomainListener<Data>() {
+
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getEditInstancesData(instanceKeys)
+    }
+
     fun start(instanceKeys: List<InstanceKey>) {
         check(instanceKeys.size > 1)
 
@@ -19,8 +24,6 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
 
         internalStart()
     }
-
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getEditInstancesData(instanceKeys)
 
     data class Data(
             val instanceDatas: Map<InstanceKey, InstanceData>,

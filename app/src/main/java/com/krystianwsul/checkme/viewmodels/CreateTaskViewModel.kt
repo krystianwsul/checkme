@@ -16,14 +16,17 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
     private var taskKey: TaskKey? = null
     private var joinTaskKeys: List<TaskKey>? = null
 
+    override val domainListener = object : DomainListener<Data>() {
+
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(taskKey, joinTaskKeys)
+    }
+
     fun start(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?) {
         this.taskKey = taskKey
         this.joinTaskKeys = joinTaskKeys
 
         internalStart()
     }
-
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getCreateTaskData(taskKey, joinTaskKeys)
 
     sealed class ScheduleData {
 

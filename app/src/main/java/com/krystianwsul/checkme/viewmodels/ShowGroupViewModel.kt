@@ -6,6 +6,11 @@ import com.krystianwsul.checkme.utils.time.TimeStamp
 
 class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
 
+    override val domainListener = object : DomainListener<Data>() {
+
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowGroupData(timeStamp)
+    }
+
     private lateinit var timeStamp: TimeStamp
 
     fun start(timeStamp: TimeStamp) {
@@ -13,8 +18,6 @@ class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
 
         internalStart()
     }
-
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowGroupData(timeStamp)
 
     data class Data(val displayText: String, val dataWrapper: GroupListFragment.DataWrapper?) : DomainData() {
 

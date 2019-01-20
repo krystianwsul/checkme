@@ -8,6 +8,11 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
 
     private lateinit var instanceKeys: Set<InstanceKey>
 
+    override val domainListener = object : DomainListener<Data>() {
+
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowNotificationGroupData(instanceKeys)
+    }
+
     fun start(instanceKeys: Set<InstanceKey>) {
         check(!instanceKeys.isEmpty())
 
@@ -15,8 +20,6 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
 
         internalStart()
     }
-
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowNotificationGroupData(instanceKeys)
 
     data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()
 }

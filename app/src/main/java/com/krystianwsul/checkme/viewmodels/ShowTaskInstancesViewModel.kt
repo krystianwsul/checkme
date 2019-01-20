@@ -8,13 +8,16 @@ class ShowTaskInstancesViewModel : DomainViewModel<ShowTaskInstancesViewModel.Da
 
     private lateinit var taskKey: TaskKey
 
+    override val domainListener = object : DomainListener<Data>() {
+
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(taskKey)
+    }
+
     fun start(taskKey: TaskKey) {
         this.taskKey = taskKey
 
         internalStart()
     }
-
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getShowTaskInstancesData(taskKey)
 
     data class Data(val dataWrapper: GroupListFragment.DataWrapper) : DomainData()
 }

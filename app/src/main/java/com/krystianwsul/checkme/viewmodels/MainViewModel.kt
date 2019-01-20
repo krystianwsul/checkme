@@ -5,9 +5,12 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 
 class MainViewModel : DomainViewModel<MainViewModel.Data>() {
 
-    fun start() = internalStart()
+    override val domainListener = object : DomainListener<Data>() {
 
-    override fun getData(domainFactory: DomainFactory) = domainFactory.getMainData()
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getMainData()
+    }
+
+    fun start() = internalStart()
 
     data class Data(val taskData: TaskListFragment.TaskData) : DomainData()
 }

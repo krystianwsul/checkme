@@ -7,14 +7,35 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import java.util.*
 
-class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
+class RemoteProjectManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
+
+    private fun DataSnapshot.toRecord() = RemoteProjectRecord(domainFactory, key!!, getValue(JsonWrapper::class.java)!!)
 
     var isSaved = false
 
-    val remoteProjectRecords = children.associate { child ->
-        val key = child.key!!
-        key to RemoteProjectRecord(domainFactory, key, child.getValue(JsonWrapper::class.java)!!)
-    }.toMutableMap()
+    val remoteProjectRecords = children.associate { child -> child.key!! to child.toRecord() }.toMutableMap()
+
+    fun addChild(dataSnapshot: DataSnapshot): RemoteProjectRecord {
+        val key = dataSnapshot.key!!
+        check(!remoteProjectRecords.containsKey(key))
+
+        return dataSnapshot.toRecord().also {
+            remoteProjectRecords[key] = it
+        }
+    }
+
+    fun changeChild(dataSnapshot: DataSnapshot): RemoteProjectRecord {
+        val key = dataSnapshot.key!!
+        check(remoteProjectRecords.containsKey(key))
+
+        return dataSnapshot.toRecord().also {
+            remoteProjectRecords[key] = it
+        }
+    }
+
+    fun removeChild(dataSnapshot: DataSnapshot) = dataSnapshot.key!!.also {
+        check(remoteProjectRecords.remove(it) != null)
+    }
 
     fun save(): Boolean {
         val values = HashMap<String, Any?>()

@@ -11,17 +11,10 @@ class RemoteProjectManager(domainFactory: DomainFactory, children: Iterable<Data
 
     var isSaved = false
 
-    val remoteProjectRecords = mutableMapOf<String, RemoteProjectRecord>()
-
-    init {
-        for (child in children) {
-            child.key!!.let {
-                check(it.isNotEmpty())
-
-                remoteProjectRecords[it] = RemoteProjectRecord(domainFactory, it, child.getValue(JsonWrapper::class.java)!!)
-            }
-        }
-    }
+    val remoteProjectRecords = children.associate { child ->
+        val key = child.key!!
+        key to RemoteProjectRecord(domainFactory, key, child.getValue(JsonWrapper::class.java)!!)
+    }.toMutableMap()
 
     fun save(): Boolean {
         val values = HashMap<String, Any?>()

@@ -10,8 +10,6 @@ import android.util.Base64
 import android.util.Log
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
@@ -22,6 +20,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -53,12 +52,7 @@ class MyApplication : Application() {
                 .putString(TOKEN_KEY, value)
                 .apply()
 
-    val googleSigninClient by lazy {
-        GoogleSignIn.getClient(this, GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build())
-    }
+    val googleSigninClient by lazy { getClient() }
 
     val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<UserInfo>())
 
@@ -93,7 +87,10 @@ class MyApplication : Application() {
         userInfoRelay.switchMapSingle {
             if (it.value != null) {
                 check(DomainFactory.nullableInstance == null)
-                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.user, DatabaseWrapper.friends) { tasks: DataSnapshot, user: DataSnapshot, friends: DataSnapshot -> Pair(it.value, Triple(tasks, user, friends)) }.firstOrError()
+
+                val remoteStart = ExactTimeStamp.now
+
+                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.user, DatabaseWrapper.friends) { tasks: DataSnapshot, user: DataSnapshot, friends: DataSnapshot -> Triple(it.value, remoteStart, Triple(tasks, user, friends)) }.firstOrError()
             } else {
                 DomainFactory.nullableInstance?.clearUserInfo()
                 DomainFactory.instanceRelay.accept(NullableWrapper())
@@ -102,10 +99,10 @@ class MyApplication : Application() {
             }
         }.subscribe {
             val userInfo = it.first
-            val (tasks, user, friends) = it.second
+            val remoteStart = it.second
+            val (tasks, user, friends) = it.third
 
-            DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, userInfo).apply {
-                setRemoteTaskRecords(tasks)
+            DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, userInfo, remoteStart, tasks).apply {
                 setUserRecord(user)
                 setFriendRecords(friends)
             }))
@@ -116,7 +113,7 @@ class MyApplication : Application() {
                 .skip(1)
                 .subscribe { it.first.setter(it.second) }
 
-        ifDomain(DatabaseWrapper.tasks, DomainFactory::setRemoteTaskRecords)
+        ifDomain(DatabaseWrapper.tasks, DomainFactory::updateRemoteTaskRecords)
         ifDomain(DatabaseWrapper.user, DomainFactory::setUserRecord)
         ifDomain(DatabaseWrapper.friends, DomainFactory::setFriendRecords)
 

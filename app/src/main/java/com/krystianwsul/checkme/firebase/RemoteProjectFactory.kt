@@ -25,7 +25,7 @@ class RemoteProjectFactory(
         private val userInfo: UserInfo,
         now: ExactTimeStamp) {
 
-    val uuid by lazy { domainFactory.uuid }
+    val uuid = domainFactory.uuid
 
     private val remoteProjectManager = RemoteProjectManager(domainFactory, children)
 

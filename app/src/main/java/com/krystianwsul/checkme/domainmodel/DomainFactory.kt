@@ -31,7 +31,7 @@ import com.krystianwsul.checkme.viewmodels.*
 import java.util.*
 
 @Suppress("LeakingThis")
-open class DomainFactory(persistenceManager: PersistenceManager, private var userInfo: UserInfo) {
+open class DomainFactory(persistenceManager: PersistenceManager, private var userInfo: UserInfo, remoteStart: ExactTimeStamp, taskSnapshot: DataSnapshot) {
 
     companion object {
 
@@ -93,13 +93,13 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     val localReadTimes: ReadTimes
 
-    lateinit var remoteReadTimes: ReadTimes
+    var remoteReadTimes: ReadTimes
         private set
 
     @JvmField
     var localFactory: LocalFactory
 
-    lateinit var remoteProjectFactory: RemoteProjectFactory
+    var remoteProjectFactory: RemoteProjectFactory
         private set
 
     private lateinit var remoteRootUser: RemoteRootUser
@@ -118,15 +118,21 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         localFactory = LocalFactory(persistenceManager)
 
-        val read = ExactTimeStamp.now
+        val localRead = ExactTimeStamp.now
 
         localFactory.initialize(this)
 
         val stop = ExactTimeStamp.now
 
-        localReadTimes = ReadTimes(start, read, stop)
+        localReadTimes = ReadTimes(start, localRead, stop)
 
         setUserHelper()
+
+        val remoteRead = ExactTimeStamp.now
+
+        this.remoteProjectFactory = RemoteProjectFactory(this, taskSnapshot.children, userInfo, remoteRead)
+
+        remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
     }
 
     // misc
@@ -143,7 +149,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     val instanceShownCount get() = localFactory.instanceShownRecords.size
 
-    val uuid by lazy { localFactory.uuid }
+    val uuid get() = localFactory.uuid
 
     fun save(dataId: Int, source: SaveService.Source) = save(listOf(dataId), source)
 
@@ -162,20 +168,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid)
 
-    /*
-    @Synchronized
-    fun setUser(newUserInfo: UserInfo) {
-        if (userInfo == newUserInfo)
-            return
-
-        clearUserInfo()
-
-        userInfo = newUserInfo
-
-        setUserHelper()
-    }
-    */
-
     @Synchronized
     fun clearUserInfo() {
         localFactory.clearRemoteCustomTimeRecords()
@@ -184,27 +176,22 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     }
 
     @Synchronized
-    fun setRemoteTaskRecords(dataSnapshot: DataSnapshot) {
-        if (this::remoteProjectFactory.isInitialized && remoteProjectFactory.isSaved) {
+    fun updateRemoteTaskRecords(dataSnapshot: DataSnapshot) {
+        if (remoteProjectFactory.isSaved) {
             remoteProjectFactory.isSaved = false
             Log.e("asdf", "skipping remoteTaskRecords")
             return
         }
 
-        val read = ExactTimeStamp.now
-
         localFactory.clearRemoteCustomTimeRecords()
 
-        this.remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo, read)
+        this.remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo, ExactTimeStamp.now)
 
         tryNotifyListeners()
-
-        if (firstTaskEvent)
-            remoteReadTimes = ReadTimes(localReadTimes.start, read, ExactTimeStamp.now)
     }
 
     private fun tryNotifyListeners() {
-        if (!this::remoteProjectFactory.isInitialized || remoteProjectFactory.isSaved || !this::remoteFriendFactory.isInitialized || remoteFriendFactory.isSaved)
+        if (remoteProjectFactory.isSaved || remoteFriendFactory.isSaved)
             return
 
         skipSave = false

@@ -113,7 +113,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
         return MonthlyWeekSchedule(domainFactory, LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord))
     }
 
-    fun save(source: SaveService.Source) = persistenceManager.save(source)
+    fun save(source: SaveService.Source): Boolean = persistenceManager.save(source)
 
     fun getInstanceShownRecord(projectId: String, taskId: String, scheduleYear: Int, scheduleMonth: Int, scheduleDay: Int, scheduleCustomTimeId: String?, scheduleHour: Int?, scheduleMinute: Int?): InstanceShownRecord? {
         val matches: List<InstanceShownRecord>

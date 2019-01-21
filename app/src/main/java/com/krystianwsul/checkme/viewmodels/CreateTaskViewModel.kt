@@ -83,7 +83,18 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             val parentKey: ParentKey,
             val scheduleText: String?,
             val note: String?,
-            val sortKey: SortKey)
+            val sortKey: SortKey) {
+
+        fun matchesSearch(query: String): Boolean {
+            if (query.isEmpty())
+                return true
+
+            if (name.toLowerCase().contains(query))
+                return true
+
+            return parentTreeDatas.values.any { it.matchesSearch(query) }
+        }
+    }
 
     sealed class ParentKey : Parcelable {
 

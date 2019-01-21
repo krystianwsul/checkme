@@ -20,16 +20,18 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.treeadapter.*
+import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Predicate
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_parent_picker.view.*
-import java.util.*
 
 class ParentPickerFragment : AbstractDialogFragment() {
 
     companion object {
 
         private const val EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys"
+        private const val QUERY_KEY = "query"
 
         private const val SHOW_DELETE_KEY = "showDelete"
 
@@ -41,7 +43,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var search: EditText
+    private lateinit var searchField: EditText
+    private lateinit var searchChanges: Observable<String>
 
     private var taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>? = null
     lateinit var listener: Listener
@@ -49,12 +52,20 @@ class ParentPickerFragment : AbstractDialogFragment() {
     private var treeViewAdapter: TreeViewAdapter? = null
     private var expandedParentKeys: List<CreateTaskViewModel.ParentKey>? = null
 
+    private val initializeDisposable = CompositeDisposable()
+
+    private var query: String = ""
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         check(arguments!!.containsKey(SHOW_DELETE_KEY))
 
-        savedInstanceState?.takeIf { it.containsKey(EXPANDED_TASK_KEYS_KEY) }?.apply {
-            expandedParentKeys = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
-            check(!expandedParentKeys!!.isEmpty())
+        savedInstanceState?.apply {
+            if (containsKey(EXPANDED_TASK_KEYS_KEY)) {
+                expandedParentKeys = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
+                check(!expandedParentKeys!!.isEmpty())
+            }
+
+            query = getString(QUERY_KEY)!!
         }
 
         return MaterialDialog(requireActivity()).apply {
@@ -69,7 +80,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
             getCustomView()!!.apply {
                 recyclerView = parentPickerRecycler as RecyclerView
 
-                search = parentPickerSearch as EditText
+                searchField = parentPickerSearch as EditText
+                searchChanges = searchField.textChanges().map { it.toString() }
             }
         }
     }
@@ -85,6 +97,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        recyclerView.layoutManager = LinearLayoutManager(activity)
+
         if (taskDatas != null)
             initialize()
     }
@@ -93,7 +107,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         check(taskDatas != null)
         check(activity != null)
 
-        recyclerView.layoutManager = LinearLayoutManager(activity)
+        initializeDisposable.clear()
 
         if (treeViewAdapter != null) {
             val expanded = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expandedParentKeys
@@ -102,20 +116,32 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             treeViewAdapter!!.updateDisplayedNodes(true) {
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(taskDatas!!, expandedParentKeys)
+
+                query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
             }
         } else {
             val taskAdapter = TaskAdapter(this)
             taskAdapter.initialize(taskDatas!!, expandedParentKeys)
             treeViewAdapter = taskAdapter.treeViewAdapter
             recyclerView.adapter = treeViewAdapter
+
+            treeViewAdapter!!.updateDisplayedNodes {
+                query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
+            }
+        }
+
+        initializeDisposable += searchChanges.subscribe {
+            treeViewAdapter!!.updateDisplayedNodes {
+                search(it, TreeViewAdapter.Placeholder)
+            }
         }
     }
 
     override fun onStart() {
         super.onStart()
 
-        search.apply {
-            startDisposable += textChanges().subscribe {
+        searchField.apply {
+            startDisposable += searchChanges.subscribe {
                 val drawable = if (it.isNullOrEmpty()) R.drawable.ic_close_white_24dp else R.drawable.ic_close_black_24dp
                 setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0)
             }
@@ -142,6 +168,20 @@ class ParentPickerFragment : AbstractDialogFragment() {
             if (!expandedParentKeys.isEmpty())
                 outState.putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedParentKeys))
         }
+
+        outState.putString(QUERY_KEY, query)
+    }
+
+    override fun onDestroyView() {
+        initializeDisposable.clear()
+
+        super.onDestroyView()
+    }
+
+    private fun search(query: String, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+        this.query = query
+
+        treeViewAdapter!!.query = query
     }
 
     private class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) : TreeModelAdapter, TaskParent {
@@ -289,6 +329,8 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
                 return comparison
             }
+
+            override fun matchesSearch(query: String) = parentTreeData.matchesSearch(query)
         }
     }
 

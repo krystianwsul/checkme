@@ -1,6 +1,10 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
+import com.androidhuman.rxfirebase2.database.ChildAddEvent
+import com.androidhuman.rxfirebase2.database.ChildChangeEvent
+import com.androidhuman.rxfirebase2.database.ChildEvent
+import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
@@ -66,6 +70,25 @@ class RemoteProjectFactory(
         get() = remoteProjects.values
                 .map { it.tasks.size }
                 .sum()
+
+    fun onChildEvent(childEvent: ChildEvent, now: ExactTimeStamp) {
+        when (childEvent) {
+            is ChildAddEvent -> {
+                val remoteProjectRecord = remoteProjectManager.addChild(childEvent.dataSnapshot())
+
+                check(!remoteProjects.containsKey(remoteProjectRecord.id))
+                remoteProjects[remoteProjectRecord.id] = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+            }
+            is ChildChangeEvent -> {
+                val remoteProjectRecord = remoteProjectManager.addChild(childEvent.dataSnapshot())
+
+                check(remoteProjects.containsKey(remoteProjectRecord.id))
+                remoteProjects[remoteProjectRecord.id] = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+            }
+            is ChildRemoveEvent -> check(remoteProjects.remove(remoteProjectManager.removeChild(childEvent.dataSnapshot())) != null)
+            else -> throw IllegalArgumentException()
+        }
+    }
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String) = createRemoteTaskHelper(now, name, note, projectId).apply {
         createSchedules(now, scheduleDatas)

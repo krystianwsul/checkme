@@ -18,13 +18,10 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.Singles
-import io.reactivex.rxkotlin.addTo
 import net.danlew.android.joda.JodaTimeAndroid
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -54,7 +51,7 @@ class MyApplication : Application() {
 
     val googleSigninClient by lazy { getClient() }
 
-    val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<UserInfo>())
+    private val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<UserInfo>())
 
     val userInfo get() = userInfoRelay.value!!.value!!
 
@@ -84,54 +81,25 @@ class MyApplication : Application() {
                 .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
                 .subscribe(userInfoRelay)
 
-        val domainDisposable = CompositeDisposable()
-
-        userInfoRelay.switchMapSingle {
-            domainDisposable.clear()
-
-            if (it.value != null) {
-                check(DomainFactory.nullableInstance == null)
-
-                val key = it.value.key
-
-                val remoteStart = ExactTimeStamp.now
-
-                val taskSingle = DatabaseWrapper.getTaskSingle(key)
-                val friendSingle = DatabaseWrapper.getFriendSingle(key)
-                val userSingle = DatabaseWrapper.getUserSingle(key)
-
-                val domainFactorySingle = Singles.zip(taskSingle, friendSingle, userSingle) { tasks, friends, user ->
-                    DomainFactory(PersistenceManager.instance, userInfo, remoteStart, tasks).apply {
+        FactoryListener(
+                userInfoRelay,
+                { DatabaseWrapper.getTaskSingle(it.key) },
+                { DatabaseWrapper.getFriendSingle(it.key) },
+                { DatabaseWrapper.getUserSingle(it.key) },
+                { DatabaseWrapper.getTaskEvents(it.key) },
+                { DatabaseWrapper.getFriendObservable(it.key) },
+                { DatabaseWrapper.getUserObservable(it.key) },
+                { userInfo, tasks, friends, user ->
+                    DomainFactory(PersistenceManager.instance, userInfo, ExactTimeStamp.now, tasks).apply {
                         setUserRecord(user)
                         setFriendRecords(friends)
                     }
-                }
-
-                taskSingle.flatMapObservable { DatabaseWrapper.getTaskEvents(key) }
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updateRemoteTaskRecords(it) }.addTo(domainDisposable)
-                        }
-                        .addTo(domainDisposable)
-
-                friendSingle.flatMapObservable { DatabaseWrapper.getFriendObservable(key) }
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.setFriendRecords(it) }.addTo(domainDisposable)
-                        }
-                        .addTo(domainDisposable)
-
-                userSingle.flatMapObservable { DatabaseWrapper.getUserObservable(key) }
-                        .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.setUserRecord(it) }.addTo(domainDisposable)
-                        }
-                        .addTo(domainDisposable)
-
-                domainFactorySingle.map { NullableWrapper(it) }
-            } else {
-                DomainFactory.nullableInstance?.clearUserInfo()
-
-                Single.just(NullableWrapper())
-            }
-        }.subscribe(DomainFactory.instanceRelay)
+                },
+                { DomainFactory.nullableInstance?.clearUserInfo() },
+                { domainFactory, tasks -> domainFactory.updateRemoteTaskRecords(tasks) },
+                { domainFactory, friends -> domainFactory.setFriendRecords(friends) },
+                { domainFactory, user -> domainFactory.setUserRecord(user) }
+        ).domainFactoryObservable.subscribe(DomainFactory.instanceRelay)
 
         if (token == null)
             FirebaseInstanceId.getInstance()

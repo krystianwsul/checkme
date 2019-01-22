@@ -224,6 +224,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         private class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : GroupHolderNode(indentation), TaskParent {
 
+            companion object {
+
+                private val background = getColor(android.R.color.white)
+            }
+
             override lateinit var treeNode: TreeNode
                 private set
 
@@ -246,6 +251,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override val isVisibleDuringActionMode = true
 
             override val isSeparatorVisibleWhenNotExpanded = false
+
+            override val colorBackground: Int
+                get() = background
 
             val expandedParentKeys: List<CreateTaskViewModel.ParentKey>
                 get() {

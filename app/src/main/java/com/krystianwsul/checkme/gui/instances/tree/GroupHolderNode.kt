@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.graphics.Color
 import android.view.View
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -16,12 +15,13 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     companion object {
 
-        private fun getColor(@ColorRes color: Int) = ContextCompat.getColor(MyApplication.instance, color)
+        fun getColor(@ColorRes color: Int) = ContextCompat.getColor(MyApplication.instance, color)
 
         val colorPrimary by lazy { getColor(R.color.textPrimary) }
         val colorSecondary by lazy { getColor(R.color.textSecondary) }
         val colorDisabled by lazy { getColor(R.color.textDisabled) }
         val colorSelected by lazy { getColor(R.color.selected) }
+        val colorBackground by lazy { getColor(R.color.listBackground) }
     }
 
     protected abstract val treeNode: TreeNode
@@ -47,6 +47,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
     open val ripple = false
 
     final override val state get() = State(id, name, details, children, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxVisibility, checkBoxChecked)
+
+    protected open val colorBackground = GroupHolderNode.colorBackground
 
     data class State(
             val id: Any,
@@ -125,7 +127,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {
-                setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else Color.TRANSPARENT)
+                setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
 
                 setOnLongClickListener {
                     onLongClick(viewHolder)

@@ -14,6 +14,29 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Default task location:" />
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/debugDefaultLocal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="local" />
+
+            <RadioButton
+                android:id="@+id/debugDefaultRemote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="remote" />
+
+        </RadioGroup>
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

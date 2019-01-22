@@ -15,6 +15,7 @@ object DatabaseWrapper {
 
     private const val USERS_KEY = "users"
     private const val RECORDS_KEY = "records"
+    private const val USER_PROJECTS_KEY = "userProjects"
 
     val root: String by lazy {
         MyApplication.instance
@@ -105,7 +106,13 @@ object DatabaseWrapper {
 
     fun getTaskSingle(key: String) = taskQuery(key).data()
 
+    private fun userProjectQuery(key: String) = rootReference.child("$RECORDS_KEY/$key")
+
     fun getTaskEvents(key: String) = taskQuery(key).childEvents()
+
+    fun getUserProjectSingle(key: String) = userProjectQuery(key).data()
+
+    fun getUserProjectObservable(key: String) = userProjectQuery(key).dataChanges()
 
     fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)
 

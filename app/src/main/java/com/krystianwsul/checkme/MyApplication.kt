@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.preference.PreferenceManager
-import android.util.Base64
-import android.util.Log
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
 import com.google.firebase.auth.FirebaseAuth
@@ -23,8 +20,6 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import net.danlew.android.joda.JodaTimeAndroid
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 
 class MyApplication : Application() {
 
@@ -124,6 +119,7 @@ class MyApplication : Application() {
                 .start()
     }
 
+    /*
     @Suppress("DEPRECATION")
     @SuppressLint("PackageManagerGetSignatures")
     private fun writeHashes() {
@@ -152,4 +148,5 @@ class MyApplication : Application() {
             Log.e("asdf", "hash error", e)
         }
     }
+    */
 }

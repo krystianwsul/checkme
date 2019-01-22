@@ -8,15 +8,15 @@ import io.reactivex.rxkotlin.Singles
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 
-class FactoryListener<T, U, V, W>(
+class FactoryListener<T, U, V, W, X>(
         userInfoObservable: Observable<NullableWrapper<T>>,
-        getTaskSingle: (T) -> Single<U>,
+        getTaskSingle: (T) -> Single<X>,
         getFriendSingle: (T) -> Single<U>,
         getUserSingle: (T) -> Single<U>,
         getTaskEvents: (T) -> Observable<V>,
         getFriendObservable: (T) -> Observable<U>,
         getUserObservable: (T) -> Observable<U>,
-        initialCallback: (userInfo: T, tasks: U, friends: U, user: U) -> W,
+        initialCallback: (userInfo: T, tasks: X, friends: U, user: U) -> W,
         clearCallback: () -> Unit,
         taskCallback: (domainFactory: W, tasks: V) -> Unit,
         friendCallback: (domainFactory: W, friends: U) -> Unit,

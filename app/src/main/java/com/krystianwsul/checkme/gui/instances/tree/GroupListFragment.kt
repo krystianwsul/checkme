@@ -669,20 +669,30 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         animateVisibility(show, hide)
+
+        setGroupMenuItemVisibility()
+        updateFabVisibility()
     }
 
-    private fun setGroupMenuItemVisibility() = listener.setGroupMenuItemVisibility(
-            (parameters as? Parameters.All)?.position,
-            treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable },
-            canAddHour())
-
-    private fun canAddHour(): Boolean {
-        val now = ExactTimeStamp.now
-        return parameters.dataWrapper
-                .instanceDatas
-                .values
-                .all { it.instanceTimeStamp.toExactTimeStamp() < now }
+    private fun setGroupMenuItemVisibility() {
+        listener.apply {
+            if (!parametersRelay.hasValue())
+                setGroupMenuItemVisibility(null, false, false)
+            else
+                setGroupMenuItemVisibility(
+                        (parameters as? Parameters.All)?.position,
+                        treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable },
+                        canAddHour())
+        }
     }
+
+    private fun canAddHour() = parameters.dataWrapper
+            .instanceDatas
+            .values
+            .run {
+                val now = ExactTimeStamp.now
+                all { it.instanceTimeStamp.toExactTimeStamp() < now }
+            }
 
     fun addHour(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         check(canAddHour())

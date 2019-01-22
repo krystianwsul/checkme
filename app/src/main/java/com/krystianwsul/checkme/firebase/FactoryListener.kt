@@ -8,17 +8,20 @@ import io.reactivex.rxkotlin.Singles
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 
-class FactoryListener<T, U, V, W, X>(
+class FactoryListener<T, U, V, W>(
         userInfoObservable: Observable<NullableWrapper<T>>,
-        getTaskSingle: (T) -> Single<X>,
+        getPrivateProjectSingle: (T) -> Single<U>,
+        getSharedProjectSingle: (T) -> Single<U>,
         getFriendSingle: (T) -> Single<U>,
         getUserSingle: (T) -> Single<U>,
-        getTaskEvents: (T) -> Observable<V>,
+        getPrivateProjectObservable: (T) -> Observable<U>,
+        getSharedProjectEvents: (T) -> Observable<V>,
         getFriendObservable: (T) -> Observable<U>,
         getUserObservable: (T) -> Observable<U>,
-        initialCallback: (userInfo: T, tasks: X, friends: U, user: U) -> W,
+        initialCallback: (userInfo: T, privateProject: U, sharedProjects: U, friends: U, user: U) -> W,
         clearCallback: () -> Unit,
-        taskCallback: (domainFactory: W, tasks: V) -> Unit,
+        privateProjectCallback: (domainFactory: W, privateProject: U) -> Unit,
+        sharedProjectCallback: (domainFactory: W, sharedProjects: V) -> Unit,
         friendCallback: (domainFactory: W, friends: U) -> Unit,
         userCallback: (domainFactory: W, user: U) -> Unit,
         logger: (String) -> Unit = { }) {
@@ -36,7 +39,11 @@ class FactoryListener<T, U, V, W, X>(
             if (it.value != null) {
                 val userInfo = it.value
 
-                val taskEvents = getTaskEvents(userInfo).doOnNext { logger("taskEvents $it") }
+                val privateProjectObservable = getPrivateProjectObservable(userInfo).doOnNext { logger("privateProjectObservable $it") }
+                        .publish()
+                        .apply { domainDisposable += connect() }
+
+                val sharedProjectEvents = getSharedProjectEvents(userInfo).doOnNext { logger("sharedProjectEvents $it") }
                         .publish()
                         .apply { domainDisposable += connect() }
 
@@ -48,15 +55,22 @@ class FactoryListener<T, U, V, W, X>(
                         .publish()
                         .apply { domainDisposable += connect() }
 
-                val taskSingle = getTaskSingle(userInfo).doOnSuccess { logger("taskSingle $it") }.cache()
+                val privateProjectSingle = getPrivateProjectSingle(userInfo).doOnSuccess { logger("privateProjectSingle $it") }.cache()
+                val sharedProjectSingle = getSharedProjectSingle(userInfo).doOnSuccess { logger("sharedProjectSingle $it") }.cache()
                 val friendSingle = getFriendSingle(userInfo).doOnSuccess { logger("friendSingle $it") }.cache()
                 val userSingle = getUserSingle(userInfo).doOnSuccess { logger("userSingle $it") }.cache()
 
-                val domainFactorySingle = Singles.zip(taskSingle, friendSingle, userSingle) { tasks, friends, user -> initialCallback(userInfo, tasks, friends, user) }.cache()
+                val domainFactorySingle = Singles.zip(privateProjectSingle, sharedProjectSingle, friendSingle, userSingle) { privateProject, sharedProjects, friends, user -> initialCallback(userInfo, privateProject, sharedProjects, friends, user) }.cache()
 
-                taskSingle.flatMapObservable { taskEvents }
+                privateProjectSingle.flatMapObservable { privateProjectObservable }
                         .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> taskCallback(domainFactory, it) }.addTo(domainDisposable)
+                            domainFactorySingle.subscribe { domainFactory -> privateProjectCallback(domainFactory, it) }.addTo(domainDisposable)
+                        }
+                        .addTo(domainDisposable)
+
+                sharedProjectSingle.flatMapObservable { sharedProjectEvents }
+                        .subscribe {
+                            domainFactorySingle.subscribe { domainFactory -> sharedProjectCallback(domainFactory, it) }.addTo(domainDisposable)
                         }
                         .addTo(domainDisposable)
 

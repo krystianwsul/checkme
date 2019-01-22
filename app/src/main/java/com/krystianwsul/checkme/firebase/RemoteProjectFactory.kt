@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import com.krystianwsul.checkme.firebase.json.ProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
+import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectManager
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectManager
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.DayOfWeek
@@ -21,25 +22,41 @@ import java.util.*
 
 class RemoteProjectFactory(
         private val domainFactory: DomainFactory,
-        children: Iterable<DataSnapshot>,
+        sharedChildren: Iterable<DataSnapshot>,
+        privateSnapshot: DataSnapshot,
         private val userInfo: UserInfo,
         now: ExactTimeStamp) {
 
     val uuid = domainFactory.uuid
 
-    private val remoteProjectManager = RemoteSharedProjectManager(domainFactory, children)
+    private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, userInfo, privateSnapshot, now)
+    private val remoteSharedProjectManager = RemoteSharedProjectManager(domainFactory, sharedChildren)
 
-    val remoteProjects = remoteProjectManager.remoteProjectRecords
+    val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
             .map { RemoteSharedProject(domainFactory, it, userInfo, uuid, now) }
             .associateBy { it.id }
-            .toMutableMap()
 
-    var isSaved
-        get() = remoteProjectManager.isSaved
-        set(value) {
-            remoteProjectManager.isSaved = value
+    private var remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid, now)
+
+    val remoteProjects
+        get() = remoteSharedProjects.toMutableMap<String, RemoteProject>().apply {
+            put(remotePrivateProject.id, remotePrivateProject)
         }
+
+    var isPrivateSaved
+        get() = remotePrivateProjectManager.isSaved
+        set(value) {
+            remotePrivateProjectManager.isSaved = value
+        }
+
+    var isSharedSaved
+        get() = remoteSharedProjectManager.isSaved
+        set(value) {
+            remoteSharedProjectManager.isSaved = value
+        }
+
+    val eitherSaved get() = isPrivateSaved || isSharedSaved
 
     val tasks get() = remoteProjects.values.flatMap { it.tasks }
 
@@ -74,19 +91,19 @@ class RemoteProjectFactory(
     fun onChildEvent(childEvent: ChildEvent, now: ExactTimeStamp) {
         when (childEvent) {
             is ChildAddEvent -> {
-                val remoteProjectRecord = remoteProjectManager.addChild(childEvent.dataSnapshot())
+                val remoteProjectRecord = remoteSharedProjectManager.addChild(childEvent.dataSnapshot())
 
                 check(!remoteProjects.containsKey(remoteProjectRecord.id))
                 remoteProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildChangeEvent -> {
-                val remoteProjectRecord = remoteProjectManager.changeChild(childEvent.dataSnapshot())
+                val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
                 remoteProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildRemoveEvent -> {
-                val key = remoteProjectManager.removeChild(childEvent.dataSnapshot())
+                val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
 
                 val remoteProject = remoteProjects[key]!!
 
@@ -96,6 +113,12 @@ class RemoteProjectFactory(
             }
             else -> throw IllegalArgumentException()
         }
+    }
+
+    fun onNewPrivate(dataSnapshot: DataSnapshot, now: ExactTimeStamp) {
+        val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
+
+        remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectRecord, uuid, now)
     }
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String) = createRemoteTaskHelper(now, name, note, projectId).apply {
@@ -114,12 +137,12 @@ class RemoteProjectFactory(
         val friendIds = HashSet(recordOf)
         friendIds.remove(userInfo.key)
 
-        val userJsons = DomainFactory.instance.remoteFriendFactory.getUserJsons(friendIds)
+        val userJsons = domainFactory.remoteFriendFactory.getUserJsons(friendIds)
         userJsons[userInfo.key] = remoteRootUser.userJson
 
         val projectJson = ProjectJson(name, now.long, users = userJsons)
 
-        val remoteProjectRecord = remoteProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
+        val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
         val remoteProject = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
 
@@ -130,7 +153,11 @@ class RemoteProjectFactory(
         return remoteProject
     }
 
-    fun save() = remoteProjectManager.save()
+    fun save(): Boolean {
+        val privateSaved = remotePrivateProjectManager.save()
+        val sharedSaved = remoteSharedProjectManager.save()
+        return privateSaved || sharedSaved
+    }
 
     fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey, remoteProject: RemoteProject): String {
         val localCustomTimeId = localCustomTimeKey.localCustomTimeId
@@ -190,7 +217,7 @@ class RemoteProjectFactory(
         return getRemoteProjectForce(childTaskKey).getTaskHierarchiesByChildTaskKey(childTaskKey)
     }
 
-    fun updateUserInfo(userInfo: UserInfo) = remoteProjects.values.forEach { it.updateUserInfo(userInfo, uuid) }
+    fun updateUserInfo(userInfo: UserInfo) = remoteSharedProjects.values.forEach { it.updateUserInfo(userInfo, uuid) }
 
     fun getRemoteProjectForce(projectId: String): RemoteProject {
         check(!TextUtils.isEmpty(projectId))

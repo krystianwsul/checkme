@@ -88,20 +88,23 @@ class MyApplication : Application() {
 
         FactoryListener(
                 userInfoRelay,
-                { DatabaseWrapper.getTaskSingle(it.key) },
+                { DatabaseWrapper.getPrivateProjectSingle(it.key) },
+                { DatabaseWrapper.getSharedProjectSingle(it.key) },
                 { DatabaseWrapper.getFriendSingle(it.key) },
                 { DatabaseWrapper.getUserSingle(it.key) },
-                { DatabaseWrapper.getTaskEvents(it.key) },
+                { DatabaseWrapper.getPrivateProjectObservable(it.key) },
+                { DatabaseWrapper.getSharedProjectEvents(it.key) },
                 { DatabaseWrapper.getFriendObservable(it.key) },
                 { DatabaseWrapper.getUserObservable(it.key) },
-                { userInfo, tasks, friends, user ->
-                    DomainFactory(PersistenceManager.instance, userInfo, ExactTimeStamp.now, tasks).apply {
+                { userInfo, privateProject, sharedProjects, friends, user ->
+                    DomainFactory(PersistenceManager.instance, userInfo, ExactTimeStamp.now, sharedProjects, privateProject).apply {
                         setUserRecord(user)
                         setFriendRecords(friends)
                     }
                 },
                 { DomainFactory.nullableInstance?.clearUserInfo() },
-                { domainFactory, tasks -> domainFactory.updateRemoteTaskRecords(tasks) },
+                { domainFactory, privateProject -> domainFactory.updatePrivateProjectRecord(privateProject) },
+                { domainFactory, sharedProjects -> domainFactory.updateSharedProjectRecords(sharedProjects) },
                 { domainFactory, friends -> domainFactory.setFriendRecords(friends) },
                 { domainFactory, user -> domainFactory.setUserRecord(user) }
                 //, { Log.e("asdf", "FactoryListener:\n$it")}

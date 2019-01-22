@@ -100,13 +100,13 @@ object DatabaseWrapper {
         return id
     }
 
-    private fun taskQuery(key: String) = rootReference.child(RECORDS_KEY)
+    private fun sharedProjectQuery(key: String) = rootReference.child(RECORDS_KEY)
             .orderByChild("recordOf/$key")
             .equalTo(true)
 
-    fun getTaskSingle(key: String) = taskQuery(key).data()
+    fun getSharedProjectSingle(key: String) = sharedProjectQuery(key).data()
 
-    fun getTaskEvents(key: String) = taskQuery(key).childEvents()
+    fun getSharedProjectEvents(key: String) = sharedProjectQuery(key).childEvents()
 
     fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)
 

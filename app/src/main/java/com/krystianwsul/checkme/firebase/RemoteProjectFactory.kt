@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import com.krystianwsul.checkme.firebase.json.ProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
-import com.krystianwsul.checkme.firebase.records.RemoteProjectManager
+import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectManager
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -27,7 +27,7 @@ class RemoteProjectFactory(
 
     val uuid = domainFactory.uuid
 
-    private val remoteProjectManager = RemoteProjectManager(domainFactory, children)
+    private val remoteProjectManager = RemoteSharedProjectManager(domainFactory, children)
 
     val remoteProjects = remoteProjectManager.remoteProjectRecords
             .values

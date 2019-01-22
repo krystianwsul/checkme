@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import java.util.*
 
-class RemoteProjectManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
+class RemoteSharedProjectManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
     private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(domainFactory, key!!, getValue(JsonWrapper::class.java)!!)
 
@@ -42,7 +42,7 @@ class RemoteProjectManager(private val domainFactory: DomainFactory, children: I
 
         remoteProjectRecords.values.forEach { it.getValues(values) }
 
-        Log.e("asdf", "RemoteProjectManager.save values: $values")
+        Log.e("asdf", "RemoteSharedProjectManager.save values: $values")
 
         if (!values.isEmpty()) {
             check(!isSaved)

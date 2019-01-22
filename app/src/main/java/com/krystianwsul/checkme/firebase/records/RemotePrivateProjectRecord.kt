@@ -23,4 +23,6 @@ class RemotePrivateProjectRecord(
             projectJson)
 
     override val createObject get() = createProjectJson
+
+    override val childKey get() = key
 }

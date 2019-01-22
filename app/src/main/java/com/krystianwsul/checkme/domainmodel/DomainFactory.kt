@@ -911,14 +911,18 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         save(0, source)
     }
 
+    private val defaultProjectId get() = remoteProjectFactory.remotePrivateProject.id.takeIf { MyApplication.instance.defaultRemote }
+
     fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
         check(name.isNotEmpty())
         check(!scheduleDatas.isEmpty())
 
-        val task = if (projectId.isNullOrEmpty()) {
+        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
+
+        val task = if (finalProjectId.isNullOrEmpty()) {
             localFactory.createScheduleRootTask(now, name, scheduleDatas, note)
         } else {
-            remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, projectId)
+            remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId)
         }
 
         updateNotifications(now)
@@ -998,7 +1002,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         } else if (!projectId.isNullOrEmpty()) {
             projectId
         } else {
-            null
+            defaultProjectId
         }
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
@@ -1008,7 +1012,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         else
             localFactory.createScheduleRootTask(now, name, scheduleDatas, note)
 
-        joinTasks = joinTasks.map { it.updateProject(now, projectId) }
+        joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
 
         joinTasks(newParentTask, joinTasks, now)
 
@@ -1059,8 +1063,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         val parentTask = getTaskForce(parentTaskKey)
         check(parentTask.current(now))
 
-        val joinProjectIds = joinTaskKeys.map { it.remoteProjectId }.distinct()
-        check(joinProjectIds.size == 1)
+        check(joinTaskKeys.map { it.remoteProjectId }.distinct().size == 1)
 
         val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 

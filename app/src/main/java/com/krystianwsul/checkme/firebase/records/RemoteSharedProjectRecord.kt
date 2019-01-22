@@ -36,6 +36,7 @@ class RemoteSharedProjectRecord(
         }
     }
 
-    override val createObject
-        get() = jsonWrapper.apply { projectJson = createProjectJson }
+    override val createObject get() = jsonWrapper.apply { projectJson = createProjectJson }
+
+    override val childKey get() = key + "/" + RemoteProjectRecord.PROJECT_JSON
 }

@@ -67,7 +67,7 @@ class RemoteTaskRecord private constructor(
             return taskJson
         }
 
-    override val key get() = remoteProjectRecord.key + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + TASKS + "/" + id
+    override val key get() = remoteProjectRecord.childKey + "/" + TASKS + "/" + id
 
     val projectId get() = remoteProjectRecord.id
 

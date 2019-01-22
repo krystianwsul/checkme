@@ -28,6 +28,8 @@ abstract class RemoteProjectRecord(
 
     override val key get() = id
 
+    abstract val childKey: String
+
     protected val createProjectJson
         get() = projectJson.apply {
             tasks = remoteTaskRecords.values

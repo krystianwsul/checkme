@@ -38,7 +38,8 @@ class RemoteProjectFactory(
             .associateBy { it.id }
             .toMutableMap()
 
-    private var remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid, now)
+    var remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid, now)
+        private set
 
     val remoteProjects
         get() = remoteSharedProjects.toMutableMap<String, RemoteProject>().apply {

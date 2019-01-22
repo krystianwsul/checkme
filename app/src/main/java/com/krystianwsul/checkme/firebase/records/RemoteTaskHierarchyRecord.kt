@@ -17,7 +17,7 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
 
     override val createObject: TaskHierarchyJson
 
-    override val key get() = remoteProjectRecord.key + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + TASK_HIERARCHIES + "/" + id
+    override val key get() = remoteProjectRecord.childKey + "/" + TASK_HIERARCHIES + "/" + id
 
     val startTime get() = createObject.startTime
 

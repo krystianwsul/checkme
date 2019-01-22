@@ -190,5 +190,5 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
 
     override val createObject get() = customTimeJson
 
-    override val key get() = remoteProjectRecord.key + "/" + RemoteProjectRecord.PROJECT_JSON + "/" + CUSTOM_TIMES + "/" + id
+    override val key get() = remoteProjectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
 }

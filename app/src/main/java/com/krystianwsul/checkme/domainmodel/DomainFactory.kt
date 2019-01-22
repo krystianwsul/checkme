@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
 import android.util.Log
+import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.google.firebase.database.DataSnapshot
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
@@ -130,6 +131,8 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         val remoteRead = ExactTimeStamp.now
 
+        Log.e("asdf", "set task records " + taskSnapshot)
+
         this.remoteProjectFactory = RemoteProjectFactory(this, taskSnapshot.children, userInfo, remoteRead)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
@@ -169,23 +172,19 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid)
 
     @Synchronized
-    fun clearUserInfo() {
-        localFactory.clearRemoteCustomTimeRecords()
-
-        updateNotifications(ExactTimeStamp.now, true)
-    }
+    fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
 
     @Synchronized
-    fun updateRemoteTaskRecords(dataSnapshot: DataSnapshot) {
+    fun updateRemoteTaskRecords(childEvent: ChildEvent) {
+        Log.e("asdf", "update task records " + childEvent)
+
         if (remoteProjectFactory.isSaved) {
             remoteProjectFactory.isSaved = false
-            Log.e("asdf", "skipping remoteTaskRecords")
+            Log.e("asdf", "skipping remote task records")
             return
         }
 
-        localFactory.clearRemoteCustomTimeRecords()
-
-        this.remoteProjectFactory = RemoteProjectFactory(this, dataSnapshot.children, userInfo, ExactTimeStamp.now)
+        remoteProjectFactory.onChildEvent(childEvent, ExactTimeStamp.now)
 
         tryNotifyListeners()
     }

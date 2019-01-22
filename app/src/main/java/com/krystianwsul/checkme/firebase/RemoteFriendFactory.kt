@@ -23,11 +23,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
     val friends: Collection<RemoteRootUser> get() = _friends.values
 
-    fun save() {
-        check(!remoteFriendManager.isSaved)
-
-        remoteFriendManager.save()
-    }
+    fun save() = remoteFriendManager.save()
 
     fun getUserJsons(friendIds: Set<String>): MutableMap<String, UserJson> {
         check(friendIds.all { _friends.containsKey(it) })

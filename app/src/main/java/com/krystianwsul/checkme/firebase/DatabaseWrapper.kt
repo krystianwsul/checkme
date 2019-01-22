@@ -1,14 +1,14 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
+import com.androidhuman.rxfirebase2.database.childEvents
+import com.androidhuman.rxfirebase2.database.data
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.records.*
-import com.krystianwsul.checkme.utils.filterNotNull
-import io.reactivex.Observable
 
 
 object DatabaseWrapper {
@@ -53,20 +53,15 @@ object DatabaseWrapper {
         rootReference.child(USERS_KEY).updateChildren(values)
     }
 
-    private fun <T> mapUserInfo(action: (String) -> Observable<T>) = MyApplication.instance
-            .userInfoRelay
-            .filterNotNull()
-            .map { it.key }
-            .switchMap(action)!!
+    fun getFriendSingle(key: String) = rootReference.child(USERS_KEY)
+            .orderByChild("friendOf/$key")
+            .equalTo(true)
+            .data()
 
-    val friends by lazy {
-        mapUserInfo {
-            rootReference.child(USERS_KEY)
-                    .orderByChild("friendOf/$it")
-                    .equalTo(true)
-                    .dataChanges()
-        }
-    }
+    fun getFriendObservable(key: String) = rootReference.child(USERS_KEY)
+            .orderByChild("friendOf/$key")
+            .equalTo(true)
+            .dataChanges()
 
     fun getScheduleRecordId(projectId: String, taskId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
@@ -104,22 +99,19 @@ object DatabaseWrapper {
         return id
     }
 
-    val tasks by lazy {
-        mapUserInfo {
-            rootReference.child(RECORDS_KEY)
-                    .orderByChild("recordOf/$it")
-                    .equalTo(true)
-                    .dataChanges()
-        }
-    }
+    private fun taskQuery(key: String) = rootReference.child(RECORDS_KEY)
+            .orderByChild("recordOf/$key")
+            .equalTo(true)
+
+    fun getTaskSingle(key: String) = taskQuery(key).data()
+
+    fun getTaskEvents(key: String) = taskQuery(key).childEvents()
 
     fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
-    val user by lazy {
-        mapUserInfo {
-            rootReference.child("$USERS_KEY/$it").dataChanges()
-        }
-    }
+    fun getUserSingle(key: String) = rootReference.child("$USERS_KEY/$key").data()
+
+    fun getUserObservable(key: String) = rootReference.child("$USERS_KEY/$key").dataChanges()
 }

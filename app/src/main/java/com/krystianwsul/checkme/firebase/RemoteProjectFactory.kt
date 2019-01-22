@@ -80,12 +80,20 @@ class RemoteProjectFactory(
                 remoteProjects[remoteProjectRecord.id] = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildChangeEvent -> {
-                val remoteProjectRecord = remoteProjectManager.addChild(childEvent.dataSnapshot())
+                val remoteProjectRecord = remoteProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
                 remoteProjects[remoteProjectRecord.id] = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
             }
-            is ChildRemoveEvent -> check(remoteProjects.remove(remoteProjectManager.removeChild(childEvent.dataSnapshot())) != null)
+            is ChildRemoveEvent -> {
+                val key = remoteProjectManager.removeChild(childEvent.dataSnapshot())
+
+                val remoteProject = remoteProjects[key]!!
+
+                domainFactory.localFactory.removeRemoteCustomTimeRecords(remoteProject.id)
+
+                remoteProjects.remove(key)
+            }
             else -> throw IllegalArgumentException()
         }
     }
@@ -122,11 +130,7 @@ class RemoteProjectFactory(
         return remoteProject
     }
 
-    fun save(): Boolean {
-        check(!remoteProjectManager.isSaved)
-
-        return remoteProjectManager.save()
-    }
+    fun save() = remoteProjectManager.save()
 
     fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey, remoteProject: RemoteProject): String {
         val localCustomTimeId = localCustomTimeKey.localCustomTimeId

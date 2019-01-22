@@ -147,9 +147,7 @@ class LocalCustomTime(
         return remoteCustomTimeRecords.containsKey(projectId)
     }
 
-    fun clearRemoteRecords() {
-        remoteCustomTimeRecords.clear()
-    }
+    fun removeRemoteRecord(projectId: String) = remoteCustomTimeRecords.remove(projectId)
 
     fun getRemoteId(projectId: String): String {
         check(projectId.isNotEmpty())

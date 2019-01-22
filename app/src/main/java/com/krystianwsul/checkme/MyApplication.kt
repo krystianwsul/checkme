@@ -11,7 +11,6 @@ import android.util.Log
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
@@ -22,9 +21,10 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.rxkotlin.Observables
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Singles
+import io.reactivex.rxkotlin.addTo
 import net.danlew.android.joda.JodaTimeAndroid
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -84,38 +84,54 @@ class MyApplication : Application() {
                 .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
                 .subscribe(userInfoRelay)
 
+        val domainDisposable = CompositeDisposable()
+
         userInfoRelay.switchMapSingle {
+            domainDisposable.clear()
+
             if (it.value != null) {
                 check(DomainFactory.nullableInstance == null)
 
+                val key = it.value.key
+
                 val remoteStart = ExactTimeStamp.now
 
-                Observables.combineLatest(DatabaseWrapper.tasks, DatabaseWrapper.user, DatabaseWrapper.friends) { tasks: DataSnapshot, user: DataSnapshot, friends: DataSnapshot -> Triple(it.value, remoteStart, Triple(tasks, user, friends)) }.firstOrError()
+                val taskSingle = DatabaseWrapper.getTaskSingle(key)
+                val friendSingle = DatabaseWrapper.getFriendSingle(key)
+                val userSingle = DatabaseWrapper.getUserSingle(key)
+
+                val domainFactorySingle = Singles.zip(taskSingle, friendSingle, userSingle) { tasks, friends, user ->
+                    DomainFactory(PersistenceManager.instance, userInfo, remoteStart, tasks).apply {
+                        setUserRecord(user)
+                        setFriendRecords(friends)
+                    }
+                }
+
+                taskSingle.flatMapObservable { DatabaseWrapper.getTaskEvents(key) }
+                        .subscribe {
+                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updateRemoteTaskRecords(it) }.addTo(domainDisposable)
+                        }
+                        .addTo(domainDisposable)
+
+                friendSingle.flatMapObservable { DatabaseWrapper.getFriendObservable(key) }
+                        .subscribe {
+                            domainFactorySingle.subscribe { domainFactory -> domainFactory.setFriendRecords(it) }.addTo(domainDisposable)
+                        }
+                        .addTo(domainDisposable)
+
+                userSingle.flatMapObservable { DatabaseWrapper.getUserObservable(key) }
+                        .subscribe {
+                            domainFactorySingle.subscribe { domainFactory -> domainFactory.setUserRecord(it) }.addTo(domainDisposable)
+                        }
+                        .addTo(domainDisposable)
+
+                domainFactorySingle.map { NullableWrapper(it) }
             } else {
                 DomainFactory.nullableInstance?.clearUserInfo()
-                DomainFactory.instanceRelay.accept(NullableWrapper())
 
-                Single.never()
+                Single.just(NullableWrapper())
             }
-        }.subscribe {
-            val userInfo = it.first
-            val remoteStart = it.second
-            val (tasks, user, friends) = it.third
-
-            DomainFactory.instanceRelay.accept(NullableWrapper(DomainFactory(PersistenceManager.instance, userInfo, remoteStart, tasks).apply {
-                setUserRecord(user)
-                setFriendRecords(friends)
-            }))
-        }
-
-        fun ifDomain(observable: Observable<DataSnapshot>, setter: DomainFactory.(DataSnapshot) -> Unit) = DomainFactory.instanceRelay
-                .switchMap { if (it.value != null) observable.map { dataSnapshot -> Pair(it.value, dataSnapshot) } else Observable.never() }
-                .skip(1)
-                .subscribe { it.first.setter(it.second) }
-
-        ifDomain(DatabaseWrapper.tasks, DomainFactory::updateRemoteTaskRecords)
-        ifDomain(DatabaseWrapper.user, DomainFactory::setUserRecord)
-        ifDomain(DatabaseWrapper.friends, DomainFactory::setFriendRecords)
+        }.subscribe(DomainFactory.instanceRelay)
 
         if (token == null)
             FirebaseInstanceId.getInstance()

@@ -20,6 +20,8 @@ class RemoteFriendManager(children: Iterable<DataSnapshot>) {
         Log.e("asdf", "RemoteFriendManager.save values: $values")
 
         if (!values.isEmpty()) {
+            check(!isSaved)
+
             isSaved = true
             DatabaseWrapper.updateFriends(values)
         }

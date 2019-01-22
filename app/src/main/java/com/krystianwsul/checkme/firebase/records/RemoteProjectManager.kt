@@ -45,6 +45,10 @@ class RemoteProjectManager(private val domainFactory: DomainFactory, children: I
         Log.e("asdf", "RemoteProjectManager.save values: $values")
 
         if (!values.isEmpty()) {
+            check(!isSaved)
+
+            Log.e("asdf", "saving task records:\n$values")
+
             isSaved = true
             DatabaseWrapper.updateRecords(values)
         }

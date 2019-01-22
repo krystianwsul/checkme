@@ -7,7 +7,7 @@ import com.google.firebase.database.IgnoreExtraProperties
 @IgnoreExtraProperties
 class JsonWrapper(
         val recordOf: MutableMap<String, Boolean> = mutableMapOf(),
-        val projectJson: ProjectJson = ProjectJson()) {
+        var projectJson: ProjectJson = ProjectJson()) {
 
     constructor(recordOf: Set<String>, projectJson: ProjectJson) : this(recordOf.associateBy({ it }, { true }).toMutableMap(), projectJson)
 

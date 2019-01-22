@@ -3,15 +3,15 @@ package com.krystianwsul.checkme.firebase.records
 import android.text.TextUtils
 import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.*
 import java.util.*
 
-class RemoteProjectRecord(
+@Suppress("LeakingThis")
+abstract class RemoteProjectRecord(
         create: Boolean,
         domainFactory: DomainFactory,
         val id: String,
-        private val jsonWrapper: JsonWrapper) : RemoteRecord(create) {
+        protected val projectJson: ProjectJson) : RemoteRecord(create) {
 
     companion object {
 
@@ -28,30 +28,24 @@ class RemoteProjectRecord(
 
     override val key get() = id
 
-    override val createObject: JsonWrapper
-        get() {
-            val projectJson = jsonWrapper.projectJson
-
-            projectJson.tasks = remoteTaskRecords.values
+    protected val createProjectJson
+        get() = projectJson.apply {
+            tasks = remoteTaskRecords.values
                     .associateBy({ it.id }, { it.createObject })
                     .toMutableMap()
 
-            projectJson.taskHierarchies = remoteTaskHierarchyRecords.values
+            taskHierarchies = remoteTaskHierarchyRecords.values
                     .associateBy({ it.id }, { it.createObject })
                     .toMutableMap()
 
-            projectJson.customTimes = remoteCustomTimeRecords.values
+            customTimes = remoteCustomTimeRecords.values
                     .associateBy({ it.id }, { it.createObject })
                     .toMutableMap()
 
-            projectJson.users = remoteUserRecords.values
+            users = remoteUserRecords.values
                     .associateBy({ it.id }, { it.createObject })
                     .toMutableMap()
-
-            return jsonWrapper
         }
-
-    private val projectJson get() = jsonWrapper.projectJson
 
     var name: String
         get() = projectJson.name
@@ -77,18 +71,6 @@ class RemoteProjectRecord(
             addValue("$id/$PROJECT_JSON/endTime", value)
         }
 
-    constructor(domainFactory: DomainFactory, id: String, jsonWrapper: JsonWrapper) : this(
-            false,
-            domainFactory,
-            id,
-            jsonWrapper)
-
-    constructor(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) : this(
-            true,
-            domainFactory,
-            DatabaseWrapper.getRootRecordId(),
-            jsonWrapper)
-
     init {
         for ((id, taskJson) in projectJson.tasks) {
             check(!TextUtils.isEmpty(id))
@@ -112,20 +94,6 @@ class RemoteProjectRecord(
             check(!TextUtils.isEmpty(id))
 
             remoteUserRecords[id] = RemoteProjectUserRecord(false, this, userJson)
-        }
-    }
-
-    fun updateRecordOf(addedFriends: Set<String>, removedFriends: Set<String>) {
-        check(addedFriends.none { removedFriends.contains(it) })
-
-        jsonWrapper.updateRecordOf(addedFriends, removedFriends)
-
-        for (addedFriend in addedFriends) {
-            addValue("$id/recordOf/$addedFriend", true)
-        }
-
-        for (removedFriend in removedFriends) {
-            addValue("$id/recordOf/$removedFriend", null)
         }
     }
 

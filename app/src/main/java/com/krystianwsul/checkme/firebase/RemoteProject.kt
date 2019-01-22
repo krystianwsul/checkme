@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
-import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
+import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
@@ -17,7 +17,7 @@ import java.util.*
 
 class RemoteProject(
         private val domainFactory: DomainFactory,
-        private val remoteProjectRecord: RemoteProjectRecord,
+        private val remoteProjectRecord: RemoteSharedProjectRecord,
         userInfo: UserInfo,
         val uuid: String,
         now: ExactTimeStamp) {

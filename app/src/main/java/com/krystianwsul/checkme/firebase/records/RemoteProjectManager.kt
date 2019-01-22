@@ -9,13 +9,13 @@ import java.util.*
 
 class RemoteProjectManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
-    private fun DataSnapshot.toRecord() = RemoteProjectRecord(domainFactory, key!!, getValue(JsonWrapper::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(domainFactory, key!!, getValue(JsonWrapper::class.java)!!)
 
     var isSaved = false
 
     val remoteProjectRecords = children.associate { child -> child.key!! to child.toRecord() }.toMutableMap()
 
-    fun addChild(dataSnapshot: DataSnapshot): RemoteProjectRecord {
+    fun addChild(dataSnapshot: DataSnapshot): RemoteSharedProjectRecord {
         val key = dataSnapshot.key!!
         check(!remoteProjectRecords.containsKey(key))
 
@@ -24,7 +24,7 @@ class RemoteProjectManager(private val domainFactory: DomainFactory, children: I
         }
     }
 
-    fun changeChild(dataSnapshot: DataSnapshot): RemoteProjectRecord {
+    fun changeChild(dataSnapshot: DataSnapshot): RemoteSharedProjectRecord {
         val key = dataSnapshot.key!!
         check(remoteProjectRecords.containsKey(key))
 
@@ -56,7 +56,7 @@ class RemoteProjectManager(private val domainFactory: DomainFactory, children: I
         return isSaved
     }
 
-    fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteProjectRecord(domainFactory, jsonWrapper).also {
+    fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(domainFactory, jsonWrapper).also {
         check(!remoteProjectRecords.containsKey(it.id))
 
         remoteProjectRecords[it.id] = it

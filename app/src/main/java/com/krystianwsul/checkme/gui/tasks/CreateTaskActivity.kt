@@ -827,7 +827,7 @@ class CreateTaskActivity : AbstractActivity() {
                     mScheduleText.run {
                         setText(this@CreateTaskActivity.parent?.name)
 
-                        isEnabled = true
+                        isEnabled = data!!.parentTreeDatas.isNotEmpty()
 
                         setOnClickListener {
                             ParentPickerFragment.newInstance(parent != null).let {

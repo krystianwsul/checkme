@@ -1748,7 +1748,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     private fun getParentTreeDatas(now: ExactTimeStamp, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         val parentTreeDatas = mutableMapOf<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>()
 
-        parentTreeDatas.putAll(localFactory.tasks
+        parentTreeDatas.putAll((localFactory.tasks + remoteProjectFactory.remotePrivateProject.tasks)
                 .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)

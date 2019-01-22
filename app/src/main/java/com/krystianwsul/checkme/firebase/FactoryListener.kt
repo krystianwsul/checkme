@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -59,7 +58,7 @@ class FactoryListener<T, U, V, W>(
 
                 domainFactorySingle.map { NullableWrapper(it) }
             } else {
-                DomainFactory.nullableInstance?.clearUserInfo()
+                clearCallback()
 
                 Single.just(NullableWrapper())
             }

@@ -8,6 +8,7 @@ import android.content.res.Resources
 import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Log
+import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -51,7 +52,7 @@ class DomainFactoryTest {
 
             SaveService.Factory.instance = object : SaveService.Factory() {
 
-                override fun startService(persistenceManager: PersistenceManager, source: SaveService.Source) = Unit
+                override fun startService(persistenceManager: PersistenceManager, source: SaveService.Source) = false
             }
         }
     }
@@ -68,7 +69,10 @@ class DomainFactoryTest {
     @Mock
     private lateinit var mEditor: SharedPreferences.Editor
 
-    private fun newPersistenceManger() = PersistenceManager()
+    @Mock
+    private lateinit var dataSnapshot: DataSnapshot
+
+    private fun newDomainFactory() = DomainFactory(PersistenceManager(), UserInfo("asdf", "asdf", "asdf"), ExactTimeStamp.now, dataSnapshot)
 
     @SuppressLint("CommitPrefEdits")
     @Before
@@ -111,8 +115,7 @@ class DomainFactoryTest {
 
     @Test
     fun testRelevantSingleNoChildren() {
-        val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = newDomainFactory()
 
         val startDate = Date(2016, 1, 1)
         val startHourMilli = HourMilli(0, 0, 0, 0)
@@ -174,9 +177,7 @@ class DomainFactoryTest {
 
     @Test
     fun testRelevantSingleWithChildren() {
-        val persistenceManger = newPersistenceManger()
-
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = newDomainFactory()
 
         val startDate = Date(2016, 1, 1)
         val startHourMilli = HourMilli(0, 0, 0, 0)
@@ -279,8 +280,7 @@ class DomainFactoryTest {
 
     @Test
     fun testRelevantSingleAndNoReminderNextDay() {
-        val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = newDomainFactory()
 
         val startDate = Date(2016, 1, 1)
         val startExactTimeStamp = ExactTimeStamp(startDate, HourMilli(1, 0, 0, 0))
@@ -323,8 +323,7 @@ class DomainFactoryTest {
 
     @Test
     fun testJoinLeavesPreviousInstances() {
-        val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = newDomainFactory()
 
         val startDate = Date(2016, 11, 9)
         val startHourMilli = HourMilli(1, 0, 0, 0)
@@ -363,8 +362,7 @@ class DomainFactoryTest {
 
     @Test
     fun testSharedChild() {
-        val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = newDomainFactory()
 
         // day 1:
 
@@ -514,8 +512,7 @@ class DomainFactoryTest {
 
     @Test
     fun testChildAddedToInstanceInPast() {
-        val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = newDomainFactory()
 
         // hour 0: check no instances
         // hour 1: add parent for hour 3
@@ -568,8 +565,7 @@ class DomainFactoryTest {
         // hour 5: edit task split, set parent parent
         // hour 6: check two instances, parent has one child
 
-        val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = newDomainFactory()
 
         val date = Date(2016, 1, 1)
 
@@ -626,8 +622,7 @@ class DomainFactoryTest {
         // hour 3: edit task, hour 6
         // hour 4: check one instance, hour 6
 
-        val persistenceManger = newPersistenceManger()
-        val domainFactory = DomainFactory(persistenceManger)
+        val domainFactory = newDomainFactory()
 
         val date = Date(2016, 1, 1)
 

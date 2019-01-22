@@ -36,13 +36,14 @@ class RemoteProjectFactory(
             .values
             .map { RemoteSharedProject(domainFactory, it, userInfo, uuid, now) }
             .associateBy { it.id }
+            .toMutableMap()
 
     private var remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid, now)
 
     val remoteProjects
         get() = remoteSharedProjects.toMutableMap<String, RemoteProject>().apply {
             put(remotePrivateProject.id, remotePrivateProject)
-        }
+        }.toMap()
 
     var isPrivateSaved
         get() = remotePrivateProjectManager.isSaved
@@ -94,13 +95,13 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteSharedProjectManager.addChild(childEvent.dataSnapshot())
 
                 check(!remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildChangeEvent -> {
                 val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildRemoveEvent -> {
                 val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
@@ -109,7 +110,7 @@ class RemoteProjectFactory(
 
                 domainFactory.localFactory.removeRemoteCustomTimeRecords(remoteProject.id)
 
-                remoteProjects.remove(key)
+                remoteSharedProjects.remove(key)
             }
             else -> throw IllegalArgumentException()
         }
@@ -146,9 +147,9 @@ class RemoteProjectFactory(
 
         val remoteProject = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
 
-        check(!this.remoteProjects.containsKey(remoteProject.id))
+        check(!remoteProjects.containsKey(remoteProject.id))
 
-        this.remoteProjects[remoteProject.id] = remoteProject
+        remoteSharedProjects[remoteProject.id] = remoteProject
 
         return remoteProject
     }
@@ -230,7 +231,7 @@ class RemoteProjectFactory(
         val projectId = remoteProject.id
 
         check(remoteProjects.containsKey(projectId))
-        remoteProjects.remove(projectId)
+        remoteSharedProjects.remove(projectId)
     }
 
     fun getTaskHierarchy(remoteTaskHierarchyKey: TaskHierarchyKey.RemoteTaskHierarchyKey) = remoteProjects[remoteTaskHierarchyKey.projectId]!!.getTaskHierarchy(remoteTaskHierarchyKey.taskHierarchyId)

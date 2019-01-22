@@ -16,7 +16,7 @@ object BackendNotifier {
     private const val PREFIX = "https://check-me-add47.appspot.com/notify?"
 
     fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String?): String {
-        check(!projects.isEmpty())
+        check(!projects.isEmpty() || !userKeys.isEmpty())
 
         val parameters = projects.map { "projects=$it" }.toMutableSet()
 

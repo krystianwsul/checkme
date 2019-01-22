@@ -2076,11 +2076,23 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         if (!remoteProjects.isEmpty()) {
             checkNotNull(userInfo)
 
-            BackendNotifier.notify(remoteProjects, userInfo, listOf())
+            notifyCloudPrivateFixed(remoteProjects.toMutableSet(), userInfo, mutableListOf())
         }
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = BackendNotifier.notify(setOf(remoteProject), userInfo, userKeys)
+    private fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userInfo, userKeys.toMutableList())
+
+    private fun notifyCloudPrivateFixed(remoteProjects: MutableSet<RemoteProject>, userInfo: UserInfo, userKeys: MutableCollection<String>) {
+        val remotePrivateProject = remoteProjects.singleOrNull { it is RemotePrivateProject }
+
+        remotePrivateProject?.let {
+            remoteProjects.remove(it)
+
+            userKeys.add(userInfo.key)
+        }
+
+        BackendNotifier.notify(remoteProjects, userInfo, userKeys)
+    }
 
     private fun updateNotifications(now: ExactTimeStamp, clear: Boolean = false) = updateNotifications(true, now, mutableListOf(), "other", clear)
 

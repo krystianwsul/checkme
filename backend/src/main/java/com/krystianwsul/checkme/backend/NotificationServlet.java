@@ -47,7 +47,7 @@ public class NotificationServlet extends HttpServlet {
         String prefix = (production ? "production" : "development");
 
         GoogleCredential googleCred = GoogleCredential.fromStream(new FileInputStream("WEB-INF/check-me-add47-firebase-adminsdk-5hvuz-436ce98200.json"));
-        Assert.assertTrue(googleCred != null);
+        Assert.assertNotNull(googleCred);
 
         GoogleCredential scoped = googleCred.createScoped(
                 Arrays.asList(
@@ -55,7 +55,7 @@ public class NotificationServlet extends HttpServlet {
                         "https://www.googleapis.com/auth/userinfo.email"
                 )
         );
-        Assert.assertTrue(scoped != null);
+        Assert.assertNotNull(scoped);
 
         scoped.refreshToken();
         String firebaseToken = scoped.getAccessToken();
@@ -105,7 +105,7 @@ public class NotificationServlet extends HttpServlet {
                 resp.getWriter().println("user keys after removing sender: " + Joiner.on(", ").join(users.keySet()));
 
                 for (Map<String, Map<String, String>> user : users.values()) {
-                    Assert.assertTrue(user != null);
+                    Assert.assertNotNull(user);
 
                     Map<String, String> userTokenMap = user.get("tokens");
 

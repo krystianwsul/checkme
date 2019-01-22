@@ -116,7 +116,7 @@ object DatabaseWrapper {
 
     fun getPrivateProjectObservable(key: String) = privateProjectQuery(key).dataChanges()
 
-    fun updatePrivateProject(key: String, values: Map<String, Any?>) = privateProjectQuery(key).updateChildren(values)
+    fun updatePrivateProject(values: Map<String, Any?>) = rootReference.child(PRIVATE_PROJECTS_KEY).updateChildren(values)
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 

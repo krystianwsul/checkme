@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.ProjectJson
 
 class RemotePrivateProjectRecord(
@@ -16,10 +16,10 @@ class RemotePrivateProjectRecord(
             id,
             projectJson)
 
-    constructor(domainFactory: DomainFactory, projectJson: ProjectJson) : this(
+    constructor(domainFactory: DomainFactory, userInfo: UserInfo, projectJson: ProjectJson) : this(
             true,
             domainFactory,
-            DatabaseWrapper.getRootRecordId(),
+            userInfo.key,
             projectJson)
 
     override val createObject get() = createProjectJson

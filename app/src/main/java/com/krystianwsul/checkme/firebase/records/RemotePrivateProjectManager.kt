@@ -11,16 +11,14 @@ import java.util.*
 
 class RemotePrivateProjectManager(
         private val domainFactory: DomainFactory,
-        private val userInfo: UserInfo,
+        userInfo: UserInfo,
         dataSnapshot: DataSnapshot,
         now: ExactTimeStamp) {
 
     var isSaved = false
 
-    val key = dataSnapshot.key!!
-
     var remoteProjectRecord = if (dataSnapshot.value == null) {
-        RemotePrivateProjectRecord(domainFactory, ProjectJson(startTime = now.long))
+        RemotePrivateProjectRecord(domainFactory, userInfo, ProjectJson(startTime = now.long))
     } else {
         dataSnapshot.toRecord()
     }
@@ -46,7 +44,7 @@ class RemotePrivateProjectManager(
             Log.e("asdf", "saving private project record:\n$values")
 
             isSaved = true
-            DatabaseWrapper.updatePrivateProject(key, values)
+            DatabaseWrapper.updatePrivateProject(values)
         }
 
         return isSaved

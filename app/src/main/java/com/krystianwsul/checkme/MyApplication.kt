@@ -79,6 +79,7 @@ class MyApplication : Application() {
                 .map { NullableWrapper(it.currentUser) }
                 .startWith(NullableWrapper(FirebaseAuth.getInstance().currentUser))
                 .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
+                .distinctUntilChanged()
                 .subscribe(userInfoRelay)
 
         FactoryListener(
@@ -99,6 +100,7 @@ class MyApplication : Application() {
                 { domainFactory, tasks -> domainFactory.updateRemoteTaskRecords(tasks) },
                 { domainFactory, friends -> domainFactory.setFriendRecords(friends) },
                 { domainFactory, user -> domainFactory.setUserRecord(user) }
+                //, { Log.e("asdf", "FactoryListener:\n$it")}
         ).domainFactoryObservable.subscribe(DomainFactory.instanceRelay)
 
         if (token == null)
@@ -106,7 +108,7 @@ class MyApplication : Application() {
                     .instanceId
                     .addOnSuccessListener { token = it.token }
 
-        writeHashes()
+        //writeHashes()
 
         ANRWatchDog()//.setReportMainThreadOnly()
                 .setANRListener { MyCrashlytics.logException(it) }

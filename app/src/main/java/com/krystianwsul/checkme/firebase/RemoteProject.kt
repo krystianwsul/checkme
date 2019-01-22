@@ -4,28 +4,25 @@ import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
-import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
+import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import java.util.*
 
-class RemoteProject(
-        private val domainFactory: DomainFactory,
-        private val remoteProjectRecord: RemoteSharedProjectRecord,
-        userInfo: UserInfo,
+abstract class RemoteProject(
+        protected val domainFactory: DomainFactory,
+        private val remoteProjectRecord: RemoteProjectRecord,
         val uuid: String,
         now: ExactTimeStamp) {
 
     private val remoteTasks: MutableMap<String, RemoteTask>
     private val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
     private val remoteCustomTimes = HashMap<String, RemoteCustomTime>()
-    private val remoteUsers: MutableMap<String, RemoteProjectUser>
 
     val id by lazy { remoteProjectRecord.id }
 
@@ -49,10 +46,9 @@ class RemoteProject(
 
     val customTimes get() = remoteCustomTimes.values
 
-    val users get() = remoteUsers.values
-
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
+            @Suppress("LeakingThis")
             val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
 
             remoteCustomTimes[remoteCustomTime.customTimeKey.remoteCustomTimeId] = remoteCustomTime
@@ -74,14 +70,6 @@ class RemoteProject(
                 .values
                 .map { RemoteTaskHierarchy(domainFactory, this, it) }
                 .forEach { remoteTaskHierarchies.add(it.id, it) }
-
-        remoteUsers = remoteProjectRecord.remoteUserRecords
-                .values
-                .map { RemoteProjectUser(this, it) }
-                .associateBy { it.id }
-                .toMutableMap()
-
-        updateUserInfo(userInfo, uuid)
     }
 
     fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask {
@@ -163,30 +151,6 @@ class RemoteProject(
         return remoteTaskHierarchy
     }
 
-    fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) {
-        remoteProjectRecord.updateRecordOf(addedFriends.asSequence().map { it.id }.toSet(), removedFriends)
-
-        for (addedFriend in addedFriends)
-            addUser(addedFriend)
-
-        for (removedFriend in removedFriends) {
-            check(remoteUsers.containsKey(removedFriend))
-
-            remoteUsers[removedFriend]!!.delete()
-        }
-    }
-
-    private fun addUser(remoteRootUser: RemoteRootUser) {
-        val id = remoteRootUser.id
-
-        check(!remoteUsers.containsKey(id))
-
-        val remoteProjectUserRecord = remoteProjectRecord.newRemoteUserRecord(remoteRootUser.userJson)
-        val remoteProjectUser = RemoteProjectUser(this, remoteProjectUserRecord)
-
-        remoteUsers[id] = remoteProjectUser
-    }
-
     fun deleteTask(remoteTask: RemoteTask) {
         check(remoteTasks.containsKey(remoteTask.id))
 
@@ -235,23 +199,6 @@ class RemoteProject(
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    fun deleteUser(remoteProjectUser: RemoteProjectUser) {
-        val id = remoteProjectUser.id
-        check(remoteUsers.containsKey(id))
-
-        remoteUsers.remove(id)
-    }
-
-    fun updateUserInfo(userInfo: UserInfo, uuid: String) {
-        val key = userInfo.key
-        check(remoteUsers.containsKey(key))
-
-        val remoteProjectUser = remoteUsers[key]!!
-
-        remoteProjectUser.name = userInfo.name
-        remoteProjectUser.setToken(userInfo.token, uuid)
-    }
-
     fun delete() {
         remoteFactory.deleteProject(this)
 
@@ -283,4 +230,6 @@ class RemoteProject(
     }
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchies.getById(id)
+
+    abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
 }

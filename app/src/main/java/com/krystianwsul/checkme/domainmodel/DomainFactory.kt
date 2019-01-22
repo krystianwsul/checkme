@@ -131,7 +131,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         val remoteRead = ExactTimeStamp.now
 
-        Log.e("asdf", "set task records " + taskSnapshot)
+        Log.e("asdf", "set task records $taskSnapshot")
 
         this.remoteProjectFactory = RemoteProjectFactory(this, taskSnapshot.children, userInfo, remoteRead)
 
@@ -176,7 +176,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     @Synchronized
     fun updateRemoteTaskRecords(childEvent: ChildEvent) {
-        Log.e("asdf", "update task records " + childEvent)
+        Log.e("asdf", "update task records $childEvent")
 
         if (remoteProjectFactory.isSaved) {
             remoteProjectFactory.isSaved = false
@@ -685,7 +685,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         val name: String?
         val userListDatas: Set<ShowProjectViewModel.UserListData>
         if (!projectId.isNullOrEmpty()) {
-            val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
+            val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId) as RemoteSharedProject
 
             name = remoteProject.name
 

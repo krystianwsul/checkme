@@ -31,7 +31,7 @@ class RemoteProjectFactory(
 
     val remoteProjects = remoteProjectManager.remoteProjectRecords
             .values
-            .map { RemoteProject(domainFactory, it, userInfo, uuid, now) }
+            .map { RemoteSharedProject(domainFactory, it, userInfo, uuid, now) }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -77,13 +77,13 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteProjectManager.addChild(childEvent.dataSnapshot())
 
                 check(!remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteProjects[remoteProjectRecord.id] = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+                remoteProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildChangeEvent -> {
                 val remoteProjectRecord = remoteProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteProjects[remoteProjectRecord.id] = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+                remoteProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildRemoveEvent -> {
                 val key = remoteProjectManager.removeChild(childEvent.dataSnapshot())
@@ -121,7 +121,7 @@ class RemoteProjectFactory(
 
         val remoteProjectRecord = remoteProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+        val remoteProject = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
 
         check(!this.remoteProjects.containsKey(remoteProject.id))
 

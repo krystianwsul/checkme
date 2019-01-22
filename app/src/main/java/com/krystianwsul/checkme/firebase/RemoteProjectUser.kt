@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.firebase.records.RemoteProjectUserRecord
 
 
 class RemoteProjectUser(
-        private val remoteProject: RemoteProject,
+        private val remoteProject: RemoteSharedProject,
         private val remoteProjectUserRecord: RemoteProjectUserRecord) {
 
     val id = remoteProjectUserRecord.id

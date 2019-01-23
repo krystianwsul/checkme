@@ -2,12 +2,14 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.ProjectJson
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import java.util.*
+import kotlin.properties.Delegates
 
 class RemotePrivateProjectManager(
         private val domainFactory: DomainFactory,
@@ -15,7 +17,7 @@ class RemotePrivateProjectManager(
         dataSnapshot: DataSnapshot,
         now: ExactTimeStamp) {
 
-    var isSaved = false
+    var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemotePrivateProjectManager.isSaved = $value") }
 
     var remoteProjectRecord = if (dataSnapshot.value == null) {
         RemotePrivateProjectRecord(domainFactory, userInfo, ProjectJson(startTime = now.long))

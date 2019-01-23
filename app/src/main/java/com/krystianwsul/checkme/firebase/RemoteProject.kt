@@ -49,14 +49,14 @@ abstract class RemoteProject(
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
             @Suppress("LeakingThis")
-            val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
+            val remoteCustomTime = RemoteCustomTime(this, remoteCustomTimeRecord)
 
-            remoteCustomTimes[remoteCustomTime.customTimeKey.remoteCustomTimeId] = remoteCustomTime
+            remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
 
             if (remoteCustomTimeRecord.ownerId == domainFactory.uuid && domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
                 val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
 
-                localCustomTime.addRemoteCustomTimeRecord(remoteCustomTimeRecord)
+                localCustomTime.updateRemoteCustomTimeRecord(remoteCustomTimeRecord)
             }
         }
 
@@ -184,7 +184,7 @@ abstract class RemoteProject(
     fun newRemoteCustomTime(customTimeJson: CustomTimeJson): RemoteCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
-        val remoteCustomTime = RemoteCustomTime(domainFactory, this, remoteCustomTimeRecord)
+        val remoteCustomTime = RemoteCustomTime(this, remoteCustomTimeRecord)
 
         check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
 
@@ -230,6 +230,8 @@ abstract class RemoteProject(
     }
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchies.getById(id)
+
+    fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.let { it.ownerId == uuid && it.localId == localCustomTimeId } }
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
 }

@@ -1586,14 +1586,14 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     fun getRemoteCustomTimeId(projectId: String, customTimeKey: CustomTimeKey) = when (customTimeKey) {
         is CustomTimeKey.RemoteCustomTimeKey -> customTimeKey.remoteCustomTimeId
-        is CustomTimeKey.LocalCustomTimeKey -> {
-            val localCustomTime = localFactory.getLocalCustomTime(customTimeKey.localCustomTimeId)
-
-            check(localCustomTime.hasRemoteRecord(projectId))
-
-            localCustomTime.getRemoteId(projectId)
-        }
+        is CustomTimeKey.LocalCustomTimeKey -> remoteProjectFactory.getRemoteProjectForce(projectId)
+                .getRemoteCustomTimeIfPresent(customTimeKey.localCustomTimeId)!!
+                .id
     }
+
+    fun getRemoteCustomTimes(localCustomTimeId: Int) = remoteProjectFactory.remoteProjects
+            .values
+            .mapNotNull { it.getRemoteCustomTimeIfPresent(localCustomTimeId) }
 
     private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
         if (taskKey.localTaskId != null) {
@@ -2363,7 +2363,12 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         return dataWrapper
     }
 
-    fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String) = localFactory.getLocalCustomTime(remoteProjectId, remoteCustomTimeId)?.customTimeKey
+    fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String): CustomTimeKey = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
+            .getRemoteCustomTime(remoteCustomTimeId)
+            .let { it.remoteCustomTimeRecord }
+            .takeIf { it.ownerId == uuid }
+            ?.let { localFactory.localCustomTimes.singleOrNull { localCustomTime -> localCustomTime.id == it.localId } }
+            ?.customTimeKey
             ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)
 
     class ProjectUndoData {
@@ -2379,11 +2384,11 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
     }
 
-    class ReadTimes(val start: ExactTimeStamp, read: ExactTimeStamp, val stop: ExactTimeStamp) {
+    class ReadTimes(start: ExactTimeStamp, read: ExactTimeStamp, stop: ExactTimeStamp) {
 
         val readMillis = read.long - start.long
         val instantiateMillis = stop.long - read.long
     }
 
-    private inner class SavedFactoryException() : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved)
+    private inner class SavedFactoryException : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved)
 }

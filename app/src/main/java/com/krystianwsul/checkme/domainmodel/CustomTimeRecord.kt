@@ -2,6 +2,8 @@ package com.krystianwsul.checkme.domainmodel
 
 interface CustomTimeRecord {
 
+    var name: String
+
     var sundayHour: Int
     var sundayMinute: Int
 

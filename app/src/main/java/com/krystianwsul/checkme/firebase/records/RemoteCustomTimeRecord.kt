@@ -22,7 +22,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
 
     val localId get() = customTimeJson.localId
 
-    var name: String
+    override var name: String
         get() = customTimeJson.name
         set(value) {
             check(value.isNotEmpty())

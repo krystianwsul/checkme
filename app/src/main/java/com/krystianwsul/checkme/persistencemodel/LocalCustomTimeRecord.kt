@@ -28,25 +28,25 @@ class LocalCustomTimeRecord(
 
     companion object {
 
-        val TABLE_CUSTOM_TIMES = "customTimes"
+        const val TABLE_CUSTOM_TIMES = "customTimes"
 
-        val COLUMN_ID = "_id"
-        private val COLUMN_NAME = "name"
-        private val COLUMN_SUNDAY_HOUR = "sundayHour"
-        private val COLUMN_SUNDAY_MINUTE = "sundayMinute"
-        private val COLUMN_MONDAY_HOUR = "mondayHour"
-        private val COLUMN_MONDAY_MINUTE = "mondayMinute"
-        private val COLUMN_TUESDAY_HOUR = "tuesdayHour"
-        private val COLUMN_TUESDAY_MINUTE = "tuesdayMinute"
-        private val COLUMN_WEDNESDAY_HOUR = "wednesdayHour"
-        private val COLUMN_WEDNESDAY_MINUTE = "wednesdayMinute"
-        private val COLUMN_THURSDAY_HOUR = "thursdayHour"
-        private val COLUMN_THURSDAY_MINUTE = "thursdayMinute"
-        private val COLUMN_FRIDAY_HOUR = "fridayHour"
-        private val COLUMN_FRIDAY_MINUTE = "fridayMinute"
-        private val COLUMN_SATURDAY_HOUR = "saturdayHour"
-        private val COLUMN_SATURDAY_MINUTE = "saturdayMinute"
-        private val COLUMN_CURRENT = "current"
+        const val COLUMN_ID = "_id"
+        private const val COLUMN_NAME = "name"
+        private const val COLUMN_SUNDAY_HOUR = "sundayHour"
+        private const val COLUMN_SUNDAY_MINUTE = "sundayMinute"
+        private const val COLUMN_MONDAY_HOUR = "mondayHour"
+        private const val COLUMN_MONDAY_MINUTE = "mondayMinute"
+        private const val COLUMN_TUESDAY_HOUR = "tuesdayHour"
+        private const val COLUMN_TUESDAY_MINUTE = "tuesdayMinute"
+        private const val COLUMN_WEDNESDAY_HOUR = "wednesdayHour"
+        private const val COLUMN_WEDNESDAY_MINUTE = "wednesdayMinute"
+        private const val COLUMN_THURSDAY_HOUR = "thursdayHour"
+        private const val COLUMN_THURSDAY_MINUTE = "thursdayMinute"
+        private const val COLUMN_FRIDAY_HOUR = "fridayHour"
+        private const val COLUMN_FRIDAY_MINUTE = "fridayMinute"
+        private const val COLUMN_SATURDAY_HOUR = "saturdayHour"
+        private const val COLUMN_SATURDAY_MINUTE = "saturdayMinute"
+        private const val COLUMN_CURRENT = "current"
 
         fun onCreate(sqLiteDatabase: SQLiteDatabase) {
             sqLiteDatabase.execSQL("CREATE TABLE $TABLE_CUSTOM_TIMES"
@@ -96,7 +96,7 @@ class LocalCustomTimeRecord(
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = Record.getMaxId(sqLiteDatabase, TABLE_CUSTOM_TIMES, COLUMN_ID)
     }
 
-    var name by observable(mName) { _, _, _ -> changed = true }
+    override var name by observable(mName) { _, _, _ -> changed = true }
 
     override var sundayHour by observable(mSundayHour) { _, _, _ -> changed = true }
     override var sundayMinute by observable(mSundayMinute) { _, _, _ -> changed = true }

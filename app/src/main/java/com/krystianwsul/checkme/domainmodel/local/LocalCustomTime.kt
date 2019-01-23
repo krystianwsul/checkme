@@ -15,8 +15,6 @@ class LocalCustomTime(
         private val domainFactory: DomainFactory,
         private val localCustomTimeRecord: LocalCustomTimeRecord) : CustomTime {
 
-    private val remoteCustomTimeRecords = HashMap<String, RemoteCustomTimeRecord>()
-
     val id get() = localCustomTimeRecord.id
 
     var current
@@ -25,15 +23,17 @@ class LocalCustomTime(
             localCustomTimeRecord.current = value
         }
 
-    private val customTimeRecords get() = mutableListOf<CustomTimeRecord>(localCustomTimeRecord).apply { addAll(remoteCustomTimeRecords.values) }
+    private fun getCustomTimeRecords() = domainFactory.getRemoteCustomTimes(id)
+            .map { it.remoteCustomTimeRecord }
+            .toMutableList<CustomTimeRecord>()
+            .apply { add(localCustomTimeRecord) }
 
     override val name get() = localCustomTimeRecord.name
 
     fun setName(name: String) {
         check(name.isNotEmpty())
-        localCustomTimeRecord.name = name
 
-        remoteCustomTimeRecords.values.forEach { it.name = name }
+        getCustomTimeRecords().forEach { it.name = name }
     }
 
     override fun getHourMinute(dayOfWeek: DayOfWeek): HourMinute = when (dayOfWeek) {
@@ -52,6 +52,8 @@ class LocalCustomTime(
         }
 
     fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
+        val customTimeRecords = getCustomTimeRecords()
+
         when (dayOfWeek) {
             DayOfWeek.SUNDAY -> {
                 customTimeRecords.forEach {
@@ -110,11 +112,8 @@ class LocalCustomTime(
 
     override val customTimeKey get() = CustomTimeKey.LocalCustomTimeKey(id)
 
-    fun addRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord) {
+    fun updateRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord) {
         check(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
-        check(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.projectId))
-
-        remoteCustomTimeRecords[remoteCustomTimeRecord.projectId] = remoteCustomTimeRecord
 
         // bez zapisywania na razie, dopiero przy następnej okazji
         remoteCustomTimeRecord.name = localCustomTimeRecord.name
@@ -139,20 +138,5 @@ class LocalCustomTime(
 
         remoteCustomTimeRecord.saturdayHour = localCustomTimeRecord.saturdayHour
         remoteCustomTimeRecord.saturdayMinute = localCustomTimeRecord.saturdayMinute
-    }
-
-    fun hasRemoteRecord(projectId: String): Boolean {
-        check(projectId.isNotEmpty())
-
-        return remoteCustomTimeRecords.containsKey(projectId)
-    }
-
-    fun removeRemoteRecord(projectId: String) = remoteCustomTimeRecords.remove(projectId)
-
-    fun getRemoteId(projectId: String): String {
-        check(projectId.isNotEmpty())
-        check(remoteCustomTimeRecords.containsKey(projectId))
-
-        return remoteCustomTimeRecords[projectId]!!.id
     }
 }

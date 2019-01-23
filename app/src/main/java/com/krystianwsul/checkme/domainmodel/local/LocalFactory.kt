@@ -328,10 +328,6 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
         return _localCustomTimes[localCustomTimeId]!!
     }
 
-    fun removeRemoteCustomTimeRecords(projectId: String) = _localCustomTimes.values.forEach { it.removeRemoteRecord(projectId) }
-
-    fun getLocalCustomTime(remoteProjectId: String, remoteCustomTimeId: String) = _localCustomTimes.values.singleOrNull { it.hasRemoteRecord(remoteProjectId) && it.getRemoteId(remoteProjectId) == remoteCustomTimeId }
-
     fun hasLocalCustomTime(localCustomTimeId: Int) = _localCustomTimes.containsKey(localCustomTimeId)
 
     fun getExistingInstances(taskKey: TaskKey) = existingLocalInstances[taskKey]

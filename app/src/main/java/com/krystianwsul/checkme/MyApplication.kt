@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
 
 class MyApplication : Application() {
@@ -85,6 +86,12 @@ class MyApplication : Application() {
                 .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
                 .distinctUntilChanged()
                 .subscribe(userInfoRelay)
+
+        userInfoRelay.switchMap {
+            it.value?.let { DatabaseWrapper.getPrivateProjectObservable(it.key) }
+                    ?: Observable.never()
+        }
+                .subscribe { MyCrashlytics.log("independent private project event") }
 
         FactoryListener(
                 userInfoRelay,

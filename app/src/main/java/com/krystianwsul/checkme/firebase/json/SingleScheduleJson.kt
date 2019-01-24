@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-class SingleScheduleJson(
+class SingleScheduleJson @JvmOverloads constructor(
         startTime: Long = 0,
         endTime: Long? = null,
         val year: Int = 0,

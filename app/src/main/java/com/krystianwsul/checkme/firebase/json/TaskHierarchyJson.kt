@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-class TaskHierarchyJson(
+class TaskHierarchyJson @JvmOverloads constructor(
         val parentTaskId: String = "",
         val childTaskId: String = "",
         val startTime: Long = 0,

@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-class MonthlyDayScheduleJson(
+class MonthlyDayScheduleJson @JvmOverloads constructor(
         startTime: Long = 0,
         endTime: Long? = null,
         val dayOfMonth: Int = 0,

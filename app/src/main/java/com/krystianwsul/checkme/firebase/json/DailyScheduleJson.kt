@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-class DailyScheduleJson(
+class DailyScheduleJson @JvmOverloads constructor(
         startTime: Long = 0,
         endTime: Long? = null,
         val customTimeId: String? = null,

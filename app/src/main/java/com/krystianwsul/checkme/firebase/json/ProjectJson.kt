@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-class ProjectJson(
+class ProjectJson @JvmOverloads constructor(
         var name: String = "",
         val startTime: Long = 0,
         var endTime: Long? = null,

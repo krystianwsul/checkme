@@ -1,9 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-import com.google.firebase.database.IgnoreExtraProperties
-
-@IgnoreExtraProperties
-class ScheduleWrapper(
+class ScheduleWrapper @JvmOverloads constructor(
         val singleScheduleJson: SingleScheduleJson? = null,
         val dailyScheduleJson: DailyScheduleJson? = null,
         val weeklyScheduleJson: WeeklyScheduleJson? = null,

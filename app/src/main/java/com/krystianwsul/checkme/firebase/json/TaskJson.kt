@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-class TaskJson(
+class TaskJson @JvmOverloads constructor(
         var name: String = "",
         val startTime: Long = 0,
         var endTime: Long? = null,

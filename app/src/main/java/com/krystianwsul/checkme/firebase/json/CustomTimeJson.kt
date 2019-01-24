@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-class CustomTimeJson(
+class CustomTimeJson @JvmOverloads constructor(
         val ownerId: String = "",
         val localId: Int = 0,
         var name: String = "",

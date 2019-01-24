@@ -1,11 +1,7 @@
 package com.krystianwsul.checkme.firebase.json
 
-import com.google.firebase.database.IgnoreExtraProperties
 
-
-
-@IgnoreExtraProperties
-class JsonWrapper(
+class JsonWrapper @JvmOverloads constructor(
         val recordOf: MutableMap<String, Boolean> = mutableMapOf(),
         var projectJson: ProjectJson = ProjectJson()) {
 

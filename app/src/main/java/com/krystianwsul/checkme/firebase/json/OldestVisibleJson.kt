@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.json
 
 import com.krystianwsul.checkme.utils.time.Date
 
-class OldestVisibleJson(
+class OldestVisibleJson @JvmOverloads constructor(
         var year: Int = 0,
         var month: Int = 0,
         var day: Int = 0) {

@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
-class InstanceJson(
+class InstanceJson @JvmOverloads constructor(
         var done: Long? = null,
         var instanceYear: Int? = null,
         var instanceMonth: Int? = null,

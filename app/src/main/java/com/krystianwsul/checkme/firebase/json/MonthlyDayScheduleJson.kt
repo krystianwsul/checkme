@@ -5,6 +5,6 @@ class MonthlyDayScheduleJson @JvmOverloads constructor(
         endTime: Long? = null,
         val dayOfMonth: Int = 0,
         val beginningOfMonth: Boolean = false,
-        val customTimeId: String?,
+        val customTimeId: String? = null,
         val hour: Int? = null,
         val minute: Int? = null) : ScheduleJson(startTime, endTime)

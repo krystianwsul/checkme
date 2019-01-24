@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -44,12 +43,10 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
 
         remoteProjectRecords.values.forEach { it.getValues(values) }
 
-        Log.e("asdf", "RemoteSharedProjectManager.save values: $values")
+        MyCrashlytics.log("RemoteSharedProjectManager.save values: $values")
 
         if (!values.isEmpty()) {
             check(!isSaved)
-
-            Log.e("asdf", "saving task records:\n$values")
 
             isSaved = true
             DatabaseWrapper.updateRecords(values)

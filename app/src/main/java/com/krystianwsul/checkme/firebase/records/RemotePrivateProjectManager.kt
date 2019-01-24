@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -38,12 +37,10 @@ class RemotePrivateProjectManager(
 
         remoteProjectRecord.getValues(values)
 
-        Log.e("asdf", "RemotePrivateProjectManager.save values: $values")
+        MyCrashlytics.log("RemotePrivateProjectManager.save values: $values")
 
         if (!values.isEmpty()) {
             check(!isSaved)
-
-            Log.e("asdf", "saving private project record:\n$values")
 
             isSaved = true
             DatabaseWrapper.updatePrivateProject(values)

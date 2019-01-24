@@ -676,13 +676,13 @@ class GroupListFragment @JvmOverloads constructor(
 
     private fun setGroupMenuItemVisibility() {
         listener.apply {
-            if (!parametersRelay.hasValue())
-                setGroupMenuItemVisibility(null, false, false)
-            else
+            if (this@GroupListFragment::treeViewAdapter.isInitialized)
                 setGroupMenuItemVisibility(
                         (parameters as? Parameters.All)?.position,
                         treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable },
                         canAddHour())
+            else
+                setGroupMenuItemVisibility(null, false, false)
         }
     }
 

@@ -25,7 +25,7 @@ class RemoteSingleScheduleRecord : RemoteScheduleRecord {
 
     val day by lazy { singleScheduleJson.day }
 
-    val customTimeId by lazy { singleScheduleJson.customTimeId }
+    override val customTimeId by lazy { singleScheduleJson.customTimeId }
 
     val hour by lazy { singleScheduleJson.hour }
 

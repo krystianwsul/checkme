@@ -6,11 +6,11 @@ import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 
-class RemoteWeeklyScheduleBridge(private val domainFactory: DomainFactory, private val remoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord) : WeeklyScheduleBridge {
+class RemoteWeeklyScheduleBridge(
+        domainFactory: DomainFactory,
+        private val remoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord) : RemoteScheduleBridge(domainFactory, remoteWeeklyScheduleRecord), WeeklyScheduleBridge {
 
     override val daysOfWeek get() = setOf(remoteWeeklyScheduleRecord.dayOfWeek)
-
-    override val customTimeKey get() = remoteWeeklyScheduleRecord.run { customTimeId?.let { domainFactory.getCustomTimeKey(projectId, it) } }
 
     override val hour get() = remoteWeeklyScheduleRecord.hour
 

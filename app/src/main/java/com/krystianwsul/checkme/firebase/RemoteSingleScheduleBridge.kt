@@ -6,17 +6,15 @@ import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 
-class RemoteSingleScheduleBridge(private val domainFactory: DomainFactory, private val remoteSingleScheduleRecord: RemoteSingleScheduleRecord) : SingleScheduleBridge {
+class RemoteSingleScheduleBridge(
+        domainFactory: DomainFactory,
+        private val remoteSingleScheduleRecord: RemoteSingleScheduleRecord) : RemoteScheduleBridge(domainFactory, remoteSingleScheduleRecord), SingleScheduleBridge {
 
     override val year get() = remoteSingleScheduleRecord.year
 
     override val month get() = remoteSingleScheduleRecord.month
 
     override val day get() = remoteSingleScheduleRecord.day
-
-    override val customTimeKey = remoteSingleScheduleRecord.customTimeId?.let {
-        domainFactory.getCustomTimeKey(remoteSingleScheduleRecord.projectId, it)
-    }
 
     override val hour get() = remoteSingleScheduleRecord.hour
 

@@ -6,7 +6,9 @@ import com.krystianwsul.checkme.firebase.records.RemoteMonthlyWeekScheduleRecord
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 
-class RemoteMonthlyWeekScheduleBridge(private val domainFactory: DomainFactory, private val remoteMonthlyWeekScheduleRecord: RemoteMonthlyWeekScheduleRecord) : MonthlyWeekScheduleBridge {
+class RemoteMonthlyWeekScheduleBridge(
+        domainFactory: DomainFactory,
+        private val remoteMonthlyWeekScheduleRecord: RemoteMonthlyWeekScheduleRecord) : RemoteScheduleBridge(domainFactory, remoteMonthlyWeekScheduleRecord), MonthlyWeekScheduleBridge {
 
     override val startTime by lazy { remoteMonthlyWeekScheduleRecord.startTime }
 
@@ -17,10 +19,6 @@ class RemoteMonthlyWeekScheduleBridge(private val domainFactory: DomainFactory, 
     override val dayOfWeek get() = remoteMonthlyWeekScheduleRecord.dayOfWeek
 
     override val beginningOfMonth get() = remoteMonthlyWeekScheduleRecord.beginningOfMonth
-
-    override val customTimeKey = remoteMonthlyWeekScheduleRecord.customTimeId?.let {
-        domainFactory.getCustomTimeKey(remoteMonthlyWeekScheduleRecord.projectId, it)
-    }
 
     override val hour get() = remoteMonthlyWeekScheduleRecord.hour
 

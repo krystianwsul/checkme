@@ -7,7 +7,9 @@ import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 
-class RemoteDailyScheduleBridge(private val domainFactory: DomainFactory, private val remoteDailyScheduleRecord: RemoteDailyScheduleRecord) : WeeklyScheduleBridge {
+class RemoteDailyScheduleBridge(
+        domainFactory: DomainFactory,
+        private val remoteDailyScheduleRecord: RemoteDailyScheduleRecord) : RemoteScheduleBridge(domainFactory, remoteDailyScheduleRecord), WeeklyScheduleBridge {
 
     override val startTime by lazy { remoteDailyScheduleRecord.startTime }
 
@@ -18,8 +20,6 @@ class RemoteDailyScheduleBridge(private val domainFactory: DomainFactory, privat
         }
 
     override val rootTaskKey get() = TaskKey(remoteDailyScheduleRecord.projectId, remoteDailyScheduleRecord.taskId)
-
-    override val customTimeKey get() = remoteDailyScheduleRecord.customTimeId?.let { domainFactory.getCustomTimeKey(remoteDailyScheduleRecord.projectId, it) }
 
     override val hour get() = remoteDailyScheduleRecord.hour
 

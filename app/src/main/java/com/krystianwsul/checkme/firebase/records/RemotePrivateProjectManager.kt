@@ -43,7 +43,9 @@ class RemotePrivateProjectManager(
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.updatePrivateProject(values)
+            DatabaseWrapper.updatePrivateProject(values).addOnCompleteListener {
+                MyCrashlytics.log("RemotePrivateProjectManager.save result isCanceled: " + it.isCanceled + ", isComplete: " + it.isComplete + ", isSuccessful: " + it.isSuccessful + ", exception: " + it.exception)
+            }
         }
 
         return isSaved

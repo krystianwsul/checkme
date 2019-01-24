@@ -137,6 +137,8 @@ class RemoteTaskRecord private constructor(
             taskJson)
 
     init {
+        check(taskJson.name.isNotEmpty())
+
         for ((key, instanceJson) in taskJson.instances) {
             check(!TextUtils.isEmpty(key))
 

@@ -88,6 +88,7 @@ class MyApplication : Application() {
                 .subscribe(userInfoRelay)
 
         userInfoRelay.switchMap {
+            MyCrashlytics.log("userInfoRelay: $it")
             it.value?.let { DatabaseWrapper.getPrivateProjectObservable(it.key) }
                     ?: Observable.never()
         }

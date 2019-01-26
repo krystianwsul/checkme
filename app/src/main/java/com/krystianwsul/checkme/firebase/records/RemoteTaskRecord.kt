@@ -142,9 +142,9 @@ class RemoteTaskRecord private constructor(
         for ((key, instanceJson) in taskJson.instances) {
             check(!TextUtils.isEmpty(key))
 
-            val scheduleKey = RemoteInstanceRecord.stringToScheduleKey(domainFactory, remoteProjectRecord.id, key)
+            val (scheduleKey, remoteCustomTimeId) = RemoteInstanceRecord.stringToScheduleKey(domainFactory, remoteProjectRecord, key)
 
-            val remoteInstanceRecord = RemoteInstanceRecord(false, domainFactory, this, instanceJson, scheduleKey)
+            val remoteInstanceRecord = RemoteInstanceRecord(false, domainFactory, this, instanceJson, scheduleKey, remoteCustomTimeId)
 
             _remoteInstanceRecords[scheduleKey] = remoteInstanceRecord
         }
@@ -230,7 +230,7 @@ class RemoteTaskRecord private constructor(
 
     override fun getValues(values: MutableMap<String, Any?>) {
         if (delete) {
-            Log.e("asdf", "RemoteTaskRecord.getValues deleting " + this)
+            Log.e("asdf", "RemoteTaskRecord.getValues deleting $this")
 
             check(update != null)
 
@@ -275,7 +275,10 @@ class RemoteTaskRecord private constructor(
     }
 
     fun newRemoteInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): RemoteInstanceRecord {
-        val remoteInstanceRecord = RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey)
+        val remoteCustomTimeId = scheduleKey.scheduleTimePair
+                .customTimeKey
+                ?.let { domainFactory.getRemoteCustomTimeId(id, it) }
+        val remoteInstanceRecord = RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey, remoteCustomTimeId)
         check(!_remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 
         _remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord

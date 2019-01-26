@@ -4,27 +4,50 @@ import android.text.TextUtils
 import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.*
-import java.util.*
 
 @Suppress("LeakingThis")
 abstract class RemoteProjectRecord(
         create: Boolean,
         domainFactory: DomainFactory,
         val id: String,
-        protected val projectJson: ProjectJson) : RemoteRecord(create) {
+        private val projectJson: ProjectJson) : RemoteRecord(create) {
 
     companion object {
 
         const val PROJECT_JSON = "projectJson"
     }
 
-    val remoteTaskRecords = HashMap<String, RemoteTaskRecord>()
+    val remoteCustomTimeRecords = projectJson.customTimes
+            .mapValues { (id, customTimeJson) ->
+                check(!TextUtils.isEmpty(id))
 
-    val remoteTaskHierarchyRecords = HashMap<String, RemoteTaskHierarchyRecord>()
+                RemoteCustomTimeRecord(id, this, customTimeJson)
+            }
+            .toMutableMap()
 
-    val remoteCustomTimeRecords = HashMap<String, RemoteCustomTimeRecord>()
+    val remoteTaskRecords = projectJson.tasks
+            .mapValues { (id, taskJson) ->
+                check(!TextUtils.isEmpty(id))
 
-    val remoteUserRecords = HashMap<String, RemoteProjectUserRecord>()
+                RemoteTaskRecord(domainFactory, id, this, taskJson)
+            }
+            .toMutableMap()
+
+    val remoteTaskHierarchyRecords = projectJson.taskHierarchies
+            .mapValues { (id, taskHierarchyJson) ->
+                check(!TextUtils.isEmpty(id))
+
+                RemoteTaskHierarchyRecord(id, this, taskHierarchyJson)
+            }
+            .toMutableMap()
+
+    val remoteUserRecords = projectJson.users
+            .mapValues { (id, userJson) ->
+                check(!TextUtils.isEmpty(id))
+
+                RemoteProjectUserRecord(false, this, userJson)
+            }
+            .toMutableMap()
 
     override val key get() = id
 
@@ -72,32 +95,6 @@ abstract class RemoteProjectRecord(
             projectJson.endTime = value
             addValue("$id/$PROJECT_JSON/endTime", value)
         }
-
-    init {
-        for ((id, taskJson) in projectJson.tasks) {
-            check(!TextUtils.isEmpty(id))
-
-            remoteTaskRecords[id] = RemoteTaskRecord(domainFactory, id, this, taskJson)
-        }
-
-        for ((id, taskHierarchyJson) in projectJson.taskHierarchies) {
-            check(!TextUtils.isEmpty(id))
-
-            remoteTaskHierarchyRecords[id] = RemoteTaskHierarchyRecord(id, this, taskHierarchyJson)
-        }
-
-        for ((id, customTimeJson) in projectJson.customTimes) {
-            check(!TextUtils.isEmpty(id))
-
-            remoteCustomTimeRecords[id] = RemoteCustomTimeRecord(id, this, customTimeJson)
-        }
-
-        for ((id, userJson) in projectJson.users) {
-            check(!TextUtils.isEmpty(id))
-
-            remoteUserRecords[id] = RemoteProjectUserRecord(false, this, userJson)
-        }
-    }
 
     override fun getValues(values: MutableMap<String, Any?>) {
         if (delete) {

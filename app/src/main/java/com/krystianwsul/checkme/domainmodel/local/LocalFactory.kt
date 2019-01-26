@@ -328,6 +328,8 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
         return _localCustomTimes[localCustomTimeId]!!
     }
 
+    fun tryGetLocalCustomTime(localCustomTimeId: Int) = _localCustomTimes[localCustomTimeId]
+
     fun hasLocalCustomTime(localCustomTimeId: Int) = _localCustomTimes.containsKey(localCustomTimeId)
 
     fun getExistingInstances(taskKey: TaskKey) = existingLocalInstances[taskKey]

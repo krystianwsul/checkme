@@ -38,11 +38,10 @@ class RemoteInstance : Instance {
     override val scheduleCustomTimeKey
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<String, RemoteInstanceRecord> -> {
-                    val customTimeId = it.instanceRecord.scheduleCustomTimeId
-
-                    customTimeId?.let { domainFactory.getCustomTimeKey(remoteProject.id, it) }
-                }
+                is InstanceData.RealInstanceData<String, RemoteInstanceRecord> -> it.instanceRecord
+                        .scheduleKey
+                        .scheduleTimePair
+                        .customTimeKey
                 is VirtualInstanceData<String, RemoteInstanceRecord> -> {
                     val customTimeKey = it.scheduleDateTime
                             .time
@@ -50,7 +49,7 @@ class RemoteInstance : Instance {
                             .customTimeKey
 
                     if (customTimeKey is CustomTimeKey.RemoteCustomTimeKey) {
-                        domainFactory.getCustomTimeKey(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
+                        domainFactory.getLocalCustomTimeKeyIfPossible(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
                     } else {
                         customTimeKey
                     }

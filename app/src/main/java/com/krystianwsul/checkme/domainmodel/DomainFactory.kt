@@ -2121,7 +2121,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
                         check(instanceShownRecord.scheduleHour == null)
                         check(instanceShownRecord.scheduleMinute == null)
 
-                        customTimeKey = getCustomTimeKey(instanceShownRecord.projectId, remoteCustomTimeId)
+                        customTimeKey = getLocalCustomTimeKeyIfPossible(instanceShownRecord.projectId, remoteCustomTimeId)
                         hourMinute = null
                     } else {
                         checkNotNull(instanceShownRecord.scheduleHour)
@@ -2363,7 +2363,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         return dataWrapper
     }
 
-    fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: String): CustomTimeKey = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
+    fun getLocalCustomTimeKeyIfPossible(remoteProjectId: String, remoteCustomTimeId: String): CustomTimeKey = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
             .getRemoteCustomTime(remoteCustomTimeId)
             .let { it.remoteCustomTimeRecord }
             .takeIf { it.ownerId == uuid }

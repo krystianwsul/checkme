@@ -178,6 +178,6 @@ class RemoteInstance : Instance {
 
         override fun getCustomTime(customTimeId: String) = remoteProject.getRemoteCustomTime(customTimeId)
 
-        override fun getSignature() = name + " " + instanceKey.toString()
+        override fun getSignature() = "$name $instanceKey"
     }
 }

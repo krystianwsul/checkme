@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.ProjectJson
+import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import java.util.*
 import kotlin.properties.Delegates
@@ -43,9 +44,7 @@ class RemotePrivateProjectManager(
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.updatePrivateProject(values).addOnCompleteListener {
-                MyCrashlytics.log("RemotePrivateProjectManager.save result isCanceled: " + it.isCanceled + ", isComplete: " + it.isComplete + ", isSuccessful: " + it.isSuccessful + ", exception: " + it.exception)
-            }
+            DatabaseWrapper.updatePrivateProject(values).checkError("RemotePrivateProjectManager.save")
         }
 
         return isSaved

@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.gui.SelectionCallback
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
@@ -245,7 +246,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))
 
-                DatabaseWrapper.addFriends(friendIds)
+                DatabaseWrapper.addFriends(friendIds).checkError("FriendListFragment.removeFriends.undo")
             }
         }
     }

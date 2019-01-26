@@ -33,26 +33,13 @@ object DatabaseWrapper {
 
     fun getRootRecordId() = rootReference.child(RECORDS_KEY).push().key!!
 
-    fun setUserInfo(userInfo: UserInfo, uuid: String) {
-        val key = userInfo.key
-
-        rootReference.child("$USERS_KEY/$key/userData").updateChildren(userInfo.getValues(uuid))
-    }
+    fun setUserInfo(userInfo: UserInfo, uuid: String) = rootReference.child("$USERS_KEY/${userInfo.key}/userData").updateChildren(userInfo.getValues(uuid))
 
     fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 
-    fun addFriend(friendKey: String) {
-        val myKey = userInfo.key
+    fun addFriend(friendKey: String) = rootReference.child("$USERS_KEY/$friendKey/friendOf/${userInfo.key}").setValue(true)
 
-        rootReference.child("$USERS_KEY/$friendKey/friendOf/$myKey").setValue(true)
-    }
-
-    fun addFriends(friendKeys: Set<String>) {
-        val myKey = userInfo.key
-
-        val values = friendKeys.map { "$it/friendOf/$myKey" to true }.toMap()
-        rootReference.child(USERS_KEY).updateChildren(values)
-    }
+    fun addFriends(friendKeys: Set<String>) = rootReference.child(USERS_KEY).updateChildren(friendKeys.map { "$it/friendOf/${userInfo.key}" to true }.toMap())
 
     fun getFriendSingle(key: String) = rootReference.child(USERS_KEY)
             .orderByChild("friendOf/$key")

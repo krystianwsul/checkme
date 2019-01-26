@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.UserWrapper
+import com.krystianwsul.checkme.utils.checkError
 import java.util.*
 
 class RemoteFriendManager(children: Iterable<DataSnapshot>) {
@@ -23,7 +24,7 @@ class RemoteFriendManager(children: Iterable<DataSnapshot>) {
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.updateFriends(values)
+            DatabaseWrapper.updateFriends(values).checkError("RemoteFriendManager.save")
         }
     }
 }

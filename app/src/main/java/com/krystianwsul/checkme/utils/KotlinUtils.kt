@@ -6,8 +6,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.view.View
 import android.view.ViewTreeObserver
+import com.google.android.gms.tasks.Task
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.firebase.FirebaseWriteException
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
@@ -102,3 +105,13 @@ fun Context.dpToPx(dp: Int): Float {
 fun Context.startTicks(receiver: BroadcastReceiver) = registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
 
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
+
+fun Task<Void>.checkError(caller: String) {
+    addOnCompleteListener {
+        val message = "firebase write: $caller isCanceled: " + it.isCanceled + ", isComplete: " + it.isComplete + ", isSuccessful: " + it.isSuccessful + ", exception: " + it.exception
+        if (it.isSuccessful)
+            MyCrashlytics.log(message)
+        else
+            MyCrashlytics.logException(FirebaseWriteException(message, it.exception))
+    }
+}

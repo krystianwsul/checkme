@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
+import com.krystianwsul.checkme.utils.checkError
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -49,7 +50,7 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.updateRecords(values)
+            DatabaseWrapper.updateRecords(values).checkError("RemoteSharedProjectManager.save")
         }
 
         return isSaved

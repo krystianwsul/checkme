@@ -169,7 +169,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     // firebase
 
-    private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid)
+    private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid).checkError("DomainFactory.setUserHelper")
 
     @Synchronized
     fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
@@ -1306,7 +1306,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         localCustomTime.setName(name)
 
         for (dayOfWeek in DayOfWeek.values()) {
-            val hourMinute = hourMinutes[dayOfWeek]!!
+            val hourMinute = hourMinutes.getValue(dayOfWeek)
 
             if (hourMinute != localCustomTime.getHourMinute(dayOfWeek))
                 localCustomTime.setHourMinute(dayOfWeek, hourMinute)
@@ -1466,7 +1466,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
             return
 
         userInfo = newUserInfo
-        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid)
+        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid).checkError("DomainFactory.updateUserInfo")
 
         remoteProjectFactory.updateUserInfo(newUserInfo)
 
@@ -1978,7 +1978,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
         tasks.asSequence()
                 .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now) }
-                .map { taskRelevances[it.taskKey]!! }.toList()
+                .map { taskRelevances.getValue(it.taskKey) }.toList()
                 .forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
 
         rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
@@ -1988,7 +1988,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
                 .map { instanceRelevances[it.instanceKey]!! }.toList()
                 .forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
 
-        getCurrentCustomTimes().map { localCustomTimeRelevances[it.id]!! }.forEach { it.setRelevant() }
+        getCurrentCustomTimes().map { localCustomTimeRelevances.getValue(it.id) }.forEach { it.setRelevant() }
 
         val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
         relevantTaskRelevances.forEach { it.task.onlyHierarchy = it.onlyHierarchy }
@@ -2031,7 +2031,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()
 
         remoteProjects.filter { it.current(now) }
-                .map { remoteProjectRelevances[it.id]!! }
+                .map { remoteProjectRelevances.getValue(it.id) }
                 .forEach { it.setRelevant() }
 
         taskRelevances.values
@@ -2153,7 +2153,9 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
             if (allTaskKeys.contains(hideInstanceKey.taskKey))
                 getInstance(hideInstanceKey).setNotificationShown(false, now)
             else
-                instanceShownRecordNotificationDatas[hideInstanceKey]!!.second.notificationShown = false
+                instanceShownRecordNotificationDatas.getValue(hideInstanceKey)
+                        .second
+                        .notificationShown = false
         }
 
         var message = ""
@@ -2171,7 +2173,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
                         if (allTaskKeys.contains(shownInstanceKey.taskKey)) {
                             NotificationWrapper.instance.cancelNotification(getInstance(shownInstanceKey).notificationId)
                         } else {
-                            val notificationId = instanceShownRecordNotificationDatas[shownInstanceKey]!!.first
+                            val notificationId = instanceShownRecordNotificationDatas.getValue(shownInstanceKey).first
 
                             NotificationWrapper.instance.cancelNotification(notificationId)
                         }
@@ -2190,14 +2192,14 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
                         if (allTaskKeys.contains(hideInstanceKey.taskKey)) {
                             NotificationWrapper.instance.cancelNotification(getInstance(hideInstanceKey).notificationId)
                         } else {
-                            val notificationId = instanceShownRecordNotificationDatas[hideInstanceKey]!!.first
+                            val notificationId = instanceShownRecordNotificationDatas.getValue(hideInstanceKey).first
 
                             NotificationWrapper.instance.cancelNotification(notificationId)
                         }
                     }
 
                     for (showInstanceKey in showInstanceKeys)
-                        notifyInstance(notificationInstances[showInstanceKey]!!, silent, now)
+                        notifyInstance(notificationInstances.getValue(showInstanceKey), silent, now)
 
                     notificationInstances.values
                             .filter { !showInstanceKeys.contains(it.instanceKey) }
@@ -2218,7 +2220,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
                 if (allTaskKeys.contains(hideInstanceKey.taskKey)) {
                     NotificationWrapper.instance.cancelNotification(getInstance(hideInstanceKey).notificationId)
                 } else {
-                    val notificationId = instanceShownRecordNotificationDatas[hideInstanceKey]!!.first
+                    val notificationId = instanceShownRecordNotificationDatas.getValue(hideInstanceKey).first
 
                     NotificationWrapper.instance.cancelNotification(notificationId)
                 }
@@ -2226,7 +2228,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
             message += ", s " + showInstanceKeys.size
             for (showInstanceKey in showInstanceKeys)
-                notifyInstance(notificationInstances[showInstanceKey]!!, silent, now)
+                notifyInstance(notificationInstances.getValue(showInstanceKey), silent, now)
 
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 

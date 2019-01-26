@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.checkError
 import io.reactivex.functions.Predicate
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_find_friend.*
@@ -84,7 +85,7 @@ class FindFriendActivity : AbstractActivity() {
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            DatabaseWrapper.addFriend(userData!!.key)
+            DatabaseWrapper.addFriend(userData!!.key).checkError("FindFriendActivity.addFriend")
 
             finish()
         }

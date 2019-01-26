@@ -219,7 +219,7 @@ class RemoteProjectFactory(
         check(!TextUtils.isEmpty(projectId))
         check(remoteProjects.containsKey(projectId))
 
-        return remoteProjects[projectId]!!
+        return remoteProjects.getValue(projectId)
     }
 
     fun deleteProject(remoteProject: RemoteProject) {

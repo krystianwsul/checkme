@@ -277,7 +277,7 @@ class RemoteTaskRecord private constructor(
     fun newRemoteInstanceRecord(instanceJson: InstanceJson, scheduleKey: ScheduleKey): RemoteInstanceRecord {
         val remoteCustomTimeId = scheduleKey.scheduleTimePair
                 .customTimeKey
-                ?.let { domainFactory.getRemoteCustomTimeId(id, it) }
+                ?.let { domainFactory.getRemoteCustomTimeId(projectId, it) }
         val remoteInstanceRecord = RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey, remoteCustomTimeId)
         check(!_remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 

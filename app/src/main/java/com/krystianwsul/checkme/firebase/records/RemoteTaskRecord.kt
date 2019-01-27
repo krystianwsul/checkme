@@ -144,7 +144,14 @@ class RemoteTaskRecord private constructor(
 
             val (scheduleKey, remoteCustomTimeId) = RemoteInstanceRecord.stringToScheduleKey(domainFactory, remoteProjectRecord, key)
 
-            val remoteInstanceRecord = RemoteInstanceRecord(false, domainFactory, this, instanceJson, scheduleKey, remoteCustomTimeId)
+            val remoteInstanceRecord = RemoteInstanceRecord(
+                    false,
+                    domainFactory,
+                    this,
+                    instanceJson,
+                    scheduleKey,
+                    key,
+                    remoteCustomTimeId)
 
             _remoteInstanceRecords[scheduleKey] = remoteInstanceRecord
         }
@@ -278,7 +285,10 @@ class RemoteTaskRecord private constructor(
         val remoteCustomTimeId = scheduleKey.scheduleTimePair
                 .customTimeKey
                 ?.let { domainFactory.getRemoteCustomTimeId(projectId, it) }
-        val remoteInstanceRecord = RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey, remoteCustomTimeId)
+
+        val firebaseKey = RemoteInstanceRecord.scheduleKeyToString(domainFactory, projectId, scheduleKey, remoteCustomTimeId)
+
+        val remoteInstanceRecord = RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)
         check(!_remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 
         _remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord

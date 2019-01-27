@@ -102,7 +102,9 @@ fun Context.dpToPx(dp: Int): Float {
     return dp * density
 }
 
-fun Context.startTicks(receiver: BroadcastReceiver) = registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
+fun Context.startTicks(receiver: BroadcastReceiver) {
+    registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
+}
 
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
 

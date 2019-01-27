@@ -18,6 +18,7 @@ class RemoteInstanceRecord(
         private val remoteTaskRecord: RemoteTaskRecord,
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
+        private val firebaseKey: String,
         override val scheduleCustomTimeId: String?) : RemoteRecord(create), InstanceRecord<String> {
 
     companion object {
@@ -25,13 +26,14 @@ class RemoteInstanceRecord(
         private val hourMinutePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
-        fun scheduleKeyToString(domainFactory: DomainFactory, projectId: String, scheduleKey: ScheduleKey): String {
+        fun scheduleKeyToString(domainFactory: DomainFactory, projectId: String, scheduleKey: ScheduleKey, remoteCustomTimeId: String? = null): String {
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
             key += scheduleKey.scheduleTimePair.let {
                 if (it.customTimeKey != null) {
                     check(it.hourMinute == null)
 
-                    domainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
+                    remoteCustomTimeId
+                            ?: domainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
                 } else {
                     it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
                 }

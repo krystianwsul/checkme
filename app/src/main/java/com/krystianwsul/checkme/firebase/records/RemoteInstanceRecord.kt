@@ -78,7 +78,7 @@ class RemoteInstanceRecord(
         }
     }
 
-    override val key by lazy { remoteTaskRecord.key + "/instances/" + scheduleKeyToString(domainFactory, remoteTaskRecord.projectId, scheduleKey) }
+    override val key by lazy { remoteTaskRecord.key + "/instances/" + firebaseKey }
 
     val taskId by lazy { remoteTaskRecord.id }
 

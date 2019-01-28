@@ -108,9 +108,10 @@ fun Context.startTicks(receiver: BroadcastReceiver) {
 
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
 
-fun Task<Void>.checkError(caller: String) {
+fun Task<Void>.checkError(caller: String, values: Any? = null) {
     addOnCompleteListener {
-        val message = "firebase write: $caller isCanceled: " + it.isCanceled + ", isComplete: " + it.isComplete + ", isSuccessful: " + it.isSuccessful + ", exception: " + it.exception
+        val message = "firebase write: $caller isCanceled: " + it.isCanceled + ", isComplete: " + it.isComplete + ", isSuccessful: " + it.isSuccessful + ", exception: " + it.exception + (values?.let { ", values: $values" }
+                ?: "")
         if (it.isSuccessful)
             MyCrashlytics.log(message)
         else

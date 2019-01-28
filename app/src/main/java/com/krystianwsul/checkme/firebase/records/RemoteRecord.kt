@@ -7,7 +7,7 @@ abstract class RemoteRecord(create: Boolean) {
 
     protected var delete = false
 
-    protected var update = if (create) null else mutableMapOf<String, Any?>()
+    var update = if (create) null else mutableMapOf<String, Any?>()
 
     abstract val key: String
 
@@ -24,8 +24,6 @@ abstract class RemoteRecord(create: Boolean) {
         } else {
             if (update == null) {
                 Log.e("asdf", "RemoteRecord.getValues creating " + this)
-
-                check(update == null)
 
                 values[key] = createObject
             } else if (update!!.isNotEmpty()) {

@@ -244,10 +244,15 @@ class RemoteTaskRecord private constructor(
             values[key] = null
             delete = false
         } else {
+            val children = _remoteInstanceRecords.values +
+                    remoteSingleScheduleRecords.values +
+                    remoteDailyScheduleRecords.values +
+                    remoteWeeklyScheduleRecords.values +
+                    remoteMonthlyDayScheduleRecords.values +
+                    remoteMonthlyWeekScheduleRecords.values
+
             if (update == null) {
                 Log.e("asdf", "RemoteTaskRecord.getValues creating " + this)
-
-                check(update == null)
 
                 values[key] = createObject
             } else {
@@ -258,26 +263,12 @@ class RemoteTaskRecord private constructor(
                     update = mutableMapOf()
                 }
 
-                for (remoteInstanceRecord in _remoteInstanceRecords.values)
-                    remoteInstanceRecord.getValues(values)
-
-                for (remoteSingleScheduleRecord in remoteSingleScheduleRecords.values)
-                    remoteSingleScheduleRecord.getValues(values)
-
-                for (remoteDailyScheduleRecord in remoteDailyScheduleRecords.values)
-                    remoteDailyScheduleRecord.getValues(values)
-
-                for (remoteWeeklyScheduleRecord in remoteWeeklyScheduleRecords.values)
-                    remoteWeeklyScheduleRecord.getValues(values)
-
-                for (remoteMonthlyDayScheduleRecord in remoteMonthlyDayScheduleRecords.values)
-                    remoteMonthlyDayScheduleRecord.getValues(values)
-
-                for (remoteMonthlyWeekScheduleRecord in remoteMonthlyWeekScheduleRecords.values)
-                    remoteMonthlyWeekScheduleRecord.getValues(values)
+                children.forEach { it.getValues(values) }
             }
 
             update = mutableMapOf()
+
+            children.forEach { it.update = mutableMapOf() }
         }
     }
 

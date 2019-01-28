@@ -44,7 +44,7 @@ class RemotePrivateProjectManager(
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.updatePrivateProject(values).checkError("RemotePrivateProjectManager.save")
+            DatabaseWrapper.updatePrivateProject(values).checkError("RemotePrivateProjectManager.save", values)
         }
 
         return isSaved

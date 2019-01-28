@@ -105,10 +105,13 @@ abstract class RemoteProjectRecord(
             values[key] = null
             delete = false
         } else {
+            val children = remoteTaskRecords.values +
+                    remoteTaskHierarchyRecords.values +
+                    remoteCustomTimeRecords.values +
+                    remoteUserRecords.values
+
             if (update == null) {
                 Log.e("asdf", "RemoteProjectRecord.getValues creating " + this)
-
-                check(update == null)
 
                 values[key] = createObject
             } else {
@@ -118,20 +121,12 @@ abstract class RemoteProjectRecord(
                     values.putAll(update!!)
                 }
 
-                for (remoteTaskRecord in remoteTaskRecords.values)
-                    remoteTaskRecord.getValues(values)
-
-                for (remoteTaskHierarchyRecord in remoteTaskHierarchyRecords.values)
-                    remoteTaskHierarchyRecord.getValues(values)
-
-                for (remoteCustomTimeRecord in remoteCustomTimeRecords.values)
-                    remoteCustomTimeRecord.getValues(values)
-
-                for (remoteProjectUserRecord in remoteUserRecords.values)
-                    remoteProjectUserRecord.getValues(values)
+                children.forEach { it.getValues(values) }
             }
 
             update = mutableMapOf()
+
+            children.forEach { it.update = mutableMapOf() }
         }
     }
 

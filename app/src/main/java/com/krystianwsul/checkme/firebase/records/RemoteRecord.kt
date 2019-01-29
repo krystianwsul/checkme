@@ -13,7 +13,9 @@ abstract class RemoteRecord(create: Boolean) {
 
     abstract val createObject: Any
 
-    open fun getValues(values: MutableMap<String, Any?>) {
+    open val children = listOf<RemoteRecord>()
+
+    fun getValues(values: MutableMap<String, Any?>) {
         if (delete) {
             Log.e("asdf", "RemoteRecord.getValues deleting " + this)
 
@@ -26,14 +28,28 @@ abstract class RemoteRecord(create: Boolean) {
                 Log.e("asdf", "RemoteRecord.getValues creating " + this)
 
                 values[key] = createObject
-            } else if (update!!.isNotEmpty()) {
-                Log.e("asdf", "RemoteRecord.getValues updating " + this)
 
-                values.putAll(update!!)
+                setCreated()
+            } else {
+                if (update!!.isNotEmpty()) {
+                    Log.e("asdf", "RemoteRecord.getValues updating " + this)
+
+                    values.putAll(update!!)
+
+                    update = mutableMapOf()
+                }
+
+                children.forEach { it.getValues(values) }
             }
-
-            update = mutableMapOf()
         }
+    }
+
+    private fun setCreated() {
+        check(update == null)
+
+        update = mutableMapOf()
+
+        children.forEach { it.setCreated() }
     }
 
     protected fun addValue(key: String, obj: Any?) {

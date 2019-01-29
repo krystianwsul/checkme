@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
-import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
@@ -199,6 +198,14 @@ class RemoteTaskRecord private constructor(
 
     private val oldestVisibleJson get() = taskJson.oldestVisible[uuid]
 
+    override val children
+        get() = _remoteInstanceRecords.values +
+                remoteSingleScheduleRecords.values +
+                remoteDailyScheduleRecords.values +
+                remoteWeeklyScheduleRecords.values +
+                remoteMonthlyDayScheduleRecords.values +
+                remoteMonthlyWeekScheduleRecords.values
+
     fun setOldestVisible(newOldestVisibleJson: OldestVisibleJson) {
         val oldOldestVisibleJson = oldestVisibleJson
 
@@ -232,43 +239,6 @@ class RemoteTaskRecord private constructor(
         if (oldestVisibleDay != taskJson.oldestVisibleDay) {
             taskJson.oldestVisibleDay = oldestVisibleDay
             addValue("$key/oldestVisibleDay", oldestVisibleDay)
-        }
-    }
-
-    override fun getValues(values: MutableMap<String, Any?>) {
-        if (delete) {
-            Log.e("asdf", "RemoteTaskRecord.getValues deleting $this")
-
-            check(update != null)
-
-            values[key] = null
-            delete = false
-        } else {
-            val children = _remoteInstanceRecords.values +
-                    remoteSingleScheduleRecords.values +
-                    remoteDailyScheduleRecords.values +
-                    remoteWeeklyScheduleRecords.values +
-                    remoteMonthlyDayScheduleRecords.values +
-                    remoteMonthlyWeekScheduleRecords.values
-
-            if (update == null) {
-                Log.e("asdf", "RemoteTaskRecord.getValues creating " + this)
-
-                values[key] = createObject
-            } else {
-                if (update!!.isNotEmpty()) {
-                    Log.e("asdf", "RemoteTaskRecord.getValues updating " + this)
-
-                    values.putAll(update!!)
-                    update = mutableMapOf()
-                }
-
-                children.forEach { it.getValues(values) }
-            }
-
-            update = mutableMapOf()
-
-            children.forEach { it.update = mutableMapOf() }
         }
     }
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
-import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.*
 
@@ -96,39 +95,11 @@ abstract class RemoteProjectRecord(
             addValue("$id/$PROJECT_JSON/endTime", value)
         }
 
-    override fun getValues(values: MutableMap<String, Any?>) {
-        if (delete) {
-            Log.e("asdf", "RemoteProjectRecord.getValues deleting " + this)
-
-            check(update != null)
-
-            values[key] = null
-            delete = false
-        } else {
-            val children = remoteTaskRecords.values +
-                    remoteTaskHierarchyRecords.values +
-                    remoteCustomTimeRecords.values +
-                    remoteUserRecords.values
-
-            if (update == null) {
-                Log.e("asdf", "RemoteProjectRecord.getValues creating " + this)
-
-                values[key] = createObject
-            } else {
-                if (!update!!.isEmpty()) {
-                    Log.e("asdf", "RemoteProjectRecord.getValues updating " + this)
-
-                    values.putAll(update!!)
-                }
-
-                children.forEach { it.getValues(values) }
-            }
-
-            update = mutableMapOf()
-
-            children.forEach { it.update = mutableMapOf() }
-        }
-    }
+    override val children
+        get() = remoteTaskRecords.values +
+                remoteTaskHierarchyRecords.values +
+                remoteCustomTimeRecords.values +
+                remoteUserRecords.values
 
     fun newRemoteTaskRecord(domainFactory: DomainFactory, taskJson: TaskJson): RemoteTaskRecord {
         val remoteTaskRecord = RemoteTaskRecord(domainFactory, this, taskJson)

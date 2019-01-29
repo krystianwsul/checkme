@@ -144,9 +144,11 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
 
         val visibleNodes = treeNodes.filter { it.canBeShown() }
 
-        val previousNode = position.takeIf { it > 0 }?.let { visibleNodes[position - 1] }
-        val node = visibleNodes[position]
-        val nextNode = position.takeIf { it < visibleNodes.size - 1 }?.let { visibleNodes[position + 1] }
+        val adjustedPosition = Math.min(visibleNodes.size - 1, position) // padding
+
+        val previousNode = adjustedPosition.takeIf { it > 0 }?.let { visibleNodes[adjustedPosition - 1] }
+        val node = visibleNodes[adjustedPosition]
+        val nextNode = adjustedPosition.takeIf { it < visibleNodes.size - 1 }?.let { visibleNodes[adjustedPosition + 1] }
 
         val previousOrdinal = (previousNode?.modelNode as? Sortable)?.getOrdinal()
                 ?: -Double.MAX_VALUE

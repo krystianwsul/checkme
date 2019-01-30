@@ -155,7 +155,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 } else {
                     false
                 }
-            }).subscribe()
+            }).subscribe() // todo use new rxbinding
         }
     }
 

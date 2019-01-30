@@ -150,15 +150,21 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
         val node = visibleNodes[adjustedPosition]
         val nextNode = adjustedPosition.takeIf { it < visibleNodes.size - 1 }?.let { visibleNodes[adjustedPosition + 1] }
 
-        val previousOrdinal = (previousNode?.modelNode as? Sortable)?.getOrdinal()
-                ?: -Double.MAX_VALUE
+        val previousOrdinal: Double
+        val nextOrdinal: Double
+        if (previousNode != null) {
+            previousOrdinal = (previousNode.modelNode as Sortable).getOrdinal()
 
-        val lastOrdinal = if (previousOrdinal.toInt() == Math.ceil(previousOrdinal).toInt())
-            previousOrdinal + 1
-        else
-            Math.ceil(previousOrdinal)
+            val lastOrdinal = if (previousOrdinal.toInt() == Math.ceil(previousOrdinal).toInt())
+                previousOrdinal + 1
+            else
+                Math.ceil(previousOrdinal)
 
-        val nextOrdinal = (nextNode?.modelNode as? Sortable)?.getOrdinal() ?: lastOrdinal
+            nextOrdinal = (nextNode?.modelNode as? Sortable)?.getOrdinal() ?: lastOrdinal
+        } else {
+            nextOrdinal = (nextNode!!.modelNode as Sortable).getOrdinal()
+            previousOrdinal = nextOrdinal - 1000
+        }
 
         (node.modelNode as Sortable).setOrdinal((previousOrdinal + nextOrdinal) / 2)
     }

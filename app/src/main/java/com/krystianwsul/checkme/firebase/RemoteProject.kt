@@ -40,6 +40,8 @@ abstract class RemoteProject(
 
     private val remoteFactory get() = domainFactory.remoteProjectFactory
 
+    val taskKeys get() = remoteTasks.keys
+
     val tasks get() = remoteTasks.values
 
     val taskIds get() = remoteTasks.keys

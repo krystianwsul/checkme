@@ -10,8 +10,10 @@ import com.google.android.gms.tasks.Task
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
 import com.krystianwsul.checkme.utils.time.DayOfWeek
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
 
@@ -109,12 +111,24 @@ fun Context.startTicks(receiver: BroadcastReceiver) {
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
 
 fun Task<Void>.checkError(caller: String, values: Any? = null) {
+    fun getTaskKeys() = Pair(ExactTimeStamp.now, DomainFactory.instance
+            .remoteProjectFactory
+            .remotePrivateProject
+            .taskKeys)
+
+    val taskKeysBefore = values?.let { getTaskKeys() }
+
     addOnCompleteListener {
-        val message = "firebase write: $caller isCanceled: " + it.isCanceled + ", isComplete: " + it.isComplete + ", isSuccessful: " + it.isSuccessful + ", exception: " + it.exception + (values?.let { ", values: $values" }
+        val message = "firebase write: $caller isCanceled: " + it.isCanceled + ", isComplete: " + it.isComplete + ", isSuccessful: " + it.isSuccessful + ", exception: " + it.exception + (values?.let { ", \nvalues: $values" }
                 ?: "")
-        if (it.isSuccessful)
+        if (it.isSuccessful) {
             MyCrashlytics.log(message)
-        else
-            MyCrashlytics.logException(FirebaseWriteException(message, it.exception))
+        } else {
+            val taskData = values?.let {
+                val taskKeysAfter = getTaskKeys()
+                ", \ntask keys before: $taskKeysBefore, \ntask keys after: $taskKeysAfter"
+            } ?: ""
+            MyCrashlytics.logException(FirebaseWriteException(message + taskData, it.exception))
+        }
     }
 }

@@ -5,7 +5,10 @@ import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.firebase.json.UserJson
 
 
-class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: RemoteProjectRecord, override val createObject: UserJson) : RemoteRecord(create) {
+class RemoteProjectUserRecord(
+        create: Boolean,
+        private val remoteProjectRecord: RemoteProjectRecord,
+        override val createObject: UserJson) : RemoteRecord(create) {
 
     companion object {
 
@@ -37,4 +40,6 @@ class RemoteProjectUserRecord(create: Boolean, private val remoteProjectRecord: 
         createObject.tokens[uuid] = token
         addValue("$key/tokens/$uuid", token)
     }
+
+    override fun deleteFromParent() = check(remoteProjectRecord.remoteUserRecords.remove(id) == this)
 }

@@ -25,4 +25,6 @@ class RemotePrivateProjectRecord(
     override val createObject get() = createProjectJson
 
     override val childKey get() = key
+
+    override fun deleteFromParent() = throw UnsupportedOperationException()
 }

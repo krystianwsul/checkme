@@ -42,4 +42,6 @@ class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapp
 
         addValue("$key/$FRIEND_OF/$friendId", null)
     }
+
+    override fun deleteFromParent() = throw UnsupportedOperationException()
 }

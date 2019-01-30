@@ -1025,6 +1025,106 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         notifyCloud(newParentTask.remoteNullableProject)
     }
 
+    fun createRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?): Task {
+        check(name.isNotEmpty())
+
+        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
+
+        val task = if (finalProjectId.isNullOrEmpty())
+            localFactory.createLocalTaskHelper(name, now, note)
+        else
+            remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(task.remoteNullableProject)
+
+        return task
+    }
+
+    @Synchronized
+    fun createRootTask(dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?) {
+        MyCrashlytics.log("DomainFactory.createRootTask")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        val now = ExactTimeStamp.now
+
+        createRootTask(now, dataId, source, name, note, projectId)
+    }
+
+    @Synchronized
+    fun createJoinRootTask(dataId: Int, source: SaveService.Source, name: String, joinTaskKeys: List<TaskKey>, note: String?, projectId: String?) {
+        MyCrashlytics.log("DomainFactory.createJoinRootTask")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        check(name.isNotEmpty())
+        check(joinTaskKeys.size > 1)
+
+        val now = ExactTimeStamp.now
+
+        val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
+                .distinct()
+                .single()
+
+        val finalProjectId = if (!joinProjectId.isNullOrEmpty()) {
+            check(projectId.isNullOrEmpty())
+
+            joinProjectId
+        } else if (!projectId.isNullOrEmpty()) {
+            projectId
+        } else {
+            null
+        }
+
+        var joinTasks = joinTaskKeys.map { getTaskForce(it) }
+
+        val newParentTask = if (!finalProjectId.isNullOrEmpty())
+            remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
+        else
+            localFactory.createLocalTaskHelper(name, now, note)
+
+        joinTasks = joinTasks.map { it.updateProject(now, projectId) }
+
+        joinTasks(newParentTask, joinTasks, now)
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(newParentTask.remoteNullableProject)
+    }
+
+    @Synchronized
+    fun updateRootTask(dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, note: String?, projectId: String?): TaskKey {
+        MyCrashlytics.log("DomainFactory.updateRootTask")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        check(name.isNotEmpty())
+
+        val now = ExactTimeStamp.now
+
+        var task = getTaskForce(taskKey)
+        check(task.current(now))
+
+        task = task.updateProject(now, projectId)
+
+        task.setName(name, note)
+
+        getParentTaskHierarchy(task, now)?.setEndExactTimeStamp(now)
+
+        task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(task.remoteNullableProject)
+
+        return task.taskKey
+    }
+
     fun createChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, parentTaskKey: TaskKey, name: String, note: String?): Task {
         check(name.isNotEmpty())
 
@@ -1326,104 +1426,6 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
             localFactory.getLocalCustomTime(localCustomTimeId).current = current
 
         save(dataId, source)
-    }
-
-    fun createRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?): Task {
-        check(name.isNotEmpty())
-
-        val task = if (projectId.isNullOrEmpty())
-            localFactory.createLocalTaskHelper(name, now, note)
-        else
-            remoteProjectFactory.createRemoteTaskHelper(now, name, note, projectId)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(task.remoteNullableProject)
-
-        return task
-    }
-
-    @Synchronized
-    fun createRootTask(dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?) {
-        MyCrashlytics.log("DomainFactory.createRootTask")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        createRootTask(now, dataId, source, name, note, projectId)
-    }
-
-    @Synchronized
-    fun createJoinRootTask(dataId: Int, source: SaveService.Source, name: String, joinTaskKeys: List<TaskKey>, note: String?, projectId: String?) {
-        MyCrashlytics.log("DomainFactory.createJoinRootTask")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-        check(joinTaskKeys.size > 1)
-
-        val now = ExactTimeStamp.now
-
-        val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
-                .distinct()
-                .single()
-
-        val finalProjectId = if (!joinProjectId.isNullOrEmpty()) {
-            check(projectId.isNullOrEmpty())
-
-            joinProjectId
-        } else if (!projectId.isNullOrEmpty()) {
-            projectId
-        } else {
-            null
-        }
-
-        var joinTasks = joinTaskKeys.map { getTaskForce(it) }
-
-        val newParentTask = if (!finalProjectId.isNullOrEmpty())
-            remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
-        else
-            localFactory.createLocalTaskHelper(name, now, note)
-
-        joinTasks = joinTasks.map { it.updateProject(now, projectId) }
-
-        joinTasks(newParentTask, joinTasks, now)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(newParentTask.remoteNullableProject)
-    }
-
-    @Synchronized
-    fun updateRootTask(dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, note: String?, projectId: String?): TaskKey {
-        MyCrashlytics.log("DomainFactory.updateRootTask")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        var task = getTaskForce(taskKey)
-        check(task.current(now))
-
-        task = task.updateProject(now, projectId)
-
-        task.setName(name, note)
-
-        getParentTaskHierarchy(task, now)?.setEndExactTimeStamp(now)
-
-        task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(task.remoteNullableProject)
-
-        return task.taskKey
     }
 
     fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean, sourceName: String): Irrelevant {

@@ -9,7 +9,7 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
 
     companion object {
 
-        val CUSTOM_TIMES = "customTimes"
+        const val CUSTOM_TIMES = "customTimes"
     }
 
     val id: String
@@ -191,4 +191,6 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
     override val createObject get() = customTimeJson
 
     override val key get() = remoteProjectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
+
+    override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
 }

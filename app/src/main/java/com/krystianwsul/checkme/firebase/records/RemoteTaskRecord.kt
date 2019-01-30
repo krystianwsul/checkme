@@ -24,7 +24,7 @@ class RemoteTaskRecord private constructor(
         const val TASKS = "tasks"
     }
 
-    private val _remoteInstanceRecords = HashMap<ScheduleKey, RemoteInstanceRecord>()
+    val remoteInstanceRecords = mutableMapOf<ScheduleKey, RemoteInstanceRecord>()
 
     val remoteSingleScheduleRecords: MutableMap<String, RemoteSingleScheduleRecord> = HashMap()
 
@@ -40,7 +40,7 @@ class RemoteTaskRecord private constructor(
         // because of duplicate functionality when converting local task
         get() {
             if (update != null)
-                taskJson.instances = _remoteInstanceRecords.entries
+                taskJson.instances = remoteInstanceRecords.entries
                         .associateBy({ RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, it.key) }, { it.value.createObject })
                         .toMutableMap()
 
@@ -119,8 +119,6 @@ class RemoteTaskRecord private constructor(
                 }
                 .min()
 
-    val remoteInstanceRecords: Map<ScheduleKey, RemoteInstanceRecord> get() = _remoteInstanceRecords
-
     constructor(domainFactory: DomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : this(
             false,
             domainFactory,
@@ -145,14 +143,13 @@ class RemoteTaskRecord private constructor(
 
             val remoteInstanceRecord = RemoteInstanceRecord(
                     false,
-                    domainFactory,
                     this,
                     instanceJson,
                     scheduleKey,
                     key,
                     remoteCustomTimeId)
 
-            _remoteInstanceRecords[scheduleKey] = remoteInstanceRecord
+            remoteInstanceRecords[scheduleKey] = remoteInstanceRecord
         }
 
         for ((id, scheduleWrapper) in taskJson.schedules) {
@@ -199,7 +196,7 @@ class RemoteTaskRecord private constructor(
     private val oldestVisibleJson get() = taskJson.oldestVisible[uuid]
 
     override val children
-        get() = _remoteInstanceRecords.values +
+        get() = remoteInstanceRecords.values +
                 remoteSingleScheduleRecords.values +
                 remoteDailyScheduleRecords.values +
                 remoteWeeklyScheduleRecords.values +
@@ -249,10 +246,10 @@ class RemoteTaskRecord private constructor(
 
         val firebaseKey = RemoteInstanceRecord.scheduleKeyToString(domainFactory, projectId, scheduleKey, remoteCustomTimeId)
 
-        val remoteInstanceRecord = RemoteInstanceRecord(true, domainFactory, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)
-        check(!_remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
+        val remoteInstanceRecord = RemoteInstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)
+        check(!remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 
-        _remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord
+        remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord
         return remoteInstanceRecord
     }
 
@@ -287,4 +284,6 @@ class RemoteTaskRecord private constructor(
         remoteMonthlyWeekScheduleRecords[remoteMonthlyWeekScheduleRecord.id] = remoteMonthlyWeekScheduleRecord
         return remoteMonthlyWeekScheduleRecord
     }
+
+    override fun deleteFromParent() = check(remoteProjectRecord.remoteTaskRecords.remove(id) == this)
 }

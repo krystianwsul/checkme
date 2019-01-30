@@ -34,4 +34,6 @@ class RemoteMonthlyWeekScheduleRecord : RemoteScheduleRecord {
             monthlyWeekScheduleJson.endTime = value
             addValue("$key/monthlyWeekScheduleJson/endTime", value)
     }
+
+    override fun deleteFromParent() = check(remoteTaskRecord.remoteMonthlyWeekScheduleRecords.remove(id) == this)
 }

@@ -24,4 +24,6 @@ class RemoteDailyScheduleRecord(id: String, remoteTaskRecord: RemoteTaskRecord, 
             dailyScheduleJson.endTime = value
             addValue("$key/dailyScheduleJson/endTime", value)
         }
+
+    override fun deleteFromParent() = check(remoteTaskRecord.remoteDailyScheduleRecords.remove(id) == this)
 }

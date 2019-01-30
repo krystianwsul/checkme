@@ -15,7 +15,9 @@ abstract class RemoteRecord(create: Boolean) {
 
     open val children = listOf<RemoteRecord>()
 
-    fun getValues(values: MutableMap<String, Any?>) {
+    protected abstract fun deleteFromParent()
+
+    fun getValues(values: MutableMap<String, Any?>): Boolean {
         if (delete) {
             Log.e("asdf", "RemoteRecord.getValues deleting " + this)
 
@@ -23,6 +25,10 @@ abstract class RemoteRecord(create: Boolean) {
 
             values[key] = null
             delete = false
+
+            deleteFromParent()
+
+            return true
         } else {
             if (update == null) {
                 Log.e("asdf", "RemoteRecord.getValues creating " + this)
@@ -41,6 +47,8 @@ abstract class RemoteRecord(create: Boolean) {
 
                 children.forEach { it.getValues(values) }
             }
+
+            return false
         }
     }
 

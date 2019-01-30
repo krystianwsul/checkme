@@ -11,7 +11,7 @@ import kotlin.properties.Delegates
 
 class RemoteSharedProjectManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
-    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(domainFactory, key!!, getValue(JsonWrapper::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(this@RemoteSharedProjectManager, domainFactory, key!!, getValue(JsonWrapper::class.java)!!)
 
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemoteSharedProjectManager.isSaved = $value") }
 
@@ -42,7 +42,7 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
     fun save(): Boolean {
         val values = HashMap<String, Any?>()
 
-        remoteProjectRecords.values.forEach { it.getValues(values) }
+        remoteProjectRecords.values.filter { it.getValues(values) }
 
         MyCrashlytics.log("RemoteSharedProjectManager.save values: $values")
 
@@ -56,7 +56,7 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
         return isSaved
     }
 
-    fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(domainFactory, jsonWrapper).also {
+    fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(this, domainFactory, jsonWrapper).also {
         check(!remoteProjectRecords.containsKey(it.id))
 
         remoteProjectRecords[it.id] = it

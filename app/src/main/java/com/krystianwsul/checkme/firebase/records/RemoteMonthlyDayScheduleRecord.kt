@@ -17,9 +17,9 @@ class RemoteMonthlyDayScheduleRecord : RemoteScheduleRecord {
 
     val minute by lazy { monthlyDayScheduleJson.minute }
 
-    constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper) {}
+    constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
 
-    constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper) {}
+    constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
 
     override val startTime by lazy { monthlyDayScheduleJson.startTime }
 
@@ -32,4 +32,6 @@ class RemoteMonthlyDayScheduleRecord : RemoteScheduleRecord {
             monthlyDayScheduleJson.endTime = value
             addValue("$key/monthlyDayScheduleJson/endTime", value)
         }
+
+    override fun deleteFromParent() = check(remoteTaskRecord.remoteMonthlyDayScheduleRecords.remove(id) == this)
 }

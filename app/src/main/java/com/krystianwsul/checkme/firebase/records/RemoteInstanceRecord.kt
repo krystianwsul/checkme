@@ -14,7 +14,6 @@ import java.util.regex.Pattern
 
 class RemoteInstanceRecord(
         create: Boolean,
-        private val domainFactory: DomainFactory,
         private val remoteTaskRecord: RemoteTaskRecord,
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
@@ -179,4 +178,6 @@ class RemoteInstanceRecord(
         createObject.instanceDay = instanceDay
         addValue("$key/instanceDay", instanceDay)
     }
+
+    override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
 }

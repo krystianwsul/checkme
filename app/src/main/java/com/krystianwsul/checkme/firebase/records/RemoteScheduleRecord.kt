@@ -12,7 +12,7 @@ abstract class RemoteScheduleRecord : RemoteRecord {
 
     val id: String
 
-    private val remoteTaskRecord: RemoteTaskRecord
+    protected val remoteTaskRecord: RemoteTaskRecord
 
     final override val createObject: ScheduleWrapper
 

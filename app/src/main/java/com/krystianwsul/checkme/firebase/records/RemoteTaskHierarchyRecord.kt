@@ -56,4 +56,6 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
         createObject.ordinal = ordinal
         addValue("$key/ordinal", ordinal)
     }
+
+    override fun deleteFromParent() = check(remoteProjectRecord.remoteTaskHierarchyRecords.remove(id) == this)
 }

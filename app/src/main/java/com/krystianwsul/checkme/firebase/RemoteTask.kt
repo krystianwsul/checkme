@@ -253,7 +253,7 @@ class RemoteTask(
     override fun belongsToRemoteProject() = true
 
     override fun updateProject(now: ExactTimeStamp, projectId: String?): RemoteTask {
-        check(TextUtils.isEmpty(projectId))
+        check(projectId.isNullOrEmpty() || projectId == remoteProject.id)
 
         return this
     }

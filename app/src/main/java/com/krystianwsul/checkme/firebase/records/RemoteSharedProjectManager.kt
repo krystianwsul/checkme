@@ -50,7 +50,7 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.updateRecords(values).checkError("RemoteSharedProjectManager.save")
+            DatabaseWrapper.updateRecords(values).checkError(domainFactory, "RemoteSharedProjectManager.save")
         }
 
         return isSaved

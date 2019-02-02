@@ -169,7 +169,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     // firebase
 
-    private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid).checkError("DomainFactory.setUserHelper")
+    private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid).checkError(this, "DomainFactory.setUserHelper")
 
     @Synchronized
     fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
@@ -255,7 +255,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
             return
         }
 
-        this.remoteFriendFactory = RemoteFriendFactory(dataSnapshot.children)
+        remoteFriendFactory = RemoteFriendFactory(this, dataSnapshot.children)
 
         tryNotifyListeners()
     }
@@ -1468,7 +1468,7 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
             return
 
         userInfo = newUserInfo
-        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid).checkError("DomainFactory.updateUserInfo")
+        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid).checkError(this, "DomainFactory.updateUserInfo")
 
         remoteProjectFactory.updateUserInfo(newUserInfo)
 

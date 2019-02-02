@@ -2,12 +2,13 @@ package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
 import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.UserJson
 import com.krystianwsul.checkme.firebase.records.RemoteFriendManager
 
-class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
+class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
-    private val remoteFriendManager = RemoteFriendManager(children)
+    private val remoteFriendManager = RemoteFriendManager(domainFactory, children)
 
     private val _friends = remoteFriendManager.remoteRootUserRecords
             .values

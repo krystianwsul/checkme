@@ -17,6 +17,7 @@ import com.jakewharton.rxbinding2.view.keys
 import com.jakewharton.rxbinding2.widget.editorActionEvents
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -85,7 +86,7 @@ class FindFriendActivity : AbstractActivity() {
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            DatabaseWrapper.addFriend(userData!!.key).checkError("FindFriendActivity.addFriend")
+            DatabaseWrapper.addFriend(userData!!.key).checkError(DomainFactory.instance, "FindFriendActivity.addFriend")
 
             finish()
         }

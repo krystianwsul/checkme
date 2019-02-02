@@ -110,9 +110,8 @@ fun Context.startTicks(receiver: BroadcastReceiver) {
 
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
 
-fun Task<Void>.checkError(caller: String, values: Any? = null) {
-    fun getTaskKeys() = Pair(ExactTimeStamp.now, DomainFactory.instance
-            .remoteProjectFactory
+fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: Any? = null) {
+    fun getTaskKeys() = Pair(ExactTimeStamp.now, domainFactory.remoteProjectFactory
             .remotePrivateProject
             .taskKeys)
 

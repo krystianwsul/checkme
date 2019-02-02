@@ -246,7 +246,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))
 
-                DatabaseWrapper.addFriends(friendIds).checkError("FriendListFragment.removeFriends.undo")
+                DatabaseWrapper.addFriends(friendIds).checkError(DomainFactory.instance, "FriendListFragment.removeFriends.undo")
             }
         }
     }

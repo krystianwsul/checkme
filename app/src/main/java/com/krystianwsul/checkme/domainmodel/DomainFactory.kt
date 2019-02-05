@@ -32,7 +32,14 @@ import com.krystianwsul.checkme.viewmodels.*
 import java.util.*
 
 @Suppress("LeakingThis")
-open class DomainFactory(persistenceManager: PersistenceManager, private var userInfo: UserInfo, remoteStart: ExactTimeStamp, sharedSnapshot: DataSnapshot, privateSnapshot: DataSnapshot) {
+open class DomainFactory(
+        persistenceManager: PersistenceManager,
+        private var userInfo: UserInfo,
+        remoteStart: ExactTimeStamp,
+        sharedSnapshot: DataSnapshot,
+        privateSnapshot: DataSnapshot,
+        userSnapshot: DataSnapshot,
+        friendSnapshot: DataSnapshot) {
 
     companion object {
 
@@ -105,9 +112,9 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     var remoteProjectFactory: RemoteProjectFactory
         private set
 
-    private lateinit var remoteRootUser: RemoteRootUser
+    private var remoteRootUser: RemoteRootUser
 
-    lateinit var remoteFriendFactory: RemoteFriendFactory
+    var remoteFriendFactory: RemoteFriendFactory
         private set
 
     private var skipSave = false
@@ -138,6 +145,12 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         this.remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, userInfo, remoteRead)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
+
+        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, userSnapshot.getValue(UserWrapper::class.java)!!))
+
+        remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
+
+        tryNotifyListeners()
     }
 
     // misc
@@ -252,12 +265,12 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
 
     @Synchronized
     fun setUserRecord(dataSnapshot: DataSnapshot) {
-        this.remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
+        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
     }
 
     @Synchronized
     fun setFriendRecords(dataSnapshot: DataSnapshot) {
-        if (this::remoteFriendFactory.isInitialized && remoteFriendFactory.isSaved) {
+        if (remoteFriendFactory.isSaved) {
             remoteFriendFactory.isSaved = false
             Log.e("asdf", "skipping setFriendRecords")
             return

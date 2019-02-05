@@ -104,17 +104,12 @@ class MyApplication : Application() {
                 { DatabaseWrapper.getSharedProjectEvents(it.key) },
                 { DatabaseWrapper.getFriendObservable(it.key) },
                 { DatabaseWrapper.getUserObservable(it.key) },
-                { userInfo, privateProject, sharedProjects, friends, user ->
-                    DomainFactory(PersistenceManager.instance, userInfo, ExactTimeStamp.now, sharedProjects, privateProject).apply {
-                        setUserRecord(user)
-                        setFriendRecords(friends)
-                    }
-                },
+                { userInfo, privateProject, sharedProjects, friends, user -> DomainFactory(PersistenceManager.instance, userInfo, ExactTimeStamp.now, sharedProjects, privateProject, user, friends) },
                 { DomainFactory.nullableInstance?.clearUserInfo() },
-                { domainFactory, privateProject -> domainFactory.updatePrivateProjectRecord(privateProject) },
-                { domainFactory, sharedProjects -> domainFactory.updateSharedProjectRecords(sharedProjects) },
-                { domainFactory, friends -> domainFactory.setFriendRecords(friends) },
-                { domainFactory, user -> domainFactory.setUserRecord(user) }
+                DomainFactory::updatePrivateProjectRecord,
+                DomainFactory::updateSharedProjectRecords,
+                DomainFactory::setFriendRecords,
+                DomainFactory::setUserRecord
                 //, { Log.e("asdf", "FactoryListener:\n$it")}
         ).domainFactoryObservable.subscribe(DomainFactory.instanceRelay)
 

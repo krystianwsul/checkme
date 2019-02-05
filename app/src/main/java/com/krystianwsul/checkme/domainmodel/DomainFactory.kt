@@ -97,8 +97,10 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
     var remoteReadTimes: ReadTimes
         private set
 
-    @JvmField
-    var localFactory: LocalFactory
+    var remoteUpdateTime: Long? = null
+        private set
+
+    val localFactory: LocalFactory
 
     var remoteProjectFactory: RemoteProjectFactory
         private set
@@ -179,6 +181,8 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         MyCrashlytics.log("updatePrivateProjectRecord")
         Log.e("asdf", "update private project record $dataSnapshot")
 
+        val start = ExactTimeStamp.now
+
         if (remoteProjectFactory.isPrivateSaved) {
             remoteProjectFactory.isPrivateSaved = false
             Log.e("asdf", "skipping private project records")
@@ -186,6 +190,10 @@ open class DomainFactory(persistenceManager: PersistenceManager, private var use
         }
 
         remoteProjectFactory.onNewPrivate(dataSnapshot, ExactTimeStamp.now)
+
+        val stop = ExactTimeStamp.now
+
+        remoteUpdateTime = stop.long - start.long
 
         tryNotifyListeners()
     }

@@ -48,36 +48,42 @@ class DebugFragment : AbstractFragment() {
 
                 val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
 
-                val kotlinDomainFactory = DomainFactory.instance
+                val domainFactory = DomainFactory.instance
 
                 append("local load time: ")
-                append(kotlinDomainFactory.localReadTimes.readMillis + kotlinDomainFactory.localReadTimes.instantiateMillis)
+                append(domainFactory.localReadTimes.readMillis + domainFactory.localReadTimes.instantiateMillis)
                 append("ms (")
-                append(kotlinDomainFactory.localReadTimes.readMillis)
+                append(domainFactory.localReadTimes.readMillis)
                 append(" + ")
-                append(kotlinDomainFactory.localReadTimes.instantiateMillis)
+                append(domainFactory.localReadTimes.instantiateMillis)
                 append(")")
 
                 append("\nremote load time: ")
-                append(kotlinDomainFactory.remoteReadTimes.readMillis + kotlinDomainFactory.remoteReadTimes.instantiateMillis)
+                append(domainFactory.remoteReadTimes.readMillis + domainFactory.remoteReadTimes.instantiateMillis)
                 append("ms (")
-                append(kotlinDomainFactory.remoteReadTimes.readMillis)
+                append(domainFactory.remoteReadTimes.readMillis)
                 append(" + ")
-                append(kotlinDomainFactory.remoteReadTimes.instantiateMillis)
+                append(domainFactory.remoteReadTimes.instantiateMillis)
                 append(")")
 
+                domainFactory.remoteUpdateTime?.let {
+                    append("\nremote update time: ")
+                    append(it)
+                    append("ms")
+                }
+
                 append("\n\ntasks: ")
-                append(kotlinDomainFactory.localTaskCount)
+                append(domainFactory.localTaskCount)
                 append("/")
-                append(kotlinDomainFactory.remoteTaskCount)
+                append(domainFactory.remoteTaskCount)
                 append("\ninstances: ")
-                append(kotlinDomainFactory.localInstanceCount)
+                append(domainFactory.localInstanceCount)
                 append("/")
-                append(kotlinDomainFactory.remoteInstanceCount)
+                append(domainFactory.remoteInstanceCount)
                 append("\ncustom times: ")
-                append(kotlinDomainFactory.customTimeCount)
+                append(domainFactory.customTimeCount)
                 append("\ninstance shown: ")
-                append(kotlinDomainFactory.instanceShownCount)
+                append(domainFactory.instanceShownCount)
 
                 val t1 = ExactTimeStamp.now
                 DomainFactory.instance.getGroupListData(ExactTimeStamp.now, 0, MainActivity.TimeRange.DAY)

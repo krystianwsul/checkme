@@ -281,13 +281,4 @@ abstract class Task(protected val domainFactory: DomainFactory) {
     abstract fun belongsToRemoteProject(): Boolean
 
     abstract fun updateProject(now: ExactTimeStamp, projectId: String?): Task
-
-    var onlyHierarchy = false
-
-    protected fun checkOnlyHierarchy(name: String) {
-        if (onlyHierarchy)
-            MyCrashlytics.logException(HierarchyException(name))
-    }
-
-    private inner class HierarchyException(name: String) : Exception("task $name $taskKey")
 }

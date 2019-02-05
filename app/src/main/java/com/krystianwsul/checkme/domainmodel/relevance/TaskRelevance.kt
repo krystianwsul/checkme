@@ -13,26 +13,22 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
     var relevant = false
         private set
 
-    var onlyHierarchy = true // todo begining to log on 08-01-2019. If nothing by 08-02-2019, start deleting these tasks
-        private set
-
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, LocalCustomTimeRelevance>, now: ExactTimeStamp, onlyHierarchy: Boolean = false) {
-        val settingNotOnlyHierarchy = this.onlyHierarchy && !onlyHierarchy
-        if (relevant && !settingNotOnlyHierarchy) return
-
-        this.onlyHierarchy = this.onlyHierarchy && onlyHierarchy
+    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, LocalCustomTimeRelevance>, now: ExactTimeStamp) {
+        if (relevant)
+            return
 
         relevant = true
 
         val taskKey = task.taskKey
 
         // mark parents and children relevant
-        (task.getTaskHierarchiesByChildTaskKey(taskKey).map { Pair(it, it.parentTaskKey) } + task.getTaskHierarchiesByParentTaskKey(taskKey).map { Pair(it, it.childTaskKey) })
-                .forEach { (taskHierarchy, taskKey) ->
-                    val childOnlyHierarchy = onlyHierarchy || !taskHierarchy.notDeleted(now)
-
-                    taskRelevances[taskKey]!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now, childOnlyHierarchy)
-                }
+        (task.getTaskHierarchiesByChildTaskKey(taskKey)
+                .filter { it.notDeleted(now) }
+                .map { it.parentTaskKey }
+                + task.getTaskHierarchiesByParentTaskKey(taskKey)
+                .filter { it.notDeleted(now) }
+                .map { it.childTaskKey })
+                .forEach { taskRelevances.getValue(it).setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
 
         val oldestVisible = task.getOldestVisible()!!
 
@@ -62,7 +58,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
                 .asSequence()
                 .map { it.customTimeKey }
                 .filterIsInstance<CustomTimeKey.LocalCustomTimeKey>()
-                .map { customTimeRelevances[it.localCustomTimeId]!! }
+                .map { customTimeRelevances.getValue(it.localCustomTimeId) }
                 .forEach { it.setRelevant() }
     }
 
@@ -71,9 +67,9 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
 
         task.schedules
                 .mapNotNull { it.remoteCustomTimeKey }
-                .map { remoteCustomTimeRelevances[it]!! }
+                .map { remoteCustomTimeRelevances.getValue(it) }
                 .forEach { it.setRelevant() }
 
-        task.remoteNullableProject?.let { remoteProjectRelevances[it.id]!!.setRelevant() }
+        task.remoteNullableProject?.let { remoteProjectRelevances.getValue(it.id).setRelevant() }
     }
 }

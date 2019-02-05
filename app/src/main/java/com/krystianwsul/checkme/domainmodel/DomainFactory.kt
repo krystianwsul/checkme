@@ -2014,7 +2014,6 @@ open class DomainFactory(
         getCurrentCustomTimes().map { localCustomTimeRelevances.getValue(it.id) }.forEach { it.setRelevant() }
 
         val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
-        relevantTaskRelevances.forEach { it.task.onlyHierarchy = it.onlyHierarchy }
 
         val relevantTasks = relevantTaskRelevances.map { it.task }
 

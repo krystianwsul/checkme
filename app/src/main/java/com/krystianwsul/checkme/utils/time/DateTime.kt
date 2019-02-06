@@ -6,7 +6,7 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
 
     override fun compareTo(other: DateTime) = compareValuesBy(this, other, { it.date }, { time.getHourMinute(date.dayOfWeek) })
 
-    override fun toString() = date.toString() + " " + time.toString()
+    override fun toString() = "$date $time"
 
     fun getDisplayText() = date.getDisplayText() + ", " + time.toString()
 

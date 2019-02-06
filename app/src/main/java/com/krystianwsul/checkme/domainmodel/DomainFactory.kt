@@ -1587,7 +1587,20 @@ open class DomainFactory(
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
-        val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, scheduleDateTime.time.timePair)
+        val originalCustomTimeKey = scheduleDateTime.time
+                .timePair
+                .customTimeKey
+
+        val fixedCustomTimeKey = originalCustomTimeKey?.let {
+            if (it is CustomTimeKey.RemoteCustomTimeKey)
+                getLocalCustomTimeKeyIfPossible(it.remoteProjectId, it.remoteCustomTimeId)
+            else
+                it
+        }
+
+        val timePair = TimePair(fixedCustomTimeKey, scheduleDateTime.time.timePair.hourMinute)
+
+        val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, timePair)
 
         return getExistingInstanceIfPresent(instanceKey)
     }

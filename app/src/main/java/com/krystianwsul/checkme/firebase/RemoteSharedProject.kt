@@ -2,15 +2,18 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
+import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import java.util.*
 
 class RemoteSharedProject(
         domainFactory: DomainFactory,
-        private val remoteProjectRecord: RemoteSharedProjectRecord,
+        override val remoteProjectRecord: RemoteSharedProjectRecord,
         userInfo: UserInfo,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject(domainFactory, remoteProjectRecord, uuid, now) {
+        now: ExactTimeStamp) : RemoteProject(domainFactory, uuid, now) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -20,7 +23,35 @@ class RemoteSharedProject(
 
     val users get() = remoteUsers.values
 
+    override val remoteCustomTimes = HashMap<String, RemoteSharedCustomTime>()
+    override val remoteTasks: MutableMap<String, RemoteTask>
+    override val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
+
     init {
+        for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
+            @Suppress("LeakingThis")
+            val remoteCustomTime = RemoteSharedCustomTime(this, remoteCustomTimeRecord)
+
+            remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
+
+            if (remoteCustomTimeRecord.ownerId == domainFactory.uuid && domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
+                val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
+
+                localCustomTime.updateRemoteCustomTimeRecord(remoteCustomTimeRecord)
+            }
+        }
+
+        remoteTasks = remoteProjectRecord.remoteTaskRecords
+                .values
+                .map { RemoteTask(domainFactory, this, it, now) }
+                .associateBy { it.id }
+                .toMutableMap()
+
+        remoteProjectRecord.remoteTaskHierarchyRecords
+                .values
+                .map { RemoteTaskHierarchy(domainFactory, this, it) }
+                .forEach { remoteTaskHierarchies.add(it.id, it) }
+
         updateUserInfo(userInfo, uuid)
     }
 
@@ -64,4 +95,24 @@ class RemoteSharedProject(
             remoteUsers[removedFriend]!!.delete()
         }
     }
+
+    fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): RemoteSharedCustomTime {
+        val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
+
+        val remoteCustomTime = RemoteSharedCustomTime(this, remoteCustomTimeRecord)
+
+        check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
+
+        remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
+
+        return remoteCustomTime
+    }
+
+    fun deleteCustomTime(remoteCustomTime: RemoteSharedCustomTime) {
+        check(remoteCustomTimes.containsKey(remoteCustomTime.id))
+
+        remoteCustomTimes.remove(remoteCustomTime.id)
+    }
+
+    override fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.let { it.ownerId == uuid && it.localId == localCustomTimeId } }
 }

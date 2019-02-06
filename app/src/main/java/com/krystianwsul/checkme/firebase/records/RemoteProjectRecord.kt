@@ -2,27 +2,25 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.json.*
+import com.krystianwsul.checkme.firebase.json.ProjectJson
+import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
+import com.krystianwsul.checkme.firebase.json.TaskJson
+import com.krystianwsul.checkme.firebase.json.UserJson
 
 @Suppress("LeakingThis")
 abstract class RemoteProjectRecord(
         create: Boolean,
         domainFactory: DomainFactory,
-        val id: String,
-        private val projectJson: ProjectJson) : RemoteRecord(create) {
+        val id: String) : RemoteRecord(create) {
 
     companion object {
 
         const val PROJECT_JSON = "projectJson"
     }
 
-    val remoteCustomTimeRecords = projectJson.customTimes
-            .mapValues { (id, customTimeJson) ->
-                check(!TextUtils.isEmpty(id))
+    protected abstract val projectJson: ProjectJson
 
-                RemoteCustomTimeRecord(id, this, customTimeJson)
-            }
-            .toMutableMap()
+    abstract val remoteCustomTimeRecords: Map<String, RemoteCustomTimeRecord>
 
     val remoteTaskRecords = projectJson.tasks
             .mapValues { (id, taskJson) ->
@@ -51,25 +49,6 @@ abstract class RemoteProjectRecord(
     override val key get() = id
 
     abstract val childKey: String
-
-    protected val createProjectJson
-        get() = projectJson.apply {
-            tasks = remoteTaskRecords.values
-                    .associateBy({ it.id }, { it.createObject })
-                    .toMutableMap()
-
-            taskHierarchies = remoteTaskHierarchyRecords.values
-                    .associateBy({ it.id }, { it.createObject })
-                    .toMutableMap()
-
-            customTimes = remoteCustomTimeRecords.values
-                    .associateBy({ it.id }, { it.createObject })
-                    .toMutableMap()
-
-            users = remoteUserRecords.values
-                    .associateBy({ it.id }, { it.createObject })
-                    .toMutableMap()
-        }
 
     var name: String
         get() = projectJson.name
@@ -115,14 +94,6 @@ abstract class RemoteProjectRecord(
 
         remoteTaskHierarchyRecords[remoteTaskHierarchyRecord.id] = remoteTaskHierarchyRecord
         return remoteTaskHierarchyRecord
-    }
-
-    fun newRemoteCustomTimeRecord(customTimeJson: CustomTimeJson): RemoteCustomTimeRecord {
-        val remoteCustomTimeRecord = RemoteCustomTimeRecord(this, customTimeJson)
-        check(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.id))
-
-        remoteCustomTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
-        return remoteCustomTimeRecord
     }
 
     fun newRemoteUserRecord(userJson: UserJson): RemoteProjectUserRecord {

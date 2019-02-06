@@ -1,20 +1,20 @@
 package com.krystianwsul.checkme.firebase.json
 
-class CustomTimeJson @JvmOverloads constructor(
-        val ownerId: String = "",
-        val localId: Int = 0,
-        var name: String = "",
-        var sundayHour: Int = 0,
-        var sundayMinute: Int = 0,
-        var mondayHour: Int = 0,
-        var mondayMinute: Int = 0,
-        var tuesdayHour: Int = 0,
-        var tuesdayMinute: Int = 0,
-        var wednesdayHour: Int = 0,
-        var wednesdayMinute: Int = 0,
-        var thursdayHour: Int = 0,
-        var thursdayMinute: Int = 0,
-        var fridayHour: Int = 0,
-        var fridayMinute: Int = 0,
-        var saturdayHour: Int = 0,
-        var saturdayMinute: Int = 0)
+interface CustomTimeJson {
+    val localId: Int
+    var name: String
+    var sundayHour: Int
+    var sundayMinute: Int
+    var mondayHour: Int
+    var mondayMinute: Int
+    var tuesdayHour: Int
+    var tuesdayMinute: Int
+    var wednesdayHour: Int
+    var wednesdayMinute: Int
+    var thursdayHour: Int
+    var thursdayMinute: Int
+    var fridayHour: Int
+    var fridayMinute: Int
+    var saturdayHour: Int
+    var saturdayMinute: Int
+}

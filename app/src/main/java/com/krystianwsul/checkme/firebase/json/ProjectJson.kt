@@ -1,10 +1,12 @@
 package com.krystianwsul.checkme.firebase.json
 
-class ProjectJson @JvmOverloads constructor(
-        var name: String = "",
-        val startTime: Long = 0,
-        var endTime: Long? = null,
-        var tasks: MutableMap<String, TaskJson> = mutableMapOf(),
-        var taskHierarchies: MutableMap<String, TaskHierarchyJson> = mutableMapOf(),
-        var customTimes: MutableMap<String, CustomTimeJson> = mutableMapOf(),
-        var users: MutableMap<String, UserJson> = mutableMapOf())
+interface ProjectJson {
+
+    var name: String
+    val startTime: Long
+    var endTime: Long?
+    var tasks: MutableMap<String, TaskJson>
+    var taskHierarchies: MutableMap<String, TaskHierarchyJson>
+    val customTimes: Map<String, CustomTimeJson>
+    var users: MutableMap<String, UserJson>
+}

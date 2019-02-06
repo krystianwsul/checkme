@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 
 
-class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
+abstract class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
 
     companion object {
 
@@ -14,11 +14,9 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
 
     val id: String
 
-    private val remoteProjectRecord: RemoteProjectRecord
+    protected abstract val remoteProjectRecord: RemoteProjectRecord
 
-    private val customTimeJson: CustomTimeJson
-
-    val ownerId get() = customTimeJson.ownerId
+    protected abstract val customTimeJson: CustomTimeJson
 
     val localId get() = customTimeJson.localId
 
@@ -176,21 +174,13 @@ class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
 
     val projectId get() = remoteProjectRecord.id
 
-    constructor(id: String, remoteProjectRecord: RemoteProjectRecord, customTimeJson: CustomTimeJson) : super(false) {
+    constructor(id: String) : super(false) {
         this.id = id
-        this.remoteProjectRecord = remoteProjectRecord
-        this.customTimeJson = customTimeJson
     }
 
-    constructor(remoteProjectRecord: RemoteProjectRecord, customTimeJson: CustomTimeJson) : super(true) {
+    constructor(remoteProjectRecord: RemoteProjectRecord) : super(true) {
         id = DatabaseWrapper.getCustomTimeRecordId(remoteProjectRecord.id)
-        this.remoteProjectRecord = remoteProjectRecord
-        this.customTimeJson = customTimeJson
     }
-
-    override val createObject get() = customTimeJson
 
     override val key get() = remoteProjectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
-
-    override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
 }

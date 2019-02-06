@@ -8,9 +8,11 @@ import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.*
 
-class RemoteCustomTime(
-        private val remoteProject: RemoteProject,
-        val remoteCustomTimeRecord: RemoteCustomTimeRecord) : CustomTime {
+abstract class RemoteCustomTime : CustomTime {
+
+    protected abstract val remoteProject: RemoteProject
+
+    abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord
 
     val id by lazy { remoteCustomTimeRecord.id }
 
@@ -39,9 +41,5 @@ class RemoteCustomTime(
 
     override fun toString() = name
 
-    fun delete() {
-        remoteProject.deleteCustomTime(this)
-
-        remoteCustomTimeRecord.delete()
-    }
+    abstract fun delete()
 }

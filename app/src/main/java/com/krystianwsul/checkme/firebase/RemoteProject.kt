@@ -5,24 +5,27 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy
-import com.krystianwsul.checkme.firebase.json.*
+import com.krystianwsul.checkme.firebase.json.InstanceJson
+import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
+import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
+import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import java.util.*
 
 abstract class RemoteProject(
         protected val domainFactory: DomainFactory,
-        private val remoteProjectRecord: RemoteProjectRecord,
         val uuid: String,
         now: ExactTimeStamp) {
 
-    private val remoteTasks: MutableMap<String, RemoteTask>
-    private val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
-    private val remoteCustomTimes = HashMap<String, RemoteCustomTime>()
+    protected abstract val remoteProjectRecord: RemoteProjectRecord
+
+    protected abstract val remoteTasks: MutableMap<String, RemoteTask>
+    protected abstract val remoteTaskHierarchies: TaskHierarchyContainer<String, RemoteTaskHierarchy>
+    protected abstract val remoteCustomTimes: Map<String, RemoteCustomTime>
 
     val id by lazy { remoteProjectRecord.id }
 
@@ -47,32 +50,6 @@ abstract class RemoteProject(
     val taskIds get() = remoteTasks.keys
 
     val customTimes get() = remoteCustomTimes.values
-
-    init {
-        for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
-            @Suppress("LeakingThis")
-            val remoteCustomTime = RemoteCustomTime(this, remoteCustomTimeRecord)
-
-            remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
-
-            if (remoteCustomTimeRecord.ownerId == domainFactory.uuid && domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
-                val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
-
-                localCustomTime.updateRemoteCustomTimeRecord(remoteCustomTimeRecord)
-            }
-        }
-
-        remoteTasks = remoteProjectRecord.remoteTaskRecords
-                .values
-                .map { RemoteTask(domainFactory, this, it, now) }
-                .associateBy { it.id }
-                .toMutableMap()
-
-        remoteProjectRecord.remoteTaskHierarchyRecords
-                .values
-                .map { RemoteTaskHierarchy(domainFactory, this, it) }
-                .forEach { remoteTaskHierarchies.add(it.id, it) }
-    }
 
     fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask {
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
@@ -183,24 +160,6 @@ abstract class RemoteProject(
         return remoteCustomTimes[remoteCustomTimeId]!!
     }
 
-    fun newRemoteCustomTime(customTimeJson: CustomTimeJson): RemoteCustomTime {
-        val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
-
-        val remoteCustomTime = RemoteCustomTime(this, remoteCustomTimeRecord)
-
-        check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
-
-        remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
-
-        return remoteCustomTime
-    }
-
-    fun deleteCustomTime(remoteCustomTime: RemoteCustomTime) {
-        check(remoteCustomTimes.containsKey(remoteCustomTime.id))
-
-        remoteCustomTimes.remove(remoteCustomTime.id)
-    }
-
     fun delete() {
         remoteFactory.deleteProject(this)
 
@@ -233,7 +192,7 @@ abstract class RemoteProject(
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchies.getById(id)
 
-    fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.let { it.ownerId == uuid && it.localId == localCustomTimeId } }
+    abstract fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int): RemoteCustomTime?
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
 }

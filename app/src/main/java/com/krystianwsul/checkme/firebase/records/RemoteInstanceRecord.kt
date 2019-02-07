@@ -63,9 +63,9 @@ class RemoteInstanceRecord(
                 val customTimeId = customTimeMatcher.group(4)
                 check(!TextUtils.isEmpty(customTimeId))
 
-                val customTimeRecord = remoteProjectRecord.remoteCustomTimeRecords[customTimeId]!!
+                val customTimeRecord = remoteProjectRecord.remoteCustomTimeRecords.getValue(customTimeId)
 
-                val customTimeKey = customTimeRecord.takeIf { it.ownerId == domainFactory.uuid }?.let {
+                val customTimeKey = customTimeRecord.takeIf { it.mine(domainFactory) }?.let {
                     domainFactory.localFactory
                             .tryGetLocalCustomTime(it.localId)
                             ?.customTimeKey

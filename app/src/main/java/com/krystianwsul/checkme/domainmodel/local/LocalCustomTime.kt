@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
+import com.krystianwsul.checkme.firebase.records.RemotePrivateCustomTimeRecord
 import com.krystianwsul.checkme.persistencemodel.LocalCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
@@ -21,6 +22,10 @@ class LocalCustomTime(
         get() = localCustomTimeRecord.current
         set(value) {
             localCustomTimeRecord.current = value
+
+            getCustomTimeRecords().filterIsInstance<RemotePrivateCustomTimeRecord>()
+                    .singleOrNull()
+                    ?.current = value
         }
 
     private fun getCustomTimeRecords() = domainFactory.getRemoteCustomTimes(id)
@@ -138,5 +143,7 @@ class LocalCustomTime(
 
         remoteCustomTimeRecord.saturdayHour = localCustomTimeRecord.saturdayHour
         remoteCustomTimeRecord.saturdayMinute = localCustomTimeRecord.saturdayMinute
+
+        (remoteCustomTimeRecord as? RemotePrivateCustomTimeRecord)?.current = localCustomTimeRecord.current
     }
 }

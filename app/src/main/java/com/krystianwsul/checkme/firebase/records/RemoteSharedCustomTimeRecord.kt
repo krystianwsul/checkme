@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
 
 
@@ -24,4 +25,6 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord {
     override val createObject get() = customTimeJson
 
     override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
+
+    override fun mine(domainFactory: DomainFactory) = ownerId == domainFactory.uuid
 }

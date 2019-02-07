@@ -22,29 +22,35 @@ abstract class RemoteProjectRecord(
 
     abstract val remoteCustomTimeRecords: Map<String, RemoteCustomTimeRecord>
 
-    val remoteTaskRecords = projectJson.tasks
-            .mapValues { (id, taskJson) ->
-                check(!TextUtils.isEmpty(id))
+    val remoteTaskRecords by lazy {
+        projectJson.tasks
+                .mapValues { (id, taskJson) ->
+                    check(!TextUtils.isEmpty(id))
 
-                RemoteTaskRecord(domainFactory, id, this, taskJson)
-            }
-            .toMutableMap()
+                    RemoteTaskRecord(domainFactory, id, this, taskJson)
+                }
+                .toMutableMap()
+    }
 
-    val remoteTaskHierarchyRecords = projectJson.taskHierarchies
-            .mapValues { (id, taskHierarchyJson) ->
-                check(!TextUtils.isEmpty(id))
+    val remoteTaskHierarchyRecords by lazy {
+        projectJson.taskHierarchies
+                .mapValues { (id, taskHierarchyJson) ->
+                    check(!TextUtils.isEmpty(id))
 
-                RemoteTaskHierarchyRecord(id, this, taskHierarchyJson)
-            }
-            .toMutableMap()
+                    RemoteTaskHierarchyRecord(id, this, taskHierarchyJson)
+                }
+                .toMutableMap()
+    }
 
-    val remoteUserRecords = projectJson.users
-            .mapValues { (id, userJson) ->
-                check(!TextUtils.isEmpty(id))
+    val remoteUserRecords by lazy {
+        projectJson.users
+                .mapValues { (id, userJson) ->
+                    check(!TextUtils.isEmpty(id))
 
-                RemoteProjectUserRecord(false, this, userJson)
-            }
-            .toMutableMap()
+                    RemoteProjectUserRecord(false, this, userJson)
+                }
+                .toMutableMap()
+    }
 
     override val key get() = id
 

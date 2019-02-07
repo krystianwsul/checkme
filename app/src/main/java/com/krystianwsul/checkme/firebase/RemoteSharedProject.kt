@@ -4,7 +4,9 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
+import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import java.util.*
 
@@ -13,7 +15,7 @@ class RemoteSharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         userInfo: UserInfo,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject(domainFactory, uuid, now) {
+        now: ExactTimeStamp) : RemoteProject(domainFactory, uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -96,7 +98,7 @@ class RemoteSharedProject(
         }
     }
 
-    fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): RemoteSharedCustomTime {
+    private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): RemoteSharedCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
         val remoteCustomTime = RemoteSharedCustomTime(this, remoteCustomTimeRecord)
@@ -115,4 +117,18 @@ class RemoteSharedProject(
     }
 
     override fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.let { it.ownerId == uuid && it.localId == localCustomTimeId } }
+
+    override fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): String {
+        val localCustomTimeId = localCustomTimeKey.localCustomTimeId
+
+        val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
+
+        val remoteCustomTime = getRemoteCustomTimeIfPresent(localCustomTimeId)
+        if (remoteCustomTime != null)
+            return remoteCustomTime.id
+
+        val customTimeJson = SharedCustomTimeJson(domainFactory.uuid, localCustomTime.id, localCustomTime.name, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, localCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, localCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute)
+
+        return newRemoteCustomTime(customTimeJson).id
+    }
 }

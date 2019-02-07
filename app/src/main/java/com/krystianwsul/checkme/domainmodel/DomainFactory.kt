@@ -2403,7 +2403,7 @@ open class DomainFactory(
     fun getLocalCustomTimeKeyIfPossible(remoteProjectId: String, remoteCustomTimeId: String): CustomTimeKey = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
             .getRemoteCustomTime(remoteCustomTimeId)
             .let { it.remoteCustomTimeRecord }
-            .takeIf { it.ownerId == uuid }
+            .takeIf { it.mine(this) }
             ?.let { localFactory.localCustomTimes.singleOrNull { localCustomTime -> localCustomTime.id == it.localId } }
             ?.customTimeKey
             ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)

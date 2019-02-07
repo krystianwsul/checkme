@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.utils.time
 import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
@@ -29,7 +28,7 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
         }
     }
 
-    fun destructureRemote(remoteProjectFactory: RemoteProjectFactory, remoteProject: RemoteProject): Triple<String?, Int?, Int?> {
+    fun destructureRemote(remoteProject: RemoteProject): Triple<String?, Int?, Int?> {
         val remoteCustomTimeId: String?
         val hour: Int?
         val minute: Int?
@@ -37,7 +36,7 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
             check(hourMinute == null)
 
             remoteCustomTimeId = when (customTimeKey) {
-                is CustomTimeKey.LocalCustomTimeKey -> remoteProjectFactory.getRemoteCustomTimeId(customTimeKey, remoteProject)
+                is CustomTimeKey.LocalCustomTimeKey -> remoteProject.getRemoteCustomTimeId(customTimeKey)
                 is CustomTimeKey.RemoteCustomTimeKey -> customTimeKey.remoteCustomTimeId
             }
 

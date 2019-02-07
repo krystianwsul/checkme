@@ -18,8 +18,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 abstract class RemoteProject(
         protected val domainFactory: DomainFactory,
-        val uuid: String,
-        now: ExactTimeStamp) {
+        val uuid: String) {
 
     protected abstract val remoteProjectRecord: RemoteProjectRecord
 
@@ -82,7 +81,7 @@ abstract class RemoteProject(
             val instanceJson = getInstanceJson(it)
             val scheduleKey = it.scheduleKey
 
-            (scheduleKey.scheduleTimePair.customTimeKey as? CustomTimeKey.LocalCustomTimeKey)?.let { remoteFactory.getRemoteCustomTimeId(it, this) }
+            (scheduleKey.scheduleTimePair.customTimeKey as? CustomTimeKey.LocalCustomTimeKey)?.let { getRemoteCustomTimeId(it) }
 
             RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey) to instanceJson
         }.toMutableMap()
@@ -109,7 +108,7 @@ abstract class RemoteProject(
         val instanceDate = instance.instanceDate
         val instanceTimePair = instance.instanceTimePair
 
-        val (instanceRemoteCustomTimeId, instanceHour, instanceMinute) = instanceTimePair.destructureRemote(remoteFactory, this)
+        val (instanceRemoteCustomTimeId, instanceHour, instanceMinute) = instanceTimePair.destructureRemote(this)
 
         return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId, instanceHour, instanceMinute, instance.ordinal)
     }
@@ -157,7 +156,7 @@ abstract class RemoteProject(
     fun getRemoteCustomTime(remoteCustomTimeId: String): RemoteCustomTime {
         check(remoteCustomTimes.containsKey(remoteCustomTimeId))
 
-        return remoteCustomTimes[remoteCustomTimeId]!!
+        return remoteCustomTimes.getValue(remoteCustomTimeId)
     }
 
     fun delete() {
@@ -195,4 +194,6 @@ abstract class RemoteProject(
     abstract fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int): RemoteCustomTime?
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
+
+    abstract fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): String
 }

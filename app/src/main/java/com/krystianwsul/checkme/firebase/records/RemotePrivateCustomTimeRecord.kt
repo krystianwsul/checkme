@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 
 
@@ -22,4 +23,16 @@ class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord {
     override val createObject get() = customTimeJson
 
     override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
+
+    override fun mine(domainFactory: DomainFactory) = true
+
+    var current: Boolean
+        get() = customTimeJson.current
+        set(value) {
+            if (customTimeJson.current == value)
+                return
+
+            customTimeJson.current = value
+            addValue("$key/current", value)
+        }
 }

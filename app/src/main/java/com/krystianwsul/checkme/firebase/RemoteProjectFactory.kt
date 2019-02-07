@@ -8,14 +8,15 @@ import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
-import com.krystianwsul.checkme.firebase.json.ProjectJson
+import com.krystianwsul.checkme.firebase.json.SharedProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectManager
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectManager
-import com.krystianwsul.checkme.utils.*
-import com.krystianwsul.checkme.utils.time.DayOfWeek
+import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.ScheduleId
+import com.krystianwsul.checkme.utils.TaskHierarchyKey
+import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
@@ -138,7 +139,7 @@ class RemoteProjectFactory(
         val userJsons = domainFactory.remoteFriendFactory.getUserJsons(friendIds)
         userJsons[userInfo.key] = remoteRootUser.userJson
 
-        val projectJson = ProjectJson(name, now.long, users = userJsons)
+        val projectJson = SharedProjectJson(name, now.long, users = userJsons)
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
@@ -157,27 +158,13 @@ class RemoteProjectFactory(
         return privateSaved || sharedSaved
     }
 
-    fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey, remoteProject: RemoteProject): String {
-        val localCustomTimeId = localCustomTimeKey.localCustomTimeId
-
-        val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
-
-        val remoteCustomTime = remoteProject.getRemoteCustomTimeIfPresent(localCustomTimeId)
-        if (remoteCustomTime != null)
-            return remoteCustomTime.id
-
-        val customTimeJson = CustomTimeJson(domainFactory.uuid, localCustomTime.id, localCustomTime.name, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, localCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, localCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute)
-
-        return remoteProject.newRemoteCustomTime(customTimeJson).id
-    }
-
     fun getRemoteCustomTime(remoteProjectId: String, remoteCustomTimeId: String): RemoteCustomTime {
         check(!TextUtils.isEmpty(remoteProjectId))
         check(!TextUtils.isEmpty(remoteCustomTimeId))
 
         check(remoteProjects.containsKey(remoteProjectId))
 
-        return remoteProjects[remoteProjectId]!!.getRemoteCustomTime(remoteCustomTimeId)
+        return remoteProjects.getValue(remoteProjectId).getRemoteCustomTime(remoteCustomTimeId)
     }
 
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance? {
@@ -229,9 +216,9 @@ class RemoteProjectFactory(
         remoteSharedProjects.remove(projectId)
     }
 
-    fun getTaskHierarchy(remoteTaskHierarchyKey: TaskHierarchyKey.RemoteTaskHierarchyKey) = remoteProjects[remoteTaskHierarchyKey.projectId]!!.getTaskHierarchy(remoteTaskHierarchyKey.taskHierarchyId)
+    fun getTaskHierarchy(remoteTaskHierarchyKey: TaskHierarchyKey.RemoteTaskHierarchyKey) = remoteProjects.getValue(remoteTaskHierarchyKey.projectId).getTaskHierarchy(remoteTaskHierarchyKey.taskHierarchyId)
 
-    fun getSchedule(scheduleId: ScheduleId.Remote) = remoteProjects[scheduleId.projectId]!!.getRemoteTaskForce(scheduleId.taskId)
+    fun getSchedule(scheduleId: ScheduleId.Remote) = remoteProjects.getValue(scheduleId.projectId).getRemoteTaskForce(scheduleId.taskId)
             .schedules
             .single { it.scheduleId == scheduleId }
 }

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 
@@ -183,4 +184,6 @@ abstract class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
     }
 
     override val key get() = remoteProjectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
+
+    abstract fun mine(domainFactory: DomainFactory): Boolean
 }

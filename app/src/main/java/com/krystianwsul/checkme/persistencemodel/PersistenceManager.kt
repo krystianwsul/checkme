@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.persistencemodel
 
 import android.annotation.SuppressLint
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
@@ -247,13 +248,13 @@ class PersistenceManager(
 
     fun save(source: SaveService.Source) = SaveService.Factory.instance.startService(this, source)
 
-    fun createInstanceShownRecord(remoteTaskId: String, scheduleDate: Date, remoteCustomTimeId: String?, hour: Int?, minute: Int?, projectId: String): InstanceShownRecord {
+    fun createInstanceShownRecord(remoteTaskId: String, scheduleDate: Date, remoteCustomTimeId: RemoteCustomTimeId?, hour: Int?, minute: Int?, projectId: String): InstanceShownRecord {
         check(remoteTaskId.isNotEmpty())
         check(projectId.isNotEmpty())
 
         val id = ++instanceShownMaxId
 
-        return InstanceShownRecord(false, id, remoteTaskId, scheduleDate.year, scheduleDate.month, scheduleDate.day, remoteCustomTimeId, hour, minute, false, false, projectId).also {
+        return InstanceShownRecord(false, id, remoteTaskId, scheduleDate.year, scheduleDate.month, scheduleDate.day, remoteCustomTimeId?.value, hour, minute, false, false, projectId).also {
             _instanceShownRecords.add(it)
         }
     }

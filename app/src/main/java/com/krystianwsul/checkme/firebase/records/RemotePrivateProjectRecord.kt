@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.json.PrivateProjectJson
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 class RemotePrivateProjectRecord(
         create: Boolean,
@@ -14,11 +15,14 @@ class RemotePrivateProjectRecord(
         override val projectJson: PrivateProjectJson) : RemoteProjectRecord(create, domainFactory, id) {
 
     override val remoteCustomTimeRecords = projectJson.customTimes
-            .mapValues { (id, customTimeJson) ->
+            .map { (id, customTimeJson) ->
                 check(!TextUtils.isEmpty(id))
 
-                RemotePrivateCustomTimeRecord(id, this, customTimeJson)
+                val remoteCustomTimeId = RemoteCustomTimeId.Private(id)
+
+                remoteCustomTimeId to RemotePrivateCustomTimeRecord(remoteCustomTimeId, this, customTimeJson)
             }
+            .toMap()
             .toMutableMap()
 
     constructor(domainFactory: DomainFactory, id: String, projectJson: PrivateProjectJson) : this(
@@ -52,7 +56,7 @@ class RemotePrivateProjectRecord(
                     .toMutableMap()
 
             customTimes = remoteCustomTimeRecords.values
-                    .associateBy({ it.id }, { it.createObject })
+                    .associateBy({ it.id.value }, { it.createObject })
                     .toMutableMap()
 
             users = remoteUserRecords.values
@@ -66,11 +70,15 @@ class RemotePrivateProjectRecord(
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    override fun getCustomTimeRecordId() = DatabaseWrapper.getPrivateCustomTimeRecordId(id)
+    fun getCustomTimeRecordId() = RemoteCustomTimeId.Private(DatabaseWrapper.getPrivateCustomTimeRecordId(id))
 
     override fun getTaskRecordId() = DatabaseWrapper.getPrivateTaskRecordId(id)
 
     override fun getScheduleRecordId(taskId: String) = DatabaseWrapper.getPrivateScheduleRecordId(id, taskId)
 
     override fun getTaskHierarchyRecordId() = DatabaseWrapper.getPrivateTaskHierarchyRecordId(id)
+
+    override fun getCustomTimeRecord(id: String) = remoteCustomTimeRecords.getValue(RemoteCustomTimeId.Private(id))
+
+    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
 }

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
@@ -14,7 +15,7 @@ abstract class RemoteCustomTime : CustomTime {
 
     abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord
 
-    val id by lazy { remoteCustomTimeRecord.id }
+    abstract val id: RemoteCustomTimeId
 
     override val name get() = remoteCustomTimeRecord.name
 

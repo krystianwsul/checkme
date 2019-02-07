@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -15,7 +16,7 @@ class RemotePrivateProject(
         uuid: String,
         now: ExactTimeStamp) : RemoteProject(domainFactory, uuid) {
 
-    override val remoteCustomTimes = HashMap<String, RemotePrivateCustomTime>()
+    override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask>
     override val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
 
@@ -67,7 +68,7 @@ class RemotePrivateProject(
 
     override fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.localId == localCustomTimeId }
 
-    override fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): String {
+    override fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): RemoteCustomTimeId.Private {
         val localCustomTimeId = localCustomTimeKey.localCustomTimeId
 
         val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
@@ -80,4 +81,12 @@ class RemotePrivateProject(
 
         return newRemoteCustomTime(customTimeJson).id
     }
+
+    override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime {
+        check(remoteCustomTimes.containsKey(remoteCustomTimeId))
+
+        return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Private)
+    }
+
+    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
 }

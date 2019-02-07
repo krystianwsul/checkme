@@ -11,7 +11,7 @@ class RemoteMonthlyDayScheduleRecord : RemoteScheduleRecord {
 
     val beginningOfMonth by lazy { monthlyDayScheduleJson.beginningOfMonth }
 
-    override val customTimeId by lazy { monthlyDayScheduleJson.customTimeId }
+    override val customTimeId by lazy { monthlyDayScheduleJson.customTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) } }
 
     val hour by lazy { monthlyDayScheduleJson.hour }
 

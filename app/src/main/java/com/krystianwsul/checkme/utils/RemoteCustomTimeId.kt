@@ -1,9 +1,18 @@
 package com.krystianwsul.checkme.utils
 
-sealed class RemoteCustomTimeId {
+import java.io.Serializable
+
+sealed class RemoteCustomTimeId : Serializable {
 
     abstract val value: String
 
-    data class Private(override val value: String) : RemoteCustomTimeId()
-    data class Shared(override val value: String) : RemoteCustomTimeId()
+    data class Private(override val value: String) : RemoteCustomTimeId() {
+
+        override fun toString() = value
+    }
+
+    data class Shared(override val value: String) : RemoteCustomTimeId() {
+
+        override fun toString() = value
+    }
 }

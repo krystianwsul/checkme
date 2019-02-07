@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 abstract class RemoteScheduleRecord : RemoteRecord {
 
@@ -25,7 +26,7 @@ abstract class RemoteScheduleRecord : RemoteRecord {
 
     val taskId get() = remoteTaskRecord.id
 
-    abstract val customTimeId: String?
+    abstract val customTimeId: RemoteCustomTimeId?
 
     constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(false) {
         this.id = id

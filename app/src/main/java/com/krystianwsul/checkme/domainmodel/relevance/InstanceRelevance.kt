@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel.relevance
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
@@ -18,7 +19,7 @@ class InstanceRelevance(val instance: Instance) {
         relevant = true
 
         // set task relevant
-        taskRelevances[instance.taskKey]!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
+        taskRelevances.getValue(instance.taskKey).setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
 
         // set parent instance relevant
         if (!instance.isRootInstance(now)) {
@@ -47,15 +48,15 @@ class InstanceRelevance(val instance: Instance) {
         // set custom time relevant
         val scheduleCustomTimeKey = instance.scheduleCustomTimeKey
         if (scheduleCustomTimeKey is CustomTimeKey.LocalCustomTimeKey)
-            customTimeRelevances[scheduleCustomTimeKey.localCustomTimeId]!!.setRelevant()
+            customTimeRelevances.getValue(scheduleCustomTimeKey.localCustomTimeId).setRelevant()
 
         // set custom time relevant
         val instanceCustomTimeId = instance.instanceCustomTimeKey
         if (instanceCustomTimeId is CustomTimeKey.LocalCustomTimeKey)
-            customTimeRelevances[instanceCustomTimeId.localCustomTimeId]!!.setRelevant()
+            customTimeRelevances.getValue(instanceCustomTimeId.localCustomTimeId).setRelevant()
     }
 
-    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<kotlin.Pair<String, String>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
+    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<Pair<String, RemoteCustomTimeId>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
         check(relevant)
 
         val pair = instance.remoteCustomTimeKey
@@ -63,9 +64,9 @@ class InstanceRelevance(val instance: Instance) {
         if (pair != null) {
             check(remoteProject != null)
 
-            remoteCustomTimeRelevances[pair]!!.setRelevant()
+            remoteCustomTimeRelevances.getValue(pair).setRelevant()
         }
 
-        if (remoteProject != null) remoteProjectRelevances[remoteProject.id]!!.setRelevant()
+        if (remoteProject != null) remoteProjectRelevances.getValue(remoteProject.id).setRelevant()
     }
 }

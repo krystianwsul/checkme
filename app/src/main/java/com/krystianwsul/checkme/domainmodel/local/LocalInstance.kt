@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.persistencemodel.LocalInstanceRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.InstanceData.VirtualInstanceData
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -16,27 +17,27 @@ import com.krystianwsul.checkme.utils.time.TimePair
 
 class LocalInstance : Instance {
 
-    override var instanceData: InstanceData<Int, LocalInstanceRecord>
+    override var instanceData: InstanceData<Int, Int, LocalInstanceRecord>
 
     val taskId
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<Int, LocalInstanceRecord> -> it.instanceRecord.taskId
-                is VirtualInstanceData<Int, LocalInstanceRecord> -> it.taskId
+                is InstanceData.RealInstanceData<Int, Int, LocalInstanceRecord> -> it.instanceRecord.taskId
+                is VirtualInstanceData<Int, Int, LocalInstanceRecord> -> it.taskId
             }
         }
 
-    override val notified get() = (instanceData as? InstanceData.RealInstanceData<Int, LocalInstanceRecord>)?.instanceRecord?.notified == true
+    override val notified get() = (instanceData as? InstanceData.RealInstanceData<Int, Int, LocalInstanceRecord>)?.instanceRecord?.notified == true
 
-    override val notificationShown get() = (instanceData as? InstanceData.RealInstanceData<Int, LocalInstanceRecord>)?.instanceRecord?.notificationShown == true
+    override val notificationShown get() = (instanceData as? InstanceData.RealInstanceData<Int, Int, LocalInstanceRecord>)?.instanceRecord?.notificationShown == true
 
     override val scheduleCustomTimeKey
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<Int, LocalInstanceRecord> -> it.instanceRecord
+                is InstanceData.RealInstanceData<Int, Int, LocalInstanceRecord> -> it.instanceRecord
                         .scheduleCustomTimeId
                         ?.let { CustomTimeKey.LocalCustomTimeKey(it) }
-                is VirtualInstanceData<Int, LocalInstanceRecord> -> it.scheduleDateTime
+                is VirtualInstanceData<Int, Int, LocalInstanceRecord> -> it.scheduleDateTime
                         .time
                         .timePair
                         .customTimeKey
@@ -49,7 +50,7 @@ class LocalInstance : Instance {
 
     override val remoteNonNullProject get() = throw UnsupportedOperationException()
 
-    override val remoteCustomTimeKey: Pair<String, String>? = null
+    override val remoteCustomTimeKey: Pair<String, RemoteCustomTimeId>? = null
 
     override val nullableInstanceShownRecord: InstanceShownRecord? = null
 
@@ -123,10 +124,10 @@ class LocalInstance : Instance {
 
     override fun getNullableOrdinal() = (instanceData as? LocalRealInstanceData)?.instanceRecord?.ordinal
 
-    private inner class LocalRealInstanceData(localInstanceRecord: LocalInstanceRecord) : InstanceData.RealInstanceData<Int, LocalInstanceRecord>(localInstanceRecord) {
+    private inner class LocalRealInstanceData(localInstanceRecord: LocalInstanceRecord) : InstanceData.RealInstanceData<Int, Int, LocalInstanceRecord>(localInstanceRecord) {
 
         override fun getCustomTime(customTimeId: Int) = domainFactory.getCustomTime(CustomTimeKey.LocalCustomTimeKey(customTimeId))
 
-        override fun getSignature() = name + " " + instanceKey.toString()
+        override fun getSignature() = "$name $instanceKey"
     }
 }

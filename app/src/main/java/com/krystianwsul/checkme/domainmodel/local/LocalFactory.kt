@@ -115,7 +115,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
     fun save(source: SaveService.Source): Boolean = persistenceManager.save(source)
 
-    fun getInstanceShownRecord(projectId: String, taskId: String, scheduleYear: Int, scheduleMonth: Int, scheduleDay: Int, scheduleCustomTimeId: String?, scheduleHour: Int?, scheduleMinute: Int?): InstanceShownRecord? {
+    fun getInstanceShownRecord(projectId: String, taskId: String, scheduleYear: Int, scheduleMonth: Int, scheduleDay: Int, scheduleCustomTimeId: RemoteCustomTimeId?, scheduleHour: Int?, scheduleMinute: Int?): InstanceShownRecord? {
         val matches: List<InstanceShownRecord>
         if (scheduleCustomTimeId != null) {
             check(scheduleHour == null)
@@ -128,7 +128,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
                     .filter { it.scheduleYear == scheduleYear }
                     .filter { it.scheduleMonth == scheduleMonth }
                     .filter { it.scheduleDay == scheduleDay }
-                    .filter { it.scheduleCustomTimeId == scheduleCustomTimeId }
+                    .filter { it.scheduleCustomTimeId == scheduleCustomTimeId.value }
                     .toList()
         } else {
             checkNotNull(scheduleHour)

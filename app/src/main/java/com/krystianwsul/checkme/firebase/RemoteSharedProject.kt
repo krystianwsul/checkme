@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -25,7 +26,7 @@ class RemoteSharedProject(
 
     val users get() = remoteUsers.values
 
-    override val remoteCustomTimes = HashMap<String, RemoteSharedCustomTime>()
+    override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Shared, RemoteSharedCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask>
     override val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
 
@@ -118,7 +119,7 @@ class RemoteSharedProject(
 
     override fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.let { it.ownerId == uuid && it.localId == localCustomTimeId } }
 
-    override fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): String {
+    override fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): RemoteCustomTimeId.Shared {
         val localCustomTimeId = localCustomTimeKey.localCustomTimeId
 
         val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
@@ -131,4 +132,12 @@ class RemoteSharedProject(
 
         return newRemoteCustomTime(customTimeJson).id
     }
+
+    override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime {
+        check(remoteCustomTimes.containsKey(remoteCustomTimeId))
+
+        return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Shared)
+    }
+
+    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
 }

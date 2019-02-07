@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.NormalTime
 import com.krystianwsul.checkme.utils.time.Time
 
-sealed class InstanceData<T, U : InstanceRecord<T>> {
+sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
     abstract val scheduleDate: Date
     abstract fun getScheduleTime(domainFactory: DomainFactory): Time
@@ -19,9 +19,9 @@ sealed class InstanceData<T, U : InstanceRecord<T>> {
 
     abstract val done: Long?
 
-    abstract class RealInstanceData<T, U : InstanceRecord<T>>(val instanceRecord: U) : InstanceData<T, U>() {
+    abstract class RealInstanceData<T, U, V : InstanceRecord<U>>(val instanceRecord: V) : InstanceData<T, U, V>() {
 
-        protected abstract fun getCustomTime(customTimeId: T): CustomTime
+        protected abstract fun getCustomTime(customTimeId: U): CustomTime
 
         protected abstract fun getSignature(): String
 
@@ -68,7 +68,7 @@ sealed class InstanceData<T, U : InstanceRecord<T>> {
         override val done get() = instanceRecord.done
     }
 
-    class VirtualInstanceData<T, U : InstanceRecord<T>>(val taskId: T, val scheduleDateTime: DateTime) : InstanceData<T, U>() {
+    class VirtualInstanceData<T, U, V : InstanceRecord<U>>(val taskId: T, val scheduleDateTime: DateTime) : InstanceData<T, U, V>() {
 
         override val scheduleDate by lazy { scheduleDateTime.date }
 

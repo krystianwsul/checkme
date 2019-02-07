@@ -34,7 +34,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         }
     }
 
-    protected abstract val instanceData: InstanceData<*, *>
+    protected abstract val instanceData: InstanceData<*, *, *>
 
     val instanceKey get() = InstanceKey(taskKey, scheduleKey)
 
@@ -53,8 +53,8 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     private val scheduleHourMinute
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<*, *> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
-                is InstanceData.VirtualInstanceData<*, *> -> it.scheduleDateTime
+                is InstanceData.RealInstanceData<*, *, *> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
+                is InstanceData.VirtualInstanceData<*, *, *> -> it.scheduleDateTime
                         .time
                         .timePair
                         .hourMinute
@@ -99,7 +99,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract val remoteNonNullProject: RemoteProject
 
-    abstract val remoteCustomTimeKey: Pair<String, String>?
+    abstract val remoteCustomTimeKey: Pair<String, RemoteCustomTimeId>?
 
     abstract val nullableInstanceShownRecord: InstanceShownRecord?
 

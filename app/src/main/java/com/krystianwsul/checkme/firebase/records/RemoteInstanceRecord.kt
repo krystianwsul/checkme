@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
@@ -18,20 +19,20 @@ class RemoteInstanceRecord(
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         private val firebaseKey: String,
-        override val scheduleCustomTimeId: String?) : RemoteRecord(create), InstanceRecord<String> {
+        override val scheduleCustomTimeId: RemoteCustomTimeId?) : RemoteRecord(create), InstanceRecord<RemoteCustomTimeId> {
 
     companion object {
 
         private val hourMinutePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
-        fun scheduleKeyToString(domainFactory: DomainFactory, projectId: String, scheduleKey: ScheduleKey, remoteCustomTimeId: String? = null): String {
+        fun scheduleKeyToString(domainFactory: DomainFactory, projectId: String, scheduleKey: ScheduleKey, remoteCustomTimeId: RemoteCustomTimeId? = null): String {
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
             key += scheduleKey.scheduleTimePair.let {
                 if (it.customTimeKey != null) {
                     check(it.hourMinute == null)
 
-                    remoteCustomTimeId
+                    remoteCustomTimeId?.value
                             ?: domainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
                 } else {
                     it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
@@ -41,7 +42,7 @@ class RemoteInstanceRecord(
             return key
         }
 
-        fun stringToScheduleKey(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord, key: String): Pair<ScheduleKey, String?> {
+        fun stringToScheduleKey(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord, key: String): Pair<ScheduleKey, RemoteCustomTimeId?> {
             val hourMinuteMatcher = hourMinutePattern.matcher(key)
 
             if (hourMinuteMatcher.matches()) {
@@ -63,7 +64,9 @@ class RemoteInstanceRecord(
                 val customTimeId = customTimeMatcher.group(4)
                 check(!TextUtils.isEmpty(customTimeId))
 
-                val customTimeRecord = remoteProjectRecord.remoteCustomTimeRecords.getValue(customTimeId)
+                val remoteCustomTimeId = remoteProjectRecord.getRemoteCustomTimeId(customTimeId)
+
+                val customTimeRecord = remoteProjectRecord.getCustomTimeRecord(customTimeId)
 
                 val customTimeKey = customTimeRecord.takeIf { it.mine(domainFactory) }?.let {
                     domainFactory.localFactory
@@ -72,7 +75,7 @@ class RemoteInstanceRecord(
                 }
                         ?: CustomTimeKey.RemoteCustomTimeKey(customTimeRecord.projectId, customTimeRecord.id)
 
-                return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeId)
+                return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), remoteCustomTimeId)
             }
         }
     }
@@ -116,13 +119,13 @@ class RemoteInstanceRecord(
     override val instanceDay get() = createObject.instanceDay
 
     override var instanceCustomTimeId
-        get() = createObject.instanceCustomTimeId
+        get() = createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }
         set(instanceCustomTimeId) {
-            if (instanceCustomTimeId == createObject.instanceCustomTimeId)
+            if (instanceCustomTimeId == createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) })
                 return
 
-            createObject.instanceCustomTimeId = instanceCustomTimeId
-            addValue("$key/instanceCustomTimeId", instanceCustomTimeId)
+            createObject.instanceCustomTimeId = instanceCustomTimeId?.value
+            addValue("$key/instanceCustomTimeId", instanceCustomTimeId?.value)
         }
 
     override var instanceHour

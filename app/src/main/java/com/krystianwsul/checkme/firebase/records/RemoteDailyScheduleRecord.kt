@@ -7,7 +7,7 @@ class RemoteDailyScheduleRecord(id: String, remoteTaskRecord: RemoteTaskRecord, 
 
     private val dailyScheduleJson by lazy { scheduleWrapper.dailyScheduleJson!! }
 
-    override val customTimeId by lazy { dailyScheduleJson.customTimeId }
+    override val customTimeId by lazy { dailyScheduleJson.customTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) } }
 
     val hour by lazy { dailyScheduleJson.hour }
 

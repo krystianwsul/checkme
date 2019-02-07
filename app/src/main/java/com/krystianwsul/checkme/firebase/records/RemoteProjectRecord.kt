@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.json.ProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.json.UserJson
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
 abstract class RemoteProjectRecord(
@@ -20,7 +21,7 @@ abstract class RemoteProjectRecord(
 
     protected abstract val projectJson: ProjectJson
 
-    abstract val remoteCustomTimeRecords: Map<String, RemoteCustomTimeRecord>
+    abstract val remoteCustomTimeRecords: Map<out RemoteCustomTimeId, RemoteCustomTimeRecord>
 
     val remoteTaskRecords by lazy {
         projectJson.tasks
@@ -104,17 +105,19 @@ abstract class RemoteProjectRecord(
 
     fun newRemoteUserRecord(userJson: UserJson): RemoteProjectUserRecord {
         val remoteProjectUserRecord = RemoteProjectUserRecord(true, this, userJson)
-        check(!remoteCustomTimeRecords.containsKey(remoteProjectUserRecord.id))
+        check(!remoteUserRecords.containsKey(remoteProjectUserRecord.id))
 
         remoteUserRecords[remoteProjectUserRecord.id] = remoteProjectUserRecord
         return remoteProjectUserRecord
     }
-
-    abstract fun getCustomTimeRecordId(): String
 
     abstract fun getTaskHierarchyRecordId(): String
 
     abstract fun getTaskRecordId(): String
 
     abstract fun getScheduleRecordId(taskId: String): String
+
+    abstract fun getCustomTimeRecord(id: String): RemoteCustomTimeRecord
+
+    abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
 }

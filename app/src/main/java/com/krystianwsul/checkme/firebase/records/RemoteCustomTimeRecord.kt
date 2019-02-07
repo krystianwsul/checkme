@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.records
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 
 abstract class RemoteCustomTimeRecord(create: Boolean) : RemoteRecord(create), CustomTimeRecord {
@@ -12,7 +13,7 @@ abstract class RemoteCustomTimeRecord(create: Boolean) : RemoteRecord(create), C
         const val CUSTOM_TIMES = "customTimes"
     }
 
-    abstract val id: String
+    abstract val id: RemoteCustomTimeId
 
     protected abstract val remoteProjectRecord: RemoteProjectRecord
 

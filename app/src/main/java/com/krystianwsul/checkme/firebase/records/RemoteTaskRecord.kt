@@ -287,4 +287,6 @@ class RemoteTaskRecord private constructor(
     override fun deleteFromParent() = check(remoteProjectRecord.remoteTaskRecords.remove(id) == this)
 
     fun getScheduleRecordId() = remoteProjectRecord.getScheduleRecordId(id)
+
+    fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
 }

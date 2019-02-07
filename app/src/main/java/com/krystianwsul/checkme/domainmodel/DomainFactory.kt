@@ -2156,7 +2156,9 @@ open class DomainFactory(
                         check(instanceShownRecord.scheduleHour == null)
                         check(instanceShownRecord.scheduleMinute == null)
 
-                        customTimeKey = getLocalCustomTimeKeyIfPossible(instanceShownRecord.projectId, remoteCustomTimeId)
+                        val remoteProject = remoteProjectFactory.getRemoteProjectForce(instanceShownRecord.projectId)
+
+                        customTimeKey = getLocalCustomTimeKeyIfPossible(instanceShownRecord.projectId, remoteProject.getRemoteCustomTimeId(remoteCustomTimeId))
                         hourMinute = null
                     } else {
                         checkNotNull(instanceShownRecord.scheduleHour)
@@ -2331,7 +2333,7 @@ open class DomainFactory(
 
                 val customTimeId = scheduleKey.scheduleTimePair.customTimeKey.remoteCustomTimeId
 
-                matches = stream.filter { customTimeId == it.scheduleCustomTimeId }
+                matches = stream.filter { customTimeId.value == it.scheduleCustomTimeId }
             } else {
                 check(scheduleKey.scheduleTimePair.hourMinute != null)
 
@@ -2400,13 +2402,21 @@ open class DomainFactory(
         return dataWrapper
     }
 
-    fun getLocalCustomTimeKeyIfPossible(remoteProjectId: String, remoteCustomTimeId: String): CustomTimeKey = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
-            .getRemoteCustomTime(remoteCustomTimeId)
-            .let { it.remoteCustomTimeRecord }
-            .takeIf { it.mine(this) }
-            ?.let { localFactory.localCustomTimes.singleOrNull { localCustomTime -> localCustomTime.id == it.localId } }
-            ?.customTimeKey
-            ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)
+    fun getLocalCustomTimeKeyIfPossible(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey {
+        val remoteProject = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
+
+        val remoteCustomTime = if (remoteProject is RemotePrivateProject) {
+            remoteProject.getRemoteCustomTime(remoteCustomTimeId as RemoteCustomTimeId.Private)
+        } else {
+            (remoteProject as RemoteSharedProject).getRemoteCustomTime(remoteCustomTimeId as RemoteCustomTimeId.Shared)
+        }
+
+        return remoteCustomTime.remoteCustomTimeRecord
+                .takeIf { it.mine(this) }
+                ?.let { localFactory.localCustomTimes.singleOrNull { localCustomTime -> localCustomTime.id == it.localId } }
+                ?.customTimeKey
+                ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)
+    }
 
     class ProjectUndoData {
 

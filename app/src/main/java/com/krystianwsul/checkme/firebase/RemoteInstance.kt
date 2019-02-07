@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.InstanceData.VirtualInstanceData
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -17,15 +18,15 @@ class RemoteInstance : Instance {
 
     private val remoteProject: RemoteProject
 
-    override var instanceData: InstanceData<String, RemoteInstanceRecord>
+    override var instanceData: InstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord>
 
     private var instanceShownRecord: InstanceShownRecord? = null
 
     private val taskId
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<String, RemoteInstanceRecord> -> it.instanceRecord.taskId
-                is VirtualInstanceData<String, RemoteInstanceRecord> -> it.taskId
+                is InstanceData.RealInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord> -> it.instanceRecord.taskId
+                is VirtualInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord> -> it.taskId
             }
         }
 
@@ -36,11 +37,11 @@ class RemoteInstance : Instance {
     override val scheduleCustomTimeKey
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<String, RemoteInstanceRecord> -> it.instanceRecord
+                is InstanceData.RealInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord> -> it.instanceRecord
                         .scheduleKey
                         .scheduleTimePair
                         .customTimeKey
-                is VirtualInstanceData<String, RemoteInstanceRecord> -> {
+                is VirtualInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord> -> {
                     val customTimeKey = it.scheduleDateTime
                             .time
                             .timePair
@@ -105,7 +106,7 @@ class RemoteInstance : Instance {
             it.setInstanceMonth(date.month)
             it.setInstanceDay(date.day)
 
-            val (customTimeId, hour, minute) = timePair.destructureRemote(domainFactory, remoteProject.id)
+            val (customTimeId, hour, minute) = timePair.destructureRemote(remoteProject)
 
             it.instanceCustomTimeId = customTimeId
             it.instanceHour = hour
@@ -172,9 +173,9 @@ class RemoteInstance : Instance {
 
     override fun getNullableOrdinal() = (instanceData as? RemoteRealInstanceData)?.instanceRecord?.ordinal
 
-    private inner class RemoteRealInstanceData(remoteInstanceRecord: RemoteInstanceRecord) : InstanceData.RealInstanceData<String, RemoteInstanceRecord>(remoteInstanceRecord) {
+    private inner class RemoteRealInstanceData(remoteInstanceRecord: RemoteInstanceRecord) : InstanceData.RealInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord>(remoteInstanceRecord) {
 
-        override fun getCustomTime(customTimeId: String) = remoteProject.getRemoteCustomTime(customTimeId)
+        override fun getCustomTime(customTimeId: RemoteCustomTimeId) = remoteProject.getRemoteCustomTime(customTimeId)
 
         override fun getSignature() = "$name $instanceKey"
     }

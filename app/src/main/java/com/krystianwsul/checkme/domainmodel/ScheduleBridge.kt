@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 
@@ -12,7 +13,7 @@ interface ScheduleBridge {
 
     val rootTaskKey: TaskKey
 
-    val remoteCustomTimeKey: Pair<String, String>?
+    val remoteCustomTimeKey: Pair<String, RemoteCustomTimeId>?
 
     fun delete()
 

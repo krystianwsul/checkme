@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
@@ -24,7 +25,7 @@ abstract class RemoteProject(
 
     protected abstract val remoteTasks: MutableMap<String, RemoteTask>
     protected abstract val remoteTaskHierarchies: TaskHierarchyContainer<String, RemoteTaskHierarchy>
-    protected abstract val remoteCustomTimes: Map<String, RemoteCustomTime>
+    protected abstract val remoteCustomTimes: Map<out RemoteCustomTimeId, RemoteCustomTime>
 
     val id by lazy { remoteProjectRecord.id }
 
@@ -110,7 +111,7 @@ abstract class RemoteProject(
 
         val (instanceRemoteCustomTimeId, instanceHour, instanceMinute) = instanceTimePair.destructureRemote(this)
 
-        return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId, instanceHour, instanceMinute, instance.ordinal)
+        return InstanceJson(done, instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId?.value, instanceHour, instanceMinute, instance.ordinal)
     }
 
     fun copyLocalTaskHierarchy(localTaskHierarchy: LocalTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy {
@@ -153,12 +154,6 @@ abstract class RemoteProject(
         return remoteTaskHierarchies.getByParentTaskKey(parentTaskKey)
     }
 
-    fun getRemoteCustomTime(remoteCustomTimeId: String): RemoteCustomTime {
-        check(remoteCustomTimes.containsKey(remoteCustomTimeId))
-
-        return remoteCustomTimes.getValue(remoteCustomTimeId)
-    }
-
     fun delete() {
         remoteFactory.deleteProject(this)
 
@@ -195,5 +190,9 @@ abstract class RemoteProject(
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
 
-    abstract fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): String
+    abstract fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): RemoteCustomTimeId
+
+    abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime
+
+    abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
 }

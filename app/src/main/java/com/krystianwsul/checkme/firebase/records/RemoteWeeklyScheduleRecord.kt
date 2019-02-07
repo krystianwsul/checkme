@@ -21,7 +21,7 @@ class RemoteWeeklyScheduleRecord : RemoteScheduleRecord {
 
     val dayOfWeek by lazy { weeklyScheduleJson.dayOfWeek }
 
-    override val customTimeId by lazy { weeklyScheduleJson.customTimeId }
+    override val customTimeId by lazy { weeklyScheduleJson.customTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) } }
 
     val hour by lazy { weeklyScheduleJson.hour }
 

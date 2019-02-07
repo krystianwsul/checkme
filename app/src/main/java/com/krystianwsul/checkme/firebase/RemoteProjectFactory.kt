@@ -13,10 +13,7 @@ import com.krystianwsul.checkme.firebase.json.SharedProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectManager
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectManager
-import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.ScheduleId
-import com.krystianwsul.checkme.utils.TaskHierarchyKey
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
@@ -158,13 +155,16 @@ class RemoteProjectFactory(
         return privateSaved || sharedSaved
     }
 
-    fun getRemoteCustomTime(remoteProjectId: String, remoteCustomTimeId: String): RemoteCustomTime {
+    fun getRemoteCustomTime(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime {
         check(!TextUtils.isEmpty(remoteProjectId))
-        check(!TextUtils.isEmpty(remoteCustomTimeId))
 
         check(remoteProjects.containsKey(remoteProjectId))
 
-        return remoteProjects.getValue(remoteProjectId).getRemoteCustomTime(remoteCustomTimeId)
+        val remoteProject = remoteProjects.getValue(remoteProjectId)
+        return when (remoteProject) {
+            is RemotePrivateProject -> remoteProject.getRemoteCustomTime(remoteCustomTimeId as RemoteCustomTimeId.Private)
+            else -> (remoteProject as RemoteSharedProject).getRemoteCustomTime(remoteCustomTimeId as RemoteCustomTimeId.Shared)
+        }
     }
 
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance? {

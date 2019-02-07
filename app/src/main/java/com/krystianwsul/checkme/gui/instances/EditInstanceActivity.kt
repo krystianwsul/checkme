@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePairPersist
@@ -259,7 +260,7 @@ class EditInstanceActivity : AbstractActivity() {
             check(this.data != null)
             val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(this.data!!.customTimeDatas
                     .values
-                    .filter { it.customTimeKey is CustomTimeKey.LocalCustomTimeKey }
+                    .filter { it.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*> && it.customTimeKey.remoteCustomTimeId is RemoteCustomTimeId.Private }
                     .sortedBy { it.hourMinutes[date!!.dayOfWeek] }
                     .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[date!!.dayOfWeek] + ")") })
 

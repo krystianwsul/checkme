@@ -24,10 +24,7 @@ import com.krystianwsul.checkme.gui.DatePickerDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.startTicks
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
@@ -233,15 +230,11 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         mScheduleDialogTime.setOnClickListener {
             check(mCustomTimeDatas != null)
 
+            val list = mCustomTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*> && it.customTimeKey.remoteCustomTimeId is RemoteCustomTimeId.Private }
+
             val customTimeDatas = when (mScheduleDialogData.scheduleType) {
-                ScheduleType.SINGLE -> mCustomTimeDatas!!.values
-                        .filter { it.customTimeKey is CustomTimeKey.LocalCustomTimeKey }
-                        .sortedBy { it.hourMinutes[mScheduleDialogData.date.dayOfWeek] }
-                        .map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.customTimeKey, customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.date.dayOfWeek] + ")") }
-                ScheduleType.DAILY, ScheduleType.WEEKLY, ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> mCustomTimeDatas!!.values
-                        .filter { it.customTimeKey is CustomTimeKey.LocalCustomTimeKey }
-                        .sortedBy { it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum() }
-                        .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name) }
+                ScheduleType.SINGLE -> list.sortedBy { it.hourMinutes[mScheduleDialogData.date.dayOfWeek] }.map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.customTimeKey, customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.date.dayOfWeek] + ")") }
+                ScheduleType.DAILY, ScheduleType.WEEKLY, ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> list.sortedBy { it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum() }.map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name) }
             }
 
             TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {

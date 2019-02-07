@@ -5,14 +5,14 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 
 
-abstract class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
+abstract class RemoteCustomTimeRecord(create: Boolean) : RemoteRecord(create), CustomTimeRecord {
 
     companion object {
 
         const val CUSTOM_TIMES = "customTimes"
     }
 
-    val id: String
+    abstract val id: String
 
     protected abstract val remoteProjectRecord: RemoteProjectRecord
 
@@ -173,14 +173,6 @@ abstract class RemoteCustomTimeRecord : RemoteRecord, CustomTimeRecord {
         }
 
     val projectId get() = remoteProjectRecord.id
-
-    constructor(id: String) : super(false) {
-        this.id = id
-    }
-
-    constructor(remoteProjectRecord: RemoteProjectRecord) : super(true) {
-        id = remoteProjectRecord.getCustomTimeRecordId()
-    }
 
     override val key get() = remoteProjectRecord.childKey + "/" + CUSTOM_TIMES + "/" + id
 

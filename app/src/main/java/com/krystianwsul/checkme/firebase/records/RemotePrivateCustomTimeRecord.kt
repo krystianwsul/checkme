@@ -6,16 +6,18 @@ import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 
 class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord {
 
+    override val id: String
     override val remoteProjectRecord: RemotePrivateProjectRecord
-
     override val customTimeJson: PrivateCustomTimeJson
 
-    constructor(id: String, remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(id) {
+    constructor(id: String, remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(false) {
+        this.id = id
         this.remoteProjectRecord = remoteProjectRecord
         this.customTimeJson = customTimeJson
     }
 
-    constructor(remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(remoteProjectRecord) {
+    constructor(remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(true) {
+        id = remoteProjectRecord.getCustomTimeRecordId()
         this.remoteProjectRecord = remoteProjectRecord
         this.customTimeJson = customTimeJson
     }

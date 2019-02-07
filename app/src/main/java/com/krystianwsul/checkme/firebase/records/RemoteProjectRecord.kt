@@ -109,4 +109,12 @@ abstract class RemoteProjectRecord(
         remoteUserRecords[remoteProjectUserRecord.id] = remoteProjectUserRecord
         return remoteProjectUserRecord
     }
+
+    abstract fun getCustomTimeRecordId(): String
+
+    abstract fun getTaskHierarchyRecordId(): String
+
+    abstract fun getTaskRecordId(): String
+
+    abstract fun getScheduleRecordId(taskId: String): String
 }

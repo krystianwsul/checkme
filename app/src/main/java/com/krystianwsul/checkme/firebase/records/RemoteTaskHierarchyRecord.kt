@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
 
 
@@ -44,7 +43,7 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
     }
 
     constructor(remoteProjectRecord: RemoteProjectRecord, taskHierarchyJson: TaskHierarchyJson) : super(true) {
-        id = DatabaseWrapper.getTaskHierarchyRecordId(remoteProjectRecord.id)
+        id = remoteProjectRecord.getTaskHierarchyRecordId()
         this.remoteProjectRecord = remoteProjectRecord
         createObject = taskHierarchyJson
     }

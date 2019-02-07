@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 
 abstract class RemoteScheduleRecord : RemoteRecord {
@@ -35,7 +34,7 @@ abstract class RemoteScheduleRecord : RemoteRecord {
     }
 
     constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(true) {
-        id = DatabaseWrapper.getScheduleRecordId(remoteTaskRecord.projectId, remoteTaskRecord.id)
+        id = remoteTaskRecord.getScheduleRecordId()
         this.remoteTaskRecord = remoteTaskRecord
         this.createObject = scheduleWrapper
     }

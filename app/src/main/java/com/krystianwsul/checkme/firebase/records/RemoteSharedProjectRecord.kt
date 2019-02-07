@@ -83,4 +83,12 @@ class RemoteSharedProjectRecord(
     override val childKey get() = key + "/" + RemoteProjectRecord.PROJECT_JSON
 
     override fun deleteFromParent() = check(remoteSharedProjectManager.remoteProjectRecords.remove(id) == this)
+
+    override fun getCustomTimeRecordId() = DatabaseWrapper.getSharedCustomTimeRecordId(id)
+
+    override fun getTaskRecordId() = DatabaseWrapper.getSharedTaskRecordId(id)
+
+    override fun getScheduleRecordId(taskId: String) = DatabaseWrapper.getSharedScheduleRecordId(id, taskId)
+
+    override fun getTaskHierarchyRecordId() = DatabaseWrapper.getSharedTaskHierarchyRecordId(id)
 }

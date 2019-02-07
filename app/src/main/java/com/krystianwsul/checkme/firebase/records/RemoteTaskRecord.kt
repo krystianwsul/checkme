@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.records
 import android.text.TextUtils
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.RemoteTask
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
@@ -129,7 +128,7 @@ class RemoteTaskRecord private constructor(
     constructor(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord, taskJson: TaskJson) : this(
             true,
             domainFactory,
-            DatabaseWrapper.getTaskRecordId(remoteProjectRecord.id),
+            remoteProjectRecord.getTaskRecordId(),
             remoteProjectRecord,
             taskJson)
 
@@ -286,4 +285,6 @@ class RemoteTaskRecord private constructor(
     }
 
     override fun deleteFromParent() = check(remoteProjectRecord.remoteTaskRecords.remove(id) == this)
+
+    fun getScheduleRecordId() = remoteProjectRecord.getScheduleRecordId(id)
 }

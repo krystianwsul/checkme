@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase.records
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.json.PrivateProjectJson
 
@@ -64,4 +65,12 @@ class RemotePrivateProjectRecord(
     override val childKey get() = key
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
+
+    override fun getCustomTimeRecordId() = DatabaseWrapper.getPrivateCustomTimeRecordId(id)
+
+    override fun getTaskRecordId() = DatabaseWrapper.getPrivateTaskRecordId(id)
+
+    override fun getScheduleRecordId(taskId: String) = DatabaseWrapper.getPrivateScheduleRecordId(id, taskId)
+
+    override fun getTaskHierarchyRecordId() = DatabaseWrapper.getPrivateTaskHierarchyRecordId(id)
 }

@@ -138,7 +138,7 @@ class RemoteTaskRecord private constructor(
         for ((key, instanceJson) in taskJson.instances) {
             check(!TextUtils.isEmpty(key))
 
-            val (scheduleKey, remoteCustomTimeId) = RemoteInstanceRecord.stringToScheduleKey(domainFactory, remoteProjectRecord, key)
+            val (scheduleKey, remoteCustomTimeId) = RemoteInstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
 
             val remoteInstanceRecord = RemoteInstanceRecord(
                     false,

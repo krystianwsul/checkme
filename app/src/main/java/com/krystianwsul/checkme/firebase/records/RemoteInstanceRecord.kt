@@ -42,7 +42,7 @@ class RemoteInstanceRecord(
             return key
         }
 
-        fun stringToScheduleKey(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord, key: String): Pair<ScheduleKey, RemoteCustomTimeId?> {
+        fun stringToScheduleKey(remoteProjectRecord: RemoteProjectRecord, key: String): Pair<ScheduleKey, RemoteCustomTimeId?> {
             val hourMinuteMatcher = hourMinutePattern.matcher(key)
 
             if (hourMinuteMatcher.matches()) {
@@ -68,12 +68,7 @@ class RemoteInstanceRecord(
 
                 val customTimeRecord = remoteProjectRecord.getCustomTimeRecord(customTimeId)
 
-                val customTimeKey = customTimeRecord.takeIf { it.mine(domainFactory) }?.let {
-                    domainFactory.localFactory
-                            .tryGetLocalCustomTime(it.localId)
-                            ?.customTimeKey
-                }
-                        ?: CustomTimeKey.RemoteCustomTimeKey(customTimeRecord.projectId, customTimeRecord.id)
+                val customTimeKey = CustomTimeKey.RemoteCustomTimeKey(customTimeRecord.projectId, customTimeRecord.id)
 
                 return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), remoteCustomTimeId)
             }

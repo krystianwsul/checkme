@@ -29,8 +29,6 @@ class RemoteInstance : Instance {
             }
         }
 
-    private val remoteFactory get() = domainFactory.remoteProjectFactory
-
     override val notified get() = instanceShownRecord?.notified == true
 
     override val notificationShown get() = instanceShownRecord?.notificationShown == true
@@ -107,7 +105,7 @@ class RemoteInstance : Instance {
             it.setInstanceMonth(date.month)
             it.setInstanceDay(date.day)
 
-            val (customTimeId, hour, minute) = timePair.destructureRemote(remoteFactory, remoteProject)
+            val (customTimeId, hour, minute) = timePair.destructureRemote(domainFactory, remoteProject.id)
 
             it.instanceCustomTimeId = customTimeId
             it.instanceHour = hour

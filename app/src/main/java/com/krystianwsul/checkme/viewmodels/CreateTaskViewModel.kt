@@ -31,13 +31,14 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
     sealed class ScheduleData {
 
         abstract val scheduleType: ScheduleType
+        abstract val timePair: TimePair
 
-        data class SingleScheduleData(val date: Date, val timePair: TimePair) : ScheduleData() {
+        data class SingleScheduleData(val date: Date, override val timePair: TimePair) : ScheduleData() {
 
             override val scheduleType = ScheduleType.SINGLE
         }
 
-        data class WeeklyScheduleData(val daysOfWeek: Set<DayOfWeek>, val timePair: TimePair) : ScheduleData() {
+        data class WeeklyScheduleData(val daysOfWeek: Set<DayOfWeek>, override val timePair: TimePair) : ScheduleData() {
 
             override val scheduleType = ScheduleType.WEEKLY
         }
@@ -45,7 +46,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         data class MonthlyDayScheduleData(
                 val dayOfMonth: Int,
                 val beginningOfMonth: Boolean,
-                val timePair: TimePair) : ScheduleData() {
+                override val timePair: TimePair) : ScheduleData() {
 
             override val scheduleType = ScheduleType.MONTHLY_DAY
         }
@@ -54,7 +55,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 val dayOfMonth: Int,
                 val dayOfWeek: DayOfWeek,
                 val beginningOfMonth: Boolean,
-                val TimePair: TimePair) : ScheduleData() {
+                override val timePair: TimePair) : ScheduleData() {
 
             override val scheduleType = ScheduleType.MONTHLY_WEEK
         }

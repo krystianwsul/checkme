@@ -19,6 +19,7 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
 
     companion object {
 
+        @Suppress("unused")
         @JvmField
         val CREATOR: Parcelable.Creator<MonthlyWeekScheduleEntry> = object : Parcelable.Creator<MonthlyWeekScheduleEntry> {
 
@@ -57,7 +58,7 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
         monthWeekNumber = monthlyWeekScheduleData.dayOfMonth
         monthWeekDay = monthlyWeekScheduleData.dayOfWeek
         beginningOfMonth = monthlyWeekScheduleData.beginningOfMonth
-        timePair = monthlyWeekScheduleData.TimePair.copy()
+        timePair = monthlyWeekScheduleData.timePair.copy()
     }
 
     private constructor(monthWeekNumber: Int, monthWeekDay: DayOfWeek, beginningOfMonth: Boolean, timePair: TimePair, error: String?) : super(error) {
@@ -83,7 +84,7 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
         return "$day, " + if (timePair.customTimeKey != null) {
             check(timePair.hourMinute == null)
 
-            val customTimeData = customTimeDatas[timePair.customTimeKey]!!
+            val customTimeData = customTimeDatas.getValue(timePair.customTimeKey)
 
             customTimeData.name
         } else {

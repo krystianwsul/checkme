@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 
-class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord {
+class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.Shared> {
 
     override val id: RemoteCustomTimeId.Shared
     override val remoteProjectRecord: RemoteSharedProjectRecord

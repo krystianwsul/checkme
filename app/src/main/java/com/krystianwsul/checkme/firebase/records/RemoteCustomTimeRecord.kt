@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 
-abstract class RemoteCustomTimeRecord(create: Boolean) : RemoteRecord(create), CustomTimeRecord {
+abstract class RemoteCustomTimeRecord<T : RemoteCustomTimeId>(create: Boolean) : RemoteRecord(create), CustomTimeRecord {
 
     companion object {
 
@@ -15,7 +15,7 @@ abstract class RemoteCustomTimeRecord(create: Boolean) : RemoteRecord(create), C
 
     abstract val id: RemoteCustomTimeId
 
-    protected abstract val remoteProjectRecord: RemoteProjectRecord
+    protected abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
     protected abstract val customTimeJson: CustomTimeJson
 

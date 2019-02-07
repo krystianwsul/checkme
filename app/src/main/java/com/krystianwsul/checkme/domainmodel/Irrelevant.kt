@@ -9,5 +9,5 @@ class Irrelevant(
         val localCustomTimes: List<LocalCustomTime>,
         val tasks: List<Task>,
         val instances: List<Instance>,
-        val remoteCustomTimes: List<RemoteCustomTime>?,
-        val remoteProjects: List<RemoteProject>?)
+        val remoteCustomTimes: List<RemoteCustomTime<*>>?,
+        val remoteProjects: List<RemoteProject<*>>?)

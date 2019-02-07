@@ -117,7 +117,7 @@ class LocalCustomTime(
 
     override val customTimeKey get() = CustomTimeKey.LocalCustomTimeKey(id)
 
-    fun updateRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord) {
+    fun updateRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord<*>) {
         check(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
 
         // bez zapisywania na razie, dopiero przy następnej okazji

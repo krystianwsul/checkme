@@ -29,9 +29,9 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     abstract val existingInstances: Map<ScheduleKey, Instance>
 
-    abstract val remoteNullableProject: RemoteProject?
+    abstract val remoteNullableProject: RemoteProject<*>?
 
-    abstract val remoteNonNullProject: RemoteProject
+    abstract val remoteNonNullProject: RemoteProject<*>
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {
         val startExactTimeStamp = startExactTimeStamp

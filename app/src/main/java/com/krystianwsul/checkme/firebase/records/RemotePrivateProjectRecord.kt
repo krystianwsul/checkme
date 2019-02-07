@@ -12,7 +12,7 @@ class RemotePrivateProjectRecord(
         create: Boolean,
         domainFactory: DomainFactory,
         id: String,
-        override val projectJson: PrivateProjectJson) : RemoteProjectRecord(create, domainFactory, id) {
+        override val projectJson: PrivateProjectJson) : RemoteProjectRecord<RemoteCustomTimeId.Private>(create, domainFactory, id) {
 
     override val remoteCustomTimeRecords = projectJson.customTimes
             .map { (id, customTimeJson) ->

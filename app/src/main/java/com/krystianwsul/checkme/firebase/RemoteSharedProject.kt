@@ -16,7 +16,7 @@ class RemoteSharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         userInfo: UserInfo,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject(domainFactory, uuid) {
+        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(domainFactory, uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -27,7 +27,7 @@ class RemoteSharedProject(
     val users get() = remoteUsers.values
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Shared, RemoteSharedCustomTime>()
-    override val remoteTasks: MutableMap<String, RemoteTask>
+    override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Shared>>
     override val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
 
     override val customTimes get() = remoteCustomTimes.values
@@ -135,7 +135,7 @@ class RemoteSharedProject(
         return newRemoteCustomTime(customTimeJson).id
     }
 
-    override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime {
+    override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteSharedCustomTime {
         check(remoteCustomTimes.containsKey(remoteCustomTimeId))
 
         return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Shared)

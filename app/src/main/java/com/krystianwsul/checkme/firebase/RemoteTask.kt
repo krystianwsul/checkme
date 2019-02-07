@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.*
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
@@ -14,10 +15,10 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.util.*
 
-class RemoteTask(
+class RemoteTask<T : RemoteCustomTimeId>(
         domainFactory: DomainFactory,
-        val remoteProject: RemoteProject,
-        private val remoteTaskRecord: RemoteTaskRecord,
+        val remoteProject: RemoteProject<T>,
+        private val remoteTaskRecord: RemoteTaskRecord<T>,
         now: ExactTimeStamp) : Task(domainFactory) {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
@@ -119,9 +120,9 @@ class RemoteTask(
     override fun addSchedules(scheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) = createSchedules(now, scheduleDatas)
 
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
-        check(childTask is RemoteTask)
+        check(childTask is RemoteTask<*>)
 
-        remoteProject.createTaskHierarchy(this, childTask, now)
+        remoteProject.createTaskHierarchy(this, childTask as RemoteTask<T>, now)
     }
 
     override fun deleteSchedule(schedule: Schedule) {
@@ -130,19 +131,19 @@ class RemoteTask(
         remoteSchedules.remove(schedule)
     }
 
-    fun createRemoteInstanceRecord(remoteInstance: RemoteInstance, scheduleDateTime: DateTime): RemoteInstanceRecord {
+    fun createRemoteInstanceRecord(remoteInstance: RemoteInstance<T>, scheduleDateTime: DateTime): RemoteInstanceRecord<T> {
         val instanceJson = InstanceJson(null, null, null, null, null, null, null, null)
 
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
-        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey)
+        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(remoteProject, instanceJson, scheduleKey)
 
         existingRemoteInstances[remoteInstance.scheduleKey] = remoteInstance
 
         return remoteInstanceRecord
     }
 
-    fun deleteInstance(remoteInstance: RemoteInstance) {
+    fun deleteInstance(remoteInstance: RemoteInstance<T>) {
         val scheduleKey = remoteInstance.scheduleKey
 
         check(existingRemoteInstances.containsKey(scheduleKey))
@@ -235,7 +236,7 @@ class RemoteTask(
 
     override fun belongsToRemoteProject() = true
 
-    override fun updateProject(now: ExactTimeStamp, projectId: String?): RemoteTask {
+    override fun updateProject(now: ExactTimeStamp, projectId: String?): RemoteTask<T> {
         check(projectId.isNullOrEmpty() || projectId == remoteProject.id)
 
         return this

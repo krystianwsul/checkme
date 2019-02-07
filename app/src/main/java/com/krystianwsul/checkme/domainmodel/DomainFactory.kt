@@ -621,7 +621,7 @@ open class DomainFactory(
 
             taskData = CreateTaskViewModel.TaskData(task.name, taskParentKey, scheduleDatas, task.note, projectName)
 
-            parentTreeDatas = if (task is RemoteTask) {
+            parentTreeDatas = if (task is RemoteTask<*>) {
                 getProjectTaskTreeDatas(now, task.remoteProject, excludedTaskKeys)
             } else {
                 check(task is LocalTask)
@@ -1284,7 +1284,7 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val remoteProject: RemoteProject?
+        val remoteProject: RemoteProject<*>?
         val taskHierarchy: TaskHierarchy
         if (hierarchyData.taskHierarchyKey is TaskHierarchyKey.LocalTaskHierarchyKey) {
 
@@ -1813,7 +1813,7 @@ open class DomainFactory(
         return parentTreeDatas
     }
 
-    private fun getProjectTaskTreeDatas(now: ExactTimeStamp, remoteProject: RemoteProject, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
+    private fun getProjectTaskTreeDatas(now: ExactTimeStamp, remoteProject: RemoteProject<*>, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         return remoteProject.tasks
                 .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
                 .map {
@@ -1825,7 +1825,7 @@ open class DomainFactory(
                 .toMap()
     }
 
-    fun convertLocalToRemote(now: ExactTimeStamp, startingLocalTask: LocalTask, projectId: String): RemoteTask {
+    fun convertLocalToRemote(now: ExactTimeStamp, startingLocalTask: LocalTask, projectId: String): RemoteTask<*> {
         check(projectId.isNotEmpty())
 
         checkNotNull(remoteProjectFactory)
@@ -2107,7 +2107,7 @@ open class DomainFactory(
         return Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject?) {
+    private fun notifyCloud(remoteProject: RemoteProject<*>?) {
         val remoteProjects = setOf(remoteProject)
                 .filterNotNull()
                 .toSet()
@@ -2115,7 +2115,7 @@ open class DomainFactory(
         notifyCloud(remoteProjects)
     }
 
-    private fun notifyCloud(remoteProjects: Set<RemoteProject>) {
+    private fun notifyCloud(remoteProjects: Set<RemoteProject<*>>) {
         if (!remoteProjects.isEmpty()) {
             checkNotNull(userInfo)
 
@@ -2123,9 +2123,9 @@ open class DomainFactory(
         }
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject, userKeys: Collection<String>) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userInfo, userKeys.toMutableList())
+    private fun notifyCloud(remoteProject: RemoteProject<*>, userKeys: Collection<String>) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userInfo, userKeys.toMutableList())
 
-    private fun notifyCloudPrivateFixed(remoteProjects: MutableSet<RemoteProject>, userInfo: UserInfo, userKeys: MutableCollection<String>) {
+    private fun notifyCloudPrivateFixed(remoteProjects: MutableSet<RemoteProject<*>>, userInfo: UserInfo, userKeys: MutableCollection<String>) {
         val remotePrivateProject = remoteProjects.singleOrNull { it is RemotePrivateProject }
 
         remotePrivateProject?.let {

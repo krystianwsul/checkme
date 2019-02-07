@@ -17,15 +17,15 @@ import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
-abstract class RemoteProject(
+abstract class RemoteProject<T : RemoteCustomTimeId>(
         protected val domainFactory: DomainFactory,
         val uuid: String) {
 
-    protected abstract val remoteProjectRecord: RemoteProjectRecord
+    protected abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
-    protected abstract val remoteTasks: MutableMap<String, RemoteTask>
+    protected abstract val remoteTasks: MutableMap<String, RemoteTask<T>>
     protected abstract val remoteTaskHierarchies: TaskHierarchyContainer<String, RemoteTaskHierarchy>
-    protected abstract val remoteCustomTimes: Map<out RemoteCustomTimeId, RemoteCustomTime>
+    protected abstract val remoteCustomTimes: Map<T, RemoteCustomTime<T>>
 
     val id by lazy { remoteProjectRecord.id }
 
@@ -49,9 +49,9 @@ abstract class RemoteProject(
 
     val taskIds get() = remoteTasks.keys
 
-    abstract val customTimes: Collection<RemoteCustomTime>
+    abstract val customTimes: Collection<RemoteCustomTime<T>>
 
-    fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask {
+    fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask<T> {
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
 
         val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
@@ -61,7 +61,7 @@ abstract class RemoteProject(
         return remoteTask
     }
 
-    fun createTaskHierarchy(parentRemoteTask: RemoteTask, childRemoteTask: RemoteTask, now: ExactTimeStamp) {
+    fun createTaskHierarchy(parentRemoteTask: RemoteTask<T>, childRemoteTask: RemoteTask<T>, now: ExactTimeStamp) {
         val taskHierarchyJson = TaskHierarchyJson(parentRemoteTask.id, childRemoteTask.id, now.long, null, null)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
@@ -70,7 +70,7 @@ abstract class RemoteProject(
         remoteTaskHierarchies.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
     }
 
-    fun copyTask(task: Task, instances: Collection<Instance>, now: ExactTimeStamp): RemoteTask {
+    fun copyTask(task: Task, instances: Collection<Instance>, now: ExactTimeStamp): RemoteTask<T> {
         val endTime = task.getEndExactTimeStamp()?.long
 
         val oldestVisible = task.getOldestVisible()
@@ -130,7 +130,7 @@ abstract class RemoteProject(
         return remoteTaskHierarchy
     }
 
-    fun deleteTask(remoteTask: RemoteTask) {
+    fun deleteTask(remoteTask: RemoteTask<T>) {
         check(remoteTasks.containsKey(remoteTask.id))
 
         remoteTasks.remove(remoteTask.id)
@@ -186,13 +186,13 @@ abstract class RemoteProject(
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchies.getById(id)
 
-    abstract fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int): RemoteCustomTime?
+    abstract fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int): RemoteCustomTime<T>?
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
 
-    abstract fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): RemoteCustomTimeId
+    abstract fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): T
 
-    abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime
+    abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<T>
 
     abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
 }

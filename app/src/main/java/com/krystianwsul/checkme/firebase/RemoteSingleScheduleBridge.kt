@@ -3,12 +3,13 @@ package com.krystianwsul.checkme.firebase
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.SingleScheduleBridge
 import com.krystianwsul.checkme.firebase.records.RemoteSingleScheduleRecord
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 
-class RemoteSingleScheduleBridge(
+class RemoteSingleScheduleBridge<T : RemoteCustomTimeId>(
         domainFactory: DomainFactory,
-        private val remoteSingleScheduleRecord: RemoteSingleScheduleRecord) : RemoteScheduleBridge(domainFactory, remoteSingleScheduleRecord), SingleScheduleBridge {
+        private val remoteSingleScheduleRecord: RemoteSingleScheduleRecord<T>) : RemoteScheduleBridge<T>(domainFactory, remoteSingleScheduleRecord), SingleScheduleBridge {
 
     override val year get() = remoteSingleScheduleRecord.year
 

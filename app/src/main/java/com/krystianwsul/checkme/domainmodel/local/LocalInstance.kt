@@ -46,7 +46,7 @@ class LocalInstance : Instance {
 
     override val task get() = domainFactory.localFactory.getTaskForce(taskId)
 
-    override val remoteNullableProject: RemoteProject? = null
+    override val remoteNullableProject: RemoteProject<*>? = null
 
     override val remoteNonNullProject get() = throw UnsupportedOperationException()
 

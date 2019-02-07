@@ -29,8 +29,8 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
         }
     }
 
-    fun destructureRemote(remoteProject: RemoteProject): Triple<RemoteCustomTimeId?, Int?, Int?> {
-        val remoteCustomTimeId: RemoteCustomTimeId?
+    fun <T : RemoteCustomTimeId> destructureRemote(remoteProject: RemoteProject<T>): Triple<T?, Int?, Int?> {
+        val remoteCustomTimeId: T?
         val hour: Int?
         val minute: Int?
         if (customTimeKey != null) {
@@ -38,7 +38,7 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
 
             remoteCustomTimeId = when (customTimeKey) {
                 is CustomTimeKey.LocalCustomTimeKey -> remoteProject.getRemoteCustomTimeId(customTimeKey)
-                is CustomTimeKey.RemoteCustomTimeKey -> customTimeKey.remoteCustomTimeId
+                is CustomTimeKey.RemoteCustomTimeKey -> customTimeKey.remoteCustomTimeId as T
             }
 
             hour = null

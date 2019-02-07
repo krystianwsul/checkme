@@ -1,9 +1,10 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 
-class RemoteMonthlyWeekScheduleRecord : RemoteScheduleRecord {
+class RemoteMonthlyWeekScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRecord<T> {
 
     private val monthlyWeekScheduleJson by lazy { createObject.monthlyWeekScheduleJson!! }
 
@@ -19,9 +20,9 @@ class RemoteMonthlyWeekScheduleRecord : RemoteScheduleRecord {
 
     val minute by lazy { monthlyWeekScheduleJson.minute }
 
-    constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
+    constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
 
-    constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
+    constructor(remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
 
     override val startTime by lazy { monthlyWeekScheduleJson.startTime }
 

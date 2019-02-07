@@ -13,27 +13,26 @@ import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.regex.Pattern
 
-class RemoteInstanceRecord(
+class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         create: Boolean,
-        private val remoteTaskRecord: RemoteTaskRecord,
+        private val remoteTaskRecord: RemoteTaskRecord<T>,
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         private val firebaseKey: String,
-        override val scheduleCustomTimeId: RemoteCustomTimeId?) : RemoteRecord(create), InstanceRecord<RemoteCustomTimeId> {
+        override val scheduleCustomTimeId: T?) : RemoteRecord(create), InstanceRecord<T> {
 
     companion object {
 
         private val hourMinutePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
-        fun scheduleKeyToString(domainFactory: DomainFactory, projectId: String, scheduleKey: ScheduleKey, remoteCustomTimeId: RemoteCustomTimeId? = null): String {
+        fun <T : RemoteCustomTimeId> scheduleKeyToString(scheduleKey: ScheduleKey, remoteCustomTimeId: T?): String {
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
             key += scheduleKey.scheduleTimePair.let {
                 if (it.customTimeKey != null) {
                     check(it.hourMinute == null)
 
                     remoteCustomTimeId?.value
-                            ?: domainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
                 } else {
                     it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
                 }
@@ -42,7 +41,22 @@ class RemoteInstanceRecord(
             return key
         }
 
-        fun stringToScheduleKey(remoteProjectRecord: RemoteProjectRecord, key: String): Pair<ScheduleKey, RemoteCustomTimeId?> {
+        fun scheduleKeyToString(domainFactory: DomainFactory, projectId: String, scheduleKey: ScheduleKey): String {
+            var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
+            key += scheduleKey.scheduleTimePair.let {
+                if (it.customTimeKey != null) {
+                    check(it.hourMinute == null)
+
+                    domainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
+                } else {
+                    it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
+                }
+            }
+
+            return key
+        }
+
+        fun <T : RemoteCustomTimeId> stringToScheduleKey(remoteProjectRecord: RemoteProjectRecord<T>, key: String): Pair<ScheduleKey, T?> {
             val hourMinuteMatcher = hourMinutePattern.matcher(key)
 
             if (hourMinuteMatcher.matches()) {

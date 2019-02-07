@@ -12,7 +12,7 @@ class RemoteSharedProjectRecord(
         create: Boolean,
         domainFactory: DomainFactory,
         id: String,
-        private val jsonWrapper: JsonWrapper) : RemoteProjectRecord(create, domainFactory, id) {
+        private val jsonWrapper: JsonWrapper) : RemoteProjectRecord<RemoteCustomTimeId.Shared>(create, domainFactory, id) {
 
     override val projectJson = jsonWrapper.projectJson
 

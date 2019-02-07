@@ -29,7 +29,7 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
 
     override val existingInstances get() = HashMap<ScheduleKey, Instance>(domainFactory.localFactory.getExistingInstances(taskKey))
 
-    override val remoteNullableProject: RemoteProject? = null
+    override val remoteNullableProject: RemoteProject<*>? = null
 
     override val remoteNonNullProject get() = throw UnsupportedOperationException()
 

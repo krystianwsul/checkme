@@ -9,13 +9,13 @@ import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.*
 
-abstract class RemoteCustomTime : CustomTime {
+abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
 
-    protected abstract val remoteProject: RemoteProject
+    protected abstract val remoteProject: RemoteProject<T>
 
-    abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord
+    abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord<T>
 
-    abstract val id: RemoteCustomTimeId
+    abstract val id: T
 
     override val name get() = remoteCustomTimeRecord.name
 

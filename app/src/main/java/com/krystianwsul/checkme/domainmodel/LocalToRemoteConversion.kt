@@ -11,6 +11,6 @@ class LocalToRemoteConversion {
     val localTasks = mutableMapOf<Int, Pair<LocalTask, List<LocalInstance>>>()
     val localTaskHierarchies = mutableListOf<LocalTaskHierarchy>()
 
-    val remoteTasks = mutableMapOf<Int, RemoteTask>()
+    val remoteTasks = mutableMapOf<Int, RemoteTask<*>>()
     val remoteTaskHierarchies = mutableListOf<RemoteTaskHierarchy>()
 }

@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 
-class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord {
+class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.Private> {
 
     override val id: RemoteCustomTimeId.Private
     override val remoteProjectRecord: RemotePrivateProjectRecord

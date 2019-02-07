@@ -95,9 +95,9 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract val notificationShown: Boolean
 
-    abstract val remoteNullableProject: RemoteProject?
+    abstract val remoteNullableProject: RemoteProject<*>?
 
-    abstract val remoteNonNullProject: RemoteProject
+    abstract val remoteNonNullProject: RemoteProject<*>
 
     abstract val remoteCustomTimeKey: Pair<String, RemoteCustomTimeId>?
 

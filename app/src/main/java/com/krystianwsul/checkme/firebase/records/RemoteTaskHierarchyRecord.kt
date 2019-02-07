@@ -12,7 +12,7 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
 
     val id: String
 
-    private val remoteProjectRecord: RemoteProjectRecord
+    private val remoteProjectRecord: RemoteProjectRecord<*>
 
     override val createObject: TaskHierarchyJson
 
@@ -36,13 +36,13 @@ class RemoteTaskHierarchyRecord : RemoteRecord {
 
     val ordinal get() = createObject.ordinal
 
-    constructor(id: String, remoteProjectRecord: RemoteProjectRecord, taskHierarchyJson: TaskHierarchyJson) : super(false) {
+    constructor(id: String, remoteProjectRecord: RemoteProjectRecord<*>, taskHierarchyJson: TaskHierarchyJson) : super(false) {
         this.id = id
         this.remoteProjectRecord = remoteProjectRecord
         createObject = taskHierarchyJson
     }
 
-    constructor(remoteProjectRecord: RemoteProjectRecord, taskHierarchyJson: TaskHierarchyJson) : super(true) {
+    constructor(remoteProjectRecord: RemoteProjectRecord<*>, taskHierarchyJson: TaskHierarchyJson) : super(true) {
         id = remoteProjectRecord.getTaskHierarchyRecordId()
         this.remoteProjectRecord = remoteProjectRecord
         createObject = taskHierarchyJson

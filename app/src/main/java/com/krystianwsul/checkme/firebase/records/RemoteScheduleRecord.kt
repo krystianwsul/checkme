@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.records
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
-abstract class RemoteScheduleRecord : RemoteRecord {
+abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord {
 
     companion object {
 
@@ -12,7 +12,7 @@ abstract class RemoteScheduleRecord : RemoteRecord {
 
     val id: String
 
-    protected val remoteTaskRecord: RemoteTaskRecord
+    protected val remoteTaskRecord: RemoteTaskRecord<T>
 
     final override val createObject: ScheduleWrapper
 
@@ -28,13 +28,13 @@ abstract class RemoteScheduleRecord : RemoteRecord {
 
     abstract val customTimeId: RemoteCustomTimeId?
 
-    constructor(id: String, remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(false) {
+    constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(false) {
         this.id = id
         this.remoteTaskRecord = remoteTaskRecord
         this.createObject = scheduleWrapper
     }
 
-    constructor(remoteTaskRecord: RemoteTaskRecord, scheduleWrapper: ScheduleWrapper) : super(true) {
+    constructor(remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(true) {
         id = remoteTaskRecord.getScheduleRecordId()
         this.remoteTaskRecord = remoteTaskRecord
         this.createObject = scheduleWrapper

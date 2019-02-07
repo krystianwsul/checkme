@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 
-class RemoteTaskHierarchy(domainFactory: DomainFactory, private val remoteProject: RemoteProject, private val remoteTaskHierarchyRecord: RemoteTaskHierarchyRecord) : TaskHierarchy(domainFactory) {
+class RemoteTaskHierarchy(domainFactory: DomainFactory, private val remoteProject: RemoteProject<*>, private val remoteTaskHierarchyRecord: RemoteTaskHierarchyRecord) : TaskHierarchy(domainFactory) {
 
     override val startExactTimeStamp get() = ExactTimeStamp(remoteTaskHierarchyRecord.startTime)
 

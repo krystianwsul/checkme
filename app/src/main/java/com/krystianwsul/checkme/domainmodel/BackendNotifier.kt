@@ -30,7 +30,7 @@ object BackendNotifier {
         return PREFIX + parameters.joinToString("&")
     }
 
-    fun notify(remoteProjects: Set<RemoteProject>, userInfo: UserInfo, userKeys: Collection<String>) {
+    fun notify(remoteProjects: Set<RemoteProject<*>>, userInfo: UserInfo, userKeys: Collection<String>) {
         val root = DatabaseWrapper.root
 
         val production = when (root) {

@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
-interface InstanceRecord<T> {
+interface InstanceRecord<out T> {
 
     val scheduleYear: Int
     val scheduleMonth: Int

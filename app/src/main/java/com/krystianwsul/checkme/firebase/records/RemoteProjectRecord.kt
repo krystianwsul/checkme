@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.firebase.json.UserJson
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
-abstract class RemoteProjectRecord(
+abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
         create: Boolean,
         domainFactory: DomainFactory,
         val id: String) : RemoteRecord(create) {
@@ -21,7 +21,7 @@ abstract class RemoteProjectRecord(
 
     protected abstract val projectJson: ProjectJson
 
-    abstract val remoteCustomTimeRecords: Map<out RemoteCustomTimeId, RemoteCustomTimeRecord>
+    abstract val remoteCustomTimeRecords: Map<out T, RemoteCustomTimeRecord<T>>
 
     val remoteTaskRecords by lazy {
         projectJson.tasks
@@ -87,7 +87,7 @@ abstract class RemoteProjectRecord(
                 remoteCustomTimeRecords.values +
                 remoteUserRecords.values
 
-    fun newRemoteTaskRecord(domainFactory: DomainFactory, taskJson: TaskJson): RemoteTaskRecord {
+    fun newRemoteTaskRecord(domainFactory: DomainFactory, taskJson: TaskJson): RemoteTaskRecord<T> {
         val remoteTaskRecord = RemoteTaskRecord(domainFactory, this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
@@ -117,7 +117,7 @@ abstract class RemoteProjectRecord(
 
     abstract fun getScheduleRecordId(taskId: String): String
 
-    abstract fun getCustomTimeRecord(id: String): RemoteCustomTimeRecord
+    abstract fun getCustomTimeRecord(id: String): RemoteCustomTimeRecord<T>
 
-    abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
+    abstract fun getRemoteCustomTimeId(id: String): T
 }

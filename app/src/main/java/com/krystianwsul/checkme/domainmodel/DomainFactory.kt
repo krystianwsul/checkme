@@ -1409,6 +1409,7 @@ open class DomainFactory(
         check(DayOfWeek.values().all { hourMinutes[it] != null })
 
         val localCustomTime = localFactory.createLocalCustomTime(name, hourMinutes)
+        remoteProjectFactory.remotePrivateProject.getRemoteCustomTimeId(localCustomTime.customTimeKey)
 
         save(0, source)
 

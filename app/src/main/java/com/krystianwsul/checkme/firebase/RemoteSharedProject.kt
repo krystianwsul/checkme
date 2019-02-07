@@ -121,18 +121,41 @@ class RemoteSharedProject(
 
     override fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.let { it.ownerId == uuid && it.localId == localCustomTimeId } }
 
-    override fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): RemoteCustomTimeId.Shared {
-        val localCustomTimeId = localCustomTimeKey.localCustomTimeId
+    override fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey): RemoteCustomTimeId.Shared {
+        return when (customTimeKey) {
+            is CustomTimeKey.LocalCustomTimeKey -> {
+                val localCustomTimeId = customTimeKey.localCustomTimeId
 
-        val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
+                val localCustomTime = domainFactory.localFactory.getLocalCustomTime(localCustomTimeId)
 
-        val remoteCustomTime = getRemoteCustomTimeIfPresent(localCustomTimeId)
-        if (remoteCustomTime != null)
-            return remoteCustomTime.id
+                val remoteCustomTime = getRemoteCustomTimeIfPresent(localCustomTimeId)
+                if (remoteCustomTime != null) {
+                    remoteCustomTime.id
+                } else {
+                    val customTimeJson = SharedCustomTimeJson(domainFactory.uuid, localCustomTime.id, localCustomTime.name, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, localCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, localCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute)
 
-        val customTimeJson = SharedCustomTimeJson(domainFactory.uuid, localCustomTime.id, localCustomTime.name, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, localCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, localCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute)
+                    newRemoteCustomTime(customTimeJson).id
+                }
+            }
+            is CustomTimeKey.RemoteCustomTimeKey<*> -> {
+                when (customTimeKey.remoteCustomTimeId) {
+                    is RemoteCustomTimeId.Private -> {
+                        val privateRemoteCustomTime = domainFactory.remoteProjectFactory
+                                .remotePrivateProject
+                                .getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
 
-        return newRemoteCustomTime(customTimeJson).id
+                        val customTimeJson = SharedCustomTimeJson(domainFactory.uuid, privateRemoteCustomTime.remoteCustomTimeRecord.localId, privateRemoteCustomTime.name, privateRemoteCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, privateRemoteCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, privateRemoteCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, privateRemoteCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, privateRemoteCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, privateRemoteCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, privateRemoteCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, privateRemoteCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, privateRemoteCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, privateRemoteCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, privateRemoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, privateRemoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, privateRemoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, privateRemoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute)
+
+                        newRemoteCustomTime(customTimeJson).id
+                    }
+                    is RemoteCustomTimeId.Shared -> {
+                        check(customTimeKey.remoteProjectId == id)
+
+                        customTimeKey.remoteCustomTimeId
+                    }
+                }
+            }
+        }
     }
 
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteSharedCustomTime {

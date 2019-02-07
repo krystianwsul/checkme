@@ -48,7 +48,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
                 .mapValues { (id, userJson) ->
                     check(!TextUtils.isEmpty(id))
 
-                    RemoteProjectUserRecord(false, this, userJson)
+                    RemoteProjectUserRecord(create, this, userJson)
                 }
                 .toMutableMap()
     }

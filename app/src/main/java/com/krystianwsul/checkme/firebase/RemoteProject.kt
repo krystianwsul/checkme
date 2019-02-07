@@ -190,7 +190,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
 
-    abstract fun getRemoteCustomTimeId(localCustomTimeKey: CustomTimeKey.LocalCustomTimeKey): T
+    abstract fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey): T
 
     abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<T>
 

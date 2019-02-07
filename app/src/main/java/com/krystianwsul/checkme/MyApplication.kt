@@ -120,9 +120,10 @@ class MyApplication : Application() {
 
         //writeHashes()
 
-        ANRWatchDog()//.setReportMainThreadOnly()
-                .setANRListener { MyCrashlytics.logException(it) }
-                .start()
+        if (!BuildConfig.DEBUG)
+            ANRWatchDog()//.setReportMainThreadOnly()
+                    .setANRListener { MyCrashlytics.logException(it) }
+                    .start()
     }
 
     /*

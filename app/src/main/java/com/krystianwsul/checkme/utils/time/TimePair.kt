@@ -36,10 +36,7 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
         if (customTimeKey != null) {
             check(hourMinute == null)
 
-            remoteCustomTimeId = when (customTimeKey) {
-                is CustomTimeKey.LocalCustomTimeKey -> remoteProject.getRemoteCustomTimeId(customTimeKey)
-                is CustomTimeKey.RemoteCustomTimeKey<*> -> customTimeKey.remoteCustomTimeId as T
-            }
+            remoteCustomTimeId = remoteProject.getRemoteCustomTimeId(customTimeKey)
 
             hour = null
             minute = null

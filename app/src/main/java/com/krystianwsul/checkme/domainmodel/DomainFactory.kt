@@ -2429,11 +2429,15 @@ open class DomainFactory(
             (remoteProject as RemoteSharedProject).getRemoteCustomTime(remoteCustomTimeId as RemoteCustomTimeId.Shared)
         }
 
+        return remoteCustomTime.customTimeKey
+
+        /* todo customTime
         return remoteCustomTime.remoteCustomTimeRecord
                 .takeIf { it.mine(this) }
                 ?.let { localFactory.localCustomTimes.singleOrNull { localCustomTime -> localCustomTime.id == it.localId } }
                 ?.customTimeKey
                 ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)
+                */
     }
 
     class ProjectUndoData {

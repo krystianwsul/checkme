@@ -49,7 +49,7 @@ abstract class RemoteProject(
 
     val taskIds get() = remoteTasks.keys
 
-    val customTimes get() = remoteCustomTimes.values
+    abstract val customTimes: Collection<RemoteCustomTime>
 
     fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask {
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)

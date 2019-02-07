@@ -30,6 +30,8 @@ class RemoteSharedProject(
     override val remoteTasks: MutableMap<String, RemoteTask>
     override val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
 
+    override val customTimes get() = remoteCustomTimes.values
+
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
             @Suppress("LeakingThis")

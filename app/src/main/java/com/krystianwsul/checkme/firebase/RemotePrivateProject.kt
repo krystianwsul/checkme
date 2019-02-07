@@ -20,6 +20,8 @@ class RemotePrivateProject(
     override val remoteTasks: MutableMap<String, RemoteTask>
     override val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy>()
 
+    override val customTimes get() = remoteCustomTimes.values
+
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
             @Suppress("LeakingThis")
@@ -44,6 +46,11 @@ class RemotePrivateProject(
                 .values
                 .map { RemoteTaskHierarchy(domainFactory, this, it) }
                 .forEach { remoteTaskHierarchies.add(it.id, it) }
+
+        domainFactory.localFactory
+                .localCustomTimes
+                .filter { getRemoteCustomTimeIfPresent(it.id) == null }
+                .forEach { getRemoteCustomTimeId(it.customTimeKey) }
     }
 
     override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) = throw UnsupportedOperationException()

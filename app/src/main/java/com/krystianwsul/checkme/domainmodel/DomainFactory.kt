@@ -2060,7 +2060,12 @@ open class DomainFactory(
         irrelevantLocalCustomTimes.let { Log.e("asdf", "irrelevant times " + it.size); it }.forEach { it.delete() }
 
         val remoteCustomTimes = remoteProjectFactory.remoteCustomTimes
-        val remoteCustomTimeRelevances = remoteCustomTimes.map { kotlin.Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
+        val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
+
+        remoteProjectFactory.remotePrivateProject
+                .customTimes
+                .filter { it.current }
+                .forEach { remoteCustomTimeRelevances.getValue(Pair(it.projectId, it.id)).setRelevant() }
 
         val remoteProjects = remoteProjectFactory.remoteProjects.values
         val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()

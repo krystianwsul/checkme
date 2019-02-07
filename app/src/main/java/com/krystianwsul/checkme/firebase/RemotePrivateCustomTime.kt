@@ -8,6 +8,8 @@ class RemotePrivateCustomTime(
 
     override val id = remoteCustomTimeRecord.id
 
+    val current get() = remoteCustomTimeRecord.current
+
     override fun delete() {
         remoteProject.deleteCustomTime(this)
 

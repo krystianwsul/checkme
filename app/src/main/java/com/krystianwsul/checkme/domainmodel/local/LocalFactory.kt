@@ -122,17 +122,20 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
             check(scheduleMinute == null)
 
             matches = persistenceManager.instanceShownRecords
+                    .asSequence()
                     .filter { it.projectId == projectId }
                     .filter { it.taskId == taskId }
                     .filter { it.scheduleYear == scheduleYear }
                     .filter { it.scheduleMonth == scheduleMonth }
                     .filter { it.scheduleDay == scheduleDay }
                     .filter { it.scheduleCustomTimeId == scheduleCustomTimeId }
+                    .toList()
         } else {
             checkNotNull(scheduleHour)
             checkNotNull(scheduleMinute)
 
             matches = persistenceManager.instanceShownRecords
+                    .asSequence()
                     .filter { it.projectId == projectId }
                     .filter { it.taskId == taskId }
                     .filter { it.scheduleYear == scheduleYear }
@@ -140,6 +143,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
                     .filter { it.scheduleDay == scheduleDay }
                     .filter { it.scheduleHour == scheduleHour }
                     .filter { it.scheduleMinute == scheduleMinute }
+                    .toList()
         }
 
         return matches.singleOrNull()

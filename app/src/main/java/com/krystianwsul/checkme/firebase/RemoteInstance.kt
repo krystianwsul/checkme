@@ -47,7 +47,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
                             .timePair
                             .customTimeKey
 
-                    if (customTimeKey is CustomTimeKey.RemoteCustomTimeKey) {
+                    if (customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>) {
                         domainFactory.getLocalCustomTimeKeyIfPossible(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
                     } else {
                         customTimeKey

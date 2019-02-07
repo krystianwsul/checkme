@@ -39,7 +39,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             if (instanceKey.scheduleKey.scheduleTimePair.customTimeKey == null)
                 return instanceKey
 
-            if (instanceKey.scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey)
+            if (instanceKey.scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>)
                 return instanceKey
 
             val projectId = instanceKey.taskKey.remoteProjectId!!

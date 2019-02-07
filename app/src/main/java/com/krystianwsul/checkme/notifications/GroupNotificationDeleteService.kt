@@ -22,7 +22,7 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
             check(instanceKeys.asSequence()
                     .filter { it.type == TaskKey.Type.REMOTE }
                     .mapNotNull { it.scheduleKey.scheduleTimePair.customTimeKey }
-                    .all { it is CustomTimeKey.RemoteCustomTimeKey })
+                    .all { it is CustomTimeKey.RemoteCustomTimeKey<*> })
 
             putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys)
         }

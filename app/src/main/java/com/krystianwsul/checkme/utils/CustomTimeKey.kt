@@ -6,5 +6,5 @@ sealed class CustomTimeKey : Serializable {
 
     data class LocalCustomTimeKey(val localCustomTimeId: Int) : CustomTimeKey()
 
-    data class RemoteCustomTimeKey(val remoteProjectId: String, val remoteCustomTimeId: RemoteCustomTimeId) : CustomTimeKey()
+    data class RemoteCustomTimeKey<T : RemoteCustomTimeId>(val remoteProjectId: String, val remoteCustomTimeId: T) : CustomTimeKey()
 }

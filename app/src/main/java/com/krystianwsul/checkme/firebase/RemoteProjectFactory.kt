@@ -155,13 +155,12 @@ class RemoteProjectFactory(
         return privateSaved || sharedSaved
     }
 
-    fun <T : RemoteCustomTimeId> getRemoteCustomTime(remoteProjectId: String, remoteCustomTimeId: T): RemoteCustomTime<T> {
+    fun getRemoteCustomTime(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<*> {
         check(!TextUtils.isEmpty(remoteProjectId))
 
         check(remoteProjects.containsKey(remoteProjectId))
 
-        val remoteProject = remoteProjects.getValue(remoteProjectId) as RemoteProject<T>
-        return remoteProject.getRemoteCustomTime(remoteCustomTimeId)
+        return remoteProjects.getValue(remoteProjectId).getRemoteCustomTime(remoteCustomTimeId)
     }
 
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance<*>? {

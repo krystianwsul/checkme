@@ -1593,7 +1593,7 @@ open class DomainFactory(
                 .customTimeKey
 
         val fixedCustomTimeKey = originalCustomTimeKey?.let {
-            if (it is CustomTimeKey.RemoteCustomTimeKey)
+            if (it is CustomTimeKey.RemoteCustomTimeKey<*>)
                 getLocalCustomTimeKeyIfPossible(it.remoteProjectId, it.remoteCustomTimeId)
             else
                 it
@@ -1622,7 +1622,7 @@ open class DomainFactory(
     }
 
     fun getRemoteCustomTimeId(projectId: String, customTimeKey: CustomTimeKey) = when (customTimeKey) {
-        is CustomTimeKey.RemoteCustomTimeKey -> customTimeKey.remoteCustomTimeId
+        is CustomTimeKey.RemoteCustomTimeKey<*> -> customTimeKey.remoteCustomTimeId
         is CustomTimeKey.LocalCustomTimeKey -> remoteProjectFactory.getRemoteProjectForce(projectId)
                 .getRemoteCustomTimeIfPresent(customTimeKey.localCustomTimeId)!!
                 .id
@@ -1749,7 +1749,7 @@ open class DomainFactory(
 
     fun getCustomTime(customTimeKey: CustomTimeKey) = when (customTimeKey) {
         is CustomTimeKey.LocalCustomTimeKey -> localFactory.getLocalCustomTime(customTimeKey.localCustomTimeId)
-        is CustomTimeKey.RemoteCustomTimeKey -> remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
+        is CustomTimeKey.RemoteCustomTimeKey<*> -> remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
     }
 
     private fun getCurrentCustomTimes() = localFactory.currentCustomTimes
@@ -2334,7 +2334,7 @@ open class DomainFactory(
             if (scheduleKey.scheduleTimePair.customTimeKey != null) {
                 check(scheduleKey.scheduleTimePair.hourMinute == null)
 
-                check(scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey) // remote custom time key hack
+                check(scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>) // remote custom time key hack
                 check(projectId == scheduleKey.scheduleTimePair.customTimeKey.remoteProjectId)
 
                 val customTimeId = scheduleKey.scheduleTimePair.customTimeKey.remoteCustomTimeId

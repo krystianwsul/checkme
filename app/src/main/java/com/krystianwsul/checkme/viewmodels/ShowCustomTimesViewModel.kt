@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 class ShowCustomTimesViewModel : DomainViewModel<ShowCustomTimesViewModel.Data>() {
 
@@ -13,7 +14,7 @@ class ShowCustomTimesViewModel : DomainViewModel<ShowCustomTimesViewModel.Data>(
 
     data class Data(val entries: MutableList<CustomTimeData>) : DomainData()
 
-    data class CustomTimeData(val id: Int, val name: String) {
+    data class CustomTimeData(val id: RemoteCustomTimeId.Private, val name: String) {
 
         init {
             check(name.isNotEmpty())

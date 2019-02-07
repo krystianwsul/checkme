@@ -597,7 +597,9 @@ class CreateTaskActivity : AbstractActivity() {
             val hourMinute = if (timePair.customTimeKey != null) {
                 check(timePair.hourMinute == null)
 
-                data!!.customTimeDatas[timePair.customTimeKey]!!.hourMinutes[singleScheduleEntry.mDate.dayOfWeek]
+                data!!.customTimeDatas
+                        .getValue(timePair.customTimeKey)
+                        .hourMinutes[singleScheduleEntry.mDate.dayOfWeek]
             } else {
                 checkNotNull(timePair.hourMinute)
 
@@ -688,7 +690,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private fun findTaskDataHelper(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, parentKey: CreateTaskViewModel.ParentKey): Iterable<CreateTaskViewModel.ParentTreeData> {
         if (taskDatas.containsKey(parentKey))
-            return listOf(taskDatas[parentKey]!!)
+            return listOf(taskDatas.getValue(parentKey))
 
         return taskDatas.values
                 .map { findTaskDataHelper(it.parentTreeDatas, parentKey) }

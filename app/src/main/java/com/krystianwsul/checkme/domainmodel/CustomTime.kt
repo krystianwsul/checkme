@@ -8,9 +8,11 @@ import java.util.*
 
 interface CustomTime : Time {
 
-    val name: String
+    var name: String
 
     val hourMinutes: TreeMap<DayOfWeek, HourMinute>
 
     val customTimeKey: CustomTimeKey
+
+    fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute)
 }

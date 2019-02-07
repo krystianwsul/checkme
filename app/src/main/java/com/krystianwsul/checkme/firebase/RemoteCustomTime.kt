@@ -17,7 +17,11 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
 
     abstract val id: T
 
-    override val name get() = remoteCustomTimeRecord.name
+    override var name
+        get() = remoteCustomTimeRecord.name
+        set(value) {
+            remoteCustomTimeRecord.name = value
+        }
 
     override val hourMinutes
         get() = DayOfWeek.values()
@@ -43,4 +47,6 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
     override fun toString() = name
 
     abstract fun delete()
+
+    override fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = remoteCustomTimeRecord.setHourMinute(dayOfWeek, hourMinute)
 }

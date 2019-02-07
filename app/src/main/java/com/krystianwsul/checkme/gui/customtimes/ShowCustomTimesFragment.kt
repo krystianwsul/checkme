@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
@@ -39,7 +40,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private lateinit var emptyText: TextView
 
-    private var selectedCustomTimeIds: List<Int>? = null
+    private var selectedCustomTimeIds: List<RemoteCustomTimeId.Private>? = null
 
     private val selectionCallback = object : SelectionCallback() {
 
@@ -111,7 +112,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         emptyText = view.findViewById(R.id.emptyText)!!
 
         if (savedInstanceState?.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY) == true) {
-            selectedCustomTimeIds = savedInstanceState.getIntegerArrayList(SELECTED_CUSTOM_TIME_IDS_KEY)!!
+            selectedCustomTimeIds = savedInstanceState.getParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY)!!
             check(!selectedCustomTimeIds!!.isEmpty())
         }
 
@@ -170,7 +171,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         if (this::treeViewAdapter.isInitialized) {
             val selectedCustomTimeIds = selectedIds
             if (!selectedCustomTimeIds.isEmpty())
-                outState.putIntegerArrayList(SELECTED_CUSTOM_TIME_IDS_KEY, ArrayList(selectedCustomTimeIds))
+                outState.putParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY, ArrayList(selectedCustomTimeIds))
         }
     }
 

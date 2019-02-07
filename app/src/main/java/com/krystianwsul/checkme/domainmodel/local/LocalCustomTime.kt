@@ -31,14 +31,12 @@ class LocalCustomTime(
     private fun getCustomTimeRecords() = domainFactory.getRemoteCustomTimes(id)
             .map { it.remoteCustomTimeRecord }
             .toMutableList<CustomTimeRecord>()
-            .apply { add(localCustomTimeRecord) }
+            .apply { add(localCustomTimeRecord) } // todo move to RemotePrivateCustomTime
 
-    override val name get() = localCustomTimeRecord.name
-
-    fun setName(name: String) {
-        check(name.isNotEmpty())
-
-        getCustomTimeRecords().forEach { it.name = name }
+    override var name
+        get() = localCustomTimeRecord.name
+        set(value) {
+            getCustomTimeRecords().forEach { it.name = value }
     }
 
     override fun getHourMinute(dayOfWeek: DayOfWeek): HourMinute = when (dayOfWeek) {
@@ -56,53 +54,8 @@ class LocalCustomTime(
             putAll(DayOfWeek.values().map { Pair(it, getHourMinute(it)) })
         }
 
-    fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
-        val customTimeRecords = getCustomTimeRecords()
-
-        when (dayOfWeek) {
-            DayOfWeek.SUNDAY -> {
-                customTimeRecords.forEach {
-                    it.sundayHour = hourMinute.hour
-                    it.sundayMinute = hourMinute.minute
-                }
-            }
-            DayOfWeek.MONDAY -> {
-                customTimeRecords.forEach {
-                    it.mondayHour = hourMinute.hour
-                    it.mondayMinute = hourMinute.minute
-                }
-            }
-            DayOfWeek.TUESDAY -> {
-                customTimeRecords.forEach {
-                    it.tuesdayHour = hourMinute.hour
-                    it.tuesdayMinute = hourMinute.minute
-                }
-            }
-            DayOfWeek.WEDNESDAY -> {
-                customTimeRecords.forEach {
-                    it.wednesdayHour = hourMinute.hour
-                    it.wednesdayMinute = hourMinute.minute
-                }
-            }
-            DayOfWeek.THURSDAY -> {
-                customTimeRecords.forEach {
-                    it.thursdayHour = hourMinute.hour
-                    it.thursdayMinute = hourMinute.minute
-                }
-            }
-            DayOfWeek.FRIDAY -> {
-                customTimeRecords.forEach {
-                    it.fridayHour = hourMinute.hour
-                    it.fridayMinute = hourMinute.minute
-                }
-            }
-            DayOfWeek.SATURDAY -> {
-                customTimeRecords.forEach {
-                    it.saturdayHour = hourMinute.hour
-                    it.saturdayMinute = hourMinute.minute
-                }
-            }
-        }
+    override fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
+        getCustomTimeRecords().forEach { it.setHourMinute(dayOfWeek, hourMinute) }
     }
 
     override fun toString() = name

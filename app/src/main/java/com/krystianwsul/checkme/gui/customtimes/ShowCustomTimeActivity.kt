@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.customtimes
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
@@ -15,6 +16,7 @@ import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
@@ -48,12 +50,12 @@ class ShowCustomTimeActivity : AbstractActivity() {
 
         private val sDefaultHourMinute = HourMinute(9, 0)
 
-        fun getEditIntent(customTimeId: Int, context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply { putExtra(CUSTOM_TIME_ID_KEY, customTimeId) }
+        fun getEditIntent(customTimeId: RemoteCustomTimeId.Private, context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply { putExtra(CUSTOM_TIME_ID_KEY, customTimeId as Parcelable) }
 
         fun getCreateIntent(context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply { putExtra(NEW_KEY, true) }
     }
 
-    private var customTimeId: Int? = null
+    private var customTimeId: RemoteCustomTimeId.Private? = null
 
     private var data: ShowCustomTimeViewModel.Data? = null
 
@@ -173,8 +175,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
         if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
             check(!intent.hasExtra(NEW_KEY))
 
-            customTimeId = intent.getIntExtra(CUSTOM_TIME_ID_KEY, -1)
-            check(customTimeId != -1)
+            customTimeId = intent.getParcelableExtra(CUSTOM_TIME_ID_KEY)!!
 
             showCustomTimeViewModel = getViewModel<ShowCustomTimeViewModel>().apply {
                 start(customTimeId!!)
@@ -280,7 +281,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
             toolbarEditText.setText(data.name)
 
             for (dayOfWeek in DayOfWeek.values())
-                hourMinutes[dayOfWeek] = data.hourMinutes[dayOfWeek]!!
+                hourMinutes[dayOfWeek] = data.hourMinutes.getValue(dayOfWeek)
 
             updateGui()
         }

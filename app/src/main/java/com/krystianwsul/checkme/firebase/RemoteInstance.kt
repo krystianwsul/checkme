@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
@@ -56,11 +55,11 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             }
         }
 
-    override val task get() = remoteProject.getRemoteTaskForce(taskId)
+    override val task: RemoteTask<T>
 
-    override val remoteNullableProject get() = task.remoteProject
+    override val remoteNullableProject get() = remoteProject
 
-    override val remoteNonNullProject get() = task.remoteProject
+    override val remoteNonNullProject get() = remoteProject
 
     override val nullableInstanceShownRecord get() = instanceShownRecord
 
@@ -70,10 +69,12 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     constructor(
             domainFactory: DomainFactory,
             remoteProject: RemoteProject<T>,
+            remoteTask: RemoteTask<T>,
             remoteInstanceRecord: RemoteInstanceRecord<T>,
             instanceShownRecord: InstanceShownRecord?,
             now: ExactTimeStamp) : super(domainFactory) {
         this.remoteProject = remoteProject
+        task = remoteTask
         instanceData = RemoteRealInstanceData(this, remoteInstanceRecord)
         this.instanceShownRecord = instanceShownRecord
 
@@ -86,13 +87,12 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     constructor(
             domainFactory: DomainFactory,
             remoteProject: RemoteProject<T>,
-            taskId: String,
+            remoteTask: RemoteTask<T>,
             scheduleDateTime: DateTime,
             instanceShownRecord: InstanceShownRecord?) : super(domainFactory) {
-        check(!TextUtils.isEmpty(taskId))
-
         this.remoteProject = remoteProject
-        instanceData = VirtualInstanceData(taskId, scheduleDateTime)
+        task = remoteTask
+        instanceData = VirtualInstanceData(task.id, scheduleDateTime)
         this.instanceShownRecord = instanceShownRecord
     }
 

@@ -40,9 +40,10 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
         override val instanceDate
             get() = instanceRecord.let {
-                check(it.instanceYear == null == (it.instanceMonth == null))
-                check(it.instanceYear == null == (it.instanceDay == null))
-                if (it.instanceYear != null)
+                if (((it.instanceYear != null) != (it.instanceMonth != null)) || (it.instanceYear != null) != (it.instanceDay != null))
+                    MyCrashlytics.logException(InconsistentInstanceException("instance: " + getSignature() + ", instanceYear: ${it.instanceYear}, instanceMonth: ${it.instanceMonth}, instanceDay: ${it.instanceDay}"))
+
+                if (it.instanceYear != null && it.instanceMonth != null && it.instanceDay != null)
                     Date(it.instanceYear!!, it.instanceMonth!!, it.instanceDay!!)
                 else
                     scheduleDate

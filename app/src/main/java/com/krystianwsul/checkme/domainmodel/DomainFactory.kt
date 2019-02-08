@@ -1656,9 +1656,7 @@ open class DomainFactory(
 
             val instanceShownRecord = localFactory.getInstanceShownRecord(taskKey.remoteProjectId, taskKey.remoteTaskId, scheduleDateTime.date.year, scheduleDateTime.date.month, scheduleDateTime.date.day, remoteCustomTimeId, hour, minute)
 
-            val remoteProject = remoteProjectFactory.getTaskForce(taskKey).remoteProject
-
-            return RemoteInstance(this, remoteProject, taskKey.remoteTaskId, scheduleDateTime, instanceShownRecord)
+            return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime, instanceShownRecord)
         }
     }
 

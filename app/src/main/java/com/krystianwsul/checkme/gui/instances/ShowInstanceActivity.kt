@@ -133,7 +133,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                     startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                 }
                 R.id.instance_menu_delete_task -> {
-                    check(!it.done)
                     check(it.taskCurrent)
 
                     if (!it.exists)

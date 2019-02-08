@@ -205,6 +205,12 @@ class RemoteProjectFactory(
         return remoteProjects.getValue(projectId)
     }
 
+    fun getRemoteProjectIfPresent(projectId: String): RemoteProject<*>? {
+        check(!TextUtils.isEmpty(projectId))
+
+        return remoteProjects[projectId]
+    }
+
     fun deleteProject(remoteProject: RemoteProject<*>) {
         val projectId = remoteProject.id
 

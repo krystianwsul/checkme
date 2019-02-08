@@ -2172,9 +2172,12 @@ open class DomainFactory(
                         check(instanceShownRecord.scheduleHour == null)
                         check(instanceShownRecord.scheduleMinute == null)
 
-                        val remoteProject = remoteProjectFactory.getRemoteProjectForce(instanceShownRecord.projectId)
+                        val remoteProject = remoteProjectFactory.getRemoteProjectIfPresent(instanceShownRecord.projectId)
 
-                        customTimeKey = getLocalCustomTimeKeyIfPossible(instanceShownRecord.projectId, remoteProject.getRemoteCustomTimeId(remoteCustomTimeId))
+                        // todo split logic for hiding absentee remote records
+                        // I don't think the user's private project can't actually disappear
+                        customTimeKey = remoteProject?.let { getLocalCustomTimeKeyIfPossible(instanceShownRecord.projectId, it.getRemoteCustomTimeId(remoteCustomTimeId)) }
+                                ?: CustomTimeKey.RemoteCustomTimeKey(instanceShownRecord.projectId, RemoteCustomTimeId.Shared(remoteCustomTimeId))
                         hourMinute = null
                     } else {
                         checkNotNull(instanceShownRecord.scheduleHour)

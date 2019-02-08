@@ -25,8 +25,8 @@ android {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 22
         targetSdkVersion 28
-        versionCode 124
-        versionName "0.11.1"
+        versionCode 125
+        versionName "0.11.1.1"
     }
     buildTypes {
         release {
@@ -75,14 +75,14 @@ dependencies {
     testImplementation "org.powermock:powermock-api-mockito:$powermockVersion"
     testImplementation "org.powermock:powermock-classloading-xstream:$powermockVersion"
 
-    implementation "androidx.appcompat:appcompat:1.1.0-alpha01"
+    implementation "androidx.appcompat:appcompat:1.1.0-alpha02"
     implementation "com.google.android.material:material:1.1.0-alpha03"
 
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"
 
     implementation 'com.google.android.gms:play-services-auth:16.0.1'
-    implementation 'com.google.firebase:firebase-core:16.0.6'
+    implementation 'com.google.firebase:firebase-core:16.0.7'
     implementation 'com.google.firebase:firebase-auth:16.1.0'
     implementation 'com.google.firebase:firebase-database:16.0.6'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'

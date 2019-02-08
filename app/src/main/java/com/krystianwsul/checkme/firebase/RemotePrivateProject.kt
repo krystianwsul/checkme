@@ -32,7 +32,7 @@ class RemotePrivateProject(
             if (domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
                 val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
 
-                localCustomTime.updateRemoteCustomTimeRecord(remoteCustomTimeRecord)
+                localCustomTime.updateRemoteCustomTimeRecord(remoteCustomTimeRecord, this)
             }
         }
 

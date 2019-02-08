@@ -30,14 +30,14 @@ class RemoteProjectFactory(
     private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, userInfo, privateSnapshot, now)
     private val remoteSharedProjectManager = RemoteSharedProjectManager(domainFactory, sharedChildren)
 
-    val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
-            .values
-            .map { RemoteSharedProject(domainFactory, it, userInfo, uuid, now) }
-            .associateBy { it.id }
-            .toMutableMap()
-
     var remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid, now)
         private set
+
+    val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
+            .values
+            .map { RemoteSharedProject(domainFactory, remotePrivateProject, it, userInfo, uuid, now) }
+            .associateBy { it.id }
+            .toMutableMap()
 
     val remoteProjects
         get() = remoteSharedProjects.toMutableMap<String, RemoteProject<*>>().apply {
@@ -94,13 +94,13 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteSharedProjectManager.addChild(childEvent.dataSnapshot())
 
                 check(!remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remotePrivateProject, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildChangeEvent -> {
                 val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remotePrivateProject, remoteProjectRecord, userInfo, uuid, now)
             }
             is ChildRemoveEvent -> {
                 val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
@@ -140,7 +140,7 @@ class RemoteProjectFactory(
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+        val remoteProject = RemoteSharedProject(domainFactory, remotePrivateProject, remoteProjectRecord, userInfo, uuid, now)
 
         check(!remoteProjects.containsKey(remoteProject.id))
 

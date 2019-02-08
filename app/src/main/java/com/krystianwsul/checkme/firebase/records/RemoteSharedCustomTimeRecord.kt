@@ -30,4 +30,28 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
     override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
 
     override fun mine(domainFactory: DomainFactory) = ownerId == domainFactory.uuid
+
+    var ownerKey: String
+        get() = customTimeJson.ownerKey
+        set(value) {
+            check(value.isNotEmpty())
+
+            if (customTimeJson.ownerKey == value)
+                return
+
+            customTimeJson.ownerKey = value
+            addValue("$key/ownerKey", value)
+        }
+
+    var privateKey: String
+        get() = customTimeJson.privateKey
+        set(value) {
+            check(value.isNotEmpty())
+
+            if (customTimeJson.privateKey == value)
+                return
+
+            customTimeJson.privateKey = value
+            addValue("$key/privateKey", value)
+        }
 }

@@ -3,8 +3,10 @@ package com.krystianwsul.checkme.domainmodel.local
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.RemotePrivateProject
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.checkme.firebase.records.RemotePrivateCustomTimeRecord
+import com.krystianwsul.checkme.firebase.records.RemoteSharedCustomTimeRecord
 import com.krystianwsul.checkme.persistencemodel.LocalCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
@@ -70,7 +72,7 @@ class LocalCustomTime(
 
     override val customTimeKey get() = CustomTimeKey.LocalCustomTimeKey(id)
 
-    fun updateRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord<*>) {
+    fun updateRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord<*>, privateProject: RemotePrivateProject) {
         check(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
 
         // bez zapisywania na razie, dopiero przy następnej okazji
@@ -98,5 +100,12 @@ class LocalCustomTime(
         remoteCustomTimeRecord.saturdayMinute = localCustomTimeRecord.saturdayMinute
 
         (remoteCustomTimeRecord as? RemotePrivateCustomTimeRecord)?.current = localCustomTimeRecord.current
+
+        (remoteCustomTimeRecord as? RemoteSharedCustomTimeRecord)?.let {
+            val remotePrivateCustomTimeRecord = privateProject.getRemoteCustomTimeIfPresent(id)!!
+
+            it.ownerKey = privateProject.id
+            it.privateKey = remotePrivateCustomTimeRecord.id.value
+        }
     }
 }

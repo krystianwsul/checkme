@@ -14,7 +14,13 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     companion object {
 
+        private const val PATTERN = "yyyy-MM-dd"
+
+        private val format = DateTimeFormat.forPattern(PATTERN)
+
         fun today() = Date(Calendar.getInstance())
+
+        fun fromJson(json: String) = format.parseLocalDate(json).let { Date(it.year, it.monthOfYear, it.dayOfMonth) }
     }
 
     val dayOfWeek get() = DayOfWeek.getDayFromCalendar(GregorianCalendar(year, month - 1, day))
@@ -26,6 +32,8 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
     override fun compareTo(other: Date) = compareValuesBy(this, other, { it.year }, { it.month }, { it.day })
 
     override fun toString() = DateTimeFormat.forStyle("S-").print(LocalDate(year, month, day))!!
+
+    fun toJson() = LocalDate(year, month, day).toString(PATTERN)!!
 
     fun getDisplayText(): String {
         val todayCalendar = Calendar.getInstance()

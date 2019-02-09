@@ -108,9 +108,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         }
 
     override val scheduleYear by lazy { scheduleKey.scheduleDate.year }
-
     override val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
-
     override val scheduleDay by lazy { scheduleKey.scheduleDate.day }
 
     override val scheduleHour by lazy {
@@ -118,7 +116,6 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                 .hourMinute
                 ?.hour
     }
-
     override val scheduleMinute by lazy {
         scheduleKey.scheduleTimePair
                 .hourMinute
@@ -130,19 +127,38 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                 .takeUnless { it.isNullOrEmpty() }
                 ?.let { return Date.fromJson(it) }
 
+        val instanceYear = createObject.instanceYear
+        val instanceMonth = createObject.instanceMonth
+        val instanceDay = createObject.instanceDay
+
         if (((instanceYear != null) != (instanceMonth != null)) || (instanceYear != null) != (instanceDay != null))
             MyCrashlytics.logException(InstanceData.InconsistentInstanceException("instance: " + remoteTaskRecord.key + " " + key + ", instanceYear: $instanceYear, instanceMonth: $instanceMonth, instanceDay: $instanceDay"))
 
         return if (instanceYear != null && instanceMonth != null && instanceDay != null)
-            Date(instanceYear!!, instanceMonth!!, instanceDay!!)
+            Date(instanceYear, instanceMonth, instanceDay)
         else
             null
     }
 
     override var instanceDate by Delegates.observable(getInitialInstanceDate()) { _, _, value ->
-        setInstanceYear(value!!.year)
-        setInstanceMonth(value.month)
-        setInstanceDay(value.day)
+        val instanceYear = value!!.year
+        val instanceMonth = value.month
+        val instanceDay = value.day
+
+        if (instanceYear != createObject.instanceYear) {
+            createObject.instanceYear = instanceYear
+            addValue("$key/instanceYear", instanceYear)
+        }
+
+        if (instanceMonth != createObject.instanceMonth) {
+            createObject.instanceMonth = instanceMonth
+            addValue("$key/instanceMonth", instanceMonth)
+        }
+
+        if (instanceDay != createObject.instanceDay) {
+            createObject.instanceDay = instanceDay
+            addValue("$key/instanceDay", instanceDay)
+        }
 
         val json = value.toJson()
 
@@ -152,36 +168,15 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         }
     }
 
-    private val instanceYear get() = createObject.instanceYear
-    private val instanceMonth get() = createObject.instanceMonth
-    private val instanceDay get() = createObject.instanceDay
-
-    private var instanceHour
-        get() = createObject.instanceHour
-        set(instanceHour) {
-            if (instanceHour == createObject.instanceHour)
-                return
-
-            createObject.instanceHour = instanceHour
-            addValue("$key/instanceHour", instanceHour)
-        }
-
-    private var instanceMinute
-        get() = createObject.instanceMinute
-        set(instanceMinute) {
-            if (instanceMinute == createObject.instanceMinute)
-                return
-
-            createObject.instanceMinute = instanceMinute
-            addValue("$key/instanceMinute", instanceMinute)
-        }
-
     private val initialInstanceJsonTime: JsonTime<T>?
 
     init {
         initialInstanceJsonTime = createObject.instanceCustomTimeId
                 ?.let { JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it)) }
-                ?: instanceHour?.let { hour -> instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) } }
+                ?: createObject.instanceHour
+                        ?.let { hour ->
+                            createObject.instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) }
+                        }
     }
 
     override var instanceJsonTime by Delegates.observable(initialInstanceJsonTime) { _, _, value ->
@@ -197,8 +192,15 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             addValue("$key/instanceCustomTimeId", customTimeId?.value)
         }
 
-        instanceHour = hourMinute?.hour
-        instanceMinute = hourMinute?.minute
+        if (hourMinute?.hour != createObject.instanceHour) {
+            createObject.instanceHour = hourMinute?.hour
+            addValue("$key/instanceHour", hourMinute?.hour)
+        }
+
+        if (hourMinute?.minute != createObject.instanceMinute) {
+            createObject.instanceMinute = hourMinute?.minute
+            addValue("$key/instanceMinute", hourMinute?.minute)
+        }
     }
 
     override var ordinal
@@ -210,30 +212,6 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             createObject.ordinal = ordinal
             addValue("$key/ordinal", ordinal)
         }
-
-    private fun setInstanceYear(instanceYear: Int) {
-        if (instanceYear == createObject.instanceYear)
-            return
-
-        createObject.instanceYear = instanceYear
-        addValue("$key/instanceYear", instanceYear)
-    }
-
-    private fun setInstanceMonth(instanceMonth: Int) {
-        if (instanceMonth == createObject.instanceMonth)
-            return
-
-        createObject.instanceMonth = instanceMonth
-        addValue("$key/instanceMonth", instanceMonth)
-    }
-
-    private fun setInstanceDay(instanceDay: Int) {
-        if (instanceDay == createObject.instanceDay)
-            return
-
-        createObject.instanceDay = instanceDay
-        addValue("$key/instanceDay", instanceDay)
-    }
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
 }

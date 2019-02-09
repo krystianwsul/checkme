@@ -8,10 +8,7 @@ import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.InstanceData.VirtualInstanceData
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DateTime
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.checkme.utils.time.*
 
 class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
@@ -104,10 +101,10 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         (instanceData as RemoteRealInstanceData).instanceRecord.let {
             it.instanceDate = date
 
-            val customTimeId = timePair.destructureRemote(remoteProject).first
-
-            it.instanceCustomTimeId = customTimeId
-            it.instanceHourMinute = timePair.hourMinute
+            it.instanceJsonTime = timePair.run {
+                hourMinute?.let { JsonTime.Normal<T>(it) }
+                        ?: JsonTime.Custom(destructureRemote(remoteProject).first!!)
+            }
         }
 
         createInstanceShownRecord()

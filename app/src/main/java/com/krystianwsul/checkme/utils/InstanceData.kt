@@ -1,13 +1,9 @@
 package com.krystianwsul.checkme.utils
 
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DateTime
-import com.krystianwsul.checkme.utils.time.NormalTime
-import com.krystianwsul.checkme.utils.time.Time
+import com.krystianwsul.checkme.utils.time.*
 
 sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
@@ -41,16 +37,15 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
         override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
         override fun getInstanceTime(domainFactory: DomainFactory): Time {
-            val instanceCustomTimeId = instanceRecord.instanceCustomTimeId
-            val instanceHourMinute = instanceRecord.instanceHourMinute
+            val instanceJsonTime = instanceRecord.instanceJsonTime
 
-            if ((instanceHourMinute != null) && (instanceCustomTimeId != null))
-                MyCrashlytics.logException(InconsistentInstanceException("instance: " + getSignature() + ", instanceHourMinute: $instanceHourMinute, instanceCustomTimeId: $instanceCustomTimeId"))
-
-            return when {
-                instanceCustomTimeId != null -> getCustomTime(instanceCustomTimeId)
-                instanceHourMinute != null -> NormalTime(instanceHourMinute)
-                else -> getScheduleTime(domainFactory)
+            return if (instanceJsonTime == null) {
+                getScheduleTime(domainFactory)
+            } else {
+                when (instanceJsonTime) {
+                    is JsonTime.Custom -> getCustomTime(instanceJsonTime.id)
+                    is JsonTime.Normal -> NormalTime(instanceJsonTime.hourMinute)
+                }
             }
         }
 

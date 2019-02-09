@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
+import com.krystianwsul.checkme.utils.time.JsonTime
 import kotlin.properties.Delegates.observable
 
 class LocalInstanceRecord(
@@ -151,15 +152,37 @@ class LocalInstanceRecord(
 
     override var done by observable(mDone) { _, _, _ -> changed = true }
 
-    override var instanceCustomTimeId by observable(mInstanceCustomTimeId) { _, _, _ -> changed = true }
+    var instanceCustomTimeId by observable(mInstanceCustomTimeId) { _, _, _ -> changed = true }
+        private set
 
     private var instanceHour by observable(mInstanceHour) { _, _, _ -> changed = true }
     private var instanceMinute by observable(mInstanceMinute) { _, _, _ -> changed = true }
 
-    override var instanceHourMinute by observable(instanceHour?.let { HourMinute(it, instanceMinute!!) }) { _, _, value ->
+    var instanceHourMinute by observable(instanceHour?.let { HourMinute(it, instanceMinute!!) }) { _, _, value ->
         instanceHour = value?.hour
         instanceMinute = value?.minute
     }
+        private set
+
+    override var instanceJsonTime: JsonTime<Int>?
+        get() = if (instanceCustomTimeId != null) {
+            check(instanceHourMinute == null)
+
+            JsonTime.Custom(instanceCustomTimeId!!)
+        } else {
+            instanceHourMinute?.let { JsonTime.Normal<Int>(it) }
+        }
+        set(value) {
+            var customTimeId: Int? = null
+            var hourMinute: HourMinute? = null
+            when (value) {
+                is JsonTime.Custom -> customTimeId = value.id
+                is JsonTime.Normal -> hourMinute = value.hourMinute
+            }
+
+            instanceCustomTimeId = customTimeId
+            instanceHourMinute = hourMinute
+        }
 
     var notified by observable(mNotified) { _, _, _ -> changed = true }
 

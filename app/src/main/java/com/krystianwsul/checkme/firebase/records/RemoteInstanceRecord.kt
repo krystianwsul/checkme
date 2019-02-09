@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
+import com.krystianwsul.checkme.utils.time.JsonTime
 import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.regex.Pattern
 import kotlin.properties.Delegates
@@ -155,16 +156,6 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
     private val instanceMonth get() = createObject.instanceMonth
     private val instanceDay get() = createObject.instanceDay
 
-    override var instanceCustomTimeId
-        get() = createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }
-        set(instanceCustomTimeId) {
-            if (instanceCustomTimeId == createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) })
-                return
-
-            createObject.instanceCustomTimeId = instanceCustomTimeId?.value
-            addValue("$key/instanceCustomTimeId", instanceCustomTimeId?.value)
-        }
-
     private var instanceHour
         get() = createObject.instanceHour
         set(instanceHour) {
@@ -195,10 +186,41 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             null
     }
 
-    override var instanceHourMinute by Delegates.observable(getInitialInstanceTime()) { _, _, value ->
+    override var instanceJsonTime: JsonTime<T>?
+        get() = if (instanceCustomTimeId != null) {
+            check(instanceHourMinute == null)
+
+            JsonTime.Custom(instanceCustomTimeId!!)
+        } else {
+            instanceHourMinute?.let { JsonTime.Normal<T>(it) }
+        }
+        set(value) {
+            var customTimeId: T? = null
+            var hourMinute: HourMinute? = null
+            when (value) {
+                is JsonTime.Custom -> customTimeId = value.id
+                is JsonTime.Normal -> hourMinute = value.hourMinute
+            }
+
+            instanceCustomTimeId = customTimeId
+            instanceHourMinute = hourMinute
+        }
+
+    var instanceCustomTimeId
+        get() = createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }
+        private set(instanceCustomTimeId) {
+            if (instanceCustomTimeId == createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) })
+                return
+
+            createObject.instanceCustomTimeId = instanceCustomTimeId?.value
+            addValue("$key/instanceCustomTimeId", instanceCustomTimeId?.value)
+        }
+
+    var instanceHourMinute by Delegates.observable(getInitialInstanceTime()) { _, _, value ->
         instanceHour = value?.hour
         instanceMinute = value?.minute
     }
+        private set
 
     override var ordinal
         get() = createObject.ordinal

@@ -9,10 +9,7 @@ import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.InstanceData.VirtualInstanceData
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DateTime
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.checkme.utils.time.*
 
 
 class LocalInstance : Instance {
@@ -70,9 +67,10 @@ class LocalInstance : Instance {
         (instanceData as LocalRealInstanceData).instanceRecord.let {
             it.instanceDate = date
 
-            val customTimeId = timePair.destructureLocal(domainFactory).first
-            it.instanceCustomTimeId = customTimeId
-            it.instanceHourMinute = timePair.hourMinute
+            it.instanceJsonTime = timePair.run {
+                hourMinute?.let { JsonTime.Normal<Int>(it) }
+                        ?: JsonTime.Custom(destructureLocal(domainFactory).first!!)
+            }
 
             it.notified = false
         }

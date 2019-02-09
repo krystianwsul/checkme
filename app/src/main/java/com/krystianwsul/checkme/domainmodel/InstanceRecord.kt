@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.HourMinute
+import com.krystianwsul.checkme.utils.time.JsonTime
 
 interface InstanceRecord<out T> {
 
@@ -15,8 +15,7 @@ interface InstanceRecord<out T> {
 
     val instanceDate: Date?
 
-    val instanceCustomTimeId: T?
-    val instanceHourMinute: HourMinute?
+    val instanceJsonTime: JsonTime<T>?
 
     val done: Long?
 

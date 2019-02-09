@@ -13,6 +13,8 @@ class RemotePrivateCustomTime(
 
     override val id = remoteCustomTimeRecord.id
 
+    val localId get() = remoteCustomTimeRecord.localId
+
     private fun getSharedCustomTimes() = domainFactory.getSharedCustomTimes(id)
 
     override val allRecords

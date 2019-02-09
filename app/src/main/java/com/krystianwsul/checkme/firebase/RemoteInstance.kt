@@ -61,7 +61,9 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override val nullableInstanceShownRecord get() = instanceShownRecord
 
     override val remoteCustomTimeKey // scenario already covered by task/schedule relevance
-        get() = (instanceData as? RemoteRealInstanceData<T>)?.instanceRecord?.instanceCustomTimeId?.let { Pair(remoteProject.id, it) }
+        get() = (instanceData as? RemoteRealInstanceData<T>)?.instanceRecord
+                ?.instanceJsonTime
+                ?.let { (it as? JsonTime.Custom)?.let { Pair(remoteProject.id, it.id) } }
 
     constructor(
             domainFactory: DomainFactory,

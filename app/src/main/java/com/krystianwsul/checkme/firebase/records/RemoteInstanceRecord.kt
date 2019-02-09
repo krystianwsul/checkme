@@ -206,17 +206,14 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             instanceHourMinute = hourMinute
         }
 
-    var instanceCustomTimeId
-        get() = createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }
-        private set(instanceCustomTimeId) {
-            if (instanceCustomTimeId == createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) })
-                return
-
-            createObject.instanceCustomTimeId = instanceCustomTimeId?.value
-            addValue("$key/instanceCustomTimeId", instanceCustomTimeId?.value)
+    private var instanceCustomTimeId by Delegates.observable(createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }) { _, _, value ->
+        if (value != createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }) {
+            createObject.instanceCustomTimeId = value?.value
+            addValue("$key/instanceCustomTimeId", value?.value)
         }
+    }
 
-    var instanceHourMinute by Delegates.observable(getInitialInstanceTime()) { _, _, value ->
+    private var instanceHourMinute by Delegates.observable(getInitialInstanceTime()) { _, _, value ->
         instanceHour = value?.hour
         instanceMinute = value?.minute
     }

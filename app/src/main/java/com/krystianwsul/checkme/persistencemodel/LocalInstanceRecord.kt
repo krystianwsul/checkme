@@ -152,13 +152,13 @@ class LocalInstanceRecord(
 
     override var done by observable(mDone) { _, _, _ -> changed = true }
 
-    var instanceCustomTimeId by observable(mInstanceCustomTimeId) { _, _, _ -> changed = true }
+    private var instanceCustomTimeId by observable(mInstanceCustomTimeId) { _, _, _ -> changed = true }
         private set
 
     private var instanceHour by observable(mInstanceHour) { _, _, _ -> changed = true }
     private var instanceMinute by observable(mInstanceMinute) { _, _, _ -> changed = true }
 
-    var instanceHourMinute by observable(instanceHour?.let { HourMinute(it, instanceMinute!!) }) { _, _, value ->
+    private var instanceHourMinute by observable(instanceHour?.let { HourMinute(it, instanceMinute!!) }) { _, _, value ->
         instanceHour = value?.hour
         instanceMinute = value?.minute
     }

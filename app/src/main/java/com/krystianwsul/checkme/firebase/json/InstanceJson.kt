@@ -6,6 +6,7 @@ class InstanceJson @JvmOverloads constructor(
         var instanceYear: Int? = null,
         var instanceMonth: Int? = null,
         var instanceDay: Int? = null,
+        var instanceTime: String? = null,
         var instanceCustomTimeId: String? = null,
         var instanceHour: Int? = null,
         var instanceMinute: Int? = null,

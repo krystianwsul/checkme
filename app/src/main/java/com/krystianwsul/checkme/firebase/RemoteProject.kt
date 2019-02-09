@@ -111,7 +111,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
         val (instanceRemoteCustomTimeId, instanceHour, instanceMinute) = instanceTimePair.destructureRemote(this)
 
-        return InstanceJson(done, instanceDate.toJson(), instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId?.value, instanceHour, instanceMinute, instance.ordinal)
+        return InstanceJson(done, instanceDate.toJson(), instanceDate.year, instanceDate.month, instanceDate.day, instanceRemoteCustomTimeId?.value, instanceTimePair.hourMinute?.toJson(), instanceHour, instanceMinute, instance.ordinal)
     }
 
     fun copyLocalTaskHierarchy(localTaskHierarchy: LocalTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy {

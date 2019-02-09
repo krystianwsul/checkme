@@ -10,15 +10,10 @@ import java.util.*
 @Parcelize
 data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, Parcelable, Serializable {
 
-    constructor(calendar: Calendar) : this(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
-
-    override fun compareTo(other: HourMinute) = compareValuesBy(this, other, { it.hour }, { it.minute })
-
-    override fun toString() = DateTimeFormat.forStyle("-S").print(LocalTime(hour, minute))!!
-
-    fun toHourMilli() = HourMilli(hour, minute, 0, 0)
-
     companion object {
+
+        private const val PATTERN = "HH:mm"
+        private val format = DateTimeFormat.forPattern(PATTERN)
 
         val now get() = TimeStamp.now.hourMinute
 
@@ -38,5 +33,17 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
 
             return Pair(Date(calendar), HourMinute(calendar))
         }
+
+        fun fromJson(json: String) = format.parseLocalTime(json).let { HourMinute(it.hourOfDay, it.minuteOfHour) }
     }
+
+    constructor(calendar: Calendar) : this(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
+
+    override fun compareTo(other: HourMinute) = compareValuesBy(this, other, { it.hour }, { it.minute })
+
+    override fun toString() = DateTimeFormat.forStyle("-S").print(LocalTime(hour, minute))!!
+
+    fun toHourMilli() = HourMilli(hour, minute, 0, 0)
+
+    fun toJson() = LocalTime(hour, minute).toString(PATTERN)!!
 }

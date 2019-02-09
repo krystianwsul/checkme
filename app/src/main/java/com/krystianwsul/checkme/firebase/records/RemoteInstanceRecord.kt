@@ -27,8 +27,10 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
 
     companion object {
 
-        private val hourMinutePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
-        private val customTimePattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
+        private val hourMinutePattern = Pattern.compile("^\\d\\d:\\d\\d$")
+
+        private val hourMinuteKeyPattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
+        private val customTimeKeyPattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
         fun <T : RemoteCustomTimeId> scheduleKeyToString(scheduleKey: ScheduleKey, remoteCustomTimeId: T?): String {
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
@@ -61,7 +63,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         }
 
         fun <T : RemoteCustomTimeId> stringToScheduleKey(remoteProjectRecord: RemoteProjectRecord<T>, key: String): Pair<ScheduleKey, T?> {
-            val hourMinuteMatcher = hourMinutePattern.matcher(key)
+            val hourMinuteMatcher = hourMinuteKeyPattern.matcher(key)
 
             if (hourMinuteMatcher.matches()) {
                 val year = Integer.valueOf(hourMinuteMatcher.group(1))
@@ -72,7 +74,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
 
                 return Pair(ScheduleKey(Date(year, month, day), TimePair(HourMinute(hour, minute))), null)
             } else {
-                val customTimeMatcher = customTimePattern.matcher(key)
+                val customTimeMatcher = customTimeKeyPattern.matcher(key)
                 check(customTimeMatcher.matches())
 
                 val year = Integer.valueOf(customTimeMatcher.group(1))
@@ -171,12 +173,17 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
     private val initialInstanceJsonTime: JsonTime<T>?
 
     init {
-        initialInstanceJsonTime = createObject.instanceCustomTimeId
-                ?.let { JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it)) }
-                ?: createObject.instanceHour
-                        ?.let { hour ->
-                            createObject.instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) }
-                        }
+        initialInstanceJsonTime = createObject.instanceTime?.let {
+            val matcher = hourMinutePattern.matcher(it)
+            if (matcher.matches())
+                JsonTime.Normal<T>(HourMinute.fromJson(it))
+            else
+                JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it))
+        }
+                ?: createObject.instanceCustomTimeId?.let { JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it)) }
+                        ?: createObject.instanceHour?.let { hour ->
+                    createObject.instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) }
+                }
     }
 
     override var instanceJsonTime by Delegates.observable(initialInstanceJsonTime) { _, _, value ->
@@ -200,6 +207,13 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         if (hourMinute?.minute != createObject.instanceMinute) {
             createObject.instanceMinute = hourMinute?.minute
             addValue("$key/instanceMinute", hourMinute?.minute)
+        }
+
+        val instanceTime = value?.toJson()
+
+        if (instanceTime != createObject.instanceTime) {
+            createObject.instanceTime = instanceTime
+            addValue("$key/instanceTime", instanceTime)
         }
     }
 

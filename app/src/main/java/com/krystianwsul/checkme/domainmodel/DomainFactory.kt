@@ -1640,6 +1640,10 @@ open class DomainFactory(
             .values
             .mapNotNull { it.getRemoteCustomTimeIfPresent(localCustomTimeId) }
 
+    fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
+            .values
+            .mapNotNull { it.getSharedTimeIfPresent(privateCustomTimeId) }
+
     private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
         if (taskKey.localTaskId != null) {
             check(taskKey.remoteProjectId.isNullOrEmpty())

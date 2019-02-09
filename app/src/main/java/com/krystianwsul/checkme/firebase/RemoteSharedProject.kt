@@ -122,6 +122,14 @@ class RemoteSharedProject(
 
     override fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.let { it.ownerId == uuid && it.localId == localCustomTimeId } }
 
+    fun getSharedTimeIfPresent(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteCustomTimes.values
+            .singleOrNull {
+                it.ownerKey == domainFactory.remoteProjectFactory
+                        .remotePrivateProject
+                        .id
+                        && it.privateKey == privateCustomTimeId
+            }
+
     override fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey): RemoteCustomTimeId.Shared {
         val privateProject = domainFactory.remoteProjectFactory.remotePrivateProject
 

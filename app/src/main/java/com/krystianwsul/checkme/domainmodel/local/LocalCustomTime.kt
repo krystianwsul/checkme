@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.RemotePrivateProject
-import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.checkme.firebase.records.RemotePrivateCustomTimeRecord
 import com.krystianwsul.checkme.firebase.records.RemoteSharedCustomTimeRecord
 import com.krystianwsul.checkme.persistencemodel.LocalCustomTimeRecord
@@ -72,40 +71,14 @@ class LocalCustomTime(
 
     override val customTimeKey get() = CustomTimeKey.LocalCustomTimeKey(id)
 
-    fun updateRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteCustomTimeRecord<*>, privateProject: RemotePrivateProject) {
+    fun updateRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteSharedCustomTimeRecord, privateProject: RemotePrivateProject) {
         check(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
 
         // bez zapisywania na razie, dopiero przy następnej okazji
-        remoteCustomTimeRecord.name = localCustomTimeRecord.name
 
-        remoteCustomTimeRecord.sundayHour = localCustomTimeRecord.sundayHour
-        remoteCustomTimeRecord.sundayMinute = localCustomTimeRecord.sundayMinute
+        val remotePrivateCustomTimeRecord = privateProject.getRemoteCustomTimeIfPresent(id)!!
 
-        remoteCustomTimeRecord.mondayHour = localCustomTimeRecord.mondayHour
-        remoteCustomTimeRecord.mondayMinute = localCustomTimeRecord.mondayMinute
-
-        remoteCustomTimeRecord.tuesdayHour = localCustomTimeRecord.tuesdayHour
-        remoteCustomTimeRecord.tuesdayMinute = localCustomTimeRecord.tuesdayMinute
-
-        remoteCustomTimeRecord.wednesdayHour = localCustomTimeRecord.wednesdayHour
-        remoteCustomTimeRecord.wednesdayMinute = localCustomTimeRecord.wednesdayMinute
-
-        remoteCustomTimeRecord.thursdayHour = localCustomTimeRecord.thursdayHour
-        remoteCustomTimeRecord.thursdayMinute = localCustomTimeRecord.thursdayMinute
-
-        remoteCustomTimeRecord.fridayHour = localCustomTimeRecord.fridayHour
-        remoteCustomTimeRecord.fridayMinute = localCustomTimeRecord.fridayMinute
-
-        remoteCustomTimeRecord.saturdayHour = localCustomTimeRecord.saturdayHour
-        remoteCustomTimeRecord.saturdayMinute = localCustomTimeRecord.saturdayMinute
-
-        (remoteCustomTimeRecord as? RemotePrivateCustomTimeRecord)?.current = localCustomTimeRecord.current
-
-        (remoteCustomTimeRecord as? RemoteSharedCustomTimeRecord)?.let {
-            val remotePrivateCustomTimeRecord = privateProject.getRemoteCustomTimeIfPresent(id)!!
-
-            it.ownerKey = privateProject.id
-            it.privateKey = remotePrivateCustomTimeRecord.id.value
-        }
+        remoteCustomTimeRecord.ownerKey = privateProject.id
+        remoteCustomTimeRecord.privateKey = remotePrivateCustomTimeRecord.id
     }
 }

@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.HourMinute
 import kotlin.properties.Delegates.observable
 
 class LocalInstanceRecord(
@@ -152,9 +153,13 @@ class LocalInstanceRecord(
 
     override var instanceCustomTimeId by observable(mInstanceCustomTimeId) { _, _, _ -> changed = true }
 
-    override var instanceHour by observable(mInstanceHour) { _, _, _ -> changed = true }
+    private var instanceHour by observable(mInstanceHour) { _, _, _ -> changed = true }
+    private var instanceMinute by observable(mInstanceMinute) { _, _, _ -> changed = true }
 
-    override var instanceMinute by observable(mInstanceMinute) { _, _, _ -> changed = true }
+    override var instanceHourMinute by observable(instanceHour?.let { HourMinute(it, instanceMinute!!) }) { _, _, value ->
+        instanceHour = value?.hour
+        instanceMinute = value?.minute
+    }
 
     var notified by observable(mNotified) { _, _, _ -> changed = true }
 

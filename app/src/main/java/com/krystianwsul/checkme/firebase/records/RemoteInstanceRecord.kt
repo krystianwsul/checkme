@@ -165,7 +165,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             addValue("$key/instanceCustomTimeId", instanceCustomTimeId?.value)
         }
 
-    override var instanceHour
+    private var instanceHour
         get() = createObject.instanceHour
         set(instanceHour) {
             if (instanceHour == createObject.instanceHour)
@@ -175,7 +175,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             addValue("$key/instanceHour", instanceHour)
         }
 
-    override var instanceMinute
+    private var instanceMinute
         get() = createObject.instanceMinute
         set(instanceMinute) {
             if (instanceMinute == createObject.instanceMinute)
@@ -184,6 +184,21 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             createObject.instanceMinute = instanceMinute
             addValue("$key/instanceMinute", instanceMinute)
         }
+
+    private fun getInitialInstanceTime(): HourMinute? {
+        if ((instanceHour != null) != (instanceMinute != null))
+            MyCrashlytics.logException(InstanceData.InconsistentInstanceException("instance: " + remoteTaskRecord.key + " " + key + ", instanceHour: $instanceHour, instanceCustomTimeId: $instanceCustomTimeId"))
+
+        return if (instanceHour != null && instanceMinute != null)
+            HourMinute(instanceHour!!, instanceMinute!!)
+        else
+            null
+    }
+
+    override var instanceHourMinute by Delegates.observable(getInitialInstanceTime()) { _, _, value ->
+        instanceHour = value?.hour
+        instanceMinute = value?.minute
+    }
 
     override var ordinal
         get() = createObject.ordinal

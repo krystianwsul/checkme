@@ -104,11 +104,10 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         (instanceData as RemoteRealInstanceData).instanceRecord.let {
             it.instanceDate = date
 
-            val (customTimeId, hour, minute) = timePair.destructureRemote(remoteProject)
+            val customTimeId = timePair.destructureRemote(remoteProject).first
 
             it.instanceCustomTimeId = customTimeId
-            it.instanceHour = hour
-            it.instanceMinute = minute
+            it.instanceHourMinute = timePair.hourMinute
         }
 
         createInstanceShownRecord()

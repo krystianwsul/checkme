@@ -70,10 +70,9 @@ class LocalInstance : Instance {
         (instanceData as LocalRealInstanceData).instanceRecord.let {
             it.instanceDate = date
 
-            val (customTimeId, hour, minute) = timePair.destructureLocal(domainFactory)
+            val customTimeId = timePair.destructureLocal(domainFactory).first
             it.instanceCustomTimeId = customTimeId
-            it.instanceHour = hour
-            it.instanceMinute = minute
+            it.instanceHourMinute = timePair.hourMinute
 
             it.notified = false
         }

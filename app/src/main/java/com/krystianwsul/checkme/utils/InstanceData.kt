@@ -42,17 +42,14 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
         override fun getInstanceTime(domainFactory: DomainFactory): Time {
             val instanceCustomTimeId = instanceRecord.instanceCustomTimeId
-            val instanceHour = instanceRecord.instanceHour
-            val instanceMinute = instanceRecord.instanceMinute
+            val instanceHourMinute = instanceRecord.instanceHourMinute
 
-            check(instanceHour == null == (instanceMinute == null))
-
-            if ((instanceHour != null) && (instanceCustomTimeId != null))
-                MyCrashlytics.logException(InconsistentInstanceException("instance: " + getSignature() + ", instanceHour: $instanceHour, instanceCustomTimeId: $instanceCustomTimeId"))
+            if ((instanceHourMinute != null) && (instanceCustomTimeId != null))
+                MyCrashlytics.logException(InconsistentInstanceException("instance: " + getSignature() + ", instanceHourMinute: $instanceHourMinute, instanceCustomTimeId: $instanceCustomTimeId"))
 
             return when {
                 instanceCustomTimeId != null -> getCustomTime(instanceCustomTimeId)
-                instanceHour != null -> NormalTime(instanceHour, instanceMinute!!)
+                instanceHourMinute != null -> NormalTime(instanceHourMinute)
                 else -> getScheduleTime(domainFactory)
             }
         }

@@ -763,6 +763,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
             if (name.toLowerCase().contains(query))
                 return true
 
+            if (note?.toLowerCase()?.contains(query) == true)
+                return true
+
             return children.any { it.matchesSearch(query) }
         }
     }

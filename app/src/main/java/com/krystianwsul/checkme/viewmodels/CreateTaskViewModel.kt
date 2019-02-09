@@ -93,6 +93,9 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             if (name.toLowerCase().contains(query))
                 return true
 
+            if (note?.toLowerCase()?.contains(query) == true)
+                return true
+
             return parentTreeDatas.values.any { it.matchesSearch(query) }
         }
     }

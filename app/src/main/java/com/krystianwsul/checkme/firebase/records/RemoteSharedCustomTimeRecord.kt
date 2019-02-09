@@ -43,7 +43,7 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
             addValue("$key/ownerKey", value)
         }
 
-    var privateKey: RemoteCustomTimeId?
+    var privateKey: RemoteCustomTimeId.Private?
         get() = customTimeJson.privateKey.takeIf { it.isNotEmpty() }?.let { RemoteCustomTimeId.Private(customTimeJson.privateKey) }
         set(value) {
             checkNotNull(value)

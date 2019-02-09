@@ -149,7 +149,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             createObject.instanceDate = json
             addValue("$key/instanceDate", json)
         }
-        }
+    }
 
     private val instanceYear get() = createObject.instanceYear
     private val instanceMonth get() = createObject.instanceMonth

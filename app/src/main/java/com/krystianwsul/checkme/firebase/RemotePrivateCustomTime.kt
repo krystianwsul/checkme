@@ -43,10 +43,9 @@ class RemotePrivateCustomTime(
             }
 
     // todo call after local version
-    fun updateRemoteCustomTimeRecord(remoteSharedCustomTimeRecord: RemoteSharedCustomTimeRecord, privateProject: RemotePrivateProject) {
+    fun updateRemoteCustomTimeRecord(remoteSharedCustomTimeRecord: RemoteSharedCustomTimeRecord) {
         check(remoteSharedCustomTimeRecord.privateKey == id)
 
-        // bez zapisywania na razie, dopiero przy następnej okazji
         remoteSharedCustomTimeRecord.name = remoteCustomTimeRecord.name
 
         remoteSharedCustomTimeRecord.sundayHour = remoteCustomTimeRecord.sundayHour

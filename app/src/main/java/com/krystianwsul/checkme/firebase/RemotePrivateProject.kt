@@ -25,15 +25,9 @@ class RemotePrivateProject(
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
             @Suppress("LeakingThis")
-            val remoteCustomTime = RemotePrivateCustomTime(this, remoteCustomTimeRecord)
+            val remoteCustomTime = RemotePrivateCustomTime(domainFactory, this, remoteCustomTimeRecord)
 
             remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
-
-            if (domainFactory.localFactory.hasLocalCustomTime(remoteCustomTimeRecord.localId)) {
-                val localCustomTime = domainFactory.localFactory.getLocalCustomTime(remoteCustomTimeRecord.localId)
-
-                localCustomTime.updateRemoteCustomTimeRecord(remoteCustomTimeRecord, this)
-            }
         }
 
         remoteTasks = remoteProjectRecord.remoteTaskRecords
@@ -58,7 +52,7 @@ class RemotePrivateProject(
     private fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
-        val remoteCustomTime = RemotePrivateCustomTime(this, remoteCustomTimeRecord)
+        val remoteCustomTime = RemotePrivateCustomTime(domainFactory, this, remoteCustomTimeRecord)
 
         check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
 

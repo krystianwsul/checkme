@@ -1,10 +1,8 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import com.krystianwsul.checkme.domainmodel.CustomTime
-import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.RemotePrivateProject
-import com.krystianwsul.checkme.firebase.records.RemotePrivateCustomTimeRecord
 import com.krystianwsul.checkme.firebase.records.RemoteSharedCustomTimeRecord
 import com.krystianwsul.checkme.persistencemodel.LocalCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
@@ -23,21 +21,12 @@ class LocalCustomTime(
         get() = localCustomTimeRecord.current
         set(value) {
             localCustomTimeRecord.current = value
-
-            getCustomTimeRecords().filterIsInstance<RemotePrivateCustomTimeRecord>()
-                    .singleOrNull()
-                    ?.current = value
         }
-
-    private fun getCustomTimeRecords() = domainFactory.getRemoteCustomTimes(id)
-            .map { it.remoteCustomTimeRecord }
-            .toMutableList<CustomTimeRecord>()
-            .apply { add(localCustomTimeRecord) } // todo move to RemotePrivateCustomTime
 
     override var name
         get() = localCustomTimeRecord.name
         set(value) {
-            getCustomTimeRecords().forEach { it.name = value }
+            localCustomTimeRecord.name = value
     }
 
     override fun getHourMinute(dayOfWeek: DayOfWeek): HourMinute = when (dayOfWeek) {
@@ -55,9 +44,7 @@ class LocalCustomTime(
             putAll(DayOfWeek.values().map { Pair(it, getHourMinute(it)) })
         }
 
-    override fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) {
-        getCustomTimeRecords().forEach { it.setHourMinute(dayOfWeek, hourMinute) }
-    }
+    override fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = localCustomTimeRecord.setHourMinute(dayOfWeek, hourMinute)
 
     override fun toString() = name
 
@@ -73,8 +60,6 @@ class LocalCustomTime(
 
     fun updateRemoteCustomTimeRecord(remoteCustomTimeRecord: RemoteSharedCustomTimeRecord, privateProject: RemotePrivateProject) {
         check(remoteCustomTimeRecord.localId == localCustomTimeRecord.id)
-
-        // bez zapisywania na razie, dopiero przy następnej okazji
 
         val remotePrivateCustomTimeRecord = privateProject.getRemoteCustomTimeIfPresent(id)!!
 

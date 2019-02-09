@@ -90,15 +90,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun getOldestVisible() = remoteTaskRecord.oldestVisible
 
-    override fun setOldestVisible(date: Date) {
-        remoteTaskRecord.apply {
-            setOldestVisible(OldestVisibleJson(date))
-
-            setOldestVisibleYear(date.year)
-            setOldestVisibleMonth(date.month)
-            setOldestVisibleDay(date.day)
-        }
-    }
+    override fun setOldestVisible(date: Date) = remoteTaskRecord.setOldestVisible(OldestVisibleJson(date))
 
     override fun delete() {
         val taskKey = taskKey

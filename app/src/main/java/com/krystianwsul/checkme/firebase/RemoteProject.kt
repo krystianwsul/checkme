@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 abstract class RemoteProject<T : RemoteCustomTimeId>(
@@ -87,7 +88,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
             RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey) to instanceJson
         }.toMutableMap()
 
-        val oldestVisibleMap = oldestVisible?.let { mapOf(uuid to OldestVisibleJson(it.year, it.month, it.day)) }
+        val oldestVisibleMap = oldestVisible?.let { mapOf(uuid to OldestVisibleJson(Date(it.year, it.month, it.day))) }
                 ?: mapOf()
 
         val taskJson = TaskJson(task.name, task.startExactTimeStamp.long, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, task.note, instanceJsons, oldestVisible = oldestVisibleMap.toMutableMap())

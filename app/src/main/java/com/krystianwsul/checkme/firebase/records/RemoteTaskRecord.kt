@@ -210,6 +210,9 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
         taskJson.oldestVisible[uuid] = newOldestVisibleJson
 
+        if (oldOldestVisibleJson?.date != newOldestVisibleJson.date)
+            addValue("$key/oldestVisible/$uuid/date", newOldestVisibleJson.date)
+
         if (oldOldestVisibleJson?.year != newOldestVisibleJson.year)
             addValue("$key/oldestVisible/$uuid/year", newOldestVisibleJson.year)
 
@@ -218,26 +221,20 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
         if (oldOldestVisibleJson?.day != newOldestVisibleJson.day)
             addValue("$key/oldestVisible/$uuid/day", newOldestVisibleJson.day)
-    }
 
-    fun setOldestVisibleYear(oldestVisibleYear: Int) {
-        if (oldestVisibleYear != taskJson.oldestVisibleYear) {
-            taskJson.oldestVisibleYear = oldestVisibleYear
-            addValue("$key/oldestVisibleYear", oldestVisibleYear)
+        if (newOldestVisibleJson.year != taskJson.oldestVisibleYear) {
+            taskJson.oldestVisibleYear = newOldestVisibleJson.year
+            addValue("$key/oldestVisibleYear", newOldestVisibleJson.year)
         }
-    }
 
-    fun setOldestVisibleMonth(oldestVisibleMonth: Int) {
-        if (oldestVisibleMonth != taskJson.oldestVisibleMonth) {
-            taskJson.oldestVisibleMonth = oldestVisibleMonth
-            addValue("$key/oldestVisibleMonth", oldestVisibleMonth)
+        if (newOldestVisibleJson.month != taskJson.oldestVisibleMonth) {
+            taskJson.oldestVisibleMonth = newOldestVisibleJson.month
+            addValue("$key/oldestVisibleMonth", newOldestVisibleJson.month)
         }
-    }
 
-    fun setOldestVisibleDay(oldestVisibleDay: Int) {
-        if (oldestVisibleDay != taskJson.oldestVisibleDay) {
-            taskJson.oldestVisibleDay = oldestVisibleDay
-            addValue("$key/oldestVisibleDay", oldestVisibleDay)
+        if (newOldestVisibleJson.day != taskJson.oldestVisibleDay) {
+            taskJson.oldestVisibleDay = newOldestVisibleJson.day
+            addValue("$key/oldestVisibleDay", newOldestVisibleJson.day)
         }
     }
 

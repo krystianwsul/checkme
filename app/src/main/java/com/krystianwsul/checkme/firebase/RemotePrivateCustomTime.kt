@@ -10,6 +10,8 @@ class RemotePrivateCustomTime(
 
     override val id = remoteCustomTimeRecord.id
 
+    val localId get() = remoteCustomTimeRecord.localId
+
     var current
         get() = remoteCustomTimeRecord.current
         set(value) {

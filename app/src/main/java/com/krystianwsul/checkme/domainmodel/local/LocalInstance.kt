@@ -72,7 +72,7 @@ class LocalInstance : Instance {
             it.instanceMonth = date.month
             it.instanceDay = date.day
 
-            val (customTimeId, hour, minute) = timePair.destructureLocal()
+            val (customTimeId, hour, minute) = timePair.destructureLocal(domainFactory)
             it.instanceCustomTimeId = customTimeId
             it.instanceHour = hour
             it.instanceMinute = minute

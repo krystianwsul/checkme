@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.persistencemodel
 
 import android.annotation.SuppressLint
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleType
@@ -134,13 +135,13 @@ class PersistenceManager(
     fun createCustomTimeRecord(name: String, hourMinutes: Map<DayOfWeek, HourMinute>): LocalCustomTimeRecord {
         check(name.isNotEmpty())
 
-        val sunday = hourMinutes[DayOfWeek.SUNDAY]!!
-        val monday = hourMinutes[DayOfWeek.MONDAY]!!
-        val tuesday = hourMinutes[DayOfWeek.TUESDAY]!!
-        val wednesday = hourMinutes[DayOfWeek.WEDNESDAY]!!
-        val thursday = hourMinutes[DayOfWeek.THURSDAY]!!
-        val friday = hourMinutes[DayOfWeek.FRIDAY]!!
-        val saturday = hourMinutes[DayOfWeek.SATURDAY]!!
+        val sunday = hourMinutes.getValue(DayOfWeek.SUNDAY)
+        val monday = hourMinutes.getValue(DayOfWeek.MONDAY)
+        val tuesday = hourMinutes.getValue(DayOfWeek.TUESDAY)
+        val wednesday = hourMinutes.getValue(DayOfWeek.WEDNESDAY)
+        val thursday = hourMinutes.getValue(DayOfWeek.THURSDAY)
+        val friday = hourMinutes.getValue(DayOfWeek.FRIDAY)
+        val saturday = hourMinutes.getValue(DayOfWeek.SATURDAY)
 
         val id = ++customTimeMaxId
 
@@ -187,7 +188,7 @@ class PersistenceManager(
         check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
         check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
-        val (customTimeId, hour, minute) = time.timePair.destructureLocal()
+        val (customTimeId, hour, minute) = time.timePair.destructureLocal(DomainFactory.instance)
 
         return SingleScheduleRecord(false, scheduleId, date.year, date.month, date.day, customTimeId, hour, minute).also {
             _singleScheduleRecords[it.scheduleId] = it
@@ -201,7 +202,7 @@ class PersistenceManager(
         check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
         check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
-        val (customTimeId, hour, minute) = time.timePair.destructureLocal()
+        val (customTimeId, hour, minute) = time.timePair.destructureLocal(DomainFactory.instance)
 
         return WeeklyScheduleRecord(false, scheduleId, dayOfWeek.ordinal, customTimeId, hour, minute).also {
             _weeklyScheduleRecords[scheduleId] = it
@@ -215,7 +216,7 @@ class PersistenceManager(
         check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
         check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
-        val (customTimeId, hour, minute) = time.timePair.destructureLocal()
+        val (customTimeId, hour, minute) = time.timePair.destructureLocal(DomainFactory.instance)
 
         return MonthlyDayScheduleRecord(false, scheduleId, dayOfMonth, beginningOfMonth, customTimeId, hour, minute).also {
             _monthlyDayScheduleRecords[scheduleId] = it
@@ -229,7 +230,7 @@ class PersistenceManager(
         check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
         check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
-        val (customTimeId, hour, minute) = time.timePair.destructureLocal()
+        val (customTimeId, hour, minute) = time.timePair.destructureLocal(DomainFactory.instance)
 
         return MonthlyWeekScheduleRecord(false, scheduleId, dayOfMonth, dayOfWeek.ordinal, beginningOfMonth, customTimeId, hour, minute).also {
             _monthlyWeekScheduleRecords[scheduleId] = it
@@ -237,7 +238,7 @@ class PersistenceManager(
     }
 
     fun createInstanceRecord(localTask: LocalTask, scheduleDate: Date, scheduleTimePair: TimePair, now: ExactTimeStamp): LocalInstanceRecord {
-        val (customTimeId, hour, minute) = scheduleTimePair.destructureLocal()
+        val (customTimeId, hour, minute) = scheduleTimePair.destructureLocal(DomainFactory.instance)
 
         val id = ++instanceMaxId
 

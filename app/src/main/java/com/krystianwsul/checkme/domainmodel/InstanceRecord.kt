@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
+import com.krystianwsul.checkme.utils.time.Date
+
 interface InstanceRecord<out T> {
 
     val scheduleYear: Int
@@ -10,9 +12,7 @@ interface InstanceRecord<out T> {
     val scheduleHour: Int?
     val scheduleMinute: Int?
 
-    val instanceYear: Int?
-    val instanceMonth: Int?
-    val instanceDay: Int?
+    val instanceDate: Date?
 
     val instanceCustomTimeId: T?
     val instanceHour: Int?

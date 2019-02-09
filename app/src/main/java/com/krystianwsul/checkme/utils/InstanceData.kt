@@ -38,16 +38,7 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
             return customTimeId?.let { getCustomTime(it) } ?: NormalTime(hour!!, minute!!)
         }
 
-        override val instanceDate
-            get() = instanceRecord.let {
-                if (((it.instanceYear != null) != (it.instanceMonth != null)) || (it.instanceYear != null) != (it.instanceDay != null))
-                    MyCrashlytics.logException(InconsistentInstanceException("instance: " + getSignature() + ", instanceYear: ${it.instanceYear}, instanceMonth: ${it.instanceMonth}, instanceDay: ${it.instanceDay}"))
-
-                if (it.instanceYear != null && it.instanceMonth != null && it.instanceDay != null)
-                    Date(it.instanceYear!!, it.instanceMonth!!, it.instanceDay!!)
-                else
-                    scheduleDate
-            }
+        override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
         override fun getInstanceTime(domainFactory: DomainFactory): Time {
             val instanceCustomTimeId = instanceRecord.instanceCustomTimeId
@@ -82,6 +73,6 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
         override val done: Long? = null
     }
 
-    private class InconsistentInstanceException(message: String) : Exception(message)
+    class InconsistentInstanceException(message: String) : Exception(message)
 }
 

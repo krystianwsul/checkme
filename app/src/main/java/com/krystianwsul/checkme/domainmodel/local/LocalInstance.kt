@@ -68,9 +68,7 @@ class LocalInstance : Instance {
         createInstanceHierarchy(now)
 
         (instanceData as LocalRealInstanceData).instanceRecord.let {
-            it.instanceYear = date.year
-            it.instanceMonth = date.month
-            it.instanceDay = date.day
+            it.instanceDate = date
 
             val (customTimeId, hour, minute) = timePair.destructureLocal(domainFactory)
             it.instanceCustomTimeId = customTimeId

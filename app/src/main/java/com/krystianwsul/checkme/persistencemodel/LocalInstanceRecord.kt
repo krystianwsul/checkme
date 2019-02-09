@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
+import com.krystianwsul.checkme.utils.time.Date
 import kotlin.properties.Delegates.observable
 
 class LocalInstanceRecord(
@@ -23,7 +24,7 @@ class LocalInstanceRecord(
         mInstanceCustomTimeId: Int?,
         mInstanceHour: Int?,
         mInstanceMinute: Int?,
-        val hierarchyTime: Long,
+        private val hierarchyTime: Long,
         mNotified: Boolean,
         mNotificationShown: Boolean,
         mOrdinal: Double?) : Record(created), InstanceRecord<Int> {
@@ -137,11 +138,15 @@ class LocalInstanceRecord(
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = Record.getMaxId(sqLiteDatabase, TABLE_INSTANCES, COLUMN_ID)
     }
 
-    override var instanceYear by observable(mInstanceYear) { _, _, _ -> changed = true }
+    private var instanceYear by observable(mInstanceYear) { _, _, _ -> changed = true }
+    private var instanceMonth by observable(mInstanceMonth) { _, _, _ -> changed = true }
+    private var instanceDay by observable(mInstanceDay) { _, _, _ -> changed = true }
 
-    override var instanceMonth by observable(mInstanceMonth) { _, _, _ -> changed = true }
-
-    override var instanceDay by observable(mInstanceDay) { _, _, _ -> changed = true }
+    override var instanceDate by observable(instanceYear?.let { Date(instanceYear!!, instanceMonth!!, instanceDay!!) }) { _, _, value ->
+        instanceYear = value?.year
+        instanceMonth = value?.month
+        instanceDay = value?.day
+    }
 
     override var done by observable(mDone) { _, _, _ -> changed = true }
 

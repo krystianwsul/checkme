@@ -8,4 +8,5 @@ class InstanceJson @JvmOverloads constructor(
         var instanceCustomTimeId: String? = null,
         var instanceHour: Int? = null,
         var instanceMinute: Int? = null,
-        var ordinal: Double? = null)
+        var ordinal: Double? = null,
+        var instanceDate: String? = null)

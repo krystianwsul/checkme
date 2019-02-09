@@ -2,10 +2,12 @@ package com.krystianwsul.checkme.firebase.records
 
 
 import android.text.TextUtils
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
@@ -121,11 +123,20 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                 ?.minute
     }
 
-    override val instanceYear get() = createObject.instanceYear
+    override val instanceDate: Date?
+        get() {
+            if (((instanceYear != null) != (instanceMonth != null)) || (instanceYear != null) != (instanceDay != null))
+                MyCrashlytics.logException(InstanceData.InconsistentInstanceException("instance: " + remoteTaskRecord.key + " " + key + ", instanceYear: $instanceYear, instanceMonth: $instanceMonth, instanceDay: $instanceDay"))
 
-    override val instanceMonth get() = createObject.instanceMonth
+            return if (instanceYear != null && instanceMonth != null && instanceDay != null)
+                Date(instanceYear!!, instanceMonth!!, instanceDay!!)
+            else
+                null
+        }
 
-    override val instanceDay get() = createObject.instanceDay
+    private val instanceYear get() = createObject.instanceYear
+    private val instanceMonth get() = createObject.instanceMonth
+    private val instanceDay get() = createObject.instanceDay
 
     override var instanceCustomTimeId
         get() = createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }
@@ -167,7 +178,13 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             addValue("$key/ordinal", ordinal)
         }
 
-    fun setInstanceYear(instanceYear: Int) {
+    fun setInstanceDate(instanceDate: Date) {
+        setInstanceYear(instanceDate.year)
+        setInstanceMonth(instanceDate.month)
+        setInstanceDay(instanceDate.day)
+    }
+
+    private fun setInstanceYear(instanceYear: Int) {
         if (instanceYear == createObject.instanceYear)
             return
 
@@ -175,7 +192,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         addValue("$key/instanceYear", instanceYear)
     }
 
-    fun setInstanceMonth(instanceMonth: Int) {
+    private fun setInstanceMonth(instanceMonth: Int) {
         if (instanceMonth == createObject.instanceMonth)
             return
 
@@ -183,7 +200,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         addValue("$key/instanceMonth", instanceMonth)
     }
 
-    fun setInstanceDay(instanceDay: Int) {
+    private fun setInstanceDay(instanceDay: Int) {
         if (instanceDay == createObject.instanceDay)
             return
 
@@ -192,4 +209,6 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
     }
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
+
+    private class InconsistentInstanceException(message: String) : Exception(message)
 }

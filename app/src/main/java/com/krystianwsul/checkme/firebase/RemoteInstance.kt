@@ -102,9 +102,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         createInstanceHierarchy(now)
 
         (instanceData as RemoteRealInstanceData).instanceRecord.let {
-            it.setInstanceYear(date.year)
-            it.setInstanceMonth(date.month)
-            it.setInstanceDay(date.day)
+            it.setInstanceDate(date)
 
             val (customTimeId, hour, minute) = timePair.destructureRemote(remoteProject)
 

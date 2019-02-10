@@ -6,12 +6,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.jakewharton.rxbinding2.widget.checkedChanges
-import com.krystianwsul.checkme.*
+import com.krystianwsul.checkme.DataDiff
+import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_debug.*
 
 class DebugFragment : AbstractFragment() {
@@ -32,12 +33,6 @@ class DebugFragment : AbstractFragment() {
             @Suppress("DIVISION_BY_ZERO", "UNUSED_VARIABLE")
             val j = 1 / i
         }
-
-        (if (MyApplication.instance.defaultRemote) debugDefaultRemote else debugDefaultLocal).isChecked = true
-
-        debugDefaultRemote.checkedChanges()
-                .subscribe { MyApplication.instance.defaultRemote = it }
-                .addTo(viewCreatedDisposable)
 
         debugTick.setOnClickListener { TickJobIntentService.startServiceDebug(activity!!, "DebugFragment: TickService.startServiceDebug") }
 

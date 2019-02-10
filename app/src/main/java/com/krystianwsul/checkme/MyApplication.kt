@@ -54,14 +54,6 @@ class MyApplication : Application() {
 
     val hasUserInfo get() = userInfoRelay.value!!.value != null
 
-    var defaultRemote: Boolean
-        get() = sharedPreferences.getBoolean(DEFAULT_REMOTE_KEY, false)
-        set(value) {
-            sharedPreferences.edit()
-                    .putBoolean(DEFAULT_REMOTE_KEY, value)
-                    .apply()
-        }
-
     @SuppressLint("CheckResult")
     override fun onCreate() {
         super.onCreate()

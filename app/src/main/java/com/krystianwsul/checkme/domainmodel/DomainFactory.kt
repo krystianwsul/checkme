@@ -934,7 +934,7 @@ open class DomainFactory(
         save(0, source)
     }
 
-    private val defaultProjectId get() = remoteProjectFactory.remotePrivateProject.id.takeIf { MyApplication.instance.defaultRemote }
+    private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
 
     fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
         check(name.isNotEmpty())
@@ -942,11 +942,7 @@ open class DomainFactory(
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
 
-        val task = if (finalProjectId.isNullOrEmpty()) {
-            localFactory.createScheduleRootTask(now, name, scheduleDatas, note)
-        } else {
-            remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId)
-        }
+        val task = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId)
 
         updateNotifications(now)
 
@@ -1030,10 +1026,7 @@ open class DomainFactory(
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-        val newParentTask = if (!finalProjectId.isNullOrEmpty())
-            remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId)
-        else
-            localFactory.createScheduleRootTask(now, name, scheduleDatas, note)
+        val newParentTask = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId)
 
         joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
 
@@ -1051,10 +1044,7 @@ open class DomainFactory(
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
 
-        val task = if (finalProjectId.isNullOrEmpty())
-            localFactory.createLocalTaskHelper(name, now, note)
-        else
-            remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
+        val task = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
 
         updateNotifications(now)
 
@@ -1635,10 +1625,6 @@ open class DomainFactory(
                 .getRemoteCustomTimeIfPresent(customTimeKey.localCustomTimeId)!!
                 .id
     }
-
-    fun getRemoteCustomTimes(localCustomTimeId: Int) = remoteProjectFactory.remoteProjects
-            .values
-            .mapNotNull { it.getRemoteCustomTimeIfPresent(localCustomTimeId) }
 
     fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
             .values

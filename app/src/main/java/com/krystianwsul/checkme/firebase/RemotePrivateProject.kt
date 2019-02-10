@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
+import android.util.Log
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectRecord
@@ -93,6 +94,8 @@ class RemotePrivateProject(
     }
 
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemotePrivateCustomTime {
+        if (!remoteCustomTimes.containsKey(remoteCustomTimeId))
+            Log.e("asdf", "missing customTime: $remoteCustomTimeId")
         check(remoteCustomTimes.containsKey(remoteCustomTimeId))
 
         return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Private)

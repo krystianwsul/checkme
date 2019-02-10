@@ -150,8 +150,16 @@ open class DomainFactory(
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
+        val now = ExactTimeStamp.now
+
+        localFactory.tasks
+                .toMutableList()
+                .forEach { it.updateProject(now, remoteProjectFactory.remotePrivateProject.id) }
+
         tryNotifyListeners()
     }
+
+    private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
 
     // misc
 
@@ -933,8 +941,6 @@ open class DomainFactory(
 
         save(0, source)
     }
-
-    private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
 
     fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
         check(name.isNotEmpty())

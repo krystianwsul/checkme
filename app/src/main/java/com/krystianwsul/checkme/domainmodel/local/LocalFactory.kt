@@ -221,7 +221,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
                     val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.SINGLE, startExactTimeStamp)
 
-                    val singleScheduleRecord = persistenceManager.createSingleScheduleRecord(scheduleRecord.id, date, time)
+                    val singleScheduleRecord = persistenceManager.createSingleScheduleRecord(domainFactory, scheduleRecord.id, date, time)
 
                     listOf(SingleSchedule(domainFactory, LocalSingleScheduleBridge(scheduleRecord, singleScheduleRecord)))
                 }
@@ -234,7 +234,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
                     daysOfWeek.map { dayOfWeek ->
                         val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.WEEKLY, startExactTimeStamp)
 
-                        val weeklyScheduleRecord = persistenceManager.createWeeklyScheduleRecord(scheduleRecord.id, dayOfWeek, time)
+                        val weeklyScheduleRecord = persistenceManager.createWeeklyScheduleRecord(domainFactory, scheduleRecord.id, dayOfWeek, time)
 
                         WeeklySchedule(domainFactory, LocalWeeklyScheduleBridge(scheduleRecord, weeklyScheduleRecord))
                     }
@@ -244,7 +244,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
                     val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_DAY, startExactTimeStamp)
 
-                    val monthlyDayScheduleRecord = persistenceManager.createMonthlyDayScheduleRecord(scheduleRecord.id, dayOfMonth, beginningOfMonth, domainFactory.getTime(timePair))
+                    val monthlyDayScheduleRecord = persistenceManager.createMonthlyDayScheduleRecord(domainFactory, scheduleRecord.id, dayOfMonth, beginningOfMonth, domainFactory.getTime(timePair))
 
                     listOf(MonthlyDaySchedule(domainFactory, LocalMonthlyDayScheduleBridge(scheduleRecord, monthlyDayScheduleRecord)))
                 }
@@ -253,7 +253,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
                     val scheduleRecord = persistenceManager.createScheduleRecord(rootLocalTask, ScheduleType.MONTHLY_WEEK, startExactTimeStamp)
 
-                    val monthlyWeekScheduleRecord = persistenceManager.createMonthlyWeekScheduleRecord(scheduleRecord.id, dayOfMonth, dayOfWeek, beginningOfMonth, domainFactory.getTime(TimePair))
+                    val monthlyWeekScheduleRecord = persistenceManager.createMonthlyWeekScheduleRecord(domainFactory, scheduleRecord.id, dayOfMonth, dayOfWeek, beginningOfMonth, domainFactory.getTime(TimePair))
 
                     listOf(MonthlyWeekSchedule(domainFactory, LocalMonthlyWeekScheduleBridge(scheduleRecord, monthlyWeekScheduleRecord)))
                 }
@@ -283,7 +283,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
     fun createInstanceRecord(localTask: LocalTask, localInstance: LocalInstance, scheduleDate: Date, scheduleTimePair: TimePair, now: ExactTimeStamp): LocalInstanceRecord {
         existingLocalInstances.add(localInstance)
 
-        return persistenceManager.createInstanceRecord(localTask, scheduleDate, scheduleTimePair, now)
+        return persistenceManager.createInstanceRecord(domainFactory, localTask, scheduleDate, scheduleTimePair, now)
     }
 
     fun convertLocalToRemoteHelper(localToRemoteConversion: LocalToRemoteConversion, localTask: LocalTask) {
@@ -331,8 +331,6 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
         return _localCustomTimes[localCustomTimeId]!!
     }
-
-    fun tryGetLocalCustomTime(localCustomTimeId: Int) = _localCustomTimes[localCustomTimeId]
 
     fun hasLocalCustomTime(localCustomTimeId: Int) = _localCustomTimes.containsKey(localCustomTimeId)
 

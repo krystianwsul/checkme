@@ -181,64 +181,64 @@ class PersistenceManager(
         }
     }
 
-    fun createSingleScheduleRecord(scheduleId: Int, date: Date, time: Time): SingleScheduleRecord {
+    fun createSingleScheduleRecord(domainFactory: DomainFactory, scheduleId: Int, date: Date, time: Time): SingleScheduleRecord {
         check(!_singleScheduleRecords.containsKey(scheduleId))
         check(!_dailyScheduleRecords.containsKey(scheduleId))
         check(!_weeklyScheduleRecords.containsKey(scheduleId))
         check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
         check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
-        val (customTimeId, hour, minute) = time.timePair.destructureLocal(DomainFactory.instance)
+        val (customTimeId, hour, minute) = time.timePair.destructureLocal(domainFactory)
 
         return SingleScheduleRecord(false, scheduleId, date.year, date.month, date.day, customTimeId, hour, minute).also {
             _singleScheduleRecords[it.scheduleId] = it
         }
     }
 
-    fun createWeeklyScheduleRecord(scheduleId: Int, dayOfWeek: DayOfWeek, time: Time): WeeklyScheduleRecord {
+    fun createWeeklyScheduleRecord(domainFactory: DomainFactory, scheduleId: Int, dayOfWeek: DayOfWeek, time: Time): WeeklyScheduleRecord {
         check(!_singleScheduleRecords.containsKey(scheduleId))
         check(!_dailyScheduleRecords.containsKey(scheduleId))
         check(!_weeklyScheduleRecords.containsKey(scheduleId))
         check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
         check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
-        val (customTimeId, hour, minute) = time.timePair.destructureLocal(DomainFactory.instance)
+        val (customTimeId, hour, minute) = time.timePair.destructureLocal(domainFactory)
 
         return WeeklyScheduleRecord(false, scheduleId, dayOfWeek.ordinal, customTimeId, hour, minute).also {
             _weeklyScheduleRecords[scheduleId] = it
         }
     }
 
-    fun createMonthlyDayScheduleRecord(scheduleId: Int, dayOfMonth: Int, beginningOfMonth: Boolean, time: Time): MonthlyDayScheduleRecord {
+    fun createMonthlyDayScheduleRecord(domainFactory: DomainFactory, scheduleId: Int, dayOfMonth: Int, beginningOfMonth: Boolean, time: Time): MonthlyDayScheduleRecord {
         check(!_singleScheduleRecords.containsKey(scheduleId))
         check(!_dailyScheduleRecords.containsKey(scheduleId))
         check(!_weeklyScheduleRecords.containsKey(scheduleId))
         check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
         check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
-        val (customTimeId, hour, minute) = time.timePair.destructureLocal(DomainFactory.instance)
+        val (customTimeId, hour, minute) = time.timePair.destructureLocal(domainFactory)
 
         return MonthlyDayScheduleRecord(false, scheduleId, dayOfMonth, beginningOfMonth, customTimeId, hour, minute).also {
             _monthlyDayScheduleRecords[scheduleId] = it
         }
     }
 
-    fun createMonthlyWeekScheduleRecord(scheduleId: Int, dayOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean, time: Time): MonthlyWeekScheduleRecord {
+    fun createMonthlyWeekScheduleRecord(domainFactory: DomainFactory, scheduleId: Int, dayOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean, time: Time): MonthlyWeekScheduleRecord {
         check(!_singleScheduleRecords.containsKey(scheduleId))
         check(!_dailyScheduleRecords.containsKey(scheduleId))
         check(!_weeklyScheduleRecords.containsKey(scheduleId))
         check(!_monthlyDayScheduleRecords.containsKey(scheduleId))
         check(!_monthlyWeekScheduleRecords.containsKey(scheduleId))
 
-        val (customTimeId, hour, minute) = time.timePair.destructureLocal(DomainFactory.instance)
+        val (customTimeId, hour, minute) = time.timePair.destructureLocal(domainFactory)
 
         return MonthlyWeekScheduleRecord(false, scheduleId, dayOfMonth, dayOfWeek.ordinal, beginningOfMonth, customTimeId, hour, minute).also {
             _monthlyWeekScheduleRecords[scheduleId] = it
         }
     }
 
-    fun createInstanceRecord(localTask: LocalTask, scheduleDate: Date, scheduleTimePair: TimePair, now: ExactTimeStamp): LocalInstanceRecord {
-        val (customTimeId, hour, minute) = scheduleTimePair.destructureLocal(DomainFactory.instance)
+    fun createInstanceRecord(domainFactory: DomainFactory, localTask: LocalTask, scheduleDate: Date, scheduleTimePair: TimePair, now: ExactTimeStamp): LocalInstanceRecord {
+        val (customTimeId, hour, minute) = scheduleTimePair.destructureLocal(domainFactory)
 
         val id = ++instanceMaxId
 

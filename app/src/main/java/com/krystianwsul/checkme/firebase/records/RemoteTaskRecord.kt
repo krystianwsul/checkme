@@ -136,7 +136,8 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             taskJson)
 
     init {
-        check(taskJson.name.isNotEmpty())
+        if (taskJson.name.isEmpty())
+            MyCrashlytics.logException(MissingNameException("taskKey: $key"))
 
         for ((key, instanceJson) in taskJson.instances) {
             check(!TextUtils.isEmpty(key))
@@ -294,4 +295,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     fun getScheduleRecordId() = remoteProjectRecord.getScheduleRecordId(id)
 
     fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
+
+    private class MissingNameException(message: String) : Exception(message)
 }

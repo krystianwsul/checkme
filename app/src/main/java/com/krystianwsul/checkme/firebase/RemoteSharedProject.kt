@@ -155,8 +155,7 @@ class RemoteSharedProject(
                     is RemoteCustomTimeId.Private -> {
                         val remotePrivateCustomTime = privateProject.getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
 
-                        val localCustomTime = remotePrivateCustomTime.tryGetLocalCustomTime(domainFactory)
-                        val sharedCustomTime = localCustomTime?.let { getRemoteCustomTimeIfPresent(it.id) }
+                        val sharedCustomTime = getSharedTimeIfPresent(remotePrivateCustomTime.id)
                         if (sharedCustomTime != null) {
                             sharedCustomTime.id
                         } else {

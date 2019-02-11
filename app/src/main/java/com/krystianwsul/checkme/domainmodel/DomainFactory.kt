@@ -168,11 +168,8 @@ open class DomainFactory(
 
     val isHoldingWakeLock get() = tickData?.wakelock?.isHeld == true
 
-    val localTaskCount get() = localFactory.taskCount
-    val remoteTaskCount get() = remoteProjectFactory.taskCount
-
-    val localInstanceCount get() = localFactory.instanceCount
-    val remoteInstanceCount get() = remoteProjectFactory.instanceCount
+    val taskCount get() = remoteProjectFactory.taskCount
+    val instanceCount get() = remoteProjectFactory.instanceCount
 
     val customTimeCount get() = customTimes.size
 

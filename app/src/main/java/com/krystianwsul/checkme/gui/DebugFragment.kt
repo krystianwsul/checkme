@@ -68,13 +68,9 @@ class DebugFragment : AbstractFragment() {
                 }
 
                 append("\n\ntasks: ")
-                append(domainFactory.localTaskCount)
-                append("/")
-                append(domainFactory.remoteTaskCount)
+                append(domainFactory.taskCount)
                 append("\ninstances: ")
-                append(domainFactory.localInstanceCount)
-                append("/")
-                append(domainFactory.remoteInstanceCount)
+                append(domainFactory.instanceCount)
                 append("\ncustom times: ")
                 append(domainFactory.customTimeCount)
                 append("\ninstance shown: ")

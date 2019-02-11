@@ -73,7 +73,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
     data class TaskData(
             val name: String,
-            val taskParentKey: ParentKey.TaskParentKey?,
+            val parentKey: ParentKey?,
             val scheduleDatas: List<ScheduleData>?,
             val note: String?,
             val projectName: String?)

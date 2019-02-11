@@ -476,12 +476,12 @@ class CreateTaskActivity : AbstractActivity() {
             }
         } else {
             this.data!!.run {
-                if (taskData?.taskParentKey != null) {
+                if (taskData?.parentKey != null) {
                     check(parentTaskKeyHint == null)
                     check(taskKeys == null)
                     checkNotNull(taskKey)
 
-                    parent = findTaskData(taskData.taskParentKey)
+                    parent = findTaskData(taskData.parentKey)
                 } else if (parentTaskKeyHint != null) {
                     check(taskKey == null)
 
@@ -646,11 +646,11 @@ class CreateTaskActivity : AbstractActivity() {
             if (!Utils.stringEquals(note, data!!.taskData!!.note))
                 return true
 
-            if (data!!.taskData!!.taskParentKey != null) {
+            if (data!!.taskData!!.parentKey != null) {
                 if (!hasValueParentInGeneral())
                     return true
 
-                return parent!!.parentKey != data!!.taskData!!.taskParentKey
+                return parent!!.parentKey != data!!.taskData!!.parentKey
             } else if (data!!.taskData!!.scheduleDatas != null) {
                 if (!hasValueSchedule())
                     return true

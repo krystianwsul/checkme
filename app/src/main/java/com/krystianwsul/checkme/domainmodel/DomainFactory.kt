@@ -607,13 +607,13 @@ open class DomainFactory(
         if (taskKey != null) {
             val task = getTaskForce(taskKey)
 
-            val taskParentKey: CreateTaskViewModel.ParentKey.TaskParentKey?
+            val parentKey: CreateTaskViewModel.ParentKey?
             var scheduleDatas: List<CreateTaskViewModel.ScheduleData>? = null
 
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                taskParentKey = null
+                parentKey = task.remoteNonNullProject.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.ProjectParentKey(it.id) }
 
                 if (!schedules.isEmpty()) {
                     val pair = getScheduleDatas(schedules, now)
@@ -622,12 +622,12 @@ open class DomainFactory(
                 }
             } else {
                 val parentTask = task.getParentTask(now)!!
-                taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.taskKey)
+                parentKey = CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.taskKey)
             }
 
             val projectName = task.remoteNullableProject?.name
 
-            taskData = CreateTaskViewModel.TaskData(task.name, taskParentKey, scheduleDatas, task.note, projectName)
+            taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName)
 
             parentTreeDatas = if (task is RemoteTask<*>) {
                 getParentTreeDatas(now, excludedTaskKeys)

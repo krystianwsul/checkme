@@ -630,7 +630,7 @@ open class DomainFactory(
             taskData = CreateTaskViewModel.TaskData(task.name, taskParentKey, scheduleDatas, task.note, projectName)
 
             parentTreeDatas = if (task is RemoteTask<*>) {
-                getProjectTaskTreeDatas(now, task.remoteProject, excludedTaskKeys)
+                getParentTreeDatas(now, excludedTaskKeys)
             } else {
                 check(task is LocalTask)
 

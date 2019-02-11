@@ -774,16 +774,8 @@ class CreateTaskActivity : AbstractActivity() {
             }
         }
 
-        private val mProjectName: String?
-
         init {
             checkNotNull(data)
-
-            mProjectName = if (data!!.taskData != null && !TextUtils.isEmpty(data!!.taskData!!.projectName)) {
-                data!!.taskData!!.projectName
-            } else {
-                null
-            }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
@@ -793,26 +785,7 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
-            if (position == 0 && !TextUtils.isEmpty(mProjectName)) {
-                check(!TextUtils.isEmpty(mProjectName))
-
-                (holder as ScheduleHolder).run {
-                    mScheduleMargin.visibility = View.VISIBLE
-
-                    mScheduleText.setText(mProjectName)
-
-                    mScheduleLayout.run {
-                        hint = getString(R.string.parentProject)
-                        error = null
-                        isHintAnimationEnabled = false
-                    }
-
-                    mScheduleText.run {
-                        isEnabled = false
-                        setOnClickListener(null)
-                    }
-                }
-            } else if (position < elementsBeforeSchedules()) {
+            if (position < elementsBeforeSchedules()) {
                 (holder as ScheduleHolder).run {
                     mScheduleMargin.visibility = if (position == 0) View.VISIBLE else View.GONE
 
@@ -896,7 +869,7 @@ class CreateTaskActivity : AbstractActivity() {
             }
         }
 
-        fun elementsBeforeSchedules() = if (TextUtils.isEmpty(mProjectName)) 1 else 2
+        fun elementsBeforeSchedules() = 1
 
         override fun getItemCount() = elementsBeforeSchedules() + scheduleEntries.size + 1 + 1
 

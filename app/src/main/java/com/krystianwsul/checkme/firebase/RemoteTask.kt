@@ -229,10 +229,11 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun belongsToRemoteProject() = true
 
-    override fun updateProject(now: ExactTimeStamp, projectId: String?): RemoteTask<T> {
-        check(projectId.isNullOrEmpty() || projectId == remoteProject.id)
-
-        return this
+    override fun updateProject(now: ExactTimeStamp, projectId: String): RemoteTask<*> {
+        return if (projectId == remoteProject.id)
+            this
+        else
+            domainFactory.convertRemoteToRemote(now, this, projectId)
     }
 
     class MissingDayException(message: String) : Exception(message)

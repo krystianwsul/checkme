@@ -113,11 +113,11 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
 
     override fun belongsToRemoteProject() = false
 
-    override fun updateProject(now: ExactTimeStamp, projectId: String?): Task {
+    override fun updateProject(now: ExactTimeStamp, projectId: String): Task {
         return if (TextUtils.isEmpty(projectId)) {
             this
         } else {
-            domainFactory.convertLocalToRemote(now, this, projectId!!)
+            domainFactory.convertLocalToRemote(now, this, projectId)
         }
     }
 }

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domainmodel.RemoteToRemoteConversion
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy
 import com.krystianwsul.checkme.firebase.json.InstanceJson
@@ -134,6 +135,22 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         return remoteTaskHierarchy
     }
 
+    fun copyRemoteTaskHierarchy(startTaskHierarchy: RemoteTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy {
+        check(!TextUtils.isEmpty(remoteParentTaskId))
+        check(!TextUtils.isEmpty(remoteChildTaskId))
+
+        val endTime = if (startTaskHierarchy.getEndExactTimeStamp() != null) startTaskHierarchy.getEndExactTimeStamp()!!.long else null
+
+        val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, startTaskHierarchy.startExactTimeStamp.long, endTime, startTaskHierarchy.ordinal)
+        val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
+
+        val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
+
+        remoteTaskHierarchies.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
+
+        return remoteTaskHierarchy
+    }
+
     fun deleteTask(remoteTask: RemoteTask<T>) {
         check(remoteTasks.containsKey(remoteTask.id))
 
@@ -199,4 +216,23 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<T>
 
     abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
+
+    fun convertRemoteToRemoteHelper(remoteToRemoteConversion: RemoteToRemoteConversion, startTask: RemoteTask<T>) {
+        if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
+            return
+
+        val taskKey = startTask.taskKey
+
+        remoteToRemoteConversion.startTasks[startTask.id] = Pair(startTask, startTask.existingInstances.values.toList())
+
+        val parentLocalTaskHierarchies = remoteTaskHierarchies.getByChildTaskKey(taskKey)
+
+        remoteToRemoteConversion.startTaskHierarchies.addAll(parentLocalTaskHierarchies)
+
+        remoteTaskHierarchies.getByParentTaskKey(taskKey)
+                .map { it.childTask }
+                .forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it as RemoteTask<T>) }
+
+        parentLocalTaskHierarchies.map { it.parentTask }.forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it as RemoteTask<T>) }
+    }
 }

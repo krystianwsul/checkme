@@ -976,7 +976,9 @@ open class DomainFactory(
         var task = getTaskForce(taskKey)
         check(task.current(now))
 
-        task = task.updateProject(now, projectId)
+        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
+
+        task = task.updateProject(now, finalProjectId)
 
         task.setName(name, note)
 
@@ -1092,17 +1094,14 @@ open class DomainFactory(
         } else if (!projectId.isNullOrEmpty()) {
             projectId
         } else {
-            null
+            defaultProjectId
         }
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-        val newParentTask = if (!finalProjectId.isNullOrEmpty())
-            remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
-        else
-            localFactory.createLocalTaskHelper(name, now, note)
+        val newParentTask = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
 
-        joinTasks = joinTasks.map { it.updateProject(now, projectId) }
+        joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
 
         joinTasks(newParentTask, joinTasks, now)
 
@@ -1125,7 +1124,9 @@ open class DomainFactory(
         var task = getTaskForce(taskKey)
         check(task.current(now))
 
-        task = task.updateProject(now, projectId)
+        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
+
+        task = task.updateProject(now, finalProjectId)
 
         task.setName(name, note)
 
@@ -1871,6 +1872,49 @@ open class DomainFactory(
         }
 
         return localToRemoteConversion.remoteTasks[startingLocalTask.id]!!
+    }
+
+    fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*> {
+        check(projectId.isNotEmpty())
+
+        checkNotNull(remoteProjectFactory)
+        checkNotNull(userInfo)
+
+        val remoteToRemoteConversion = RemoteToRemoteConversion()
+        val project = startingRemoteTask.remoteProject
+        project.convertRemoteToRemoteHelper(remoteToRemoteConversion, startingRemoteTask)
+
+        updateNotifications(true, now, remoteToRemoteConversion.startTasks
+                .values
+                .map { it.first.taskKey }, "other")
+
+        val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
+
+        for (pair in remoteToRemoteConversion.startTasks.values) {
+            checkNotNull(pair)
+
+            val remoteTask = remoteProject.copyTask(pair.first, pair.second, now)
+            remoteToRemoteConversion.endTasks[pair.first.id] = remoteTask
+        }
+
+        for (startTaskHierarchy in remoteToRemoteConversion.startTaskHierarchies) {
+            checkNotNull(startTaskHierarchy)
+
+            val parentRemoteTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.parentTaskId]!!
+            val childRemoteTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.childTaskId]!!
+
+            val remoteTaskHierarchy = remoteProject.copyRemoteTaskHierarchy(startTaskHierarchy, parentRemoteTask.id, childRemoteTask.id)
+
+            remoteToRemoteConversion.endTaskHierarchies.add(remoteTaskHierarchy)
+        }
+
+        for (pair in remoteToRemoteConversion.startTasks.values) {
+            pair.second.forEach { it.delete() }
+
+            pair.first.delete()
+        }
+
+        return remoteToRemoteConversion.endTasks[startingRemoteTask.id]!!
     }
 
     private fun joinTasks(newParentTask: Task, joinTasks: List<Task>, now: ExactTimeStamp) {

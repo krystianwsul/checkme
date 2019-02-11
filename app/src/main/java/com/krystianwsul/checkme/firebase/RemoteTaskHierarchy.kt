@@ -8,7 +8,10 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 
-class RemoteTaskHierarchy(domainFactory: DomainFactory, private val remoteProject: RemoteProject<*>, private val remoteTaskHierarchyRecord: RemoteTaskHierarchyRecord) : TaskHierarchy(domainFactory) {
+class RemoteTaskHierarchy( // todo add type param
+        domainFactory: DomainFactory,
+        private val remoteProject: RemoteProject<*>,
+        private val remoteTaskHierarchyRecord: RemoteTaskHierarchyRecord) : TaskHierarchy(domainFactory) {
 
     override val startExactTimeStamp get() = ExactTimeStamp(remoteTaskHierarchyRecord.startTime)
 
@@ -22,9 +25,8 @@ class RemoteTaskHierarchy(domainFactory: DomainFactory, private val remoteProjec
 
     override val childTask by lazy { remoteProject.getRemoteTaskForce(childTaskId) }
 
-    private val parentTaskId by lazy { remoteTaskHierarchyRecord.parentTaskId }
-
-    private val childTaskId by lazy { remoteTaskHierarchyRecord.childTaskId }
+    val parentTaskId by lazy { remoteTaskHierarchyRecord.parentTaskId }
+    val childTaskId by lazy { remoteTaskHierarchyRecord.childTaskId }
 
     override var ordinal: Double
         get() = remoteTaskHierarchyRecord.ordinal ?: remoteTaskHierarchyRecord.startTime.toDouble()

@@ -152,9 +152,12 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        localFactory.tasks
-                .toMutableList()
-                .forEach { it.updateProject(now, remoteProjectFactory.remotePrivateProject.id) }
+        var localTasks = localFactory.tasks
+        while (localTasks.isNotEmpty()) {
+            localTasks.first().updateProject(now, remoteProjectFactory.remotePrivateProject.id)
+
+            localTasks = localFactory.tasks
+        }
 
         tryNotifyListeners()
     }

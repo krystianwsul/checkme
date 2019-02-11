@@ -144,8 +144,8 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
             val (scheduleKey, remoteCustomTimeId) = RemoteInstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
 
-            val remoteInstanceRecord = RemoteInstanceRecord<T>(
-                    false,
+            val remoteInstanceRecord = RemoteInstanceRecord(
+                    create,
                     this,
                     instanceJson,
                     scheduleKey,

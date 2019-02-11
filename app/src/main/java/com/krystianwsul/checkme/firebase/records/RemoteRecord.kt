@@ -19,7 +19,7 @@ abstract class RemoteRecord(create: Boolean) {
 
     fun getValues(values: MutableMap<String, Any?>): Boolean {
         if (delete) {
-            Log.e("asdf", "RemoteRecord.getValues deleting " + this)
+            Log.e("asdf", "RemoteRecord.getValues deleting $this")
 
             check(update != null)
 
@@ -31,14 +31,14 @@ abstract class RemoteRecord(create: Boolean) {
             return true
         } else {
             if (update == null) {
-                Log.e("asdf", "RemoteRecord.getValues creating " + this)
+                Log.e("asdf", "RemoteRecord.getValues creating $this")
 
                 values[key] = createObject
 
                 setCreated()
             } else {
                 if (update!!.isNotEmpty()) {
-                    Log.e("asdf", "RemoteRecord.getValues updating " + this)
+                    Log.e("asdf", "RemoteRecord.getValues updating $this")
 
                     values.putAll(update!!)
 

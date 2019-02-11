@@ -31,14 +31,10 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
     val currentCustomTimes get() = _localCustomTimes.values.filter { it.current }
 
-    val instanceCount get() = existingLocalInstances.size()
-
     val existingInstances: List<LocalInstance>
         get() = existingLocalInstances.values()
 
     val taskIds get() = localTasks.keys
-
-    val taskCount get() = localTasks.size
 
     val uuid get() = persistenceManager.uuid
 
@@ -181,21 +177,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
         persistenceManager.deleteInstanceShownRecords(taskKeys)
     }
 
-    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?): LocalTask {
-        check(name.isNotEmpty())
-        check(!scheduleDatas.isEmpty())
-
-        val rootLocalTask = createLocalTaskHelper(name, now, note)
-
-        val schedules = createSchedules(rootLocalTask, scheduleDatas, now)
-        check(!schedules.isEmpty())
-
-        rootLocalTask.addSchedules(schedules)
-
-        return rootLocalTask
-    }
-
-    fun createLocalTaskHelper(name: String, now: ExactTimeStamp, note: String?): LocalTask {
+    private fun createLocalTaskHelper(name: String, now: ExactTimeStamp, note: String?): LocalTask {
         check(name.isNotEmpty())
 
         val taskRecord = persistenceManager.createTaskRecord(name, now, note)

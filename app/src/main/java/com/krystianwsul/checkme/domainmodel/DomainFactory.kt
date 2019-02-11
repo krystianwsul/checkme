@@ -1851,7 +1851,7 @@ open class DomainFactory(
             checkNotNull(pair)
 
             val remoteTask = remoteProject.copyTask(pair.first, pair.second, now)
-            localToRemoteConversion.remoteTasks[pair.first.id] = remoteTask
+            localToRemoteConversion.remoteTasks.put(pair.first.id, remoteTask)
         }
 
         for (localTaskHierarchy in localToRemoteConversion.localTaskHierarchies) {
@@ -1880,9 +1880,9 @@ open class DomainFactory(
         checkNotNull(remoteProjectFactory)
         checkNotNull(userInfo)
 
-        val remoteToRemoteConversion = RemoteToRemoteConversion()
-        val project = startingRemoteTask.remoteProject
-        project.convertRemoteToRemoteHelper(remoteToRemoteConversion, startingRemoteTask)
+        val remoteToRemoteConversion = RemoteToRemoteConversion<T>()
+        val startProject = startingRemoteTask.remoteProject
+        startProject.convertRemoteToRemoteHelper(remoteToRemoteConversion, startingRemoteTask)
 
         updateNotifications(true, now, remoteToRemoteConversion.startTasks
                 .values

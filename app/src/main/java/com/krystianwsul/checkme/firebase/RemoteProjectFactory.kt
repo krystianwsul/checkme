@@ -190,12 +190,6 @@ class RemoteProjectFactory(
         return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId!!)
     }
 
-    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<RemoteTaskHierarchy> {
-        check(!TextUtils.isEmpty(childTaskKey.remoteTaskId))
-
-        return getRemoteProjectForce(childTaskKey).getTaskHierarchiesByChildTaskKey(childTaskKey)
-    }
-
     fun updateUserInfo(userInfo: UserInfo) = remoteSharedProjects.values.forEach { it.updateUserInfo(userInfo, uuid) }
 
     fun getRemoteProjectForce(projectId: String): RemoteProject<*> {

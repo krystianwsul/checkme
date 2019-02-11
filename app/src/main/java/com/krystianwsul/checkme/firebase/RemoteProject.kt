@@ -26,7 +26,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     protected abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
     protected abstract val remoteTasks: MutableMap<String, RemoteTask<T>>
-    protected abstract val remoteTaskHierarchies: TaskHierarchyContainer<String, RemoteTaskHierarchy>
+    protected abstract val remoteTaskHierarchies: TaskHierarchyContainer<String, RemoteTaskHierarchy<T>>
     protected abstract val remoteCustomTimes: Map<T, RemoteCustomTime<T>>
 
     val id by lazy { remoteProjectRecord.id }
@@ -119,7 +119,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         return InstanceJson(done, instanceDate.toJson(), instanceDate.year, instanceDate.month, instanceDate.day, instanceTime, instanceRemoteCustomTimeId?.value, instanceHour, instanceMinute, instance.ordinal)
     }
 
-    fun copyLocalTaskHierarchy(localTaskHierarchy: LocalTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy {
+    fun copyLocalTaskHierarchy(localTaskHierarchy: LocalTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy<T> {
         check(!TextUtils.isEmpty(remoteParentTaskId))
         check(!TextUtils.isEmpty(remoteChildTaskId))
 
@@ -135,7 +135,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         return remoteTaskHierarchy
     }
 
-    fun copyRemoteTaskHierarchy(startTaskHierarchy: RemoteTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy {
+    fun <U : RemoteCustomTimeId> copyRemoteTaskHierarchy(startTaskHierarchy: RemoteTaskHierarchy<U>, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy<T> {
         check(!TextUtils.isEmpty(remoteParentTaskId))
         check(!TextUtils.isEmpty(remoteChildTaskId))
 
@@ -157,19 +157,19 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         remoteTasks.remove(remoteTask.id)
     }
 
-    fun deleteTaskHierarchy(remoteTaskHierarchy: RemoteTaskHierarchy) = remoteTaskHierarchies.removeForce(remoteTaskHierarchy.id)
+    fun deleteTaskHierarchy(remoteTaskHierarchy: RemoteTaskHierarchy<T>) = remoteTaskHierarchies.removeForce(remoteTaskHierarchy.id)
 
     fun getRemoteTaskIfPresent(taskId: String) = remoteTasks[taskId]
 
     fun getRemoteTaskForce(taskId: String) = remoteTasks[taskId]!!
 
-    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<RemoteTaskHierarchy> {
+    fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<RemoteTaskHierarchy<T>> {
         check(!TextUtils.isEmpty(childTaskKey.remoteTaskId))
 
         return remoteTaskHierarchies.getByChildTaskKey(childTaskKey)
     }
 
-    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<RemoteTaskHierarchy> {
+    fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<RemoteTaskHierarchy<T>> {
         check(!TextUtils.isEmpty(parentTaskKey.remoteTaskId))
 
         return remoteTaskHierarchies.getByParentTaskKey(parentTaskKey)
@@ -217,7 +217,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
 
-    fun convertRemoteToRemoteHelper(remoteToRemoteConversion: RemoteToRemoteConversion, startTask: RemoteTask<T>) {
+    fun convertRemoteToRemoteHelper(remoteToRemoteConversion: RemoteToRemoteConversion<T>, startTask: RemoteTask<T>) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
             return
 
@@ -231,8 +231,8 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
         remoteTaskHierarchies.getByParentTaskKey(taskKey)
                 .map { it.childTask }
-                .forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it as RemoteTask<T>) }
+                .forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it) }
 
-        parentLocalTaskHierarchies.map { it.parentTask }.forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it as RemoteTask<T>) }
+        parentLocalTaskHierarchies.map { it.parentTask }.forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it) }
     }
 }

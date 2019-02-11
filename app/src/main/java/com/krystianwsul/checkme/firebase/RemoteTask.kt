@@ -32,8 +32,6 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override val name get() = remoteTaskRecord.name
 
-    private val remoteFactory get() = domainFactory.remoteProjectFactory
-
     override val schedules get() = remoteSchedules
 
     override val startExactTimeStamp get() = ExactTimeStamp(remoteTaskRecord.startTime)
@@ -95,7 +93,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
     override fun delete() {
         val taskKey = taskKey
 
-        ArrayList(remoteFactory.getTaskHierarchiesByChildTaskKey(taskKey)).forEach { it.delete() }
+        ArrayList(remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)).forEach { it.delete() }
 
         ArrayList(schedules).forEach { it.delete() }
 

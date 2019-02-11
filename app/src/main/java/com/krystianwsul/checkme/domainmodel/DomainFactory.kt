@@ -8,11 +8,13 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domainmodel.local.LocalCustomTime
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
-import com.krystianwsul.checkme.domainmodel.relevance.*
+import com.krystianwsul.checkme.domainmodel.relevance.InstanceRelevance
+import com.krystianwsul.checkme.domainmodel.relevance.RemoteCustomTimeRelevance
+import com.krystianwsul.checkme.domainmodel.relevance.RemoteProjectRelevance
+import com.krystianwsul.checkme.domainmodel.relevance.TaskRelevance
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.UserWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
@@ -152,11 +154,11 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        var localTasks = localFactory.tasks
+        var localTasks = localFactory.getConversionTasks()
         while (localTasks.isNotEmpty()) {
             localTasks.first().updateProject(now, remoteProjectFactory.remotePrivateProject.id)
 
-            localTasks = localFactory.tasks
+            localTasks = localFactory.getConversionTasks()
         }
 
         tryNotifyListeners()
@@ -1755,8 +1757,6 @@ open class DomainFactory(
         is CustomTimeKey.RemoteCustomTimeKey<*> -> remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
     }
 
-    private fun getCurrentCustomTimes() = localFactory.currentCustomTimes
-
     private fun getCurrentRemoteCustomTimes() = remoteProjectFactory.remotePrivateProject
             .customTimes
             .filter { it.current }
@@ -1794,7 +1794,8 @@ open class DomainFactory(
     private fun getParentTreeDatas(now: ExactTimeStamp, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         val parentTreeDatas = mutableMapOf<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>()
 
-        parentTreeDatas.putAll((localFactory.tasks + remoteProjectFactory.remotePrivateProject.tasks)
+        parentTreeDatas.putAll(remoteProjectFactory.remotePrivateProject
+                .tasks
                 .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
@@ -1851,7 +1852,7 @@ open class DomainFactory(
             checkNotNull(pair)
 
             val remoteTask = remoteProject.copyTask(pair.first, pair.second, now)
-            localToRemoteConversion.remoteTasks.put(pair.first.id, remoteTask)
+            localToRemoteConversion.remoteTasks[pair.first.id] = remoteTask
         }
 
         for (localTaskHierarchy in localToRemoteConversion.localTaskHierarchies) {
@@ -1967,9 +1968,9 @@ open class DomainFactory(
         }
     }
 
-    private fun getTasks() = localFactory.tasks.asSequence() + remoteProjectFactory.tasks.asSequence()
+    private fun getTasks() = remoteProjectFactory.tasks.asSequence()
 
-    private val customTimes get() = localFactory.localCustomTimes + remoteProjectFactory.remoteCustomTimes
+    private val customTimes get() = remoteProjectFactory.remoteCustomTimes
 
     fun getTaskForce(taskKey: TaskKey) = if (taskKey.localTaskId != null) {
         check(taskKey.remoteTaskId.isNullOrEmpty())
@@ -2004,7 +2005,7 @@ open class DomainFactory(
                 .toList()
     }
 
-    private fun getExistingInstances() = localFactory.existingInstances + remoteProjectFactory.existingInstances
+    private fun getExistingInstances() = remoteProjectFactory.existingInstances
 
     private fun getGroupListChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now)
             .map {
@@ -2038,7 +2039,7 @@ open class DomainFactory(
 
     fun setIrrelevant(now: ExactTimeStamp): Irrelevant {
         if (SnackbarListener.deleting)
-            return Irrelevant(listOf(), listOf(), listOf(), listOf(), listOf())
+            return Irrelevant(listOf(), listOf(), listOf(), listOf())
 
         val tasks = getTasks()
 
@@ -2059,23 +2060,17 @@ open class DomainFactory(
                 .toMap()
                 .toMutableMap()
 
-        val localCustomTimeRelevances = localFactory.localCustomTimes
-                .map { it.id to LocalCustomTimeRelevance(it) }
-                .toMap()
-
         tasks.asSequence()
                 .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now) }
                 .map { taskRelevances.getValue(it.taskKey) }.toList()
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
+                .forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
 
-        rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
+        rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
 
         existingInstances.asSequence()
                 .filter { it.isRootInstance(now) && it.isVisible(now) }
                 .map { instanceRelevances[it.instanceKey]!! }.toList()
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, localCustomTimeRelevances, now) }
-
-        getCurrentCustomTimes().map { localCustomTimeRelevances.getValue(it.id) }.forEach { it.setRelevant() }
+                .forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
 
         val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
 
@@ -2097,18 +2092,8 @@ open class DomainFactory(
 
         check(irrelevantExistingInstances.none { it.isVisible(now) })
 
-        val relevantLocalCustomTimes = localCustomTimeRelevances.values
-                .filter { it.relevant }
-                .map { it.localCustomTime }
-
-        val irrelevantLocalCustomTimes = ArrayList<LocalCustomTime>(localFactory.localCustomTimes)
-        irrelevantLocalCustomTimes.removeAll(relevantLocalCustomTimes)
-
-        check(irrelevantLocalCustomTimes.none { it.current })
-
         irrelevantExistingInstances.let { Log.e("asdf", "irrelevant instances " + it.size); it }.forEach { it.delete() }
         irrelevantTasks.let { Log.e("asdf", "irrelevant tasks " + it.size); it }.forEach { it.delete() }
-        irrelevantLocalCustomTimes.let { Log.e("asdf", "irrelevant times " + it.size); it }.forEach { it.delete() }
 
         val remoteCustomTimes = remoteProjectFactory.remoteCustomTimes
         val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
@@ -2154,7 +2139,7 @@ open class DomainFactory(
                 .apply { removeAll(relevantInstances.map { it.nullableInstanceShownRecord }) }
         irrelevantInstanceShownRecords.forEach { it.delete() }
 
-        return Irrelevant(irrelevantLocalCustomTimes, irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
+        return Irrelevant(irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
     }
 
     private fun notifyCloud(remoteProject: RemoteProject<*>?) {
@@ -2189,7 +2174,7 @@ open class DomainFactory(
 
     private fun updateNotifications(now: ExactTimeStamp, clear: Boolean = false) = updateNotifications(true, now, mutableListOf(), "other", clear)
 
-    private val taskKeys get() = (localFactory.taskIds.map { TaskKey(it) } + remoteProjectFactory.taskKeys).toSet()
+    private val taskKeys get() = remoteProjectFactory.taskKeys.toSet()
 
     private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String, clear: Boolean = false) {
         Preferences.logLineDate("updateNotifications start $sourceName")

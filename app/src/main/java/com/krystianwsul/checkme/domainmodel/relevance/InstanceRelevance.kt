@@ -13,13 +13,13 @@ class InstanceRelevance(val instance: Instance) {
     var relevant = false
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, LocalCustomTimeRelevance>, now: ExactTimeStamp) {
+    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, now: ExactTimeStamp) {
         if (relevant) return
 
         relevant = true
 
         // set task relevant
-        taskRelevances.getValue(instance.taskKey).setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
+        taskRelevances.getValue(instance.taskKey).setRelevant(taskRelevances, instanceRelevances, now)
 
         // set parent instance relevant
         if (!instance.isRootInstance(now)) {
@@ -30,7 +30,7 @@ class InstanceRelevance(val instance: Instance) {
             if (!instanceRelevances.containsKey(parentInstanceKey))
                 instanceRelevances[parentInstanceKey] = InstanceRelevance(parentInstance)
 
-            instanceRelevances[parentInstanceKey]!!.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now)
+            instanceRelevances[parentInstanceKey]!!.setRelevant(taskRelevances, instanceRelevances, now)
         }
 
         // set child instances relevant
@@ -43,17 +43,7 @@ class InstanceRelevance(val instance: Instance) {
 
                     instanceRelevances[instanceKey]!!
                 }
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
-
-        // set custom time relevant
-        val scheduleCustomTimeKey = instance.scheduleCustomTimeKey
-        if (scheduleCustomTimeKey is CustomTimeKey.LocalCustomTimeKey)
-            customTimeRelevances.getValue(scheduleCustomTimeKey.localCustomTimeId).setRelevant()
-
-        // set custom time relevant
-        val instanceCustomTimeId = instance.instanceCustomTimeKey
-        if (instanceCustomTimeId is CustomTimeKey.LocalCustomTimeKey)
-            customTimeRelevances.getValue(instanceCustomTimeId.localCustomTimeId).setRelevant()
+                .forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
     }
 
     fun setRemoteRelevant(remoteCustomTimeRelevances: Map<Pair<String, RemoteCustomTimeId>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
@@ -68,5 +58,9 @@ class InstanceRelevance(val instance: Instance) {
         }
 
         if (remoteProject != null) remoteProjectRelevances.getValue(remoteProject.id).setRelevant()
+
+        (instance.scheduleCustomTimeKey as? CustomTimeKey.RemoteCustomTimeKey<*>)?.let {
+            remoteCustomTimeRelevances.getValue(Pair(it.remoteProjectId, it.remoteCustomTimeId)).setRelevant()
+        }
     }
 }

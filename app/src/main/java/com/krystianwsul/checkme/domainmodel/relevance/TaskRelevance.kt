@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel.relevance
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Task
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskKey
@@ -14,7 +13,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
     var relevant = false
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, customTimeRelevances: Map<Int, LocalCustomTimeRelevance>, now: ExactTimeStamp) {
+    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, now: ExactTimeStamp) {
         if (relevant)
             return
 
@@ -29,7 +28,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
                 + task.getTaskHierarchiesByParentTaskKey(taskKey)
                 .filter { it.notDeleted(now) }
                 .map { it.childTaskKey })
-                .forEach { taskRelevances.getValue(it).setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
+                .forEach { taskRelevances.getValue(it).setRelevant(taskRelevances, instanceRelevances, now) }
 
         val oldestVisible = task.getOldestVisible()!!
 
@@ -46,21 +45,13 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
                     instanceRelevances[instanceKey]!!
                 }
                 .toList()
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
+                .forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
 
         task.existingInstances
                 .values
                 .filter { it.scheduleDate >= oldestVisible }
                 .map { instanceRelevances[it.instanceKey]!! }
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, customTimeRelevances, now) }
-
-        // mark custom times relevant
-        task.schedules
-                .asSequence()
-                .map { it.customTimeKey }
-                .filterIsInstance<CustomTimeKey.LocalCustomTimeKey>()
-                .map { customTimeRelevances.getValue(it.localCustomTimeId) }
-                .forEach { it.setRelevant() }
+                .forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
     }
 
     fun setRemoteRelevant(remoteCustomTimeRelevances: Map<Pair<String, RemoteCustomTimeId>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {

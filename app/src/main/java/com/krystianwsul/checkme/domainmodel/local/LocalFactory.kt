@@ -23,22 +23,14 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
     val instanceShownRecords: Collection<InstanceShownRecord>
         get() = persistenceManager.instanceShownRecords
 
-    val tasks: Collection<LocalTask>
-        get() = localTasks.values
+    val uuid get() = persistenceManager.uuid
+
+    fun getConversionTasks() = localTasks.values
+
+    private lateinit var domainFactory: DomainFactory
 
     val localCustomTimes: Collection<LocalCustomTime>
         get() = _localCustomTimes.values
-
-    val currentCustomTimes get() = _localCustomTimes.values.filter { it.current }
-
-    val existingInstances: List<LocalInstance>
-        get() = existingLocalInstances.values()
-
-    val taskIds get() = localTasks.keys
-
-    val uuid get() = persistenceManager.uuid
-
-    private lateinit var domainFactory: DomainFactory
 
     fun initialize(domainFactory: DomainFactory) {
         this.domainFactory = domainFactory

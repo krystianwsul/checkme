@@ -72,7 +72,7 @@ object SaveService {
                         .flatten()
                         .toMutableList()
 
-                val hasChanges = insertCommands.any() || updateCommands.any() || updateCommands.any()
+                val hasChanges = insertCommands.any() || updateCommands.any() || deleteCommands.any()
 
                 if (hasChanges) {
                     when (source) {

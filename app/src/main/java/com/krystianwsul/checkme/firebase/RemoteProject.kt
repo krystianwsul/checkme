@@ -83,7 +83,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
             val instanceJson = getInstanceJson(it)
             val scheduleKey = it.scheduleKey
 
-            (scheduleKey.scheduleTimePair.customTimeKey as? CustomTimeKey.LocalCustomTimeKey)?.let { getRemoteCustomTimeId(it) }
+            (scheduleKey.scheduleTimePair.customTimeKey as? CustomTimeKey.LocalCustomTimeKey)?.let { getRemoteCustomTimeKey(it) }
 
             RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey) to instanceJson
         }.toMutableMap()
@@ -194,7 +194,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
 
-    abstract fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey): T
+    abstract fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey): CustomTimeKey.RemoteCustomTimeKey<T>
 
     abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<T>
 

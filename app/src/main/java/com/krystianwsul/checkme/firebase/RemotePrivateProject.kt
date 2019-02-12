@@ -45,7 +45,7 @@ class RemotePrivateProject(
         domainFactory.localFactory
                 .localCustomTimes
                 .filter { getRemoteCustomTimeIfPresent(it.id) == null }
-                .forEach { getRemoteCustomTimeId(it.customTimeKey) }
+                .forEach { getRemoteCustomTimeKey(it.customTimeKey) }
     }
 
     override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) = throw UnsupportedOperationException()
@@ -70,7 +70,7 @@ class RemotePrivateProject(
 
     override fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int) = remoteCustomTimes.values.singleOrNull { it.remoteCustomTimeRecord.localId == localCustomTimeId }
 
-    override fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey) = when (customTimeKey) {
+    override fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey): CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private> = when (customTimeKey) {
         is CustomTimeKey.LocalCustomTimeKey -> {
             val localCustomTimeId = customTimeKey.localCustomTimeId
 
@@ -78,17 +78,17 @@ class RemotePrivateProject(
 
             val remoteCustomTime = getRemoteCustomTimeIfPresent(localCustomTimeId)
             if (remoteCustomTime != null) {
-                remoteCustomTime.id
+                remoteCustomTime.customTimeKey
             } else {
                 val customTimeJson = PrivateCustomTimeJson(localCustomTime.id, localCustomTime.name, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, localCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, localCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute, localCustomTime.current)
 
-                newRemoteCustomTime(customTimeJson).id
+                newRemoteCustomTime(customTimeJson).customTimeKey
             }
         }
         is CustomTimeKey.RemoteCustomTimeKey<*> -> {
             when (customTimeKey.remoteCustomTimeId) {
-                is RemoteCustomTimeId.Private -> customTimeKey.remoteCustomTimeId
-                is RemoteCustomTimeId.Shared -> throw java.lang.UnsupportedOperationException()
+                is RemoteCustomTimeId.Private -> customTimeKey as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private>
+                is RemoteCustomTimeId.Shared -> throw UnsupportedOperationException()
             }
         }
     }

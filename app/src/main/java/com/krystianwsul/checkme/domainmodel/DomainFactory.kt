@@ -1390,7 +1390,7 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun createCustomTime(source: SaveService.Source, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): Int {
+    fun createCustomTime(source: SaveService.Source, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private> {
         MyCrashlytics.log("DomainFactory.createCustomTime")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1399,11 +1399,11 @@ open class DomainFactory(
         check(DayOfWeek.values().all { hourMinutes[it] != null })
 
         val localCustomTime = localFactory.createLocalCustomTime(name, hourMinutes)
-        remoteProjectFactory.remotePrivateProject.getRemoteCustomTimeId(localCustomTime.customTimeKey)
+        val remoteCustomTimeKey = remoteProjectFactory.remotePrivateProject.getRemoteCustomTimeKey(localCustomTime.customTimeKey)
 
         save(0, source)
 
-        return localCustomTime.id
+        return remoteCustomTimeKey
     }
 
     @Synchronized

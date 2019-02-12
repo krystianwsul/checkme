@@ -130,7 +130,7 @@ class RemoteSharedProject(
                         && it.privateKey == privateCustomTimeId
             }
 
-    override fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey): RemoteCustomTimeId.Shared {
+    override fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey): CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Shared> {
         val privateProject = domainFactory.remoteProjectFactory.remotePrivateProject
 
         return when (customTimeKey) {
@@ -141,13 +141,13 @@ class RemoteSharedProject(
 
                 val remoteCustomTime = getRemoteCustomTimeIfPresent(localCustomTimeId)
                 if (remoteCustomTime != null) {
-                    remoteCustomTime.id
+                    remoteCustomTime.customTimeKey
                 } else {
                     val privateCustomTime = privateProject.getRemoteCustomTimeIfPresent(localCustomTimeId)!!
 
                     val customTimeJson = SharedCustomTimeJson(domainFactory.uuid, localCustomTime.id, localCustomTime.name, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, localCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, localCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, localCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, localCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, localCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, localCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute, privateProject.id, privateCustomTime.id.value)
 
-                    newRemoteCustomTime(customTimeJson).id
+                    newRemoteCustomTime(customTimeJson).customTimeKey
                 }
             }
             is CustomTimeKey.RemoteCustomTimeKey<*> -> {
@@ -157,17 +157,17 @@ class RemoteSharedProject(
 
                         val sharedCustomTime = getSharedTimeIfPresent(remotePrivateCustomTime.id)
                         if (sharedCustomTime != null) {
-                            sharedCustomTime.id
+                            sharedCustomTime.customTimeKey
                         } else {
                             val customTimeJson = SharedCustomTimeJson(domainFactory.uuid, remotePrivateCustomTime.remoteCustomTimeRecord.localId, remotePrivateCustomTime.name, remotePrivateCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute, privateProject.id, remotePrivateCustomTime.id.value)
 
-                            newRemoteCustomTime(customTimeJson).id
+                            newRemoteCustomTime(customTimeJson).customTimeKey
                         }
                     }
                     is RemoteCustomTimeId.Shared -> {
                         check(customTimeKey.remoteProjectId == id)
 
-                        customTimeKey.remoteCustomTimeId
+                        customTimeKey as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Shared>
                     }
                 }
             }

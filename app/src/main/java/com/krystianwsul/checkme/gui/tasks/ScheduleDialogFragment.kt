@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tasks
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -78,27 +79,28 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
     private lateinit var mButton: DialogActionButton
 
-    private var mCustomTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>? = null
-    private var mScheduleDialogListener: ScheduleDialogListener? = null
+    private var customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>? = null
+    private var scheduleDialogListener: ScheduleDialogListener? = null
 
-    private lateinit var mScheduleDialogData: ScheduleDialogData
+    private lateinit var scheduleDialogData: ScheduleDialogData
 
-    private var mBroadcastReceiver: BroadcastReceiver? = null
+    private var broadcastReceiver: BroadcastReceiver? = null
 
-    private val mTimeDialogListener = object : TimeDialogFragment.TimeDialogListener {
+    private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
+
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
-            check(mCustomTimeDatas != null)
+            check(customTimeDatas != null)
 
-            mScheduleDialogData.timePairPersist.customTimeKey = customTimeKey
+            scheduleDialogData.timePairPersist.customTimeKey = customTimeKey
 
             updateFields()
         }
 
         override fun onOtherSelected() {
-            check(mCustomTimeDatas != null)
+            check(customTimeDatas != null)
 
-            TimePickerDialogFragment.newInstance(mScheduleDialogData.timePairPersist.hourMinute).let {
-                it.listener = mTimePickerDialogFragmentListener
+            TimePickerDialogFragment.newInstance(scheduleDialogData.timePairPersist.hourMinute).let {
+                it.listener = timePickerDialogFragmentListener
                 it.show(childFragmentManager, TIME_PICKER_TAG)
             }
         }
@@ -108,39 +110,39 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
     }
 
-    private val mTimePickerDialogFragmentListener = { hourMinute: HourMinute ->
-        check(mCustomTimeDatas != null)
+    private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
+        check(customTimeDatas != null)
 
-        mScheduleDialogData.timePairPersist.hourMinute = hourMinute
+        scheduleDialogData.timePairPersist.hourMinute = hourMinute
         updateFields()
     }
 
-    private val mDatePickerDialogFragmentListener = { date: Date ->
-        check(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
+    private val datePickerDialogFragmentListener = { date: Date ->
+        check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
-        mScheduleDialogData.date = date
+        scheduleDialogData.date = date
         updateFields()
     }
 
     //cached data doesn't contain new custom time
     private val isValid: Boolean
         get() {
-            if (mCustomTimeDatas == null)
+            if (customTimeDatas == null)
                 return false
 
-            if (mScheduleDialogData.scheduleType != ScheduleType.SINGLE)
+            if (scheduleDialogData.scheduleType != ScheduleType.SINGLE)
                 return true
 
-            val hourMinute = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                if (!mCustomTimeDatas!!.containsKey(mScheduleDialogData.timePairPersist.customTimeKey!!))
+            val hourMinute = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
+                if (!customTimeDatas!!.containsKey(scheduleDialogData.timePairPersist.customTimeKey!!))
                     return false
 
-                mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!.hourMinutes[mScheduleDialogData.date.dayOfWeek]!!
+                customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!.hourMinutes[scheduleDialogData.date.dayOfWeek]!!
             } else {
-                mScheduleDialogData.timePairPersist.hourMinute
+                scheduleDialogData.timePairPersist.hourMinute
             }
 
-            return TimeStamp(mScheduleDialogData.date, hourMinute) > TimeStamp.now
+            return TimeStamp(scheduleDialogData.date, hourMinute) > TimeStamp.now
         }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -150,16 +152,16 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             customView(R.layout.fragment_schedule_dialog)
             negativeButton(android.R.string.cancel) { it.cancel() }
             positiveButton(android.R.string.ok) {
-                    check(mCustomTimeDatas != null)
-                    check(mScheduleDialogListener != null)
+                check(customTimeDatas != null)
+                check(scheduleDialogListener != null)
                     check(isValid)
 
-                    mScheduleDialogListener!!.onScheduleDialogResult(mScheduleDialogData)
+                scheduleDialogListener!!.onScheduleDialogResult(scheduleDialogData)
                 }
 
             @Suppress("DEPRECATION")
             if (arguments!!.getBoolean(SHOW_DELETE_KEY))
-                neutralButton(R.string.delete) { mScheduleDialogListener!!.onScheduleDialogDelete() }
+                neutralButton(R.string.delete) { scheduleDialogListener!!.onScheduleDialogDelete() }
 
             getCustomView()!!.run {
                 mScheduleType = scheduleType
@@ -198,12 +200,13 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        mScheduleDialogData = (savedInstanceState ?: arguments!!).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
+        scheduleDialogData = (savedInstanceState
+                ?: arguments!!).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
 
         mScheduleType.run {
             adapter = ArrayAdapter.createFromResource(requireContext(), R.array.schedule_types, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
-            setSelection(when (mScheduleDialogData.scheduleType) {
+            setSelection(when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> 0
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> 1
@@ -212,14 +215,14 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, i: Int, l: Long) {
-                    mScheduleDialogData.scheduleType = when (i) {
+                    scheduleDialogData.scheduleType = when (i) {
                         0 -> ScheduleType.SINGLE
                         1 -> ScheduleType.WEEKLY
-                        2 -> if (mScheduleDialogData.monthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
+                        2 -> if (scheduleDialogData.monthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
                         else -> throw UnsupportedOperationException()
                     }
 
-                    if (activity != null && mCustomTimeDatas != null)
+                    if (activity != null && customTimeDatas != null)
                         initialize()
                 }
 
@@ -228,54 +231,54 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         mScheduleDialogTime.setOnClickListener {
-            check(mCustomTimeDatas != null)
+            check(customTimeDatas != null)
 
-            val list = mCustomTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*> && it.customTimeKey.remoteCustomTimeId is RemoteCustomTimeId.Private }
+            val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*> && it.customTimeKey.remoteCustomTimeId is RemoteCustomTimeId.Private }
 
-            val customTimeDatas = when (mScheduleDialogData.scheduleType) {
-                ScheduleType.SINGLE -> list.sortedBy { it.hourMinutes[mScheduleDialogData.date.dayOfWeek] }.map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.customTimeKey, customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.date.dayOfWeek] + ")") }
+            val customTimeDatas = when (scheduleDialogData.scheduleType) {
+                ScheduleType.SINGLE -> list.sortedBy { it.hourMinutes[scheduleDialogData.date.dayOfWeek] }.map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.customTimeKey, customTimeData.name + " (" + customTimeData.hourMinutes[scheduleDialogData.date.dayOfWeek] + ")") }
                 ScheduleType.DAILY, ScheduleType.WEEKLY, ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> list.sortedBy { it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum() }.map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name) }
             }
 
             TimeDialogFragment.newInstance(ArrayList(customTimeDatas)).let {
-                it.timeDialogListener = mTimeDialogListener
+                it.timeDialogListener = timeDialogListener
                 it.show(childFragmentManager, TIME_LIST_FRAGMENT_TAG)
             }
         }
 
-        (childFragmentManager.findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.timeDialogListener = mTimeDialogListener
+        (childFragmentManager.findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.timeDialogListener = timeDialogListener
 
-        (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.listener = mTimePickerDialogFragmentListener
+        (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.listener = timePickerDialogFragmentListener
 
         mScheduleDialogDate.setOnClickListener {
-            check(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
+            check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
-            DatePickerDialogFragment.newInstance(mScheduleDialogData.date).let {
-                it.listener = mDatePickerDialogFragmentListener
+            DatePickerDialogFragment.newInstance(scheduleDialogData.date).let {
+                it.listener = datePickerDialogFragmentListener
                 it.show(childFragmentManager, DATE_FRAGMENT_TAG)
             }
         }
 
         (childFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment)?.run {
-            check(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
+            check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
-            listener = mDatePickerDialogFragmentListener
+            listener = datePickerDialogFragmentListener
         }
 
-        mBroadcastReceiver = object : BroadcastReceiver() {
+        broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                if (mCustomTimeDatas != null)
+                if (customTimeDatas != null)
                     updateFields()
             }
         }
 
         val dayListener = { day: DayOfWeek, isChecked: Boolean ->
-            mScheduleDialogData.daysOfWeek.run { if (isChecked) add(day) else remove(day) }
+            scheduleDialogData.daysOfWeek.run { if (isChecked) add(day) else remove(day) }
 
             updateFields()
         }
 
-        mScheduleDialogData.daysOfWeek.forEach { mScheduleDialogDays[it]!!.isChecked = true }
+        scheduleDialogData.daysOfWeek.forEach { mScheduleDialogDays[it]!!.isChecked = true }
         mScheduleDialogDays.forEach { (day, view) -> view.setOnCheckedChangeListener { _, isChecked -> dayListener(day, isChecked) } }
 
         val textPrimary = ContextCompat.getColor(activity!!, R.color.textPrimary)
@@ -286,11 +289,11 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 if (!isChecked)
                     return@setOnCheckedChangeListener
 
-                mScheduleDialogData.scheduleType = ScheduleType.MONTHLY_DAY
+                scheduleDialogData.scheduleType = ScheduleType.MONTHLY_DAY
 
                 mScheduleDialogMonthWeekRadio.isChecked = false
 
-                mScheduleDialogData.monthlyDay = true
+                scheduleDialogData.monthlyDay = true
 
                 mScheduleDialogMonthDayNumber.isEnabled = true
                 mScheduleDialogMonthDayLabel.setTextColor(textPrimary)
@@ -299,19 +302,19 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogMonthWeekDay.isEnabled = false
             }
 
-            isChecked = mScheduleDialogData.monthlyDay
+            isChecked = scheduleDialogData.monthlyDay
         }
 
         mScheduleDialogMonthDayNumber.apply {
             adapter = ArrayAdapter(requireContext(), R.layout.spinner_no_padding, (1..28).map { Utils.ordinal(it) }).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-            setSelection(mScheduleDialogData.monthDayNumber - 1)
+            setSelection(scheduleDialogData.monthDayNumber - 1)
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     check(position >= 0)
                     check(position < 28)
 
-                    mScheduleDialogData.monthDayNumber = position + 1
+                    scheduleDialogData.monthDayNumber = position + 1
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) = Unit
@@ -323,11 +326,11 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 if (!isChecked)
                     return@setOnCheckedChangeListener
 
-                mScheduleDialogData.scheduleType = ScheduleType.MONTHLY_WEEK
+                scheduleDialogData.scheduleType = ScheduleType.MONTHLY_WEEK
 
                 mScheduleDialogMonthDayRadio.isChecked = false
 
-                mScheduleDialogData.monthlyDay = false
+                scheduleDialogData.monthlyDay = false
 
                 mScheduleDialogMonthDayNumber.isEnabled = false
                 mScheduleDialogMonthDayLabel.setTextColor(textDisabledSpinner)
@@ -336,19 +339,19 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogMonthWeekDay.isEnabled = true
             }
 
-            isChecked = !mScheduleDialogData.monthlyDay
+            isChecked = !scheduleDialogData.monthlyDay
         }
 
         mScheduleDialogMonthWeekNumber.run {
             adapter = ArrayAdapter(requireContext(), R.layout.spinner_no_padding, listOf(1, 2, 3, 4).map { Utils.ordinal(it) }).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-            setSelection(mScheduleDialogData.monthWeekNumber - 1)
+            setSelection(scheduleDialogData.monthWeekNumber - 1)
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     check(position >= 0)
                     check(position <= 3)
 
-                    mScheduleDialogData.monthWeekNumber = position + 1
+                    scheduleDialogData.monthWeekNumber = position + 1
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) = Unit
@@ -358,12 +361,12 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         mScheduleDialogMonthWeekDay.run {
             val monthWeekDayAdapter = ArrayAdapter(context, R.layout.spinner_no_padding, DayOfWeek.values()).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
             adapter = monthWeekDayAdapter
-            setSelection(monthWeekDayAdapter.getPosition(mScheduleDialogData.monthWeekDay))
+            setSelection(monthWeekDayAdapter.getPosition(scheduleDialogData.monthWeekDay))
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val dayOfWeek = monthWeekDayAdapter.getItem(position)!!
 
-                    mScheduleDialogData.monthWeekDay = dayOfWeek
+                    scheduleDialogData.monthWeekDay = dayOfWeek
 
                     updateFields()
                 }
@@ -375,46 +378,46 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         mScheduleDialogMonthEnd.run {
             adapter = ArrayAdapter.createFromResource(requireContext(), R.array.month, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
-            setSelection(if (mScheduleDialogData.beginningOfMonth) 0 else 1)
+            setSelection(if (scheduleDialogData.beginningOfMonth) 0 else 1)
 
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     check(position == 0 || position == 1)
 
-                    mScheduleDialogData.beginningOfMonth = position == 0
+                    scheduleDialogData.beginningOfMonth = position == 0
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) = Unit
             }
         }
 
-        if (mCustomTimeDatas != null)
+        if (customTimeDatas != null)
             initialize()
     }
 
     override fun onResume() {
         super.onResume()
 
-        requireActivity().startTicks(mBroadcastReceiver!!)
+        requireActivity().startTicks(broadcastReceiver!!)
 
-        if (mCustomTimeDatas != null)
+        if (customTimeDatas != null)
             updateFields()
     }
 
     fun initialize(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, scheduleDialogListener: ScheduleDialogListener) {
-        mCustomTimeDatas = customTimeDatas
-        mScheduleDialogListener = scheduleDialogListener
+        this.customTimeDatas = customTimeDatas
+        this.scheduleDialogListener = scheduleDialogListener
 
-        if (this::mScheduleDialogData.isInitialized)
+        if (this::scheduleDialogData.isInitialized)
             initialize()
     }
 
     private fun initialize() {
-        check(mCustomTimeDatas != null)
-        check(mScheduleDialogListener != null)
+        check(customTimeDatas != null)
+        check(scheduleDialogListener != null)
         check(activity != null)
 
-        when (mScheduleDialogData.scheduleType) {
+        when (scheduleDialogData.scheduleType) {
             ScheduleType.SINGLE -> {
                 mScheduleDialogDateLayout.visibility = View.VISIBLE
                 mScheduleDialogDayLayout.visibility = View.GONE
@@ -455,59 +458,55 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onPause() {
         super.onPause()
 
-        activity!!.unregisterReceiver(mBroadcastReceiver)
+        activity!!.unregisterReceiver(broadcastReceiver)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putParcelable(SCHEDULE_DIALOG_DATA_KEY, mScheduleDialogData)
+        outState.putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
-        check(resultCode >= 0)
-        check(data == null)
 
-        if (resultCode > 0) {
-            mCustomTimeDatas = null
-            mScheduleDialogData.timePairPersist.customTimeKey = CustomTimeKey.LocalCustomTimeKey(resultCode)
-        }
+        if (resultCode == Activity.RESULT_OK)
+            scheduleDialogData.timePairPersist.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private>
     }
 
     @SuppressLint("SetTextI18n")
     private fun updateFields() {
-        check(mCustomTimeDatas != null)
+        check(customTimeDatas != null)
 
-        when (mScheduleDialogData.scheduleType) {
+        when (scheduleDialogData.scheduleType) {
             ScheduleType.SINGLE -> {
-                mScheduleDialogDate.text = mScheduleDialogData.date.getDisplayText()
+                mScheduleDialogDate.text = scheduleDialogData.date.getDisplayText()
 
-                mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                    val customTimeData = mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!
+                mScheduleDialogTime.text = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
+                    val customTimeData = customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!
 
-                    customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.date.dayOfWeek] + ")"
+                    customTimeData.name + " (" + customTimeData.hourMinutes[scheduleDialogData.date.dayOfWeek] + ")"
                 } else {
-                    mScheduleDialogData.timePairPersist.hourMinute.toString()
+                    scheduleDialogData.timePairPersist.hourMinute.toString()
                 }
             }
-            ScheduleType.DAILY -> mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!.name
+            ScheduleType.DAILY -> mScheduleDialogTime.text = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
+                customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!.name
             } else {
-                mScheduleDialogData.timePairPersist.hourMinute.toString()
+                scheduleDialogData.timePairPersist.hourMinute.toString()
             }
-            ScheduleType.WEEKLY -> mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                val customTimeData = mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!
+            ScheduleType.WEEKLY -> mScheduleDialogTime.text = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
+                val customTimeData = customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!
 
                 customTimeData.name
             } else {
-                mScheduleDialogData.timePairPersist.hourMinute.toString()
+                scheduleDialogData.timePairPersist.hourMinute.toString()
             }
             ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
-                mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                    mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!.name
+                mScheduleDialogTime.text = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
+                    customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!.name
                 } else {
-                    mScheduleDialogData.timePairPersist.hourMinute.toString()
+                    scheduleDialogData.timePairPersist.hourMinute.toString()
                 }
             }
         }
@@ -518,10 +517,10 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             mScheduleDialogDateLayout.error = null
             mScheduleDialogTimeLayout.error = null
         } else {
-            check(mScheduleDialogData.scheduleType == ScheduleType.SINGLE)
+            check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
             mButton.isEnabled = false
 
-            if (mScheduleDialogData.date >= Date.today()) {
+            if (scheduleDialogData.date >= Date.today()) {
                 mScheduleDialogDateLayout.error = null
                 mScheduleDialogTimeLayout.error = getString(R.string.error_time)
             } else {
@@ -534,9 +533,9 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
 
-        check(mScheduleDialogListener != null)
+        check(scheduleDialogListener != null)
 
-        mScheduleDialogListener!!.onScheduleDialogCancel()
+        scheduleDialogListener!!.onScheduleDialogCancel()
     }
 
     @Parcelize

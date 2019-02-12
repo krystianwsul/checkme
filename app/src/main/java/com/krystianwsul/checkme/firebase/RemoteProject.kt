@@ -83,7 +83,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
             val instanceJson = getInstanceJson(it)
             val scheduleKey = it.scheduleKey
 
-            RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey) to instanceJson
+            RemoteInstanceRecord.scheduleKeyToString(domainFactory, scheduleKey) to instanceJson
         }.toMutableMap()
 
         val oldestVisibleMap = oldestVisible?.let { mapOf(uuid to OldestVisibleJson(Date(it.year, it.month, it.day))) }

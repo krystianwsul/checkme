@@ -47,13 +47,13 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             return key
         }
 
-        fun scheduleKeyToString(domainFactory: DomainFactory, projectId: String, scheduleKey: ScheduleKey): String {
+        fun scheduleKeyToString(domainFactory: DomainFactory, scheduleKey: ScheduleKey): String {
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
             key += scheduleKey.scheduleTimePair.let {
                 if (it.customTimeKey != null) {
                     check(it.hourMinute == null)
 
-                    domainFactory.getRemoteCustomTimeId(projectId, it.customTimeKey)
+                    domainFactory.getRemoteCustomTimeId(it.customTimeKey)
                 } else {
                     it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
                 }

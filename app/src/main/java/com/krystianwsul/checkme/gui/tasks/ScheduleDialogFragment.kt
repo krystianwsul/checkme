@@ -483,7 +483,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogDate.text = scheduleDialogData.date.getDisplayText()
 
                 mScheduleDialogTime.text = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
-                    val customTimeData = customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!
+                    val customTimeData = customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!)
 
                     customTimeData.name + " (" + customTimeData.hourMinutes[scheduleDialogData.date.dayOfWeek] + ")"
                 } else {
@@ -491,12 +491,12 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 }
             }
             ScheduleType.DAILY -> mScheduleDialogTime.text = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
-                customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!.name
+                customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!).name
             } else {
                 scheduleDialogData.timePairPersist.hourMinute.toString()
             }
             ScheduleType.WEEKLY -> mScheduleDialogTime.text = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
-                val customTimeData = customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!
+                val customTimeData = customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!)
 
                 customTimeData.name
             } else {
@@ -504,7 +504,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
             ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
                 mScheduleDialogTime.text = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
-                    customTimeDatas!![scheduleDialogData.timePairPersist.customTimeKey!!]!!.name
+                    customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!).name
                 } else {
                     scheduleDialogData.timePairPersist.hourMinute.toString()
                 }

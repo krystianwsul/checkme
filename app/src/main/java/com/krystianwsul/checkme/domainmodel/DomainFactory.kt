@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.domainmodel.relevance.RemoteCustomTimeRelevance
 import com.krystianwsul.checkme.domainmodel.relevance.RemoteProjectRelevance
 import com.krystianwsul.checkme.domainmodel.relevance.TaskRelevance
 import com.krystianwsul.checkme.firebase.*
+import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.json.UserWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
@@ -907,7 +908,7 @@ open class DomainFactory(
         MyCrashlytics.log("DomainFactory.setInstanceNotified")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
-        setInstanceNotified(instanceKey, ExactTimeStamp.now)
+        setInstanceNotified(instanceKey)
 
         save(dataId, source)
     }
@@ -919,10 +920,8 @@ open class DomainFactory(
 
         check(!instanceKeys.isEmpty())
 
-        val now = ExactTimeStamp.now
-
         for (instanceKey in instanceKeys)
-            setInstanceNotified(instanceKey, now)
+            setInstanceNotified(instanceKey)
 
         save(0, source)
     }
@@ -1003,19 +1002,10 @@ open class DomainFactory(
         check(!scheduleDatas.isEmpty())
         check(joinTaskKeys.size > 1)
 
-        val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
+        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() }
+                ?: joinTaskKeys.map { it.remoteProjectId }
                 .distinct()
                 .single()
-
-        val finalProjectId = if (!joinProjectId.isNullOrEmpty()) {
-            check(projectId.isNullOrEmpty())
-
-            joinProjectId
-        } else if (!projectId.isNullOrEmpty()) {
-            projectId
-        } else {
-            defaultProjectId
-        }
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
@@ -1068,19 +1058,10 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val joinProjectId = joinTaskKeys.map { it.remoteProjectId }
+        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() }
+                ?: joinTaskKeys.map { it.remoteProjectId }
                 .distinct()
                 .single()
-
-        val finalProjectId = if (!joinProjectId.isNullOrEmpty()) {
-            check(projectId.isNullOrEmpty())
-
-            joinProjectId
-        } else if (!projectId.isNullOrEmpty()) {
-            projectId
-        } else {
-            defaultProjectId
-        }
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
@@ -1366,12 +1347,29 @@ open class DomainFactory(
 
         check(DayOfWeek.values().all { hourMinutes[it] != null })
 
-        val localCustomTime = localFactory.createLocalCustomTime(name, hourMinutes)
-        val remoteCustomTimeKey = remoteProjectFactory.remotePrivateProject.getRemoteCustomTimeKey(localCustomTime.customTimeKey)
+        val customTimeJson = PrivateCustomTimeJson(
+                name,
+                hourMinutes.getValue(DayOfWeek.SUNDAY).hour,
+                hourMinutes.getValue(DayOfWeek.SUNDAY).minute,
+                hourMinutes.getValue(DayOfWeek.MONDAY).hour,
+                hourMinutes.getValue(DayOfWeek.MONDAY).minute,
+                hourMinutes.getValue(DayOfWeek.TUESDAY).hour,
+                hourMinutes.getValue(DayOfWeek.TUESDAY).minute,
+                hourMinutes.getValue(DayOfWeek.WEDNESDAY).hour,
+                hourMinutes.getValue(DayOfWeek.WEDNESDAY).minute,
+                hourMinutes.getValue(DayOfWeek.THURSDAY).hour,
+                hourMinutes.getValue(DayOfWeek.THURSDAY).minute,
+                hourMinutes.getValue(DayOfWeek.FRIDAY).hour,
+                hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
+                hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
+                hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
+                true)
+
+        val remoteCustomTime = remoteProjectFactory.remotePrivateProject.newRemoteCustomTime(customTimeJson)
 
         save(0, source)
 
-        return remoteCustomTimeKey
+        return remoteCustomTime.customTimeKey
     }
 
     @Synchronized
@@ -1566,22 +1564,9 @@ open class DomainFactory(
         return getExistingInstanceIfPresent(instanceKey)
     }
 
-    private fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance? {
-        return if (instanceKey.taskKey.localTaskId != null) {
-            check(instanceKey.taskKey.remoteProjectId.isNullOrEmpty())
-            check(instanceKey.taskKey.remoteTaskId.isNullOrEmpty())
+    private fun getExistingInstanceIfPresent(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)
 
-            localFactory.getExistingInstanceIfPresent(instanceKey)
-        } else {
-            check(!instanceKey.taskKey.remoteProjectId.isNullOrEmpty())
-            check(!instanceKey.taskKey.remoteTaskId.isNullOrEmpty())
-            checkNotNull(remoteProjectFactory)
-
-            remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)
-        }
-    }
-
-    fun getRemoteCustomTimeId(projectId: String, customTimeKey: CustomTimeKey) = when (customTimeKey) {
+    fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey) = when (customTimeKey) {
         is CustomTimeKey.RemoteCustomTimeKey<*> -> customTimeKey.remoteCustomTimeId
     }
 
@@ -1662,7 +1647,7 @@ open class DomainFactory(
         return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now) }
     }
 
-    fun getTime(timePair: TimePair): Time {
+    private fun getTime(timePair: TimePair): Time {
         return if (timePair.hourMinute != null) {
             check(timePair.customTimeKey == null)
 
@@ -2234,7 +2219,7 @@ open class DomainFactory(
 
     private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, true, now)
 
-    private fun setInstanceNotified(instanceKey: InstanceKey, now: ExactTimeStamp) {
+    private fun setInstanceNotified(instanceKey: InstanceKey) {
         val taskKey = instanceKey.taskKey
 
         val projectId = taskKey.remoteProjectId

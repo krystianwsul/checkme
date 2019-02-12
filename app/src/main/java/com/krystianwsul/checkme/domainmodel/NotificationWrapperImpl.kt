@@ -40,7 +40,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
             val projectId = instanceKey.taskKey.remoteProjectId
 
-            val customTimeId = domainFactory.getRemoteCustomTimeId(projectId, instanceKey.scheduleKey.scheduleTimePair.customTimeKey)
+            val customTimeId = domainFactory.getRemoteCustomTimeId(instanceKey.scheduleKey.scheduleTimePair.customTimeKey)
 
             val customTimeKey = CustomTimeKey.RemoteCustomTimeKey(projectId, customTimeId)
             val scheduleKey = ScheduleKey(instanceKey.scheduleKey.scheduleDate, TimePair(customTimeKey))

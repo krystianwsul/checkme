@@ -19,8 +19,6 @@ abstract class RemoteCustomTimeRecord<T : RemoteCustomTimeId>(create: Boolean) :
 
     protected abstract val customTimeJson: CustomTimeJson
 
-    val localId get() = customTimeJson.localId
-
     override var name: String
         get() = customTimeJson.name
         set(value) {

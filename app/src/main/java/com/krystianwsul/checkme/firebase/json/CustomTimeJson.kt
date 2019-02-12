@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
 interface CustomTimeJson {
-    val localId: Int
     var name: String
     var sundayHour: Int
     var sundayMinute: Int

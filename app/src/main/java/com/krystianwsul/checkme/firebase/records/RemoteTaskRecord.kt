@@ -244,7 +244,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                 .customTimeKey
                 ?.let {
                     when (it) {
-                        is CustomTimeKey.LocalCustomTimeKey -> remoteProject.getRemoteCustomTimeIfPresent(it.localCustomTimeId)!!.id
                         is CustomTimeKey.RemoteCustomTimeKey<*> -> remoteProject.getRemoteCustomTime(it.remoteCustomTimeId).id
                     }
                 }

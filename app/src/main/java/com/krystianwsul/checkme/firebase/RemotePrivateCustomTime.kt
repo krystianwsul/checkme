@@ -32,12 +32,4 @@ class RemotePrivateCustomTime(
 
         remoteCustomTimeRecord.delete()
     }
-
-    fun tryGetLocalCustomTime(domainFactory: DomainFactory) = remoteCustomTimeRecord
-            .takeIf { it.mine(domainFactory) }
-            ?.let {
-                domainFactory.localFactory
-                        .localCustomTimes
-                        .singleOrNull { localCustomTime -> localCustomTime.id == it.localId }
-            }
 }

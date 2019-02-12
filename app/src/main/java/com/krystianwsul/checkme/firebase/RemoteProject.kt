@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.RemoteToRemoteConversion
 import com.krystianwsul.checkme.domainmodel.Task
-import com.krystianwsul.checkme.domainmodel.local.LocalTaskHierarchy
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
@@ -84,8 +83,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
             val instanceJson = getInstanceJson(it)
             val scheduleKey = it.scheduleKey
 
-            (scheduleKey.scheduleTimePair.customTimeKey as? CustomTimeKey.LocalCustomTimeKey)?.let { getRemoteCustomTimeKey(it) }
-
             RemoteInstanceRecord.scheduleKeyToString(domainFactory, remoteProjectRecord.id, scheduleKey) to instanceJson
         }.toMutableMap()
 
@@ -117,22 +114,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
                 ?: instanceTimePair.hourMinute?.toJson()
 
         return InstanceJson(done, instanceDate.toJson(), instanceDate.year, instanceDate.month, instanceDate.day, instanceTime, instanceRemoteCustomTimeId?.value, instanceHour, instanceMinute, instance.ordinal)
-    }
-
-    fun copyLocalTaskHierarchy(localTaskHierarchy: LocalTaskHierarchy, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy<T> {
-        check(!TextUtils.isEmpty(remoteParentTaskId))
-        check(!TextUtils.isEmpty(remoteChildTaskId))
-
-        val endTime = if (localTaskHierarchy.getEndExactTimeStamp() != null) localTaskHierarchy.getEndExactTimeStamp()!!.long else null
-
-        val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, localTaskHierarchy.startExactTimeStamp.long, endTime, localTaskHierarchy.ordinal)
-        val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
-
-        val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
-
-        remoteTaskHierarchies.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
-
-        return remoteTaskHierarchy
     }
 
     fun <U : RemoteCustomTimeId> copyRemoteTaskHierarchy(startTaskHierarchy: RemoteTaskHierarchy<U>, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy<T> {
@@ -206,8 +187,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     }
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchies.getById(id)
-
-    abstract fun getRemoteCustomTimeIfPresent(localCustomTimeId: Int): RemoteCustomTime<T>?
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
 

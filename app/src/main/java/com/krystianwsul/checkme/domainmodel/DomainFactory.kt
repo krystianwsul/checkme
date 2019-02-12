@@ -9,8 +9,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
-import com.krystianwsul.checkme.domainmodel.local.LocalInstance
-import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.domainmodel.relevance.InstanceRelevance
 import com.krystianwsul.checkme.domainmodel.relevance.RemoteCustomTimeRelevance
 import com.krystianwsul.checkme.domainmodel.relevance.RemoteProjectRelevance
@@ -151,15 +149,6 @@ open class DomainFactory(
         remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, userSnapshot.getValue(UserWrapper::class.java)!!))
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
-
-        val now = ExactTimeStamp.now
-
-        var localTasks = localFactory.getConversionTasks()
-        while (localTasks.isNotEmpty()) {
-            localTasks.first().updateProject(now, remoteProjectFactory.remotePrivateProject.id)
-
-            localTasks = localFactory.getConversionTasks()
-        }
 
         tryNotifyListeners()
     }
@@ -478,7 +467,7 @@ open class DomainFactory(
         val existingInstances = task.existingInstances.values
         val pastInstances = task.getInstances(null, now, now)
 
-        val allInstances = existingInstances.toMutableSet()
+        val allInstances = existingInstances.toMutableSet<Instance>()
         allInstances.addAll(pastInstances)
 
         val instanceDatas = allInstances.associate {
@@ -627,17 +616,11 @@ open class DomainFactory(
                 parentKey = CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.taskKey)
             }
 
-            val projectName = task.remoteNullableProject?.name
+            val projectName = task.remoteNullableProject.name
 
             taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName)
 
-            parentTreeDatas = if (task is RemoteTask<*>) {
-                getParentTreeDatas(now, excludedTaskKeys)
-            } else {
-                check(task is LocalTask)
-
-                getParentTreeDatas(now, excludedTaskKeys)
-            }
+            parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys)
         } else {
             var projectId: String? = null
             if (joinTaskKeys != null) {
@@ -1285,18 +1268,11 @@ open class DomainFactory(
 
         val remoteProject: RemoteProject<*>?
         val taskHierarchy: TaskHierarchy
-        if (hierarchyData.taskHierarchyKey is TaskHierarchyKey.LocalTaskHierarchyKey) {
 
-            remoteProject = null
-            taskHierarchy = localFactory.getTaskHierarchy(hierarchyData.taskHierarchyKey)
-        } else {
-            check(hierarchyData.taskHierarchyKey is TaskHierarchyKey.RemoteTaskHierarchyKey)
+        val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey as TaskHierarchyKey.RemoteTaskHierarchyKey
 
-            val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey
-
-            remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
-            taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
-        }
+        remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
+        taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
 
         check(taskHierarchy.current(now))
 
@@ -1306,8 +1282,7 @@ open class DomainFactory(
 
         save(dataId, SaveService.Source.GUI)
 
-        if (remoteProject != null)
-            notifyCloud(remoteProject)
+        notifyCloud(remoteProject)
     }
 
     @Synchronized
@@ -1326,7 +1301,7 @@ open class DomainFactory(
 
         tasks.forEach { it.setEndExactTimeStamp(now, taskUndoData) }
 
-        val remoteProjects = tasks.mapNotNull { it.remoteNullableProject }.toSet()
+        val remoteProjects = tasks.map { it.remoteNullableProject }.toSet()
 
         updateNotifications(now)
 
@@ -1351,8 +1326,7 @@ open class DomainFactory(
         save(dataId, source)
 
         val remoteProjects = taskUndoData.taskKeys
-                .map { getTaskForce(it) }
-                .mapNotNull { it.remoteNullableProject }
+                .map { getTaskForce(it).remoteNonNullProject }
                 .toSet()
 
         notifyCloud(remoteProjects)
@@ -1367,25 +1341,10 @@ open class DomainFactory(
                     it.clearEndExactTimeStamp(now)
                 }
 
-        val localTaskHierarchyKeys = taskUndoData.taskHierarchyKeys.filterIsInstance<TaskHierarchyKey.LocalTaskHierarchyKey>()
         val remoteTaskHierarchyKeys = taskUndoData.taskHierarchyKeys.filterIsInstance<TaskHierarchyKey.RemoteTaskHierarchyKey>()
-
-        val localScheduleIds = taskUndoData.scheduleIds.filterIsInstance<ScheduleId.Local>()
         val remoteScheduleIds = taskUndoData.scheduleIds.filterIsInstance<ScheduleId.Remote>()
 
-        localTaskHierarchyKeys.map { localFactory.getTaskHierarchy(it) }.forEach {
-            check(!it.current(now))
-
-            it.clearEndExactTimeStamp(now)
-        }
-
         remoteTaskHierarchyKeys.map { remoteProjectFactory.getTaskHierarchy(it) }.forEach {
-            check(!it.current(now))
-
-            it.clearEndExactTimeStamp(now)
-        }
-
-        localScheduleIds.map { localFactory.getSchedule(it) }.forEach {
             check(!it.current(now))
 
             it.clearEndExactTimeStamp(now)
@@ -1422,20 +1381,15 @@ open class DomainFactory(
 
         check(name.isNotEmpty())
 
-        val remoteCustomTime = remoteProjectFactory.remotePrivateProject.getRemoteCustomTime(customTimeId)
-        val localCustomTime = remoteCustomTime.tryGetLocalCustomTime(this)
+        val customTime = remoteProjectFactory.remotePrivateProject.getRemoteCustomTime(customTimeId)
 
-        val customTimes = listOfNotNull(remoteCustomTime, localCustomTime)
+        customTime.name = name
 
-        for (customTime in customTimes) {
-            customTime.name = name
+        for (dayOfWeek in DayOfWeek.values()) {
+            val hourMinute = hourMinutes.getValue(dayOfWeek)
 
-            for (dayOfWeek in DayOfWeek.values()) {
-                val hourMinute = hourMinutes.getValue(dayOfWeek)
-
-                if (hourMinute != customTime.getHourMinute(dayOfWeek))
-                    customTime.setHourMinute(dayOfWeek, hourMinute)
-            }
+            if (hourMinute != customTime.getHourMinute(dayOfWeek))
+                customTime.setHourMinute(dayOfWeek, hourMinute)
         }
 
         save(dataId, source)
@@ -1451,7 +1405,6 @@ open class DomainFactory(
         for (remoteCustomTimeId in customTimeIds) {
             val remotePrivateCustomTime = remoteProjectFactory.remotePrivateProject.getRemoteCustomTime(remoteCustomTimeId)
             remotePrivateCustomTime.current = current
-            remotePrivateCustomTime.tryGetLocalCustomTime(this)?.current = current
         }
 
         save(dataId, source)
@@ -1630,9 +1583,6 @@ open class DomainFactory(
 
     fun getRemoteCustomTimeId(projectId: String, customTimeKey: CustomTimeKey) = when (customTimeKey) {
         is CustomTimeKey.RemoteCustomTimeKey<*> -> customTimeKey.remoteCustomTimeId
-        is CustomTimeKey.LocalCustomTimeKey -> remoteProjectFactory.getRemoteProjectForce(projectId)
-                .getRemoteCustomTimeIfPresent(customTimeKey.localCustomTimeId)!!
-                .id
     }
 
     fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
@@ -1640,23 +1590,13 @@ open class DomainFactory(
             .mapNotNull { it.getSharedTimeIfPresent(privateCustomTimeId) }
 
     private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
-        if (taskKey.localTaskId != null) {
-            check(taskKey.remoteProjectId.isNullOrEmpty())
-            check(taskKey.remoteTaskId.isNullOrEmpty())
+        val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
+                .timePair
+                .destructureRemote(this, taskKey.remoteProjectId)
 
-            return LocalInstance(this, taskKey.localTaskId, scheduleDateTime)
-        } else {
-            check(!taskKey.remoteProjectId.isNullOrEmpty())
-            check(!taskKey.remoteTaskId.isNullOrEmpty())
+        val instanceShownRecord = localFactory.getInstanceShownRecord(taskKey.remoteProjectId, taskKey.remoteTaskId, scheduleDateTime.date.year, scheduleDateTime.date.month, scheduleDateTime.date.day, remoteCustomTimeId, hour, minute)
 
-            val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
-                    .timePair
-                    .destructureRemote(this, taskKey.remoteProjectId)
-
-            val instanceShownRecord = localFactory.getInstanceShownRecord(taskKey.remoteProjectId, taskKey.remoteTaskId, scheduleDateTime.date.year, scheduleDateTime.date.month, scheduleDateTime.date.day, remoteCustomTimeId, hour, minute)
-
-            return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime, instanceShownRecord)
-        }
+        return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime, instanceShownRecord)
     }
 
     fun getInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
@@ -1753,7 +1693,6 @@ open class DomainFactory(
     }
 
     fun getCustomTime(customTimeKey: CustomTimeKey) = when (customTimeKey) {
-        is CustomTimeKey.LocalCustomTimeKey -> localFactory.getLocalCustomTime(customTimeKey.localCustomTimeId)
         is CustomTimeKey.RemoteCustomTimeKey<*> -> remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
     }
 
@@ -1831,48 +1770,6 @@ open class DomainFactory(
                     taskParentKey to parentTreeData
                 }
                 .toMap()
-    }
-
-    fun convertLocalToRemote(now: ExactTimeStamp, startingLocalTask: LocalTask, projectId: String): RemoteTask<*> {
-        check(projectId.isNotEmpty())
-
-        checkNotNull(remoteProjectFactory)
-        checkNotNull(userInfo)
-
-        val localToRemoteConversion = LocalToRemoteConversion()
-        localFactory.convertLocalToRemoteHelper(localToRemoteConversion, startingLocalTask)
-
-        updateNotifications(true, now, localToRemoteConversion.localTasks
-                .values
-                .map { it.first.taskKey }, "other")
-
-        val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
-
-        for (pair in localToRemoteConversion.localTasks.values) {
-            checkNotNull(pair)
-
-            val remoteTask = remoteProject.copyTask(pair.first, pair.second, now)
-            localToRemoteConversion.remoteTasks[pair.first.id] = remoteTask
-        }
-
-        for (localTaskHierarchy in localToRemoteConversion.localTaskHierarchies) {
-            checkNotNull(localTaskHierarchy)
-
-            val parentRemoteTask = localToRemoteConversion.remoteTasks[localTaskHierarchy.parentTaskId]!!
-            val childRemoteTask = localToRemoteConversion.remoteTasks[localTaskHierarchy.childTaskId]!!
-
-            val remoteTaskHierarchy = remoteProject.copyLocalTaskHierarchy(localTaskHierarchy, parentRemoteTask.id, childRemoteTask.id)
-
-            localToRemoteConversion.remoteTaskHierarchies.add(remoteTaskHierarchy)
-        }
-
-        for (pair in localToRemoteConversion.localTasks.values) {
-            pair.second.forEach { it.delete() }
-
-            pair.first.delete()
-        }
-
-        return localToRemoteConversion.remoteTasks[startingLocalTask.id]!!
     }
 
     fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*> {
@@ -1972,16 +1869,7 @@ open class DomainFactory(
 
     private val customTimes get() = remoteProjectFactory.remoteCustomTimes
 
-    fun getTaskForce(taskKey: TaskKey) = if (taskKey.localTaskId != null) {
-        check(taskKey.remoteTaskId.isNullOrEmpty())
-
-        localFactory.getTaskForce(taskKey.localTaskId)
-    } else {
-        check(!taskKey.remoteTaskId.isNullOrEmpty())
-        checkNotNull(remoteProjectFactory)
-
-        remoteProjectFactory.getTaskForce(taskKey)
-    }
+    fun getTaskForce(taskKey: TaskKey) = remoteProjectFactory.getTaskForce(taskKey)
 
     fun getChildTaskHierarchies(parentTask: Task, exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
         check(parentTask.current(exactTimeStamp))
@@ -2347,50 +2235,40 @@ open class DomainFactory(
     private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, true, now)
 
     private fun setInstanceNotified(instanceKey: InstanceKey, now: ExactTimeStamp) {
-        if (instanceKey.type === TaskKey.Type.LOCAL) {
-            val instance = getInstance(instanceKey)
+        val taskKey = instanceKey.taskKey
 
-            instance.setNotified(now)
-            instance.setNotificationShown(false, now)
+        val projectId = taskKey.remoteProjectId
+        val taskId = taskKey.remoteTaskId
+
+        val scheduleKey = instanceKey.scheduleKey
+        val scheduleDate = scheduleKey.scheduleDate
+
+        val stream = localFactory.instanceShownRecords
+                .asSequence()
+                .filter { it.projectId == projectId && it.taskId == taskId && it.scheduleYear == scheduleDate.year && it.scheduleMonth == scheduleDate.month && it.scheduleDay == scheduleDate.day }
+
+        val matches: Sequence<InstanceShownRecord>
+        if (scheduleKey.scheduleTimePair.customTimeKey != null) {
+            check(scheduleKey.scheduleTimePair.hourMinute == null)
+
+            check(scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>) // remote custom time key hack
+            check(projectId == scheduleKey.scheduleTimePair.customTimeKey.remoteProjectId)
+
+            val customTimeId = scheduleKey.scheduleTimePair.customTimeKey.remoteCustomTimeId
+
+            matches = stream.filter { customTimeId.value == it.scheduleCustomTimeId }
         } else {
-            val taskKey = instanceKey.taskKey
+            check(scheduleKey.scheduleTimePair.hourMinute != null)
 
-            val projectId = taskKey.remoteProjectId
-            check(!projectId.isNullOrEmpty())
+            val hourMinute = scheduleKey.scheduleTimePair.hourMinute
 
-            val taskId = taskKey.remoteTaskId
-            check(!taskId.isNullOrEmpty())
-
-            val scheduleKey = instanceKey.scheduleKey
-            val scheduleDate = scheduleKey.scheduleDate
-
-            val stream = localFactory.instanceShownRecords
-                    .asSequence()
-                    .filter { it.projectId == projectId && it.taskId == taskId && it.scheduleYear == scheduleDate.year && it.scheduleMonth == scheduleDate.month && it.scheduleDay == scheduleDate.day }
-
-            val matches: Sequence<InstanceShownRecord>
-            if (scheduleKey.scheduleTimePair.customTimeKey != null) {
-                check(scheduleKey.scheduleTimePair.hourMinute == null)
-
-                check(scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>) // remote custom time key hack
-                check(projectId == scheduleKey.scheduleTimePair.customTimeKey.remoteProjectId)
-
-                val customTimeId = scheduleKey.scheduleTimePair.customTimeKey.remoteCustomTimeId
-
-                matches = stream.filter { customTimeId.value == it.scheduleCustomTimeId }
-            } else {
-                check(scheduleKey.scheduleTimePair.hourMinute != null)
-
-                val hourMinute = scheduleKey.scheduleTimePair.hourMinute
-
-                matches = stream.filter { hourMinute.hour == it.scheduleHour && hourMinute.minute == it.scheduleMinute }
-            }
-
-            val instanceShownRecord = matches.single()
-
-            instanceShownRecord.notified = true
-            instanceShownRecord.notificationShown = false
+            matches = stream.filter { hourMinute.hour == it.scheduleHour && hourMinute.minute == it.scheduleMinute }
         }
+
+        val instanceShownRecord = matches.single()
+
+        instanceShownRecord.notified = true
+        instanceShownRecord.notificationShown = false
     }
 
     private fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListFragment.DataWrapper {

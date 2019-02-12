@@ -41,36 +41,21 @@ object SaveService {
         private class FactoryImpl : Factory() {
 
             override fun startService(persistenceManager: PersistenceManager, source: Source): Boolean {
-                val collections = listOf(
-                        persistenceManager.customTimeRecords,
-                        persistenceManager.taskRecords,
-                        persistenceManager.taskHierarchyRecords,
-                        persistenceManager.scheduleRecords,
-                        persistenceManager.singleScheduleRecords,
-                        persistenceManager.dailyScheduleRecords,
-                        persistenceManager.weeklyScheduleRecords,
-                        persistenceManager.monthlyDayScheduleRecords,
-                        persistenceManager.monthlyWeekScheduleRecords,
-                        persistenceManager.localInstanceRecords,
-                        persistenceManager.instanceShownRecords)
+                val collections = persistenceManager.instanceShownRecords
 
-                val insertCommands = collections.flatten()
-                        .asSequence()
+                val insertCommands = collections.asSequence()
                         .filter { it.needsInsert() }
                         .map { it.insertCommand }
                         .toList()
 
                 // update
 
-                val updateCommands = collections.flatten()
-                        .asSequence()
+                val updateCommands = collections.asSequence()
                         .filter { it.needsUpdate() }
                         .map { it.updateCommand }
                         .toList()
 
-                val deleteCommands = collections.map { delete(it) }
-                        .flatten()
-                        .toMutableList()
+                val deleteCommands = delete(collections).toMutableList()
 
                 val hasChanges = insertCommands.any() || updateCommands.any() || deleteCommands.any()
 

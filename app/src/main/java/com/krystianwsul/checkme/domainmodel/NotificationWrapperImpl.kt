@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.notifications.*
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.ScheduleKey
-import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimeStamp
@@ -33,16 +32,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     companion object {
 
         fun getRemoteCustomTimeFixInstanceKey(domainFactory: DomainFactory, instanceKey: InstanceKey): InstanceKey { // remote custom time key hack
-            if (instanceKey.type == TaskKey.Type.LOCAL)
-                return instanceKey
-
             if (instanceKey.scheduleKey.scheduleTimePair.customTimeKey == null)
                 return instanceKey
 
             if (instanceKey.scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>)
                 return instanceKey
 
-            val projectId = instanceKey.taskKey.remoteProjectId!!
+            val projectId = instanceKey.taskKey.remoteProjectId
 
             val customTimeId = domainFactory.getRemoteCustomTimeId(projectId, instanceKey.scheduleKey.scheduleTimePair.customTimeKey)
 

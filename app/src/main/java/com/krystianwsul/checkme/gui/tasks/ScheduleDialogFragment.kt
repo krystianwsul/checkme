@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tasks
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -135,7 +136,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 if (!mCustomTimeDatas!!.containsKey(mScheduleDialogData.timePairPersist.customTimeKey!!))
                     return false
 
-                mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!.hourMinutes[mScheduleDialogData.date.dayOfWeek]!!
+                mCustomTimeDatas!!.getValue(mScheduleDialogData.timePairPersist.customTimeKey!!).hourMinutes[mScheduleDialogData.date.dayOfWeek]!!
             } else {
                 mScheduleDialogData.timePairPersist.hourMinute
             }
@@ -466,12 +467,10 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
-        check(resultCode >= 0)
-        check(data == null)
 
-        if (resultCode > 0) {
+        if (resultCode == Activity.RESULT_OK) { // todo rx startActivityForResult?
             mCustomTimeDatas = null
-            mScheduleDialogData.timePairPersist.customTimeKey = CustomTimeKey.LocalCustomTimeKey(resultCode)
+            mScheduleDialogData.timePairPersist.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private>
         }
     }
 
@@ -484,7 +483,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogDate.text = mScheduleDialogData.date.getDisplayText()
 
                 mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                    val customTimeData = mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!
+                    val customTimeData = mCustomTimeDatas!!.getValue(mScheduleDialogData.timePairPersist.customTimeKey!!)
 
                     customTimeData.name + " (" + customTimeData.hourMinutes[mScheduleDialogData.date.dayOfWeek] + ")"
                 } else {
@@ -492,12 +491,12 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 }
             }
             ScheduleType.DAILY -> mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!.name
+                mCustomTimeDatas!!.getValue(mScheduleDialogData.timePairPersist.customTimeKey!!).name
             } else {
                 mScheduleDialogData.timePairPersist.hourMinute.toString()
             }
             ScheduleType.WEEKLY -> mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                val customTimeData = mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!
+                val customTimeData = mCustomTimeDatas!!.getValue(mScheduleDialogData.timePairPersist.customTimeKey!!)
 
                 customTimeData.name
             } else {
@@ -505,7 +504,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             }
             ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
                 mScheduleDialogTime.text = if (mScheduleDialogData.timePairPersist.customTimeKey != null) {
-                    mCustomTimeDatas!![mScheduleDialogData.timePairPersist.customTimeKey!!]!!.name
+                    mCustomTimeDatas!!.getValue(mScheduleDialogData.timePairPersist.customTimeKey!!).name
                 } else {
                     mScheduleDialogData.timePairPersist.hourMinute.toString()
                 }

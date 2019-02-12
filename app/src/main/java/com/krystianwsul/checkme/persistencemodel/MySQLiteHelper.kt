@@ -9,28 +9,13 @@ class MySQLiteHelper private constructor() : SQLiteOpenHelper(MyApplication.inst
     companion object {
 
         private const val DATABASE_NAME = "tasks.db"
-        private const val DATABASE_VERSION = 22
+        private const val DATABASE_VERSION = 23
 
         val database by lazy { MySQLiteHelper().writableDatabase!! }
     }
 
     override fun onCreate(sqLiteDatabase: SQLiteDatabase) {
-        LocalCustomTimeRecord.onCreate(sqLiteDatabase)
-
-        TaskRecord.onCreate(sqLiteDatabase)
-        TaskHierarchyRecord.onCreate(sqLiteDatabase)
-
-        ScheduleRecord.onCreate(sqLiteDatabase)
-        SingleScheduleRecord.onCreate(sqLiteDatabase)
-        DailyScheduleRecord.onCreate(sqLiteDatabase)
-        WeeklyScheduleRecord.onCreate(sqLiteDatabase)
-        MonthlyDayScheduleRecord.onCreate(sqLiteDatabase)
-        MonthlyWeekScheduleRecord.onCreate(sqLiteDatabase)
-
-        LocalInstanceRecord.onCreate(sqLiteDatabase)
-
         InstanceShownRecord.onCreate(sqLiteDatabase)
-
         UuidRecord.onCreate(sqLiteDatabase)
     }
 
@@ -38,52 +23,17 @@ class MySQLiteHelper private constructor() : SQLiteOpenHelper(MyApplication.inst
         sqLiteDatabase.beginTransaction()
 
         try {
-            if (oldVersion < 19) {
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + LocalCustomTimeRecord.TABLE_CUSTOM_TIMES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + DailyScheduleRecord.TABLE_DAILY_SCHEDULES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + LocalInstanceRecord.TABLE_INSTANCES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + InstanceShownRecord.TABLE_INSTANCES_SHOWN)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyDayScheduleRecord.TABLE_MONTHLY_DAY_SCHEDULES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MonthlyWeekScheduleRecord.TABLE_MONTHLY_WEEK_SCHEDULES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + ScheduleRecord.TABLE_SCHEDULES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SingleScheduleRecord.TABLE_SINGLE_SCHEDULES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskHierarchyRecord.TABLE_TASK_HIERARCHIES)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TaskRecord.TABLE_TASKS)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UuidRecord.TABLE_UUID)
-                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + WeeklyScheduleRecord.TABLE_WEEKLY_SCHEDULES)
-
-                onCreate(sqLiteDatabase)
-            } else {
-                if (oldVersion < 20) {
-                    sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.INDEX_HOUR_MINUTE + " ON " + InstanceShownRecord.TABLE_INSTANCES_SHOWN
-                            + "("
-                            + InstanceShownRecord.COLUMN_PROJECT_ID + ", "
-                            + InstanceShownRecord.COLUMN_TASK_ID + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_YEAR + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_MONTH + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_DAY + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_HOUR + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_MINUTE
-                            + ")")
-
-                    sqLiteDatabase.execSQL("CREATE UNIQUE INDEX " + InstanceShownRecord.INDEX_CUSTOM_TIME_ID + " ON " + InstanceShownRecord.TABLE_INSTANCES_SHOWN
-                            + "("
-                            + InstanceShownRecord.COLUMN_PROJECT_ID + ", "
-                            + InstanceShownRecord.COLUMN_TASK_ID + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_YEAR + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_MONTH + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_DAY + ", "
-                            + InstanceShownRecord.COLUMN_SCHEDULE_CUSTOM_TIME_ID
-                            + ")")
-                }
-
-                if (oldVersion < 21) {
-                    sqLiteDatabase.execSQL("ALTER TABLE ${TaskHierarchyRecord.TABLE_TASK_HIERARCHIES} ADD COLUMN ${TaskHierarchyRecord.COLUMN_ORDINAL} REAL")
-                }
-
-                if (oldVersion < 22) {
-                    sqLiteDatabase.execSQL("ALTER TABLE ${LocalInstanceRecord.TABLE_INSTANCES} ADD COLUMN ${LocalInstanceRecord.COLUMN_ORDINAL} REAL")
-                }
+            if (oldVersion < 23) {
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS customTimes")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS dailySchedules")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS instances")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS monthlyDaySchedules")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS monthlyWeekSchedules")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS schedules")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS singleSchedules")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS taskHierarchies")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS tasks")
+                sqLiteDatabase.execSQL("DROP TABLE IF EXISTS weeklySchedules")
             }
 
             sqLiteDatabase.setTransactionSuccessful()

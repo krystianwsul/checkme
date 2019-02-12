@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.json
 
 class PrivateCustomTimeJson @JvmOverloads constructor(
-        override val localId: Int = 0,
         override var name: String = "",
         override var sundayHour: Int = 0,
         override var sundayMinute: Int = 0,

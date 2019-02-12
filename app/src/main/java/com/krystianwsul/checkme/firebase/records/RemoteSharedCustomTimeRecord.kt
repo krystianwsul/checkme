@@ -11,8 +11,6 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
     override val remoteProjectRecord: RemoteSharedProjectRecord
     override val customTimeJson: SharedCustomTimeJson
 
-    val ownerId get() = customTimeJson.ownerId
-
     constructor(id: RemoteCustomTimeId.Shared, remoteProjectRecord: RemoteSharedProjectRecord, customTimeJson: SharedCustomTimeJson) : super(false) {
         this.id = id
         this.remoteProjectRecord = remoteProjectRecord
@@ -29,7 +27,9 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
 
     override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
 
-    override fun mine(domainFactory: DomainFactory) = ownerId == domainFactory.uuid
+    override fun mine(domainFactory: DomainFactory) = ownerKey == domainFactory.remoteProjectFactory
+            .remotePrivateProject
+            .id
 
     var ownerKey: String
         get() = customTimeJson.ownerKey

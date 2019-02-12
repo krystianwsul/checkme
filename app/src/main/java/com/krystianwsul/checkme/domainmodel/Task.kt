@@ -29,7 +29,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     abstract val existingInstances: Map<ScheduleKey, Instance>
 
-    abstract val remoteNullableProject: RemoteProject<*>?
+    abstract val remoteNullableProject: RemoteProject<*>? // todo
 
     abstract val remoteNonNullProject: RemoteProject<*>
 

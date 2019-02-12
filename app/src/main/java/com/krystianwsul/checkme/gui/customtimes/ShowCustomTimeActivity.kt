@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.customtimes
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -30,7 +31,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
 
     companion object {
 
-        private const val CUSTOM_TIME_ID_KEY = "customTimeId"
+        const val CUSTOM_TIME_ID_KEY = "customTimeId"
         private const val NEW_KEY = "new"
 
         private const val HOUR_MINUTE_SUNDAY_KEY = "hourMinuteSunday"
@@ -107,10 +108,9 @@ class ShowCustomTimeActivity : AbstractActivity() {
                     if (data != null) {
                         DomainFactory.instance.updateCustomTime(data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
                     } else {
-                        val customTimeId = DomainFactory.instance.createCustomTime(SaveService.Source.GUI, name, hourMinutes)
-                        check(customTimeId > 0)
+                        val customTimeKey = DomainFactory.instance.createCustomTime(SaveService.Source.GUI, name, hourMinutes)
 
-                        setResult(customTimeId)
+                        setResult(Activity.RESULT_OK, Intent().apply { putExtra(CUSTOM_TIME_ID_KEY, customTimeKey) })
                     }
 
                     finish()

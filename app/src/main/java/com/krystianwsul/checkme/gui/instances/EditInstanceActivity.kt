@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.instances
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -363,11 +364,11 @@ class EditInstanceActivity : AbstractActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
-        check(resultCode >= 0)
-        check(data == null)
-        check(timePairPersist != null)
+        checkNotNull(timePairPersist)
 
-        if (resultCode > 0)
-            timePairPersist!!.customTimeKey = CustomTimeKey.LocalCustomTimeKey(resultCode)
+        if (resultCode == Activity.RESULT_OK) {
+            timePairPersist!!.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private>
+            updateTimeText()
+        }
     }
 }

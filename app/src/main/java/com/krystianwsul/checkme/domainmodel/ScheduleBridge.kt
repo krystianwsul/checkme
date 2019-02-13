@@ -17,7 +17,7 @@ interface ScheduleBridge {
 
     fun delete()
 
-    val customTimeKey: CustomTimeKey?
+    val customTimeKey: CustomTimeKey<*>?
 
     val hour: Int?
 

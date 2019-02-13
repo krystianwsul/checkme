@@ -13,7 +13,6 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
-import com.krystianwsul.checkme.domainmodel.NotificationWrapperImpl
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
@@ -234,11 +233,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     private fun setInstanceNotified() {
         if (intent.hasExtra(NOTIFICATION_ID_KEY))
-            DomainFactory.instance.let {
-                val remoteCustomTimeFixInstanceKey = NotificationWrapperImpl.getRemoteCustomTimeFixInstanceKey(it, instanceKey)
-
-                it.setInstanceNotified(data!!.dataId, SaveService.Source.GUI, remoteCustomTimeFixInstanceKey)
-            }
+            DomainFactory.instance.setInstanceNotified(data!!.dataId, SaveService.Source.GUI, instanceKey)
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {

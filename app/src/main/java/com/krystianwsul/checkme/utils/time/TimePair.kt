@@ -9,9 +9,9 @@ import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 
 @Parcelize
-data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinute?) : Parcelable, Serializable {
+data class TimePair(val customTimeKey: CustomTimeKey<*>?, val hourMinute: HourMinute?) : Parcelable, Serializable {
 
-    constructor(customTimeKey: CustomTimeKey) : this(customTimeKey, null)
+    constructor(customTimeKey: CustomTimeKey<*>) : this(customTimeKey, null)
 
     constructor(hourMinute: HourMinute) : this(null, hourMinute)
 
@@ -49,7 +49,7 @@ data class TimePair(val customTimeKey: CustomTimeKey?, val hourMinute: HourMinut
         return Triple(remoteCustomTimeId, hour, minute)
     }
 
-    fun destructureRemote(domainFactory: DomainFactory, remoteProjectId: String): Triple<RemoteCustomTimeId?, Int?, Int?> {
+    fun destructureRemote(domainFactory: DomainFactory): Triple<RemoteCustomTimeId?, Int?, Int?> { // todo unneeded
         val remoteCustomTimeId: RemoteCustomTimeId?
         val hour: Int?
         val minute: Int?

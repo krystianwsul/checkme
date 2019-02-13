@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
 import com.krystianwsul.checkme.domainmodel.Instance
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskKey
@@ -59,7 +58,7 @@ class InstanceRelevance(val instance: Instance) {
 
         if (remoteProject != null) remoteProjectRelevances.getValue(remoteProject.id).setRelevant()
 
-        (instance.scheduleCustomTimeKey as? CustomTimeKey.RemoteCustomTimeKey<*>)?.let {
+        (instance.scheduleCustomTimeKey)?.let {
             remoteCustomTimeRelevances.getValue(Pair(it.remoteProjectId, it.remoteCustomTimeId)).setRelevant()
         }
     }

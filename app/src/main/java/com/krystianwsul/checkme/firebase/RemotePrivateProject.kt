@@ -61,13 +61,9 @@ class RemotePrivateProject(
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    override fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey): CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private> = when (customTimeKey) {
-        is CustomTimeKey.RemoteCustomTimeKey<*> -> {
-            when (customTimeKey.remoteCustomTimeId) {
-                is RemoteCustomTimeId.Private -> customTimeKey as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private>
-                is RemoteCustomTimeId.Shared -> throw UnsupportedOperationException()
-            }
-        }
+    override fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey<*>): CustomTimeKey.Private = when (customTimeKey) {
+        is CustomTimeKey.Private -> customTimeKey
+        is CustomTimeKey.Shared -> throw UnsupportedOperationException()
     }
 
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemotePrivateCustomTime {

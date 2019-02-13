@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePairPersist
@@ -67,7 +66,7 @@ class EditInstanceActivity : AbstractActivity() {
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
-        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
+        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
             check(data != null)
 
             timePairPersist!!.customTimeKey = customTimeKey
@@ -261,7 +260,7 @@ class EditInstanceActivity : AbstractActivity() {
             check(this.data != null)
             val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(this.data!!.customTimeDatas
                     .values
-                    .filter { it.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*> && it.customTimeKey.remoteCustomTimeId is RemoteCustomTimeId.Private }
+                    .filter { it.customTimeKey is CustomTimeKey.Private }
                     .sortedBy { it.hourMinutes[date!!.dayOfWeek] }
                     .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[date!!.dayOfWeek] + ")") })
 
@@ -291,7 +290,7 @@ class EditInstanceActivity : AbstractActivity() {
         check(date != null)
 
         if (timePairPersist!!.customTimeKey != null) {
-            val customTimeData = data!!.customTimeDatas[timePairPersist!!.customTimeKey]!!
+            val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey)
 
             editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date!!.dayOfWeek] + ")")
         } else {
@@ -314,7 +313,7 @@ class EditInstanceActivity : AbstractActivity() {
                     if (!data!!.customTimeDatas.containsKey(timePairPersist!!.customTimeKey))
                         return false
 
-                    data!!.customTimeDatas[timePairPersist!!.customTimeKey]!!.hourMinutes[date!!.dayOfWeek]!!
+                    data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey).hourMinutes[date!!.dayOfWeek]!!
                 } else {
                     timePairPersist!!.hourMinute
                 }
@@ -367,7 +366,7 @@ class EditInstanceActivity : AbstractActivity() {
         checkNotNull(timePairPersist)
 
         if (resultCode == Activity.RESULT_OK) {
-            timePairPersist!!.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private>
+            timePairPersist!!.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.Private
             updateTimeText()
         }
     }

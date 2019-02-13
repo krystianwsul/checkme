@@ -19,33 +19,14 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.notifications.*
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import java.util.*
 
 open class NotificationWrapperImpl : NotificationWrapper() {
 
     companion object {
-
-        fun getRemoteCustomTimeFixInstanceKey(domainFactory: DomainFactory, instanceKey: InstanceKey): InstanceKey { // remote custom time key hack
-            if (instanceKey.scheduleKey.scheduleTimePair.customTimeKey == null)
-                return instanceKey
-
-            if (instanceKey.scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>)
-                return instanceKey
-
-            val projectId = instanceKey.taskKey.remoteProjectId
-
-            val customTimeId = domainFactory.getRemoteCustomTimeId(instanceKey.scheduleKey.scheduleTimePair.customTimeKey)
-
-            val customTimeKey = CustomTimeKey.RemoteCustomTimeKey(projectId, customTimeId)
-            val scheduleKey = ScheduleKey(instanceKey.scheduleKey.scheduleDate, TimePair(customTimeKey))
-            return InstanceKey(instanceKey.taskKey, scheduleKey)
-        }
 
         val alarmManager by lazy { MyApplication.instance.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
     }
@@ -83,13 +64,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val notificationId = instance.notificationId
 
         val instanceKey = instance.instanceKey
-        val remoteCustomTimeFixInstanceKey = getRemoteCustomTimeFixInstanceKey(domainFactory, instanceKey)
 
         fun pendingService(intent: Intent) = PendingIntent.getService(MyApplication.instance, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, notificationId, ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId), PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val pendingDeleteIntent = pendingService(InstanceNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKey))
+        val pendingDeleteIntent = pendingService(InstanceNotificationDeleteService.getIntent(MyApplication.instance, instanceKey))
 
         val pendingDoneIntent = pendingService(InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId))
         val pendingHourIntent = pendingService(InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId))
@@ -210,14 +190,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     override fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean /* not needed >= 24 */, now: ExactTimeStamp) {
         val names = ArrayList<String>()
         val instanceKeys = ArrayList<InstanceKey>()
-        val remoteCustomTimeFixInstanceKeys = ArrayList<InstanceKey>()
         instances.forEach {
             names.add(it.name)
             instanceKeys.add(it.instanceKey)
-            remoteCustomTimeFixInstanceKeys.add(getRemoteCustomTimeFixInstanceKey(domainFactory, it.instanceKey))
         }
 
-        val deleteIntent = GroupNotificationDeleteService.getIntent(MyApplication.instance, remoteCustomTimeFixInstanceKeys)
+        val deleteIntent = GroupNotificationDeleteService.getIntent(MyApplication.instance, instanceKeys)
         val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         val contentIntent = ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys)

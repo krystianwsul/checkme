@@ -12,7 +12,7 @@ interface CustomTime : Time {
 
     val hourMinutes: TreeMap<DayOfWeek, HourMinute>
 
-    val customTimeKey: CustomTimeKey
+    val customTimeKey: CustomTimeKey<*>
 
     fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute)
 }

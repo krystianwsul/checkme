@@ -122,13 +122,11 @@ class RemoteSharedProject(
                         && it.privateKey == privateCustomTimeId
             }
 
-    override fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey): CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Shared> {
+    override fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey<*>): CustomTimeKey.Shared {
         val privateProject = domainFactory.remoteProjectFactory.remotePrivateProject
 
         return when (customTimeKey) {
-            is CustomTimeKey.RemoteCustomTimeKey<*> -> {
-                when (customTimeKey.remoteCustomTimeId) {
-                    is RemoteCustomTimeId.Private -> {
+            is CustomTimeKey.Private -> {
                         val remotePrivateCustomTime = privateProject.getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
 
                         val sharedCustomTime = getSharedTimeIfPresent(remotePrivateCustomTime.id)
@@ -140,12 +138,10 @@ class RemoteSharedProject(
                             newRemoteCustomTime(customTimeJson).customTimeKey
                         }
                     }
-                    is RemoteCustomTimeId.Shared -> {
+            is CustomTimeKey.Shared -> {
                         check(customTimeKey.remoteProjectId == id)
 
-                        customTimeKey as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Shared>
-                    }
-                }
+                customTimeKey
             }
         }
     }

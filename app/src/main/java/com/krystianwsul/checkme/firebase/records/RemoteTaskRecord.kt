@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
 import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
 import com.krystianwsul.checkme.firebase.json.TaskJson
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
@@ -242,11 +241,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     fun newRemoteInstanceRecord(remoteProject: RemoteProject<T>, instanceJson: InstanceJson, scheduleKey: ScheduleKey): RemoteInstanceRecord<T> {
         val remoteCustomTimeId = scheduleKey.scheduleTimePair
                 .customTimeKey
-                ?.let {
-                    when (it) {
-                        is CustomTimeKey.RemoteCustomTimeKey<*> -> remoteProject.getRemoteCustomTime(it.remoteCustomTimeId).id
-                    }
-                }
+                ?.let { remoteProject.getRemoteCustomTime(it.remoteCustomTimeId).id }
 
         val firebaseKey = RemoteInstanceRecord.scheduleKeyToString(scheduleKey, remoteCustomTimeId)
 

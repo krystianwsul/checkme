@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.InstanceData.VirtualInstanceData
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
@@ -37,18 +36,10 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
                         .scheduleKey
                         .scheduleTimePair
                         .customTimeKey
-                is VirtualInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> {
-                    val customTimeKey = it.scheduleDateTime
-                            .time
-                            .timePair
-                            .customTimeKey
-
-                    if (customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>) {
-                        domainFactory.getLocalCustomTimeKeyIfPossible(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
-                    } else {
-                        customTimeKey
-                    }
-                }
+                is VirtualInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.scheduleDateTime
+                        .time
+                        .timePair
+                        .customTimeKey
             }
         }
 

@@ -48,7 +48,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     val instanceTime get() = instanceData.getInstanceTime(domainFactory)
 
-    abstract val scheduleCustomTimeKey: CustomTimeKey?
+    abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
 
     private val scheduleHourMinute
         get() = instanceData.let {

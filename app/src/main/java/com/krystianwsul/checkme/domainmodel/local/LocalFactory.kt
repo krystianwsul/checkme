@@ -62,7 +62,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
     fun createInstanceShownRecord(remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
         val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
                 .timePair
-                .destructureRemote(domainFactory, projectId)
+                .destructureRemote(domainFactory)
 
         return persistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime.date, remoteCustomTimeId, hour, minute, projectId)
     }

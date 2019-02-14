@@ -2,7 +2,7 @@ package com.krystianwsul.treeadapter
 
 import java.util.*
 
-class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
+class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter, private val logger: ((List<String>) -> Unit)? = null) : NodeContainer {
 
     private lateinit var treeNodes: MutableList<TreeNode>
 
@@ -27,7 +27,18 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
 
             treeNodes = ArrayList(rootTreeNodes)
             treeNodes.sort()
+
+            printOrdinals("setNodes")
         }
+
+    private fun printOrdinals(prefix: String) {
+        val lines = treeNodes.mapNotNull { it.modelNode.ordinalDesc()?.let { "ordinal $prefix $it" } }
+
+        if (lines.isEmpty())
+            return
+
+        logger?.invoke(lines)
+    }
 
     fun getNode(position: Int): TreeNode {
         if (!this::treeNodes.isInitialized)
@@ -166,7 +177,11 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
             previousOrdinal = nextOrdinal - 1000
         }
 
+        printOrdinals("setNewItemPosition before")
+
         (node.modelNode as Sortable).setOrdinal((previousOrdinal + nextOrdinal) / 2)
+
+        printOrdinals("setNewItemPosition after")
     }
 
     class SetTreeNodesNotCalledException : InitializationException("TreeNodeCollection.setTreeNodes() has not been called.")

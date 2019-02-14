@@ -18,6 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.common.collect.HashMultimap
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.DataDiff
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
@@ -203,7 +204,7 @@ class GroupListFragment @JvmOverloads constructor(
                                 .associateBy { it.InstanceKey }
 
                         undoAll.undos.forEach {
-                            allInstanceDatas[it.key]!!.let { instanceData ->
+                            allInstanceDatas.getValue(it.key).let { instanceData ->
                                 instanceData.TaskCurrent = it.value.taskCurrent
                                 instanceData.IsRootTask = it.value.isRootTask
                             }
@@ -216,7 +217,7 @@ class GroupListFragment @JvmOverloads constructor(
                         undoAll.removedChildren
                                 .asMap()
                                 .forEach { (instanceKey, instanceDatas) ->
-                                    allInstanceDatas[instanceKey]!!.children.putAll(instanceDatas.map { it.InstanceKey to it })
+                                    allInstanceDatas.getValue(instanceKey).children.putAll(instanceDatas.map { it.InstanceKey to it })
                                 }
 
                         initialize()
@@ -824,7 +825,10 @@ class GroupListFragment @JvmOverloads constructor(
             this.customTimeDatas = customTimeDatas
 
             treeViewAdapter.showPadding = showFab
-            treeNodeCollection = TreeNodeCollection(treeViewAdapter)
+            treeNodeCollection = TreeNodeCollection(treeViewAdapter) {
+                Preferences.logLineDate("logging ordinals")
+                it.forEach { Preferences.logLineHour(it) }
+            }
 
             nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 
@@ -891,7 +895,7 @@ class GroupListFragment @JvmOverloads constructor(
             var IsRootTask: Boolean?,
             var Exists: Boolean,
             val InstanceTimePair: TimePair,
-            val mNote: String?,
+            val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
             val hierarchyData: HierarchyData?,
             var ordinal: Double) : InstanceDataParent, Comparable<InstanceData> {

@@ -27,4 +27,6 @@ interface ModelNode : Comparable<ModelNode> {
     val toggleDescendants get() = false
 
     val deselectParent get() = false
+
+    fun ordinalDesc(): String? = null
 }

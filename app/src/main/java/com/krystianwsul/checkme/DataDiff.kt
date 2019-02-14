@@ -80,8 +80,8 @@ object DataDiff {
         if (oldInstanceData.InstanceTimePair != newInstanceData.InstanceTimePair)
             sDiff.add(indent + "oldInstanceData.instanceTimePair == " + oldInstanceData.InstanceTimePair + ", newInstanceData.instanceTimePair == " + newInstanceData.InstanceTimePair)
 
-        if (oldInstanceData.mNote != newInstanceData.mNote)
-            sDiff.add(indent + "oldInstanceData.note == " + oldInstanceData.mNote + ", newInstanceData.note == " + newInstanceData.mNote)
+        if (oldInstanceData.note != newInstanceData.note)
+            sDiff.add(indent + "oldInstanceData.note == " + oldInstanceData.note + ", newInstanceData.note == " + newInstanceData.note)
 
         if (oldInstanceData.children != newInstanceData.children) {
             sDiff.add(indent + "oldInstanceData.children != newInstanceData.children")

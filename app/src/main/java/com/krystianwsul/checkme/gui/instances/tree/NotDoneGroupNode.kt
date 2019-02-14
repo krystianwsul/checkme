@@ -55,7 +55,7 @@ class NotDoneGroupNode(
 
             if (expandedInstances.containsKey(instanceData.InstanceKey) && instanceData.children.isNotEmpty()) {
                 expanded = true
-                doneExpanded = expandedInstances[instanceData.InstanceKey]!!
+                doneExpanded = expandedInstances.getValue(instanceData.InstanceKey)
             } else {
                 expanded = false
                 doneExpanded = false
@@ -360,8 +360,8 @@ class NotDoneGroupNode(
                             val children = it.sorted().joinToString(", ") { it.name }
 
                             Pair(children, color())
-                        } else if (!instanceData.mNote.isNullOrEmpty()) {
-                            Pair(instanceData.mNote, color())
+                        } else if (!instanceData.note.isNullOrEmpty()) {
+                            Pair(instanceData.note, color())
                         } else {
                             null
                         }
@@ -388,7 +388,7 @@ class NotDoneGroupNode(
             val doneExpanded: Boolean
             if (expandedInstances.containsKey(instanceData.InstanceKey) && instanceData.children.isNotEmpty()) {
                 expanded = true
-                doneExpanded = expandedInstances[instanceData.InstanceKey]!!
+                doneExpanded = expandedInstances.getValue(instanceData.InstanceKey)
             } else {
                 expanded = false
                 doneExpanded = false
@@ -453,5 +453,13 @@ class NotDoneGroupNode(
         override val deselectParent get() = true
 
         data class Id(val instanceKey: InstanceKey)
+    }
+
+    override fun ordinalDesc(): String? {
+        return if (singleInstance()) {
+            singleInstanceData.run { hierarchyData?.let { name + " " + it.ordinal } }
+        } else {
+            null
+        }
     }
 }

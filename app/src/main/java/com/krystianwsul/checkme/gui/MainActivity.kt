@@ -24,7 +24,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
@@ -70,8 +69,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         private const val CALENDAR_KEY = "calendar"
         private const val DAY_STATES_KEY = "dayStates"
 
-        private const val RC_SIGN_IN = 1000
-
         private const val NORMAL_ELEVATION = 6f
         private const val INSTANCES_ELEVATION = 0f
 
@@ -100,8 +97,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private lateinit var headerName: TextView
     private lateinit var headerEmail: TextView
-
-    private val authStateListener = { firebaseAuth: FirebaseAuth -> updateSignInState(firebaseAuth.currentUser) }
 
     private var debug = false
 
@@ -138,7 +133,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 findItem(R.id.action_calendar).isVisible = (timeRange == TimeRange.DAY)
                 findItem(R.id.action_close).isVisible = false
                 findItem(R.id.action_search).isVisible = false
-                findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
+                findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentPosition]
+                        ?: false
             }
             Tab.TASKS -> {
                 findItem(R.id.action_calendar).isVisible = false
@@ -459,18 +455,19 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
 
         dayViewModel = getViewModel()
-    }
 
-    override fun onStart() {
-        super.onStart()
+        FirebaseAuth.getInstance()
+                .currentUser!!
+                .let {
+                    val displayName = it.displayName
+                    check(!TextUtils.isEmpty(displayName))
 
-        FirebaseAuth.getInstance().addAuthStateListener(authStateListener)
-    }
+                    val email = it.email
+                    check(!TextUtils.isEmpty(email))
 
-    override fun onStop() {
-        super.onStop()
-
-        FirebaseAuth.getInstance().removeAuthStateListener(authStateListener)
+                    headerName.text = displayName
+                    headerEmail.text = email
+                }
     }
 
     override fun onBackPressed() {
@@ -664,32 +661,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override val snackbarParent get() = mainCoordinator!!
-
-    private fun updateSignInState(firebaseUser: FirebaseUser?) {
-        mainActivityNavigation.menu.run {
-            if (firebaseUser != null) {
-                val displayName = firebaseUser.displayName
-                check(!TextUtils.isEmpty(displayName))
-
-                val email = firebaseUser.email
-                check(!TextUtils.isEmpty(email))
-
-                headerName.text = displayName
-                headerEmail.text = email
-
-                findItem(R.id.main_drawer_sign_out).setTitle(R.string.signOut)
-                findItem(R.id.main_drawer_projects).isEnabled = true
-                findItem(R.id.main_drawer_friends).isEnabled = true
-            } else {
-                headerName.text = null
-                headerEmail.text = null
-
-                findItem(R.id.main_drawer_sign_out).setTitle(R.string.signIn)
-                findItem(R.id.main_drawer_projects).isEnabled = false
-                findItem(R.id.main_drawer_friends).isEnabled = false
-            }
-        }
-    }
 
     private fun hideKeyboard() {
         currentFocus?.let { (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(it.windowToken, 0) }

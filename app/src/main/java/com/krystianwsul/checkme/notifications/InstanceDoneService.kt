@@ -32,7 +32,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         check(notificationId != -1)
 
         val notificationWrapper = NotificationWrapper.instance
-        notificationWrapper.cleanGroup(notificationId) // todo uodpornić na podwójne kliknięcie
+        notificationWrapper.cleanGroup(notificationId)
 
         DomainFactory.addFirebaseListener { setInstanceNotificationDone(it, instanceKey) }
     }

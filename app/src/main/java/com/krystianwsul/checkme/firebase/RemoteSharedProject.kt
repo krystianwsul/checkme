@@ -13,7 +13,6 @@ import java.util.*
 
 class RemoteSharedProject(
         domainFactory: DomainFactory,
-        privateProject: RemotePrivateProject,
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         userInfo: UserInfo,
         uuid: String,

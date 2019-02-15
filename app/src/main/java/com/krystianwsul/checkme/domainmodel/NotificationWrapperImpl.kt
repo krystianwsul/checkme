@@ -40,7 +40,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.cancel(id)
     }
 
-    override fun notifyInstance(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
+    override fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {
         val reallySilent = if (silent) {
             true
         } else {
@@ -53,13 +53,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                     } ?: false
         }
 
-        notifyInstanceHelper(domainFactory, instance, reallySilent, now)
+        notifyInstanceHelper(instance, reallySilent, now)
 
         if (!reallySilent)
             lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
     }
 
-    protected fun notifyInstanceHelper(domainFactory: DomainFactory, instance: Instance, silent: Boolean, now: ExactTimeStamp) {
+    protected fun notifyInstanceHelper(instance: Instance, silent: Boolean, now: ExactTimeStamp) {
         val task = instance.task
         val notificationId = instance.notificationId
 
@@ -187,7 +187,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.notify(notificationId, notification)
     }
 
-    override fun notifyGroup(domainFactory: DomainFactory, instances: Collection<Instance>, silent: Boolean /* not needed >= 24 */, now: ExactTimeStamp) {
+    override fun notifyGroup(instances: Collection<Instance>, silent: Boolean /* not needed >= 24 */, now: ExactTimeStamp) {
         val names = ArrayList<String>()
         val instanceKeys = ArrayList<InstanceKey>()
         instances.forEach {

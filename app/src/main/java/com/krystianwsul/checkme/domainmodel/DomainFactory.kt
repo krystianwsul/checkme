@@ -2098,9 +2098,9 @@ open class DomainFactory(
             if (notificationInstances.size > TickJobIntentService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
                     if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        NotificationWrapper.instance.notifyGroup(this, notificationInstances.values, silent, now)
+                        NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now)
                     } else {
-                        NotificationWrapper.instance.notifyGroup(this, notificationInstances.values, true, now)
+                        NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
                     }
                 } else { // instances shown
                     for (shownInstanceKey in shownInstanceKeys) {
@@ -2113,7 +2113,7 @@ open class DomainFactory(
                         }
                     }
 
-                    NotificationWrapper.instance.notifyGroup(this, notificationInstances.values, silent, now)
+                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now)
                 }
             } else { // show instances
                 if (shownInstanceKeys.size > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
@@ -2146,7 +2146,7 @@ open class DomainFactory(
                 NotificationWrapper.instance.cancelNotification(0)
             } else {
                 message += ", sg"
-                NotificationWrapper.instance.notifyGroup(this, notificationInstances.values, true, now)
+                NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
             }
 
             message += ", hiding " + hideInstanceKeys.size
@@ -2195,9 +2195,9 @@ open class DomainFactory(
             Preferences.logLineHour("next tick: $nextAlarm")
     }
 
-    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, silent, now)
+    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(instance, silent, now)
 
-    private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(this, instance, true, now)
+    private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(instance, true, now)
 
     private fun setInstanceNotified(instanceKey: InstanceKey) {
         val taskKey = instanceKey.taskKey

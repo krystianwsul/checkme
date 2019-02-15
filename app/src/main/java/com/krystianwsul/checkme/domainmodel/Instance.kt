@@ -13,18 +13,20 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     companion object {
 
-        fun getNotificationId(scheduleDate: Date, scheduleCustomTimeKey: CustomTimeKey<*>?, scheduleHourMinute: HourMinute?, taskKey: TaskKey): Int {
-            check(scheduleCustomTimeKey == null != (scheduleHourMinute == null))
+        fun getNotificationId(scheduleDate: Date, scheduleCustomTimeKey: CustomTimeKey<*>?, scheduleHourMinute: HourMinute?, taskKey: TaskKey) = getNotificationId(scheduleDate, scheduleCustomTimeKey?.let { Pair(it.remoteProjectId, it.remoteCustomTimeId.value) }, scheduleHourMinute, taskKey)
+
+        fun getNotificationId(scheduleDate: Date, scheduleCustomTimeData: Pair<String, String>?, scheduleHourMinute: HourMinute?, taskKey: TaskKey): Int {
+            check(scheduleCustomTimeData == null != (scheduleHourMinute == null))
 
             var hash = scheduleDate.month
             hash += 12 * scheduleDate.day
             hash += 12 * 31 * (scheduleDate.year - 2015)
 
-            if (scheduleCustomTimeKey == null) {
+            if (scheduleCustomTimeData == null) {
                 hash += 12 * 31 * 73 * (scheduleHourMinute!!.hour + 1)
                 hash += 12 * 31 * 73 * 24 * (scheduleHourMinute.minute + 1)
             } else {
-                hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeKey.hashCode()
+                hash += 12 * 31 * 73 * 24 * 60 * scheduleCustomTimeData.hashCode()
             }
 
             @Suppress("INTEGER_OVERFLOW")

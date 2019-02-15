@@ -42,7 +42,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         get() {
             if (update != null)
                 taskJson.instances = remoteInstanceRecords.entries
-                        .associateBy({ RemoteInstanceRecord.scheduleKeyToString(domainFactory, it.key) }, { it.value.createObject })
+                        .associateBy({ RemoteInstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
                         .toMutableMap()
 
             val scheduleWrappers = HashMap<String, ScheduleWrapper>()

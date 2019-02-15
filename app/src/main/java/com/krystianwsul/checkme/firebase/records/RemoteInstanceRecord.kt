@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.firebase.json.InstanceJson
 import com.krystianwsul.checkme.utils.InstanceData
@@ -31,7 +30,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         private val hourMinuteKeyPattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimeKeyPattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
-        fun <T : RemoteCustomTimeId> scheduleKeyToString(scheduleKey: ScheduleKey, remoteCustomTimeId: T?): String {
+        fun <T : RemoteCustomTimeId> scheduleKeyToString(scheduleKey: ScheduleKey, remoteCustomTimeId: T?): String { // todo need remoteCustomTimeId?
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
             key += scheduleKey.scheduleTimePair.let {
                 if (it.customTimeKey != null) {
@@ -46,13 +45,13 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             return key
         }
 
-        fun scheduleKeyToString(domainFactory: DomainFactory, scheduleKey: ScheduleKey): String {
+        fun scheduleKeyToString(scheduleKey: ScheduleKey): String {
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
             key += scheduleKey.scheduleTimePair.let {
                 if (it.customTimeKey != null) {
                     check(it.hourMinute == null)
 
-                    domainFactory.getRemoteCustomTimeId(it.customTimeKey)
+                    it.customTimeKey.remoteCustomTimeId
                 } else {
                     it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
                 }

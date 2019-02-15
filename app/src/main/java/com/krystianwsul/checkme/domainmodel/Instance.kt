@@ -75,7 +75,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
 
-    val instanceCustomTimeKey get() = (instanceTime as? CustomTime)?.customTimeKey
+    private val instanceCustomTimeKey get() = (instanceTime as? CustomTime)?.customTimeKey
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
 
@@ -91,17 +91,13 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
 
-    protected val scheduleTimePair get() = TimePair(scheduleCustomTimeKey, scheduleHourMinute)
-
     abstract val notificationShown: Boolean
 
-    abstract val remoteNullableProject: RemoteProject<*>?
+    abstract val project: RemoteProject<*>
 
-    abstract val remoteNonNullProject: RemoteProject<*>
+    abstract val customTimeKey: Pair<String, RemoteCustomTimeId>?
 
-    abstract val remoteCustomTimeKey: Pair<String, RemoteCustomTimeId>?
-
-    abstract val nullableInstanceShownRecord: InstanceShownRecord?
+    abstract val instanceShownRecord: InstanceShownRecord?
 
     fun exists() = (instanceData is InstanceData.RealInstanceData)
 

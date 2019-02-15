@@ -44,9 +44,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override val existingInstances get() = existingRemoteInstances
 
-    override val remoteNullableProject get() = remoteProject
-
-    override val remoteNonNullProject get() = remoteProject
+    override val project get() = remoteProject
 
     init {
         remoteSchedules.addAll(remoteTaskRecord.remoteSingleScheduleRecords

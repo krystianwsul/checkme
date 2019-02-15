@@ -15,7 +15,8 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
     override var instanceData: InstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>
 
-    private var instanceShownRecord: InstanceShownRecord? = null
+    override var instanceShownRecord: InstanceShownRecord? = null
+        private set
 
     private val taskId
         get() = instanceData.let {
@@ -25,9 +26,9 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             }
         }
 
-    override val notified get() = instanceShownRecord?.notified == true
+    override val notified get() = this.instanceShownRecord?.notified == true
 
-    override val notificationShown get() = instanceShownRecord?.notificationShown == true
+    override val notificationShown get() = this.instanceShownRecord?.notificationShown == true
 
     override val scheduleCustomTimeKey
         get() = instanceData.let {
@@ -45,13 +46,9 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
     override val task: RemoteTask<T>
 
-    override val remoteNullableProject get() = remoteProject
+    override val project get() = remoteProject
 
-    override val remoteNonNullProject get() = remoteProject
-
-    override val nullableInstanceShownRecord get() = instanceShownRecord
-
-    override val remoteCustomTimeKey // scenario already covered by task/schedule relevance
+    override val customTimeKey // scenario already covered by task/schedule relevance
         get() = (instanceData as? RemoteRealInstanceData<T>)?.instanceRecord
                 ?.instanceJsonTime
                 ?.let { (it as? JsonTime.Custom)?.let { Pair(remoteProject.id, it.id) } }
@@ -102,14 +99,14 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
         createInstanceShownRecord()
 
-        instanceShownRecord!!.notified = false
+        this.instanceShownRecord!!.notified = false
     }
 
     private fun createInstanceShownRecord() {
-        if (instanceShownRecord != null)
+        if (this.instanceShownRecord != null)
             return
 
-        instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
+        this.instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
     }
 
     override fun createInstanceRecord(now: ExactTimeStamp) {
@@ -123,9 +120,9 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override fun setNotificationShown(notificationShown: Boolean, now: ExactTimeStamp) {
         createInstanceShownRecord()
 
-        checkNotNull(instanceShownRecord)
+        checkNotNull(this.instanceShownRecord)
 
-        instanceShownRecord!!.notificationShown = notificationShown
+        this.instanceShownRecord!!.notificationShown = notificationShown
     }
 
     override fun setDone(done: Boolean, now: ExactTimeStamp) {
@@ -134,7 +131,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
             (instanceData as RemoteRealInstanceData).instanceRecord.done = now.long
 
-            instanceShownRecord?.notified = false
+            this.instanceShownRecord?.notified = false
         } else {
             (instanceData as RemoteRealInstanceData).instanceRecord.done = null
         }
@@ -143,9 +140,9 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override fun setNotified(now: ExactTimeStamp) {
         createInstanceShownRecord()
 
-        check(instanceShownRecord != null)
+        check(this.instanceShownRecord != null)
 
-        instanceShownRecord!!.notified = true
+        this.instanceShownRecord!!.notified = true
     }
 
     override fun delete() {

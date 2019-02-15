@@ -604,7 +604,7 @@ open class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                parentKey = task.remoteNonNullProject.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.ProjectParentKey(it.id) }
+                parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.ProjectParentKey(it.id) }
 
                 if (!schedules.isEmpty()) {
                     val pair = getScheduleDatas(schedules, now)
@@ -616,7 +616,7 @@ open class DomainFactory(
                 parentKey = CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.taskKey)
             }
 
-            val projectName = task.remoteNullableProject.name
+            val projectName = task.project.name
 
             taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName)
 
@@ -749,7 +749,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(instance.remoteNullableProject)
+        notifyCloud(instance.project)
     }
 
     @Synchronized
@@ -767,7 +767,7 @@ open class DomainFactory(
 
         val remoteProjects = instances
                 .filter { it.belongsToRemoteProject() }
-                .map { it.remoteNonNullProject }
+                .map { it.project }
                 .toSet()
 
         updateNotifications(now)
@@ -797,7 +797,7 @@ open class DomainFactory(
 
         save(0, source)
 
-        notifyCloud(instance.remoteNullableProject)
+        notifyCloud(instance.project)
     }
 
     @Synchronized
@@ -819,7 +819,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(instance.remoteNullableProject)
+        notifyCloud(instance.project)
     }
 
     @Synchronized
@@ -842,7 +842,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        val remoteProjects = instances.mapNotNull { it.remoteNullableProject }.toSet()
+        val remoteProjects = instances.map { it.project }.toSet()
 
         notifyCloud(remoteProjects)
 
@@ -865,7 +865,7 @@ open class DomainFactory(
 
         save(0, source)
 
-        notifyCloud(instance.remoteNullableProject)
+        notifyCloud(instance.project)
     }
 
     @Synchronized
@@ -891,7 +891,7 @@ open class DomainFactory(
 
         instances.forEach { it.setDone(done, now) }
 
-        val remoteProjects = instances.mapNotNull(Instance::remoteNullableProject).toSet()
+        val remoteProjects = instances.mapNotNull(Instance::project).toSet()
 
         updateNotifications(now)
 
@@ -937,7 +937,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(task.remoteNullableProject)
+        notifyCloud(task.project)
 
         return task
     }
@@ -974,7 +974,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(task.remoteNullableProject)
+        notifyCloud(task.project)
 
         return task.taskKey
     }
@@ -1018,7 +1018,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(newParentTask.remoteNullableProject)
+        notifyCloud(newParentTask.project)
     }
 
     fun createRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, note: String?, projectId: String?): Task {
@@ -1032,7 +1032,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(task.remoteNullableProject)
+        notifyCloud(task.project)
 
         return task
     }
@@ -1074,7 +1074,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(newParentTask.remoteNullableProject)
+        notifyCloud(newParentTask.project)
     }
 
     @Synchronized
@@ -1103,7 +1103,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(task.remoteNullableProject)
+        notifyCloud(task.project)
 
         return task.taskKey
     }
@@ -1120,7 +1120,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(childTask.remoteNullableProject)
+        notifyCloud(childTask.project)
 
         return childTask
     }
@@ -1160,7 +1160,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(childTask.remoteNullableProject)
+        notifyCloud(childTask.project)
     }
 
     @Synchronized
@@ -1193,7 +1193,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(task.remoteNullableProject)
+        notifyCloud(task.project)
 
         return task.taskKey
     }
@@ -1216,7 +1216,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(task.remoteNullableProject)
+        notifyCloud(task.project)
 
         return taskUndoData
     }
@@ -1236,7 +1236,7 @@ open class DomainFactory(
 
         save(dataId, SaveService.Source.GUI)
 
-        notifyCloud(instance.remoteNullableProject)
+        notifyCloud(instance.project)
     }
 
     @Synchronized
@@ -1281,7 +1281,7 @@ open class DomainFactory(
 
         tasks.forEach { it.setEndExactTimeStamp(now, taskUndoData) }
 
-        val remoteProjects = tasks.map { it.remoteNullableProject }.toSet()
+        val remoteProjects = tasks.map { it.project }.toSet()
 
         updateNotifications(now)
 
@@ -1306,7 +1306,7 @@ open class DomainFactory(
         save(dataId, source)
 
         val remoteProjects = taskUndoData.taskKeys
-                .map { getTaskForce(it).remoteNonNullProject }
+                .map { getTaskForce(it).project }
                 .toSet()
 
         notifyCloud(remoteProjects)
@@ -1891,7 +1891,7 @@ open class DomainFactory(
 
         save(dataId, source)
 
-        notifyCloud(instance.remoteNullableProject)
+        notifyCloud(instance.project)
 
         return instance
     }
@@ -1995,19 +1995,13 @@ open class DomainFactory(
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
                 .toMutableList()
-                .apply { removeAll(relevantInstances.map { it.nullableInstanceShownRecord }) }
+                .apply { removeAll(relevantInstances.map { it.instanceShownRecord }) }
         irrelevantInstanceShownRecords.forEach { it.delete() }
 
         return Irrelevant(irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject<*>?) {
-        val remoteProjects = setOf(remoteProject)
-                .filterNotNull()
-                .toSet()
-
-        notifyCloud(remoteProjects)
-    }
+    private fun notifyCloud(remoteProject: RemoteProject<*>) = notifyCloud(setOf(remoteProject))
 
     private fun notifyCloud(remoteProjects: Set<RemoteProject<*>>) {
         if (!remoteProjects.isEmpty()) {
@@ -2295,13 +2289,7 @@ open class DomainFactory(
     fun getLocalCustomTimeKeyIfPossible(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey<*> {
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
 
-        val remoteCustomTime = if (remoteProject is RemotePrivateProject) {
-            remoteProject.getRemoteCustomTime(remoteCustomTimeId as RemoteCustomTimeId.Private)
-        } else {
-            (remoteProject as RemoteSharedProject).getRemoteCustomTime(remoteCustomTimeId as RemoteCustomTimeId.Shared)
-        }
-
-        return remoteCustomTime.customTimeKey
+        return remoteProject.getRemoteCustomTime(remoteCustomTimeId).customTimeKey
 
         /* todo customTime
         return remoteCustomTime.remoteCustomTimeRecord

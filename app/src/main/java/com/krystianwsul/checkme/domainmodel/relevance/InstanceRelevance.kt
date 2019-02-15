@@ -48,15 +48,12 @@ class InstanceRelevance(val instance: Instance) {
     fun setRemoteRelevant(remoteCustomTimeRelevances: Map<Pair<String, RemoteCustomTimeId>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
         check(relevant)
 
-        val pair = instance.remoteCustomTimeKey
-        val remoteProject = instance.remoteNullableProject
-        if (pair != null) {
-            check(remoteProject != null)
-
+        val pair = instance.customTimeKey
+        val remoteProject = instance.project
+        if (pair != null)
             remoteCustomTimeRelevances.getValue(pair).setRelevant()
-        }
 
-        if (remoteProject != null) remoteProjectRelevances.getValue(remoteProject.id).setRelevant()
+        remoteProjectRelevances.getValue(remoteProject.id).setRelevant()
 
         (instance.scheduleCustomTimeKey)?.let {
             remoteCustomTimeRelevances.getValue(Pair(it.remoteProjectId, it.remoteCustomTimeId)).setRelevant()

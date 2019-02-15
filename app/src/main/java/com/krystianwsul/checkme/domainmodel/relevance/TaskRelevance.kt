@@ -62,6 +62,6 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
                 .map { remoteCustomTimeRelevances.getValue(it) }
                 .forEach { it.setRelevant() }
 
-        task.remoteNullableProject?.let { remoteProjectRelevances.getValue(it.id).setRelevant() }
+        remoteProjectRelevances.getValue(task.project.id).setRelevant()
     }
 }

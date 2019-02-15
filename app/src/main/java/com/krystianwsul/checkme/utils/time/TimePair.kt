@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.utils.time
 
 import android.os.Parcelable
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
@@ -49,7 +48,7 @@ data class TimePair(val customTimeKey: CustomTimeKey<*>?, val hourMinute: HourMi
         return Triple(remoteCustomTimeId, hour, minute)
     }
 
-    fun destructureRemote(domainFactory: DomainFactory): Triple<RemoteCustomTimeId?, Int?, Int?> { // todo unneeded
+    fun destructureRemote(): Triple<RemoteCustomTimeId?, Int?, Int?> {
         val remoteCustomTimeId: RemoteCustomTimeId?
         val hour: Int?
         val minute: Int?
@@ -57,7 +56,7 @@ data class TimePair(val customTimeKey: CustomTimeKey<*>?, val hourMinute: HourMi
         if (customTimeKey != null) {
             check(hourMinute == null)
 
-            remoteCustomTimeId = domainFactory.getRemoteCustomTimeId(customTimeKey)
+            remoteCustomTimeId = customTimeKey.remoteCustomTimeId
             hour = null
             minute = null
         } else {

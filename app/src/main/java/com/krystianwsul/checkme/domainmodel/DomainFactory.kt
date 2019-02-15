@@ -1558,8 +1558,6 @@ open class DomainFactory(
 
     private fun getExistingInstanceIfPresent(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)
 
-    fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey<*>) = customTimeKey.remoteCustomTimeId
-
     fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
             .values
             .mapNotNull { it.getSharedTimeIfPresent(privateCustomTimeId) }
@@ -1567,7 +1565,7 @@ open class DomainFactory(
     private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
         val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
                 .timePair
-                .destructureRemote(this)
+                .destructureRemote()
 
         val instanceShownRecord = localFactory.getInstanceShownRecord(taskKey.remoteProjectId, taskKey.remoteTaskId, scheduleDateTime.date.year, scheduleDateTime.date.month, scheduleDateTime.date.day, remoteCustomTimeId, hour, minute)
 

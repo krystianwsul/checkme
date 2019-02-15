@@ -2054,7 +2054,7 @@ open class DomainFactory(
 
                         // todo split logic for hiding absentee remote records
                         // I don't think the user's private project can't actually disappear
-                        customTimeKey = remoteProject?.let { getLocalCustomTimeKeyIfPossible(instanceShownRecord.projectId, it.getRemoteCustomTimeId(remoteCustomTimeId)) }
+                        customTimeKey = remoteProject?.let { getCustomTimeKey(instanceShownRecord.projectId, it.getRemoteCustomTimeId(remoteCustomTimeId)) }
                                 ?: CustomTimeKey.Shared(instanceShownRecord.projectId, RemoteCustomTimeId.Shared(remoteCustomTimeId))
                         hourMinute = null
                     } else {
@@ -2286,18 +2286,8 @@ open class DomainFactory(
         return dataWrapper
     }
 
-    fun getLocalCustomTimeKeyIfPossible(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey<*> {
-        val remoteProject = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
-
-        return remoteProject.getRemoteCustomTime(remoteCustomTimeId).customTimeKey
-
-        /* todo customTime
-        return remoteCustomTime.remoteCustomTimeRecord
-                .takeIf { it.mine(this) }
-                ?.let { localFactory.localCustomTimes.singleOrNull { localCustomTime -> localCustomTime.id == it.localId } }
-                ?.customTimeKey
-                ?: CustomTimeKey.RemoteCustomTimeKey(remoteProjectId, remoteCustomTimeId)
-                */
+    fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey<*> {
+        return remoteProjectFactory.getRemoteCustomTime(remoteProjectId, remoteCustomTimeId).customTimeKey
     }
 
     class ProjectUndoData {

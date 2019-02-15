@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.gui.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
@@ -289,7 +288,7 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val currentCustomTimes = getCurrentRemoteCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
+        val currentCustomTimes = getCurrentRemoteCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey<*>, RemoteCustomTime<*>>()
 
         val instance = getInstance(instanceKey)
         check(instance.isRootInstance(now))
@@ -313,7 +312,7 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val currentCustomTimes = getCurrentRemoteCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
+        val currentCustomTimes = getCurrentRemoteCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey<*>, CustomTime>()
 
         val instanceDatas = mutableMapOf<InstanceKey, EditInstancesViewModel.InstanceData>()
 
@@ -532,8 +531,8 @@ open class DomainFactory(
         return ShowInstanceViewModel.Data(instance.name, instance.instanceDateTime, instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now))
     }
 
-    fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): kotlin.Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {
-        val customTimes = HashMap<CustomTimeKey, CustomTime>()
+    fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {
+        val customTimes = HashMap<CustomTimeKey<*>, CustomTime>()
 
         val scheduleDatas = HashMap<CreateTaskViewModel.ScheduleData, List<Schedule>>()
 
@@ -575,7 +574,7 @@ open class DomainFactory(
             scheduleDatas[CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, key)] = ArrayList<Schedule>(value)
         }
 
-        return Pair<Map<CustomTimeKey, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>>(customTimes, scheduleDatas)
+        return Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>>(customTimes, scheduleDatas)
     }
 
     @Synchronized
@@ -586,7 +585,7 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val customTimes = getCurrentRemoteCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey, CustomTime>()
+        val customTimes = getCurrentRemoteCustomTimes().associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey<*>, CustomTime>()
 
         val excludedTaskKeys = when {
             taskKey != null -> listOf(taskKey)
@@ -1339,7 +1338,7 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun createCustomTime(source: SaveService.Source, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private> {
+    fun createCustomTime(source: SaveService.Source, name: String, hourMinutes: Map<DayOfWeek, HourMinute>): CustomTimeKey.Private {
         MyCrashlytics.log("DomainFactory.createCustomTime")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1546,18 +1545,11 @@ open class DomainFactory(
     // internal
 
     private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
-        val originalCustomTimeKey = scheduleDateTime.time
+        val customTimeKey = scheduleDateTime.time
                 .timePair
                 .customTimeKey
 
-        val fixedCustomTimeKey = originalCustomTimeKey?.let {
-            if (it is CustomTimeKey.RemoteCustomTimeKey<*>)
-                getLocalCustomTimeKeyIfPossible(it.remoteProjectId, it.remoteCustomTimeId)
-            else
-                it
-        }
-
-        val timePair = TimePair(fixedCustomTimeKey, scheduleDateTime.time.timePair.hourMinute)
+        val timePair = TimePair(customTimeKey, scheduleDateTime.time.timePair.hourMinute)
 
         val instanceKey = InstanceKey(taskKey, scheduleDateTime.date, timePair)
 
@@ -1566,9 +1558,7 @@ open class DomainFactory(
 
     private fun getExistingInstanceIfPresent(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)
 
-    fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey) = when (customTimeKey) {
-        is CustomTimeKey.RemoteCustomTimeKey<*> -> customTimeKey.remoteCustomTimeId
-    }
+    fun getRemoteCustomTimeId(customTimeKey: CustomTimeKey<*>) = customTimeKey.remoteCustomTimeId
 
     fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
             .values
@@ -1577,7 +1567,7 @@ open class DomainFactory(
     private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
         val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
                 .timePair
-                .destructureRemote(this, taskKey.remoteProjectId)
+                .destructureRemote(this)
 
         val instanceShownRecord = localFactory.getInstanceShownRecord(taskKey.remoteProjectId, taskKey.remoteTaskId, scheduleDateTime.date.year, scheduleDateTime.date.month, scheduleDateTime.date.day, remoteCustomTimeId, hour, minute)
 
@@ -1677,9 +1667,7 @@ open class DomainFactory(
         }
     }
 
-    fun getCustomTime(customTimeKey: CustomTimeKey) = when (customTimeKey) {
-        is CustomTimeKey.RemoteCustomTimeKey<*> -> remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
-    }
+    fun getCustomTime(customTimeKey: CustomTimeKey<*>) = remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
 
     private fun getCurrentRemoteCustomTimes() = remoteProjectFactory.remotePrivateProject
             .customTimes
@@ -2064,7 +2052,7 @@ open class DomainFactory(
                     val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
                     val remoteCustomTimeId = instanceShownRecord.scheduleCustomTimeId
 
-                    val customTimeKey: CustomTimeKey?
+                    val customTimeKey: CustomTimeKey<*>?
                     val hourMinute: HourMinute?
                     if (!remoteCustomTimeId.isNullOrEmpty()) {
                         check(instanceShownRecord.scheduleHour == null)
@@ -2075,7 +2063,7 @@ open class DomainFactory(
                         // todo split logic for hiding absentee remote records
                         // I don't think the user's private project can't actually disappear
                         customTimeKey = remoteProject?.let { getLocalCustomTimeKeyIfPossible(instanceShownRecord.projectId, it.getRemoteCustomTimeId(remoteCustomTimeId)) }
-                                ?: CustomTimeKey.RemoteCustomTimeKey(instanceShownRecord.projectId, RemoteCustomTimeId.Shared(remoteCustomTimeId))
+                                ?: CustomTimeKey.Shared(instanceShownRecord.projectId, RemoteCustomTimeId.Shared(remoteCustomTimeId))
                         hourMinute = null
                     } else {
                         checkNotNull(instanceShownRecord.scheduleHour)
@@ -2232,22 +2220,19 @@ open class DomainFactory(
                 .asSequence()
                 .filter { it.projectId == projectId && it.taskId == taskId && it.scheduleYear == scheduleDate.year && it.scheduleMonth == scheduleDate.month && it.scheduleDay == scheduleDate.day }
 
-        val matches: Sequence<InstanceShownRecord>
-        if (scheduleKey.scheduleTimePair.customTimeKey != null) {
+        val matches = if (scheduleKey.scheduleTimePair.customTimeKey != null) {
             check(scheduleKey.scheduleTimePair.hourMinute == null)
-
-            check(scheduleKey.scheduleTimePair.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*>) // remote custom time key hack
             check(projectId == scheduleKey.scheduleTimePair.customTimeKey.remoteProjectId)
 
             val customTimeId = scheduleKey.scheduleTimePair.customTimeKey.remoteCustomTimeId
 
-            matches = stream.filter { customTimeId.value == it.scheduleCustomTimeId }
+            stream.filter { customTimeId.value == it.scheduleCustomTimeId }
         } else {
             check(scheduleKey.scheduleTimePair.hourMinute != null)
 
             val hourMinute = scheduleKey.scheduleTimePair.hourMinute
 
-            matches = stream.filter { hourMinute.hour == it.scheduleHour && hourMinute.minute == it.scheduleMinute }
+            stream.filter { hourMinute.hour == it.scheduleHour && hourMinute.minute == it.scheduleMinute }
         }
 
         val instanceShownRecord = matches.single()
@@ -2309,7 +2294,7 @@ open class DomainFactory(
         return dataWrapper
     }
 
-    fun getLocalCustomTimeKeyIfPossible(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey {
+    fun getLocalCustomTimeKeyIfPossible(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey<*> {
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(remoteProjectId)
 
         val remoteCustomTime = if (remoteProject is RemotePrivateProject) {

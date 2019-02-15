@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.firebase.records.RemoteSharedCustomTimeRecord
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 class RemoteSharedCustomTime(
@@ -8,6 +9,8 @@ class RemoteSharedCustomTime(
         override val remoteCustomTimeRecord: RemoteSharedCustomTimeRecord) : RemoteCustomTime<RemoteCustomTimeId.Shared>() {
 
     override val id = remoteCustomTimeRecord.id
+
+    override val customTimeKey by lazy { CustomTimeKey.Shared(projectId, id) }
 
     val ownerKey get() = remoteCustomTimeRecord.ownerKey
     val privateKey get() = remoteCustomTimeRecord.privateKey

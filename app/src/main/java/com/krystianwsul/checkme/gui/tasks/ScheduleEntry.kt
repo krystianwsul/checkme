@@ -28,7 +28,7 @@ abstract class ScheduleEntry(var error: String?) : Parcelable {
 
     constructor() : this(null)
 
-    abstract fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String
+    abstract fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String
 
     abstract fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.ScheduleHint?): ScheduleDialogFragment.ScheduleDialogData
 }

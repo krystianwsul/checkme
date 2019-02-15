@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.firebase
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.checkme.firebase.records.RemotePrivateCustomTimeRecord
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 class RemotePrivateCustomTime(
@@ -11,6 +12,8 @@ class RemotePrivateCustomTime(
         override val remoteCustomTimeRecord: RemotePrivateCustomTimeRecord) : RemoteCustomTime<RemoteCustomTimeId.Private>() {
 
     override val id = remoteCustomTimeRecord.id
+
+    override val customTimeKey by lazy { CustomTimeKey.Private(projectId, id) }
 
     private fun getSharedCustomTimes() = domainFactory.getSharedCustomTimes(id)
 

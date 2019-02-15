@@ -27,7 +27,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
 
     data class Data(
             val instanceDatas: Map<InstanceKey, InstanceData>,
-            val customTimeDatas: Map<CustomTimeKey, CustomTimeData>,
+            val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
             val showHour: Boolean) : DomainData() {
 
         init {
@@ -43,7 +43,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
     }
 
     data class CustomTimeData(
-            val customTimeKey: CustomTimeKey,
+            val customTimeKey: CustomTimeKey<*>,
             val name: String,
             val hourMinutes: TreeMap<DayOfWeek, HourMinute>) {
 

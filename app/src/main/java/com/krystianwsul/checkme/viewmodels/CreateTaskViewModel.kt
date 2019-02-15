@@ -64,10 +64,10 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
     data class Data(
             val taskData: TaskData?,
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
-            val customTimeDatas: Map<CustomTimeKey, CustomTimeData>) : DomainData()
+            val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>) : DomainData()
 
     data class CustomTimeData(
-            val customTimeKey: CustomTimeKey,
+            val customTimeKey: CustomTimeKey<*>,
             val name: String,
             val hourMinutes: TreeMap<DayOfWeek, HourMinute>)
 

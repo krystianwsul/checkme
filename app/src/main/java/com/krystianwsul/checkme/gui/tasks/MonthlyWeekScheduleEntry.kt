@@ -78,7 +78,7 @@ class MonthlyWeekScheduleEntry : ScheduleEntry {
         timePair = scheduleDialogData.timePairPersist.timePair
     }
 
-    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String {
+    override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         val day = Utils.ordinal(monthWeekNumber) + " " + monthWeekDay + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day, " + if (timePair.customTimeKey != null) {

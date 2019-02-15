@@ -5,7 +5,7 @@ import android.os.Parcelable
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import kotlin.properties.Delegates
 
-class TimePairPersist private constructor(var customTimeKey: CustomTimeKey?, _hourMinute: HourMinute) : Parcelable {
+class TimePairPersist private constructor(var customTimeKey: CustomTimeKey<*>?, _hourMinute: HourMinute) : Parcelable {
 
     companion object {
 
@@ -14,8 +14,8 @@ class TimePairPersist private constructor(var customTimeKey: CustomTimeKey?, _ho
             override fun createFromParcel(source: Parcel): TimePairPersist {
                 val hourMinute = source.readParcelable<HourMinute>(HourMinute::class.java.classLoader)!!
 
-                val customTimeKey: CustomTimeKey? = if (source.readInt() == 1) {
-                    source.readSerializable() as CustomTimeKey
+                val customTimeKey: CustomTimeKey<*>? = if (source.readInt() == 1) {
+                    source.readSerializable() as CustomTimeKey<*>
                 } else {
                     null
                 }

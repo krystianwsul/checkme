@@ -74,7 +74,7 @@ class SingleScheduleEntry : ScheduleEntry {
         mTimePair = scheduleDialogData.timePairPersist.timePair
     }
 
-    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String {
+    override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return mDate.getDisplayText() + ", " + if (mTimePair.customTimeKey != null) {
             check(mTimePair.hourMinute == null)
 

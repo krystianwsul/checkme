@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
@@ -31,8 +30,6 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
                 .toMap(TreeMap())
 
     override val timePair by lazy { TimePair(customTimeKey, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
-
-    override val customTimeKey by lazy { CustomTimeKey.RemoteCustomTimeKey(projectId, id) }
 
     val projectId by lazy { remoteProject.id }
 

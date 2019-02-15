@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.json.PrivateProjectJson
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 class RemotePrivateProjectRecord(
@@ -81,4 +82,6 @@ class RemotePrivateProjectRecord(
     override fun getCustomTimeRecord(id: String) = remoteCustomTimeRecords.getValue(RemoteCustomTimeId.Private(id))
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
+
+    override fun getRemoteCustomTimeKey(projectId: String, customTimeId: String) = CustomTimeKey.Private(projectId, getRemoteCustomTimeId(customTimeId))
 }

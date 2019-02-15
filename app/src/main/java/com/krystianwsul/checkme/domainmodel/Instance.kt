@@ -13,7 +13,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     companion object {
 
-        fun getNotificationId(scheduleDate: Date, scheduleCustomTimeKey: CustomTimeKey?, scheduleHourMinute: HourMinute?, taskKey: TaskKey): Int {
+        fun getNotificationId(scheduleDate: Date, scheduleCustomTimeKey: CustomTimeKey<*>?, scheduleHourMinute: HourMinute?, taskKey: TaskKey): Int {
             check(scheduleCustomTimeKey == null != (scheduleHourMinute == null))
 
             var hash = scheduleDate.month

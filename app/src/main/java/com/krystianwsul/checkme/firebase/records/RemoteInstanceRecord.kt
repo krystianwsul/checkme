@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.firebase.json.InstanceJson
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
@@ -84,13 +83,11 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                 val customTimeId = customTimeMatcher.group(4)
                 check(!TextUtils.isEmpty(customTimeId))
 
-                val remoteCustomTimeId = remoteProjectRecord.getRemoteCustomTimeId(customTimeId)
-
                 val customTimeRecord = remoteProjectRecord.getCustomTimeRecord(customTimeId)
 
-                val customTimeKey = CustomTimeKey.RemoteCustomTimeKey(customTimeRecord.projectId, customTimeRecord.id)
+                val customTimeKey = remoteProjectRecord.getRemoteCustomTimeKey(customTimeRecord.projectId, customTimeId)
 
-                return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), remoteCustomTimeId)
+                return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.remoteCustomTimeId)
             }
         }
     }

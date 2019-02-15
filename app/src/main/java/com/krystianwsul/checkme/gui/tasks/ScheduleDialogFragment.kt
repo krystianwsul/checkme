@@ -25,7 +25,10 @@ import com.krystianwsul.checkme.gui.DatePickerDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.ScheduleType
+import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
@@ -79,7 +82,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
     private lateinit var mButton: DialogActionButton
 
-    private var customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>? = null
+    private var customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>? = null
     private var scheduleDialogListener: ScheduleDialogListener? = null
 
     private lateinit var scheduleDialogData: ScheduleDialogData
@@ -88,7 +91,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
-        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey) {
+        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
             check(customTimeDatas != null)
 
             scheduleDialogData.timePairPersist.customTimeKey = customTimeKey
@@ -233,7 +236,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         mScheduleDialogTime.setOnClickListener {
             check(customTimeDatas != null)
 
-            val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.RemoteCustomTimeKey<*> && it.customTimeKey.remoteCustomTimeId is RemoteCustomTimeId.Private }
+            val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Private }
 
             val customTimeDatas = when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> list.sortedBy { it.hourMinutes[scheduleDialogData.date.dayOfWeek] }.map { customTimeData -> TimeDialogFragment.CustomTimeData(customTimeData.customTimeKey, customTimeData.name + " (" + customTimeData.hourMinutes[scheduleDialogData.date.dayOfWeek] + ")") }
@@ -404,7 +407,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             updateFields()
     }
 
-    fun initialize(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, scheduleDialogListener: ScheduleDialogListener) {
+    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, scheduleDialogListener: ScheduleDialogListener) {
         this.customTimeDatas = customTimeDatas
         this.scheduleDialogListener = scheduleDialogListener
 
@@ -471,7 +474,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
 
         if (resultCode == Activity.RESULT_OK)
-            scheduleDialogData.timePairPersist.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.RemoteCustomTimeKey<RemoteCustomTimeId.Private>
+            scheduleDialogData.timePairPersist.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.Private
     }
 
     @SuppressLint("SetTextI18n")

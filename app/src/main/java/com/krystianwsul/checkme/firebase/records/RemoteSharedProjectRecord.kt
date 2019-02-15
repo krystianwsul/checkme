@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 class RemoteSharedProjectRecord(
@@ -99,4 +100,6 @@ class RemoteSharedProjectRecord(
     override fun getCustomTimeRecord(id: String) = remoteCustomTimeRecords.getValue(RemoteCustomTimeId.Shared(id))
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
+
+    override fun getRemoteCustomTimeKey(projectId: String, customTimeId: String) = CustomTimeKey.Shared(projectId, getRemoteCustomTimeId(customTimeId))
 }

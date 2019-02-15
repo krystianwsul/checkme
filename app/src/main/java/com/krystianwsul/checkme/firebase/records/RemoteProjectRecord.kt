@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.json.ProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.json.UserJson
+import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
@@ -120,4 +121,6 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
     abstract fun getCustomTimeRecord(id: String): RemoteCustomTimeRecord<T>
 
     abstract fun getRemoteCustomTimeId(id: String): T
+
+    abstract fun getRemoteCustomTimeKey(projectId: String, customTimeId: String): CustomTimeKey<T>
 }

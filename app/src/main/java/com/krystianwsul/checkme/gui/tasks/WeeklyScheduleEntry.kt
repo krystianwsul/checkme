@@ -55,7 +55,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
         timePair = scheduleDialogData.timePairPersist.timePair
     }
 
-    override fun getText(customTimeDatas: Map<CustomTimeKey, CreateTaskViewModel.CustomTimeData>, context: Context): String {
+    override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
             check(timePair.hourMinute == null)
 

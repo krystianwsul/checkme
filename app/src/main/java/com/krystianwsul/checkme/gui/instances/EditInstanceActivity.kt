@@ -290,7 +290,7 @@ class EditInstanceActivity : AbstractActivity() {
         check(date != null)
 
         if (timePairPersist!!.customTimeKey != null) {
-            val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey)
+            val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!)
 
             editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date!!.dayOfWeek] + ")")
         } else {
@@ -313,7 +313,7 @@ class EditInstanceActivity : AbstractActivity() {
                     if (!data!!.customTimeDatas.containsKey(timePairPersist!!.customTimeKey))
                         return false
 
-                    data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey).hourMinutes[date!!.dayOfWeek]!!
+                    data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!).hourMinutes[date!!.dayOfWeek]!!
                 } else {
                     timePairPersist!!.hourMinute
                 }

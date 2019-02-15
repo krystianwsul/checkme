@@ -30,21 +30,6 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         private val hourMinuteKeyPattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)-(\\d?\\d)$")
         private val customTimeKeyPattern = Pattern.compile("^(\\d\\d\\d\\d)-(\\d?\\d)-(\\d?\\d)-(.+)$")
 
-        fun <T : RemoteCustomTimeId> scheduleKeyToString(scheduleKey: ScheduleKey, remoteCustomTimeId: T?): String { // todo need remoteCustomTimeId?
-            var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
-            key += scheduleKey.scheduleTimePair.let {
-                if (it.customTimeKey != null) {
-                    check(it.hourMinute == null)
-
-                    remoteCustomTimeId?.value
-                } else {
-                    it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
-                }
-            }
-
-            return key
-        }
-
         fun scheduleKeyToString(scheduleKey: ScheduleKey): String {
             var key = scheduleKey.scheduleDate.year.toString() + "-" + scheduleKey.scheduleDate.month + "-" + scheduleKey.scheduleDate.day + "-"
             key += scheduleKey.scheduleTimePair.let {

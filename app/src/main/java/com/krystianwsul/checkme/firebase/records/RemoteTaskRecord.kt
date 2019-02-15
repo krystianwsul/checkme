@@ -243,7 +243,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                 .customTimeKey
                 ?.let { remoteProject.getRemoteCustomTime(it.remoteCustomTimeId).id }
 
-        val firebaseKey = RemoteInstanceRecord.scheduleKeyToString(scheduleKey, remoteCustomTimeId)
+        val firebaseKey = RemoteInstanceRecord.scheduleKeyToString(scheduleKey)
 
         val remoteInstanceRecord = RemoteInstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)
         check(!remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))

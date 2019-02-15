@@ -86,7 +86,7 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
                     add(Calendar.DATE, -1)
                 })
 
-                startDate.toString() + " - " + endDate.toString()
+                "$startDate - $endDate"
             } else {
                 check(timeRange == MainActivity.TimeRange.MONTH)
 

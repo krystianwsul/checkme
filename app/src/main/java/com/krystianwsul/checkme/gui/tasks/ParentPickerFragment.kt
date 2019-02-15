@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
-import com.jakewharton.rxbinding2.view.touches
-import com.jakewharton.rxbinding2.widget.textChanges
+import com.jakewharton.rxbinding3.view.touches
+import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.Predicate
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.fragment_parent_picker.view.*
 
@@ -146,7 +145,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0)
             }
 
-            startDisposable += touches(Predicate {
+            startDisposable += touches {
                 if (it.x >= width - totalPaddingEnd) {
                     if (it.action == MotionEvent.ACTION_UP)
                         text.clear()
@@ -155,7 +154,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 } else {
                     false
                 }
-            }).subscribe() // todo use new rxbinding
+            }.subscribe()
         }
     }
 

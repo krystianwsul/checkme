@@ -13,8 +13,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.jakewharton.rxbinding2.view.keys
-import com.jakewharton.rxbinding2.widget.editorActionEvents
+import com.jakewharton.rxbinding3.view.keys
+import com.jakewharton.rxbinding3.widget.editorActionEvents
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.checkError
-import io.reactivex.functions.Predicate
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_find_friend.*
 
@@ -64,23 +63,23 @@ class FindFriendActivity : AbstractActivity() {
         setSupportActionBar(findFriendToolbar)
 
         findFriendEmail.apply {
-            createDisposable += editorActionEvents(Predicate {
-                if (it.actionId() == EditorInfo.IME_ACTION_SEARCH) {
+            createDisposable += editorActionEvents {
+                if (it.actionId == EditorInfo.IME_ACTION_SEARCH) {
                     startSearch()
                     true
                 } else {
                     false
                 }
-            }).subscribe()
+            }.subscribe()
 
-            createDisposable += keys(Predicate {
+            createDisposable += keys {
                 if (it.action == KeyEvent.ACTION_DOWN && it.keyCode == KeyEvent.KEYCODE_ENTER) {
                     startSearch()
                     true
                 } else {
                     false
                 }
-            }).subscribe()
+            }.subscribe()
         }
 
         findFriendUserLayout.setOnClickListener {

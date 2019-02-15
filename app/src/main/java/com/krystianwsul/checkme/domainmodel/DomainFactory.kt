@@ -1003,8 +1003,8 @@ open class DomainFactory(
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() }
                 ?: joinTaskKeys.map { it.remoteProjectId }
-                .distinct()
-                .single()
+                        .distinct()
+                        .single()
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
@@ -1059,8 +1059,8 @@ open class DomainFactory(
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() }
                 ?: joinTaskKeys.map { it.remoteProjectId }
-                .distinct()
-                .single()
+                        .distinct()
+                        .single()
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
@@ -2027,8 +2027,6 @@ open class DomainFactory(
 
     private fun updateNotifications(now: ExactTimeStamp, clear: Boolean = false) = updateNotifications(true, now, mutableListOf(), "other", clear)
 
-    private val taskKeys get() = remoteProjectFactory.taskKeys.toSet()
-
     private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String, clear: Boolean = false) {
         Preferences.logLineDate("updateNotifications start $sourceName")
 
@@ -2038,41 +2036,61 @@ open class DomainFactory(
                 .map { it.instanceKey }
                 .toMutableSet()
 
-        val instanceShownRecordNotificationDatas = localFactory.instanceShownRecords
+        val instanceShownPairs = localFactory.instanceShownRecords
                 .filter { it.notificationShown }
-                .map { instanceShownRecord ->
-                    val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
-                    val remoteCustomTimeId = instanceShownRecord.scheduleCustomTimeId
+                .map { Pair(it, remoteProjectFactory.getRemoteProjectIfPresent(it.projectId)) }
 
-                    val customTimeKey: CustomTimeKey<*>?
-                    val hourMinute: HourMinute?
-                    if (!remoteCustomTimeId.isNullOrEmpty()) {
-                        check(instanceShownRecord.scheduleHour == null)
-                        check(instanceShownRecord.scheduleMinute == null)
+        instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
+            val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
+            val remoteCustomTimeId = instanceShownRecord.scheduleCustomTimeId
 
-                        val remoteProject = remoteProjectFactory.getRemoteProjectIfPresent(instanceShownRecord.projectId)
+            val customTimePair: Pair<String, String>?
+            val hourMinute: HourMinute?
+            if (!remoteCustomTimeId.isNullOrEmpty()) {
+                check(instanceShownRecord.scheduleHour == null)
+                check(instanceShownRecord.scheduleMinute == null)
 
-                        // todo split logic for hiding absentee remote records
-                        // I don't think the user's private project can't actually disappear
-                        customTimeKey = remoteProject?.let { getCustomTimeKey(instanceShownRecord.projectId, it.getRemoteCustomTimeId(remoteCustomTimeId)) }
-                                ?: CustomTimeKey.Shared(instanceShownRecord.projectId, RemoteCustomTimeId.Shared(remoteCustomTimeId))
-                        hourMinute = null
-                    } else {
-                        checkNotNull(instanceShownRecord.scheduleHour)
-                        checkNotNull(instanceShownRecord.scheduleMinute)
+                customTimePair = Pair(instanceShownRecord.projectId, remoteCustomTimeId)
+                hourMinute = null
+            } else {
+                checkNotNull(instanceShownRecord.scheduleHour)
+                checkNotNull(instanceShownRecord.scheduleMinute)
 
-                        customTimeKey = null
-                        hourMinute = HourMinute(instanceShownRecord.scheduleHour, instanceShownRecord.scheduleMinute)
-                    }
+                customTimePair = null
+                hourMinute = HourMinute(instanceShownRecord.scheduleHour, instanceShownRecord.scheduleMinute)
+            }
 
-                    val taskKey = TaskKey(instanceShownRecord.projectId, instanceShownRecord.taskId)
-                    val instanceKey = InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
+            val taskKey = TaskKey(instanceShownRecord.projectId, instanceShownRecord.taskId)
 
-                    shownInstanceKeys.add(instanceKey)
+            NotificationWrapper.instance.cancelNotification(Instance.getNotificationId(scheduleDate, customTimePair, hourMinute, taskKey))
+            instanceShownRecord.notificationShown = false
+        }
 
-                    instanceKey to Pair(Instance.getNotificationId(scheduleDate, customTimeKey, hourMinute, taskKey), instanceShownRecord)
-                }
-                .toMap()
+        instanceShownPairs.filter { it.second != null }.forEach { (instanceShownRecord, project) ->
+            val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
+            val remoteCustomTimeId = instanceShownRecord.scheduleCustomTimeId
+
+            val customTimeKey: CustomTimeKey<*>?
+            val hourMinute: HourMinute?
+            if (!remoteCustomTimeId.isNullOrEmpty()) {
+                check(instanceShownRecord.scheduleHour == null)
+                check(instanceShownRecord.scheduleMinute == null)
+
+                customTimeKey = getCustomTimeKey(instanceShownRecord.projectId, project!!.getRemoteCustomTimeId(remoteCustomTimeId))
+                hourMinute = null
+            } else {
+                checkNotNull(instanceShownRecord.scheduleHour)
+                checkNotNull(instanceShownRecord.scheduleMinute)
+
+                customTimeKey = null
+                hourMinute = HourMinute(instanceShownRecord.scheduleHour, instanceShownRecord.scheduleMinute)
+            }
+
+            val taskKey = TaskKey(instanceShownRecord.projectId, instanceShownRecord.taskId)
+            val instanceKey = InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
+
+            shownInstanceKeys.add(instanceKey)
+        }
 
         val showInstanceKeys = notificationInstances.keys.filter { !shownInstanceKeys.contains(it) }
 
@@ -2081,16 +2099,8 @@ open class DomainFactory(
         for (showInstanceKey in showInstanceKeys)
             getInstance(showInstanceKey).setNotificationShown(true, now)
 
-        val allTaskKeys = taskKeys
-
-        for (hideInstanceKey in hideInstanceKeys) {
-            if (allTaskKeys.contains(hideInstanceKey.taskKey))
-                getInstance(hideInstanceKey).setNotificationShown(false, now)
-            else
-                instanceShownRecordNotificationDatas.getValue(hideInstanceKey)
-                        .second
-                        .notificationShown = false
-        }
+        for (hideInstanceKey in hideInstanceKeys)
+            getInstance(hideInstanceKey).setNotificationShown(false, now)
 
         var message = ""
 
@@ -2103,15 +2113,8 @@ open class DomainFactory(
                         NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
                     }
                 } else { // instances shown
-                    for (shownInstanceKey in shownInstanceKeys) {
-                        if (allTaskKeys.contains(shownInstanceKey.taskKey)) {
-                            NotificationWrapper.instance.cancelNotification(getInstance(shownInstanceKey).notificationId)
-                        } else {
-                            val notificationId = instanceShownRecordNotificationDatas.getValue(shownInstanceKey).first
-
-                            NotificationWrapper.instance.cancelNotification(notificationId)
-                        }
-                    }
+                    for (shownInstanceKey in shownInstanceKeys)
+                        NotificationWrapper.instance.cancelNotification(getInstance(shownInstanceKey).notificationId)
 
                     NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now)
                 }
@@ -2122,15 +2125,8 @@ open class DomainFactory(
                     for (instance in notificationInstances.values)
                         notifyInstance(instance, silent, now)
                 } else { // instances shown
-                    for (hideInstanceKey in hideInstanceKeys) {
-                        if (allTaskKeys.contains(hideInstanceKey.taskKey)) {
-                            NotificationWrapper.instance.cancelNotification(getInstance(hideInstanceKey).notificationId)
-                        } else {
-                            val notificationId = instanceShownRecordNotificationDatas.getValue(hideInstanceKey).first
-
-                            NotificationWrapper.instance.cancelNotification(notificationId)
-                        }
-                    }
+                    for (hideInstanceKey in hideInstanceKeys)
+                        NotificationWrapper.instance.cancelNotification(getInstance(hideInstanceKey).notificationId)
 
                     for (showInstanceKey in showInstanceKeys)
                         notifyInstance(notificationInstances.getValue(showInstanceKey), silent, now)
@@ -2150,15 +2146,8 @@ open class DomainFactory(
             }
 
             message += ", hiding " + hideInstanceKeys.size
-            for (hideInstanceKey in hideInstanceKeys) {
-                if (allTaskKeys.contains(hideInstanceKey.taskKey)) {
-                    NotificationWrapper.instance.cancelNotification(getInstance(hideInstanceKey).notificationId)
-                } else {
-                    val notificationId = instanceShownRecordNotificationDatas.getValue(hideInstanceKey).first
-
-                    NotificationWrapper.instance.cancelNotification(notificationId)
-                }
-            }
+            for (hideInstanceKey in hideInstanceKeys)
+                NotificationWrapper.instance.cancelNotification(getInstance(hideInstanceKey).notificationId)
 
             message += ", s " + showInstanceKeys.size
             for (showInstanceKey in showInstanceKeys)

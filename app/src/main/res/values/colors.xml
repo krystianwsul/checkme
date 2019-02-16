@@ -12,5 +12,5 @@
     <color name="textSecondaryWhite">#B2FFFFFF</color>
     <color name="textDisabledWhite">#7FFFFFFF</color>
     <color name="actionModeBackground">#303030</color>
-    <color name="listBackground">#FAFAFA</color>
+    <color name="materialBackground">#FAFAFA</color>
 </resources>

@@ -21,7 +21,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         val colorSecondary by lazy { getColor(R.color.textSecondary) }
         val colorDisabled by lazy { getColor(R.color.textDisabled) }
         val colorSelected by lazy { getColor(R.color.selected) }
-        val colorBackground by lazy { getColor(R.color.listBackground) }
+        val colorBackground by lazy { getColor(R.color.materialBackground) }
     }
 
     protected abstract val treeNode: TreeNode

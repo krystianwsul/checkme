@@ -418,7 +418,7 @@ open class DomainFactory(
             val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
             val children = getChildInstanceDatas(instance, now)
-            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
+            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal, instance.notificationShown)
             children.values.forEach { it.instanceDataParent = instanceData }
             instanceDatas[instanceData.InstanceKey] = instanceData
         }
@@ -478,7 +478,7 @@ open class DomainFactory(
                 HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal)
             }
 
-            it.instanceKey to GroupListFragment.InstanceData(it.done, it.instanceKey, it.getDisplayText(now), it.name, it.instanceDateTime.timeStamp, task.current(now), it.isRootInstance(now), isRootTask, it.exists(), it.instanceDateTime.time.timePair, task.note, children, hierarchyData, it.ordinal)
+            it.instanceKey to GroupListFragment.InstanceData(it.done, it.instanceKey, it.getDisplayText(now), it.name, it.instanceDateTime.timeStamp, task.current(now), it.isRootInstance(now), isRootTask, it.exists(), it.instanceDateTime.time.timePair, task.note, children, hierarchyData, it.ordinal, it.notificationShown)
         }.toMutableMap()
 
         return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(customTimeDatas, task.current(now), listOf(), null, instanceDatas))
@@ -504,7 +504,7 @@ open class DomainFactory(
             val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
             val children = getChildInstanceDatas(instance, now)
-            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
+            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal, instance.notificationShown)
             children.values.forEach { it.instanceDataParent = instanceData }
             instance.instanceKey to instanceData
         }.toMutableMap()
@@ -878,18 +878,20 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun setInstanceNotNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceNotNotified")
+    fun setInstancesNotNotified(dataId: Int, source: SaveService.Source, instanceKeys: List<InstanceKey>) {
+        MyCrashlytics.log("DomainFactory.setInstancesNotNotified")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
-        val instance = getInstance(instanceKey)
-        check(instance.notified)
-        check(instance.done == null && instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !instance.notificationShown)
+        instanceKeys.forEach {
+            val instance = getInstance(it)
+            check(instance.notified)
+            check(instance.done == null && instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !instance.notificationShown && instance.isRootInstance(now))
 
-        instance.notified = false
-        instance.setNotificationShown(false, now)
+            instance.notified = false
+            instance.setNotificationShown(false, now)
+        }
 
         updateNotifications(now)
 
@@ -1695,7 +1697,7 @@ open class DomainFactory(
                     val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
 
                     val children = getChildInstanceDatas(childInstance, now)
-                    val instanceData = GroupListFragment.InstanceData(childInstance.done, childInstance.instanceKey, null, childInstance.name, childInstance.instanceDateTime.timeStamp, childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.instanceDateTime.time.timePair, childTask.note, children, HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal), childInstance.ordinal)
+                    val instanceData = GroupListFragment.InstanceData(childInstance.done, childInstance.instanceKey, null, childInstance.name, childInstance.instanceDateTime.timeStamp, childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.instanceDateTime.time.timePair, childTask.note, children, HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal), childInstance.ordinal, childInstance.notificationShown)
                     children.values.forEach { it.instanceDataParent = instanceData }
                     childInstance.instanceKey to instanceData
                 }
@@ -2265,7 +2267,7 @@ open class DomainFactory(
             val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
             val children = getChildInstanceDatas(instance, now)
-            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, null, instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal)
+            val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, null, instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal, instance.notificationShown)
             children.values.forEach { it.instanceDataParent = instanceData }
             instanceDatas[instance.instanceKey] = instanceData
         }
@@ -2287,7 +2289,7 @@ open class DomainFactory(
                     val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
 
                     val children = getChildInstanceDatas(childInstance, now)
-                    val instanceData = GroupListFragment.InstanceData(childInstance.done, childInstance.instanceKey, null, childInstance.name, childInstance.instanceDateTime.timeStamp, childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.instanceDateTime.time.timePair, childTask.note, children, HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal), childInstance.ordinal)
+                    val instanceData = GroupListFragment.InstanceData(childInstance.done, childInstance.instanceKey, null, childInstance.name, childInstance.instanceDateTime.timeStamp, childTask.current(now), childInstance.isRootInstance(now), isRootTask, childInstance.exists(), childInstance.instanceDateTime.time.timePair, childTask.note, children, HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal), childInstance.ordinal, childInstance.notificationShown)
                     children.values.forEach { it.instanceDataParent = instanceData }
                     childInstance.instanceKey to instanceData
                 }

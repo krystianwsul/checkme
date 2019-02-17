@@ -310,6 +310,15 @@ class GroupListFragment @JvmOverloads constructor(
                         }
                     }
                 }
+                R.id.action_group_notify -> {
+                    instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
+
+                    val instanceKeys = instanceDatas.map { it.InstanceKey }
+
+                    DomainFactory.instance.setInstancesNotNotified(parameters.dataId, SaveService.Source.GUI, instanceKeys)
+
+                    instanceDatas.forEach { it.notificationShown = true }
+                }
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -409,6 +418,7 @@ class GroupListFragment @JvmOverloads constructor(
                 findItem(R.id.action_group_mark_done).isVisible = instanceDatas.all { it.Done == null }
                 findItem(R.id.action_group_mark_not_done).isVisible = instanceDatas.all { it.Done != null }
                 findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
+                findItem(R.id.action_group_notify).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
             }
 
             if (instanceDatas.size == 1) {
@@ -898,7 +908,8 @@ class GroupListFragment @JvmOverloads constructor(
             val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
             val hierarchyData: HierarchyData?,
-            var ordinal: Double) : InstanceDataParent, Comparable<InstanceData> {
+            var ordinal: Double,
+            var notificationShown: Boolean) : InstanceDataParent, Comparable<InstanceData> {
 
         lateinit var instanceDataParent: InstanceDataParent
 

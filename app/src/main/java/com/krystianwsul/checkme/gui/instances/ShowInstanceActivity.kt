@@ -78,7 +78,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.run {
             findItem(R.id.instance_menu_edit_instance).isVisible = data?.run { !done && isRootInstance } == true
-            findItem(R.id.instance_menu_notify).isVisible = data?.run { !done && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown } == true
+            findItem(R.id.instance_menu_notify).isVisible = data?.run { !done && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown && isRootInstance } == true
             findItem(R.id.instance_menu_check).isVisible = data?.done == false
             findItem(R.id.instance_menu_uncheck).isVisible = data?.done == true
             findItem(R.id.instance_menu_share).isVisible = data != null
@@ -105,9 +105,10 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                 R.id.instance_menu_notify -> {
                     check(!it.done)
                     check(it.instanceDateTime.timeStamp < TimeStamp.now)
+                    check(it.isRootInstance)
 
                     if (!it.notificationShown) {
-                        DomainFactory.instance.setInstanceNotNotified(it.dataId, SaveService.Source.GUI, instanceKey)
+                        DomainFactory.instance.setInstancesNotNotified(it.dataId, SaveService.Source.GUI, listOf(instanceKey))
                         it.notificationShown = true
 
                         invalidateOptionsMenu()

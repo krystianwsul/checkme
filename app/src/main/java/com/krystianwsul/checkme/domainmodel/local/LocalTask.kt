@@ -74,11 +74,7 @@ class LocalTask(domainFactory: DomainFactory, private val taskRecord: TaskRecord
     }
 
     override fun delete() {
-        val taskKey = taskKey
-
-        ArrayList(domainFactory.localFactory.getTaskHierarchiesByChildTaskKey(taskKey)).forEach { it.delete() }
-
-        ArrayList(schedules).forEach { it.delete() }
+        schedules.toMutableList().forEach { it.delete() }
 
         domainFactory.localFactory.deleteTask(this)
         taskRecord.delete()

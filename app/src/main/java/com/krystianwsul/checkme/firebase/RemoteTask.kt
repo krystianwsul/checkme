@@ -91,11 +91,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
     override fun setOldestVisible(date: Date) = remoteTaskRecord.setOldestVisible(OldestVisibleJson(date))
 
     override fun delete() {
-        val taskKey = taskKey
-
-        ArrayList(remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)).forEach { it.delete() }
-
-        ArrayList(schedules).forEach { it.delete() }
+        schedules.toMutableList().forEach { it.delete() }
 
         remoteProject.deleteTask(this)
         remoteTaskRecord.delete()

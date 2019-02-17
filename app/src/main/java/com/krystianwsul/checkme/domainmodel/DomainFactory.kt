@@ -11,10 +11,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalInstance
 import com.krystianwsul.checkme.domainmodel.local.LocalTask
-import com.krystianwsul.checkme.domainmodel.relevance.InstanceRelevance
-import com.krystianwsul.checkme.domainmodel.relevance.RemoteCustomTimeRelevance
-import com.krystianwsul.checkme.domainmodel.relevance.RemoteProjectRelevance
-import com.krystianwsul.checkme.domainmodel.relevance.TaskRelevance
+import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.UserWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
@@ -2049,6 +2046,11 @@ open class DomainFactory(
         // relevant hack
         val taskRelevances = tasks.map { it.taskKey to TaskRelevance(this, it) }.toMap()
 
+        val taskHierarchies = remoteProjectFactory.remoteProjects
+                .map { it.value.taskHierarchies }
+                .flatten()
+        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(this, it) }
+
         val existingInstances = getExistingInstances()
         val rootInstances = getRootInstances(null, now.plusOne(), now)
 
@@ -2063,23 +2065,27 @@ open class DomainFactory(
         tasks.asSequence()
                 .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now) }
                 .map { taskRelevances.getValue(it.taskKey) }.toList()
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
+                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-        rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
+        rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         existingInstances.asSequence()
                 .filter { it.isRootInstance(now) && it.isVisible(now) }
                 .map { instanceRelevances[it.instanceKey]!! }.toList()
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
+                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
-
         val relevantTasks = relevantTaskRelevances.map { it.task }
 
         val irrelevantTasks = tasks.toMutableList()
         irrelevantTasks.removeAll(relevantTasks)
 
         check(irrelevantTasks.none { it.isVisible(now) })
+
+        val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
+        val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
+
+        val irrelevantTaskHierarchies = taskHierarchies.toMutableList().apply { removeAll(relevantTaskHierarchies) }
 
         val relevantInstances = instanceRelevances.values
                 .filter { it.relevant }
@@ -2092,8 +2098,9 @@ open class DomainFactory(
 
         check(irrelevantExistingInstances.none { it.isVisible(now) })
 
-        irrelevantExistingInstances.let { Log.e("asdf", "irrelevant instances " + it.size); it }.forEach { it.delete() }
-        irrelevantTasks.let { Log.e("asdf", "irrelevant tasks " + it.size); it }.forEach { it.delete() }
+        irrelevantExistingInstances.apply { Log.e("asdf", "irrelevant instances $size") }.forEach { it.delete() }
+        irrelevantTasks.apply { Log.e("asdf", "irrelevant tasks $size") }.forEach { it.delete() }
+        irrelevantTaskHierarchies.apply { Log.e("asdf", "irrelevant task hierarchies $size") }.forEach { it.delete() }
 
         val remoteCustomTimes = remoteProjectFactory.remoteCustomTimes
         val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()

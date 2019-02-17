@@ -18,7 +18,7 @@ class RemotePrivateProject(
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private>>
-    override val remoteTaskHierarchies = TaskHierarchyContainer<String, RemoteTaskHierarchy<RemoteCustomTimeId.Private>>()
+    override val remoteTaskHierarchyContainer = TaskHierarchyContainer<String, RemoteTaskHierarchy<RemoteCustomTimeId.Private>>()
 
     override val customTimes get() = remoteCustomTimes.values
 
@@ -39,7 +39,7 @@ class RemotePrivateProject(
         remoteProjectRecord.remoteTaskHierarchyRecords
                 .values
                 .map { RemoteTaskHierarchy(domainFactory, this, it) }
-                .forEach { remoteTaskHierarchies.add(it.id, it) }
+                .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
 
         domainFactory.localFactory
                 .localCustomTimes

@@ -125,8 +125,16 @@
             android:src="@android:drawable/ic_input_add"
             android:tint="@android:color/white"
             android:visibility="invisible"
-            app:layout_anchor="@id/main_frame"
-            app:layout_anchorGravity="bottom|end" />
+            app:layout_anchor="@id/mainActivityBottomAppBar" />
+
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/mainActivityBottomAppBar"
+            style="@style/Widget.MaterialComponents.BottomAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:backgroundTint="@color/primaryColor"
+            app:hideOnScroll="true" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

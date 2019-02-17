@@ -230,7 +230,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-        setSupportActionBar(mainActivityToolbar)
+        setSupportActionBar(mainActivityBottomAppBar)
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         PagerSnapHelper().attachToRecyclerView(mainDaysPager)
 

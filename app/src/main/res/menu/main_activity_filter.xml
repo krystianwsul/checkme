@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <group
         android:id="@+id/actionMainFilter"
@@ -28,5 +29,20 @@
             android:visible="false" />
 
     </group>
+
+    <item
+        android:id="@+id/actionMainClose"
+        android:orderInCategory="50"
+        android:icon="@drawable/ic_close_white_24dp"
+        app:showAsAction="always"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/actionMainSearch"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_search_white_24dp"
+        app:showAsAction="always"
+        android:visible="false"
+        tools:ignore="AlwaysShowAction" />
 
 </menu>

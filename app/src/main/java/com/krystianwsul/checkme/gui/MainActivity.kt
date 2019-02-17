@@ -129,36 +129,23 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         when (visibleTab.value!!) {
             Tab.INSTANCES -> {
                 findItem(R.id.action_calendar).isVisible = (timeRange == TimeRange.DAY)
-                findItem(R.id.action_close).isVisible = false
-                findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentPosition]
                         ?: false
             }
             Tab.TASKS -> {
                 findItem(R.id.action_calendar).isVisible = false
-
-                val searching = mainActivitySearch.visibility == View.VISIBLE
-
-                findItem(R.id.action_close).isVisible = searching
-                findItem(R.id.action_search).isVisible = !searching
-                findItem(R.id.action_select_all).isVisible = taskSelectAllVisible && !searching
+                findItem(R.id.action_select_all).isVisible = taskSelectAllVisible
             }
             Tab.CUSTOM_TIMES -> {
                 findItem(R.id.action_calendar).isVisible = false
-                findItem(R.id.action_close).isVisible = false
-                findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = customTimesSelectAllVisible
             }
             Tab.FRIENDS -> {
                 findItem(R.id.action_calendar).isVisible = false
-                findItem(R.id.action_close).isVisible = false
-                findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = userSelectAllVisible
             }
             else -> {
                 findItem(R.id.action_calendar).isVisible = false
-                findItem(R.id.action_close).isVisible = false
-                findItem(R.id.action_search).isVisible = false
                 findItem(R.id.action_select_all).isVisible = false
             }
         }
@@ -174,18 +161,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 calendarOpen = !calendarOpen
 
                 updateCalendarHeight()
-            }
-            R.id.action_close -> closeSearch()
-            R.id.action_search -> {
-                mainActivitySearch.apply {
-                    check(visibility == View.GONE)
-                    visibility = View.VISIBLE // todo replace with actionMode
-                    requestFocus()
-
-                    (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-                }
-
-                invalidateOptionsMenu()
             }
             R.id.action_select_all -> when (visibleTab.value!!) {
                 MainActivity.Tab.INSTANCES -> selectAllRelay.accept(Unit)
@@ -220,7 +195,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             visibility = View.GONE
             text = null
         }
-        invalidateOptionsMenu()
+        updateSearchMenu()
         hideKeyboard()
     }
 
@@ -289,24 +264,43 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             update()
 
             setOnMenuItemClickListener { item ->
-                check(visibleTab.value!! == Tab.INSTANCES)
+                val triple = triples.singleOrNull { it.first == item.itemId }
+                if (triple != null) {
+                    check(visibleTab.value!! == Tab.INSTANCES)
 
-                val newTimeRange = triples.single { it.first == item.itemId }.second
+                    val newTimeRange = triple.second
 
-                if (newTimeRange != timeRange) {
-                    timeRange = newTimeRange
+                    if (newTimeRange != timeRange) {
+                        timeRange = newTimeRange
 
-                    mainDaysPager.adapter = MyFragmentStatePagerAdapter()
+                        mainDaysPager.adapter = MyFragmentStatePagerAdapter()
 
-                    groupSelectAllVisible.clear()
-                    invalidateOptionsMenu()
+                        groupSelectAllVisible.clear()
+                        invalidateOptionsMenu()
 
-                    if (timeRange != TimeRange.DAY)
-                        calendarOpen = false
+                        if (timeRange != TimeRange.DAY)
+                            calendarOpen = false
 
-                    updateCalendarDate()
-                    updateCalendarHeight()
-                    update()
+                        updateCalendarDate()
+                        updateCalendarHeight()
+                        update()
+                    }
+                } else {
+                    when (item.itemId) {
+                        R.id.actionMainClose -> closeSearch()
+                        R.id.actionMainSearch -> {
+                            mainActivitySearch.apply {
+                                check(visibility == View.GONE)
+                                visibility = View.VISIBLE // todo replace with actionMode
+                                requestFocus()
+
+                                (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                            }
+
+                            updateSearchMenu()
+                        }
+                        else -> throw IllegalArgumentException()
+                    }
                 }
 
                 true
@@ -470,6 +464,20 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 }
     }
 
+    private fun updateSearchMenu() {
+        mainActivityToolbar.menu.apply {
+            if (visibleTab.value!! == Tab.TASKS) {
+                val searching = mainActivitySearch.visibility == View.VISIBLE
+
+                findItem(R.id.actionMainClose).isVisible = searching
+                findItem(R.id.actionMainSearch).isVisible = !searching
+            } else {
+                findItem(R.id.actionMainClose).isVisible = false
+                findItem(R.id.actionMainSearch).isVisible = false
+            }
+        }
+    }
+
     override fun onBackPressed() {
         mainActivityDrawer.run {
             if (isDrawerOpen(GravityCompat.START))
@@ -596,6 +604,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         visibleTab.accept(tab)
 
         updateCalendarHeight()
+        updateSearchMenu()
     }
 
     override fun onDestroy() {
@@ -665,7 +674,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override val snackbarParent get() = mainCoordinator!!
 
     private fun hideKeyboard() {
-        currentFocus?.let { (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(it.windowToken, 0) }
+        (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(mainCoordinator.windowToken, 0)
     }
 
     private fun updateCalendarHeight() {

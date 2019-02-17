@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 
@@ -12,13 +13,13 @@ class InstanceRelevance(val instance: Instance) {
     var relevant = false
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, now: ExactTimeStamp) {
+    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, now: ExactTimeStamp) {
         if (relevant) return
 
         relevant = true
 
         // set task relevant
-        taskRelevances.getValue(instance.taskKey).setRelevant(taskRelevances, instanceRelevances, now)
+        taskRelevances.getValue(instance.taskKey).setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
 
         // set parent instance relevant
         if (!instance.isRootInstance(now)) {
@@ -29,7 +30,7 @@ class InstanceRelevance(val instance: Instance) {
             if (!instanceRelevances.containsKey(parentInstanceKey))
                 instanceRelevances[parentInstanceKey] = InstanceRelevance(parentInstance)
 
-            instanceRelevances[parentInstanceKey]!!.setRelevant(taskRelevances, instanceRelevances, now)
+            instanceRelevances[parentInstanceKey]!!.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now)
         }
 
         // set child instances relevant
@@ -42,7 +43,7 @@ class InstanceRelevance(val instance: Instance) {
 
                     instanceRelevances[instanceKey]!!
                 }
-                .forEach { it.setRelevant(taskRelevances, instanceRelevances, now) }
+                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 
     fun setRemoteRelevant(remoteCustomTimeRelevances: Map<Pair<String, RemoteCustomTimeId>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {

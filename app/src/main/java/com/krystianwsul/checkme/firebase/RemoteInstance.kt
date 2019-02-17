@@ -62,13 +62,14 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             now: ExactTimeStamp) : super(domainFactory) {
         this.remoteProject = remoteProject
         task = remoteTask
-        instanceData = RemoteRealInstanceData(this, remoteInstanceRecord)
+        val realInstanceData = RemoteRealInstanceData(this, remoteInstanceRecord)
+        instanceData = realInstanceData
         this.instanceShownRecord = instanceShownRecord
 
         val date = instanceDate
         val instanceTimeStamp = ExactTimeStamp(date, instanceTime.getHourMinute(date.dayOfWeek).toHourMilli())
-        if (this.instanceShownRecord != null && ((instanceData as RemoteRealInstanceData).instanceRecord.done != null || instanceTimeStamp > now))
-            this.instanceShownRecord!!.notified = false
+        if (realInstanceData.instanceRecord.done != null || instanceTimeStamp > now)
+            instanceShownRecord?.notified = false
     }
 
     constructor(
@@ -99,14 +100,14 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
         createInstanceShownRecord()
 
-        this.instanceShownRecord!!.notified = false
+        instanceShownRecord!!.notified = false
     }
 
     private fun createInstanceShownRecord() {
-        if (this.instanceShownRecord != null)
+        if (instanceShownRecord != null)
             return
 
-        this.instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
+        instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
     }
 
     override fun createInstanceRecord(now: ExactTimeStamp) {
@@ -131,7 +132,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
             (instanceData as RemoteRealInstanceData).instanceRecord.done = now.long
 
-            this.instanceShownRecord?.notified = false
+            instanceShownRecord?.notified = false
         } else {
             (instanceData as RemoteRealInstanceData).instanceRecord.done = null
         }
@@ -140,9 +141,9 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override fun setNotified(now: ExactTimeStamp) {
         createInstanceShownRecord()
 
-        check(this.instanceShownRecord != null)
+        checkNotNull(instanceShownRecord)
 
-        this.instanceShownRecord!!.notified = true
+        instanceShownRecord!!.notified = true
     }
 
     override fun delete() {

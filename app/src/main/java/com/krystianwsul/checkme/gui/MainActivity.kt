@@ -51,6 +51,7 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.joda.time.DateTime
 import org.joda.time.Days
@@ -203,13 +204,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-        setSupportActionBar(mainActivityBottomAppBar)
+        setSupportActionBar(bottomAppBar)
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         PagerSnapHelper().attachToRecyclerView(mainDaysPager)
 
         hostEvents = Observables.combineLatest(visibleTab, daysPosition) { tab: Tab, position: Int ->
             if (tab == Tab.INSTANCES) {
-                DayFragment.Event.PageVisible(position, mainFab)
+                DayFragment.Event.PageVisible(position, bottomFab)
             } else {
                 DayFragment.Event.Invisible
             }
@@ -426,9 +427,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 .subscribe {
                     val query = it.toString().toLowerCase()
                     if (query.isEmpty())
-                        mainFab.show()
+                        bottomFab.show()
                     else
-                        mainFab.hide()
+                        bottomFab.hide()
                 }
                 .addTo(createDisposable)
 
@@ -570,28 +571,28 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
-                taskListFragment.setFab(mainFab)
+                taskListFragment.setFab(bottomFab)
             }
             MainActivity.Tab.PROJECTS -> {
                 taskListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
-                projectListFragment.setFab(mainFab)
+                projectListFragment.setFab(bottomFab)
             }
             MainActivity.Tab.CUSTOM_TIMES -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 friendListFragment.clearFab()
 
-                showCustomTimesFragment.setFab(mainFab)
+                showCustomTimesFragment.setFab(bottomFab)
             }
             MainActivity.Tab.FRIENDS -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
 
-                friendListFragment.setFab(mainFab)
+                friendListFragment.setFab(bottomFab)
             }
             MainActivity.Tab.DEBUG -> {
                 taskListFragment.clearFab()
@@ -599,7 +600,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
-                mainFab.hide()
+                bottomFab.hide()
             }
         }
 

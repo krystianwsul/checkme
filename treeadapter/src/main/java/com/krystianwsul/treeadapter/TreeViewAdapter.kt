@@ -215,8 +215,6 @@ class TreeViewAdapter(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        check(!treeModelAdapter.hasActionMode)
-
         treeNodeCollection!!.selectAll(x)
     }
 

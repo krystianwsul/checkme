@@ -295,9 +295,6 @@ class TreeNode(
         if (childTreeNodes == null)
             throw SetChildTreeNodesNotCalledException()
 
-        if (selected)
-            throw SelectAllException()
-
         if (modelNode.isSelectable) {
             check(modelNode.isVisibleDuringActionMode)
 
@@ -423,8 +420,6 @@ class TreeNode(
     class SelectableNotVisibleException : IllegalStateException("A TreeNode cannot be selectable if it isn't visible during action mode.")
 
     class EmptyExpandedException : IllegalStateException("A TreeNode cannot be expanded if it has no children.")
-
-    class SelectAllException : UnsupportedOperationException("TreeViewAdapter.selectAll() can be called only if no nodes are selected.")
 
     class NoSuchNodeException : IllegalArgumentException("The given node is not a direct descendant of this TreeNode.")
 

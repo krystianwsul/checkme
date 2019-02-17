@@ -33,12 +33,6 @@
                 app:popupTheme="@style/AppTheme.PopupOverlay"
                 app:layout_scrollFlags="scroll|enterAlways">
                 
-                <Spinner
-                    android:id="@+id/mainActivitySpinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"/>
-
                 <EditText
                     android:id="@+id/mainActivitySearch"
                     android:layout_width="match_parent"

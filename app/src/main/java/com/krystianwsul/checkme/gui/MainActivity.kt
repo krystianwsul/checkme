@@ -12,8 +12,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.view.ActionMode
@@ -276,40 +274,42 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             states = mutableMapOf()
         }
 
-        mainActivitySpinner.run {
-            adapter = ArrayAdapter.createFromResource(supportActionBar!!.themedContext, R.array.main_activity_spinner, R.layout.custom_toolbar_spinner).apply {
-                setDropDownViewResource(R.layout.custom_toolbar_spinner_dropdown)
+        menuInflater.inflate(R.menu.main_activity_filter, mainActivityToolbar.menu)
+
+        mainActivityToolbar.apply {
+            val triples = listOf(
+                    R.id.actionMainFilterDay to TimeRange.DAY,
+                    R.id.actionMainFilterWeek to TimeRange.WEEK,
+                    R.id.actionMainFilterMonth to TimeRange.MONTH).map { Triple(it.first, it.second, menu.findItem(it.first)) }
+
+            fun update() {
+                triples.single { it.second == timeRange }.third.isChecked = true
             }
 
-            setSelection(timeRange.ordinal)
+            update()
 
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            setOnMenuItemClickListener { item ->
+                check(visibleTab.value!! == Tab.INSTANCES)
 
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    check(visibleTab.value!! == Tab.INSTANCES)
+                val newTimeRange = triples.single { it.first == item.itemId }.second
 
-                    check(position >= 0)
-                    check(position < 3)
+                if (newTimeRange != timeRange) {
+                    timeRange = newTimeRange
 
-                    val newTimeRange = TimeRange.values()[position]
+                    mainDaysPager.adapter = MyFragmentStatePagerAdapter()
 
-                    if (newTimeRange != timeRange) {
-                        timeRange = newTimeRange
+                    groupSelectAllVisible.clear()
+                    invalidateOptionsMenu()
 
-                        mainDaysPager.adapter = MyFragmentStatePagerAdapter()
+                    if (timeRange != TimeRange.DAY)
+                        calendarOpen = false
 
-                        groupSelectAllVisible.clear()
-                        invalidateOptionsMenu()
-
-                        if (timeRange != TimeRange.DAY)
-                            calendarOpen = false
-
-                        updateCalendarDate()
-                        updateCalendarHeight()
-                    }
+                    updateCalendarDate()
+                    updateCalendarHeight()
+                    update()
                 }
 
-                override fun onNothingSelected(parent: AdapterView<*>) = Unit
+                true
             }
         }
 
@@ -503,14 +503,16 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private fun showTab(tab: Tab) {
         val density = resources.displayMetrics.density
 
+        fun setVisible(visible: Boolean) = mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visible)
+
         if (tab == Tab.INSTANCES) {
             mainDaysPager.visibility = View.VISIBLE
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
-            mainActivitySpinner.visibility = View.VISIBLE
+            setVisible(true)
         } else {
             mainDaysPager.visibility = View.GONE
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
-            mainActivitySpinner.visibility = View.GONE
+            setVisible(false)
             calendarOpen = false
         }
 

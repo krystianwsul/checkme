@@ -77,4 +77,7 @@
     <string name="undo">cofnij</string>
     <string name="add_task_this_time">Dodaj zadanie z tym samym czasem</string>
     <string name="notify">Pokaż powiadomienie</string>
+    <string name="filterDay">Dzień</string>
+    <string name="filterWeek">Tydzień</string>
+    <string name="filterMonth">Miesiąc</string>
 </resources>

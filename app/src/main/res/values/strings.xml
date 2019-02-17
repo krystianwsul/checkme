@@ -77,4 +77,7 @@
     <string name="undo">undo</string>
     <string name="add_task_this_time">Add task at this time</string>
     <string name="notify">Show notification</string>
+    <string name="filterDay">Day</string>
+    <string name="filterWeek">Week</string>
+    <string name="filterMonth">Month</string>
 </resources>

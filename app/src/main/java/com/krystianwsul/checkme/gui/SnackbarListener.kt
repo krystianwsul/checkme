@@ -15,7 +15,7 @@ interface SnackbarListener {
         val deleting get() = count > 0
     }
 
-    val snackbarParent: CoordinatorLayout
+    val snackbarParent: CoordinatorLayout // todo anchor above fab
 
     fun showSnackbar(count: Int, action: () -> Unit) {
         MyCrashlytics.logMethod(this)

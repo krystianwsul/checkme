@@ -26,7 +26,15 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             }
         }
 
-    override val notified get() = this.instanceShownRecord?.notified == true
+    override var notified
+        get() = this.instanceShownRecord?.notified == true
+        set(value) {
+            createInstanceShownRecord()
+
+            checkNotNull(instanceShownRecord)
+
+            instanceShownRecord!!.notified = value
+        }
 
     override val notificationShown get() = this.instanceShownRecord?.notificationShown == true
 
@@ -136,14 +144,6 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         } else {
             (instanceData as RemoteRealInstanceData).instanceRecord.done = null
         }
-    }
-
-    override fun setNotified(now: ExactTimeStamp) {
-        createInstanceShownRecord()
-
-        checkNotNull(instanceShownRecord)
-
-        instanceShownRecord!!.notified = true
     }
 
     override fun delete() {

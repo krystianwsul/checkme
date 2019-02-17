@@ -32,7 +32,7 @@ abstract class AbstractActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         MyCrashlytics.logMethod(this)
 
         super.onNewIntent(intent)

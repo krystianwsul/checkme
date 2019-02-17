@@ -76,4 +76,5 @@
     <string name="snackbar">Usunięto %1$s</string>
     <string name="undo">cofnij</string>
     <string name="add_task_this_time">Dodaj zadanie z tym samym czasem</string>
+    <string name="notify">Pokaż powiadomienie</string>
 </resources>

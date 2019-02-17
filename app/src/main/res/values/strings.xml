@@ -76,4 +76,5 @@
     <string name="snackbar">%1$s removed</string>
     <string name="undo">undo</string>
     <string name="add_task_this_time">Add task at this time</string>
+    <string name="notify">Show notification</string>
 </resources>

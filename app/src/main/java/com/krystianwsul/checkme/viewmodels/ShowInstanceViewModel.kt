@@ -27,7 +27,8 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             var taskCurrent: Boolean,
             val isRootInstance: Boolean,
             var exists: Boolean,
-            val dataWrapper: GroupListFragment.DataWrapper) : DomainData() {
+            val dataWrapper: GroupListFragment.DataWrapper,
+            var notificationShown: Boolean) : DomainData() {
 
         init {
             check(name.isNotEmpty())

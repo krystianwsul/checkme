@@ -525,7 +525,7 @@ open class DomainFactory(
         val now = ExactTimeStamp.now
 
         val instance = getInstance(instanceKey)
-        return ShowInstanceViewModel.Data(instance.name, instance.instanceDateTime, instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now))
+        return ShowInstanceViewModel.Data(instance.name, instance.instanceDateTime, instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now), instance.notificationShown)
     }
 
     fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {
@@ -875,6 +875,25 @@ open class DomainFactory(
         val instance = setInstanceDone(now, dataId, source, instanceKey, done)
 
         return instance.done
+    }
+
+    @Synchronized
+    fun setInstanceNotNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
+        MyCrashlytics.log("DomainFactory.setInstanceNotNotified")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        val now = ExactTimeStamp.now
+
+        val instance = getInstance(instanceKey)
+        check(instance.notified)
+        check(instance.done == null && instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !instance.notificationShown)
+
+        instance.notified = false
+        instance.setNotificationShown(false, now)
+
+        updateNotifications(now)
+
+        save(dataId, source)
     }
 
     @Synchronized

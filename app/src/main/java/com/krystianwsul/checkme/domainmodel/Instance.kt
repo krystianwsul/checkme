@@ -81,7 +81,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
 
-    abstract val notified: Boolean
+    abstract var notified: Boolean
 
     /*
     I'm going to make some assumptions here:
@@ -161,8 +161,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     abstract fun setNotificationShown(notificationShown: Boolean, now: ExactTimeStamp)
 
     abstract fun setDone(done: Boolean, now: ExactTimeStamp)
-
-    abstract fun setNotified(now: ExactTimeStamp)
 
     fun isVisible(now: ExactTimeStamp): Boolean {
         val isVisible = isVisibleHelper(now)

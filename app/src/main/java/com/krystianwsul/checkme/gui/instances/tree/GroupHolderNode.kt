@@ -5,6 +5,7 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.treeadapter.ModelNode
@@ -112,7 +113,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             rowExpand.run {
                 visibility = if (treeNode.expandVisible) View.VISIBLE else View.INVISIBLE
                 setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
-                setOnClickListener { treeNode.onExpandClick() }
+                setOnClickListener {
+                    Preferences.logLineHour("expanding node " + this@GroupHolderNode)
+                    treeNode.onExpandClick()
+                }
             }
 
             rowCheckBox.run {
@@ -133,7 +137,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     onLongClick(viewHolder)
                     true
                 }
-                setOnClickListener { treeNode.onClick() }
+                setOnClickListener {
+                    Preferences.logLineHour("clicking node " + this@GroupHolderNode)
+                    treeNode.onClick()
+                }
 
                 @SuppressWarnings("TargetApi")
                 foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null

@@ -21,6 +21,7 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
+import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
@@ -51,9 +52,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_task)
 
-        setSupportActionBar(toolbar)
-
-        supportActionBar!!.title = null
+        setSupportActionBar(bottomAppBar)
 
         taskKey = if (savedInstanceState != null) {
             check(savedInstanceState.containsKey(TASK_KEY_KEY))
@@ -70,7 +69,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
                     .beginTransaction()
                     .add(R.id.show_task_fragment, it)
                     .commit()
-        }.also { it.setFab(showTaskFab) }
+        }.also { it.setFab(bottomFab) }
 
         showTaskViewModel = getViewModel<ShowTaskViewModel>().apply {
             start(taskKey)
@@ -149,7 +148,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
-        supportActionBar!!.run {
+        toolbar.run {
             title = data.name
             subtitle = data.scheduleText
         }

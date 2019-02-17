@@ -29,16 +29,7 @@
 
         </androidx.core.widget.NestedScrollView>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/showInstanceFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/fabMargin"
-            android:src="@android:drawable/ic_input_add"
-            android:tint="@android:color/white"
-            android:visibility="invisible"
-            app:layout_anchor="@id/show_instance_list"
-            app:layout_anchorGravity="bottom|end" />
+        <include layout="@layout/bottom" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

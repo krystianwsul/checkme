@@ -5,9 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.view.ActionMode
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
@@ -18,6 +16,7 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_group.*
+import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener {
@@ -33,8 +32,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
 
     private lateinit var timeStamp: TimeStamp
 
-    private lateinit var actionBar: ActionBar
-
     private var selectAllVisible = false
 
     private lateinit var showGroupViewModel: ShowGroupViewModel
@@ -45,13 +42,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_group)
 
-        setSupportActionBar(toolbar)
-
-        actionBar = supportActionBar!!
-
-        actionBar.title = null
-
-        val showGroupFab = findViewById<FloatingActionButton>(R.id.show_group_fab)!!
+        setSupportActionBar(bottomAppBar)
 
         check(intent.hasExtra(TIME_KEY))
 
@@ -60,7 +51,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
 
         timeStamp = TimeStamp.fromMillis(time)
 
-        groupListFragment.setFab(showGroupFab)
+        groupListFragment.setFab(bottomFab)
 
         showGroupViewModel = getViewModel<ShowGroupViewModel>().apply {
             start(timeStamp)
@@ -70,7 +61,7 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
     }
 
     private fun onLoadFinished(data: ShowGroupViewModel.Data) {
-        actionBar.title = data.displayText
+        toolbar.title = data.displayText
 
         if (data.dataWrapper == null) {
             finish()

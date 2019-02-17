@@ -29,6 +29,8 @@
 
         </androidx.core.widget.NestedScrollView>
 
+        <!-- todo think about bottom bar -->
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>

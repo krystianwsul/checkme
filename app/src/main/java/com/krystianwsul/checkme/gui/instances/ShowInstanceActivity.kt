@@ -29,6 +29,7 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_instance.*
+import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListListener {
@@ -190,13 +191,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_instance)
 
-        setSupportActionBar(toolbar)
-        supportActionBar!!.title = null
+        setSupportActionBar(bottomAppBar)
 
         if (savedInstanceState == null)
             first = true
 
-        groupListFragment.setFab(showInstanceFab)
+        groupListFragment.setFab(bottomFab)
 
         check(intent.hasExtra(INSTANCE_KEY))
         instanceKey = intent.getParcelableExtra(INSTANCE_KEY)!!
@@ -261,7 +261,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             setInstanceNotified()
         }
 
-        supportActionBar!!.run {
+        toolbar.run {
             title = data.name
             subtitle = data.displayText
         }

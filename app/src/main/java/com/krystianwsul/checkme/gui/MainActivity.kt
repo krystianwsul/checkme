@@ -438,6 +438,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
             mainDaysPager.scrollToPosition(Days.daysBetween(LocalDate.now(), date).days)
 
+            actionMode?.finish()
+
             calendarOpen = false
             updateCalendarHeight()
         }

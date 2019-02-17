@@ -9,12 +9,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
-import com.krystianwsul.checkme.domainmodel.relevance.InstanceRelevance
-import com.krystianwsul.checkme.domainmodel.relevance.RemoteCustomTimeRelevance
-import com.krystianwsul.checkme.domainmodel.relevance.RemoteProjectRelevance
-import com.krystianwsul.checkme.domainmodel.relevance.TaskRelevance
-import com.krystianwsul.checkme.domainmodel.local.LocalInstance
-import com.krystianwsul.checkme.domainmodel.local.LocalTask
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson

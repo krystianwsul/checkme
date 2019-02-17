@@ -30,7 +30,7 @@
             android:tint="@android:color/white"
             android:visibility="invisible"
             app:layout_anchor="@id/show_project_frame"
-            app:layout_anchorGravity="bottom|center" /> <!-- consider bottom bar -->
+            app:layout_anchorGravity="bottom|center" /> <!-- todo consider bottom bar -->
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

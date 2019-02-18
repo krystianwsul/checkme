@@ -79,8 +79,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         menu.run {
             findItem(R.id.instance_menu_edit_instance).isVisible = data?.run { !done && isRootInstance } == true
             findItem(R.id.instance_menu_notify).isVisible = data?.run { !done && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown && isRootInstance } == true
-            findItem(R.id.instance_menu_check).isVisible = data?.done == false
-            findItem(R.id.instance_menu_uncheck).isVisible = data?.done == true
             findItem(R.id.instance_menu_share).isVisible = data != null
             findItem(R.id.instance_menu_show_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
@@ -113,14 +111,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
                         invalidateOptionsMenu()
                     }
-                }
-                R.id.instance_menu_check -> {
-                    if (!it.done)
-                        setDone(true)
-                }
-                R.id.instance_menu_uncheck -> {
-                    if (it.done)
-                        setDone(false)
                 }
                 R.id.instance_menu_share -> {
                     val shareData = groupListFragment.shareData
@@ -194,6 +184,29 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
         setSupportActionBar(bottomAppBar)
 
+        toolbar.apply {
+            menuInflater.inflate(R.menu.show_instance_top_menu, menu)
+
+            setOnMenuItemClickListener { item ->
+                data!!.let {
+                    when (item.itemId) {
+                        R.id.instanceMenuCheck -> {
+                            if (!it.done)
+                                setDone(true)
+                        }
+                        R.id.instanceMenuUncheck -> {
+                            if (it.done)
+                                setDone(false)
+                        }
+                    }
+                }
+
+                true
+            }
+        }
+
+        updateTopMenu()
+
         if (savedInstanceState == null)
             first = true
 
@@ -208,6 +221,13 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             start(instanceKey)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
+        }
+    }
+
+    private fun updateTopMenu() {
+        toolbar.menu.apply {
+            findItem(R.id.instanceMenuCheck).isVisible = data?.done == false
+            findItem(R.id.instanceMenuUncheck).isVisible = data?.done == true
         }
     }
 
@@ -268,6 +288,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         }
 
         invalidateOptionsMenu()
+        updateTopMenu()
 
         groupListFragment.setInstanceKey(instanceKey, data.dataId, data.dataWrapper)
     }
@@ -283,6 +304,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         }
 
         invalidateOptionsMenu()
+        updateTopMenu()
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit

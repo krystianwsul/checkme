@@ -134,7 +134,7 @@ abstract class SelectionCallback : ActionMode.Callback {
         }
     }
 
-    fun updateTitle() {
+    private fun updateTitle() {
         actionMode!!.title = getTitleCount().toString()
     }
 

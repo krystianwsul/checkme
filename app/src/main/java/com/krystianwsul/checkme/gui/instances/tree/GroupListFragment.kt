@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
@@ -128,12 +127,6 @@ class GroupListFragment @JvmOverloads constructor(
     val selectionCallback = object : SelectionCallback() {
 
         override fun getTreeViewAdapter() = treeViewAdapter
-
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            super.onCreateActionMode(mode, menu)
-
-            return true
-        }
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 

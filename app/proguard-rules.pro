@@ -47,3 +47,5 @@
 -keep class android.arch.lifecycle.** {*;}
 
 -keep class com.google.firebase.** { *; }
+
+-dontwarn com.google.auto.value.AutoValue

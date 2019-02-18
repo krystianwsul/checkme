@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -27,16 +28,19 @@ interface SnackbarListener {
 
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
 
-                override fun onShown(transientBottomBar: Snackbar?) {
-                    MyCrashlytics.logMethod(this@apply)
-                }
+                override fun onShown(transientBottomBar: Snackbar) = MyCrashlytics.logMethod(this@apply)
 
-                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                override fun onDismissed(transientBottomBar: Snackbar, event: Int) {
                     MyCrashlytics.logMethod(this@apply)
 
                     check(SnackbarListener.count-- > 0)
                 }
             })
+
+            snackbarParent.run {
+                findViewById<View>(R.id.bottomFab)?.takeIf { it.visibility == View.VISIBLE }
+                        ?: findViewById<View>(R.id.bottomAppBar)
+            }?.let { anchorView = it }
 
             show()
         }

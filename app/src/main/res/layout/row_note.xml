@@ -24,7 +24,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="@dimen/textPrimary"
-            tools:ignore="LabelFor,TextFields"/>
+            tools:ignore="LabelFor"
+            android:inputType="text"
+            android:importantForAutofill="no"
+            tools:targetApi="o" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

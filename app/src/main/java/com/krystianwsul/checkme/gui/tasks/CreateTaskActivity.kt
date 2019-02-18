@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,8 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.*
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.common.collect.HashMultiset
@@ -35,6 +38,7 @@ import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
+
 
 @Suppress("CascadeIf")
 class CreateTaskActivity : AbstractActivity() {
@@ -132,6 +136,30 @@ class CreateTaskActivity : AbstractActivity() {
 
             scheduleHolder.mScheduleText.text = null
         }
+    }
+
+    private fun setupParent(view: View) {
+        if (view !is EditText) {
+            view.setOnTouchListener(object : View.OnTouchListener {
+
+                @SuppressLint("ClickableViewAccessibility")
+                override fun onTouch(v: View, event: MotionEvent): Boolean {
+                    hideSoftKeyboard()
+                    return false
+                }
+            })
+        }
+
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                setupParent(view.getChildAt(i))
+            }
+        }
+    }
+
+    private fun hideSoftKeyboard() {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(createTaskRoot.windowToken, 0)
     }
 
     private val scheduleDialogListener = object : ScheduleDialogFragment.ScheduleDialogListener {
@@ -387,6 +415,8 @@ class CreateTaskActivity : AbstractActivity() {
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
+
+        setupParent(createTaskRoot)
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {

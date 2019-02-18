@@ -4,18 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".gui.MainActivity">
     <item
-        android:id="@+id/task_menu_edit"
-        android:title="@string/edit"
-        android:orderInCategory="100"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_mode_edit_white_24dp"
-        android:visible="false"/>
-    <item
         android:id="@+id/task_menu_share"
         android:title="@string/share"
-        android:orderInCategory="150"
+        android:orderInCategory="100"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_share_white_24dp"
+        android:visible="false" />
+    <item
+        android:id="@+id/task_menu_edit"
+        android:title="@string/edit"
+        android:orderInCategory="150"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_mode_edit_white_24dp"
         android:visible="false"/>
     <item
         android:id="@+id/task_menu_delete"

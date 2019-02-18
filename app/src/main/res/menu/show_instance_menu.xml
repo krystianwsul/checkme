@@ -4,20 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".gui.MainActivity">
     <item
-        android:id="@+id/instance_menu_edit_instance"
-        android:title="@string/edit_instance"
-        android:orderInCategory="200"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_alarm_white_24dp"
-        android:visible="false"/>
-    <item
-        android:id="@+id/instance_menu_notify"
-        android:title="@string/notify"
-        android:orderInCategory="250"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_notifications_active_white_24dp"
-        android:visible="false" /><!-- todo add to groupListFragment menu -->
-    <item
         android:id="@+id/instance_menu_share"
         android:title="@string/share"
         android:orderInCategory="300"

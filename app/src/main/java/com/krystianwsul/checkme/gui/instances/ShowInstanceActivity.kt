@@ -77,8 +77,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.run {
-            findItem(R.id.instance_menu_edit_instance).isVisible = data?.run { !done && isRootInstance } == true
-            findItem(R.id.instance_menu_notify).isVisible = data?.run { !done && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown && isRootInstance } == true
             findItem(R.id.instance_menu_share).isVisible = data != null
             findItem(R.id.instance_menu_show_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
@@ -94,24 +92,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         data!!.let {
             when (item.itemId) {
-                R.id.instance_menu_edit_instance -> {
-                    check(!it.done)
-                    check(it.isRootInstance)
-
-                    startActivity(EditInstanceActivity.getIntent(instanceKey))
-                }
-                R.id.instance_menu_notify -> {
-                    check(!it.done)
-                    check(it.instanceDateTime.timeStamp < TimeStamp.now)
-                    check(it.isRootInstance)
-
-                    if (!it.notificationShown) {
-                        DomainFactory.instance.setInstancesNotNotified(it.dataId, SaveService.Source.GUI, listOf(instanceKey))
-                        it.notificationShown = true
-
-                        invalidateOptionsMenu()
-                    }
-                }
                 R.id.instance_menu_share -> {
                     val shareData = groupListFragment.shareData
                     if (TextUtils.isEmpty(shareData))
@@ -190,6 +170,24 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             setOnMenuItemClickListener { item ->
                 data!!.let {
                     when (item.itemId) {
+                        R.id.instanceMenuEditInstance -> {
+                            check(!it.done)
+                            check(it.isRootInstance)
+
+                            startActivity(EditInstanceActivity.getIntent(instanceKey))
+                        }
+                        R.id.instanceMenuNotify -> {
+                            check(!it.done)
+                            check(it.instanceDateTime.timeStamp < TimeStamp.now)
+                            check(it.isRootInstance)
+
+                            if (!it.notificationShown) {
+                                DomainFactory.instance.setInstancesNotNotified(it.dataId, SaveService.Source.GUI, listOf(instanceKey))
+                                it.notificationShown = true
+
+                                updateTopMenu()
+                            }
+                        }
                         R.id.instanceMenuCheck -> {
                             if (!it.done)
                                 setDone(true)
@@ -226,6 +224,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     private fun updateTopMenu() {
         toolbar.menu.apply {
+            findItem(R.id.instanceMenuEditInstance).isVisible = data?.run { !done && isRootInstance } == true
+            findItem(R.id.instanceMenuNotify).isVisible = data?.run { !done && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown && isRootInstance } == true
             findItem(R.id.instanceMenuCheck).isVisible = data?.done == false
             findItem(R.id.instanceMenuUncheck).isVisible = data?.done == true
         }
@@ -240,7 +240,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             cancelNotification()
             setInstanceNotified()
 
-            invalidateOptionsMenu()
+            updateTopMenu()
         } else {
             startActivity(getForwardIntent(this, instanceKey, intent.getIntExtra(NOTIFICATION_ID_KEY, -1)))
         }
@@ -303,7 +303,6 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                 it.exists = true
         }
 
-        invalidateOptionsMenu()
         updateTopMenu()
     }
 

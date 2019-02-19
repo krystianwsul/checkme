@@ -31,12 +31,16 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         set(value) {
             createInstanceShownRecord()
 
-            checkNotNull(instanceShownRecord)
-
             instanceShownRecord!!.notified = value
         }
 
-    override val notificationShown get() = this.instanceShownRecord?.notificationShown == true
+    override var notificationShown
+        get() = this.instanceShownRecord?.notificationShown == true
+        set(value) {
+            createInstanceShownRecord()
+
+            instanceShownRecord!!.notificationShown = value
+        }
 
     override val scheduleCustomTimeKey
         get() = instanceData.let {
@@ -124,14 +128,6 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         val scheduleDateTime = scheduleDateTime
 
         instanceData = RemoteRealInstanceData(this, task.createRemoteInstanceRecord(this, scheduleDateTime))
-    }
-
-    override fun setNotificationShown(notificationShown: Boolean, now: ExactTimeStamp) {
-        createInstanceShownRecord()
-
-        checkNotNull(this.instanceShownRecord)
-
-        this.instanceShownRecord!!.notificationShown = notificationShown
     }
 
     override fun setDone(done: Boolean, now: ExactTimeStamp) {

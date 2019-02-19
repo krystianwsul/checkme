@@ -788,7 +788,7 @@ open class DomainFactory(
         val hourMinute = HourMinute(calendar)
 
         instance.setInstanceDateTime(date, TimePair(hourMinute), now)
-        instance.setNotificationShown(false, now)
+        instance.notificationShown = false
 
         updateNotifications(now)
 
@@ -856,7 +856,7 @@ open class DomainFactory(
         val now = ExactTimeStamp.now
 
         instance.setDone(true, now)
-        instance.setNotificationShown(false, now)
+        instance.notificationShown = false
 
         updateNotifications(now)
 
@@ -890,7 +890,7 @@ open class DomainFactory(
             check(instance.done == null && instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !instance.notificationShown && instance.isRootInstance(now))
 
             instance.notified = false
-            instance.setNotificationShown(false, now)
+            instance.notificationShown = false
         }
 
         updateNotifications(now)
@@ -2125,10 +2125,10 @@ open class DomainFactory(
         val hideInstanceKeys = shownInstanceKeys.filter { !notificationInstances.containsKey(it) }.toSet()
 
         for (showInstanceKey in showInstanceKeys)
-            getInstance(showInstanceKey).setNotificationShown(true, now)
+            getInstance(showInstanceKey).notificationShown = true
 
         for (hideInstanceKey in hideInstanceKeys)
-            getInstance(hideInstanceKey).setNotificationShown(false, now)
+            getInstance(hideInstanceKey).notificationShown = false
 
         var message = ""
 
@@ -2216,38 +2216,11 @@ open class DomainFactory(
 
     private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(instance, true, now)
 
-    private fun setInstanceNotified(instanceKey: InstanceKey) {
-        val taskKey = instanceKey.taskKey
-
-        val projectId = taskKey.remoteProjectId
-        val taskId = taskKey.remoteTaskId
-
-        val scheduleKey = instanceKey.scheduleKey
-        val scheduleDate = scheduleKey.scheduleDate
-
-        val stream = localFactory.instanceShownRecords
-                .asSequence()
-                .filter { it.projectId == projectId && it.taskId == taskId && it.scheduleYear == scheduleDate.year && it.scheduleMonth == scheduleDate.month && it.scheduleDay == scheduleDate.day }
-
-        val matches = if (scheduleKey.scheduleTimePair.customTimeKey != null) {
-            check(scheduleKey.scheduleTimePair.hourMinute == null)
-            check(projectId == scheduleKey.scheduleTimePair.customTimeKey.remoteProjectId)
-
-            val customTimeId = scheduleKey.scheduleTimePair.customTimeKey.remoteCustomTimeId
-
-            stream.filter { customTimeId.value == it.scheduleCustomTimeId }
-        } else {
-            check(scheduleKey.scheduleTimePair.hourMinute != null)
-
-            val hourMinute = scheduleKey.scheduleTimePair.hourMinute
-
-            stream.filter { hourMinute.hour == it.scheduleHour && hourMinute.minute == it.scheduleMinute }
+    private fun setInstanceNotified(instanceKey: InstanceKey) { // todo does this warrant a separate function?
+        getInstance(instanceKey).apply {
+            notified = true
+            notificationShown = false
         }
-
-        val instanceShownRecord = matches.single()
-
-        instanceShownRecord.notified = true
-        instanceShownRecord.notificationShown = false
     }
 
     private fun getGroupListData(timeStamp: TimeStamp, now: ExactTimeStamp): GroupListFragment.DataWrapper {

@@ -93,7 +93,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
 
-    abstract val notificationShown: Boolean
+    abstract var notificationShown: Boolean
 
     abstract val project: RemoteProject<*>
 
@@ -157,8 +157,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     }
 
     protected abstract fun createInstanceRecord(now: ExactTimeStamp)
-
-    abstract fun setNotificationShown(notificationShown: Boolean, now: ExactTimeStamp)
 
     abstract fun setDone(done: Boolean, now: ExactTimeStamp)
 

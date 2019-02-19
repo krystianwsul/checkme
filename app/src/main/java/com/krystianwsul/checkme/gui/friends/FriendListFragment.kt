@@ -62,7 +62,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                 R.id.action_friends_delete -> {
                     (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
 
-                    updateSelectAll() // todo snackbar? why is this the same as for ShowCustomTimesFragment
+                    updateSelectAll()
                 }
                 else -> throw UnsupportedOperationException()
             }

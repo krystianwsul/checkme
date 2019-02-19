@@ -16,7 +16,7 @@ interface SnackbarListener {
         val deleting get() = count > 0
     }
 
-    val snackbarParent: CoordinatorLayout // todo anchor above fab
+    val snackbarParent: CoordinatorLayout
 
     fun showSnackbar(count: Int, action: () -> Unit) {
         MyCrashlytics.logMethod(this)
@@ -37,9 +37,9 @@ interface SnackbarListener {
                 }
             })
 
+            // todo anchoring above fab not working when fab hidden
             snackbarParent.run {
-                findViewById<View>(R.id.bottomFab)?.takeIf { it.visibility == View.VISIBLE }
-                        ?: findViewById<View>(R.id.bottomAppBar)
+                findViewById(R.id.bottomFab) ?: findViewById<View>(R.id.bottomAppBar)
             }?.let { anchorView = it }
 
             show()

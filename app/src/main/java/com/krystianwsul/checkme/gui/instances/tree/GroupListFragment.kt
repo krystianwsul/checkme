@@ -686,7 +686,7 @@ class GroupListFragment @JvmOverloads constructor(
                         treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable },
                         canAddHour())
             else
-                setGroupMenuItemVisibility(null, false, false)
+                setGroupMenuItemVisibility(null, selectAllVisible = false, addHourVisible = false)
         }
     }
 

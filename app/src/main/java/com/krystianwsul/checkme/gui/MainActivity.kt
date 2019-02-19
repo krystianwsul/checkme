@@ -127,28 +127,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) = menu.run {
-        when (visibleTab.value!!) {
-            Tab.INSTANCES -> {
-                findItem(R.id.action_calendar).isVisible = (timeRange == TimeRange.DAY)
-                findItem(R.id.action_select_all).isVisible = groupSelectAllVisible[mainDaysPager.currentPosition]
-                        ?: false
-            }
-            Tab.TASKS -> {
-                findItem(R.id.action_calendar).isVisible = false
-                findItem(R.id.action_select_all).isVisible = taskSelectAllVisible
-            }
-            Tab.CUSTOM_TIMES -> {
-                findItem(R.id.action_calendar).isVisible = false
-                findItem(R.id.action_select_all).isVisible = customTimesSelectAllVisible
-            }
-            Tab.FRIENDS -> {
-                findItem(R.id.action_calendar).isVisible = false
-                findItem(R.id.action_select_all).isVisible = userSelectAllVisible
-            }
-            else -> {
-                findItem(R.id.action_calendar).isVisible = false
-                findItem(R.id.action_select_all).isVisible = false
-            }
+        findItem(R.id.action_select_all).isVisible = when (visibleTab.value!!) {
+            Tab.INSTANCES -> groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
+            Tab.TASKS -> taskSelectAllVisible
+            Tab.CUSTOM_TIMES -> customTimesSelectAllVisible
+            Tab.FRIENDS -> userSelectAllVisible
+            else -> false
         }
 
         true
@@ -158,11 +142,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         MyCrashlytics.logMethod(this, "item: " + item.title)
 
         when (item.itemId) {
-            R.id.action_calendar -> {
-                calendarOpen = !calendarOpen
-
-                updateCalendarHeight()
-            }
             R.id.action_select_all -> when (visibleTab.value!!) {
                 MainActivity.Tab.INSTANCES -> selectAllRelay.accept(Unit)
                 MainActivity.Tab.TASKS -> {
@@ -288,6 +267,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     }
                 } else {
                     when (item.itemId) {
+                        R.id.actionMainCalendar -> {
+                            calendarOpen = !calendarOpen
+
+                            updateCalendarHeight()
+                        }
                         R.id.actionMainClose -> closeSearch()
                         R.id.actionMainSearch -> {
                             mainActivitySearch.apply {
@@ -469,6 +453,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private fun updateSearchMenu() {
         mainActivityToolbar.menu.apply {
+            findItem(R.id.actionMainCalendar).isVisible = if (visibleTab.value!! == Tab.INSTANCES) {
+                (timeRange == TimeRange.DAY)
+            } else {
+                false
+            }
+
             if (visibleTab.value!! == Tab.TASKS) {
                 val searching = mainActivitySearch.visibility == View.VISIBLE
 

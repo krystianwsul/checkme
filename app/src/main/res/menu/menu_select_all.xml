@@ -4,13 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_calendar"
-        android:orderInCategory="25"
-        android:icon="@drawable/ic_date_range_white_24dp"
-        app:showAsAction="always"
-        android:visible="false"/>
-
-    <item
         android:id="@+id/action_select_all"
         android:title="@string/selectAll"
         android:orderInCategory="200"

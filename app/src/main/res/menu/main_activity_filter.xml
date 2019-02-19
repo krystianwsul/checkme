@@ -3,6 +3,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <item
+        android:id="@+id/actionMainCalendar"
+        android:orderInCategory="25"
+        android:icon="@drawable/ic_date_range_white_24dp"
+        app:showAsAction="always"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/actionMainClose"
+        android:orderInCategory="50"
+        android:icon="@drawable/ic_close_white_24dp"
+        app:showAsAction="always"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/actionMainSearch"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_search_white_24dp"
+        app:showAsAction="always"
+        android:visible="false"
+        tools:ignore="AlwaysShowAction" />
+
     <group
         android:id="@+id/actionMainFilter"
         android:checkableBehavior="single">
@@ -10,7 +32,7 @@
         <item
             android:id="@+id/actionMainFilterDay"
             android:title="@string/filterDay"
-            android:orderInCategory="100"
+            android:orderInCategory="150"
             app:showAsAction="never"
             android:visible="false" />
 
@@ -29,20 +51,5 @@
             android:visible="false" />
 
     </group>
-
-    <item
-        android:id="@+id/actionMainClose"
-        android:orderInCategory="50"
-        android:icon="@drawable/ic_close_white_24dp"
-        app:showAsAction="always"
-        android:visible="false" />
-
-    <item
-        android:id="@+id/actionMainSearch"
-        android:orderInCategory="100"
-        android:icon="@drawable/ic_search_white_24dp"
-        app:showAsAction="always"
-        android:visible="false"
-        tools:ignore="AlwaysShowAction" />
 
 </menu>

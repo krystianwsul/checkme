@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.google.android.gms.tasks.Task
 import com.krystianwsul.checkme.MyApplication
@@ -131,3 +132,5 @@ fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: 
         }
     }
 }
+
+val ViewGroup.children get() = ViewGroupChildrenIterable(this)

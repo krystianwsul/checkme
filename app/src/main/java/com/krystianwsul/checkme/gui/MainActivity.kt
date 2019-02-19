@@ -38,6 +38,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.children
 import com.krystianwsul.checkme.utils.currentPosition
 import com.krystianwsul.checkme.utils.pageSelections
 import com.krystianwsul.checkme.viewmodels.DayViewModel
@@ -496,8 +497,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             }
 
             putBoolean(CALENDAR_KEY, calendarOpen)
-
-            (mainDaysPager.layoutManager!!.findViewByPosition(mainDaysPager.currentPosition) as? DayFragment)?.saveState()
+            mainDaysPager.children.forEach { (it as DayFragment).saveState() }
 
             putParcelableArrayList(DAY_STATES_KEY, ArrayList(states.map { ParcelableState(it.key.first, it.key.second, it.value) }))
         }

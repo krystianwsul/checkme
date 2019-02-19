@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -44,6 +45,7 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
     }
 
     fun saveState() {
+        Log.e("asdf", "saving state for " + key.value)
         activity.states[key.value!!] = groupListFragment.onSaveInstanceState()
     }
 

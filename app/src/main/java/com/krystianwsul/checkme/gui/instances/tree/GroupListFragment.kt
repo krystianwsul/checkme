@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -477,6 +478,11 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         override fun getTitleCount() = nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).size
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            Log.e("asdf", "state destroying ActionMode")
+            super.onDestroyActionMode(mode)
+        }
     }
 
     private var floatingActionButton: FloatingActionButton? = null
@@ -544,8 +550,11 @@ class GroupListFragment @JvmOverloads constructor(
         if (state is Bundle) {
             state.apply {
                 classLoader = State::class.java.classLoader
-                if (containsKey(EXPANSION_STATE_KEY))
+                if (containsKey(EXPANSION_STATE_KEY)) {
                     this@GroupListFragment.state = getParcelable(EXPANSION_STATE_KEY)!!
+                    if (this@GroupListFragment.state.selectedGroups.isNotEmpty())
+                        Log.e("asdf", "restoring state: " + this@GroupListFragment.state)
+                }
 
                 groupListRecycler.layoutManager!!.onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
             }
@@ -610,8 +619,13 @@ class GroupListFragment @JvmOverloads constructor(
         return Bundle().apply {
             putParcelable(SUPER_STATE_KEY, super.onSaveInstanceState())
 
-            if (this@GroupListFragment::treeViewAdapter.isInitialized)
-                putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).state)
+            if (this@GroupListFragment::treeViewAdapter.isInitialized) {
+                val state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
+                putParcelable(EXPANSION_STATE_KEY, state)
+
+                if (state.selectedGroups.isNotEmpty())
+                    Log.e("asdf", "saving state: " + state)
+            }
 
             putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
         }
@@ -627,6 +641,8 @@ class GroupListFragment @JvmOverloads constructor(
             }
         } else {
             val groupAdapter = GroupAdapter(this)
+            if (state.selectedGroups.isNotEmpty())
+                Log.e("asdf", "initializing state: " + state)
             groupAdapter.initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, showPadding(), useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
             treeViewAdapter = groupAdapter.treeViewAdapter
             groupListRecycler.adapter = treeViewAdapter
@@ -814,6 +830,9 @@ class GroupListFragment @JvmOverloads constructor(
                         .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
                         .map { it.exactTimeStamp.long }
 
+                if (selectedGroups.isNotEmpty() || selectedInstances.isNotEmpty())
+                    Log.e("asdf", "asdf")
+
                 return State(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys, selectedInstances, selectedGroups)
             }
 
@@ -826,6 +845,9 @@ class GroupListFragment @JvmOverloads constructor(
         fun initialize(dataId: Int, customTimeDatas: List<CustomTimeData>, showFab: Boolean, useGroups: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
+
+            if (state.selectedGroups.isNotEmpty() || state.selectedInstances.isNotEmpty())
+                Log.e("asdf", "asdf")
 
             treeViewAdapter.showPadding = showFab
             treeNodeCollection = TreeNodeCollection(treeViewAdapter) {
@@ -848,7 +870,6 @@ class GroupListFragment @JvmOverloads constructor(
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = groupListFragment.selectionCallback.decrementSelected(x)
 
         override val groupAdapter = this
-
     }
 
     @Parcelize

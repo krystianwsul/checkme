@@ -181,7 +181,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                             check(it.instanceDateTime.timeStamp < TimeStamp.now)
                             check(it.isRootInstance)
 
-                            if (!it.notificationShown) {
+                            if (!it.notificationShown) { // to ignore double taps
                                 DomainFactory.instance.setInstancesNotNotified(it.dataId, SaveService.Source.GUI, listOf(instanceKey))
                                 it.notificationShown = true
 

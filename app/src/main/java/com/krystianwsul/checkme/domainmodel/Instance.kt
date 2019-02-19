@@ -81,7 +81,14 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
 
+    /*
+    Has the instance's notification been dismissed? Meaningful only if the instance is a root
+    instance, in the past, and not done.  If either of the last two are changed, this flag gets
+    reset.  As far as being a root instance, there's no simple way to catch that moment.
+     */
     abstract var notified: Boolean
+
+    abstract var notificationShown: Boolean // Is the notification visible?
 
     /*
     I'm going to make some assumptions here:
@@ -92,8 +99,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
      */
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
-
-    abstract var notificationShown: Boolean
 
     abstract val project: RemoteProject<*>
 

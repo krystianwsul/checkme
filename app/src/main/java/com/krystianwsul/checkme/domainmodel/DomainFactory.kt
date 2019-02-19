@@ -886,8 +886,10 @@ open class DomainFactory(
 
         instanceKeys.forEach {
             val instance = getInstance(it)
-            check(instance.notified)
-            check(instance.done == null && instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !instance.notificationShown && instance.isRootInstance(now))
+            check(instance.done == null)
+            check(instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
+            check(!instance.notificationShown)
+            check(instance.isRootInstance(now))
 
             instance.notified = false
             instance.notificationShown = false

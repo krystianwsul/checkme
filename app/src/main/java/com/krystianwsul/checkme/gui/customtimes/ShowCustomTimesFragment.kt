@@ -56,7 +56,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
                 R.id.action_custom_times_delete -> {
                     (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).removeSelected(x)
 
-                    updateSelectAll()
+                    updateSelectAll() // todo snackbar? where are they getting deleted?
                 }
                 else -> throw UnsupportedOperationException()
             }

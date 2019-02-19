@@ -93,6 +93,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private var taskSelectAllVisible = false
     private var customTimesSelectAllVisible = false
     private var userSelectAllVisible = false
+    private var projectSelectAllVisible = false
 
     private lateinit var headerName: TextView
     private lateinit var headerEmail: TextView
@@ -132,7 +133,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             Tab.TASKS -> taskSelectAllVisible
             Tab.CUSTOM_TIMES -> customTimesSelectAllVisible
             Tab.FRIENDS -> userSelectAllVisible
-            else -> false
+            Tab.PROJECTS -> projectSelectAllVisible
+            Tab.DEBUG -> false
         }
 
         true
@@ -660,6 +662,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     fun setUserSelectAllVisibility(selectAllVisible: Boolean) {
         userSelectAllVisible = selectAllVisible
+
+        invalidateOptionsMenu()
+    }
+
+    fun setProjectSelectAllVisibility(selectAllVisible: Boolean) {
+        projectSelectAllVisible = selectAllVisible
 
         invalidateOptionsMenu()
     }

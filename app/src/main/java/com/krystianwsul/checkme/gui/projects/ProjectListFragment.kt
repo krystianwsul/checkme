@@ -86,6 +86,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
                         DomainFactory.instance.clearProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectUndoData)
                     }
+
+                    updateSelectAll()
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -193,6 +195,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         }
 
         updateFabVisibility()
+        updateSelectAll()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -223,6 +226,12 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 hide()
             }
         }
+    }
+
+    private fun updateSelectAll() {
+        checkNotNull(treeViewAdapter)
+
+        mainActivity.setProjectSelectAllVisibility(treeViewAdapter.itemCount != 0)
     }
 
     override fun clearFab() {

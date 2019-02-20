@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.instances
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -42,12 +41,11 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         orientation = LinearLayoutCompat.VERTICAL
 
         View.inflate(context, R.layout.fragment_day, this)
+
+        groupListFragment.forceSaveStateListener = { saveState() }
     }
 
-    fun saveState() {
-        Log.e("asdf", "saving state for " + key.value)
-        activity.states[key.value!!] = groupListFragment.onSaveInstanceState()
-    }
+    fun saveState() = activity.setState(key.value!!, groupListFragment.onSaveInstanceState())
 
     fun setPosition(timeRange: MainActivity.TimeRange, position: Int) {
         entry?.stop()
@@ -57,7 +55,7 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
 
         key.accept(Pair(timeRange, position))
 
-        activity.states[key.value!!]?.let {
+        activity.getState(key.value!!)?.let {
             groupListFragment.onRestoreInstanceState(it)
         }
 

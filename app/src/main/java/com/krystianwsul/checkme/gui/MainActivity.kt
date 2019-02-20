@@ -110,8 +110,13 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     lateinit var dayViewModel: DayViewModel
         private set
 
-    lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
-        private set
+    private lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
+
+    fun getState(pair: Pair<TimeRange, Int>) = states[pair]
+
+    fun setState(pair: Pair<TimeRange, Int>, bundle: Bundle) {
+        states[pair] = bundle
+    }
 
     val selectAllRelay = PublishRelay.create<Unit>()
 

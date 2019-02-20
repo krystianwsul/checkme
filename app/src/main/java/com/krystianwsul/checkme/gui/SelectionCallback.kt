@@ -1,8 +1,13 @@
 package com.krystianwsul.checkme.gui
 
+import android.animation.ValueAnimator
+import android.content.res.ColorStateList
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
+import androidx.core.content.ContextCompat
+import com.google.android.material.bottomappbar.BottomAppBar
+import com.krystianwsul.checkme.R
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
@@ -18,12 +23,37 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     protected abstract fun getTreeViewAdapter(): TreeViewAdapter
 
+    protected open val bottomBar: BottomAppBar? = null // todo bottom action
+
+    private var initialBottomColor: Int? = null
+
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         check(actionMode == null)
 
         actionMode = mode
 
+        bottomBar?.let {
+            if (initialBottomColor == null)
+                initialBottomColor = it.backgroundTint!!.defaultColor
+
+            val final = ContextCompat.getColor(it.context, R.color.actionModeBackground)
+            it.animateBottom(final)
+        }
+
         return true
+    }
+
+    private fun BottomAppBar.animateBottom(final: Int) {
+        val initial = backgroundTint!!.defaultColor
+
+        ValueAnimator.ofArgb(initial, final).apply {
+            duration = context.resources.getInteger(android.R.integer.config_longAnimTime).toLong()
+
+            addUpdateListener { valueAnimator ->
+                backgroundTint = ColorStateList.valueOf(valueAnimator.animatedValue as Int)
+            }
+            start()
+        }
     }
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
@@ -53,6 +83,8 @@ abstract class SelectionCallback : ActionMode.Callback {
                 countdown()
             }
         }
+
+        bottomBar?.animateBottom(initialBottomColor!!)
     }
 
     private fun countdown() {

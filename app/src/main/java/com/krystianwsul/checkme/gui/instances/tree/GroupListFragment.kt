@@ -13,6 +13,7 @@ import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.common.collect.HashMultimap
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -131,6 +132,8 @@ class GroupListFragment @JvmOverloads constructor(
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+
+        override val bottomBar by lazy { listener.getBottomBar() }
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val treeNodes = treeViewAdapter.selectedNodes
@@ -875,6 +878,8 @@ class GroupListFragment @JvmOverloads constructor(
         fun onDestroyGroupActionMode()
 
         fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean)
+
+        fun getBottomBar(): BottomAppBar? = null // todo bottom action
     }
 
     data class DataWrapper(

@@ -112,6 +112,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
 
+    override fun getBottomBar() = bottomAppBar!!
+
     fun getState(pair: Pair<TimeRange, Int>) = states[pair]
 
     fun setState(pair: Pair<TimeRange, Int>, bundle: Bundle) {
@@ -284,7 +286,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         R.id.actionMainSearch -> {
                             mainActivitySearch.apply {
                                 check(visibility == View.GONE)
-                                visibility = View.VISIBLE // todo replace with actionMode
+                                visibility = View.VISIBLE
                                 requestFocus()
 
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)

@@ -23,7 +23,7 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     protected abstract fun getTreeViewAdapter(): TreeViewAdapter
 
-    protected open val bottomBar: BottomAppBar? = null // todo bottom action
+    protected open val bottomBarData: Triple<BottomAppBar, Int, () -> Unit>? = null // todo bottom action
 
     private var initialBottomColor: Int? = null
 
@@ -32,12 +32,21 @@ abstract class SelectionCallback : ActionMode.Callback {
 
         actionMode = mode
 
-        bottomBar?.let {
-            if (initialBottomColor == null)
-                initialBottomColor = it.backgroundTint!!.defaultColor
+        bottomBarData?.let { bottomBarData ->
+            bottomBarData.first.let {
+                if (initialBottomColor == null)
+                    initialBottomColor = it.backgroundTint!!.defaultColor
 
-            val final = ContextCompat.getColor(it.context, R.color.actionModeBackground)
-            it.animateBottom(final)
+                val final = ContextCompat.getColor(it.context, R.color.actionModeBackground)
+                it.animateBottom(final)
+
+                it.replaceMenu(bottomBarData.second)
+                it.setOnMenuItemClickListener {
+                    onActionItemClicked(actionMode!!, it)
+
+                    true
+                }
+            }
         }
 
         return true
@@ -84,7 +93,10 @@ abstract class SelectionCallback : ActionMode.Callback {
             }
         }
 
-        bottomBar?.animateBottom(initialBottomColor!!)
+        bottomBarData?.let {
+            it.first.animateBottom(initialBottomColor!!)
+            it.third.invoke()
+        }
     }
 
     private fun countdown() {

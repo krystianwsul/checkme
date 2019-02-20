@@ -7,8 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -130,13 +128,10 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var actionMode: ActionMode? = null
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_select_all, menu)
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) = menu.run {
-        findItem(R.id.action_select_all).isVisible = when (visibleTab.value!!) {
+    private fun updateBottomMenu() {
+        bottomAppBar.menu
+                .findItem(R.id.action_select_all)
+                ?.isVisible = when (visibleTab.value!!) { // todo bottom
             Tab.INSTANCES -> groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
             Tab.TASKS -> taskSelectAllVisible
             Tab.CUSTOM_TIMES -> customTimesSelectAllVisible
@@ -144,40 +139,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             Tab.PROJECTS -> projectSelectAllVisible
             Tab.DEBUG -> false
         }
-
-        true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        MyCrashlytics.logMethod(this, "item: " + item.title)
-
-        when (item.itemId) {
-            R.id.action_select_all -> when (visibleTab.value!!) {
-                MainActivity.Tab.INSTANCES -> selectAllRelay.accept(Unit)
-                MainActivity.Tab.TASKS -> {
-                    val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
-                    taskListFragment.treeViewAdapter.updateDisplayedNodes {
-                        taskListFragment.selectAll(TreeViewAdapter.Placeholder)
-                    }
-                }
-                MainActivity.Tab.CUSTOM_TIMES -> {
-                    val showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
-                    showCustomTimesFragment.treeViewAdapter.updateDisplayedNodes {
-                        showCustomTimesFragment.selectAll(TreeViewAdapter.Placeholder)
-                    }
-                }
-                MainActivity.Tab.FRIENDS -> {
-                    val friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
-                    friendListFragment.treeViewAdapter.updateDisplayedNodes {
-                        friendListFragment.selectAll(TreeViewAdapter.Placeholder)
-                    }
-                }
-                else -> throw UnsupportedOperationException()
-            }
-            else -> throw IllegalArgumentException()
-        }
-
-        return true
     }
 
     private fun closeSearch() {
@@ -193,7 +154,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
-        setSupportActionBar(bottomAppBar)
+
         mainDaysPager.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         PagerSnapHelper().attachToRecyclerView(mainDaysPager)
 
@@ -239,9 +200,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             states = mutableMapOf()
         }
 
-        menuInflater.inflate(R.menu.main_activity_filter, mainActivityToolbar.menu)
-
         mainActivityToolbar.apply {
+            menuInflater.inflate(R.menu.main_activity_filter, menu)
+
             val triples = listOf(
                     R.id.actionMainFilterDay to TimeRange.DAY,
                     R.id.actionMainFilterWeek to TimeRange.WEEK,
@@ -266,7 +227,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                         mainDaysPager.adapter = MyFragmentStatePagerAdapter()
 
                         groupSelectAllVisible.clear()
-                        invalidateOptionsMenu()
+                        updateBottomMenu()
 
                         if (timeRange != TimeRange.DAY)
                             calendarOpen = false
@@ -301,6 +262,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 true
             }
         }
+
+        initBottomBar()
 
         val toggle = ActionBarDrawerToggle(this, mainActivityDrawer, mainActivityToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         mainActivityDrawer.addDrawerListener(toggle)
@@ -346,7 +309,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             pageSelections().subscribe {
                 daysPosition.accept(it)
 
-                invalidateOptionsMenu()
+                updateBottomMenu()
 
                 updateCalendarDate()
             }.addTo(createDisposable)
@@ -387,7 +350,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     closeDrawer(GravityCompat.START)
                 }
 
-                invalidateOptionsMenu()
+                updateBottomMenu()
 
                 true
             }
@@ -459,6 +422,44 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     headerName.text = displayName
                     headerEmail.text = email
                 }
+    }
+
+    override fun initBottomBar() {
+        bottomAppBar.apply {
+            replaceMenu(R.menu.menu_select_all)
+
+            setOnMenuItemClickListener { item ->
+                MyCrashlytics.logMethod(this, "item: " + item.title)
+
+                when (item.itemId) {
+                    R.id.action_select_all -> when (visibleTab.value!!) {
+                        MainActivity.Tab.INSTANCES -> selectAllRelay.accept(Unit)
+                        MainActivity.Tab.TASKS -> {
+                            val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
+                            taskListFragment.treeViewAdapter.updateDisplayedNodes {
+                                taskListFragment.selectAll(TreeViewAdapter.Placeholder)
+                            }
+                        }
+                        MainActivity.Tab.CUSTOM_TIMES -> {
+                            val showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
+                            showCustomTimesFragment.treeViewAdapter.updateDisplayedNodes {
+                                showCustomTimesFragment.selectAll(TreeViewAdapter.Placeholder)
+                            }
+                        }
+                        MainActivity.Tab.FRIENDS -> {
+                            val friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
+                            friendListFragment.treeViewAdapter.updateDisplayedNodes {
+                                friendListFragment.selectAll(TreeViewAdapter.Placeholder)
+                            }
+                        }
+                        else -> throw UnsupportedOperationException()
+                    }
+                    else -> throw IllegalArgumentException()
+                }
+
+                true
+            }
+        }
     }
 
     private fun updateSearchMenu() {
@@ -549,7 +550,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             mainDebugFrame.visibility = View.GONE
         }
 
-        supportActionBar!!.title = when (tab) {
+        mainActivityToolbar.title = when (tab) {
             MainActivity.Tab.INSTANCES -> null
             MainActivity.Tab.TASKS -> getString(R.string.tasks)
             MainActivity.Tab.PROJECTS -> getString(R.string.projects)
@@ -619,7 +620,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
         taskSelectAllVisible = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
@@ -646,7 +647,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         groupSelectAllVisible[position] = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) {
@@ -664,19 +665,19 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     override fun setCustomTimesSelectAllVisibility(selectAllVisible: Boolean) {
         customTimesSelectAllVisible = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
     }
 
     fun setUserSelectAllVisibility(selectAllVisible: Boolean) {
         userSelectAllVisible = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
     }
 
     fun setProjectSelectAllVisibility(selectAllVisible: Boolean) {
         projectSelectAllVisible = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
     }
 
     override val snackbarParent get() = mainCoordinator!!

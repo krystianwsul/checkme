@@ -133,7 +133,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override val bottomBar by lazy { listener.getBottomBar() }
+        override val bottomBarData by lazy { Triple(listener.getBottomBar()!!, R.menu.menu_edit_groups, listener::initBottomBar) }
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val treeNodes = treeViewAdapter.selectedNodes
@@ -880,6 +880,8 @@ class GroupListFragment @JvmOverloads constructor(
         fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean)
 
         fun getBottomBar(): BottomAppBar? = null // todo bottom action
+
+        fun initBottomBar() = Unit // todo
     }
 
     data class DataWrapper(

@@ -71,7 +71,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.show_instance_menu, menu)
+        menuInflater.inflate(R.menu.show_instance_menu_bottom, menu)
         return true
     }
 
@@ -165,7 +165,7 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
         setSupportActionBar(bottomAppBar)
 
         toolbar.apply {
-            menuInflater.inflate(R.menu.show_instance_top_menu, menu)
+            menuInflater.inflate(R.menu.show_instance_menu_top, menu)
 
             setOnMenuItemClickListener { item ->
                 data!!.let {

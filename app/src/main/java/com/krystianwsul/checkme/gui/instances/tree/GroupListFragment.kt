@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
+import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -133,7 +134,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override val bottomBarData by lazy { Triple(listener.getBottomBar()!!, R.menu.menu_edit_groups, listener::initBottomBar) }
+        override val bottomBarData by lazy { Triple(listener.getBottomBar()!!, R.menu.menu_edit_groups_bottom, listener::initBottomBar) }
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val treeNodes = treeViewAdapter.selectedNodes
@@ -387,7 +388,7 @@ class GroupListFragment @JvmOverloads constructor(
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            actionMode!!.menuInflater.inflate(R.menu.menu_edit_groups, actionMode!!.menu)
+            actionMode!!.menuInflater.inflate(R.menu.menu_edit_groups_top, actionMode!!.menu)
 
             listener.onCreateGroupActionMode(actionMode!!, treeViewAdapter)
 
@@ -407,50 +408,45 @@ class GroupListFragment @JvmOverloads constructor(
         private fun updateMenu() {
             checkNotNull(actionMode)
 
-            val menu = actionMode!!.menu!!
+            val menus = listOf(actionMode!!.menu!!, listener.getBottomBar()!!.menu)
+            fun findItem(@IdRes itemId: Int) = menus.mapNotNull { it.findItem(itemId) }.single()
 
             val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes, true)
             check(instanceDatas.isNotEmpty())
 
-            menu.apply {
-                findItem(R.id.action_group_mark_done).isVisible = instanceDatas.all { it.Done == null }
-                findItem(R.id.action_group_mark_not_done).isVisible = instanceDatas.all { it.Done != null }
-                findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
-                findItem(R.id.action_group_notify).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
-            }
+            findItem(R.id.action_group_mark_done).isVisible = instanceDatas.all { it.Done == null }
+            findItem(R.id.action_group_mark_not_done).isVisible = instanceDatas.all { it.Done != null }
+            findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
+            findItem(R.id.action_group_notify).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
 
             if (instanceDatas.size == 1) {
                 val instanceData = instanceDatas.single()
 
-                menu.apply {
-                    findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
-                    findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
-                    findItem(R.id.action_group_join).isVisible = false
-                    findItem(R.id.action_group_delete_task).isVisible = instanceData.TaskCurrent
-                    findItem(R.id.action_group_add_task).isVisible = instanceData.TaskCurrent
-                }
+                findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
+                findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
+                findItem(R.id.action_group_join).isVisible = false
+                findItem(R.id.action_group_delete_task).isVisible = instanceData.TaskCurrent
+                findItem(R.id.action_group_add_task).isVisible = instanceData.TaskCurrent
             } else {
                 check(instanceDatas.size > 1)
 
-                menu.apply {
-                    findItem(R.id.action_group_show_task).isVisible = false
-                    findItem(R.id.action_group_edit_task).isVisible = false
-                    findItem(R.id.action_group_add_task).isVisible = false
+                findItem(R.id.action_group_show_task).isVisible = false
+                findItem(R.id.action_group_edit_task).isVisible = false
+                findItem(R.id.action_group_add_task).isVisible = false
 
-                    if (instanceDatas.all { it.TaskCurrent }) {
-                        val projectIdCount = instanceDatas.asSequence()
-                                .map { it.InstanceKey.taskKey.remoteProjectId }
-                                .distinct()
-                                .count()
+                if (instanceDatas.all { it.TaskCurrent }) {
+                    val projectIdCount = instanceDatas.asSequence()
+                            .map { it.InstanceKey.taskKey.remoteProjectId }
+                            .distinct()
+                            .count()
 
-                        check(projectIdCount > 0)
+                    check(projectIdCount > 0)
 
-                        findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
-                        findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
-                    } else {
-                        findItem(R.id.action_group_join).isVisible = false
-                        findItem(R.id.action_group_delete_task).isVisible = false
-                    }
+                    findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
+                    findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
+                } else {
+                    findItem(R.id.action_group_join).isVisible = false
+                    findItem(R.id.action_group_delete_task).isVisible = false
                 }
             }
         }

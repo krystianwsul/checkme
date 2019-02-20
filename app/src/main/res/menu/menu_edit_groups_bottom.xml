@@ -2,26 +2,14 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/action_group_edit_instance"
-        android:title="@string/edit_instance"
-        android:orderInCategory="200"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_alarm_white_24dp"
-        android:visible="false"/>
-    <item
-        android:id="@+id/action_group_notify"
-        android:title="@string/notify"
-        android:orderInCategory="250"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_notifications_active_white_24dp"
-        android:visible="false" />
+
     <item
         android:id="@+id/action_group_share"
         android:title="@string/share"
         android:orderInCategory="300"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_share_white_24dp"/>
+
     <item
         android:id="@+id/action_group_edit_task"
         android:title="@string/edit_task"
@@ -29,6 +17,7 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_mode_edit_white_24dp"
         android:visible="false"/>
+
     <item
         android:id="@+id/action_group_delete_task"
         android:title="@string/delete_task"
@@ -36,6 +25,7 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_delete_white_24dp"
         android:visible="false"/>
+
     <item
         android:id="@+id/action_group_add_task"
         android:title="@string/add_task"
@@ -43,6 +33,7 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_add_white_24dp"
         android:visible="false"/>
+
     <item
         android:id="@+id/action_group_join"
         android:title="@string/join"
@@ -50,6 +41,7 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_merge_type_white_24dp"
         android:visible="false"/>
+
     <item
         android:id="@+id/action_group_show_task"
         android:title="@string/show_task"
@@ -57,16 +49,5 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_assignment_white_24dp"
         android:visible="false"/>
-    <item
-        android:id="@+id/action_group_mark_done"
-        android:title="@string/mark_done"
-        android:orderInCategory="600"
-        app:showAsAction="always"
-        android:icon="@drawable/ic_check_box_outline_blank_white_24dp"/>
-    <item
-        android:id="@+id/action_group_mark_not_done"
-        android:title="@string/mark_done"
-        android:orderInCategory="700"
-        app:showAsAction="always"
-        android:icon="@drawable/ic_check_box_white_24dp"/>
+
 </menu>

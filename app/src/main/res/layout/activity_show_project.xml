@@ -21,16 +21,7 @@
             android:fillViewport="true"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/showProjectFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/fabMargin"
-            android:src="@android:drawable/ic_input_add"
-            android:tint="@android:color/white"
-            android:visibility="invisible"
-            app:layout_anchor="@id/show_project_frame"
-            app:layout_anchorGravity="bottom|center" /> <!-- todo consider bottom bar -->
+        <include layout="@layout/bottom" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

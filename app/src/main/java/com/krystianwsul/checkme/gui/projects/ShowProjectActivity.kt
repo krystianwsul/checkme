@@ -16,8 +16,7 @@ import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
-
-import kotlinx.android.synthetic.main.activity_show_project.*
+import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 
 class ShowProjectActivity : AbstractActivity() {
@@ -125,7 +124,7 @@ class ShowProjectActivity : AbstractActivity() {
                     .commit()
         }
 
-        userListFragment.setFab(showProjectFab)
+        userListFragment.setFab(bottomFab)
 
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
 

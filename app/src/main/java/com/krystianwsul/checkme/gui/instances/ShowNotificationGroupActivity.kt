@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.instances
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -15,6 +13,7 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_notification_group.*
+import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 
@@ -44,9 +43,7 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_notification_group)
 
-        setSupportActionBar(toolbar)
-
-        supportActionBar!!.title = null
+        toolbar.title = null
 
         check(intent.hasExtra(INSTANCES_KEY))
 
@@ -60,6 +57,8 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
 
             createDisposable += data.subscribe { groupListFragment.setInstanceKeys(it.dataId, it.dataWrapper) }
         }
+
+        initBottomBar()
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
@@ -67,44 +66,47 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
     override fun onDestroyGroupActionMode() = Unit
 
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
-        val invalidate = (this.selectAllVisible != selectAllVisible) || (this.addHourVisible != addHourVisible)
-
         this.selectAllVisible = selectAllVisible
         this.addHourVisible = addHourVisible
 
-        if (invalidate)
-            invalidateOptionsMenu()
+        updateBottomBar()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_show_notification_group, menu)
-        return true
-    }
+    private fun updateBottomBar() {
+        bottomAppBar.menu.apply {
+            if (findItem(R.id.action_notification_group_select_all) == null)
+                return
 
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.apply {
             findItem(R.id.action_notification_group_select_all).isVisible = selectAllVisible
             findItem(R.id.action_notification_group_hour).isVisible = addHourVisible
         }
-
-        return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_notification_group_hour -> {
-                groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                    groupListFragment.addHour(TreeViewAdapter.Placeholder)
+    override fun getBottomBar() = bottomAppBar!!
+
+    override fun initBottomBar() {
+        bottomAppBar.apply {
+            replaceMenu(R.menu.menu_show_notification_group)
+
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_notification_group_hour -> { // todo bottom (move to top bar)
+                        groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                            groupListFragment.addHour(TreeViewAdapter.Placeholder)
+                        }
+                    }
+                    R.id.action_notification_group_select_all -> {
+                        groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                            groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+                        }
+                    }
+                    else -> throw IllegalArgumentException()
                 }
+
+                true
             }
-            R.id.action_notification_group_select_all -> {
-                groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                    groupListFragment.selectAll(TreeViewAdapter.Placeholder)
-                }
-            }
-            else -> throw IllegalArgumentException()
         }
 
-        return true
+        updateBottomBar()
     }
 }

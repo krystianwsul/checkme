@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -62,6 +63,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private val selectionCallback = object : SelectionCallback() {
 
         override fun getTreeViewAdapter() = treeViewAdapter
+
+        override val bottomBarData by lazy { Triple(taskListListener.getBottomBar(), R.menu.menu_edit_tasks, taskListListener::initBottomBar) }
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
@@ -129,8 +132,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            actionMode!!.menuInflater.inflate(R.menu.menu_edit_tasks, actionMode!!.menu)
-
             updateFabVisibility()
 
             (activity as TaskListListener).onCreateActionMode(actionMode!!)
@@ -147,12 +148,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             check(projectIdCount > 0)
 
-            actionMode!!.menu.run {
-                findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                findItem(R.id.action_task_edit).isVisible = false
-                findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
-                findItem(R.id.action_task_add).isVisible = false
-            }
+            taskListListener.getBottomBar()
+                    .menu
+                    .run {
+                        findItem(R.id.action_task_join).isVisible = projectIdCount == 1
+                        findItem(R.id.action_task_edit).isVisible = false
+                        findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
+                        findItem(R.id.action_task_add).isVisible = false
+                    }
         }
 
         override fun onOtherAdded() {
@@ -166,10 +169,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             check(projectIdCount > 0)
 
-            actionMode!!.menu.run {
-                findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
-            }
+            taskListListener.getBottomBar()
+                    .menu
+                    .run {
+                        findItem(R.id.action_task_join).isVisible = projectIdCount == 1
+                        findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
+                    }
         }
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
@@ -179,12 +184,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
 
         override fun onSecondToLastRemoved() {
-            actionMode!!.menu.run {
-                findItem(R.id.action_task_join).isVisible = false
-                findItem(R.id.action_task_edit).isVisible = true
-                findItem(R.id.action_task_delete).isVisible = true
-                findItem(R.id.action_task_add).isVisible = true
-            }
+            taskListListener.getBottomBar()
+                    .menu
+                    .run {
+                        findItem(R.id.action_task_join).isVisible = false
+                        findItem(R.id.action_task_edit).isVisible = true
+                        findItem(R.id.action_task_delete).isVisible = true
+                        findItem(R.id.action_task_add).isVisible = true
+                    }
         }
 
         override fun onOtherRemoved() {
@@ -198,10 +205,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             check(projectIdCount > 0)
 
-            actionMode!!.menu.run {
-                findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
-            }
+            taskListListener.getBottomBar()
+                    .menu
+                    .run {
+                        findItem(R.id.action_task_join).isVisible = projectIdCount == 1
+                        findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
+                    }
         }
 
         private fun containsLoop(treeNodes: List<TreeNode>): Boolean {
@@ -701,7 +710,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
-                treeNode = TreeNode(this, treeNodeCollection, false, false)
+                treeNode = TreeNode(this, treeNodeCollection, expanded = false, selected = false)
                 treeNode.setChildTreeNodes(listOf())
 
                 return treeNode
@@ -775,5 +784,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 
         val search: Observable<String>
+
+        fun getBottomBar(): BottomAppBar
+
+        fun initBottomBar()
     }
 }

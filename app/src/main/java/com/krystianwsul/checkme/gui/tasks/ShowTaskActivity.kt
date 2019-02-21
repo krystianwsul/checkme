@@ -4,8 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
@@ -52,7 +50,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_task)
 
-        setSupportActionBar(bottomAppBar)
+        initBottomBar()
 
         taskKey = if (savedInstanceState != null) {
             check(savedInstanceState.containsKey(TASK_KEY_KEY))
@@ -94,57 +92,6 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         showTaskViewModel.start(taskKey)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.show_task_menu, menu)
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.run {
-            findItem(R.id.task_menu_edit).isVisible = data != null
-            findItem(R.id.task_menu_share).isVisible = data != null
-            findItem(R.id.task_menu_delete).isVisible = data != null
-            findItem(R.id.task_menu_select_all).isVisible = selectAllVisible
-            findItem(R.id.task_menu_show_instances).isVisible = data?.hasInstances == true
-        }
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.task_menu_edit -> {
-                showTaskViewModel.stop()
-
-                startActivityForResult(CreateTaskActivity.getEditIntent(taskKey), REQUEST_EDIT_TASK)
-            }
-            R.id.task_menu_share -> {
-                check(data != null)
-
-                Utils.share(this, data!!.name + taskListFragment.shareData.let { "\n" + it })
-            }
-            R.id.task_menu_delete -> {
-                showTaskViewModel.stop()
-
-                val taskUndoData = DomainFactory.instance.setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
-
-                setResult(RESULT_DELETE)
-
-                finish()
-
-                setSnackbar(taskUndoData)
-            }
-            R.id.task_menu_select_all -> {
-                taskListFragment.treeViewAdapter.updateDisplayedNodes {
-                    taskListFragment.selectAll(TreeViewAdapter.Placeholder)
-                }
-            }
-            R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKey))
-            else -> throw UnsupportedOperationException()
-        }
-        return true
-    }
-
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
@@ -153,7 +100,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
             subtitle = data.scheduleText
         }
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
 
         taskListFragment.setTaskKey(taskKey, data.dataId, data.taskData)
     }
@@ -165,7 +112,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
     override fun setTaskSelectAllVisibility(selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
     }
 
     override val snackbarParent get() = showTaskCoordinator!!
@@ -174,5 +121,61 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
         super.onSaveInstanceState(outState)
 
         outState.putParcelable(TASK_KEY_KEY, taskKey)
+    }
+
+    private fun updateBottomMenu() {
+        bottomAppBar.menu.run {
+            if (findItem(R.id.task_menu_edit) == null)
+                return
+
+            findItem(R.id.task_menu_edit).isVisible = data != null
+            findItem(R.id.task_menu_share).isVisible = data != null
+            findItem(R.id.task_menu_delete).isVisible = data != null
+            findItem(R.id.task_menu_select_all).isVisible = selectAllVisible
+            findItem(R.id.task_menu_show_instances).isVisible = data?.hasInstances == true
+        }
+    }
+
+    override fun getBottomBar() = bottomAppBar!!
+
+    override fun initBottomBar() {
+        bottomAppBar.apply {
+            replaceMenu(R.menu.show_task_menu)
+
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.task_menu_edit -> {
+                        showTaskViewModel.stop()
+
+                        startActivityForResult(CreateTaskActivity.getEditIntent(taskKey), REQUEST_EDIT_TASK)
+                    }
+                    R.id.task_menu_share -> {
+                        check(data != null)
+
+                        Utils.share(this@ShowTaskActivity, data!!.name + taskListFragment.shareData.let { "\n" + it })
+                    }
+                    R.id.task_menu_delete -> {
+                        showTaskViewModel.stop()
+
+                        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamp(data!!.dataId, SaveService.Source.GUI, taskKey)
+
+                        setResult(RESULT_DELETE)
+
+                        finish()
+
+                        setSnackbar(taskUndoData)
+                    }
+                    R.id.task_menu_select_all -> {
+                        taskListFragment.treeViewAdapter.updateDisplayedNodes {
+                            taskListFragment.selectAll(TreeViewAdapter.Placeholder)
+                        }
+                    }
+                    R.id.task_menu_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKey))
+                    else -> throw UnsupportedOperationException()
+                }
+
+                true
+            }
+        }
     }
 }

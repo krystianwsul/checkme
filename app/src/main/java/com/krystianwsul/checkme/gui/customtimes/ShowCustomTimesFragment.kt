@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -42,11 +43,15 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private var selectedCustomTimeIds: List<RemoteCustomTimeId.Private>? = null
 
+    private val listener get() = activity as CustomTimesListListener
+
     private val selectionCallback = object : SelectionCallback() {
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+
+        override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_custom_times, listener::initBottomBar) }
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val customTimeIds = selectedIds
@@ -64,8 +69,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
-
-            actionMode!!.menuInflater.inflate(R.menu.menu_custom_times, actionMode!!.menu)
 
             updateFabVisibility()
 
@@ -291,5 +294,9 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     interface CustomTimesListListener : ActionModeListener, SnackbarListener {
 
         fun setCustomTimesSelectAllVisibility(selectAllVisible: Boolean)
+
+        fun getBottomBar(): BottomAppBar
+
+        fun initBottomBar()
     }
 }

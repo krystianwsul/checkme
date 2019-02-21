@@ -8,12 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractFragment
 import com.krystianwsul.checkme.gui.FabUser
 import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -37,7 +39,8 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var projectId: String? = null
 
-    private lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter
+        private set
 
     private var data: ShowProjectViewModel.Data? = null
 
@@ -49,16 +52,18 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
+        override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_friends, listener::initBottomBar) }
+
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             check(itemId == R.id.action_friends_delete)
 
             (treeViewAdapter.treeModelAdapter as FriendListAdapter).removeSelected(x)
+
+            updateSelectAll()
         }
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
-
-            actionMode!!.menuInflater.inflate(R.menu.menu_friends, actionMode!!.menu)
 
             updateFabVisibility()
         }
@@ -75,6 +80,8 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private var friendListFab: FloatingActionButton? = null
+
+    private val listener get() = activity as UserListListener
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
 
@@ -105,7 +112,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             check(data!!.friendDatas.containsKey(friendId))
             check(getSelected().none { it.userListData.id == friendId })
 
-            val friendData = data!!.friendDatas[friendId]!!
+            val friendData = data!!.friendDatas.getValue(friendId)
 
             treeViewAdapter.updateDisplayedNodes {
                 val userNode = UserNode(friendData, HashSet())
@@ -145,6 +152,8 @@ class UserListFragment : AbstractFragment(), FabUser {
         updateVisibility()
 
         (childFragmentManager.findFragmentByTag(FRIEND_PICKER_TAG) as? FriendPickerFragment)?.let { initializeFriendPickerFragment(it) }
+
+        updateSelectAll()
     }
 
     private fun updateVisibility() {
@@ -229,6 +238,12 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private fun getSelected() = treeViewAdapter.selectedNodes.map { (it.modelNode as UserNode) }
+
+    private fun updateSelectAll() {
+        checkNotNull(treeViewAdapter)
+
+        listener.setUserSelectAllVisibility(treeViewAdapter.itemCount != 0)
+    }
 
     inner class FriendListAdapter : TreeModelAdapter {
 
@@ -332,4 +347,13 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     @Parcelize
     class SaveState(val addedIds: Set<String>, val removedIds: Set<String>, val selectedIds: Set<String>) : Parcelable
+
+    interface UserListListener : SnackbarListener {
+
+        fun setUserSelectAllVisibility(selectAllVisible: Boolean)
+
+        fun getBottomBar(): BottomAppBar
+
+        fun initBottomBar()
+    }
 }

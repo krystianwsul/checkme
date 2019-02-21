@@ -15,11 +15,13 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.synthetic.main.activity_show_project.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 
-class ShowProjectActivity : AbstractActivity() {
+class ShowProjectActivity : AbstractActivity(), UserListFragment.UserListListener {
 
     companion object {
 
@@ -47,6 +49,8 @@ class ShowProjectActivity : AbstractActivity() {
     private val discardDialogListener = this::finish
 
     private lateinit var showProjectViewModel: ShowProjectViewModel
+
+    private var selectAllVisible = false
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -93,6 +97,8 @@ class ShowProjectActivity : AbstractActivity() {
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(R.drawable.ic_close_white_24dp)
         }
+
+        initBottomBar()
 
         toolbarEditText.addTextChangedListener(object : TextWatcher {
 
@@ -192,4 +198,36 @@ class ShowProjectActivity : AbstractActivity() {
             false
         }
     }
+
+    override fun initBottomBar() {
+        bottomAppBar.apply {
+            replaceMenu(R.menu.menu_select_all)
+
+            setOnMenuItemClickListener { item ->
+                check(item.itemId == R.id.action_select_all)
+
+                userListFragment.treeViewAdapter.updateDisplayedNodes {
+                    userListFragment.treeViewAdapter.selectAll(TreeViewAdapter.Placeholder)
+                }
+
+                true
+            }
+        }
+    }
+
+    override fun getBottomBar() = bottomAppBar!!
+
+    private fun updateBottomMenu() {
+        bottomAppBar.menu
+                .findItem(R.id.action_select_all)
+                ?.isVisible = selectAllVisible
+    }
+
+    override fun setUserSelectAllVisibility(selectAllVisible: Boolean) {
+        this.selectAllVisible = selectAllVisible
+
+        updateBottomMenu()
+    }
+
+    override val snackbarParent get() = showProjectCoordinator!!
 }

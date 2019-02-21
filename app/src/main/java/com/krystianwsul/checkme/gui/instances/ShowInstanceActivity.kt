@@ -7,8 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -67,102 +65,12 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
 
     private val broadcastReceiver = object : BroadcastReceiver() {
 
-        override fun onReceive(context: Context?, intent: Intent?) = invalidateOptionsMenu()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.show_instance_menu_bottom, menu)
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.run {
-            findItem(R.id.instance_menu_share).isVisible = data != null
-            findItem(R.id.instance_menu_show_task).isVisible = data?.taskCurrent == true
-            findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
-            findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
-            findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
-            findItem(R.id.instance_menu_add_task).isVisible = data?.run { isRootInstance && instanceDateTime.timeStamp > TimeStamp.now } == true
-            // todo ticks
-        }
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        data!!.let {
-            when (item.itemId) {
-                R.id.instance_menu_share -> {
-                    val shareData = groupListFragment.shareData
-                    if (TextUtils.isEmpty(shareData))
-                        Utils.share(this, it.name)
-                    else
-                        Utils.share(this, it.name + "\n" + shareData)
-                }
-                R.id.instance_menu_show_task -> {
-                    check(!it.done)
-                    check(it.taskCurrent)
-
-                    showInstanceViewModel.stop()
-
-                    startActivityForResult(ShowTaskActivity.newIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
-                }
-                R.id.instance_menu_edit_task -> {
-                    check(!it.done)
-                    check(it.taskCurrent)
-
-                    showInstanceViewModel.stop()
-
-                    startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
-                }
-                R.id.instance_menu_delete_task -> {
-                    check(it.taskCurrent)
-
-                    if (!it.exists)
-                        showInstanceViewModel.stop()
-
-                    val todoTaskData = DomainFactory.instance.setTaskEndTimeStamp(it.dataId, SaveService.Source.GUI, instanceKey.taskKey)
-
-                    if (it.exists) {
-                        it.taskCurrent = false
-
-                        invalidateOptionsMenu()
-
-                        showSnackbar(1) {
-                            it.taskCurrent = true
-
-                            invalidateOptionsMenu()
-
-                            DomainFactory.instance.clearTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, todoTaskData)
-                        }
-                    } else {
-                        setSnackbar(todoTaskData)
-
-                        finish()
-                    }
-                }
-                R.id.instance_menu_select_all -> {
-                    groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                        groupListFragment.selectAll(TreeViewAdapter.Placeholder)
-                    }
-                }
-                R.id.instance_menu_add_task -> {
-                    data!!.instanceDateTime.let {
-                        startActivity(CreateTaskActivity.getCreateIntent(this, CreateTaskActivity.ScheduleHint(it.date, it.time.timePair)))
-                    }
-                }
-                else -> throw UnsupportedOperationException()
-            }
-        }
-
-        return true
+        override fun onReceive(context: Context?, intent: Intent?) = updateBottomMenu()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_instance)
-
-        setSupportActionBar(bottomAppBar)
 
         toolbar.apply {
             menuInflater.inflate(R.menu.show_instance_menu_top, menu)
@@ -202,8 +110,9 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
                 true
             }
         }
-
         updateTopMenu()
+
+        initBottomBar()
 
         if (savedInstanceState == null)
             first = true
@@ -228,6 +137,20 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             findItem(R.id.instanceMenuNotify).isVisible = data?.run { !done && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown && isRootInstance } == true
             findItem(R.id.instanceMenuCheck).isVisible = data?.done == false
             findItem(R.id.instanceMenuUncheck).isVisible = data?.done == true
+        }
+    }
+
+    private fun updateBottomMenu() {
+        bottomAppBar.menu.run {
+            if (findItem(R.id.instance_menu_share) == null)
+                return
+
+            findItem(R.id.instance_menu_share).isVisible = data != null
+            findItem(R.id.instance_menu_show_task).isVisible = data?.taskCurrent == true
+            findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
+            findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
+            findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
+            findItem(R.id.instance_menu_add_task).isVisible = data?.run { isRootInstance && instanceDateTime.timeStamp > TimeStamp.now } == true
         }
     }
 
@@ -287,8 +210,8 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
             subtitle = data.displayText
         }
 
-        invalidateOptionsMenu()
         updateTopMenu()
+        updateBottomMenu()
 
         groupListFragment.setInstanceKey(instanceKey, data.dataId, data.dataWrapper)
     }
@@ -313,7 +236,86 @@ class ShowInstanceActivity : AbstractActivity(), GroupListFragment.GroupListList
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
+    }
+
+    override fun getBottomBar() = bottomAppBar!!
+
+    override fun initBottomBar() {
+        bottomAppBar.apply {
+            replaceMenu(R.menu.show_instance_menu_bottom)
+
+            setOnMenuItemClickListener { item ->
+                data!!.let {
+                    when (item.itemId) {
+                        R.id.instance_menu_share -> {
+                            val shareData = groupListFragment.shareData
+                            if (TextUtils.isEmpty(shareData))
+                                Utils.share(this@ShowInstanceActivity, it.name)
+                            else
+                                Utils.share(this@ShowInstanceActivity, it.name + "\n" + shareData)
+                        }
+                        R.id.instance_menu_show_task -> {
+                            check(!it.done)
+                            check(it.taskCurrent)
+
+                            showInstanceViewModel.stop()
+
+                            startActivityForResult(ShowTaskActivity.newIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
+                        }
+                        R.id.instance_menu_edit_task -> {
+                            check(!it.done)
+                            check(it.taskCurrent)
+
+                            showInstanceViewModel.stop()
+
+                            startActivityForResult(CreateTaskActivity.getEditIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
+                        }
+                        R.id.instance_menu_delete_task -> {
+                            check(it.taskCurrent)
+
+                            if (!it.exists)
+                                showInstanceViewModel.stop()
+
+                            val todoTaskData = DomainFactory.instance.setTaskEndTimeStamp(it.dataId, SaveService.Source.GUI, instanceKey.taskKey)
+
+                            if (it.exists) {
+                                it.taskCurrent = false
+
+                                updateBottomMenu()
+
+                                showSnackbar(1) {
+                                    it.taskCurrent = true
+
+                                    updateBottomMenu()
+
+                                    DomainFactory.instance.clearTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, todoTaskData)
+                                }
+                            } else {
+                                setSnackbar(todoTaskData)
+
+                                finish()
+                            }
+                        }
+                        R.id.instance_menu_select_all -> {
+                            groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                                groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+                            }
+                        }
+                        R.id.instance_menu_add_task -> {
+                            data!!.instanceDateTime.let {
+                                startActivity(CreateTaskActivity.getCreateIntent(this@ShowInstanceActivity, CreateTaskActivity.ScheduleHint(it.date, it.time.timePair)))
+                            }
+                        }
+                        else -> throw UnsupportedOperationException()
+                    }
+                }
+
+                true
+            }
+        }
+
+        updateBottomMenu()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

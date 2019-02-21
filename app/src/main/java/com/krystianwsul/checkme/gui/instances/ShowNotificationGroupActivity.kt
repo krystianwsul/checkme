@@ -43,7 +43,25 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_notification_group)
 
-        toolbar.title = null
+        toolbar.apply {
+            title = null
+
+            menuInflater.inflate(R.menu.menu_show_notification_group_top, menu)
+
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_notification_group_hour -> {
+                        groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                            groupListFragment.addHour(TreeViewAdapter.Placeholder)
+                        }
+                    }
+                    else -> throw IllegalArgumentException()
+                }
+
+                true
+
+            }
+        }
 
         check(intent.hasExtra(INSTANCES_KEY))
 
@@ -69,33 +87,31 @@ class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.Grou
         this.selectAllVisible = selectAllVisible
         this.addHourVisible = addHourVisible
 
+        updateTopBar()
         updateBottomBar()
     }
 
-    private fun updateBottomBar() {
-        bottomAppBar.menu.apply {
-            if (findItem(R.id.action_notification_group_select_all) == null)
-                return
+    private fun updateTopBar() {
+        toolbar.menu
+                .findItem(R.id.action_notification_group_hour)
+                .isVisible = addHourVisible
+    }
 
-            findItem(R.id.action_notification_group_select_all).isVisible = selectAllVisible
-            findItem(R.id.action_notification_group_hour).isVisible = addHourVisible
-        }
+    private fun updateBottomBar() {
+        bottomAppBar.menu
+                .findItem(R.id.action_select_all)
+                ?.isVisible = selectAllVisible
     }
 
     override fun getBottomBar() = bottomAppBar!!
 
     override fun initBottomBar() {
         bottomAppBar.apply {
-            replaceMenu(R.menu.menu_show_notification_group)
+            replaceMenu(R.menu.menu_select_all)
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.action_notification_group_hour -> { // todo bottom (move to top bar)
-                        groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                            groupListFragment.addHour(TreeViewAdapter.Placeholder)
-                        }
-                    }
-                    R.id.action_notification_group_select_all -> {
+                    R.id.action_select_all -> {
                         groupListFragment.treeViewAdapter.updateDisplayedNodes {
                             groupListFragment.selectAll(TreeViewAdapter.Placeholder)
                         }

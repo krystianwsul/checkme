@@ -23,7 +23,7 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     protected abstract fun getTreeViewAdapter(): TreeViewAdapter
 
-    protected open val bottomBarData: Triple<BottomAppBar, Int, () -> Unit>? = null // todo bottom
+    protected abstract val bottomBarData: Triple<BottomAppBar, Int, () -> Unit>
 
     private var initialBottomColor: Int? = null
 
@@ -32,7 +32,6 @@ abstract class SelectionCallback : ActionMode.Callback {
 
         actionMode = mode
 
-        bottomBarData?.let { bottomBarData ->
             bottomBarData.first.let {
                 if (initialBottomColor == null)
                     initialBottomColor = it.backgroundTint!!.defaultColor
@@ -47,7 +46,6 @@ abstract class SelectionCallback : ActionMode.Callback {
                     true
                 }
             }
-        }
 
         return true
     }
@@ -93,9 +91,9 @@ abstract class SelectionCallback : ActionMode.Callback {
             }
         }
 
-        bottomBarData?.let {
-            it.first.animateBottom(initialBottomColor!!)
-            it.third.invoke()
+        bottomBarData.apply {
+            first.animateBottom(initialBottomColor!!)
+            third.invoke()
         }
     }
 

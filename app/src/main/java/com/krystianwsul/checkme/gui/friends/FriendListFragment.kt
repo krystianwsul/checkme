@@ -10,14 +10,12 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.checkme.gui.AbstractFragment
-import com.krystianwsul.checkme.gui.FabUser
-import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -48,11 +46,15 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private var selectedIds = listOf<String>()
 
+    private val listener get() = activity as FriendListListener
+
     private val selectionCallback = object : SelectionCallback() {
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+
+        override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_friends, listener::initBottomBar) }
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val selectedUserDataEmails = treeViewAdapter.selectedNodes
@@ -70,8 +72,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
-
-            actionMode!!.menuInflater.inflate(R.menu.menu_friends, actionMode!!.menu)
 
             updateFabVisibility()
 
@@ -281,5 +281,14 @@ class FriendListFragment : AbstractFragment(), FabUser {
             treeNode.setChildTreeNodes(listOf())
             return treeNode
         }
+    }
+
+    interface FriendListListener : SnackbarListener, ActionModeListener {
+
+        fun setUserSelectAllVisibility(selectAllVisible: Boolean)
+
+        fun getBottomBar(): BottomAppBar
+
+        fun initBottomBar()
     }
 }

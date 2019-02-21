@@ -56,7 +56,7 @@ import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
 
-class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, TaskListFragment.TaskListListener, DayFragment.Host {
+class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, TaskListFragment.TaskListListener, DayFragment.Host, FriendListFragment.FriendListListener {
 
     companion object {
 
@@ -668,7 +668,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         updateBottomMenu()
     }
 
-    fun setUserSelectAllVisibility(selectAllVisible: Boolean) {
+    override fun setUserSelectAllVisibility(selectAllVisible: Boolean) {
         userSelectAllVisible = selectAllVisible
 
         updateBottomMenu()

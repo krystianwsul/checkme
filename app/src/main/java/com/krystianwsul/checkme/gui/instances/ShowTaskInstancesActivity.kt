@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.instances
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
@@ -16,6 +14,7 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_notification_group.*
+import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 
 class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupListListener {
@@ -54,6 +53,8 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
 
             createDisposable += data.subscribe { groupListFragment.setTaskKey(taskKey, it.dataId, it.dataWrapper) }
         }
+
+        initBottomBar()
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
@@ -63,26 +64,30 @@ class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupLis
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_select_all, menu)
-        return true
-    }
+    override fun getBottomBar() = bottomAppBar!!
 
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.action_select_all).isVisible = selectAllVisible
-        return true
-    }
+    override fun initBottomBar() {
+        bottomAppBar.apply {
+            replaceMenu(R.menu.menu_select_all)
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        check(item.itemId == R.id.action_select_all)
+            setOnMenuItemClickListener { item ->
+                check(item.itemId == R.id.action_select_all)
 
-        groupListFragment.treeViewAdapter.updateDisplayedNodes {
-            groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+                groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                    groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+                }
+
+                true
+            }
         }
+    }
 
-        return true
+    private fun updateBottomMenu() {
+        bottomAppBar.menu
+                .findItem(R.id.action_select_all)
+                ?.isVisible = selectAllVisible
     }
 }

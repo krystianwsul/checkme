@@ -131,7 +131,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private fun updateBottomMenu() {
         bottomAppBar.menu
                 .findItem(R.id.action_select_all)
-                ?.isVisible = when (visibleTab.value!!) { // todo bottom
+                ?.isVisible = when (visibleTab.value!!) {
             Tab.INSTANCES -> groupSelectAllVisible[mainDaysPager.currentPosition] ?: false
             Tab.TASKS -> taskSelectAllVisible
             Tab.CUSTOM_TIMES -> customTimesSelectAllVisible

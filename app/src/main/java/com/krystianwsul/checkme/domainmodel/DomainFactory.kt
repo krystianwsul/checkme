@@ -461,13 +461,9 @@ open class DomainFactory(
 
         val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-        val existingInstances = task.existingInstances.values
-        val pastInstances = task.getInstances(null, now, now)
+        val instances = task.existingInstances.values + task.getInstances(null, now, now)
 
-        val allInstances = existingInstances.toMutableSet<Instance>()
-        allInstances.addAll(pastInstances)
-
-        val instanceDatas = allInstances.associate {
+        val instanceDatas = instances.associate {
             val children = getChildInstanceDatas(it, now)
 
             val hierarchyData = if (task.isRootTask(now)) {
@@ -659,7 +655,7 @@ open class DomainFactory(
                 }
                 .sorted()
 
-        return ShowTaskViewModel.Data(task.name, task.getScheduleText(now), TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note), !task.existingInstances.isEmpty())
+        return ShowTaskViewModel.Data(task.name, task.getScheduleText(now), TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note), task.existingInstances.values.isNotEmpty() || task.getInstances(null, now, now).isNotEmpty())
     }
 
     @Synchronized

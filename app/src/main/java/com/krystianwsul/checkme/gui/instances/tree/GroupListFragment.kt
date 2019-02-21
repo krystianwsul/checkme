@@ -875,9 +875,9 @@ class GroupListFragment @JvmOverloads constructor(
 
         fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean)
 
-        fun getBottomBar(): BottomAppBar? = null // todo bottom action
+        fun getBottomBar(): BottomAppBar? = null // todo bottom
 
-        fun initBottomBar() = Unit // todo
+        fun initBottomBar() = Unit // todo bottom
     }
 
     data class DataWrapper(

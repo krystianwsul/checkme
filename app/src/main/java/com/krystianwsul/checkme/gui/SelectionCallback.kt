@@ -23,7 +23,7 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     protected abstract fun getTreeViewAdapter(): TreeViewAdapter
 
-    protected open val bottomBarData: Triple<BottomAppBar, Int, () -> Unit>? = null // todo bottom action
+    protected open val bottomBarData: Triple<BottomAppBar, Int, () -> Unit>? = null // todo bottom
 
     private var initialBottomColor: Int? = null
 

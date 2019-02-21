@@ -3,8 +3,6 @@ package com.krystianwsul.checkme.gui.instances
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -42,8 +40,6 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_group)
 
-        setSupportActionBar(bottomAppBar)
-
         check(intent.hasExtra(TIME_KEY))
 
         val time = intent.getLongExtra(TIME_KEY, -1)
@@ -58,6 +54,8 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
+
+        initBottomBar()
     }
 
     private fun onLoadFinished(data: ShowGroupViewModel.Data) {
@@ -79,26 +77,28 @@ class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListene
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
 
-        invalidateOptionsMenu()
+        updateBottomMenu()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_select_all, menu)
-        return true
-    }
+    override fun initBottomBar() {
+        bottomAppBar.apply {
+            replaceMenu(R.menu.menu_select_all)
 
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.action_select_all).isVisible = selectAllVisible
-        return true
-    }
+            setOnMenuItemClickListener { item ->
+                check(item.itemId == R.id.action_select_all)
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        check(item.itemId == R.id.action_select_all)
+                groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                    groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+                }
 
-        groupListFragment.treeViewAdapter.updateDisplayedNodes {
-            groupListFragment.selectAll(TreeViewAdapter.Placeholder)
+                true
+            }
         }
+    }
 
-        return true
+    override fun getBottomBar() = bottomAppBar!!
+
+    private fun updateBottomMenu() {
+        bottomAppBar.menu.findItem(R.id.action_select_all)?.isVisible = selectAllVisible
     }
 }

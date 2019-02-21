@@ -10,13 +10,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.AbstractFragment
-import com.krystianwsul.checkme.gui.FabUser
-import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.SelectionCallback
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -42,17 +40,22 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private var projectListFab: FloatingActionButton? = null
 
-    private lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter
+        private set
 
     private var data: ProjectListViewModel.Data? = null
 
     private val mainActivity get() = activity as MainActivity
+
+    private val listener get() = activity as ProjectListListener
 
     private val selectionCallback = object : SelectionCallback() {
 
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
+
+        override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_projects, listener::initBottomBar) }
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val selected = treeViewAdapter.selectedNodes
@@ -95,8 +98,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
-
-            actionMode!!.menuInflater.inflate(R.menu.menu_projects, actionMode!!.menu)
 
             updateFabVisibility()
 
@@ -313,5 +314,14 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             fun remove(x: TreeViewAdapter.Placeholder) = projectListAdapter.remove(this, x)
         }
+    }
+
+    interface ProjectListListener : SnackbarListener, ActionModeListener {
+
+        fun setProjectSelectAllVisibility(selectAllVisible: Boolean)
+
+        fun getBottomBar(): BottomAppBar
+
+        fun initBottomBar()
     }
 }

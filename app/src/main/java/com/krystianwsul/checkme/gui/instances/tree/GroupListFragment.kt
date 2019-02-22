@@ -629,12 +629,12 @@ class GroupListFragment @JvmOverloads constructor(
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
 
             treeViewAdapter.updateDisplayedNodes(true) {
-                (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, showPadding(), useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
+                (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }
         } else {
             val groupAdapter = GroupAdapter(this)
-            groupAdapter.initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, showPadding(), useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
+            groupAdapter.initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
             treeViewAdapter = groupAdapter.treeViewAdapter
             groupListRecycler.adapter = treeViewAdapter
 
@@ -731,7 +731,7 @@ class GroupListFragment @JvmOverloads constructor(
         this.floatingActionButton = floatingActionButton
 
         floatingActionButton.setOnClickListener {
-            check(showPadding())
+            check(showFab())
 
             when (val parameters = parameters) {
                 is Parameters.All -> {
@@ -759,7 +759,7 @@ class GroupListFragment @JvmOverloads constructor(
         updateFabVisibility()
     }
 
-    private fun showPadding() = when (val parameters = parameters) {
+    private fun showFab() = when (val parameters = parameters) {
         is Parameters.All -> {
             if (selectionCallback.hasActionMode) {
                 nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).filter { it.IsRootInstance }
@@ -778,7 +778,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     private fun updateFabVisibility() {
         floatingActionButton?.apply {
-            if (parametersRelay.hasValue() && showPadding()) {
+            if (parametersRelay.hasValue() && showFab()) {
                 show()
             } else {
                 hide()
@@ -830,11 +830,10 @@ class GroupListFragment @JvmOverloads constructor(
         lateinit var customTimeDatas: List<CustomTimeData>
             private set
 
-        fun initialize(dataId: Int, customTimeDatas: List<CustomTimeData>, showFab: Boolean, useGroups: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?) {
+        fun initialize(dataId: Int, customTimeDatas: List<CustomTimeData>, useGroups: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
 
-            treeViewAdapter.showPadding = showFab
             treeNodeCollection = TreeNodeCollection(treeViewAdapter) {
                 Preferences.logLineDate("logging ordinals")
                 it.forEach { Preferences.logLineHour(it) }

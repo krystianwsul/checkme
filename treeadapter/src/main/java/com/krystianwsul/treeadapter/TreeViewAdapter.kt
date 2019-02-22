@@ -9,14 +9,12 @@ import com.jakewharton.rxrelay2.PublishRelay
 
 class TreeViewAdapter(
         val treeModelAdapter: TreeModelAdapter,
-        @param:LayoutRes @field:LayoutRes private val paddingLayout: Int? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+        @param:LayoutRes @field:LayoutRes private val paddingLayout: Int?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
 
         private const val TYPE_PADDING = 1000
     }
-
-    var showPadding = false
 
     private var treeNodeCollection: TreeNodeCollection? = null
 
@@ -41,7 +39,7 @@ class TreeViewAdapter(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        return treeNodeCollection!!.displayedSize + if (showPadding) 1 else 0
+        return treeNodeCollection!!.displayedSize + if (paddingLayout != null) 1 else 0
     }
 
     fun hasActionMode() = treeModelAdapter.hasActionMode
@@ -59,19 +57,18 @@ class TreeViewAdapter(
         check(!updating)
 
         val oldStates = treeNodeCollection!!.displayedNodes.map { it.state }
-        val oldShowPadding = showPadding
+        val showPadding = paddingLayout != null
 
         updating = true
         action()
         updating = false
 
         val newStates = treeNodeCollection!!.displayedNodes.map { it.state }
-        val newShowPadding = showPadding
 
         val target = if (forceChange) {
             val listUpdateCallback = object : ListUpdateCallback {
 
-                val states = BooleanArray(oldStates.size + (if (oldShowPadding) 1 else 0)) { false }.toMutableList()
+                val states = BooleanArray(oldStates.size + (if (showPadding) 1 else 0)) { false }.toMutableList()
 
                 override fun onChanged(position: Int, count: Int, payload: Any?) {
                     for (i in 0 until count)
@@ -157,8 +154,8 @@ class TreeViewAdapter(
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
             private fun paddingComparison(oldItemPosition: Int, newItemPosition: Int): Boolean? {
-                val oldIsPadding = oldShowPadding && oldItemPosition == oldStates.size
-                val newIsPadding = newShowPadding && newItemPosition == newStates.size
+                val oldIsPadding = showPadding && oldItemPosition == oldStates.size
+                val newIsPadding = showPadding && newItemPosition == newStates.size
 
                 if (oldIsPadding && newIsPadding)
                     return true
@@ -175,9 +172,9 @@ class TreeViewAdapter(
                 return oldStates[oldItemPosition].modelState.same(newStates[newItemPosition].modelState)
             }
 
-            override fun getOldListSize() = oldStates.size + (if (oldShowPadding) 1 else 0)
+            override fun getOldListSize() = oldStates.size + (if (showPadding) 1 else 0)
 
-            override fun getNewListSize() = newStates.size + (if (newShowPadding) 1 else 0)
+            override fun getNewListSize() = newStates.size + (if (showPadding) 1 else 0)
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 paddingComparison(oldItemPosition, newItemPosition)?.let { return it }
@@ -244,7 +241,7 @@ class TreeViewAdapter(
             treeNode.onBindViewHolder(holder)
         } else {
             check(position == displayedSize)
-            check(showPadding)
+            check(paddingLayout != null)
             check(position == itemCount - 1)
         }
     }
@@ -253,7 +250,7 @@ class TreeViewAdapter(
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
-        return if (showPadding && position == treeNodeCollection!!.displayedSize)
+        return if (paddingLayout != null && position == treeNodeCollection!!.displayedSize)
             TYPE_PADDING
         else
             treeNodeCollection!!.getItemViewType(position)

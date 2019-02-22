@@ -203,7 +203,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         lateinit var userDataWrappers: MutableList<FriendNode>
 
-        val treeViewAdapter = TreeViewAdapter(this)
+        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
         private lateinit var treeNodeCollection: TreeNodeCollection
 
         fun initialize() {

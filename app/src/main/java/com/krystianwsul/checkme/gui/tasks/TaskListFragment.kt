@@ -508,8 +508,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
         val expandedTaskKeys get() = taskWrappers.flatMap { it.expandedTaskKeys }
 
         fun initialize(taskData: TaskData, selectedTaskKeys: List<TaskKey>?, expandedTaskKeys: List<TaskKey>?) {
-            treeViewAdapter.showPadding = true
-
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)

@@ -187,7 +187,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
-        val treeViewAdapter = TreeViewAdapter(this)
+        val treeViewAdapter = TreeViewAdapter(this, null)
 
         override val taskAdapter = this
 

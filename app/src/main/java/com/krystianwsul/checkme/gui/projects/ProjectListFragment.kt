@@ -241,7 +241,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private inner class ProjectListAdapter : TreeModelAdapter {
 
-        val treeViewAdapter = TreeViewAdapter(this)
+        val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
 
         private lateinit var projectNodes: MutableList<ProjectNode>
         private lateinit var treeNodeCollection: TreeNodeCollection

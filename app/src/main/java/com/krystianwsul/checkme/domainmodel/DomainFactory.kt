@@ -2128,7 +2128,7 @@ open class DomainFactory(
         for (hideInstanceKey in hideInstanceKeys)
             getInstance(hideInstanceKey).notificationShown = false
 
-        var message = ""
+        Preferences.logLineHour("silent? $silent")
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             if (notificationInstances.size > TickJobIntentService.MAX_NOTIFICATIONS) { // show group
@@ -2164,28 +2164,32 @@ open class DomainFactory(
             }
         } else {
             if (notificationInstances.isEmpty()) {
-                message += ", hg"
+                Preferences.logLineHour("hiding group")
                 NotificationWrapper.instance.cancelNotification(0)
             } else {
-                message += ", sg"
+                Preferences.logLineHour("showing group")
                 NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
             }
 
-            message += ", hiding " + hideInstanceKeys.size
-            for (hideInstanceKey in hideInstanceKeys)
-                NotificationWrapper.instance.cancelNotification(getInstance(hideInstanceKey).notificationId)
+            for (hideInstanceKey in hideInstanceKeys) {
+                val instance = getInstance(hideInstanceKey)
+                Preferences.logLineHour("hiding '" + instance.name + "'")
+                NotificationWrapper.instance.cancelNotification(instance.notificationId)
+            }
 
-            message += ", s " + showInstanceKeys.size
-            for (showInstanceKey in showInstanceKeys)
-                notifyInstance(notificationInstances.getValue(showInstanceKey), silent, now)
+            for (showInstanceKey in showInstanceKeys) {
+                val instance = notificationInstances.getValue(showInstanceKey)
+                Preferences.logLineHour("showing '" + instance.name + "'")
+                notifyInstance(instance, silent, now)
+            }
 
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
-            message += ", u " + updateInstances.size
-            updateInstances.forEach { updateInstance(it, now) }
+            updateInstances.forEach {
+                Preferences.logLineHour("updating '" + it.name + "'")
+                updateInstance(it, now)
+            }
         }
-
-        Preferences.logLineHour("s? " + (if (silent) "t" else "f") + message)
 
         if (!silent)
             Preferences.lastTick = now.long

@@ -31,9 +31,9 @@ object Preferences {
         MyCrashlytics.log("Preferences.logLine: $line")
 
         tickLog = tickLog.split('\n')
-                .takeLast(100)
+                .take(100)
                 .toMutableList()
-                .apply { add(line) }
+                .apply { add(0, line) }
                 .joinToString("\n")
     }
 

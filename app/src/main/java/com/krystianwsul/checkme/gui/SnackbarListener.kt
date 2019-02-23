@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui
 
-import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -37,10 +36,7 @@ interface SnackbarListener {
                 }
             })
 
-            // todo anchoring above fab not working when fab hidden
-            snackbarParent.run {
-                findViewById(R.id.bottomFab) ?: findViewById<View>(R.id.bottomAppBar)
-            }?.let { anchorView = it }
+            anchorView = snackbarParent.findViewById(R.id.bottomAnchor)
 
             show()
         }

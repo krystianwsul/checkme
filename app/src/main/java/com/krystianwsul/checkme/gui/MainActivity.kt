@@ -6,28 +6,22 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.view.ActionMode
-import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
-import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
+import com.krystianwsul.checkme.DrawerFragment
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment
@@ -35,7 +29,6 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
-import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
@@ -49,7 +42,6 @@ import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.nav_header_main.view.*
 import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
@@ -68,6 +60,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         private const val NORMAL_ELEVATION = 6f
         private const val INSTANCES_ELEVATION = 0f
 
+        private const val DRAWER_TAG = "drawer"
+
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
     }
 
@@ -78,7 +72,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var onPageChangeDisposable: Disposable? = null
 
-    private val visibleTab = BehaviorRelay.createDefault(Tab.INSTANCES)
+    val visibleTab = BehaviorRelay.createDefault(Tab.INSTANCES)
     private val daysPosition = BehaviorRelay.create<Int>()
 
     override lateinit var hostEvents: Observable<DayFragment.Event>
@@ -92,10 +86,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     private var userSelectAllVisible = false
     private var projectSelectAllVisible = false
 
-    private lateinit var headerName: TextView
-    private lateinit var headerEmail: TextView
-
-    private var debug = false
+    var debug = false
 
     private var calendarOpen = false
     private var calendarHeight: Int? = null
@@ -126,7 +117,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private var actionMode: ActionMode? = null
 
-    private fun updateBottomMenu() {
+    fun updateBottomMenu() {
         bottomAppBar.menu
                 .findItem(R.id.action_select_all)
                 ?.isVisible = when (visibleTab.value!!) {
@@ -265,24 +256,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         initBottomBar()
 
-        val toggle = ActionBarDrawerToggle(this, mainActivityDrawer, mainActivityToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        mainActivityDrawer.addDrawerListener(toggle)
-        toggle.syncState()
-
-        mainActivityDrawer.addDrawerListener(object : DrawerLayout.DrawerListener {
-
-            override fun onDrawerSlide(drawerView: View, slideOffset: Float) = Unit
-
-            override fun onDrawerOpened(drawerView: View) = Unit
-
-            override fun onDrawerClosed(drawerView: View) = Unit
-
-            override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING)
-                    actionMode?.finish()
-            }
-        })
-
         var debugFragment = supportFragmentManager.findFragmentById(R.id.mainDebugFrame)
         if (debugFragment != null) {
             taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
@@ -315,59 +288,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
             }.addTo(createDisposable)
 
             adapter = MyFragmentStatePagerAdapter()
-        }
-
-        mainActivityNavigation.run {
-            setCheckedItem(R.id.main_drawer_instances)
-
-            setNavigationItemSelectedListener {
-                mainActivityDrawer.run {
-                    when (it.itemId) {
-                        R.id.main_drawer_instances -> showTab(Tab.INSTANCES)
-                        R.id.main_drawer_tasks -> showTab(Tab.TASKS)
-                        R.id.main_drawer_projects -> showTab(Tab.PROJECTS)
-                        R.id.main_drawer_custom_times -> showTab(Tab.CUSTOM_TIMES)
-                        R.id.main_drawer_friends -> showTab(Tab.FRIENDS)
-                        R.id.main_drawer_sign_out -> {
-                            val domainFactory = DomainFactory.instance
-                            val userInfo = MyApplication.instance.userInfo
-
-                            domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
-
-                            MyApplication.instance.googleSigninClient.signOut()
-
-                            FirebaseAuth.getInstance().signOut()
-
-                            finish()
-
-                            startActivity(TutorialActivity.newLoginIntent())
-                        }
-                        R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newHelpIntent())
-                        R.id.main_drawer_debug -> showTab(Tab.DEBUG)
-                        else -> throw IndexOutOfBoundsException()
-                    }
-
-                    closeDrawer(GravityCompat.START)
-                }
-
-                updateBottomMenu()
-
-                true
-            }
-
-            menu.findItem(R.id.main_drawer_debug).isVisible = debug
-
-            getHeaderView(0)!!.run {
-                setOnLongClickListener {
-                    debug = true
-
-                    mainActivityNavigation.menu.findItem(R.id.main_drawer_debug).isVisible = true
-                    true
-                }
-
-                headerName = navHeaderName
-                headerEmail = navHeaderEmail
-            }
         }
 
         mainCalendar.addOneShotGlobalLayoutListener {
@@ -412,19 +332,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         dayViewModel = getViewModel()
 
-        FirebaseAuth.getInstance()
-                .currentUser!!
-                .let {
-                    val displayName = it.displayName
-                    check(!TextUtils.isEmpty(displayName))
-
-                    val email = it.email
-                    check(!TextUtils.isEmpty(email))
-
-                    headerName.text = displayName
-                    headerEmail.text = email
-                }
-
         mainDaysPager.addOneShotGlobalLayoutListener {
             var selectedByTab: Int? = null
             var selectedByPager = false
@@ -464,6 +371,12 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     override fun initBottomBar() {
         bottomAppBar.apply {
+            setNavigationIcon(R.drawable.ic_menu_white_24dp) // todo remove in actionMode
+            setNavigationOnClickListener {
+                actionMode?.finish()
+                DrawerFragment.newInstance().show(supportFragmentManager, DRAWER_TAG)
+            }
+
             replaceMenu(R.menu.menu_select_all)
 
             setOnMenuItemClickListener { item ->
@@ -526,15 +439,6 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
     }
 
-    override fun onBackPressed() {
-        mainActivityDrawer.run {
-            if (isDrawerOpen(GravityCompat.START))
-                closeDrawer(GravityCompat.START)
-            else
-                super.onBackPressed()
-        }
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         outState.run {
             super.onSaveInstanceState(this)
@@ -555,7 +459,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
     }
 
-    private fun showTab(tab: Tab) {
+    fun showTab(tab: Tab) {
         val density = resources.displayMetrics.density
 
         fun setVisible(visible: Boolean) = mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visible)
@@ -787,7 +691,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     private class Holder(val dayFragment: DayFragment) : RecyclerView.ViewHolder(dayFragment)
 
-    private enum class Tab {
+    enum class Tab {
         INSTANCES,
         TASKS,
         PROJECTS,

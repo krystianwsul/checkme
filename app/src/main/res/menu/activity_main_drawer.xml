@@ -2,7 +2,11 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <group android:checkableBehavior="single">
+
+    <group
+        android:id="@+id/mainDrawerTabs"
+        android:checkableBehavior="single">
+
         <item
             android:id="@+id/main_drawer_instances"
             android:title="@string/instances"
@@ -24,20 +28,25 @@
             android:title="@string/friends"
             android:icon="@drawable/ic_people_black_24dp"/>
         <item
-            android:id="@+id/main_drawer_sign_out"
-            android:title="@string/signOut"
-            android:icon="@drawable/ic_account_circle_black_24dp"
-            android:checkable="false"/>
-        <item
-            android:id="@+id/main_drawer_tutorial"
-            android:title="@string/tutorial"
-            android:icon="@drawable/ic_help_black_24dp"
-            android:checkable="false"/>
-        <item
             tools:ignore="HardcodedText"
             android:id="@+id/main_drawer_debug"
             android:title="Debug"
             android:icon="@drawable/ic_build_black_24dp"
             android:visible="false"/>
+
     </group>
+
+    <group android:id="@+id/mainDrawerOther">
+        <item
+            android:id="@+id/main_drawer_tutorial"
+            android:title="@string/tutorial"
+            android:icon="@drawable/ic_help_black_24dp"
+            android:checkable="false" />
+        <item
+            android:id="@+id/main_drawer_sign_out"
+            android:title="@string/signOut"
+            android:icon="@drawable/ic_account_circle_black_24dp"
+            android:checkable="false" />
+    </group>
+
 </menu>

@@ -2221,7 +2221,7 @@ open class DomainFactory(
 
     private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(instance, true, now)
 
-    private fun setInstanceNotified(instanceKey: InstanceKey) { // todo does this warrant a separate function?
+    private fun setInstanceNotified(instanceKey: InstanceKey) {
         getInstance(instanceKey).apply {
             notified = true
             notificationShown = false

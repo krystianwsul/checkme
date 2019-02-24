@@ -44,9 +44,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap">
+                    tools:ignore="RelativeOverlap"
+                    style="@style/OldTextInput">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:cursorVisible="false"
                         android:focusable="false"
@@ -85,9 +86,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap">
+                    tools:ignore="RelativeOverlap"
+                    style="@style/OldTextInput">
 
-                    <EditText
+                    <com.google.android.material.textfield.TextInputEditText
                         style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:cursorVisible="false"
                         android:focusable="false"
@@ -126,7 +128,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap">
+                    tools:ignore="RelativeOverlap"
+                    style="@style/OldTextInput">
 
                     <EditText
                         style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -167,7 +170,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap">
+                    tools:ignore="RelativeOverlap"
+                    style="@style/OldTextInput">
 
                     <EditText
                         style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -208,7 +212,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap">
+                    tools:ignore="RelativeOverlap"
+                    style="@style/OldTextInput">
 
                     <EditText
                         style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -249,7 +254,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap">
+                    tools:ignore="RelativeOverlap"
+                    style="@style/OldTextInput">
 
                     <EditText
                         style="@style/Widget.AppCompat.Spinner.Underlined"
@@ -290,7 +296,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap">
+                    tools:ignore="RelativeOverlap"
+                    style="@style/OldTextInput">
 
                     <EditText
                         style="@style/Widget.AppCompat.Spinner.Underlined"

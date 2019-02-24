@@ -9,6 +9,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:navigationBarColor">@color/primaryDarkColor</item>
+        <item name="colorError">#FF5722</item>
 
         <item name="colorPrimaryVariant">@color/primaryLightColor</item>
         <item name="colorSecondaryVariant">@color/secondaryLightColor</item>
@@ -68,4 +69,6 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">#E0E0E0</item>
     </style>
+
+    <style name="OldTextInput" parent="@style/Widget.Design.TextInputLayout" />
 </resources>

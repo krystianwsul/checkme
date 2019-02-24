@@ -21,7 +21,8 @@
         android:hint="@string/parentTask"
         android:textColorHint="@color/textDisabled"
         app:errorEnabled="true"
-        app:hintAnimationEnabled="false">
+        app:hintAnimationEnabled="false"
+        style="@style/OldTextInput">
 
         <EditText
             android:id="@+id/schedule_text"

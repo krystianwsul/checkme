@@ -17,9 +17,10 @@
         android:layout_marginTop="5dp"
         android:hint="@string/note"
         android:textColorHint="@color/textDisabled"
-        app:hintAnimationEnabled="false">
+        app:hintAnimationEnabled="false"
+        style="@style/OldTextInput">
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/noteText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

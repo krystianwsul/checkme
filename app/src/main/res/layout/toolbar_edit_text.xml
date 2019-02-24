@@ -26,7 +26,7 @@
             android:visibility="invisible"
             app:hintAnimationEnabled="false"
             app:errorEnabled="true"
-            style="@style/Widget.Design.TextInputLayout"
+            style="@style/OldTextInput"
             android:textColorHint="@color/textDisabledWhite">
 
             <com.google.android.material.textfield.TextInputEditText

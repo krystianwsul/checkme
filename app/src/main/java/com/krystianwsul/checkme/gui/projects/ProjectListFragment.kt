@@ -51,6 +51,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private val selectionCallback = object : SelectionCallback() {
 
+        override val activity get() = requireActivity()
+
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)

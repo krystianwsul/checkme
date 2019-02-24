@@ -130,6 +130,8 @@ class GroupListFragment @JvmOverloads constructor(
 
     val selectionCallback = object : SelectionCallback() {
 
+        override val activity get() = this@GroupListFragment.activity
+
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)

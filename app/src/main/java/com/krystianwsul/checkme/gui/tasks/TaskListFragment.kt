@@ -62,6 +62,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private val selectionCallback = object : SelectionCallback() {
 
+        override val activity get() = requireActivity()
+
         override fun getTreeViewAdapter() = treeViewAdapter
 
         override val bottomBarData by lazy { Triple(taskListListener.getBottomBar(), R.menu.menu_edit_tasks, taskListListener::initBottomBar) }

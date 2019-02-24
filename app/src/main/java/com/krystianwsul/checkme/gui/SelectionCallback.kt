@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.gui
 
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.view.ActionMode
@@ -27,25 +29,36 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     private var initialBottomColor: Int? = null
 
+    protected abstract val activity: Activity
+
+    private var oldNavigationBarColor = -1
+
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         check(actionMode == null)
 
         actionMode = mode
 
-            bottomBarData.first.let {
-                if (initialBottomColor == null)
-                    initialBottomColor = it.backgroundTint!!.defaultColor
+        bottomBarData.first.let {
+            if (initialBottomColor == null)
+                initialBottomColor = it.backgroundTint!!.defaultColor
 
-                val final = ContextCompat.getColor(it.context, R.color.actionModeBackground)
-                it.animateBottom(final)
+            val final = ContextCompat.getColor(it.context, R.color.actionModeBackground)
+            it.animateBottom(final)
 
-                it.replaceMenu(bottomBarData.second)
-                it.setOnMenuItemClickListener {
-                    onActionItemClicked(actionMode!!, it)
+            it.replaceMenu(bottomBarData.second)
+            it.setOnMenuItemClickListener {
+                onActionItemClicked(actionMode!!, it)
 
-                    true
-                }
+                true
             }
+
+            it.navigationIcon = null
+            it.setNavigationOnClickListener(null)
+        }
+
+        oldNavigationBarColor = activity.window.navigationBarColor
+
+        activity.window.navigationBarColor = Color.BLACK
 
         return true
     }
@@ -95,6 +108,8 @@ abstract class SelectionCallback : ActionMode.Callback {
             first.animateBottom(initialBottomColor!!)
             third.invoke()
         }
+
+        activity.window.navigationBarColor = oldNavigationBarColor
     }
 
     private fun countdown() {

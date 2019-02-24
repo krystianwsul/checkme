@@ -25,9 +25,11 @@
             android:layout_height="wrap_content"
             android:visibility="invisible"
             app:hintAnimationEnabled="false"
-            app:errorEnabled="true">
+            app:errorEnabled="true"
+            style="@style/Widget.Design.TextInputLayout"
+            android:textColorHint="@color/textDisabledWhite">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/toolbarEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -41,7 +43,7 @@
 
                 <requestFocus/>
 
-            </EditText>
+            </com.google.android.material.textfield.TextInputEditText>
 
         </com.google.android.material.textfield.TextInputLayout>
 

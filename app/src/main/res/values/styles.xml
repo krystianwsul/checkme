@@ -1,8 +1,10 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSecondary">@color/secondaryColor</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -12,7 +14,7 @@
         <item name="colorSecondaryVariant">@color/secondaryLightColor</item>
         <item name="colorSurface">#FFFFFF</item>
         <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="colorOnSecondary">#000000</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
         <item name="colorOnBackground">#000000</item>
         <item name="colorOnError">#FFFFFF</item>
         <item name="colorOnSurface">#000000</item>

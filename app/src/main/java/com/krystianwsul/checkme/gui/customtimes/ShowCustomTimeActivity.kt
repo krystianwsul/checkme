@@ -309,7 +309,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
         if (customTimeId == null) {
             check(data == null)
 
-            if (toolbarEditText.text.isNotEmpty())
+            if (!toolbarEditText.text.isNullOrEmpty())
                 return true
 
             return DayOfWeek.values().any { hourMinutes[it] != sDefaultHourMinute }

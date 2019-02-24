@@ -658,7 +658,7 @@ open class DomainFactory(
                 }
                 .sorted()
 
-        return ShowTaskViewModel.Data(task.name, task.getScheduleText(now), TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note), task.existingInstances.values.isNotEmpty() || task.getInstances(null, now, now).isNotEmpty())
+        return ShowTaskViewModel.Data(task.name, task.getScheduleText(now, true), TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note), task.existingInstances.values.isNotEmpty() || task.getInstances(null, now, now).isNotEmpty())
     }
 
     @Synchronized

@@ -38,21 +38,20 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
-    fun getScheduleText(exactTimeStamp: ExactTimeStamp): String? {
+    fun getScheduleText(exactTimeStamp: ExactTimeStamp, showParent: Boolean = false): String? {
         check(current(exactTimeStamp))
 
         val currentSchedules = getCurrentSchedules(exactTimeStamp)
+        val parentTask = getParentTask(exactTimeStamp)
 
-        if (isRootTask(exactTimeStamp)) {
-            if (currentSchedules.isEmpty())
-                return null
-
+        return if (parentTask == null) {
             check(currentSchedules.all { it.current(exactTimeStamp) })
 
-            return currentSchedules.joinToString(", ") { it.getScheduleText() }
+            currentSchedules.joinToString(", ") { it.getScheduleText() }
         } else {
             check(currentSchedules.isEmpty())
-            return null
+
+            parentTask.name.takeIf { showParent }
         }
     }
 

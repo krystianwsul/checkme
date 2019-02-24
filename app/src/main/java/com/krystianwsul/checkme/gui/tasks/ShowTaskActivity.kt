@@ -97,7 +97,7 @@ class ShowTaskActivity : AbstractActivity(), TaskListFragment.TaskListListener {
 
         toolbar.run {
             title = data.name
-            subtitle = data.scheduleText
+            subtitle = data.displayText
         }
 
         updateBottomMenu()

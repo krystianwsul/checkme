@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.google.android.gms.tasks.Task
+import com.google.android.material.tabs.TabLayout
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -134,3 +135,5 @@ fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: 
 }
 
 val ViewGroup.children get() = ViewGroupChildrenIterable(this)
+
+fun TabLayout.select(position: Int) = selectTab(getTabAt(position))

@@ -5,9 +5,11 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.appcompat.widget.LinearLayoutCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.Date
@@ -22,6 +24,53 @@ import java.util.*
 
 
 class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr) {
+
+    companion object {
+
+        fun getTitle(timeRange: MainActivity.TimeRange, position: Int): String {
+            fun getString(@StringRes stringId: Int) = MyApplication.instance.getString(stringId)
+
+            return if (timeRange == MainActivity.TimeRange.DAY) {
+                when (position) {
+                    0 -> getString(R.string.today)
+                    1 -> getString(R.string.tomorrow)
+                    else -> {
+                        Date(Calendar.getInstance().apply {
+                            add(Calendar.DATE, position)
+                        }).let {
+                            it.dayOfWeek.toString() + ", " + it.toString()
+                        }
+                    }
+                }
+            } else {
+                if (timeRange == MainActivity.TimeRange.WEEK) {
+                    val startDate = Date(Calendar.getInstance().apply {
+                        if (position > 0) {
+                            add(Calendar.WEEK_OF_YEAR, position)
+                            set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
+                        }
+                    })
+
+                    val endDate = Date(Calendar.getInstance().apply {
+                        add(Calendar.WEEK_OF_YEAR, position + 1)
+                        set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
+                        add(Calendar.DATE, -1)
+                    })
+
+                    "$startDate - $endDate"
+                } else {
+                    check(timeRange == MainActivity.TimeRange.MONTH)
+
+                    val month = Calendar.getInstance().run {
+                        add(Calendar.MONTH, position)
+                        get(Calendar.MONTH)
+                    }
+
+                    DateFormatSymbols.getInstance().months[month]
+                }
+            }
+        }
+    }
 
     private val key = BehaviorRelay.create<Pair<MainActivity.TimeRange, Int>>()
 
@@ -59,45 +108,7 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
             groupListFragment.onRestoreInstanceState(it)
         }
 
-        val title = if (timeRange == MainActivity.TimeRange.DAY) {
-            when (position) {
-                0 -> activity.getString(R.string.today)
-                1 -> activity.getString(R.string.tomorrow)
-                else -> {
-                    Date(Calendar.getInstance().apply {
-                        add(Calendar.DATE, position)
-                    }).let {
-                        it.dayOfWeek.toString() + ", " + it.toString()
-                    }
-                }
-            }
-        } else {
-            if (timeRange == MainActivity.TimeRange.WEEK) {
-                val startDate = Date(Calendar.getInstance().apply {
-                    if (position > 0) {
-                        add(Calendar.WEEK_OF_YEAR, position)
-                        set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
-                    }
-                })
-
-                val endDate = Date(Calendar.getInstance().apply {
-                    add(Calendar.WEEK_OF_YEAR, position + 1)
-                    set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
-                    add(Calendar.DATE, -1)
-                })
-
-                "$startDate - $endDate"
-            } else {
-                check(timeRange == MainActivity.TimeRange.MONTH)
-
-                val month = Calendar.getInstance().run {
-                    add(Calendar.MONTH, position)
-                    get(Calendar.MONTH)
-                }
-
-                DateFormatSymbols.getInstance().months[month]
-            }
-        }
+        val title = getTitle(timeRange, position)
 
         dayTabLayout.removeAllTabs()
         dayTabLayout.addTab(dayTabLayout.newTab().setText(title))

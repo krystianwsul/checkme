@@ -19,6 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -35,10 +36,7 @@ import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
-import com.krystianwsul.checkme.utils.children
-import com.krystianwsul.checkme.utils.currentPosition
-import com.krystianwsul.checkme.utils.pageSelections
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -224,7 +222,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     if (newTimeRange != timeRange) {
                         timeRange = newTimeRange
 
+                        mainTabLayout.removeAllTabs()
                         mainDaysPager.adapter = MyFragmentStatePagerAdapter()
+                        mainTabLayout.selectTab(mainTabLayout.getTabAt(mainDaysPager.currentPosition))
 
                         groupSelectAllVisible.clear()
                         updateBottomMenu()
@@ -394,7 +394,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         mainCalendar.setOnDateChangeListener { _, year, month, dayOfMonth ->
             val date = LocalDate(year, month + 1, dayOfMonth)
 
-            mainDaysPager.scrollToPosition(Days.daysBetween(LocalDate.now(), date).days)
+            val position = Days.daysBetween(LocalDate.now(), date).days
+            //mainDaysPager.scrollToPosition(position)
+            mainTabLayout.select(position)
 
             actionMode?.finish()
 
@@ -422,6 +424,42 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                     headerName.text = displayName
                     headerEmail.text = email
                 }
+
+        mainDaysPager.addOneShotGlobalLayoutListener {
+            var selectedByTab: Int? = null
+            var selectedByPager = false
+
+            mainDaysPager.pageSelections()
+                    .subscribe {
+                        if (selectedByTab != null) {
+                            if (it == selectedByTab)
+                                selectedByTab = null
+                        } else {
+                            selectedByPager = true
+                            mainTabLayout.apply { selectTab(getTabAt(it)) }
+                        }
+                    }
+                    .addTo(createDisposable)
+
+            mainTabLayout.select(mainDaysPager.currentPosition)
+
+            mainTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+
+                override fun onTabSelected(tab: TabLayout.Tab) {
+                    if (selectedByPager) {
+                        selectedByPager = false
+                    } else {
+                        selectedByTab = tab.position
+
+                        mainDaysPager.smoothScrollToPosition(tab.position)
+                    }
+                }
+
+                override fun onTabReselected(tab: TabLayout.Tab?) = Unit
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) = Unit
+            })
+        }
     }
 
     override fun initBottomBar() {
@@ -735,7 +773,16 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         override fun onCreateViewHolder(parent: ViewGroup, position: Int) = Holder(DayFragment(this@MainActivity))
 
-        override fun onBindViewHolder(holder: Holder, position: Int) = holder.dayFragment.setPosition(timeRange, position)
+        override fun onBindViewHolder(holder: Holder, position: Int) {
+            val maxPosition = position + 10
+            mainTabLayout.apply {
+                (tabCount..maxPosition).forEach {
+                    addTab(newTab().setText(DayFragment.getTitle(timeRange, it)))
+                }
+            }
+
+            holder.dayFragment.setPosition(timeRange, position)
+        }
     }
 
     private class Holder(val dayFragment: DayFragment) : RecyclerView.ViewHolder(dayFragment)

@@ -649,9 +649,9 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
     }
 
     override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
-        checkNotNull(position)
-
-        groupSelectAllVisible[position] = selectAllVisible
+        position?.let {
+            groupSelectAllVisible[it] = selectAllVisible
+        }
 
         updateBottomMenu()
     }

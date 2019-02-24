@@ -28,12 +28,11 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             val isRootInstance: Boolean,
             var exists: Boolean,
             val dataWrapper: GroupListFragment.DataWrapper,
-            var notificationShown: Boolean) : DomainData() {
+            var notificationShown: Boolean,
+            val displayText: String) : DomainData() {
 
         init {
             check(name.isNotEmpty())
         }
-
-        val displayText = instanceDateTime.takeIf { isRootInstance }?.getDisplayText()
     }
 }

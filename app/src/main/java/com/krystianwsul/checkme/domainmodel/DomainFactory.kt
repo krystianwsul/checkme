@@ -521,7 +521,10 @@ open class DomainFactory(
         val now = ExactTimeStamp.now
 
         val instance = getInstance(instanceKey)
-        return ShowInstanceViewModel.Data(instance.name, instance.instanceDateTime, instance.done != null, task.current(now), instance.isRootInstance(now), instance.exists(), getGroupListData(instance, task, now), instance.notificationShown)
+        val instanceDateTime = instance.instanceDateTime
+        val parentInstance = instance.getParentInstance(now)
+        val displayText = parentInstance?.name ?: instanceDateTime.getDisplayText()
+        return ShowInstanceViewModel.Data(instance.name, instanceDateTime, instance.done != null, task.current(now), parentInstance == null, instance.exists(), getGroupListData(instance, task, now), instance.notificationShown, displayText)
     }
 
     fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {

@@ -1,16 +1,14 @@
 package com.krystianwsul.checkme
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.TutorialActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import kotlinx.android.synthetic.main.main_navigation.*
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 
 class DrawerFragment : BottomSheetDialogFragment() {
@@ -22,12 +20,15 @@ class DrawerFragment : BottomSheetDialogFragment() {
 
     private val mainActivity get() = activity as MainActivity
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.main_navigation, container, false)!!
+    override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
+        setCancelable(true)
+        setContentView(R.layout.main_navigation)
+    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onStart() {
+        super.onStart()
 
-        mainActivityNavigation.run {
+        dialog!!.findViewById<NavigationView>(R.id.mainActivityNavigation).apply {
             mainActivity.apply {
                 setCheckedItem(when (visibleTab.value!!) {
                     MainActivity.Tab.INSTANCES -> R.id.main_drawer_instances

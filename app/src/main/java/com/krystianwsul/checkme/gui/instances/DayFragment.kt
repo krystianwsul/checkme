@@ -23,7 +23,8 @@ import java.text.DateFormatSymbols
 import java.util.*
 
 
-class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr) {
+class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayoutCompat(context, attrs, defStyleAttr) {
+    // todo consider subclass
 
     companion object {
 
@@ -107,11 +108,6 @@ class DayFragment @JvmOverloads constructor(context: Context?, attrs: AttributeS
         activity.getState(key.value!!)?.let {
             groupListFragment.onRestoreInstanceState(it)
         }
-
-        val title = getTitle(timeRange, position)
-
-        dayTabLayout.removeAllTabs()
-        dayTabLayout.addTab(dayTabLayout.newTab().setText(title))
 
         floatingActionButton?.let { groupListFragment.setFab(it) }
 

@@ -561,11 +561,11 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         fun setVisible(visible: Boolean) = mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visible)
 
         if (tab == Tab.INSTANCES) {
-            mainDaysPager.visibility = View.VISIBLE
+            mainDaysLayout.visibility = View.VISIBLE
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
             setVisible(true)
         } else {
-            mainDaysPager.visibility = View.GONE
+            mainDaysLayout.visibility = View.GONE
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
             setVisible(false)
             calendarOpen = false

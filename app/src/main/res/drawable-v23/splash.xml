@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@color/materialBackground" />
+
+    <item
+        android:width="149dp"
+        android:height="166dp"
+        android:gravity="center">
+
+        <bitmap
+            android:gravity="fill_horizontal|fill_vertical"
+            android:src="@drawable/ic_launcher_round_try_sign2_unscaled" />
+
+    </item>
+
+</layer-list>

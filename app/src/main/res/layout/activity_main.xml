@@ -79,7 +79,9 @@
                         android:theme="@style/AppTheme.AppBarOverlay"
                         app:tabGravity="center"
                         app:tabMode="scrollable"
-                        tools:ignore="UnusedAttribute" />
+                        tools:ignore="UnusedAttribute"
+                        app:tabTextColor="@color/textSecondaryWhite"
+                        app:tabSelectedTextColor="@color/textPrimaryWhite" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/mainDaysPager"

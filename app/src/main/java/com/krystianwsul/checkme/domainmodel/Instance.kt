@@ -134,17 +134,11 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         return ArrayList(childInstances.values)
     }
 
-    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp): Pair<ExactTimeStamp, String> {
-        val exactTimeStamps = mutableListOf(Pair(now, "now"))
-
-        task.getEndExactTimeStamp()?.let { exactTimeStamps.add(Pair(it.minusOne(), "task end")) }
-
-        done?.let { exactTimeStamps.add(Pair(it.minusOne(), "done")) }
-
-        exactTimeStamps.add(Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"))
-
-        return exactTimeStamps.minBy { it.first }!!
-    }
+    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
+            Pair(now, "now"),
+            Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"),
+            task.getEndExactTimeStamp()?.let { Pair(it.minusOne(), "task end") },
+            done?.let { Pair(it.minusOne(), "done") }).minBy { it.first }!!
 
     fun isRootInstance(now: ExactTimeStamp) = getParentInstance(now) == null
 

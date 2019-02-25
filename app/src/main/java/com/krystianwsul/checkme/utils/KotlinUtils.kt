@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -137,3 +138,5 @@ fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: 
 val ViewGroup.children get() = ViewGroupChildrenIterable(this)
 
 fun TabLayout.select(position: Int) = selectTab(getTabAt(position))
+
+val Menu.items get() = MenuItemsIterable(this)

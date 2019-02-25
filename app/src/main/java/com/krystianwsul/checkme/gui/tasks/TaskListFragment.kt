@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -785,7 +784,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         val search: Observable<String>
 
-        fun getBottomBar(): BottomAppBar
+        fun getBottomBar(): MyBottomBar
 
         fun initBottomBar()
     }

@@ -14,7 +14,6 @@ import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.common.collect.HashMultimap
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -407,34 +406,34 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun onOtherRemoved() = updateMenu()
 
-        private fun updateMenu() {
+        override fun updateMenu() {
             checkNotNull(actionMode)
 
             val menus = listOf(actionMode!!.menu!!, listener.getBottomBar().menu)
-            fun findItem(@IdRes itemId: Int) = menus.mapNotNull { it.findItem(itemId) }.single()
+            fun findItem(@IdRes itemId: Int) = menus.mapNotNull { it.findItem(itemId) }.singleOrNull()
 
             val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes, true)
             check(instanceDatas.isNotEmpty())
 
-            findItem(R.id.action_group_mark_done).isVisible = instanceDatas.all { it.Done == null }
-            findItem(R.id.action_group_mark_not_done).isVisible = instanceDatas.all { it.Done != null }
-            findItem(R.id.action_group_edit_instance).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
-            findItem(R.id.action_group_notify).isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
+            findItem(R.id.action_group_mark_done)?.isVisible = instanceDatas.all { it.Done == null }
+            findItem(R.id.action_group_mark_not_done)?.isVisible = instanceDatas.all { it.Done != null }
+            findItem(R.id.action_group_edit_instance)?.isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
+            findItem(R.id.action_group_notify)?.isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
 
             if (instanceDatas.size == 1) {
                 val instanceData = instanceDatas.single()
 
-                findItem(R.id.action_group_show_task).isVisible = instanceData.TaskCurrent
-                findItem(R.id.action_group_edit_task).isVisible = instanceData.TaskCurrent
-                findItem(R.id.action_group_join).isVisible = false
-                findItem(R.id.action_group_delete_task).isVisible = instanceData.TaskCurrent
-                findItem(R.id.action_group_add_task).isVisible = instanceData.TaskCurrent
+                findItem(R.id.action_group_show_task)?.isVisible = instanceData.TaskCurrent
+                findItem(R.id.action_group_edit_task)?.isVisible = instanceData.TaskCurrent
+                findItem(R.id.action_group_join)?.isVisible = false
+                findItem(R.id.action_group_delete_task)?.isVisible = instanceData.TaskCurrent
+                findItem(R.id.action_group_add_task)?.isVisible = instanceData.TaskCurrent
             } else {
                 check(instanceDatas.size > 1)
 
-                findItem(R.id.action_group_show_task).isVisible = false
-                findItem(R.id.action_group_edit_task).isVisible = false
-                findItem(R.id.action_group_add_task).isVisible = false
+                findItem(R.id.action_group_show_task)?.isVisible = false
+                findItem(R.id.action_group_edit_task)?.isVisible = false
+                findItem(R.id.action_group_add_task)?.isVisible = false
 
                 if (instanceDatas.all { it.TaskCurrent }) {
                     val projectIdCount = instanceDatas.asSequence()
@@ -444,11 +443,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     check(projectIdCount > 0)
 
-                    findItem(R.id.action_group_join).isVisible = (projectIdCount == 1)
-                    findItem(R.id.action_group_delete_task).isVisible = !containsLoop(instanceDatas)
+                    findItem(R.id.action_group_join)?.isVisible = (projectIdCount == 1)
+                    findItem(R.id.action_group_delete_task)?.isVisible = !containsLoop(instanceDatas)
                 } else {
-                    findItem(R.id.action_group_join).isVisible = false
-                    findItem(R.id.action_group_delete_task).isVisible = false
+                    findItem(R.id.action_group_join)?.isVisible = false
+                    findItem(R.id.action_group_delete_task)?.isVisible = false
                 }
             }
         }
@@ -878,7 +877,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean)
 
-        fun getBottomBar(): BottomAppBar
+        fun getBottomBar(): MyBottomBar
 
         fun initBottomBar()
     }

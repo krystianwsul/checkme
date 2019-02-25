@@ -18,7 +18,7 @@
         android:visibility="invisible"
         app:layout_anchor="@id/bottomAppBar" />
 
-    <com.google.android.material.bottomappbar.BottomAppBar
+    <com.krystianwsul.checkme.gui.MyBottomBar
         android:id="@+id/bottomAppBar"
         style="@style/Widget.MaterialComponents.BottomAppBar"
         android:layout_width="match_parent"

@@ -377,7 +377,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
                 DrawerFragment.newInstance().show(supportFragmentManager, DRAWER_TAG)
             }
 
-            replaceMenu(R.menu.menu_select_all)
+            animateReplaceMenu(R.menu.menu_select_all) { updateBottomMenu() }
 
             setOnMenuItemClickListener { item ->
                 MyCrashlytics.logMethod(this, "item: " + item.title)

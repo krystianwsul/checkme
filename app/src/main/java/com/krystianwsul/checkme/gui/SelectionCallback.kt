@@ -25,13 +25,15 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     protected abstract fun getTreeViewAdapter(): TreeViewAdapter
 
-    protected abstract val bottomBarData: Triple<BottomAppBar, Int, () -> Unit>
+    protected abstract val bottomBarData: Triple<MyBottomBar, Int, () -> Unit>
 
     private var initialBottomColor: Int? = null
 
     protected abstract val activity: Activity
 
     private var oldNavigationBarColor = -1
+
+    protected open fun updateMenu() = Unit // todo
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         check(actionMode == null)
@@ -45,7 +47,8 @@ abstract class SelectionCallback : ActionMode.Callback {
             val final = ContextCompat.getColor(it.context, R.color.actionModeBackground)
             it.animateBottom(final)
 
-            it.replaceMenu(bottomBarData.second)
+            it.animateReplaceMenu(bottomBarData.second) { updateMenu() }
+
             it.setOnMenuItemClickListener {
                 onActionItemClicked(actionMode!!, it)
 

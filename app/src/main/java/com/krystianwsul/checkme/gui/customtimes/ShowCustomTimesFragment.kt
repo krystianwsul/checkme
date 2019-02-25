@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -297,7 +296,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         fun setCustomTimesSelectAllVisibility(selectAllVisible: Boolean)
 
-        fun getBottomBar(): BottomAppBar
+        fun getBottomBar(): MyBottomBar
 
         fun initBottomBar()
     }

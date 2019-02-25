@@ -8,14 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.bottomappbar.BottomAppBar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.AbstractFragment
-import com.krystianwsul.checkme.gui.FabUser
-import com.krystianwsul.checkme.gui.SelectionCallback
-import com.krystianwsul.checkme.gui.SnackbarListener
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -354,7 +350,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         fun setUserSelectAllVisibility(selectAllVisible: Boolean)
 
-        fun getBottomBar(): BottomAppBar
+        fun getBottomBar(): MyBottomBar
 
         fun initBottomBar()
     }

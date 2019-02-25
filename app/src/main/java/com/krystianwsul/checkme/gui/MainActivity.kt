@@ -371,7 +371,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
     override fun initBottomBar() {
         bottomAppBar.apply {
-            setNavigationIcon(R.drawable.ic_menu_white_24dp) // todo remove in actionMode
+            setNavigationIcon(R.drawable.ic_menu_white_24dp)
             setNavigationOnClickListener {
                 actionMode?.finish()
                 DrawerFragment.newInstance().show(supportFragmentManager, DRAWER_TAG)

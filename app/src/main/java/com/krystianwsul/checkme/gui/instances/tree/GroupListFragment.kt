@@ -393,18 +393,10 @@ class GroupListFragment @JvmOverloads constructor(
 
             listener.onCreateGroupActionMode(actionMode!!, treeViewAdapter)
 
-            updateMenu()
+            super.onFirstAdded(x)
         }
 
-        override fun onSecondAdded() = updateMenu()
-
-        override fun onOtherAdded() = updateMenu()
-
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
-
-        override fun onSecondToLastRemoved() = updateMenu()
-
-        override fun onOtherRemoved() = updateMenu()
 
         override fun updateMenu() {
             checkNotNull(actionMode)

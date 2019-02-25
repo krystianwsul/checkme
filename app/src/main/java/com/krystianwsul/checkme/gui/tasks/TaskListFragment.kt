@@ -136,11 +136,15 @@ class TaskListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
 
             (activity as TaskListListener).onCreateActionMode(actionMode!!)
+
+            super.onFirstAdded(x)
         }
 
-        override fun onSecondAdded() {
+        override fun updateMenu() {
             val selectedNodes = treeViewAdapter.selectedNodes
             check(!selectedNodes.isEmpty())
+
+            val single = selectedNodes.size < 2
 
             val projectIdCount = selectedNodes.asSequence()
                     .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
@@ -152,29 +156,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
             taskListListener.getBottomBar()
                     .menu
                     .run {
-                        findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                        findItem(R.id.action_task_edit).isVisible = false
-                        findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
-                        findItem(R.id.action_task_add).isVisible = false
-                    }
-        }
-
-        override fun onOtherAdded() {
-            val selectedNodes = treeViewAdapter.selectedNodes
-            check(!selectedNodes.isEmpty())
-
-            val projectIdCount = selectedNodes.asSequence()
-                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
-                    .distinct()
-                    .count()
-
-            check(projectIdCount > 0)
-
-            taskListListener.getBottomBar()
-                    .menu
-                    .run {
-                        findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                        findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
+                        findItem(R.id.action_task_join)?.isVisible = !single && projectIdCount == 1
+                        findItem(R.id.action_task_edit)?.isVisible = single
+                        findItem(R.id.action_task_delete)?.isVisible = !containsLoop(selectedNodes)
+                        findItem(R.id.action_task_add)?.isVisible = single
                     }
         }
 
@@ -184,38 +169,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
             (activity as TaskListListener).onDestroyActionMode()
         }
 
-        override fun onSecondToLastRemoved() {
-            taskListListener.getBottomBar()
-                    .menu
-                    .run {
-                        findItem(R.id.action_task_join).isVisible = false
-                        findItem(R.id.action_task_edit).isVisible = true
-                        findItem(R.id.action_task_delete).isVisible = true
-                        findItem(R.id.action_task_add).isVisible = true
-                    }
-        }
-
-        override fun onOtherRemoved() {
-            val selectedNodes = treeViewAdapter.selectedNodes
-            check(selectedNodes.size > 1)
-
-            val projectIdCount = selectedNodes.asSequence()
-                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
-                    .distinct()
-                    .count()
-
-            check(projectIdCount > 0)
-
-            taskListListener.getBottomBar()
-                    .menu
-                    .run {
-                        findItem(R.id.action_task_join).isVisible = projectIdCount == 1
-                        findItem(R.id.action_task_delete).isVisible = !containsLoop(selectedNodes)
-                    }
-        }
-
         private fun containsLoop(treeNodes: List<TreeNode>): Boolean {
-            check(treeNodes.size > 1)
+            if (treeNodes.size == 1)
+                return false
 
             for (treeNode in treeNodes) {
                 val parents = ArrayList<TreeNode>()

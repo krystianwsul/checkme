@@ -97,27 +97,23 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             }
         }
 
+        override fun updateMenu() = Unit
+
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             updateFabVisibility()
 
             mainActivity.onCreateActionMode(actionMode!!)
+
+            super.onFirstAdded(x)
         }
-
-        override fun onSecondAdded() = Unit
-
-        override fun onOtherAdded() = Unit
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
             mainActivity.onDestroyActionMode()
         }
-
-        override fun onSecondToLastRemoved() = Unit
-
-        override fun onOtherRemoved() = Unit
     }
 
     private var selectedProjectIds: Set<String> = setOf()

@@ -71,27 +71,23 @@ class FriendListFragment : AbstractFragment(), FabUser {
             }
         }
 
+        override fun updateMenu() = Unit
+
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
             updateFabVisibility()
 
             (activity as MainActivity).onCreateActionMode(actionMode!!)
+
+            super.onFirstAdded(x)
         }
-
-        override fun onSecondAdded() = Unit
-
-        override fun onOtherAdded() = Unit
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
             updateFabVisibility()
 
             (activity as MainActivity).onDestroyActionMode()
         }
-
-        override fun onSecondToLastRemoved() = Unit
-
-        override fun onOtherRemoved() = Unit
     }
 
     private var friendListFab: FloatingActionButton? = null

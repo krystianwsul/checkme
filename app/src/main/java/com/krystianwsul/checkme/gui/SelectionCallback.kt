@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.Menu
 import android.view.MenuItem
+import androidx.annotation.CallSuper
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomappbar.BottomAppBar
@@ -33,7 +34,7 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     private var oldNavigationBarColor = -1
 
-    protected open fun updateMenu() = Unit // todo
+    protected abstract fun updateMenu()
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         check(actionMode == null)
@@ -206,15 +207,20 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     protected abstract fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder)
 
-    protected abstract fun onFirstAdded(x: TreeViewAdapter.Placeholder)
+    @CallSuper
+    protected open fun onFirstAdded(x: TreeViewAdapter.Placeholder) = updateMenu()
 
-    protected abstract fun onSecondAdded()
+    @CallSuper
+    protected open fun onSecondAdded() = updateMenu()
 
-    protected abstract fun onOtherAdded()
+    @CallSuper
+    protected open fun onOtherAdded() = updateMenu()
 
     protected abstract fun onLastRemoved(x: TreeViewAdapter.Placeholder)
 
-    protected abstract fun onSecondToLastRemoved()
+    @CallSuper
+    protected open fun onSecondToLastRemoved() = updateMenu()
 
-    protected abstract fun onOtherRemoved()
+    @CallSuper
+    protected open fun onOtherRemoved() = updateMenu()
 }

@@ -140,3 +140,9 @@ val ViewGroup.children get() = ViewGroupChildrenIterable(this)
 fun TabLayout.select(position: Int) = selectTab(getTabAt(position))
 
 val Menu.items get() = MenuItemsIterable(this)
+
+fun Menu.animateVisibility(itemVisibilities: List<Pair<Int, Boolean>>) {
+    items.forEach { it.isVisible = false }
+
+    itemVisibilities.forEach { findItem(it.first)?.isVisible = it.second }
+}

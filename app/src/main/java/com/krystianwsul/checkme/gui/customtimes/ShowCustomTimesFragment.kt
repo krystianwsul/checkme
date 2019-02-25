@@ -54,8 +54,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_custom_times, listener::initBottomBar) }
 
-        override fun updateMenu() = Unit
-
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val customTimeIds = selectedIds
             check(!customTimeIds.isEmpty())

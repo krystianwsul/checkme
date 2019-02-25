@@ -60,8 +60,6 @@ class UserListFragment : AbstractFragment(), FabUser {
             updateSelectAll()
         }
 
-        override fun updateMenu() = Unit
-
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 

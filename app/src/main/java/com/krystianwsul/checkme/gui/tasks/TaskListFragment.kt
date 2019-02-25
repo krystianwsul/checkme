@@ -140,7 +140,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             super.onFirstAdded(x)
         }
 
-        override fun updateMenu() {
+        override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
             val selectedNodes = treeViewAdapter.selectedNodes
             check(!selectedNodes.isEmpty())
 
@@ -153,14 +153,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             check(projectIdCount > 0)
 
-            taskListListener.getBottomBar()
-                    .menu
-                    .run {
-                        findItem(R.id.action_task_join)?.isVisible = !single && projectIdCount == 1
-                        findItem(R.id.action_task_edit)?.isVisible = single
-                        findItem(R.id.action_task_delete)?.isVisible = !containsLoop(selectedNodes)
-                        findItem(R.id.action_task_add)?.isVisible = single
-                    }
+            return listOf(
+                    R.id.action_task_join to (!single && projectIdCount == 1),
+                    R.id.action_task_edit to single,
+                    R.id.action_task_delete to !containsLoop(selectedNodes),
+                    R.id.action_task_add to single
+            )
         }
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {

@@ -97,8 +97,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             }
         }
 
-        override fun updateMenu() = Unit
-
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 

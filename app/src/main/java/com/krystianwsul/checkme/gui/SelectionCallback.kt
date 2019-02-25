@@ -11,6 +11,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
@@ -34,7 +35,13 @@ abstract class SelectionCallback : ActionMode.Callback {
 
     private var oldNavigationBarColor = -1
 
-    protected abstract fun updateMenu()
+    private fun updateMenu() {
+        val itemVisibilities = getItemVisibilities()
+
+        listOf(actionMode!!.menu, bottomBarData.first.menu).forEach { it.animateVisibility(itemVisibilities) }
+    }
+
+    protected open fun getItemVisibilities() = listOf<Pair<Int, Boolean>>()
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         check(actionMode == null)

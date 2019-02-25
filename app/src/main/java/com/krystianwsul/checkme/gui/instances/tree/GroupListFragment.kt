@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
-import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -398,34 +397,37 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
 
-        override fun updateMenu() {
+        override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
             checkNotNull(actionMode)
-
-            val menus = listOf(actionMode!!.menu!!, listener.getBottomBar().menu)
-            fun findItem(@IdRes itemId: Int) = menus.mapNotNull { it.findItem(itemId) }.singleOrNull()
 
             val instanceDatas = nodesToInstanceDatas(treeViewAdapter.selectedNodes, true)
             check(instanceDatas.isNotEmpty())
 
-            findItem(R.id.action_group_mark_done)?.isVisible = instanceDatas.all { it.Done == null }
-            findItem(R.id.action_group_mark_not_done)?.isVisible = instanceDatas.all { it.Done != null }
-            findItem(R.id.action_group_edit_instance)?.isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null }
-            findItem(R.id.action_group_notify)?.isVisible = instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
+            val itemVisibilities = mutableListOf(
+                    R.id.action_group_mark_done to instanceDatas.all { it.Done == null },
+                    R.id.action_group_mark_not_done to instanceDatas.all { it.Done != null },
+                    R.id.action_group_edit_instance to instanceDatas.all { it.IsRootInstance && it.Done == null },
+                    R.id.action_group_notify to instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
+            )
 
             if (instanceDatas.size == 1) {
                 val instanceData = instanceDatas.single()
 
-                findItem(R.id.action_group_show_task)?.isVisible = instanceData.TaskCurrent
-                findItem(R.id.action_group_edit_task)?.isVisible = instanceData.TaskCurrent
-                findItem(R.id.action_group_join)?.isVisible = false
-                findItem(R.id.action_group_delete_task)?.isVisible = instanceData.TaskCurrent
-                findItem(R.id.action_group_add_task)?.isVisible = instanceData.TaskCurrent
+                itemVisibilities.addAll(listOf(
+                        R.id.action_group_show_task to instanceData.TaskCurrent,
+                        R.id.action_group_edit_task to instanceData.TaskCurrent,
+                        R.id.action_group_join to false,
+                        R.id.action_group_delete_task to instanceData.TaskCurrent,
+                        R.id.action_group_add_task to instanceData.TaskCurrent
+                ))
             } else {
                 check(instanceDatas.size > 1)
 
-                findItem(R.id.action_group_show_task)?.isVisible = false
-                findItem(R.id.action_group_edit_task)?.isVisible = false
-                findItem(R.id.action_group_add_task)?.isVisible = false
+                itemVisibilities.addAll(listOf(
+                        R.id.action_group_show_task to false,
+                        R.id.action_group_edit_task to false,
+                        R.id.action_group_add_task to false
+                ))
 
                 if (instanceDatas.all { it.TaskCurrent }) {
                     val projectIdCount = instanceDatas.asSequence()
@@ -435,13 +437,19 @@ class GroupListFragment @JvmOverloads constructor(
 
                     check(projectIdCount > 0)
 
-                    findItem(R.id.action_group_join)?.isVisible = (projectIdCount == 1)
-                    findItem(R.id.action_group_delete_task)?.isVisible = !containsLoop(instanceDatas)
+                    itemVisibilities.addAll(listOf(
+                            R.id.action_group_join to (projectIdCount == 1),
+                            R.id.action_group_delete_task to !containsLoop(instanceDatas)
+                    ))
                 } else {
-                    findItem(R.id.action_group_join)?.isVisible = false
-                    findItem(R.id.action_group_delete_task)?.isVisible = false
+                    itemVisibilities.addAll(listOf(
+                            R.id.action_group_join to false,
+                            R.id.action_group_delete_task to false
+                    ))
                 }
             }
+
+            return itemVisibilities
         }
 
         private fun containsLoop(instanceDatas: Collection<InstanceData>): Boolean {

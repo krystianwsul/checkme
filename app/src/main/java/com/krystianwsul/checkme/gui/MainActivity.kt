@@ -464,38 +464,49 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         fun setVisible(visible: Boolean) = mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visible)
 
+        val showViews = mutableListOf<View>()
+        val hideViews = mutableListOf<View>()
+
         if (tab == Tab.INSTANCES) {
-            mainDaysLayout.visibility = View.VISIBLE
+            showViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
             setVisible(true)
         } else {
-            mainDaysLayout.visibility = View.GONE
+            hideViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
             setVisible(false)
             calendarOpen = false
         }
 
-        mainTaskListFrame.visibility = if (tab == Tab.TASKS) {
-            View.VISIBLE
+        if (tab == Tab.TASKS) {
+            showViews.add(mainTaskListFrame)
         } else {
+            hideViews.add(mainTaskListFrame)
             closeSearch()
-            View.GONE
         }
 
-        mainProjectListFrame.visibility = if (tab == Tab.PROJECTS) View.VISIBLE else View.GONE
+        if (tab == Tab.PROJECTS) {
+            showViews.add(mainProjectListFrame)
+        } else {
+            hideViews.add(mainProjectListFrame)
+        }
 
         if (tab == Tab.CUSTOM_TIMES) {
-            mainCustomTimesFrame.visibility = View.VISIBLE
+            showViews.add(mainCustomTimesFrame)
         } else {
-            mainCustomTimesFrame.visibility = View.GONE
+            hideViews.add(mainCustomTimesFrame)
         }
 
-        mainFriendListFrame.visibility = if (tab == Tab.FRIENDS) View.VISIBLE else View.GONE
+        if (tab == Tab.FRIENDS) {
+            showViews.add(mainFriendListFrame)
+        } else {
+            hideViews.add(mainFriendListFrame)
+        }
 
         if (tab == Tab.DEBUG) {
-            mainDebugFrame.visibility = View.VISIBLE
+            showViews.add(mainDebugFrame)
         } else {
-            mainDebugFrame.visibility = View.GONE
+            hideViews.add(mainDebugFrame)
         }
 
         mainActivityToolbar.title = when (tab) {
@@ -553,6 +564,8 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
         }
 
         visibleTab.accept(tab)
+
+        animateVisibility(showViews, hideViews, resources.getInteger(android.R.integer.config_shortAnimTime))
 
         updateCalendarHeight()
         updateSearchMenu()

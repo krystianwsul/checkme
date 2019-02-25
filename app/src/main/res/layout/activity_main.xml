@@ -81,8 +81,8 @@
                         app:tabMode="scrollable"
                         tools:ignore="UnusedAttribute"
                         app:tabTextColor="@color/textSecondaryWhite"
-                        app:tabSelectedTextColor="@color/secondaryColor"
-                        app:tabRippleColor="@color/secondaryColor"
+                        app:tabSelectedTextColor="@color/textPrimaryWhite"
+                        app:tabRippleColor="@color/textPrimaryWhite"
                         app:tabIndicatorColor="@color/secondaryColor" />
 
                     <androidx.recyclerview.widget.RecyclerView

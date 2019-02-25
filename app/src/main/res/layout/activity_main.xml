@@ -81,7 +81,9 @@
                         app:tabMode="scrollable"
                         tools:ignore="UnusedAttribute"
                         app:tabTextColor="@color/textSecondaryWhite"
-                        app:tabSelectedTextColor="@color/textPrimaryWhite" />
+                        app:tabSelectedTextColor="@color/secondaryColor"
+                        app:tabRippleColor="@color/secondaryColor"
+                        app:tabIndicatorColor="@color/secondaryColor" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/mainDaysPager"

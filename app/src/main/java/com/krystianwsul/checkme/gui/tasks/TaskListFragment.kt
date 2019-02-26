@@ -93,7 +93,20 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 R.id.action_task_delete -> {
                     checkNotNull(dataId)
 
-                    removeFromGetter({ treeViewAdapter.selectedNodes }) {
+                    val removeNodes = selected.toMutableList()
+
+                    fun parentPresent(treeNode: TreeNode): Boolean {
+                        return (treeNode.parent as? TreeNode)?.let {
+                            removeNodes.contains(it) || parentPresent(it)
+                        } ?: false
+                    }
+
+                    removeNodes.toMutableList().forEach {
+                        if (parentPresent(it))
+                            removeNodes.remove(it)
+                    }
+
+                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) {
                         val taskWrapper = it.modelNode as TaskAdapter.TaskWrapper
 
                         taskWrapper.removeFromParent(x)
@@ -101,16 +114,19 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         decrementSelected(x)
                     }
 
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys)
-                    taskData!!.childTaskDatas.removeAll(childTaskDatas)
+                    val removeTaskDatas = removeNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
+                    val removeTaskKeys = removeTaskDatas.map { it.taskKey }
+
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, removeTaskKeys)
+                    taskData!!.childTaskDatas.removeAll(removeTaskDatas)
 
                     updateSelectAll()
 
-                    taskListListener.showSnackbar(taskKeys.size) {
+                    taskListListener.showSnackbar(removeTaskKeys.size) {
                         DomainFactory.instance.clearTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskUndoData)
 
                         taskData!!.childTaskDatas.apply {
-                            addAll(childTaskDatas)
+                            addAll(removeTaskDatas)
 
                             if (taskKey != null)
                                 sort()
@@ -156,7 +172,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             return listOf(
                     R.id.action_task_join to (!single && projectIdCount == 1),
                     R.id.action_task_edit to single,
-                    R.id.action_task_delete to !containsLoop(selectedNodes),
                     R.id.action_task_add to single
             )
         }
@@ -165,30 +180,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             updateFabVisibility()
 
             (activity as TaskListListener).onDestroyActionMode()
-        }
-
-        private fun containsLoop(treeNodes: List<TreeNode>): Boolean {
-            if (treeNodes.size == 1)
-                return false
-
-            for (treeNode in treeNodes) {
-                val parents = ArrayList<TreeNode>()
-                addParents(parents, treeNode)
-
-                for (parent in parents) {
-                    if (treeNodes.contains(parent))
-                        return true
-                }
-            }
-
-            return false
-        }
-
-        private fun addParents(parents: MutableList<TreeNode>, treeNode: TreeNode) {
-            val parent = treeNode.parent as? TreeNode ?: return
-
-            parents.add(parent)
-            addParents(parents, parent)
         }
     }
 

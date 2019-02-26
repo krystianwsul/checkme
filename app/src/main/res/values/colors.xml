@@ -22,4 +22,6 @@
     <color name="textDisabledWhite">#7FFFFFFF</color>
     <color name="actionModeBackground">#303030</color>
     <color name="materialBackground">#FFF</color>
+
+    <color name="navigationDivider">#DEDEDE</color>
 </resources>

@@ -38,6 +38,10 @@
             android:visible="false"
             tools:ignore="HardcodedText" />
 
+    </group>
+
+    <group android:id="@+id/mainDrawerOther">
+
         <item
             android:id="@+id/main_drawer_tutorial"
             android:checkable="false"

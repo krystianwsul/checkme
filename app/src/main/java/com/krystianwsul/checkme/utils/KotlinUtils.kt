@@ -155,9 +155,11 @@ fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, onEnd: (() 
         val showItems = itemVisibilities.filter { it.second }.map { it.first }.filter { menu.findItem(it)?.isVisible == false }
         showItems.forEach { menu.findItem(it)?.isVisible = true }
 
-        val showViews = getViews(showItems)
-        showViews.forEach { it.visibility = View.GONE }
+        //val showViews = getViews(showItems)
+        //showViews.forEach { it.visibility = View.GONE }
 
-        animateVisibility(show = showViews, duration = MyBottomBar.duration, onEnd = onEnd)
+        //animateVisibility(show = showViews, duration = MyBottomBar.duration, onEnd = onEnd)
+
+        onEnd?.invoke()
     }
 }

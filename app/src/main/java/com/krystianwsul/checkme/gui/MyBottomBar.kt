@@ -24,10 +24,12 @@ class MyBottomBar @JvmOverloads constructor(context: Context, attrs: AttributeSe
         animateItems(visibleViews) {
             replaceMenu(newMenu)
 
-            val visible = menu.items.filter { it.isVisible }
-            visible.forEach { it.isVisible = false }
+            //val visible = menu.items.filter { it.isVisible }
+            //visible.forEach { it.isVisible = false }
 
-            animateItems(visible.map { it.itemId to true }, onEnd)
+            //animateItems(visible.map { it.itemId to true }, onEnd)
+
+            onEnd()
         }
     }
 }

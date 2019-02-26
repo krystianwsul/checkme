@@ -143,23 +143,27 @@ fun TabLayout.select(position: Int) = selectTab(getTabAt(position))
 
 val Menu.items get() = MenuItemsIterable(this)
 
-fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, onEnd: (() -> Unit)? = null) {
-    fun getViews(ids: List<Int>) = ids.mapNotNull { findViewById<View>(it) }
+fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenuHack: Boolean = false, onEnd: (() -> Unit)? = null) {
+    if (replaceMenuHack) {
+        fun getViews(ids: List<Int>) = ids.mapNotNull { findViewById<View>(it) }
 
-    val hideItems = itemVisibilities.filterNot { it.second }.map { it.first }
-    val hideViews = getViews(hideItems)
+        val hideItems = itemVisibilities.filterNot { it.second }.map { it.first }
+        val hideViews = getViews(hideItems)
 
-    animateVisibility(hide = hideViews, duration = MyBottomBar.duration) {
-        hideItems.forEach { menu.findItem(it)?.isVisible = false }
+        animateVisibility(hide = hideViews, duration = MyBottomBar.duration) {
+            hideItems.forEach { menu.findItem(it)?.isVisible = false }
 
-        val showItems = itemVisibilities.filter { it.second }.map { it.first }.filter { menu.findItem(it)?.isVisible == false }
-        showItems.forEach { menu.findItem(it)?.isVisible = true }
+            val showItems = itemVisibilities.filter { it.second }.map { it.first }.filter { menu.findItem(it)?.isVisible == false }
+            showItems.forEach { menu.findItem(it)?.isVisible = true }
 
-        //val showViews = getViews(showItems)
-        //showViews.forEach { it.visibility = View.GONE }
+            //val showViews = getViews(showItems)
+            //showViews.forEach { it.visibility = View.GONE }
 
-        //animateVisibility(show = showViews, duration = MyBottomBar.duration, onEnd = onEnd)
+            //animateVisibility(show = showViews, duration = MyBottomBar.duration, onEnd = onEnd)
 
-        onEnd?.invoke()
+            onEnd?.invoke()
+        }
+    } else {
+        itemVisibilities.forEach { menu.findItem(it.first)?.isVisible = it.second }
     }
 }

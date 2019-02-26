@@ -21,7 +21,7 @@ class MyBottomBar @JvmOverloads constructor(context: Context, attrs: AttributeSe
     fun animateReplaceMenu(newMenu: Int, onEnd: () -> Unit) {
         val visibleViews = menu.items.map { it.itemId to false }
 
-        animateItems(visibleViews) {
+        animateItems(visibleViews, true) {
             replaceMenu(newMenu)
 
             //val visible = menu.items.filter { it.isVisible }

@@ -81,7 +81,7 @@ class NotDoneGroupNode(
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf()))
         } else {
             val notDoneInstanceTreeNodes = instanceDatas.map {
-                val childSelected = selected || selectedInstances.contains(it.InstanceKey)
+                val childSelected = selectedInstances.contains(it.InstanceKey)
                 newChildTreeNode(it, expandedInstances, childSelected, selectedInstances, selectedGroups)
             }
 

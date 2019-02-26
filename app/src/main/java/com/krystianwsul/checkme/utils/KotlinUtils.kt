@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import androidx.appcompat.widget.Toolbar
 import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayout
 import com.krystianwsul.checkme.MyApplication
@@ -15,6 +16,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
+import com.krystianwsul.checkme.gui.MyBottomBar
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -141,8 +143,21 @@ fun TabLayout.select(position: Int) = selectTab(getTabAt(position))
 
 val Menu.items get() = MenuItemsIterable(this)
 
-fun Menu.animateVisibility(itemVisibilities: List<Pair<Int, Boolean>>) {
-    items.forEach { it.isVisible = false }
+fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, onEnd: (() -> Unit)? = null) {
+    fun getViews(ids: List<Int>) = ids.mapNotNull { findViewById<View>(it) }
 
-    itemVisibilities.forEach { findItem(it.first)?.isVisible = it.second }
+    val hideItems = itemVisibilities.filterNot { it.second }.map { it.first }
+    val hideViews = getViews(hideItems)
+
+    animateVisibility(hide = hideViews, duration = MyBottomBar.duration) {
+        hideItems.forEach { menu.findItem(it)?.isVisible = false }
+
+        val showItems = itemVisibilities.filter { it.second }.map { it.first }.filter { menu.findItem(it)?.isVisible == false }
+        showItems.forEach { menu.findItem(it)?.isVisible = true }
+
+        val showViews = getViews(showItems)
+        showViews.forEach { it.visibility = View.GONE }
+
+        animateVisibility(show = showViews, duration = MyBottomBar.duration, onEnd = onEnd)
+    }
 }

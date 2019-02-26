@@ -11,7 +11,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.animateItems
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
 
@@ -38,7 +38,13 @@ abstract class SelectionCallback : ActionMode.Callback {
     private fun updateMenu() {
         val itemVisibilities = getItemVisibilities()
 
-        listOf(actionMode!!.menu, bottomBarData.first.menu).forEach { it.animateVisibility(itemVisibilities) }
+        itemVisibilities.forEach {
+            actionMode!!.menu
+                    .findItem(it.first)
+                    ?.isVisible = it.second
+        }
+
+        bottomBarData.first.animateItems(itemVisibilities)
     }
 
     protected open fun getItemVisibilities() = listOf<Pair<Int, Boolean>>()

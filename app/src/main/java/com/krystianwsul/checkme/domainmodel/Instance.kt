@@ -15,6 +15,14 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
         fun getNotificationId(scheduleDate: Date, scheduleCustomTimeKey: CustomTimeKey<*>?, scheduleHourMinute: HourMinute?, taskKey: TaskKey) = getNotificationId(scheduleDate, scheduleCustomTimeKey?.let { Pair(it.remoteProjectId, it.remoteCustomTimeId.value) }, scheduleHourMinute, taskKey)
 
+        /*
+        I'm going to make some assumptions here:
+            1. I won't live past a hundred years
+            2. scheduleYear is between 2016 and 2088 (that way the algorithm should be fine during my lifetime)
+            3. scheduleCustomTimeId is between 1 and 10,000
+            4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
+         */
+
         fun getNotificationId(scheduleDate: Date, scheduleCustomTimeData: Pair<String, String>?, scheduleHourMinute: HourMinute?, taskKey: TaskKey): Int {
             check(scheduleCustomTimeData == null != (scheduleHourMinute == null))
 
@@ -89,14 +97,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     abstract var notified: Boolean
 
     abstract var notificationShown: Boolean // Is the notification visible?
-
-    /*
-    I'm going to make some assumptions here:
-        1. I won't live past a hundred years
-        2. scheduleYear is between 2016 and 2088 (that way the algorithm should be fine during my lifetime)
-        3. scheduleCustomTimeId is between 1 and 10,000
-        4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
-     */
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
 

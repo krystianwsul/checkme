@@ -420,7 +420,7 @@ open class DomainFactory(
             val children = getChildInstanceDatas(instance, now)
             val instanceData = GroupListFragment.InstanceData(instance.done, instance.instanceKey, instance.getDisplayText(now), instance.name, instance.instanceDateTime.timeStamp, task.current(now), instance.isRootInstance(now), isRootTask, instance.exists(), instance.instanceDateTime.time.timePair, task.note, children, null, instance.ordinal, instance.notificationShown)
             children.values.forEach { it.instanceDataParent = instanceData }
-            instanceDatas[instanceData.InstanceKey] = instanceData
+            instanceDatas[instanceData.instanceKey] = instanceData
         }
 
         val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas)
@@ -1286,7 +1286,7 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun setTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskKeys: List<TaskKey>): TaskUndoData {
+    fun setTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskKeys: Set<TaskKey>): TaskUndoData {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1294,8 +1294,17 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val tasks = taskKeys.map { getTaskForce(it) }
+        val tasks = taskKeys.map { getTaskForce(it) }.toMutableSet()
         check(tasks.all { it.current(now) })
+
+        fun parentPresent(task: Task): Boolean = task.getParentTask(now)?.let {
+            tasks.contains(it) || parentPresent(it)
+        } ?: false
+
+        tasks.toMutableSet().forEach {
+            if (parentPresent(it))
+                tasks.remove(it)
+        }
 
         val taskUndoData = TaskUndoData()
 

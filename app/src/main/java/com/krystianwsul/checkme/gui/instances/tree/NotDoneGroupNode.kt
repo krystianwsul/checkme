@@ -53,9 +53,9 @@ class NotDoneGroupNode(
         if (instanceDatas.size == 1) {
             val instanceData = instanceDatas.single()
 
-            if (expandedInstances.containsKey(instanceData.InstanceKey) && instanceData.children.isNotEmpty()) {
+            if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
                 expanded = true
-                doneExpanded = expandedInstances.getValue(instanceData.InstanceKey)
+                doneExpanded = expandedInstances.getValue(instanceData.instanceKey)
             } else {
                 expanded = false
                 doneExpanded = false
@@ -66,7 +66,7 @@ class NotDoneGroupNode(
         }
 
         val selected = if (instanceDatas.size == 1) {
-            selectedInstances.contains(instanceDatas.single().InstanceKey)
+            selectedInstances.contains(instanceDatas.single().instanceKey)
         } else {
             check(instanceDatas.size > 1)
 
@@ -81,7 +81,7 @@ class NotDoneGroupNode(
             treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf()))
         } else {
             val notDoneInstanceTreeNodes = instanceDatas.map {
-                val childSelected = selectedInstances.contains(it.InstanceKey)
+                val childSelected = selectedInstances.contains(it.instanceKey)
                 newChildTreeNode(it, expandedInstances, childSelected, selectedInstances, selectedGroups)
             }
 
@@ -102,9 +102,9 @@ class NotDoneGroupNode(
             return
 
         if (singleInstance()) {
-            check(!expandedInstances.containsKey(singleInstanceData.InstanceKey))
+            check(!expandedInstances.containsKey(singleInstanceData.instanceKey))
 
-            expandedInstances[singleInstanceData.InstanceKey] = singleInstanceNodeCollection!!.doneExpanded
+            expandedInstances[singleInstanceData.instanceKey] = singleInstanceNodeCollection!!.doneExpanded
             singleInstanceNodeCollection!!.addExpandedInstances(expandedInstances)
         } else {
             notDoneInstanceNodes.forEach { it.addExpandedInstances(expandedInstances) }
@@ -114,7 +114,7 @@ class NotDoneGroupNode(
     override val name
         get(): Triple<String, Int, Boolean>? {
             return if (singleInstance()) {
-                Triple(singleInstanceData.name, if (!singleInstanceData.TaskCurrent) colorDisabled else colorPrimary, true)
+                Triple(singleInstanceData.name, if (!singleInstanceData.taskCurrent) colorDisabled else colorPrimary, true)
             } else {
                 if (treeNode.isExpanded) {
                     null
@@ -132,7 +132,7 @@ class NotDoneGroupNode(
                 return if (singleInstanceData.displayText.isNullOrEmpty()) {
                     null
                 } else {
-                    Pair(singleInstanceData.displayText!!, if (!singleInstanceData.TaskCurrent) colorDisabled else colorSecondary)
+                    Pair(singleInstanceData.displayText!!, if (!singleInstanceData.taskCurrent) colorDisabled else colorSecondary)
                 }
             } else {
                 val exactTimeStamp = (treeNode.modelNode as NotDoneGroupNode).exactTimeStamp
@@ -184,7 +184,7 @@ class NotDoneGroupNode(
         groupAdapter.treeNodeCollection
                 .treeViewAdapter
                 .updateDisplayedNodes {
-                    singleInstanceData.Done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.InstanceKey, true)!!
+                    singleInstanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.instanceKey, true)!!
 
                     GroupListFragment.recursiveExists(singleInstanceData)
 
@@ -208,7 +208,7 @@ class NotDoneGroupNode(
 
     override fun onClick() {
         groupListFragment.activity.startActivity(if (singleInstance()) {
-            ShowInstanceActivity.getIntent(groupListFragment.activity, singleInstanceData.InstanceKey)
+            ShowInstanceActivity.getIntent(groupListFragment.activity, singleInstanceData.instanceKey)
         } else {
             ShowGroupActivity.getIntent((treeNode.modelNode as NotDoneGroupNode).exactTimeStamp, groupListFragment.activity)
         })
@@ -332,12 +332,12 @@ class NotDoneGroupNode(
             } else {
                 it.ordinal = ordinal
 
-                DomainFactory.instance.setInstanceOrdinal(groupListFragment.parameters.dataId, it.InstanceKey, ordinal)
+                DomainFactory.instance.setInstanceOrdinal(groupListFragment.parameters.dataId, it.instanceKey, ordinal)
             }
         }
     }
 
-    override val id: Any = if (singleInstance()) Id(singleInstanceData.InstanceKey) else exactTimeStamp
+    override val id: Any = if (singleInstance()) Id(singleInstanceData.instanceKey) else exactTimeStamp
 
     override val toggleDescendants get() = !singleInstance()
 
@@ -352,9 +352,9 @@ class NotDoneGroupNode(
 
             fun getChildrenNew(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData) = instanceData.children
                     .values
-                    .filter { it.Done == null }
+                    .filter { it.done == null }
                     .let {
-                        fun color() = if (!instanceData.TaskCurrent) colorDisabled else colorSecondary
+                        fun color() = if (!instanceData.taskCurrent) colorDisabled else colorSecondary
 
                         if (it.isNotEmpty() && !treeNode.isExpanded) {
                             val children = it.sorted().joinToString(", ") { it.name }
@@ -386,9 +386,9 @@ class NotDoneGroupNode(
         fun initialize(expandedInstances: Map<InstanceKey, Boolean>, selected: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, notDoneGroupTreeNode: TreeNode): TreeNode {
             val expanded: Boolean
             val doneExpanded: Boolean
-            if (expandedInstances.containsKey(instanceData.InstanceKey) && instanceData.children.isNotEmpty()) {
+            if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
                 expanded = true
-                doneExpanded = expandedInstances.getValue(instanceData.InstanceKey)
+                doneExpanded = expandedInstances.getValue(instanceData.instanceKey)
             } else {
                 expanded = false
                 doneExpanded = false
@@ -406,15 +406,15 @@ class NotDoneGroupNode(
             if (!treeNode.isExpanded)
                 return
 
-            check(!expandedInstances.containsKey(instanceData.InstanceKey))
+            check(!expandedInstances.containsKey(instanceData.instanceKey))
 
-            expandedInstances[instanceData.InstanceKey] = nodeCollection.doneExpanded
+            expandedInstances[instanceData.instanceKey] = nodeCollection.doneExpanded
             nodeCollection.addExpandedInstances(expandedInstances)
         }
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val name get() = Triple(instanceData.name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
+        override val name get() = Triple(instanceData.name, if (!instanceData.taskCurrent) colorDisabled else colorPrimary, true)
 
         override val children get() = getChildrenNew(treeNode, instanceData)
 
@@ -432,7 +432,7 @@ class NotDoneGroupNode(
             groupAdapter.treeNodeCollection
                     .treeViewAdapter
                     .updateDisplayedNodes {
-                        instanceData.Done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, true)!!
+                        instanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.instanceKey, true)!!
 
                         GroupListFragment.recursiveExists(instanceData)
 
@@ -442,13 +442,13 @@ class NotDoneGroupNode(
                     }
         }
 
-        override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
+        override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
 
         override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
         fun removeFromParent(x: TreeViewAdapter.Placeholder) = parentNotDoneGroupNode.remove(this, x)
 
-        override val id = Id(instanceData.InstanceKey)
+        override val id = Id(instanceData.instanceKey)
 
         override val deselectParent get() = true
 

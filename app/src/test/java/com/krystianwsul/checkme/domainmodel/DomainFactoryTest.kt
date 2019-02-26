@@ -344,8 +344,8 @@ class DomainFactoryTest {
 
         val doneExactTimeStamp = ExactTimeStamp(startDate, HourMilli(3, 0, 0, 0))
 
-        domainFactory.setInstanceDone(doneExactTimeStamp, 0, SaveService.Source.GUI, dataWrapper.instanceDatas.values.iterator().next().InstanceKey, true)
-        domainFactory.setInstanceDone(doneExactTimeStamp, 0, SaveService.Source.GUI, dataWrapper.instanceDatas.values.iterator().next().InstanceKey, false)
+        domainFactory.setInstanceDone(doneExactTimeStamp, 0, SaveService.Source.GUI, dataWrapper.instanceDatas.values.iterator().next().instanceKey, true)
+        domainFactory.setInstanceDone(doneExactTimeStamp, 0, SaveService.Source.GUI, dataWrapper.instanceDatas.values.iterator().next().instanceKey, false)
 
         val joinExactTimeStamp = ExactTimeStamp(startDate, HourMilli(4, 0, 0, 0))
 
@@ -432,11 +432,11 @@ class DomainFactoryTest {
         val secondTask = domainFactory.createScheduleRootTask(ExactTimeStamp(day1, hour5.toHourMilli()), dataId, SaveService.Source.GUI, "secondTask", listOf(secondScheduleData), null, null)
 
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
-        Assert.assertTrue(!domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().Exists)
+        Assert.assertTrue(!domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().exists)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.size == 1)
-        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().Done == null)
-        Assert.assertTrue(!domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().Exists)
+        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().done == null)
+        Assert.assertTrue(!domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().exists)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range2, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour6.toHourMilli()), range2, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.isEmpty())
 
@@ -444,10 +444,10 @@ class DomainFactoryTest {
         domainFactory.setInstanceDone(ExactTimeStamp(day1, hour7.toHourMilli()), dataId, SaveService.Source.GUI, childTaskInFirstTaskInstanceKey, true)
 
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
-        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().Exists)
+        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().exists)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.size == 1)
-        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().Done != null)
-        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().Exists)
+        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().done != null)
+        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour8.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.values.iterator().next().exists)
 
         run {
             val irrelevant = domainFactory.updateNotificationsTick(ExactTimeStamp(day1, hour12.toHourMilli()), SaveService.Source.GUI, false, "test")
@@ -458,7 +458,7 @@ class DomainFactoryTest {
         domainFactory.updateChildTask(ExactTimeStamp(day1, hour13.toHourMilli()), dataId, SaveService.Source.GUI, childTask.taskKey, childTask.name, secondTask.taskKey, childTask.note)
 
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour14.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
-        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour14.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().Done == null)
+        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour14.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().done == null)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour14.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour14.toHourMilli()), range2, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour14.toHourMilli()), range2, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.size == 1)
@@ -467,7 +467,7 @@ class DomainFactoryTest {
         domainFactory.setInstanceDone(ExactTimeStamp(day1, hour15.toHourMilli()), dataId, SaveService.Source.GUI, firstTaskInstanceKey, true)
 
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour16.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
-        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour16.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().Done != null)
+        Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour16.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().done != null)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour16.toHourMilli()), range1, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour16.toHourMilli()), range2, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.size == 1)
         Assert.assertTrue(domainFactory.getGroupListData(ExactTimeStamp(day1, hour16.toHourMilli()), range2, MainActivity.TimeRange.DAY).dataWrapper.instanceDatas.values.iterator().next().children.size == 1)
@@ -481,8 +481,8 @@ class DomainFactoryTest {
 
             Assert.assertTrue(dataWrapper.instanceDatas.size == 2)
             Assert.assertTrue(dataWrapper.instanceDatas[firstTaskInstanceKey]!!.children.size == 1)
-            Assert.assertTrue(dataWrapper.instanceDatas[secondTaskInstanceKey]!!.Done == null)
-            Assert.assertTrue(!dataWrapper.instanceDatas[secondTaskInstanceKey]!!.Exists)
+            Assert.assertTrue(dataWrapper.instanceDatas[secondTaskInstanceKey]!!.done == null)
+            Assert.assertTrue(!dataWrapper.instanceDatas[secondTaskInstanceKey]!!.exists)
             Assert.assertTrue(dataWrapper.instanceDatas[secondTaskInstanceKey]!!.children.size == 1)
         }
 
@@ -493,8 +493,8 @@ class DomainFactoryTest {
 
             Assert.assertTrue(dataWrapper.instanceDatas.size == 2)
             Assert.assertTrue(dataWrapper.instanceDatas[firstTaskInstanceKey]!!.children.size == 1)
-            Assert.assertTrue(dataWrapper.instanceDatas[secondTaskInstanceKey]!!.Done != null)
-            Assert.assertTrue(dataWrapper.instanceDatas[secondTaskInstanceKey]!!.Exists)
+            Assert.assertTrue(dataWrapper.instanceDatas[secondTaskInstanceKey]!!.done != null)
+            Assert.assertTrue(dataWrapper.instanceDatas[secondTaskInstanceKey]!!.exists)
             Assert.assertTrue(dataWrapper.instanceDatas[secondTaskInstanceKey]!!.children.size == 1)
         }
 

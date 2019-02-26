@@ -37,7 +37,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     }
 
     private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
-        checkNotNull(instanceData.Done)
+        checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
 

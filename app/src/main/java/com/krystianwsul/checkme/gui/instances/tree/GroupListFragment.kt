@@ -94,7 +94,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         fun recursiveExists(instanceData: InstanceData) {
-            instanceData.Exists = true
+            instanceData.exists = true
 
             if (instanceData.instanceDataParent is InstanceData) {
                 recursiveExists(instanceData.instanceDataParent as InstanceData)
@@ -148,14 +148,14 @@ class GroupListFragment @JvmOverloads constructor(
 
                     if (instanceDatas.size == 1) {
                         val instanceData = instanceDatas.single()
-                        check(instanceData.IsRootInstance)
+                        check(instanceData.isRootInstance)
 
-                        activity.startActivity(EditInstanceActivity.getIntent(instanceData.InstanceKey))
+                        activity.startActivity(EditInstanceActivity.getIntent(instanceData.instanceKey))
                     } else {
                         check(instanceDatas.size > 1)
-                        check(instanceDatas.all { it.IsRootInstance })
+                        check(instanceDatas.all { it.isRootInstance })
 
-                        val instanceKeys = ArrayList(instanceDatas.map { it.InstanceKey })
+                        val instanceKeys = ArrayList(instanceDatas.map { it.instanceKey })
 
                         activity.startActivity(EditInstancesActivity.getIntent(instanceKeys))
                     }
@@ -163,20 +163,20 @@ class GroupListFragment @JvmOverloads constructor(
                 R.id.action_group_share -> Utils.share(activity, getShareData(instanceDatas))
                 R.id.action_group_show_task -> {
                     val instanceData = instanceDatas.single()
-                    check(instanceData.TaskCurrent)
+                    check(instanceData.taskCurrent)
 
-                    activity.startActivity(ShowTaskActivity.newIntent(instanceData.InstanceKey.taskKey))
+                    activity.startActivity(ShowTaskActivity.newIntent(instanceData.instanceKey.taskKey))
                 }
                 R.id.action_group_edit_task -> {
                     val instanceData = instanceDatas.single()
-                    check(instanceData.TaskCurrent)
+                    check(instanceData.taskCurrent)
 
-                    activity.startActivity(CreateTaskActivity.getEditIntent(instanceData.InstanceKey.taskKey))
+                    activity.startActivity(CreateTaskActivity.getEditIntent(instanceData.instanceKey.taskKey))
                 }
                 R.id.action_group_delete_task -> {
-                    val taskKeys = instanceDatas.map { it.InstanceKey.taskKey }
+                    val taskKeys = instanceDatas.map { it.instanceKey.taskKey }
                     check(taskKeys.isNotEmpty())
-                    check(instanceDatas.all { it.TaskCurrent })
+                    check(instanceDatas.all { it.taskCurrent })
 
                     val undoAll = UndoAll()
 
@@ -185,9 +185,9 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys)
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys.toSet())
 
-                    listener.showSnackbar(instanceDatas.size) {
+                    listener.showSnackbar(taskUndoData.taskKeys.size) {
                         fun Map<InstanceKey, InstanceData>.flattenMap(): List<InstanceData> = map {
                             listOf(
                                     listOf(it.value),
@@ -200,23 +200,30 @@ class GroupListFragment @JvmOverloads constructor(
                         val allInstanceDatas = parameters.dataWrapper
                                 .instanceDatas
                                 .flattenMap()
-                                .associateBy { it.InstanceKey }
+                                .associateBy { it.instanceKey }
+                                .toMutableMap()
 
                         undoAll.undos.forEach {
                             allInstanceDatas.getValue(it.key).let { instanceData ->
-                                instanceData.TaskCurrent = it.value.taskCurrent
-                                instanceData.IsRootTask = it.value.isRootTask
+                                instanceData.taskCurrent = it.value.taskCurrent
+                                instanceData.isRootTask = it.value.isRootTask
                             }
                         }
 
                         parameters.dataWrapper
                                 .instanceDatas
-                                .putAll(undoAll.removedRoots.map { it.InstanceKey to it })
+                                .putAll(undoAll.removedRoots.map { it.instanceKey to it })
+
+                        val newAllInstanceDatas = parameters.dataWrapper
+                                .instanceDatas
+                                .flattenMap()
+                                .associateBy { it.instanceKey }
+                                .toMutableMap()
 
                         undoAll.removedChildren
                                 .asMap()
                                 .forEach { (instanceKey, instanceDatas) ->
-                                    allInstanceDatas.getValue(instanceKey).children.putAll(instanceDatas.map { it.InstanceKey to it })
+                                    newAllInstanceDatas.getValue(instanceKey).children.putAll(instanceDatas.map { it.instanceKey to it })
                                 }
 
                         initialize()
@@ -226,12 +233,12 @@ class GroupListFragment @JvmOverloads constructor(
                 }
                 R.id.action_group_add_task -> {
                     val instanceData = instanceDatas.single()
-                    check(instanceData.TaskCurrent)
+                    check(instanceData.taskCurrent)
 
-                    activity.startActivity(CreateTaskActivity.getCreateIntent(instanceData.InstanceKey.taskKey))
+                    activity.startActivity(CreateTaskActivity.getCreateIntent(instanceData.instanceKey.taskKey))
                 }
                 R.id.action_group_join -> {
-                    val taskKeys = ArrayList(instanceDatas.map { it.InstanceKey.taskKey })
+                    val taskKeys = ArrayList(instanceDatas.map { it.instanceKey.taskKey })
                     check(taskKeys.size > 1)
 
                     if (parameters is Parameters.InstanceKey) {
@@ -241,15 +248,15 @@ class GroupListFragment @JvmOverloads constructor(
 
                         val date = firstInstanceData.instanceTimeStamp.date
 
-                        val timePair = firstInstanceData.InstanceTimePair
+                        val timePair = firstInstanceData.instanceTimePair
 
                         activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.ScheduleHint(date, timePair)))
                     }
                 }
                 R.id.action_group_mark_done -> {
-                    check(instanceDatas.all { it.Done == null })
+                    check(instanceDatas.all { it.done == null })
 
-                    val instanceKeys = instanceDatas.map { it.InstanceKey }
+                    val instanceKeys = instanceDatas.map { it.instanceKey }
 
                     val done = DomainFactory.instance.setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, true)
 
@@ -262,7 +269,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                                 if (!it.expanded()) {
                                     it.instanceDatas.forEach {
-                                        it.Done = done
+                                        it.done = done
 
                                         recursiveExists(it)
 
@@ -275,7 +282,7 @@ class GroupListFragment @JvmOverloads constructor(
                                 decrementSelected(x)
                             } else {
                                 val instanceData = (it as NotDoneGroupNode.NotDoneInstanceNode).instanceData
-                                instanceData.Done = done
+                                instanceData.done = done
 
                                 recursiveExists(instanceData)
 
@@ -287,16 +294,16 @@ class GroupListFragment @JvmOverloads constructor(
                     }
                 }
                 R.id.action_group_mark_not_done -> {
-                    check(instanceDatas.all { it.Done != null })
+                    check(instanceDatas.all { it.done != null })
 
-                    val instanceKeys = instanceDatas.map { it.InstanceKey }
+                    val instanceKeys = instanceDatas.map { it.instanceKey }
 
                     DomainFactory.instance.setInstancesDone(parameters.dataId, SaveService.Source.GUI, instanceKeys, false)
 
                     removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) { treeNode ->
                         treeNode.modelNode.let {
                             val instanceData = (it as DoneInstanceNode).instanceData
-                            instanceData.Done = null
+                            instanceData.done = null
 
                             recursiveExists(instanceData)
 
@@ -310,9 +317,9 @@ class GroupListFragment @JvmOverloads constructor(
                     }
                 }
                 R.id.action_group_notify -> {
-                    instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
+                    instanceDatas.all { it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
 
-                    val instanceKeys = instanceDatas.map { it.InstanceKey }
+                    val instanceKeys = instanceDatas.map { it.instanceKey }
 
                     DomainFactory.instance.setInstancesNotNotified(parameters.dataId, SaveService.Source.GUI, instanceKeys)
 
@@ -352,18 +359,18 @@ class GroupListFragment @JvmOverloads constructor(
                     else -> throw IllegalArgumentException()
                 }
 
-                if (instanceData.Exists) {
-                    if (instanceData.TaskCurrent) {
-                        check(instanceData.TaskCurrent)
-                        checkNotNull(instanceData.IsRootTask)
+                if (instanceData.exists) {
+                    if (instanceData.taskCurrent) {
+                        check(instanceData.taskCurrent)
+                        checkNotNull(instanceData.isRootTask)
 
-                        check(!undoAll.undos.containsKey(instanceData.InstanceKey))
+                        check(!undoAll.undos.containsKey(instanceData.instanceKey))
 
                         // mark gray
-                        undoAll.undos[instanceData.InstanceKey] = Undo(instanceData.TaskCurrent, instanceData.IsRootTask!!)
+                        undoAll.undos[instanceData.instanceKey] = Undo(instanceData.taskCurrent, instanceData.isRootTask!!)
 
-                        instanceData.TaskCurrent = false
-                        instanceData.IsRootTask = null
+                        instanceData.taskCurrent = false
+                        instanceData.isRootTask = null
 
                         treeNode.deselect(x)
                     } else {
@@ -404,21 +411,21 @@ class GroupListFragment @JvmOverloads constructor(
             check(instanceDatas.isNotEmpty())
 
             val itemVisibilities = mutableListOf(
-                    R.id.action_group_mark_done to instanceDatas.all { it.Done == null },
-                    R.id.action_group_mark_not_done to instanceDatas.all { it.Done != null },
-                    R.id.action_group_edit_instance to instanceDatas.all { it.IsRootInstance && it.Done == null },
-                    R.id.action_group_notify to instanceDatas.all { it.IsRootInstance && it.Done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
+                    R.id.action_group_mark_done to instanceDatas.all { it.done == null },
+                    R.id.action_group_mark_not_done to instanceDatas.all { it.done != null },
+                    R.id.action_group_edit_instance to instanceDatas.all { it.isRootInstance && it.done == null },
+                    R.id.action_group_notify to instanceDatas.all { it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
             )
 
             if (instanceDatas.size == 1) {
                 val instanceData = instanceDatas.single()
 
                 itemVisibilities.addAll(listOf(
-                        R.id.action_group_show_task to instanceData.TaskCurrent,
-                        R.id.action_group_edit_task to instanceData.TaskCurrent,
+                        R.id.action_group_show_task to instanceData.taskCurrent,
+                        R.id.action_group_edit_task to instanceData.taskCurrent,
                         R.id.action_group_join to false,
-                        R.id.action_group_delete_task to instanceData.TaskCurrent,
-                        R.id.action_group_add_task to instanceData.TaskCurrent
+                        R.id.action_group_delete_task to instanceData.taskCurrent,
+                        R.id.action_group_add_task to instanceData.taskCurrent
                 ))
             } else {
                 check(instanceDatas.size > 1)
@@ -429,9 +436,9 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_add_task to false
                 ))
 
-                if (instanceDatas.all { it.TaskCurrent }) {
+                if (instanceDatas.all { it.taskCurrent }) {
                     val projectIdCount = instanceDatas.asSequence()
-                            .map { it.InstanceKey.taskKey.remoteProjectId }
+                            .map { it.instanceKey.taskKey.remoteProjectId }
                             .distinct()
                             .count()
 
@@ -439,7 +446,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     itemVisibilities.addAll(listOf(
                             R.id.action_group_join to (projectIdCount == 1),
-                            R.id.action_group_delete_task to !containsLoop(instanceDatas)
+                            R.id.action_group_delete_task to true
                     ))
                 } else {
                     itemVisibilities.addAll(listOf(
@@ -450,32 +457,6 @@ class GroupListFragment @JvmOverloads constructor(
             }
 
             return itemVisibilities
-        }
-
-        private fun containsLoop(instanceDatas: Collection<InstanceData>): Boolean {
-            check(instanceDatas.size > 1)
-
-            for (instanceData in instanceDatas) {
-                val parents = ArrayList<InstanceData>()
-                addParents(parents, instanceData)
-
-                parents.forEach {
-                    if (instanceDatas.contains(it))
-                        return true
-                }
-            }
-
-            return false
-        }
-
-        private fun addParents(parents: MutableList<InstanceData>, instanceData: InstanceData) {
-            if (instanceData.instanceDataParent !is InstanceData)
-                return
-
-            val parent = instanceData.instanceDataParent as InstanceData
-
-            parents.add(parent)
-            addParents(parents, parent)
         }
 
         override fun getTitleCount() = nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).size
@@ -519,7 +500,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         val tree = LinkedHashMap<InstanceKey, InstanceData>()
 
-        instanceDatas.filterNot { inTree(tree, it) }.forEach { tree[it.InstanceKey] = it }
+        instanceDatas.filterNot { inTree(tree, it) }.forEach { tree[it.instanceKey] = it }
 
         val lines = mutableListOf<String>()
 
@@ -529,7 +510,7 @@ class GroupListFragment @JvmOverloads constructor(
         return lines.joinToString("\n")
     }
 
-    private fun inTree(shareTree: Map<InstanceKey, InstanceData>, instanceData: InstanceData): Boolean = if (shareTree.containsKey(instanceData.InstanceKey)) true else shareTree.values.any { inTree(it.children, instanceData) }
+    private fun inTree(shareTree: Map<InstanceKey, InstanceData>, instanceData: InstanceData): Boolean = if (shareTree.containsKey(instanceData.instanceKey)) true else shareTree.values.any { inTree(it.children, instanceData) }
 
     private fun printTree(lines: MutableList<String>, indentation: Int, instanceData: InstanceData) {
         lines.add("-".repeat(indentation) + instanceData.name)
@@ -720,7 +701,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     values.forEach {
                         it.instanceTimeStamp = instanceTimeStamp
-                        if (it.IsRootInstance)
+                        if (it.isRootInstance)
                             it.displayText = displayText
                     }
 
@@ -742,9 +723,9 @@ class GroupListFragment @JvmOverloads constructor(
 
                     if (actionMode != null) {
                         nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).let {
-                            (it.firstOrNull { it.InstanceTimePair.customTimeKey != null }
+                            (it.firstOrNull { it.instanceTimePair.customTimeKey != null }
                                     ?: it.first()).let {
-                                activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(it.instanceTimeStamp.date, it.InstanceTimePair)))
+                                activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(it.instanceTimeStamp.date, it.instanceTimePair)))
                             }
                         }
 
@@ -765,7 +746,7 @@ class GroupListFragment @JvmOverloads constructor(
     private fun showFab() = when (val parameters = parameters) {
         is Parameters.All -> {
             if (selectionCallback.hasActionMode) {
-                nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).filter { it.IsRootInstance }
+                nodesToInstanceDatas(treeViewAdapter.selectedNodes, true).filter { it.isRootInstance }
                         .map { it.instanceTimeStamp }
                         .distinct()
                         .singleOrNull()
@@ -819,7 +800,7 @@ class GroupListFragment @JvmOverloads constructor(
                 val expandedTaskKeys = nodeCollection.expandedTaskKeys
 
                 val selectedNodes = treeViewAdapter.selectedNodes
-                val selectedInstances = nodesToInstanceDatas(selectedNodes, false).map { it.InstanceKey }
+                val selectedInstances = nodesToInstanceDatas(selectedNodes, false).map { it.instanceKey }
                 val selectedGroups = selectedNodes.map { it.modelNode }
                         .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
                         .map { it.exactTimeStamp.long }
@@ -890,7 +871,7 @@ class GroupListFragment @JvmOverloads constructor(
             val instanceDatas: MutableMap<InstanceKey, InstanceData>) : InstanceDataParent {
 
         override fun remove(instanceData: InstanceData, undoAll: UndoAll) {
-            val instanceKey = instanceData.InstanceKey
+            val instanceKey = instanceData.instanceKey
             check(instanceDatas.containsKey(instanceKey))
 
             instanceDatas.remove(instanceKey)
@@ -900,16 +881,16 @@ class GroupListFragment @JvmOverloads constructor(
     }
 
     data class InstanceData(
-            var Done: ExactTimeStamp?,
-            val InstanceKey: InstanceKey,
+            var done: ExactTimeStamp?,
+            val instanceKey: InstanceKey,
             var displayText: String?,
             val name: String,
             var instanceTimeStamp: TimeStamp,
-            var TaskCurrent: Boolean,
-            val IsRootInstance: Boolean,
-            var IsRootTask: Boolean?,
-            var Exists: Boolean,
-            val InstanceTimePair: TimePair,
+            var taskCurrent: Boolean,
+            val isRootInstance: Boolean,
+            var isRootTask: Boolean?,
+            var exists: Boolean,
+            val instanceTimePair: TimePair,
             val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
             val hierarchyData: HierarchyData?,
@@ -923,12 +904,12 @@ class GroupListFragment @JvmOverloads constructor(
         }
 
         override fun remove(instanceData: InstanceData, undoAll: UndoAll) {
-            val instanceKey = instanceData.InstanceKey
+            val instanceKey = instanceData.instanceKey
             check(children.containsKey(instanceKey))
 
             children.remove(instanceKey)
 
-            undoAll.removedChildren.put(InstanceKey, instanceData)
+            undoAll.removedChildren.put(this.instanceKey, instanceData)
         }
 
         override fun compareTo(other: InstanceData): Int {

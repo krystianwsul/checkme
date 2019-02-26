@@ -51,10 +51,10 @@ object DataDiff {
 
     private fun diffInstance(indent: String, oldInstanceData: GroupListFragment.InstanceData, newInstanceData: GroupListFragment.InstanceData) {
         check(indent.isNotEmpty())
-        check(oldInstanceData.InstanceKey == newInstanceData.InstanceKey)
+        check(oldInstanceData.instanceKey == newInstanceData.instanceKey)
 
-        if (oldInstanceData.Done != newInstanceData.Done)
-            sDiff.add(indent + "oldInstanceData.done == " + oldInstanceData.Done + ", newInstanceData.done == " + newInstanceData.Done)
+        if (oldInstanceData.done != newInstanceData.done)
+            sDiff.add(indent + "oldInstanceData.done == " + oldInstanceData.done + ", newInstanceData.done == " + newInstanceData.done)
 
         if (oldInstanceData.displayText != newInstanceData.displayText)
             sDiff.add(indent + "oldInstanceData.displayText == " + oldInstanceData.displayText + ", newInstanceData.displayText == " + newInstanceData.displayText)
@@ -65,20 +65,20 @@ object DataDiff {
         if (oldInstanceData.instanceTimeStamp != newInstanceData.instanceTimeStamp)
             sDiff.add(indent + "oldInstanceData.instanceTimeStamp == " + oldInstanceData.instanceTimeStamp + ", newInstanceData.instanceTimeStamp == " + newInstanceData.instanceTimeStamp)
 
-        if (oldInstanceData.TaskCurrent != newInstanceData.TaskCurrent)
-            sDiff.add(indent + "oldInstanceData.taskCurrent == " + oldInstanceData.TaskCurrent + ", newInstanceData.taskCurrent == " + newInstanceData.TaskCurrent)
+        if (oldInstanceData.taskCurrent != newInstanceData.taskCurrent)
+            sDiff.add(indent + "oldInstanceData.taskCurrent == " + oldInstanceData.taskCurrent + ", newInstanceData.taskCurrent == " + newInstanceData.taskCurrent)
 
-        if (oldInstanceData.IsRootInstance != newInstanceData.IsRootInstance)
-            sDiff.add(indent + "oldInstanceData.isRootInstance == " + oldInstanceData.IsRootInstance + ", newInstanceData.isRootInstance == " + newInstanceData.IsRootInstance)
+        if (oldInstanceData.isRootInstance != newInstanceData.isRootInstance)
+            sDiff.add(indent + "oldInstanceData.isRootInstance == " + oldInstanceData.isRootInstance + ", newInstanceData.isRootInstance == " + newInstanceData.isRootInstance)
 
-        if (oldInstanceData.IsRootTask == null != (newInstanceData.IsRootTask == null) || oldInstanceData.IsRootTask != null && oldInstanceData.IsRootTask != newInstanceData.IsRootTask)
-            sDiff.add(indent + "oldInstanceData.IsRootTask == " + oldInstanceData.IsRootTask + ", newInstanceData.IsRootTask == " + newInstanceData.IsRootTask)
+        if (oldInstanceData.isRootTask == null != (newInstanceData.isRootTask == null) || oldInstanceData.isRootTask != null && oldInstanceData.isRootTask != newInstanceData.isRootTask)
+            sDiff.add(indent + "oldInstanceData.isRootTask == " + oldInstanceData.isRootTask + ", newInstanceData.isRootTask == " + newInstanceData.isRootTask)
 
-        if (oldInstanceData.Exists != newInstanceData.Exists)
-            sDiff.add(indent + "oldInstanceData.Exists == " + oldInstanceData.Exists + ", newInstanceData.exists == " + newInstanceData.Exists)
+        if (oldInstanceData.exists != newInstanceData.exists)
+            sDiff.add(indent + "oldInstanceData.exists == " + oldInstanceData.exists + ", newInstanceData.exists == " + newInstanceData.exists)
 
-        if (oldInstanceData.InstanceTimePair != newInstanceData.InstanceTimePair)
-            sDiff.add(indent + "oldInstanceData.instanceTimePair == " + oldInstanceData.InstanceTimePair + ", newInstanceData.instanceTimePair == " + newInstanceData.InstanceTimePair)
+        if (oldInstanceData.instanceTimePair != newInstanceData.instanceTimePair)
+            sDiff.add(indent + "oldInstanceData.instanceTimePair == " + oldInstanceData.instanceTimePair + ", newInstanceData.instanceTimePair == " + newInstanceData.instanceTimePair)
 
         if (oldInstanceData.note != newInstanceData.note)
             sDiff.add(indent + "oldInstanceData.note == " + oldInstanceData.note + ", newInstanceData.note == " + newInstanceData.note)

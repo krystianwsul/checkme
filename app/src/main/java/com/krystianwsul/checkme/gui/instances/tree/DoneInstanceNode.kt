@@ -26,13 +26,13 @@ class DoneInstanceNode(
     private val groupListFragment get() = groupAdapter.groupListFragment
 
     fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
-        val selected = selectedInstances.contains(instanceData.InstanceKey)
+        val selected = selectedInstances.contains(instanceData.instanceKey)
 
         val expanded: Boolean
         val doneExpanded: Boolean
-        if (expandedInstances.containsKey(instanceData.InstanceKey) && !instanceData.children.isEmpty()) {
+        if (expandedInstances.containsKey(instanceData.instanceKey) && !instanceData.children.isEmpty()) {
             expanded = true
-            doneExpanded = expandedInstances[instanceData.InstanceKey]!!
+            doneExpanded = expandedInstances[instanceData.instanceKey]!!
         } else {
             expanded = false
             doneExpanded = false
@@ -52,20 +52,20 @@ class DoneInstanceNode(
         if (!expanded())
             return
 
-        check(!expandedInstances.containsKey(instanceData.InstanceKey))
+        check(!expandedInstances.containsKey(instanceData.instanceKey))
 
-        expandedInstances[instanceData.InstanceKey] = nodeCollection.doneExpanded
+        expandedInstances[instanceData.instanceKey] = nodeCollection.doneExpanded
         nodeCollection.addExpandedInstances(expandedInstances)
     }
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
-    override val name get() = Triple(instanceData.name, if (!instanceData.TaskCurrent) colorDisabled else colorPrimary, true)
+    override val name get() = Triple(instanceData.name, if (!instanceData.taskCurrent) colorDisabled else colorPrimary, true)
 
     override val details
         get() = instanceData.displayText
                 .takeUnless { it.isNullOrEmpty() }
-                ?.let { Pair(it, if (!instanceData.TaskCurrent) colorDisabled else colorSecondary) }
+                ?.let { Pair(it, if (!instanceData.taskCurrent) colorDisabled else colorSecondary) }
 
     override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData)
 
@@ -86,7 +86,7 @@ class DoneInstanceNode(
         groupAdapter.treeNodeCollection
                 .treeViewAdapter
                 .updateDisplayedNodes {
-                    instanceData.Done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.InstanceKey, false)
+                    instanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.instanceKey, false)
 
                     dividerNode.remove(this, TreeViewAdapter.Placeholder)
 
@@ -95,17 +95,17 @@ class DoneInstanceNode(
     }
 
     override fun compareTo(other: ModelNode): Int {
-        checkNotNull(instanceData.Done)
+        checkNotNull(instanceData.done)
 
         val doneInstanceNode = other as DoneInstanceNode
-        checkNotNull(doneInstanceNode.instanceData.Done)
+        checkNotNull(doneInstanceNode.instanceData.done)
 
-        return -instanceData.Done!!.compareTo(doneInstanceNode.instanceData.Done!!) // negate
+        return -instanceData.done!!.compareTo(doneInstanceNode.instanceData.done!!) // negate
     }
 
     override val isSelectable = true
 
-    override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.InstanceKey))
+    override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
 
     fun removeFromParent(x: TreeViewAdapter.Placeholder) {
         dividerNode.remove(this, x)
@@ -113,5 +113,5 @@ class DoneInstanceNode(
         treeNode.deselect(x)
     }
 
-    override val id = instanceData.InstanceKey
+    override val id = instanceData.instanceKey
 }

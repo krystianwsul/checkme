@@ -93,6 +93,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 R.id.action_task_delete -> {
                     checkNotNull(dataId)
 
+                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) {
+                        val taskWrapper = it.modelNode as TaskAdapter.TaskWrapper
+
+                        taskWrapper.removeFromParent(x)
+
+                        decrementSelected(x)
+                    }
+
                     val removeNodes = selected.toMutableList()
 
                     fun parentPresent(treeNode: TreeNode): Boolean {
@@ -106,23 +114,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
                             removeNodes.remove(it)
                     }
 
-                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) {
-                        val taskWrapper = it.modelNode as TaskAdapter.TaskWrapper
-
-                        taskWrapper.removeFromParent(x)
-
-                        decrementSelected(x)
-                    }
-
                     val removeTaskDatas = removeNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
-                    val removeTaskKeys = removeTaskDatas.map { it.taskKey }
 
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, removeTaskKeys)
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys.toSet())
                     taskData!!.childTaskDatas.removeAll(removeTaskDatas)
 
                     updateSelectAll()
 
-                    taskListListener.showSnackbar(removeTaskKeys.size) {
+                    taskListListener.showSnackbar(taskUndoData.taskKeys.size) {
                         DomainFactory.instance.clearTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskUndoData)
 
                         taskData!!.childTaskDatas.apply {

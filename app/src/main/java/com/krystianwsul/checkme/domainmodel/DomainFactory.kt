@@ -739,6 +739,7 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
+        Preferences.logLineHour("setting instanceDateTime for ${instance.name} to $instanceDate $instanceTimePair")
         instance.setInstanceDateTime(instanceDate, instanceTimePair, now)
 
         updateNotifications(now)
@@ -2189,7 +2190,7 @@ open class DomainFactory(
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
             updateInstances.forEach {
-                Preferences.logLineHour("updating '" + it.name + "'")
+                Preferences.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
                 updateInstance(it, now)
             }
         }

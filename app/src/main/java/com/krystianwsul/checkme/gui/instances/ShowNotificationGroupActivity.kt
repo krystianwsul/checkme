@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractActivity
+import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 
-class ShowNotificationGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener {
+class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
 
     companion object {
 

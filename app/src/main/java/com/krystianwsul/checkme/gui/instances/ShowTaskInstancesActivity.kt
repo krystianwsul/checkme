@@ -6,7 +6,7 @@ import android.os.Parcelable
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractActivity
+import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.viewmodels.ShowTaskInstancesViewModel
@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.activity_show_notification_group.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowTaskInstancesActivity : AbstractActivity(), GroupListFragment.GroupListListener {
+class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
 
     companion object {
 

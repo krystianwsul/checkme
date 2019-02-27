@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractActivity
+import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.activity_show_group.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class ShowGroupActivity : AbstractActivity(), GroupListFragment.GroupListListener {
+class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
 
     companion object {
 

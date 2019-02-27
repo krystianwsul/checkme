@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.view.clicks
@@ -42,7 +41,6 @@ class TutorialActivity : AbstractActivity() {
         }
 
         setContentView(R.layout.activity_tutorial)
-        tutorialRoot.setBackgroundColor(ContextCompat.getColor(this, R.color.materialBackground))
 
         tutorialPager.adapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
 

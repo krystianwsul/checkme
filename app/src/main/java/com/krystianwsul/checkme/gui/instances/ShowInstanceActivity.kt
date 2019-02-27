@@ -86,7 +86,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                         }
                         R.id.instanceMenuNotify -> {
                             check(!it.done)
-                            check(it.instanceDateTime.timeStamp < TimeStamp.now)
+                            check(it.instanceDateTime.timeStamp <= TimeStamp.now)
                             check(it.isRootInstance)
 
                             if (!it.notificationShown) { // to ignore double taps

@@ -298,7 +298,7 @@ class MainActivity : AbstractActivity(), GroupListFragment.GroupListListener, Sh
 
         showTab(visibleTab.value!!)
 
-        TickJobIntentService.startServiceRegister(this, "MainActivity: TickJobIntentService.startServiceRegister")
+        TickJobIntentService.startServiceRegister(this, "MainActivity.onCreate: TickJobIntentService.startServiceRegister")
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {

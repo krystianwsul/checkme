@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import io.reactivex.disposables.CompositeDisposable
 
@@ -57,6 +58,8 @@ abstract class AbstractActivity : AppCompatActivity() {
             }
         }
         taskUndoData = null
+
+        TickJobIntentService.startServiceRegister(this, "AbstractActivity.onResume: TickJobIntentService.startServiceRegister")
     }
 
     override fun onPause() {

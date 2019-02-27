@@ -157,16 +157,16 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             positiveButton(android.R.string.ok) {
                 check(customTimeDatas != null)
                 check(scheduleDialogListener != null)
-                    check(isValid)
+                check(isValid)
 
                 scheduleDialogListener!!.onScheduleDialogResult(scheduleDialogData)
-                }
+            }
 
             @Suppress("DEPRECATION")
             if (arguments!!.getBoolean(SHOW_DELETE_KEY))
                 neutralButton(R.string.delete) { scheduleDialogListener!!.onScheduleDialogDelete() }
 
-            getCustomView()!!.run {
+            getCustomView().run {
                 mScheduleType = scheduleType
                 mScheduleDialogDateLayout = scheduleDialogDateLayout
                 mScheduleDialogDate = scheduleDialogDate

@@ -167,5 +167,5 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         }
     }
 
-    private class StaleTreeNodeException() : Exception()
+    private class StaleTreeNodeException : Exception()
 }

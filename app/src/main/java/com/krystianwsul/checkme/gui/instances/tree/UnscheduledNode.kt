@@ -58,7 +58,5 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val isVisibleWhenEmpty = false
 
-    override val isVisibleDuringActionMode = false
-
     override val checkBoxVisibility = View.INVISIBLE
 }

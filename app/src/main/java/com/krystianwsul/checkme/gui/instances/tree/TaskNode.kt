@@ -7,7 +7,10 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 
 
-class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, private val taskParent: TaskParent) : GroupHolderNode(indentation), TaskParent {
+class TaskNode(
+        indentation: Int,
+        val taskData: GroupListFragment.TaskData,
+        private val taskParent: TaskParent) : GroupHolderNode(indentation), TaskParent {
 
     override lateinit var treeNode: TreeNode
         private set
@@ -88,4 +91,6 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
     }
 
     override val checkBoxVisibility = View.INVISIBLE
+
+    override val isSelectable = true
 }

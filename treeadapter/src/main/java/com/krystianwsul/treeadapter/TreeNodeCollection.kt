@@ -6,6 +6,8 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter, private val logge
 
     private lateinit var treeNodes: MutableList<TreeNode>
 
+    var stale = false
+
     val selectedNodes: List<TreeNode>
         get() {
             if (!this::treeNodes.isInitialized)

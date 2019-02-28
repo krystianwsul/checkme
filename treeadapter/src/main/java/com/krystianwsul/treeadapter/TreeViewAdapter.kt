@@ -32,6 +32,8 @@ class TreeViewAdapter(
     val updates = PublishRelay.create<Unit>()
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection) {
+        this.treeNodeCollection?.stale = true
+
         this.treeNodeCollection = treeNodeCollection
     }
 

@@ -83,7 +83,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
                     val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectIds)
 
-                    mainActivity.showSnackbar(selected.size) {
+                    mainActivity.showSnackbarRemoved(selected.size) {
                         onLoadFinished(data!!.also {
                             it.projectDatas.putAll(projectDatas.map { it.id to it })
                         })

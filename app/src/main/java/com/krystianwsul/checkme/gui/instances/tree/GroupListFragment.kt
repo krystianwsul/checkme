@@ -187,7 +187,7 @@ class GroupListFragment @JvmOverloads constructor(
                     val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
                     val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys.toSet())
 
-                    listener.showSnackbar(taskUndoData.taskKeys.size) {
+                    listener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
                         fun Map<InstanceKey, InstanceData>.flattenMap(): List<InstanceData> = map {
                             listOf(
                                     listOf(it.value),

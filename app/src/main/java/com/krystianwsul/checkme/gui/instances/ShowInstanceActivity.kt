@@ -284,7 +284,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
                                 updateBottomMenu()
 
-                                showSnackbar(1) {
+                                showSnackbarRemoved(1) {
                                     it.taskCurrent = true
 
                                     updateBottomMenu()

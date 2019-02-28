@@ -4,9 +4,9 @@ abstract class DomainData {
 
     companion object {
 
-        private var sDataId = 1
+        private var dataId = 1
 
-        private val nextId get() = sDataId++
+        private val nextId get() = dataId++
     }
 
     val dataId = nextId

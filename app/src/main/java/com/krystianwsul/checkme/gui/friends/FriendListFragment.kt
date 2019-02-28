@@ -236,7 +236,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             DomainFactory.instance.removeFriends(friendIds)
 
-            mainActivity.showSnackbar(userListDatas.size) {
+            mainActivity.showSnackbarRemoved(userListDatas.size) {
                 onLoadFinished(data!!.copy(userListDatas = data!!.userListDatas
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))

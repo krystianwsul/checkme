@@ -242,7 +242,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             DomainFactory.instance.setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, false)
 
-            customTimesListListener.showSnackbar(selectedCustomTimeIds.size) {
+            customTimesListListener.showSnackbarRemoved(selectedCustomTimeIds.size) {
                 onLoadFinished(data.apply {
                     entries.apply {
                         addAll(customTimeDatas)

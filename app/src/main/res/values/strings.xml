@@ -73,11 +73,13 @@
     <string name="tutorial4">Sign into your Google account to share tasks with other users.  Start out by searching for users by e-mail address to add them as friends.  Next, create a project, and add friends to it.  Finally, when creating or editing a task, set the project as its parent.</string>
     <string name="tutorial">Tutorial</string>
     <string name="open">Open</string>
-    <string name="snackbar">%1$s removed</string>
+    <string name="snackbarRemoved">%1$s removed</string>
     <string name="undo">undo</string>
     <string name="add_task_this_time">Add task at this time</string>
     <string name="notify">Show notification</string>
     <string name="filterDay">Day</string>
     <string name="filterWeek">Week</string>
     <string name="filterMonth">Month</string>
+    <string name="snackbarDone">%1$s marked as done</string>
+    <string name="snackbarNotDone">%1$s marked as not done</string>
 </resources>

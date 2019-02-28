@@ -121,7 +121,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                     updateSelectAll()
 
-                    taskListListener.showSnackbar(taskUndoData.taskKeys.size) {
+                    taskListListener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
                         DomainFactory.instance.clearTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskUndoData)
 
                         taskData!!.childTaskDatas.apply {

@@ -73,11 +73,13 @@
     <string name="tutorial4">Zaloguj się do konta Google żeby dzielić się zadaniami z innymi użytkownikami.  Zacznij od wyszukania użytkowników po adresie e-mailowym, żeby dodać ich jako znajomych.  Następnie, utwórz projekt, i dodaj do niegogo znajomych.  Potem, przy tworzeniu zadania, ustaw że to zadanie należy do danego projektu.</string>
     <string name="tutorial">Przewodnik</string>
     <string name="open">Otwórz</string>
-    <string name="snackbar">Usunięto %1$s</string>
+    <string name="snackbarRemoved">Usunięto %1$s</string>
     <string name="undo">cofnij</string>
     <string name="add_task_this_time">Dodaj zadanie z tym samym czasem</string>
     <string name="notify">Pokaż powiadomienie</string>
     <string name="filterDay">Dzień</string>
     <string name="filterWeek">Tydzień</string>
     <string name="filterMonth">Miesiąc</string>
+    <string name="snackbarDone">Oznaczono %1$s jako zrobione</string>
+    <string name="snackbarNotDone">Oznaczono %1$s jako nie zrobione</string>
 </resources>

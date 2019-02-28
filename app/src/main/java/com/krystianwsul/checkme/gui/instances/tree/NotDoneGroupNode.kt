@@ -192,6 +192,11 @@ class NotDoneGroupNode(
 
                     notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
                 }
+
+        groupListFragment.listener.showSnackbarDone(1) {
+            // todo dataId?
+            DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, singleInstanceData.instanceKey, false)
+        }
     }
 
     override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {

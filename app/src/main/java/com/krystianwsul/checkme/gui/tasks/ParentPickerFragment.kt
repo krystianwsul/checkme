@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui.tasks
 
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.os.Bundle
 import android.text.TextUtils
@@ -9,9 +10,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import com.afollestad.materialdialogs.customview.getCustomView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxbinding3.view.touches
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.R
@@ -55,6 +54,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private var query: String = ""
 
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         check(arguments!!.containsKey(SHOW_DELETE_KEY))
 
@@ -67,22 +67,24 @@ class ParentPickerFragment : AbstractDialogFragment() {
             query = getString(QUERY_KEY)!!
         }
 
-        return MaterialDialog(requireActivity()).apply {
-            title(R.string.parent_dialog_title)
-            customView(R.layout.fragment_parent_picker)
-            negativeButton(android.R.string.cancel)
+        val view = requireActivity().layoutInflater
+                .inflate(R.layout.fragment_parent_picker, null)
+                .apply {
+                    recyclerView = parentPickerRecycler as RecyclerView
 
-            @Suppress("DEPRECATION")
-            if (arguments!!.getBoolean(SHOW_DELETE_KEY))
-                neutralButton(R.string.delete) { listener.onTaskDeleted() }
+                    searchField = parentPickerSearch as EditText
+                    searchChanges = searchField.textChanges().map { it.toString() }
+                }
 
-            getCustomView()!!.apply {
-                recyclerView = parentPickerRecycler as RecyclerView
-
-                searchField = parentPickerSearch as EditText
-                searchChanges = searchField.textChanges().map { it.toString() }
-            }
-        }
+        return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)
+                .setView(view)
+                .setNegativeButton(android.R.string.cancel, null)
+                .apply {
+                    @Suppress("DEPRECATION")
+                    if (arguments!!.getBoolean(SHOW_DELETE_KEY))
+                        setNeutralButton(R.string.delete) { _, _ -> listener.onTaskDeleted() }
+                }
+                .create()
     }
 
     fun initialize(taskDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>, listener: Listener) {
@@ -213,7 +215,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             treeNodeCollection.nodes = treeNodes
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(R.layout.row_list, parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(parentPickerFragment.requireActivity().layoutInflater.inflate(R.layout.row_list_dialog, parent, false))
 
         override val hasActionMode = false
 

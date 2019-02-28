@@ -835,7 +835,7 @@ class CreateTaskActivity : AbstractActivity() {
                         isEnabled = data!!.parentTreeDatas.isNotEmpty()
 
                         setOnClickListener {
-                            ParentPickerFragment.newInstance(parent != null).let {
+                            ParentPickerFragment.newInstance(this@CreateTaskActivity.parent != null).let {
                                 it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
                                 it.initialize(data!!.parentTreeDatas, parentFragmentListener)
                             }

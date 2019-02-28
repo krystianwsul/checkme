@@ -18,20 +18,20 @@ interface SnackbarListener {
 
     val snackbarParent: CoordinatorLayout
 
-    fun showSnackbarRemoved(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarRemoved, count, action)
+    fun showSnackbarRemoved(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarRemoved, count, 5000, action)
 
-    fun showSnackbarDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarDone, count, action)
+    fun showSnackbarDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarDone, count, Snackbar.LENGTH_SHORT, action)
 
-    fun showSnackbarNotDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarNotDone, count, action)
+    fun showSnackbarNotDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarNotDone, count, Snackbar.LENGTH_SHORT, action)
 
-    private fun showSnackbar(@StringRes messageId: Int, count: Int, action: () -> Unit) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), action)
+    private fun showSnackbar(@StringRes messageId: Int, count: Int, duration: Int, action: () -> Unit) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), duration, action)
 
-    private fun showSnackbar(message: String, action: () -> Unit) {
+    private fun showSnackbar(message: String, duration: Int, action: () -> Unit) {
         MyCrashlytics.logMethod(this)
 
         check(++SnackbarListener.count > 0)
 
-        Snackbar.make(snackbarParent, message, 5000).apply {
+        Snackbar.make(snackbarParent, message, duration).apply {
             setAction(R.string.undo) { action() }
 
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {

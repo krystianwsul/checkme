@@ -4,7 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay2.PublishRelay
 
 class TreeViewAdapter(
@@ -58,6 +59,9 @@ class TreeViewAdapter(
 
         check(!updating)
 
+        if (forceChange)
+            treeNodeCollection!!.stale = true
+
         val oldStates = treeNodeCollection!!.displayedNodes.map { it.state }
         val showPadding = paddingLayout != null
 
@@ -66,92 +70,6 @@ class TreeViewAdapter(
         updating = false
 
         val newStates = treeNodeCollection!!.displayedNodes.map { it.state }
-
-        val target = if (forceChange) {
-            val listUpdateCallback = object : ListUpdateCallback {
-
-                val states = BooleanArray(oldStates.size + (if (showPadding) 1 else 0)) { false }.toMutableList()
-
-                override fun onChanged(position: Int, count: Int, payload: Any?) {
-                    for (i in 0 until count)
-                        states[position + i] = true
-
-                    notifyItemRangeChanged(position, count)
-                }
-
-                override fun onMoved(fromPosition: Int, toPosition: Int) {
-                    states.removeAt(fromPosition)
-                    states.add(toPosition, true)
-
-                    notifyItemMoved(fromPosition, toPosition)
-                }
-
-                override fun onInserted(position: Int, count: Int) {
-                    for (i in 0 until count)
-                        states.add(position, true)
-
-                    notifyItemRangeInserted(position, count)
-                }
-
-                override fun onRemoved(position: Int, count: Int) {
-                    for (i in 0 until count)
-                        states.removeAt(position)
-
-                    notifyItemRangeRemoved(position, count)
-                }
-
-                fun done() {
-                    BatchingListUpdateCallback(AdapterListUpdateCallback(this@TreeViewAdapter)).apply {
-                        states.mapIndexed { index, value -> Pair(index, value) }
-                                .filterNot { it.second }
-                                .map { it.first }
-                                .forEach {
-                                    onChanged(it, 1, null)
-                                }
-
-                        dispatchLastEvent()
-                    }
-                }
-            }
-
-            object : BatchingListUpdateCallback(listUpdateCallback) {
-
-                private var me = false
-
-                override fun onChanged(position: Int, count: Int, payload: Any?) {
-                    me = true
-                    super.onChanged(position, count, payload)
-                    me = false
-                }
-
-                override fun onInserted(position: Int, count: Int) {
-                    me = true
-                    super.onInserted(position, count)
-                    me = false
-                }
-
-                override fun onMoved(fromPosition: Int, toPosition: Int) {
-                    me = true
-                    super.onMoved(fromPosition, toPosition)
-                    me = false
-                }
-
-                override fun onRemoved(position: Int, count: Int) {
-                    me = true
-                    super.onRemoved(position, count)
-                    me = false
-                }
-
-                override fun dispatchLastEvent() {
-                    super.dispatchLastEvent()
-
-                    if (!me)
-                        listUpdateCallback.done()
-                }
-            }
-        } else {
-            AdapterListUpdateCallback(this@TreeViewAdapter)
-        }
 
         DiffUtil.calculateDiff(object : DiffUtil.Callback() {
 
@@ -181,24 +99,9 @@ class TreeViewAdapter(
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
                 paddingComparison(oldItemPosition, newItemPosition)?.let { return it }
 
-                val oldState = oldStates[oldItemPosition]
-                val newState = newStates[newItemPosition]
-
-                if (oldState.isExpanded != newState.isExpanded)
-                    return false
-
-                if (oldState.isSelected != newState.isSelected)
-                    return false
-
-                if (oldState.separatorVisibility != newState.separatorVisibility)
-                    return false
-
-                if (oldState.expandVisible != newState.expandVisible)
-                    return false
-
-                return oldState.modelState == newState.modelState
+                return oldStates[oldItemPosition] == newStates[newItemPosition]
             }
-        }).dispatchUpdatesTo(target)
+        }).dispatchUpdatesTo(this)
 
         updates.accept(Unit)
     }

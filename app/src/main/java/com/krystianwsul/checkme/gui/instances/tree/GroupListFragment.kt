@@ -292,6 +292,10 @@ class GroupListFragment @JvmOverloads constructor(
                             }
                         }
                     }
+
+                    listener.showSnackbarDone(instanceKeys.size) {
+                        DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, false)
+                    }
                 }
                 R.id.action_group_mark_not_done -> {
                     check(instanceDatas.all { it.done != null })
@@ -314,6 +318,10 @@ class GroupListFragment @JvmOverloads constructor(
                                     .notDoneGroupCollection
                                     .add(instanceData, x)
                         }
+                    }
+
+                    listener.showSnackbarDone(instanceKeys.size) {
+                        DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, true)
                     }
                 }
                 R.id.action_group_notify -> {

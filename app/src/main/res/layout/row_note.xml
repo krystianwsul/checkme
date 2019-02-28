@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/textPrimary"
             tools:ignore="LabelFor"
-            android:inputType="text"
+            android:inputType="textMultiLine"
             android:importantForAutofill="no"
             tools:targetApi="o" />
 

@@ -59,7 +59,8 @@
 
         <activity
             android:name=".gui.tasks.CreateTaskActivity"
-            android:windowSoftInputMode="stateHidden"> <!-- keyboard hack -->
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/AppTheme.NoSplash"> <!-- keyboard hack -->
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>

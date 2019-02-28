@@ -194,7 +194,6 @@ class NotDoneGroupNode(
                 }
 
         groupListFragment.listener.showSnackbarDone(1) {
-            // todo dataId?
             DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, singleInstanceData.instanceKey, false)
         }
     }
@@ -445,6 +444,10 @@ class NotDoneGroupNode(
 
                         parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
                     }
+
+            groupListFragment.listener.showSnackbarDone(1) {
+                DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceData.instanceKey, false)
+            }
         }
 
         override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))

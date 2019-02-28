@@ -92,6 +92,10 @@ class DoneInstanceNode(
 
                     nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
                 }
+
+        groupListFragment.listener.showSnackbarNotDone(1) {
+            DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceData.instanceKey, true)
+        }
     }
 
     override fun compareTo(other: ModelNode): Int {

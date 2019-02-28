@@ -72,7 +72,7 @@ class TreeNode(
             return true
         }
 
-    val state get() = State(isExpanded, isSelected, expandVisible, separatorVisible, modelNode.state)
+    val state get() = State(isExpanded, isSelected, expandVisible, separatorVisible, modelNode.state, treeNodeCollection.stale)
 
     // hiding
     // showing
@@ -436,7 +436,8 @@ class TreeNode(
             val isSelected: Boolean,
             val expandVisible: Boolean,
             val separatorVisibility: Boolean,
-            val modelState: ModelState)
+            val modelState: ModelState,
+            val stale: Boolean)
 
     override val id get() = modelNode.id
 }

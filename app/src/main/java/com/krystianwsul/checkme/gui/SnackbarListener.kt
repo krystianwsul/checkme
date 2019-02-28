@@ -18,6 +18,11 @@ interface SnackbarListener {
 
     val snackbarParent: CoordinatorLayout
 
+    /*
+    SHORT = 1500
+    LONG = 2750
+     */
+
     fun showSnackbarRemoved(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarRemoved, count, 5000, action)
 
     fun showSnackbarDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarDone, count, Snackbar.LENGTH_SHORT, action)

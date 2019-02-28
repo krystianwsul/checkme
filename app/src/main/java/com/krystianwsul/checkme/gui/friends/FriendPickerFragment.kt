@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui.friends
 
 
+import android.annotation.SuppressLint
+import android.app.Dialog
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
@@ -9,9 +11,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import com.afollestad.materialdialogs.customview.getCustomView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -32,23 +32,26 @@ class FriendPickerFragment : AbstractDialogFragment() {
 
     private lateinit var listener: (String) -> Unit
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialDialog(requireActivity()).apply {
-        title(R.string.friend_dialog_title)
-        customView(R.layout.fragment_friend_picker)
-        negativeButton(android.R.string.cancel) { it.cancel() }
+    @SuppressLint("InflateParams")
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val view = requireActivity().layoutInflater
+                .inflate(R.layout.fragment_friend_picker, null)
+                .also {
+                    friendPickerProgress = it.friendPickerProgress
+                    friendPickerRecycler = it.friendPickerRecycler.apply {
+                        layoutManager = LinearLayoutManager(activity)
+                    }
+                }
 
-        getCustomView()!!.also {
-            friendPickerProgress = it.friendPickerProgress
-            friendPickerRecycler = it.friendPickerRecycler.apply {
-                layoutManager = LinearLayoutManager(activity)
-            }
-        }
+        return MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.friend_dialog_title)
+                .setView(view)
+                .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.cancel() }
+                .create()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        animateVisibility(friendPickerRecycler, friendPickerProgress)
 
         if (friendDatas != null)
             initialize()
@@ -65,6 +68,8 @@ class FriendPickerFragment : AbstractDialogFragment() {
     private fun initialize() {
         check(activity != null)
         check(friendDatas != null)
+
+        animateVisibility(friendPickerRecycler, friendPickerProgress)
 
         friendPickerRecycler.adapter = FriendListAdapter()
     }

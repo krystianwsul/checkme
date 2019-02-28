@@ -78,7 +78,7 @@ class NotDoneGroupNode(
         if (instanceDatas.size == 1) {
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
-            treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf()))
+            treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf(), listOf()))
         } else {
             val notDoneInstanceTreeNodes = instanceDatas.map {
                 val childSelected = selectedInstances.contains(it.instanceKey)
@@ -254,7 +254,7 @@ class NotDoneGroupNode(
 
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
-            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, listOf(), mapOf(), false, listOf(), listOf(), listOf(), false, listOf())
+            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, listOf(), mapOf(), false, listOf(), listOf(), listOf(), false, listOf(), listOf())
 
             childTreeNodes.forEach { treeNode.add(it, x) }
         }
@@ -318,12 +318,6 @@ class NotDoneGroupNode(
     fun expanded() = treeNode.isExpanded
 
     override val isSelectable = true
-
-    fun removeFromParent(x: TreeViewAdapter.Placeholder) {
-        notDoneGroupCollection.remove(this, x)
-
-        treeNode.deselect(x)
-    }
 
     override fun getOrdinal() = singleInstanceData.run { hierarchyData?.ordinal ?: ordinal }
 
@@ -401,7 +395,7 @@ class NotDoneGroupNode(
             treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
 
             nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
-            treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, listOf(), expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf()))
+            treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, listOf(), expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf(), listOf()))
 
             return this.treeNode
         }

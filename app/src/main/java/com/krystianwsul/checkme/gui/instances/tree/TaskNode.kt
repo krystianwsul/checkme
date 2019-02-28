@@ -7,7 +7,10 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 
 
-class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, private val taskParent: TaskParent) : GroupHolderNode(indentation), TaskParent {
+class TaskNode(
+        indentation: Int,
+        val taskData: GroupListFragment.TaskData,
+        private val taskParent: TaskParent) : GroupHolderNode(indentation), TaskParent {
 
     override lateinit var treeNode: TreeNode
         private set
@@ -34,48 +37,49 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
             }
         }
 
-    fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>): TreeNode {
+    fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>): TreeNode {
+        val selected = selectedTaskKeys.contains(taskData.taskKey)
         val expanded = expandedTaskKeys.contains(taskData.taskKey) && taskData.children.isNotEmpty()
 
-        treeNode = TreeNode(this, parentTreeNode, expanded, false)
+        treeNode = TreeNode(this, parentTreeNode, expanded, selected)
 
-        treeNode.setChildTreeNodes(taskData.children.map { newChildTreeNode(it, expandedTaskKeys) })
+        treeNode.setChildTreeNodes(taskData.children.map { newChildTreeNode(it, expandedTaskKeys, selectedTaskKeys) })
 
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>) = TaskNode(indentation + 1, taskData, this).let {
+    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>) = TaskNode(indentation + 1, taskData, this).let {
         taskNodes.add(it)
 
-        it.initialize(treeNode, expandedTaskKeys)
+        it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)
     }
 
     override val groupAdapter by lazy { taskParent.groupAdapter }
 
     private fun expanded() = treeNode.isExpanded
 
-    override fun compareTo(other: ModelNode) = (other as TaskNode).taskData.mStartExactTimeStamp.let {
+    override fun compareTo(other: ModelNode) = (other as TaskNode).taskData.startExactTimeStamp.let {
         if (indentation == 0) {
-            -taskData.mStartExactTimeStamp.compareTo(it)
+            -taskData.startExactTimeStamp.compareTo(it)
         } else {
-            taskData.mStartExactTimeStamp.compareTo(it)
+            taskData.startExactTimeStamp.compareTo(it)
         }
     }
 
-    override val name get() = Triple(taskData.Name, colorPrimary, true)
+    override val name get() = Triple(taskData.name, colorPrimary, true)
 
     override val children
-        get() = if ((taskData.children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
+        get() = if ((taskData.children.isEmpty() || expanded()) && taskData.note.isNullOrEmpty()) {
             null
         } else {
             val text = if (!expanded() && !taskData.children.isEmpty()) {
                 taskData.children
-                        .sortedBy { it.mStartExactTimeStamp }
-                        .joinToString(", ") { it.Name }
+                        .sortedBy { it.startExactTimeStamp }
+                        .joinToString(", ") { it.name }
             } else {
-                check(!taskData.mNote.isNullOrEmpty())
+                check(!taskData.note.isNullOrEmpty())
 
-                taskData.mNote
+                taskData.note
             }
 
             val color = colorSecondary
@@ -88,4 +92,6 @@ class TaskNode(indentation: Int, val taskData: GroupListFragment.TaskData, priva
     }
 
     override val checkBoxVisibility = View.INVISIBLE
+
+    override val isSelectable = true
 }

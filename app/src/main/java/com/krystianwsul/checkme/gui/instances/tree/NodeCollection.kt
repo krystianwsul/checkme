@@ -25,7 +25,7 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
 
     val doneExpanded get() = dividerNode.expanded()
 
-    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, doneExpanded: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, taskDatas: List<GroupListFragment.TaskData>, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>): List<TreeNode> {
+    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, doneExpanded: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, taskDatas: List<GroupListFragment.TaskData>, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>): List<TreeNode> {
         val notDoneInstanceDatas = instanceDatas.filter { it.done == null }
         val doneInstanceDatas = instanceDatas.filter { it.done != null }
 
@@ -44,7 +44,7 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
             if (taskDatas.isNotEmpty()) {
                 unscheduledNode = UnscheduledNode(this@NodeCollection)
 
-                add(unscheduledNode!!.initialize(unscheduledExpanded, nodeContainer, taskDatas, expandedTaskKeys))
+                add(unscheduledNode!!.initialize(unscheduledExpanded, nodeContainer, taskDatas, expandedTaskKeys, selectedTaskKeys))
             }
 
             dividerNode = DividerNode(indentation, this@NodeCollection)

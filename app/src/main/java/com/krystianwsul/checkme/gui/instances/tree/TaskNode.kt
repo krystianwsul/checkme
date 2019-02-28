@@ -37,20 +37,21 @@ class TaskNode(
             }
         }
 
-    fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>): TreeNode {
+    fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>): TreeNode {
+        val selected = selectedTaskKeys.contains(taskData.taskKey)
         val expanded = expandedTaskKeys.contains(taskData.taskKey) && taskData.children.isNotEmpty()
 
-        treeNode = TreeNode(this, parentTreeNode, expanded, false)
+        treeNode = TreeNode(this, parentTreeNode, expanded, selected)
 
-        treeNode.setChildTreeNodes(taskData.children.map { newChildTreeNode(it, expandedTaskKeys) })
+        treeNode.setChildTreeNodes(taskData.children.map { newChildTreeNode(it, expandedTaskKeys, selectedTaskKeys) })
 
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>) = TaskNode(indentation + 1, taskData, this).let {
+    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>) = TaskNode(indentation + 1, taskData, this).let {
         taskNodes.add(it)
 
-        it.initialize(treeNode, expandedTaskKeys)
+        it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)
     }
 
     override val groupAdapter by lazy { taskParent.groupAdapter }

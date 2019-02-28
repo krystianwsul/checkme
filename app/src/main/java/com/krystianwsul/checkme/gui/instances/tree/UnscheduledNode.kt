@@ -24,22 +24,22 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
-    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>): TreeNode {
+    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>): TreeNode {
         check(!expanded || !taskDatas.isEmpty())
 
         this.taskDatas = taskDatas
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
 
-        treeNode.setChildTreeNodes(taskDatas.map { newChildTreeNode(it, expandedTaskKeys) })
+        treeNode.setChildTreeNodes(taskDatas.map { newChildTreeNode(it, expandedTaskKeys, selectedTaskKeys) })
 
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>) = TaskNode(0, taskData, this).let {
+    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>) = TaskNode(0, taskData, this).let {
         taskNodes.add(it)
 
-        it.initialize(treeNode, expandedTaskKeys)
+        it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)
     }
 
     fun expanded() = treeNode.isExpanded

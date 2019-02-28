@@ -292,64 +292,6 @@ class GroupListFragment @JvmOverloads constructor(
             }
         }
 
-        private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: TreeViewAdapter.Placeholder) {
-            check(root == treeNode.isSelected)
-
-            treeNode.modelNode.let {
-                val instanceData = when (it) {
-                    is NotDoneGroupNode -> {
-                        check(root)
-
-                        if (it.singleInstance()) {
-                            it.singleInstanceData
-                        } else {
-                            treeNode.allChildren
-                                    .first()
-                                    .let { recursiveDelete(it, false, x) }
-
-                            return
-                        }
-                    }
-                    is NotDoneGroupNode.NotDoneInstanceNode -> it.instanceData
-                    is DoneInstanceNode -> it.instanceData
-                    is DividerNode -> {
-                        check(!root)
-
-                        treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
-
-                        return
-                    } // todo
-                    else -> throw IllegalArgumentException()
-                }
-
-                if (instanceData.exists) {
-                    if (instanceData.taskCurrent) {
-                        check(instanceData.taskCurrent)
-                        checkNotNull(instanceData.isRootTask)
-
-                        instanceData.taskCurrent = false
-                        instanceData.isRootTask = null
-
-                        treeNode.deselect(x)
-                    } else {
-                        check(!root)
-                    }
-
-                    treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
-                } else {
-                    // remove from tree
-                    instanceData.instanceDataParent.remove(instanceData)
-
-                    when (it) {
-                        is NotDoneGroupNode -> it.removeFromParent(x)
-                        is NotDoneGroupNode.NotDoneInstanceNode -> it.removeFromParent(x)
-                        is DoneInstanceNode -> it.removeFromParent(x)
-                        else -> throw IllegalArgumentException()
-                    }
-                }
-            }
-        }
-
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
@@ -777,12 +719,12 @@ class GroupListFragment @JvmOverloads constructor(
                 val selectedNodes = treeViewAdapter.selectedNodes
                 val selectedDatas = nodesToSelectedDatas(selectedNodes, false)
                 val selectedInstances = selectedDatas.filterIsInstance<InstanceData>().map { it.instanceKey }
-                // todo selectedTasks
+                val selectedTasks = selectedDatas.filterIsInstance<TaskData>().map { it.taskKey }
                 val selectedGroups = selectedNodes.map { it.modelNode }
                         .filterIsInstance<NotDoneGroupNode>().filterNot { it.singleInstance() }
                         .map { it.exactTimeStamp.long }
 
-                return State(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys, selectedInstances, selectedGroups)
+                return State(doneExpanded, expandedGroups, expandedInstances, unscheduledExpanded, expandedTaskKeys, selectedInstances, selectedGroups, selectedTasks)
             }
 
         var dataId = -1
@@ -802,7 +744,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 
-            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, state.expandedGroups, state.expandedInstances, state.doneExpanded, state.selectedInstances, state.selectedGroups, taskDatas, state.unscheduledExpanded, state.expandedTaskKeys)
+            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, state.expandedGroups, state.expandedInstances, state.doneExpanded, state.selectedInstances, state.selectedGroups, taskDatas, state.unscheduledExpanded, state.expandedTaskKeys, state.selectedTaskKeys)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
         }
 
@@ -825,7 +767,8 @@ class GroupListFragment @JvmOverloads constructor(
             val unscheduledExpanded: Boolean = false,
             val expandedTaskKeys: List<TaskKey> = listOf(),
             val selectedInstances: List<InstanceKey> = listOf(),
-            val selectedGroups: List<Long> = listOf()) : Parcelable
+            val selectedGroups: List<Long> = listOf(),
+            val selectedTaskKeys: List<TaskKey> = listOf()) : Parcelable
 
     interface GroupListListener : SnackbarListener {
 

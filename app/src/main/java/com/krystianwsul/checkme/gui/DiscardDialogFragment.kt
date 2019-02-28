@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.gui
 
 import android.os.Bundle
-import com.afollestad.materialdialogs.MaterialDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 
 class DiscardDialogFragment : AbstractDialogFragment() {
@@ -13,9 +13,8 @@ class DiscardDialogFragment : AbstractDialogFragment() {
 
     lateinit var discardDialogListener: () -> Unit
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialDialog(requireActivity()).show {
-        message(R.string.discard_changes)
-        negativeButton(android.R.string.cancel)
-        positiveButton(R.string.discard) { discardDialogListener() }
-    }
+    override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.discard_changes)
+            .setNegativeButton(android.R.string.cancel) { _, _ -> }
+            .setPositiveButton(R.string.discard) { _, _ -> discardDialogListener() }
+            .create()
 }

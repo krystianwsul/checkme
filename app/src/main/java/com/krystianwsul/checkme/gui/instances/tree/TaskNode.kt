@@ -57,28 +57,28 @@ class TaskNode(
 
     private fun expanded() = treeNode.isExpanded
 
-    override fun compareTo(other: ModelNode) = (other as TaskNode).taskData.mStartExactTimeStamp.let {
+    override fun compareTo(other: ModelNode) = (other as TaskNode).taskData.startExactTimeStamp.let {
         if (indentation == 0) {
-            -taskData.mStartExactTimeStamp.compareTo(it)
+            -taskData.startExactTimeStamp.compareTo(it)
         } else {
-            taskData.mStartExactTimeStamp.compareTo(it)
+            taskData.startExactTimeStamp.compareTo(it)
         }
     }
 
-    override val name get() = Triple(taskData.Name, colorPrimary, true)
+    override val name get() = Triple(taskData.name, colorPrimary, true)
 
     override val children
-        get() = if ((taskData.children.isEmpty() || expanded()) && taskData.mNote.isNullOrEmpty()) {
+        get() = if ((taskData.children.isEmpty() || expanded()) && taskData.note.isNullOrEmpty()) {
             null
         } else {
             val text = if (!expanded() && !taskData.children.isEmpty()) {
                 taskData.children
-                        .sortedBy { it.mStartExactTimeStamp }
-                        .joinToString(", ") { it.Name }
+                        .sortedBy { it.startExactTimeStamp }
+                        .joinToString(", ") { it.name }
             } else {
-                check(!taskData.mNote.isNullOrEmpty())
+                check(!taskData.note.isNullOrEmpty())
 
-                taskData.mNote
+                taskData.note
             }
 
             val color = colorSecondary

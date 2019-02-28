@@ -179,12 +179,7 @@ class GroupListFragment @JvmOverloads constructor(
                     check(taskKeys.isNotEmpty())
                     check(selectedDatas.all { it.taskCurrent })
 
-                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) {
-                        recursiveDelete(it, true, x)
-                    }
-
-                    val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys.toSet())
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(0, SaveService.Source.GUI, taskKeys.toSet())
 
                     listener.showSnackbar(taskUndoData.taskKeys.size) {
                         DomainFactory.instance.clearTaskEndTimeStamps(0, SaveService.Source.GUI, taskUndoData)

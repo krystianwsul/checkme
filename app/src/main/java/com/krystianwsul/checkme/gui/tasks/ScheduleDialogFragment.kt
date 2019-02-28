@@ -11,13 +11,9 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.WhichButton
-import com.afollestad.materialdialogs.actions.getActionButton
-import com.afollestad.materialdialogs.customview.customView
-import com.afollestad.materialdialogs.customview.getCustomView
-import com.afollestad.materialdialogs.internal.button.DialogActionButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
@@ -80,7 +76,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private lateinit var mScheduleDialogTimeLayout: TextInputLayout
     private lateinit var mScheduleDialogTime: TextView
 
-    private lateinit var mButton: DialogActionButton
+    private var mButton: Button? = null
 
     private var customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>? = null
     private var scheduleDialogListener: ScheduleDialogListener? = null
@@ -148,55 +144,53 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             return TimeStamp(scheduleDialogData.date, hourMinute) > TimeStamp.now
         }
 
+    @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return MaterialDialog(activity!!).apply {
-            check(arguments!!.containsKey(SHOW_DELETE_KEY))
+        check(arguments!!.containsKey(SHOW_DELETE_KEY))
 
-            customView(R.layout.fragment_schedule_dialog)
-            negativeButton(android.R.string.cancel) { it.cancel() }
-            positiveButton(android.R.string.ok) {
-                check(customTimeDatas != null)
-                check(scheduleDialogListener != null)
-                check(isValid)
+        val view = requireActivity().layoutInflater.inflate(R.layout.fragment_schedule_dialog, null).apply {
+            mScheduleType = scheduleType
+            mScheduleDialogDateLayout = scheduleDialogDateLayout
+            mScheduleDialogDate = scheduleDialogDate
+            mScheduleDialogDayLayout = scheduleDialogDayLayout
 
-                scheduleDialogListener!!.onScheduleDialogResult(scheduleDialogData)
-            }
+            mScheduleDialogDays[DayOfWeek.SUNDAY] = scheduleDialogSunday
+            mScheduleDialogDays[DayOfWeek.MONDAY] = scheduleDialogMonday
+            mScheduleDialogDays[DayOfWeek.TUESDAY] = scheduleDialogTuesday
+            mScheduleDialogDays[DayOfWeek.WEDNESDAY] = scheduleDialogWednesday
+            mScheduleDialogDays[DayOfWeek.THURSDAY] = scheduleDialogThursday
+            mScheduleDialogDays[DayOfWeek.FRIDAY] = scheduleDialogFriday
+            mScheduleDialogDays[DayOfWeek.SATURDAY] = scheduleDialogSaturday
 
-            @Suppress("DEPRECATION")
-            if (arguments!!.getBoolean(SHOW_DELETE_KEY))
-                neutralButton(R.string.delete) { scheduleDialogListener!!.onScheduleDialogDelete() }
+            mScheduleDialogDays.forEach { (day, view) -> view.text = day.toString() }
 
-            getCustomView().run {
-                mScheduleType = scheduleType
-                mScheduleDialogDateLayout = scheduleDialogDateLayout
-                mScheduleDialogDate = scheduleDialogDate
-                mScheduleDialogDayLayout = scheduleDialogDayLayout
-
-                mScheduleDialogDays[DayOfWeek.SUNDAY] = scheduleDialogSunday
-                mScheduleDialogDays[DayOfWeek.MONDAY] = scheduleDialogMonday
-                mScheduleDialogDays[DayOfWeek.TUESDAY] = scheduleDialogTuesday
-                mScheduleDialogDays[DayOfWeek.WEDNESDAY] = scheduleDialogWednesday
-                mScheduleDialogDays[DayOfWeek.THURSDAY] = scheduleDialogThursday
-                mScheduleDialogDays[DayOfWeek.FRIDAY] = scheduleDialogFriday
-                mScheduleDialogDays[DayOfWeek.SATURDAY] = scheduleDialogSaturday
-
-                mScheduleDialogDays.forEach { (day, view) -> view.text = day.toString() }
-
-                mScheduleDialogMonthLayout = scheduleDialogMonthLayout
-                mScheduleDialogMonthDayRadio = scheduleDialogMonthDayRadio
-                mScheduleDialogMonthDayNumber = scheduleDialogMonthDayNumber
-                mScheduleDialogMonthDayLabel = scheduleDialogMonthDayLabel
-                mScheduleDialogMonthWeekRadio = scheduleDialogMonthWeekRadio
-                mScheduleDialogMonthWeekNumber = scheduleDialogMonthWeekNumber
-                mScheduleDialogMonthWeekDay = scheduleDialogMonthWeekDay
-                mScheduleDialogMonthEnd = scheduleDialogMonthEnd
-                mScheduleDialogDailyPadding = scheduleDialogDailyPadding
-                mScheduleDialogTimeLayout = scheduleDialogTimeLayout
-                mScheduleDialogTime = scheduleDialogTime
-            }
-
-            mButton = getActionButton(WhichButton.POSITIVE)
+            mScheduleDialogMonthLayout = scheduleDialogMonthLayout
+            mScheduleDialogMonthDayRadio = scheduleDialogMonthDayRadio
+            mScheduleDialogMonthDayNumber = scheduleDialogMonthDayNumber
+            mScheduleDialogMonthDayLabel = scheduleDialogMonthDayLabel
+            mScheduleDialogMonthWeekRadio = scheduleDialogMonthWeekRadio
+            mScheduleDialogMonthWeekNumber = scheduleDialogMonthWeekNumber
+            mScheduleDialogMonthWeekDay = scheduleDialogMonthWeekDay
+            mScheduleDialogMonthEnd = scheduleDialogMonthEnd
+            mScheduleDialogDailyPadding = scheduleDialogDailyPadding
+            mScheduleDialogTimeLayout = scheduleDialogTimeLayout
+            mScheduleDialogTime = scheduleDialogTime
         }
+
+        return MaterialAlertDialogBuilder(requireContext()).setView(view)
+                .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.cancel() }
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    check(customTimeDatas != null)
+                    check(scheduleDialogListener != null)
+                    check(isValid)
+
+                    scheduleDialogListener!!.onScheduleDialogResult(scheduleDialogData)
+                }
+                .apply {
+                    if (arguments!!.getBoolean(SHOW_DELETE_KEY))
+                        setNeutralButton(R.string.delete) { _, _ -> scheduleDialogListener!!.onScheduleDialogDelete() }
+                }
+                .create()
     }
 
     @SuppressLint("SetTextI18n")
@@ -398,6 +392,12 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             initialize()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        mButton = (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)!!
+    }
+
     override fun onResume() {
         super.onResume()
 
@@ -515,13 +515,13 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
         }
 
         if (isValid) {
-            mButton.isEnabled = true
+            mButton?.isEnabled = true
 
             mScheduleDialogDateLayout.error = null
             mScheduleDialogTimeLayout.error = null
         } else {
             check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
-            mButton.isEnabled = false
+            mButton?.isEnabled = false
 
             if (scheduleDialogData.date >= Date.today()) {
                 mScheduleDialogDateLayout.error = null

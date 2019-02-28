@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.common.collect.HashMultimap
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.Preferences
@@ -178,57 +177,15 @@ class GroupListFragment @JvmOverloads constructor(
                     check(taskKeys.isNotEmpty())
                     check(instanceDatas.all { it.taskCurrent })
 
-                    val undoAll = UndoAll()
-
                     removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) {
-                        recursiveDelete(it, true, x, undoAll)
+                        recursiveDelete(it, true, x)
                     }
 
                     val dataId = (treeViewAdapter.treeModelAdapter as GroupAdapter).dataId
                     val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskKeys.toSet())
 
                     listener.showSnackbar(taskUndoData.taskKeys.size) {
-                        fun Map<InstanceKey, InstanceData>.flattenMap(): List<InstanceData> = map {
-                            listOf(
-                                    listOf(it.value),
-                                    it.value
-                                            .children
-                                            .flattenMap()
-                            ).flatten()
-                        }.flatten()
-
-                        val allInstanceDatas = parameters.dataWrapper
-                                .instanceDatas
-                                .flattenMap()
-                                .associateBy { it.instanceKey }
-                                .toMutableMap()
-
-                        undoAll.undos.forEach {
-                            allInstanceDatas.getValue(it.key).let { instanceData ->
-                                instanceData.taskCurrent = it.value.taskCurrent
-                                instanceData.isRootTask = it.value.isRootTask
-                            }
-                        }
-
-                        parameters.dataWrapper
-                                .instanceDatas
-                                .putAll(undoAll.removedRoots.map { it.instanceKey to it })
-
-                        val newAllInstanceDatas = parameters.dataWrapper
-                                .instanceDatas
-                                .flattenMap()
-                                .associateBy { it.instanceKey }
-                                .toMutableMap()
-
-                        undoAll.removedChildren
-                                .asMap()
-                                .forEach { (instanceKey, instanceDatas) ->
-                                    newAllInstanceDatas.getValue(instanceKey).children.putAll(instanceDatas.map { it.instanceKey to it })
-                                }
-
-                        initialize()
-
-                        DomainFactory.instance.clearTaskEndTimeStamps(dataId, SaveService.Source.GUI, taskUndoData)
+                        DomainFactory.instance.clearTaskEndTimeStamps(0, SaveService.Source.GUI, taskUndoData)
                     }
                 }
                 R.id.action_group_add_task -> {
@@ -329,7 +286,7 @@ class GroupListFragment @JvmOverloads constructor(
             }
         }
 
-        private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: TreeViewAdapter.Placeholder, undoAll: UndoAll) {
+        private fun recursiveDelete(treeNode: TreeNode, root: Boolean, x: TreeViewAdapter.Placeholder) {
             check(root == treeNode.isSelected)
 
             treeNode.modelNode.let {
@@ -342,7 +299,7 @@ class GroupListFragment @JvmOverloads constructor(
                         } else {
                             treeNode.allChildren
                                     .first()
-                                    .let { recursiveDelete(it, false, x, undoAll) }
+                                    .let { recursiveDelete(it, false, x) }
 
                             return
                         }
@@ -352,7 +309,7 @@ class GroupListFragment @JvmOverloads constructor(
                     is DividerNode -> {
                         check(!root)
 
-                        treeNode.allChildren.forEach { recursiveDelete(it, false, x, undoAll) }
+                        treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
 
                         return
                     }
@@ -364,11 +321,6 @@ class GroupListFragment @JvmOverloads constructor(
                         check(instanceData.taskCurrent)
                         checkNotNull(instanceData.isRootTask)
 
-                        check(!undoAll.undos.containsKey(instanceData.instanceKey))
-
-                        // mark gray
-                        undoAll.undos[instanceData.instanceKey] = Undo(instanceData.taskCurrent, instanceData.isRootTask!!)
-
                         instanceData.taskCurrent = false
                         instanceData.isRootTask = null
 
@@ -377,10 +329,10 @@ class GroupListFragment @JvmOverloads constructor(
                         check(!root)
                     }
 
-                    treeNode.allChildren.forEach { recursiveDelete(it, false, x, undoAll) }
+                    treeNode.allChildren.forEach { recursiveDelete(it, false, x) }
                 } else {
                     // remove from tree
-                    instanceData.instanceDataParent.remove(instanceData, undoAll)
+                    instanceData.instanceDataParent.remove(instanceData)
 
                     when (it) {
                         is NotDoneGroupNode -> it.removeFromParent(x)
@@ -870,13 +822,11 @@ class GroupListFragment @JvmOverloads constructor(
             val note: String?,
             val instanceDatas: MutableMap<InstanceKey, InstanceData>) : InstanceDataParent {
 
-        override fun remove(instanceData: InstanceData, undoAll: UndoAll) {
+        override fun remove(instanceData: InstanceData) {
             val instanceKey = instanceData.instanceKey
             check(instanceDatas.containsKey(instanceKey))
 
             instanceDatas.remove(instanceKey)
-
-            undoAll.removedRoots.add(instanceData)
         }
     }
 
@@ -903,13 +853,11 @@ class GroupListFragment @JvmOverloads constructor(
             check(name.isNotEmpty())
         }
 
-        override fun remove(instanceData: InstanceData, undoAll: UndoAll) {
+        override fun remove(instanceData: InstanceData) {
             val instanceKey = instanceData.instanceKey
             check(children.containsKey(instanceKey))
 
             children.remove(instanceKey)
-
-            undoAll.removedChildren.put(this.instanceKey, instanceData)
         }
 
         override fun compareTo(other: InstanceData): Int {
@@ -939,7 +887,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     interface InstanceDataParent {
 
-        fun remove(instanceData: InstanceData, undoAll: UndoAll)
+        fun remove(instanceData: InstanceData)
     }
 
     data class TaskData(val taskKey: TaskKey, val Name: String, val children: List<TaskData>, val mStartExactTimeStamp: ExactTimeStamp, val mNote: String?) {
@@ -960,15 +908,5 @@ class GroupListFragment @JvmOverloads constructor(
         class InstanceKeys(dataId: Int, dataWrapper: DataWrapper) : Parameters(dataId, dataWrapper)
 
         class TaskKey(dataId: Int, dataWrapper: DataWrapper, val taskKey: com.krystianwsul.checkme.utils.TaskKey) : Parameters(dataId, dataWrapper)
-    }
-
-    class Undo(val taskCurrent: Boolean, val isRootTask: Boolean)
-
-    class UndoAll {
-
-        val undos = mutableMapOf<InstanceKey, Undo>()
-
-        val removedChildren = HashMultimap.create<InstanceKey, InstanceData>()!!
-        val removedRoots = mutableListOf<InstanceData>()
     }
 }

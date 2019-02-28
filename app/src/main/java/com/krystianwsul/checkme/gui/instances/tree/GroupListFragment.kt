@@ -788,15 +788,7 @@ class GroupListFragment @JvmOverloads constructor(
             val taskEditable: Boolean?,
             val taskDatas: List<TaskData>,
             val note: String?,
-            val instanceDatas: MutableMap<InstanceKey, InstanceData>) : InstanceDataParent {
-
-        override fun remove(instanceData: InstanceData) {
-            val instanceKey = instanceData.instanceKey
-            check(instanceDatas.containsKey(instanceKey))
-
-            instanceDatas.remove(instanceKey)
-        }
-    }
+            val instanceDatas: MutableMap<InstanceKey, InstanceData>) : InstanceDataParent
 
     interface SelectedData {
 
@@ -830,13 +822,6 @@ class GroupListFragment @JvmOverloads constructor(
             check(name.isNotEmpty())
         }
 
-        override fun remove(instanceData: InstanceData) {
-            val instanceKey = instanceData.instanceKey
-            check(children.containsKey(instanceKey))
-
-            children.remove(instanceKey)
-        }
-
         override fun compareTo(other: InstanceData): Int {
             val timeStampComparison = instanceTimeStamp.compareTo(other.instanceTimeStamp)
             if (timeStampComparison != 0)
@@ -866,10 +851,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    interface InstanceDataParent {
-
-        fun remove(instanceData: InstanceData)
-    }
+    interface InstanceDataParent
 
     data class TaskData(
             override val taskKey: TaskKey,

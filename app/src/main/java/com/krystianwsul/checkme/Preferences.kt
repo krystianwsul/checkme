@@ -21,7 +21,8 @@ object Preferences {
     var tickLog by ReadWriteStrPref(TICK_LOG)
 
     fun logLineDate(line: String) {
-        logLine("\n" + ExactTimeStamp.now.date.toString())
+        logLine("")
+        logLine(ExactTimeStamp.now.date.toString())
         logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
     }
 

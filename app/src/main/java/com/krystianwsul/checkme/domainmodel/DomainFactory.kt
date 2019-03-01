@@ -76,6 +76,7 @@ open class DomainFactory(
 
                 false
             } else {
+                Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData")
                 tickData = if (tickData != null) {
                     mergeTickDatas(tickData!!, newTickData)
                 } else {

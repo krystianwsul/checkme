@@ -76,7 +76,7 @@ open class DomainFactory(
 
                 false
             } else {
-                Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData")
+                Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData, eitherSaved: " + domainFactory?.remoteProjectFactory?.eitherSaved + ", tickData: $tickData")
                 tickData = if (tickData != null) {
                     mergeTickDatas(tickData!!, newTickData)
                 } else {
@@ -148,7 +148,7 @@ open class DomainFactory(
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
-        tryNotifyListeners()
+        tryNotifyListeners("DomainFactory.init")
     }
 
     private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
@@ -205,7 +205,7 @@ open class DomainFactory(
 
         remoteUpdateTime = stop.long - start.long
 
-        tryNotifyListeners()
+        tryNotifyListeners("DomainFactory.updatePrivateProjectRecord")
     }
 
     @Synchronized
@@ -221,10 +221,10 @@ open class DomainFactory(
 
         remoteProjectFactory.onChildEvent(childEvent, ExactTimeStamp.now)
 
-        tryNotifyListeners()
+        tryNotifyListeners("DomainFactory.updateSharedProjectRecords")
     }
 
-    private fun tryNotifyListeners() {
+    private fun tryNotifyListeners(source: String) {
         if (remoteProjectFactory.eitherSaved || remoteFriendFactory.isSaved)
             return
 
@@ -232,7 +232,7 @@ open class DomainFactory(
 
         if (tickData == null) {
             Log.e("asdf", "tickData null")
-            updateNotifications(firstTaskEvent, ExactTimeStamp.now, listOf(), "DomainModel.setRemoteTaskRecords")
+            updateNotifications(firstTaskEvent, ExactTimeStamp.now, listOf(), source)
         } else {
             updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
 
@@ -240,12 +240,12 @@ open class DomainFactory(
             From a cold start, there may be two firebase events: one cached, one live
              */
             if (firstTaskEvent) {
-                Log.e("asdf", "not first, clearing getMTickData()")
+                Preferences.logLineHour("DomainFactory.tryNotifyListeners ($source) not first, clearing tickData")
 
                 tickData!!.release()
                 tickData = null
             } else {
-                Log.e("asdf", "first, keeping getMTickData()")
+                Preferences.logLineHour("DomainFactory.tryNotifyListeners ($source) first, keeping tickData")
             }
         }
 
@@ -275,7 +275,7 @@ open class DomainFactory(
 
         remoteFriendFactory = RemoteFriendFactory(this, dataSnapshot.children)
 
-        tryNotifyListeners()
+        tryNotifyListeners("DomainFactory.setFriendRecords")
     }
 
     // gets

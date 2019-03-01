@@ -34,7 +34,7 @@ class DebugFragment : AbstractFragment() {
             val j = 1 / i
         }
 
-        debugTick.setOnClickListener { TickJobIntentService.startServiceDebug(activity!!, "DebugFragment: TickService.startServiceDebug") }
+        debugTick.setOnClickListener { TickJobIntentService.startServiceNormal(activity!!, "DebugFragment: TickService.startServiceNormal") }
 
         debugLoad.setOnClickListener {
             debugData.text = StringBuilder().apply {

@@ -298,7 +298,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         showTab(visibleTab.value!!)
 
-        TickJobIntentService.startServiceRegister(this, "MainActivity.onCreate: TickJobIntentService.startServiceRegister")
+        TickJobIntentService.startServiceSilent(this, "MainActivity.onCreate: TickJobIntentService.startServiceSilent")
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {

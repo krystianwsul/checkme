@@ -13,6 +13,6 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        TickJobIntentService.start(TickJobIntentService.getIntent(context, false, "AlarmReceiver"))
+        TickJobIntentService.startServiceNormal(context, "AlarmReceiver")
     }
 }

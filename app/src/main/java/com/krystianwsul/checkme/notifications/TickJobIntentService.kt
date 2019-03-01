@@ -24,15 +24,15 @@ class TickJobIntentService : JobIntentService() {
 
         // DON'T HOLD STATE IN STATIC VARIABLES
 
-        fun startServiceRegister(context: Context, source: String) {
+        fun startServiceSilent(context: Context, source: String) {
             TickJobIntentService.start(getIntent(context, true, source))
         }
 
-        fun startServiceDebug(context: Context, source: String) {
+        fun startServiceNormal(context: Context, source: String) {
             TickJobIntentService.start(getIntent(context, false, source))
         }
 
-        fun getIntent(context: Context, silent: Boolean, source: String): Intent {
+        private fun getIntent(context: Context, silent: Boolean, source: String): Intent {
             check(!TextUtils.isEmpty(source))
 
             val intent = Intent(context, TickJobIntentService::class.java)

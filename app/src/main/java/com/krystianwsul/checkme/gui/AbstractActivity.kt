@@ -68,7 +68,7 @@ abstract class AbstractActivity : AppCompatActivity() {
         }
         taskUndoData = null
 
-        TickJobIntentService.startServiceSilent(this, "AbstractActivity.onResume: TickJobIntentService.startServiceSilent")
+        TickJobIntentService.startServiceSilent(this, "AbstractActivity.onResume")
     }
 
     override fun onPause() {

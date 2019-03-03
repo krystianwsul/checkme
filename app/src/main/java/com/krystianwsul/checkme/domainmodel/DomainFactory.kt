@@ -63,20 +63,41 @@ open class DomainFactory(
             return TickData(silent, source, listeners)
         }
 
+        private fun tryClearTickData() { // todo change to getTickData
+            Preferences.logLineHour("DomainFactory.tryClearTickData: tickData $tickData")
+            tickData?.let {
+                if (it.expires < ExactTimeStamp.now) {
+                    Preferences.logLineHour("DomainFactory.tryClearTickData: tickData expired, clearing")
+                    tickData = null
+                } else {
+                    Preferences.logLineHour("DomainFactory.tryClearTickData: tickData not expired")
+                }
+            }
+        }
+
         @Synchronized
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData): Boolean {
             check(MyApplication.instance.hasUserInfo)
 
             val domainFactory = nullableInstance
 
-            return if (domainFactory?.remoteProjectFactory?.eitherSaved == false && tickData == null) {
-                domainFactory.updateNotificationsTick(source, newTickData.silent, newTickData.source)
+            tryClearTickData()
 
+            val savedFalse = domainFactory?.remoteProjectFactory?.eitherSaved == false
+
+            Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData, savedFalse: $savedFalse")
+            return if (savedFalse) {
+                val silent = (tickData?.silent ?: true) && newTickData.silent
+
+                domainFactory!!.updateNotificationsTick(source, silent, newTickData.source)
+
+                tickData?.release()
                 newTickData.release()
 
                 false
             } else {
-                Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData, eitherSaved: " + domainFactory?.remoteProjectFactory?.eitherSaved + ", tickData: $tickData")
+                Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData")
+
                 tickData = if (tickData != null) {
                     mergeTickDatas(tickData!!, newTickData)
                 } else {
@@ -230,15 +251,18 @@ open class DomainFactory(
 
         skipSave = false
 
+        tryClearTickData()
         if (tickData == null) {
             Log.e("asdf", "tickData null")
             updateNotifications(firstTaskEvent, ExactTimeStamp.now, listOf(), source)
         } else {
             updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
 
+            // todo check all updates called instead of expires?
             /*
             From a cold start, there may be two firebase events: one cached, one live
              */
+            /*
             if (firstTaskEvent) {
                 Preferences.logLineHour("DomainFactory.tryNotifyListeners ($source) not first, clearing tickData")
 
@@ -246,7 +270,7 @@ open class DomainFactory(
                 tickData = null
             } else {
                 Preferences.logLineHour("DomainFactory.tryNotifyListeners ($source) first, keeping tickData")
-            }
+            }*/
         }
 
         firebaseListeners.forEach { it.invoke(this) }

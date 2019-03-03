@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.utils.time
 
+import org.joda.time.DateTime
 import java.util.*
 
 data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
@@ -30,6 +31,8 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
     })
 
     constructor(calendar: Calendar) : this(calendar.timeInMillis)
+
+    constructor(dateTime: DateTime) : this(dateTime.millis)
 
     override fun compareTo(other: ExactTimeStamp) = long.compareTo(other.long)
 

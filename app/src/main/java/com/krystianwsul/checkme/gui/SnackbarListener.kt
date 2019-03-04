@@ -11,9 +11,9 @@ interface SnackbarListener {
 
     companion object {
 
-        private var count = 0
+        private val hashes = mutableSetOf<Int>()
 
-        val deleting get() = count > 0
+        val deleting get() = hashes.size > 0
     }
 
     val snackbarParent: CoordinatorLayout
@@ -34,19 +34,18 @@ interface SnackbarListener {
     private fun showSnackbar(message: String, duration: Int, action: () -> Unit) {
         MyCrashlytics.logMethod(this)
 
-        check(++SnackbarListener.count > 0)
-
         Snackbar.make(snackbarParent, message, duration).apply {
+            val hash = hashCode()
+            hashes.add(hash)
+
             setAction(R.string.undo) { action() }
 
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
 
-                override fun onShown(transientBottomBar: Snackbar) = MyCrashlytics.logMethod(this@apply)
+                override fun onShown(transientBottomBar: Snackbar) = Unit
 
                 override fun onDismissed(transientBottomBar: Snackbar, event: Int) {
-                    MyCrashlytics.logMethod(this@apply)
-
-                    check(SnackbarListener.count-- > 0)
+                    hashes.remove(hash)
                 }
             })
 

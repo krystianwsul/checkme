@@ -48,7 +48,7 @@ open class DomainFactory(
 
         private val firebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
 
-        @Synchronized
+        @Synchronized // still running?
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData): Boolean {
             check(MyApplication.instance.hasUserInfo)
 
@@ -56,25 +56,25 @@ open class DomainFactory(
 
             val savedFalse = domainFactory?.remoteProjectFactory?.eitherSaved == false
 
-            Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData, savedFalse: $savedFalse")
+            Preferences.logLineHour("DomainFactory.setFirebaseTickListener savedFalse: $savedFalse")
 
             val tickData = TickHolder.getTickData()
 
-            return if (savedFalse) {
+            if (savedFalse) {
                 val silent = (tickData?.silent ?: true) && newTickData.silent
 
                 domainFactory!!.updateNotificationsTick(source, silent, newTickData.source)
+            }
 
+            return if (!savedFalse && (tickData?.privateRefreshed == false || tickData?.sharedRefreshed == false)) {
+                TickHolder.addTickData(newTickData)
+
+                true
+            } else {
                 tickData?.release()
                 newTickData.release()
 
                 false
-            } else {
-                Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData")
-
-                TickHolder.addTickData(newTickData)
-
-                true
             }
         }
 
@@ -197,6 +197,8 @@ open class DomainFactory(
 
         remoteUpdateTime = stop.long - start.long
 
+        TickHolder.getTickData()?.privateRefreshed = true
+
         tryNotifyListeners("DomainFactory.updatePrivateProjectRecord")
     }
 
@@ -212,6 +214,8 @@ open class DomainFactory(
         }
 
         remoteProjectFactory.onChildEvent(childEvent, ExactTimeStamp.now)
+
+        TickHolder.getTickData()?.sharedRefreshed = true
 
         tryNotifyListeners("DomainFactory.updateSharedProjectRecords")
     }
@@ -229,19 +233,8 @@ open class DomainFactory(
         } else {
             updateNotificationsTick(SaveService.Source.GUI, tickData.silent, tickData.source)
 
-            // todo check all updates called instead of expires?
-            /*
-            From a cold start, there may be two firebase events: one cached, one live
-             */
-            /*
-            if (firstTaskEvent) {
-                Preferences.logLineHour("DomainFactory.tryNotifyListeners ($source) not first, clearing tickData")
-
-                tickData!!.release()
-                tickData = null
-            } else {
-                Preferences.logLineHour("DomainFactory.tryNotifyListeners ($source) first, keeping tickData")
-            }*/
+            if (tickData.privateRefreshed && tickData.sharedRefreshed)
+                tickData.release()
         }
 
         firebaseListeners.forEach { it.invoke(this) }

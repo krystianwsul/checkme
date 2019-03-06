@@ -9,9 +9,12 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.notifications.TickJobIntentService
+import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.schedulers.Schedulers
 
 abstract class AbstractActivity : AppCompatActivity() {
 
@@ -27,6 +30,7 @@ abstract class AbstractActivity : AppCompatActivity() {
     }
 
     protected val createDisposable = CompositeDisposable()
+    private val resumeDisposable = CompositeDisposable()
 
     val started = BehaviorRelay.createDefault(false)
 
@@ -56,6 +60,10 @@ abstract class AbstractActivity : AppCompatActivity() {
         started.accept(true)
     }
 
+    protected fun tick(source: String) = Single.just(Unit)
+            .observeOn(Schedulers.single())
+            .subscribe { _ -> DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(true, source, listOf())) }!!
+
     override fun onResume() {
         MyCrashlytics.logMethod(this)
 
@@ -68,11 +76,13 @@ abstract class AbstractActivity : AppCompatActivity() {
         }
         taskUndoData = null
 
-        TickJobIntentService.startServiceSilent(this, "AbstractActivity.onResume")
+        resumeDisposable += tick("AbstractActivity.onResume")
     }
 
     override fun onPause() {
         MyCrashlytics.logMethod(this)
+
+        resumeDisposable.clear()
 
         super.onPause()
     }

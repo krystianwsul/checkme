@@ -250,7 +250,7 @@ open class DomainFactory(
         if (remoteProjectFactory.eitherSaved || remoteFriendFactory.isSaved)
             return
 
-        skipSave = false
+        skipSave = true
 
         tryClearTickData()
         if (tickData == null) {
@@ -276,8 +276,6 @@ open class DomainFactory(
 
         firebaseListeners.forEach { it.invoke(this) }
         firebaseListeners.clear()
-
-        domainChanged.accept(listOf()) // todo make selective
 
         firstTaskEvent = false
 

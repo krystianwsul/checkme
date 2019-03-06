@@ -165,7 +165,8 @@ open class DomainFactory(
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 
-        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, userSnapshot.getValue(UserWrapper::class.java)!!))
+        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, userSnapshot.getValue(UserWrapper::class.java)
+                ?: UserWrapper()))
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 

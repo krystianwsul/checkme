@@ -17,7 +17,7 @@ object TickHolder {
 
         val listeners = oldTickData.listeners + newTickData.listeners
 
-        return TickData(silent, source, listeners)
+        return TickData(silent, source, listeners, oldTickData.privateRefreshed || newTickData.privateRefreshed, oldTickData.sharedRefreshed || newTickData.sharedRefreshed)
     }
 
     private fun tryClearTickData() {

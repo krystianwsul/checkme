@@ -46,34 +46,7 @@ open class DomainFactory(
 
         val instance get() = instanceRelay.value!!.value!!
 
-        private var tickData: TickData? = null
-
         private val firebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
-
-        private fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
-            val silent = oldTickData.silent && newTickData.silent
-
-            val source = "merged (${oldTickData.source}, ${newTickData.source})"
-
-            oldTickData.releaseWakelock()
-            newTickData.releaseWakelock()
-
-            val listeners = oldTickData.listeners + newTickData.listeners
-
-            return TickData(silent, source, listeners)
-        }
-
-        private fun tryClearTickData() { // todo change to getTickData
-            Preferences.logLineHour("DomainFactory.tryClearTickData: tickData $tickData")
-            tickData?.let {
-                if (it.expires < ExactTimeStamp.now) {
-                    Preferences.logLineHour("DomainFactory.tryClearTickData: tickData expired, clearing")
-                    tickData = null
-                } else {
-                    Preferences.logLineHour("DomainFactory.tryClearTickData: tickData not expired")
-                }
-            }
-        }
 
         @Synchronized
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData): Boolean {
@@ -81,11 +54,12 @@ open class DomainFactory(
 
             val domainFactory = nullableInstance
 
-            tryClearTickData()
-
             val savedFalse = domainFactory?.remoteProjectFactory?.eitherSaved == false
 
             Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData, savedFalse: $savedFalse")
+
+            val tickData = TickHolder.getTickData()
+
             return if (savedFalse) {
                 val silent = (tickData?.silent ?: true) && newTickData.silent
 
@@ -98,11 +72,7 @@ open class DomainFactory(
             } else {
                 Preferences.logLineHour("DomainFactory.setFirebaseTickListener setting tickData")
 
-                tickData = if (tickData != null) {
-                    mergeTickDatas(tickData!!, newTickData)
-                } else {
-                    newTickData
-                }
+                TickHolder.addTickData(newTickData)
 
                 true
             }
@@ -177,7 +147,7 @@ open class DomainFactory(
 
     // misc
 
-    val isHoldingWakeLock get() = tickData?.wakelock?.isHeld == true
+    val isHoldingWakeLock get() = TickHolder.isHeld
 
     val taskCount get() = remoteProjectFactory.taskCount
     val instanceCount get() = remoteProjectFactory.instanceCount
@@ -252,12 +222,12 @@ open class DomainFactory(
 
         skipSave = true
 
-        tryClearTickData()
+        val tickData = TickHolder.getTickData()
         if (tickData == null) {
             Log.e("asdf", "tickData null")
             updateNotifications(firstTaskEvent, ExactTimeStamp.now, listOf(), source)
         } else {
-            updateNotificationsTick(SaveService.Source.GUI, tickData!!.silent, tickData!!.source)
+            updateNotificationsTick(SaveService.Source.GUI, tickData.silent, tickData.source)
 
             // todo check all updates called instead of expires?
             /*

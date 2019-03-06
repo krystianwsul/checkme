@@ -23,7 +23,7 @@ object TickHolder {
     private fun tryClearTickData() {
         Preferences.logLineHour("TickHolder.tryClearTickData: tickData $tickData")
         tickData?.let {
-            if (it.expires < ExactTimeStamp.now) {
+            if (it.expires < ExactTimeStamp.now || !it.wakelock.isHeld) {
                 Preferences.logLineHour("TickHolder.tryClearTickData: tickData expired, clearing")
                 tickData = null
             } else {

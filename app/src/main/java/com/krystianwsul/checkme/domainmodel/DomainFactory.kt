@@ -66,7 +66,7 @@ open class DomainFactory(
                 domainFactory!!.updateNotificationsTick(source, silent, newTickData.source)
             }
 
-            return if (!savedFalse && (tickData?.privateRefreshed == false || tickData?.sharedRefreshed == false)) {
+            return if (!savedFalse || tickData?.privateRefreshed == false || tickData?.sharedRefreshed == false) {
                 TickHolder.addTickData(newTickData)
 
                 true

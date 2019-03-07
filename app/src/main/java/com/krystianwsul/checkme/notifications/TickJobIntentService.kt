@@ -38,10 +38,10 @@ class TickJobIntentService : JobIntentService() {
         private fun getIntent(context: Context, silent: Boolean, source: String): Intent {
             check(!TextUtils.isEmpty(source))
 
-            val intent = Intent(context, TickJobIntentService::class.java)
-            intent.putExtra(SILENT_KEY, silent)
-            intent.putExtra(SOURCE_KEY, source)
-            return intent
+            return Intent(context, TickJobIntentService::class.java).apply {
+                putExtra(SILENT_KEY, silent)
+                putExtra(SOURCE_KEY, source)
+            }
         }
 
         // still running?

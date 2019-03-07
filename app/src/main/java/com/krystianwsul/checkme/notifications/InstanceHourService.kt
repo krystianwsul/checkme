@@ -35,8 +35,6 @@ class InstanceHourService : IntentService("InstanceHourService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId)
 
-        DomainFactory.addFirebaseListener { setInstanceAddHour(it, instanceKey) }
+        DomainFactory.addFirebaseListener { it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey) }
     }
-
-    private fun setInstanceAddHour(domainFactory: DomainFactory, instanceKey: InstanceKey) = domainFactory.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey)
 }

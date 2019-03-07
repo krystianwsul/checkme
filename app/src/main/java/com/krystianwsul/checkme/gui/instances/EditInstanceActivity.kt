@@ -11,7 +11,6 @@ import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
 import com.krystianwsul.checkme.MyApplication
@@ -230,7 +229,13 @@ class EditInstanceActivity : AbstractActivity() {
         this.data = data
 
         if (data.done) {
-            Toast.makeText(this, R.string.instanceMarkedDone, Toast.LENGTH_LONG).show()
+            AbstractActivity.setSnackbar(object : SnackbarData {
+
+                override fun show(snackbarListener: SnackbarListener) {
+                    snackbarListener.showInstanceMarkedDone()
+                }
+            })
+
             finish()
             return
         }

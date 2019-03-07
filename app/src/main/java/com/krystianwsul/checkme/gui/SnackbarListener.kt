@@ -29,16 +29,21 @@ interface SnackbarListener {
 
     fun showSnackbarNotDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarNotDone, count, Snackbar.LENGTH_SHORT, action)
 
-    private fun showSnackbar(@StringRes messageId: Int, count: Int, duration: Int, action: () -> Unit) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), duration, action)
+    fun showInstanceMarkedDone() = showSnackbar(snackbarParent.context.getString(R.string.instanceMarkedDone), Snackbar.LENGTH_LONG, false)
 
-    private fun showSnackbar(message: String, duration: Int, action: () -> Unit) {
+    private fun showSnackbar(@StringRes messageId: Int, count: Int, duration: Int, action: () -> Unit) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), duration, true, action)
+
+    private fun showSnackbar(message: String, duration: Int, preventIrrelevant: Boolean, action: (() -> Unit)? = null) {
         MyCrashlytics.logMethod(this)
 
         Snackbar.make(snackbarParent, message, duration).apply {
             val hash = hashCode()
-            hashes.add(hash)
+            if (preventIrrelevant)
+                hashes.add(hash)
 
-            setAction(R.string.undo) { action() }
+            action?.let {
+                setAction(R.string.undo) { action() }
+            }
 
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
 

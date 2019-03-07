@@ -27,7 +27,8 @@
             android:hint="@string/email_hint"
             android:textColorHint="@color/textDisabledWhite"
             android:imeOptions="actionSearch"
-            tools:ignore="Deprecated">
+            tools:ignore="Deprecated"
+            android:importantForAutofill="no">
 
             <requestFocus/>
 
@@ -35,49 +36,56 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <LinearLayout
-        android:id="@+id/findFriendUserLayout"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/findFriendCoordinator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/findFriendUserName"
-            android:singleLine="true"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/findFriendUserLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@color/textPrimary"
-            tools:ignore="Deprecated"/>
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:orientation="vertical"
+            android:visibility="gone">
 
-        <TextView
-            android:id="@+id/findFriendUserEmail"
-            android:singleLine="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/textSecondary"
-            tools:ignore="Deprecated"/>
+            <TextView
+                android:id="@+id/findFriendUserName"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@color/textPrimary"
+                tools:ignore="Deprecated" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/findFriendUserEmail"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/textSecondary"
+                tools:ignore="Deprecated" />
 
-    <LinearLayout
-        android:id="@+id/findFriendProgress"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:visibility="gone">
+        </LinearLayout>
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"/>
+        <LinearLayout
+            android:id="@+id/findFriendProgress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:visibility="gone">
 
-    </LinearLayout>
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </LinearLayout>

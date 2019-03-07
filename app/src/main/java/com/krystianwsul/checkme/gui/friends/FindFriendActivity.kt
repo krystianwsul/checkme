@@ -8,7 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -128,7 +128,7 @@ class FindFriendActivity : AbstractActivity() {
                 if (dataSnapshot.exists()) {
                     userData = dataSnapshot.getValue(UserData::class.java)!!
                 } else {
-                    Toast.makeText(this@FindFriendActivity, R.string.userNotFound, Toast.LENGTH_SHORT).show()
+                    Snackbar.make(findFriendCoordinator, R.string.userNotFound, Snackbar.LENGTH_SHORT).show()
                 }
 
                 updateLayout()
@@ -145,7 +145,7 @@ class FindFriendActivity : AbstractActivity() {
 
                 MyCrashlytics.logException(databaseError.toException())
 
-                Toast.makeText(this@FindFriendActivity, R.string.connectionError, Toast.LENGTH_SHORT).show()
+                Snackbar.make(findFriendCoordinator, R.string.connectionError, Snackbar.LENGTH_SHORT).show()
             }
         }
 

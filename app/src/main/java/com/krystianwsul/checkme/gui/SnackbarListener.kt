@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.view.View
 import androidx.annotation.StringRes
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -18,6 +19,8 @@ interface SnackbarListener {
 
     val snackbarParent: CoordinatorLayout
 
+    val anchor get() = snackbarParent.findViewById<View>(R.id.bottomAnchor)
+
     /*
     SHORT = 1500
     LONG = 2750
@@ -29,11 +32,13 @@ interface SnackbarListener {
 
     fun showSnackbarNotDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarNotDone, count, Snackbar.LENGTH_SHORT, action)
 
-    fun showInstanceMarkedDone() = showSnackbar(snackbarParent.context.getString(R.string.instanceMarkedDone), Snackbar.LENGTH_LONG, false)
+    fun showInstanceMarkedDone() = showSnackbar(snackbarParent.context.getString(R.string.instanceMarkedDone), Snackbar.LENGTH_LONG)
+
+    fun showText(message: String, duration: Int) = showSnackbar(message, duration)
 
     private fun showSnackbar(@StringRes messageId: Int, count: Int, duration: Int, action: () -> Unit) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), duration, true, action)
 
-    private fun showSnackbar(message: String, duration: Int, preventIrrelevant: Boolean, action: (() -> Unit)? = null) {
+    private fun showSnackbar(message: String, duration: Int, preventIrrelevant: Boolean = false, action: (() -> Unit)? = null) {
         MyCrashlytics.logMethod(this)
 
         Snackbar.make(snackbarParent, message, duration).apply {
@@ -54,7 +59,7 @@ interface SnackbarListener {
                 }
             })
 
-            anchorView = snackbarParent.findViewById(R.id.bottomAnchor)
+            anchorView = anchor
 
             show()
         }

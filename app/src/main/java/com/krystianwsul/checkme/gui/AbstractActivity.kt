@@ -11,6 +11,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
@@ -66,15 +67,24 @@ abstract class AbstractActivity : AppCompatActivity() {
             .observeOn(Schedulers.single())
             .subscribe { _ -> DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(true, source, listOf())) }!!
 
+    protected open val tickOnResume = true
+
     override fun onResume() {
         MyCrashlytics.logMethod(this)
 
         super.onResume()
 
-        snackbarData?.show(this as SnackbarListener)
+        snackbarData?.let {
+            (this as SnackbarListener).apply {
+                anchor.addOneShotGlobalLayoutListener {
+                    it.show(this)
+                }
+            }
+        }
         snackbarData = null
 
-        resumeDisposable += tick("AbstractActivity.onResume")
+        if (tickOnResume)
+            resumeDisposable += tick("AbstractActivity.onResume")
     }
 
     override fun onPause() {

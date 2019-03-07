@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.gui
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.FragmentStatePagerAdapter
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.jakewharton.rxbinding3.view.clicks
 import com.krystianwsul.checkme.MyApplication
@@ -27,6 +27,8 @@ class TutorialActivity : AbstractActivity() {
         fun newLoginIntent() = Intent(MyApplication.instance, TutorialActivity::class.java)
         fun newHelpIntent() = newLoginIntent().apply { putExtra(HELP_KEY, true) }
     }
+
+    override val tickOnResume = false
 
     private val tutorialViewModel by lazy { getViewModel<TutorialViewModel>() }
 
@@ -79,11 +81,16 @@ class TutorialActivity : AbstractActivity() {
                         TutorialViewModel.State.Initial -> animateVisibility(tutorialLayout, tutorialProgress)
                         TutorialViewModel.State.Progress -> animateVisibility(tutorialProgress, tutorialLayout)
                         is TutorialViewModel.State.Success -> {
-                            Toast.makeText(this, getString(R.string.signInAs) + " " + it.displayName, Toast.LENGTH_SHORT).show()
+                            AbstractActivity.setSnackbar(object : SnackbarData {
+
+                                override fun show(snackbarListener: SnackbarListener) {
+                                    snackbarListener.showText(getString(R.string.signInAs) + " " + it.displayName, Snackbar.LENGTH_SHORT)
+                                }
+                            })
 
                             startMain()
                         }
-                        TutorialViewModel.State.Error -> Toast.makeText(this, R.string.signInFailed, Toast.LENGTH_SHORT).show()
+                        TutorialViewModel.State.Error -> Snackbar.make(tutorialCoordinator, R.string.signInFailed, Snackbar.LENGTH_SHORT).show()
                     }
                 }
                 .addTo(createDisposable)

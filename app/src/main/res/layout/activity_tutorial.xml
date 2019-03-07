@@ -1,64 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".gui.TutorialActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gui.TutorialActivity"
-    android:id="@+id/tutorialRoot">
+    android:id="@+id/tutorialCoordinator">
 
-    <LinearLayout
-        android:id="@+id/tutorialLayout"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/tutorialLayout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <androidx.viewpager.widget.ViewPager
-                android:id="@+id/tutorialPager"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="0dp"
+                android:layout_weight="1">
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tutorialDots"
-                android:layout_alignParentBottom="true"
+                <androidx.viewpager.widget.ViewPager
+                    android:id="@+id/tutorialPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tutorialDots"
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:tabBackground="@drawable/tab_selector"
+                    app:tabGravity="center"
+                    app:tabIndicatorHeight="0dp" />
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/tutorialFab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/fabMargin"
+                    android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
+                    android:tint="@android:color/white"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    tools:ignore="RelativeOverlap" />
+
+            </RelativeLayout>
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/tutorialSignIn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:tabBackground="@drawable/tab_selector"
-                app:tabGravity="center"
-                app:tabIndicatorHeight="0dp" />
+                android:layout_margin="@dimen/activity_horizontal_margin" />
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/tutorialFab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/fabMargin"
-                android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
-                android:tint="@android:color/white"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
-                tools:ignore="RelativeOverlap" />
+        </LinearLayout>
 
-        </RelativeLayout>
-
-        <com.google.android.gms.common.SignInButton
-            android:id="@+id/tutorialSignIn"
-            android:layout_width="match_parent"
+        <ProgressBar
+            android:id="@+id/tutorialProgress"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin" />
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
-    <ProgressBar
-        android:id="@+id/tutorialProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:visibility="gone" />
-
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

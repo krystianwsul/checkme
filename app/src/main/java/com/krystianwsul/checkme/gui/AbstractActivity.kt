@@ -20,13 +20,15 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     companion object {
 
-        private var taskUndoData: DomainFactory.TaskUndoData? = null
+        private var snackbarData: SnackbarData? = null
 
-        fun setSnackbar(taskUndoData: DomainFactory.TaskUndoData) {
-            check(this.taskUndoData == null)
+        fun setSnackbar(snackbarData: SnackbarData) {
+            check(this.snackbarData == null)
 
-            this.taskUndoData = taskUndoData
+            this.snackbarData = snackbarData
         }
+
+        fun setSnackbar(taskUndoData: DomainFactory.TaskUndoData) = setSnackbar(TaskSnackbarData(taskUndoData))
     }
 
     protected val createDisposable = CompositeDisposable()
@@ -60,7 +62,7 @@ abstract class AbstractActivity : AppCompatActivity() {
         started.accept(true)
     }
 
-    protected fun tick(source: String) = Single.just(Unit)
+    private fun tick(source: String) = Single.just(Unit)
             .observeOn(Schedulers.single())
             .subscribe { _ -> DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(true, source, listOf())) }!!
 
@@ -69,12 +71,8 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         super.onResume()
 
-        taskUndoData?.let {
-            (this as SnackbarListener).showSnackbarRemoved(1) {
-                DomainFactory.instance.clearTaskEndTimeStamps(0, SaveService.Source.GUI, it)
-            }
-        }
-        taskUndoData = null
+        snackbarData?.show(this as SnackbarListener)
+        snackbarData = null
 
         resumeDisposable += tick("AbstractActivity.onResume")
     }

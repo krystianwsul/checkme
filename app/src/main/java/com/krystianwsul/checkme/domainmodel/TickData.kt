@@ -6,7 +6,12 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import org.joda.time.DateTime
 
-class TickData(val silent: Boolean, val source: String, val listeners: List<() -> Unit>) {
+class TickData(
+        val silent: Boolean,
+        val source: String,
+        val listeners: List<() -> Unit>,
+        var privateRefreshed: Boolean = false,
+        var sharedRefreshed: Boolean = false) {
 
     companion object {
 

@@ -28,7 +28,6 @@ import com.krystianwsul.checkme.gui.instances.DayFragment
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
@@ -297,8 +296,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
 
         showTab(visibleTab.value!!)
-
-        TickJobIntentService.startServiceSilent(this, "MainActivity.onCreate")
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {

@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
 import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayout
@@ -167,3 +168,5 @@ fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenu
         itemVisibilities.forEach { menu.findItem(it.first)?.isVisible = it.second }
     }
 }
+
+fun Context.normalizedId(@IdRes id: Int) = if (id == View.NO_ID) "NO_ID" else resources.getResourceName(id)!!

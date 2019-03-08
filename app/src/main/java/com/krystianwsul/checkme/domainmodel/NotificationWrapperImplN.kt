@@ -7,6 +7,7 @@ import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 
@@ -24,12 +25,16 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
                 cancelNotification(lastNotificationId)
             } else if (statusBarNotifications.size < 2) {
                 if (statusBarNotifications.isNotEmpty())
-                    NotificationException.throwException(lastNotificationId, statusBarNotifications)
+                    MyCrashlytics.logException(NotificationException(lastNotificationId, statusBarNotifications))
+
+                // guessing, basically
+                cancelNotification(0)
+                cancelNotification(lastNotificationId)
             } else {
                 check(statusBarNotifications.size == 2)
 
                 if (statusBarNotifications.none { it.id == 0 })
-                    NotificationException.throwException(lastNotificationId, statusBarNotifications)
+                    throw NotificationException(lastNotificationId, statusBarNotifications)
 
                 if (statusBarNotifications.any { it.id == lastNotificationId }) {
                     cancelNotification(0)
@@ -74,13 +79,5 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
         }
     }
 
-    private class NotificationException(message: String) : RuntimeException(message) {
-
-        companion object {
-
-            fun throwException(lastNotificationId: Int, statusBarNotifications: Array<StatusBarNotification>) {
-                throw NotificationException("last id: $lastNotificationId, shown ids: " + statusBarNotifications.joinToString(", ") { it.id.toString() })
-            }
-        }
-    }
+    private class NotificationException(lastNotificationId: Int, statusBarNotifications: Array<StatusBarNotification>) : RuntimeException("last id: $lastNotificationId, shown ids: " + statusBarNotifications.joinToString(", ") { it.id.toString() })
 }

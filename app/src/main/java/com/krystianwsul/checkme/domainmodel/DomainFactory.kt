@@ -226,6 +226,9 @@ open class DomainFactory(
 
         skipSave = true
 
+        firebaseListeners.forEach { it.invoke(this) }
+        firebaseListeners.clear()
+
         val tickData = TickHolder.getTickData()
         if (tickData == null) {
             Log.e("asdf", "tickData null")
@@ -236,9 +239,6 @@ open class DomainFactory(
             if (tickData.privateRefreshed && tickData.sharedRefreshed)
                 tickData.release()
         }
-
-        firebaseListeners.forEach { it.invoke(this) }
-        firebaseListeners.clear()
 
         firstTaskEvent = false
 

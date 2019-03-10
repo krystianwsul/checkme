@@ -55,8 +55,6 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
     private var data: ShowInstanceViewModel.Data? = null
 
-    private var first = false
-
     private var selectAllVisible = false
 
     private lateinit var showInstanceViewModel: ShowInstanceViewModel
@@ -114,15 +112,15 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
         initBottomBar()
 
-        if (savedInstanceState == null)
-            first = true
-
         groupListFragment.setFab(bottomFab)
 
         check(intent.hasExtra(INSTANCE_KEY))
         instanceKey = intent.getParcelableExtra(INSTANCE_KEY)!!
 
         cancelNotification()
+
+        if (savedInstanceState == null)
+            setInstanceNotified()
 
         showInstanceViewModel = getViewModel<ShowInstanceViewModel>().apply {
             start(instanceKey)
@@ -191,19 +189,14 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
     private fun setInstanceNotified() {
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
-            DomainFactory.instance.setInstanceNotified(data!!.dataId, SaveService.Source.GUI, instanceKey)
-            data!!.notificationShown = false
+            DomainFactory.instance.setInstanceNotified(data?.dataId
+                    ?: 0, SaveService.Source.GUI, instanceKey)
+            data?.notificationShown = false
         }
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
-
-        if (first) {
-            first = false
-
-            setInstanceNotified()
-        }
 
         toolbar.run {
             title = data.name

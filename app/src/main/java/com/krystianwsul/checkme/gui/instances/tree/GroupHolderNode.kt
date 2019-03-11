@@ -212,6 +212,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 }
             }
 
+            rowMargin.visibility = if (checkBoxVisibility == View.GONE) View.VISIBLE else View.GONE
+
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 
             itemView.run {

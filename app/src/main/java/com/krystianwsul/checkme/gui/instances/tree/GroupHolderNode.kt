@@ -111,18 +111,26 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             fun TextView.getEllipsis(action: (Boolean) -> Unit) {
-                viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                if (layout != null) {
+                    layout.apply { action(lineCount > 0 && getEllipsisCount(1) > 0) }
+                    ellipsisCallback()
+                } else {
+                    viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
 
-                    override fun onGlobalLayout() {
-                        layout?.let {
-                            viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        override fun onPreDraw(): Boolean {
+                            layout?.let {
+                                viewTreeObserver.removeOnPreDrawListener(this)
 
-                            action(it.lineCount > 0 && it.getEllipsisCount(1) > 0)
+                                action(it.lineCount > 0 && it.getEllipsisCount(1) > 0)
+                                ellipsisCallback()
+                            }
 
-                            ellipsisCallback()
+                            return true
                         }
-                    }
-                })
+                    })
+
+                    requestLayout()
+                }
             }
 
             rowName.run {

@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
+import android.view.ViewTreeObserver
+import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         val colorDisabled by lazy { getColor(R.color.textDisabled) }
         val colorSelected by lazy { getColor(R.color.selected) }
         val colorBackground by lazy { getColor(R.color.materialBackground) }
+
+        const val TOTAL_LINES = 3
     }
 
     protected abstract val treeNode: TreeNode
@@ -80,18 +84,64 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
         checkStale()
 
+        var lines = 0
+
         groupHolder.run {
             rowContainer.setIndent(indentation)
 
+            var nameHasEllipsis: Boolean? = null
+            var detailsHasEllipsis: Boolean? = null
+            var childrenHasEllipsis: Boolean? = null
+
+            fun ellipsisCallback() {
+                if (nameHasEllipsis != null && detailsHasEllipsis != null && childrenHasEllipsis != null) {
+                    fun TextView.maxify() {
+                        setSingleLine(false)
+                        maxLines = TOTAL_LINES - lines + 1
+                    }
+
+                    if (lines < TOTAL_LINES) {
+                        when {
+                            nameHasEllipsis!! -> rowName.maxify()
+                            detailsHasEllipsis!! -> rowDetails.maxify()
+                            childrenHasEllipsis!! -> rowChildren.maxify()
+                        }
+                    }
+                }
+            }
+
+            fun TextView.getEllipsis(action: (Boolean) -> Unit) {
+                viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+
+                    override fun onGlobalLayout() {
+                        layout?.let {
+                            viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                            action(it.lineCount > 0 && it.getEllipsisCount(1) > 0)
+
+                            ellipsisCallback()
+                        }
+                    }
+                })
+            }
+
             rowName.run {
+                setSingleLine()
+
                 name.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
                         setSingleLine(it.third)
+
+                        lines++
+                        getEllipsis { nameHasEllipsis = it }
                     } else {
                         visibility = View.INVISIBLE
+
+                        nameHasEllipsis = false
+                        ellipsisCallback()
                     }
 
                     setTextIsSelectable(textSelectable)
@@ -99,25 +149,41 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             rowDetails.run {
+                setSingleLine()
+
                 details.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
+
+                        lines++
+                        getEllipsis { detailsHasEllipsis = it }
                     } else {
                         visibility = View.GONE
+
+                        detailsHasEllipsis = false
+                        ellipsisCallback()
                     }
                 }
             }
 
             rowChildren.run {
+                setSingleLine()
+
                 children.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
+
+                        lines++
+                        getEllipsis { childrenHasEllipsis = it }
                     } else {
                         visibility = View.GONE
+
+                        childrenHasEllipsis = false
+                        ellipsisCallback()
                     }
                 }
             }

@@ -67,7 +67,7 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
             return
         }
 
-        groupListFragment.setTimeStamp(timeStamp, data.dataId, data.dataWrapper)
+        groupListFragment.setTimeStamp(timeStamp, data.dataId, data.immediate, data.dataWrapper)
     }
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit

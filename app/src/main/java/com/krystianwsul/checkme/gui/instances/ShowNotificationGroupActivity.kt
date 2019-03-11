@@ -73,7 +73,7 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
         showNotificationGroupViewModel = getViewModel<ShowNotificationGroupViewModel>().apply {
             start(this@ShowNotificationGroupActivity.instanceKeys)
 
-            createDisposable += data.subscribe { groupListFragment.setInstanceKeys(it.dataId, it.dataWrapper) }
+            createDisposable += data.subscribe { groupListFragment.setInstanceKeys(it.dataId, it.immediate, it.dataWrapper) }
         }
 
         initBottomBar()

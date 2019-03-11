@@ -206,7 +206,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         updateTopMenu()
         updateBottomMenu()
 
-        groupListFragment.setInstanceKey(instanceKey, data.dataId, data.dataWrapper)
+        groupListFragment.setInstanceKey(instanceKey, data.dataId, data.immediate, data.dataWrapper)
     }
 
     private fun setDone(done: Boolean) {

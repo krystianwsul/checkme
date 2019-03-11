@@ -139,7 +139,7 @@ class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSe
                 .addTo(compositeDisposable)
 
         key.switchMap { key -> entry!!.data.map { Pair(key, it) } }
-                .subscribe { (key, data) -> groupListFragment.setAll(key.first, key.second, data.dataId, data.dataWrapper) }
+                .subscribe { (key, data) -> groupListFragment.setAll(key.first, key.second, data.dataId, data.immediate, data.dataWrapper) }
                 .addTo(compositeDisposable)
     }
 

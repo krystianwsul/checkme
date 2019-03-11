@@ -499,22 +499,22 @@ class GroupListFragment @JvmOverloads constructor(
         super.onDetachedFromWindow()
     }
 
-    fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, dataWrapper: DataWrapper) {
+    fun setAll(timeRange: MainActivity.TimeRange, position: Int, dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) {
         check(position >= 0)
 
         val differentPage = (parametersRelay.value as? Parameters.All)?.let { it.timeRange != timeRange || it.position != position }
                 ?: false
 
-        parametersRelay.accept(Parameters.All(dataId, dataWrapper, position, timeRange, differentPage))
+        parametersRelay.accept(Parameters.All(dataId, immediate, dataWrapper, position, timeRange, differentPage))
     }
 
-    fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TimeStamp(dataId, dataWrapper, timeStamp))
+    fun setTimeStamp(timeStamp: TimeStamp, dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TimeStamp(dataId, immediate, dataWrapper, timeStamp))
 
-    fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.InstanceKey(dataId, dataWrapper, instanceKey))
+    fun setInstanceKey(instanceKey: InstanceKey, dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.InstanceKey(dataId, immediate, dataWrapper, instanceKey))
 
-    fun setInstanceKeys(dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.InstanceKeys(dataId, dataWrapper))
+    fun setInstanceKeys(dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.InstanceKeys(dataId, immediate, dataWrapper))
 
-    fun setTaskKey(taskKey: TaskKey, dataId: Int, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TaskKey(dataId, dataWrapper, taskKey))
+    fun setTaskKey(taskKey: TaskKey, dataId: Int, immediate: Boolean, dataWrapper: DataWrapper) = parametersRelay.accept(Parameters.TaskKey(dataId, immediate, dataWrapper, taskKey))
 
     private fun useGroups() = parameters is Parameters.All
 
@@ -584,7 +584,12 @@ class GroupListFragment @JvmOverloads constructor(
             hide.add(emptyText)
         }
 
-        animateVisibility(show, hide)
+        if (parameters.immediate) {
+            show.forEach { it.visibility = View.VISIBLE }
+            hide.forEach { it.visibility = View.GONE }
+        } else {
+            animateVisibility(show, hide)
+        }
 
         setGroupMenuItemVisibility()
         updateFabVisibility()
@@ -882,17 +887,42 @@ class GroupListFragment @JvmOverloads constructor(
         override val childSelectedDatas get() = children
     }
 
-    sealed class Parameters(val dataId: Int, val dataWrapper: DataWrapper) {
+    sealed class Parameters {
 
-        class All(dataId: Int, dataWrapper: DataWrapper, val position: Int, val timeRange: MainActivity.TimeRange, val differentPage: Boolean) : Parameters(dataId, dataWrapper)
+        abstract val dataId: Int
+        abstract val immediate: Boolean
+        abstract val dataWrapper: DataWrapper
 
-        class TimeStamp(dataId: Int, dataWrapper: DataWrapper, val timeStamp: com.krystianwsul.checkme.utils.time.TimeStamp) : Parameters(dataId, dataWrapper)
+        class All(
+                override val dataId: Int,
+                override val immediate: Boolean,
+                override val dataWrapper: DataWrapper,
+                val position: Int,
+                val timeRange: MainActivity.TimeRange,
+                val differentPage: Boolean) : Parameters()
 
-        class InstanceKey(dataId: Int, dataWrapper: DataWrapper, val instanceKey: com.krystianwsul.checkme.utils.InstanceKey) : Parameters(dataId, dataWrapper)
+        class TimeStamp(
+                override val dataId: Int,
+                override val immediate: Boolean,
+                override val dataWrapper: DataWrapper,
+                val timeStamp: com.krystianwsul.checkme.utils.time.TimeStamp) : Parameters()
 
-        class InstanceKeys(dataId: Int, dataWrapper: DataWrapper) : Parameters(dataId, dataWrapper)
+        class InstanceKey(
+                override val dataId: Int,
+                override val immediate: Boolean,
+                override val dataWrapper: DataWrapper,
+                val instanceKey: com.krystianwsul.checkme.utils.InstanceKey) : Parameters()
 
-        class TaskKey(dataId: Int, dataWrapper: DataWrapper, val taskKey: com.krystianwsul.checkme.utils.TaskKey) : Parameters(dataId, dataWrapper)
+        class InstanceKeys(
+                override val dataId: Int,
+                override val immediate: Boolean,
+                override val dataWrapper: DataWrapper) : Parameters()
+
+        class TaskKey(
+                override val dataId: Int,
+                override val immediate: Boolean,
+                override val dataWrapper: DataWrapper,
+                val taskKey: com.krystianwsul.checkme.utils.TaskKey) : Parameters()
     }
 
     private class NoSelectionException(message: String) : Exception(message)

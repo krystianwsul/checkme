@@ -51,7 +51,7 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
         showTaskInstancesViewModel = getViewModel<ShowTaskInstancesViewModel>().apply {
             start(taskKey)
 
-            createDisposable += data.subscribe { groupListFragment.setTaskKey(taskKey, it.dataId, it.dataWrapper) }
+            createDisposable += data.subscribe { groupListFragment.setTaskKey(taskKey, it.dataId, it.immediate, it.dataWrapper) }
         }
 
         initBottomBar()

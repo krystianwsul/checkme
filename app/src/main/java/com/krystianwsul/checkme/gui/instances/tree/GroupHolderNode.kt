@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.text.Layout
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.TextView
@@ -84,7 +85,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
         checkStale()
 
-        var lines = 0
+        var minLines = 0
 
         groupHolder.run {
             rowContainer.setIndent(indentation)
@@ -95,12 +96,17 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
             fun ellipsisCallback() {
                 if (nameHasEllipsis != null && detailsHasEllipsis != null && childrenHasEllipsis != null) {
+                    var usedLines = minLines
+
+                    listOf(rowName, rowDetails, rowChildren).forEach { it.setSingleLine() }
+
                     fun TextView.maxify() {
                         setSingleLine(false)
-                        maxLines = TOTAL_LINES - lines + 1
+                        maxLines = TOTAL_LINES - usedLines + 1
+                        usedLines += maxLines - 1
                     }
 
-                    if (lines < TOTAL_LINES) {
+                    if (minLines < TOTAL_LINES) {
                         when {
                             nameHasEllipsis!! -> rowName.maxify()
                             detailsHasEllipsis!! -> rowDetails.maxify()
@@ -110,9 +116,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 }
             }
 
+            fun Layout.hasEllipsis() = lineCount > 0 && getEllipsisCount(lineCount - 1) > 0
+
             fun TextView.getEllipsis(action: (Boolean) -> Unit) {
                 if (layout != null) {
-                    layout.apply { action(lineCount > 0 && getEllipsisCount(1) > 0) }
+                    action(layout.hasEllipsis())
                     ellipsisCallback()
                 } else {
                     viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
@@ -121,7 +129,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                             layout?.let {
                                 viewTreeObserver.removeOnPreDrawListener(this)
 
-                                action(it.lineCount > 0 && it.getEllipsisCount(1) > 0)
+                                action(it.hasEllipsis())
                                 ellipsisCallback()
                             }
 
@@ -134,20 +142,18 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             rowName.run {
-                setSingleLine()
-
                 name.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
-                        setSingleLine(it.third)
 
-                        lines++
+                        minLines++
                         getEllipsis { nameHasEllipsis = it }
                     } else {
                         visibility = View.INVISIBLE
 
+                        minLines++
                         nameHasEllipsis = false
                         ellipsisCallback()
                     }
@@ -157,15 +163,13 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             rowDetails.run {
-                setSingleLine()
-
                 details.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
 
-                        lines++
+                        minLines++
                         getEllipsis { detailsHasEllipsis = it }
                     } else {
                         visibility = View.GONE
@@ -177,15 +181,13 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             rowChildren.run {
-                setSingleLine()
-
                 children.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
 
-                        lines++
+                        minLines++
                         getEllipsis { childrenHasEllipsis = it }
                     } else {
                         visibility = View.GONE

@@ -7,6 +7,7 @@ import kotlinx.android.synthetic.main.row_list.view.*
 class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     val rowContainer = itemView.rowContainer!!
+    val rowTextLayout = itemView.rowTextLayout!!
     val rowName = itemView.rowName!!
     val rowDetails = itemView.rowDetails!!
     val rowChildren = itemView.rowChildren!!
@@ -14,4 +15,6 @@ class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
     val rowCheckBox = itemView.rowCheckbox!!
     val rowMargin = itemView.rowMargin!!
     val rowSeparator = itemView.rowSeparator!!
+
+    var textWidth: Int? = null
 }

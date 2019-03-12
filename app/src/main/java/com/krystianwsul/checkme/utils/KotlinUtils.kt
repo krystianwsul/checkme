@@ -54,6 +54,17 @@ fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.a
     }
 })
 
+fun View.addOneShotPreDrawListener(action: () -> Unit) = viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+
+    override fun onPreDraw(): Boolean {
+        viewTreeObserver.removeOnPreDrawListener(this)
+
+        action()
+
+        return true
+    }
+})
+
 fun getRanges(list: List<DayOfWeek>) = getRanges(list.sorted()) { x, y ->
     check(x.ordinal < y.ordinal)
 

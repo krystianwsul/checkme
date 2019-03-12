@@ -30,6 +30,7 @@
             android:visibility="gone" />
 
         <LinearLayout
+            android:id="@+id/rowTextLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -37,7 +38,7 @@
 
             <TextView
                 android:id="@+id/rowName"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textColor="@color/textPrimary"
@@ -46,7 +47,7 @@
 
             <TextView
                 android:id="@+id/rowDetails"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textColor="@color/textSecondary"
@@ -55,7 +56,7 @@
 
             <TextView
                 android:id="@+id/rowChildren"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:textColor="@color/textSecondary"

@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import android.graphics.Paint
+import android.graphics.Rect
+import android.util.Log
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -14,6 +16,7 @@ import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
+
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
@@ -28,6 +31,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         val colorBackground by lazy { getColor(R.color.materialBackground) }
 
         const val TOTAL_LINES = 3
+
+        val textWidths = mutableMapOf<Pair<Int, Boolean>, Int>()
     }
 
     protected abstract val treeNode: TreeNode
@@ -84,72 +89,56 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
         checkStale()
 
-        var lines = 0
-
         groupHolder.run {
             rowContainer.setIndent(indentation)
 
-            var nameHasEllipsis: Boolean? = null
-            var detailsHasEllipsis: Boolean? = null
-            var childrenHasEllipsis: Boolean? = null
+            textWidth = textWidths[Pair(indentation, checkBoxVisibility == View.GONE)]
 
-            fun ellipsisCallback() {
-                if (nameHasEllipsis != null && detailsHasEllipsis != null && childrenHasEllipsis != null) {
-                    fun TextView.maxify() {
-                        setSingleLine(false)
-                        maxLines = TOTAL_LINES - lines + 1
+            val minLines = 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0)
+            var remainingLines = TOTAL_LINES - minLines
+
+            fun TextView.allocateLines() {
+                val wantLines = Rect().run {
+                    val currentSize = textSize
+                    Log.e("asdf", "lines currentSize $currentSize")
+
+                    Paint().let {
+                        it.textSize = currentSize
+                        it.getTextBounds(text.toString(), 0, text.length, this)
                     }
 
-                    if (lines < TOTAL_LINES) {
-                        when {
-                            nameHasEllipsis!! -> rowName.maxify()
-                            detailsHasEllipsis!! -> rowDetails.maxify()
-                            childrenHasEllipsis!! -> rowChildren.maxify()
-                        }
-                    }
+                    Log.e("asdf", "lines bounds width " + width())
+                    Log.e("asdf", "lines textView width $textWidth")
+                    Log.e("asdf", "result lines " + Math.ceil(width().toDouble() / (textWidth
+                            ?: 0)).toInt())
+
+                    Math.ceil(width().toDouble() / (textWidth ?: 0)).toInt()
                 }
-            }
 
-            fun TextView.getEllipsis(action: (Boolean) -> Unit) {
-                if (layout != null) {
-                    layout.apply { action(lineCount > 0 && getEllipsisCount(1) > 0) }
-                    ellipsisCallback()
+                val lines = listOf(wantLines, remainingLines + 1).min()!!
+
+                remainingLines -= (lines - 1)
+
+                if (lines == 1) {
+                    setSingleLine()
                 } else {
-                    viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-
-                        override fun onPreDraw(): Boolean {
-                            layout?.let {
-                                viewTreeObserver.removeOnPreDrawListener(this)
-
-                                action(it.lineCount > 0 && it.getEllipsisCount(1) > 0)
-                                ellipsisCallback()
-                            }
-
-                            return true
-                        }
-                    })
-
-                    requestLayout()
+                    setSingleLine(false)
+                    maxLines = lines
                 }
             }
 
             rowName.run {
-                setSingleLine()
-
                 name.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
-                        setSingleLine(it.third)
 
-                        lines++
-                        getEllipsis { nameHasEllipsis = it }
+                        allocateLines()
                     } else {
                         visibility = View.INVISIBLE
 
-                        nameHasEllipsis = false
-                        ellipsisCallback()
+                        setSingleLine()
                     }
 
                     setTextIsSelectable(textSelectable)
@@ -157,42 +146,38 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             }
 
             rowDetails.run {
-                setSingleLine()
-
                 details.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
 
-                        lines++
-                        getEllipsis { detailsHasEllipsis = it }
+                        allocateLines()
                     } else {
                         visibility = View.GONE
-
-                        detailsHasEllipsis = false
-                        ellipsisCallback()
                     }
                 }
             }
 
             rowChildren.run {
-                setSingleLine()
-
                 children.let {
                     if (it != null) {
                         visibility = View.VISIBLE
                         text = it.first
                         setTextColor(it.second)
 
-                        lines++
-                        getEllipsis { childrenHasEllipsis = it }
+                        allocateLines()
                     } else {
                         visibility = View.GONE
-
-                        childrenHasEllipsis = false
-                        ellipsisCallback()
                     }
+                }
+            }
+
+            rowTextLayout.apply {
+                viewTreeObserver.addOnGlobalLayoutListener {
+                    val width = measuredWidth
+                    textWidth = width
+                    textWidths[Pair(indentation, checkBoxVisibility == View.GONE)] = width
                 }
             }
 

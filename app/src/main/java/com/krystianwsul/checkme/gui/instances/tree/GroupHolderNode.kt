@@ -32,7 +32,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
         const val TOTAL_LINES = 3
 
-        val textWidths = mutableMapOf<Pair<Int, Boolean>, Int>()
+        val textWidths = mutableMapOf<Triple<Int, Boolean, Int>, Int>()
     }
 
     protected abstract val treeNode: TreeNode
@@ -90,9 +90,12 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         checkStale()
 
         groupHolder.run {
+            val checkBoxVisibility = checkBoxVisibility
+            val widthKey = Triple(indentation, checkBoxVisibility == View.GONE, rowContainer.orientation)
+
             rowContainer.setIndent(indentation)
 
-            textWidth = textWidths[Pair(indentation, checkBoxVisibility == View.GONE)]
+            textWidth = textWidths[widthKey]
 
             val minLines = 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0)
             var remainingLines = TOTAL_LINES - minLines
@@ -177,7 +180,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 viewTreeObserver.addOnGlobalLayoutListener {
                     val width = measuredWidth
                     textWidth = width
-                    textWidths[Pair(indentation, checkBoxVisibility == View.GONE)] = width
+                    textWidths[widthKey] = width
                 }
             }
 

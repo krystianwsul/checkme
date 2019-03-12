@@ -324,7 +324,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         mainViewModel = getViewModel<MainViewModel>().apply {
             start()
 
-            createDisposable += data.subscribe { taskListFragment.setAllTasks(it.dataId, it.taskData) }
+            createDisposable += data.subscribe { taskListFragment.setAllTasks(TaskListFragment.Data(it.dataId, it.immediate, it.taskData)) }
         }
 
         dayViewModel = getViewModel()

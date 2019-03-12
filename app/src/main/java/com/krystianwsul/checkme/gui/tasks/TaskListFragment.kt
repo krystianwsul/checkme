@@ -43,9 +43,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private var taskKey: TaskKey? = null
 
-    private var dataId: Int? = null
-
-    private var taskData: TaskData? = null
+    private var data: Data? = null
 
     lateinit var treeViewAdapter: TreeViewAdapter
         private set
@@ -91,7 +89,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         CreateTaskActivity.getJoinIntent(taskKeys, taskKey!!))
                 }
                 R.id.action_task_delete -> {
-                    checkNotNull(dataId)
+                    checkNotNull(data)
 
                     removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) {
                         val taskWrapper = it.modelNode as TaskAdapter.TaskWrapper
@@ -116,15 +114,19 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                     val removeTaskDatas = removeNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
 
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskKeys.toSet())
-                    taskData!!.childTaskDatas.removeAll(removeTaskDatas)
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(data!!.dataId, SaveService.Source.GUI, taskKeys.toSet())
+                    data!!.taskData
+                            .childTaskDatas
+                            .removeAll(removeTaskDatas)
 
                     updateSelectAll()
 
                     taskListListener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
-                        DomainFactory.instance.clearTaskEndTimeStamps(dataId!!, SaveService.Source.GUI, taskUndoData)
+                        DomainFactory.instance.clearTaskEndTimeStamps(data!!.dataId, SaveService.Source.GUI, taskUndoData)
 
-                        taskData!!.childTaskDatas.apply {
+                        data!!.taskData
+                                .childTaskDatas
+                                .apply {
                             addAll(removeTaskDatas)
 
                             if (taskKey != null)
@@ -186,9 +188,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     val shareData
         get() = mutableListOf<String>().also {
-            checkNotNull(taskData)
+            checkNotNull(data)
 
-            for (childTaskData in taskData!!.childTaskDatas)
+            for (childTaskData in data!!.taskData.childTaskDatas)
                 printTree(it, 1, childTaskData)
 
         }.joinToString("\n")
@@ -259,24 +261,22 @@ class TaskListFragment : AbstractFragment(), FabUser {
         initialize()
     }
 
-    fun setAllTasks(dataId: Int, taskData: TaskData) {
+    fun setAllTasks(data: Data) {
         check(taskKey == null)
 
         allTasks = true
 
-        this.dataId = dataId
-        this.taskData = taskData
+        this.data = data
 
         initialize()
     }
 
-    fun setTaskKey(taskKey: TaskKey, dataId: Int, taskData: TaskData) {
+    fun setTaskKey(taskKey: TaskKey, data: Data) {
         check(!allTasks)
 
         this.taskKey = taskKey
 
-        this.dataId = dataId
-        this.taskData = taskData
+        this.data = data
 
         initialize()
     }
@@ -285,10 +285,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
         if (view == null)
             return
 
-        if (taskData == null)
+        if (data == null)
             return
-
-        checkNotNull(dataId)
 
         initializeDisposable.clear()
 
@@ -308,7 +306,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             expandedTaskIds = if (expanded.isEmpty()) null else expanded
 
             treeViewAdapter.updateDisplayedNodes(true) {
-                (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(taskData!!, selectedTaskKeys, expandedTaskIds)
+                (treeViewAdapter.treeModelAdapter as TaskAdapter).initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds)
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
@@ -316,7 +314,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
         } else {
             val taskAdapter = TaskAdapter(this)
-            taskAdapter.initialize(taskData!!, selectedTaskKeys, expandedTaskIds)
+            taskAdapter.initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds)
             treeViewAdapter = taskAdapter.treeViewAdapter
             taskListRecycler.adapter = treeViewAdapter
             dragHelper.attachToRecyclerView(taskListRecycler)
@@ -341,7 +339,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         val hide = mutableListOf<View>(taskListProgress)
         val show: View
 
-        if (taskData!!.childTaskDatas.isEmpty() && taskData!!.note.isNullOrEmpty()) {
+        if (data!!.taskData.childTaskDatas.isEmpty() && data!!.taskData.note.isNullOrEmpty()) {
             hide.add(taskListRecycler)
             show = emptyText
 
@@ -355,7 +353,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             hide.add(emptyText)
         }
 
-        animateVisibility(listOf(show), hide)
+        animateVisibility(listOf(show), hide, immediate = data!!.immediate)
 
         updateSelectAll()
     }
@@ -410,7 +408,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private fun updateFabVisibility() {
         taskListFragmentFab?.run {
-            if (dataId != null && !selectionCallback.hasActionMode) {
+            if (data != null && !selectionCallback.hasActionMode) {
                 show()
             } else {
                 hide()
@@ -635,7 +633,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun setOrdinal(ordinal: Double) {
                 childTaskData.hierarchyData!!.ordinal = ordinal
 
-                DomainFactory.instance.setTaskHierarchyOrdinal(taskListFragment.dataId!!, childTaskData.hierarchyData)
+                DomainFactory.instance.setTaskHierarchyOrdinal(taskListFragment.data!!.dataId, childTaskData.hierarchyData)
             }
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)
@@ -688,6 +686,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         fun remove(taskWrapper: TaskAdapter.TaskWrapper, x: TreeViewAdapter.Placeholder)
     }
+
+    data class Data(val dataId: Int, val immediate: Boolean, val taskData: TaskData)
 
     data class TaskData(val childTaskDatas: MutableList<ChildTaskData>, val note: String?)
 

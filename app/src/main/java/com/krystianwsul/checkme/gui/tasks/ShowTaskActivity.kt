@@ -102,7 +102,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         updateBottomMenu()
 
-        taskListFragment.setTaskKey(taskKey, data.dataId, data.taskData)
+        taskListFragment.setTaskKey(taskKey, TaskListFragment.Data(data.dataId, data.immediate, data.taskData))
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) = Unit

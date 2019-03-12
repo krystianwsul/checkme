@@ -61,7 +61,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
         this.friendDatas = friendDatas
         this.listener = listener
 
-        if (activity != null)
+        if (this::friendPickerRecycler.isInitialized)
             initialize()
     }
 

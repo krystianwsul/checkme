@@ -40,7 +40,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var data: ShowProjectViewModel.Data? = null
 
-    private var saveState: SaveState? = null
+    private var saveState = SaveState(HashSet(), HashSet(), HashSet())
 
     private val selectionCallback = object : SelectionCallback() {
 
@@ -84,6 +84,8 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         if (savedInstanceState?.containsKey(SAVE_STATE_KEY) == true)
             saveState = savedInstanceState.getParcelable(SAVE_STATE_KEY)!!
+
+        initialize()
     }
 
     private fun initializeFriendPickerFragment(friendPickerFragment: FriendPickerFragment) {
@@ -123,17 +125,25 @@ class UserListFragment : AbstractFragment(), FabUser {
         this.projectId = projectId
         this.data = data
 
+        initialize()
+    }
+
+    private fun initialize() {
+        if (data == null)
+            return
+
+        if (friendListRecycler == null)
+            return
+
         if (this::treeViewAdapter.isInitialized) {
             saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
             treeViewAdapter.updateDisplayedNodes(true) {
-                (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize(data.userListDatas, saveState!!)
+                (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize(data!!.userListDatas, saveState)
             }
-        } else if (saveState == null) {
-            saveState = SaveState(HashSet(), HashSet(), HashSet())
-
+        } else {
             val friendListAdapter = FriendListAdapter()
-            friendListAdapter.initialize(data.userListDatas, saveState!!)
+            friendListAdapter.initialize(data!!.userListDatas, saveState)
             treeViewAdapter = friendListAdapter.treeViewAdapter
             friendListRecycler.adapter = treeViewAdapter
         }

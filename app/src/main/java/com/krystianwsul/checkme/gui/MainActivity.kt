@@ -562,7 +562,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         visibleTab.accept(tab)
 
-        animateVisibility(showViews, hideViews, resources.getInteger(android.R.integer.config_shortAnimTime))
+        animateVisibility(showViews, hideViews, duration = resources.getInteger(android.R.integer.config_shortAnimTime))
 
         updateCalendarHeight()
         updateSearchMenu()

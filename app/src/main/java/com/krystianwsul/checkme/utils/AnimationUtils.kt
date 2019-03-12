@@ -5,16 +5,16 @@ import android.animation.AnimatorListenerAdapter
 import android.view.View
 import android.view.ViewPropertyAnimator
 
-fun animateVisibility(show: View, hide: View, duration: Int? = null) = animateVisibility(listOf(show), listOf(hide), duration)
+fun animateVisibility(show: View, hide: View, immediate: Boolean = false, duration: Int? = null) = animateVisibility(listOf(show), listOf(hide), immediate, duration)
 
-fun animateVisibility(show: List<View> = listOf(), hide: List<View> = listOf(), duration: Int? = null, immediate: Boolean = false, onEnd: (() -> Unit)? = null) {
+fun animateVisibility(show: List<View> = listOf(), hide: List<View> = listOf(), immediate: Boolean = false, duration: Int? = null, onEnd: (() -> Unit)? = null) {
     val showPairs = show.map { Pair(it, HideType.GONE) }
     val hidePairs = hide.map { Pair(it, HideType.GONE) }
 
-    animateVisibility2(showPairs, hidePairs, duration, immediate, onEnd)
+    animateVisibility2(showPairs, hidePairs, immediate, duration, onEnd)
 }
 
-fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, HideType>>, duration: Int? = null, immediate: Boolean = false, onEnd: (() -> Unit)? = null) {
+fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, HideType>>, immediate: Boolean = false, duration: Int? = null, onEnd: (() -> Unit)? = null) {
     if (show.isEmpty() && hide.isEmpty()) {
         onEnd?.invoke()
         return

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.friends
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -102,7 +103,7 @@ class UserListFragment : AbstractFragment(), FabUser {
                 .map { FriendPickerFragment.FriendData(it.id, it.name, it.email) }
                 .toList()
 
-        friendPickerFragment.initialize(friendDatas) { friendId ->
+        friendPickerFragment.initialize(FriendPickerFragment.Data(data!!.immediate, friendDatas)) { friendId ->
             check(data!!.friendDatas.containsKey(friendId))
             check(getSelected().none { it.userListData.id == friendId })
 
@@ -117,7 +118,7 @@ class UserListFragment : AbstractFragment(), FabUser {
                 }
             }
 
-            updateVisibility()
+            updateVisibility(false)
         }
     }
 
@@ -151,14 +152,15 @@ class UserListFragment : AbstractFragment(), FabUser {
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
         updateFabVisibility()
-        updateVisibility()
+        updateVisibility(data!!.immediate)
 
         (childFragmentManager.findFragmentByTag(FRIEND_PICKER_TAG) as? FriendPickerFragment)?.let { initializeFriendPickerFragment(it) }
 
         updateSelectAll()
     }
 
-    private fun updateVisibility() {
+    private fun updateVisibility(immediate: Boolean) {
+        Log.e("asdf", "wtf " + friendListProgress.visibility)
         val hide = mutableListOf<View>(friendListProgress)
         val show: View
         if ((treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.isEmpty()) {
@@ -171,7 +173,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             hide.add(emptyText)
         }
 
-        animateVisibility(listOf(show), hide)
+        animateVisibility(listOf(show), hide, immediate)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

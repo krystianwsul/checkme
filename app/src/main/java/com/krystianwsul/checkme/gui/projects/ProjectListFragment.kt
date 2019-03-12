@@ -5,11 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -22,6 +19,8 @@ import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.synthetic.main.empty_text.*
+import kotlinx.android.synthetic.main.fragment_project_list.*
 import java.util.*
 
 class ProjectListFragment : AbstractFragment(), FabUser {
@@ -32,10 +31,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         fun newInstance() = ProjectListFragment()
     }
-
-    private lateinit var projectListProgress: ProgressBar
-    private lateinit var emptyText: TextView
-    private lateinit var projectListRecycler: RecyclerView
 
     private var projectListFab: FloatingActionButton? = null
 
@@ -128,17 +123,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_project_list, container, false)
-
-        projectListProgress = view.findViewById(R.id.projectListProgress)
-
-        emptyText = view.findViewById(R.id.emptyText)
-
-        projectListRecycler = view.findViewById(R.id.projectListRecycler)
-
-        return view
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_project_list, container, false)!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -168,7 +153,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             hide.add(emptyText)
         }
 
-        animateVisibility(listOf(show), hide)
+        animateVisibility(listOf(show), hide, data.immediate)
 
         if (this::treeViewAdapter.isInitialized) {
             selectedProjectIds = treeViewAdapter.selectedNodes

@@ -26,7 +26,7 @@ interface SnackbarListener {
     LONG = 2750
      */
 
-    fun showSnackbarRemoved(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarRemoved, count, 5000, action)
+    fun showSnackbarRemoved(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarRemoved, count, Snackbar.LENGTH_LONG, action)
 
     fun showSnackbarDone(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarDone, count, Snackbar.LENGTH_SHORT, action)
 

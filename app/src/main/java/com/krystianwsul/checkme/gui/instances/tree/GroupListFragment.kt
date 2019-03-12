@@ -584,12 +584,7 @@ class GroupListFragment @JvmOverloads constructor(
             hide.add(emptyText)
         }
 
-        if (parameters.immediate) {
-            show.forEach { it.visibility = View.VISIBLE }
-            hide.forEach { it.visibility = View.GONE }
-        } else {
-            animateVisibility(show, hide)
-        }
+        animateVisibility(show, hide, immediate = parameters.immediate)
 
         setGroupMenuItemVisibility()
         updateFabVisibility()

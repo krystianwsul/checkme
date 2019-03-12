@@ -59,7 +59,6 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
                 }
 
                 true
-
             }
         }
 

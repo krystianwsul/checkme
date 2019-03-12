@@ -7,14 +7,14 @@ import android.view.ViewPropertyAnimator
 
 fun animateVisibility(show: View, hide: View, duration: Int? = null) = animateVisibility(listOf(show), listOf(hide), duration)
 
-fun animateVisibility(show: List<View> = listOf(), hide: List<View> = listOf(), duration: Int? = null, onEnd: (() -> Unit)? = null) {
+fun animateVisibility(show: List<View> = listOf(), hide: List<View> = listOf(), duration: Int? = null, immediate: Boolean = false, onEnd: (() -> Unit)? = null) {
     val showPairs = show.map { Pair(it, HideType.GONE) }
     val hidePairs = hide.map { Pair(it, HideType.GONE) }
 
-    animateVisibility2(showPairs, hidePairs, duration, onEnd)
+    animateVisibility2(showPairs, hidePairs, duration, immediate, onEnd)
 }
 
-fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, HideType>>, duration: Int? = null, onEnd: (() -> Unit)? = null) {
+fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, HideType>>, duration: Int? = null, immediate: Boolean = false, onEnd: (() -> Unit)? = null) {
     if (show.isEmpty() && hide.isEmpty()) {
         onEnd?.invoke()
         return
@@ -25,11 +25,11 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
     val shortAnimTime = duration
             ?: context.resources.getInteger(android.R.integer.config_longAnimTime)
 
-    var showDone = show.isEmpty()
-    var hideDone = hide.isEmpty()
+    var showWaiting = show.size
+    var hideWaiting = hide.size
 
     fun callOnEnd() {
-        if (showDone && hideDone)
+        if (showWaiting == 0 && hideWaiting == 0)
             onEnd?.invoke()
     }
 
@@ -39,20 +39,30 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
 
             check(visibility != hideType.opposite)
 
-            if (visibility == View.VISIBLE)
+            if (visibility == View.VISIBLE) {
+                showWaiting--
+                callOnEnd()
+
                 return@run
+            }
 
             visibility = View.VISIBLE
-            alpha = 0f
 
-            animate().setDuration(shortAnimTime.toLong())
-                    .alpha(1f)
-                    .onEnd {
-                        visibility = View.VISIBLE
+            if (immediate) {
+                showWaiting--
+                callOnEnd()
+            } else {
+                alpha = 0f
 
-                        showDone = true
-                        callOnEnd()
-                    }
+                animate().setDuration(shortAnimTime.toLong())
+                        .alpha(1f)
+                        .onEnd {
+                            visibility = View.VISIBLE
+
+                            showWaiting--
+                            callOnEnd()
+                        }
+            }
         }
     }
 
@@ -62,21 +72,32 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
 
             check(visibility != hideType.opposite)
 
-            if (visibility == hideType.visibility)
+            if (visibility == hideType.visibility) {
+                hideWaiting--
+                callOnEnd()
+
                 return@run
+            }
 
-            visibility = View.VISIBLE
-            alpha = 1f
+            if (immediate) {
+                visibility = hideType.visibility
 
-            animate().setDuration(shortAnimTime.toLong())
-                    .alpha(0f)
-                    .onEnd {
-                        visibility = hideType.visibility
-                        alpha = 1f
+                hideWaiting--
+                callOnEnd()
+            } else {
+                visibility = View.VISIBLE
+                alpha = 1f
 
-                        hideDone = true
-                        callOnEnd()
-                    }
+                animate().setDuration(shortAnimTime.toLong())
+                        .alpha(0f)
+                        .onEnd {
+                            visibility = hideType.visibility
+                            alpha = 1f
+
+                            hideWaiting--
+                            callOnEnd()
+                        }
+            }
         }
     }
 }

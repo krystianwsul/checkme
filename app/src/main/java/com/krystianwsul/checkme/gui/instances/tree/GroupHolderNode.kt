@@ -4,7 +4,6 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Log
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -32,6 +31,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         val colorBackground by lazy { getColor(R.color.materialBackground) }
 
         const val TOTAL_LINES = 3
+
+        val textWidths = mutableMapOf<Pair<Int, Boolean>, Int>()
     }
 
     protected abstract val treeNode: TreeNode
@@ -91,6 +92,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         groupHolder.run {
             rowContainer.setIndent(indentation)
 
+            textWidth = textWidths[Pair(indentation, checkBoxVisibility == View.GONE)]
+
             val minLines = 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0)
             var remainingLines = TOTAL_LINES - minLines
 
@@ -105,10 +108,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     }
 
                     Log.e("asdf", "lines bounds width " + width())
-                    Log.e("asdf", "lines textView width " + textWidth)
-                    Log.e("asdf", "result lines " + Math.ceil(width().toDouble() / textWidth!!).toInt())
+                    Log.e("asdf", "lines textView width $textWidth")
+                    Log.e("asdf", "result lines " + Math.ceil(width().toDouble() / (textWidth
+                            ?: 0)).toInt())
 
-                    Math.ceil(width().toDouble() / textWidth!!).toInt()
+                    Math.ceil(width().toDouble() / (textWidth ?: 0)).toInt()
                 }
 
                 val lines = listOf(wantLines, remainingLines + 1).min()!!
@@ -123,83 +127,58 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 }
             }
 
-            val drawListeners = mutableListOf<() -> Unit>()
-
             rowName.run {
                 name.let {
-                    drawListeners.add {
-                        if (it != null) {
-                            visibility = View.VISIBLE
-                            text = it.first
-                            setTextColor(it.second)
+                    if (it != null) {
+                        visibility = View.VISIBLE
+                        text = it.first
+                        setTextColor(it.second)
 
-                            allocateLines()
-                        } else {
-                            visibility = View.INVISIBLE
+                        allocateLines()
+                    } else {
+                        visibility = View.INVISIBLE
 
-                            setSingleLine()
-                        }
-
-                        setTextIsSelectable(textSelectable)
+                        setSingleLine()
                     }
+
+                    setTextIsSelectable(textSelectable)
                 }
             }
 
             rowDetails.run {
                 details.let {
-                    drawListeners.add {
-                        if (it != null) {
-                            visibility = View.VISIBLE
-                            text = it.first
-                            setTextColor(it.second)
+                    if (it != null) {
+                        visibility = View.VISIBLE
+                        text = it.first
+                        setTextColor(it.second)
 
-                            allocateLines()
-                        } else {
-                            visibility = View.GONE
-                        }
+                        allocateLines()
+                    } else {
+                        visibility = View.GONE
                     }
                 }
             }
 
             rowChildren.run {
                 children.let {
-                    drawListeners.add {
-                        if (it != null) {
-                            visibility = View.VISIBLE
-                            text = it.first
-                            setTextColor(it.second)
+                    if (it != null) {
+                        visibility = View.VISIBLE
+                        text = it.first
+                        setTextColor(it.second)
 
-                            allocateLines()
-                        } else {
-                            visibility = View.GONE
-                        }
+                        allocateLines()
+                    } else {
+                        visibility = View.GONE
                     }
                 }
             }
 
-            fun allocate() {
-                Log.e("asdf", "lines allocating for " + name?.first)
-                drawListeners.forEach { it() }
-            }
-
-            if (textWidth != null) {
-                allocate()
-            } else {
-                Log.e("asdf", "lines delaying for " + name?.first)
-                rowTextLayout.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-
-                    override fun onGlobalLayout() {
-                        val measuredWidth = rowTextLayout.measuredWidth
-                        //if (measuredWidth == 0)
-                        //    return
-
-                        rowTextLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
-
-                        textWidth = measuredWidth
-
-                        allocate()
-                    }
-                })
+            rowTextLayout.apply {
+                viewTreeObserver.addOnGlobalLayoutListener {
+                    val width = measuredWidth
+                    textWidth = width
+                    textWidths[Pair(indentation, checkBoxVisibility == View.GONE)] = width
+                }
             }
 
             rowExpand.run {

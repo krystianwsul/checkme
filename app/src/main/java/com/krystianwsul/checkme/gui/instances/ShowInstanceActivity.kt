@@ -189,8 +189,9 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
     private fun setInstanceNotified() {
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
-            DomainFactory.instance.setInstanceNotified(data?.dataId
-                    ?: 0, SaveService.Source.GUI, instanceKey)
+            DomainFactory.addFirebaseListener {
+                it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)
+            }
             data?.notificationShown = false
         }
     }

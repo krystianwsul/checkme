@@ -144,7 +144,8 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     fun getRemoteTaskIfPresent(taskId: String) = remoteTasks[taskId]
 
-    fun getRemoteTaskForce(taskId: String) = remoteTasks[taskId]!!
+    fun getRemoteTaskForce(taskId: String) = remoteTasks[taskId]
+            ?: throw MissingTaskException(id, taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<RemoteTaskHierarchy<T>> {
         check(!TextUtils.isEmpty(childTaskKey.remoteTaskId))
@@ -216,4 +217,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
         parentLocalTaskHierarchies.map { it.parentTask }.forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it) }
     }
+
+    private class MissingTaskException(projectId: String, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")
 }

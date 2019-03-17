@@ -305,7 +305,7 @@ open class DomainFactory(
             check(instance.isRootInstance(now))
             check(instance.done == null)
 
-            instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(instance.instanceDateTime, instance.name)
+            instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(instance.instanceDateTime, instance.name, instance.done != null)
 
             if (instance.instanceTimePair.customTimeKey != null) {
                 val customTime = getCustomTime(instance.instanceTimePair.customTimeKey!!)

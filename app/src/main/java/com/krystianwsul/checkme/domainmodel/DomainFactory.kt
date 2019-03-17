@@ -292,7 +292,7 @@ open class DomainFactory(
     fun getEditInstancesData(instanceKeys: List<InstanceKey>): EditInstancesViewModel.Data {
         MyCrashlytics.log("DomainFactory.getEditInstancesData")
 
-        check(instanceKeys.size > 1)
+        check(instanceKeys.isNotEmpty())
 
         val now = ExactTimeStamp.now
 
@@ -718,30 +718,11 @@ open class DomainFactory(
     // sets
 
     @Synchronized
-    fun setInstanceDateTime(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, instanceDate: Date, instanceTimePair: TimePair) {
-        MyCrashlytics.log("DomainFactory.setInstanceDateTime")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        val instance = getInstance(instanceKey)
-
-        val now = ExactTimeStamp.now
-
-        Preferences.logLineHour("setting instanceDateTime for ${instance.name} to $instanceDate $instanceTimePair")
-        instance.setInstanceDateTime(instanceDate, instanceTimePair, now)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(instance.project)
-    }
-
-    @Synchronized
     fun setInstancesDateTime(dataId: Int, source: SaveService.Source, instanceKeys: Set<InstanceKey>, instanceDate: Date, instanceTimePair: TimePair) {
         MyCrashlytics.log("DomainFactory.setInstancesDateTime")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
-        check(instanceKeys.size > 1)
+        check(instanceKeys.isNotEmpty())
 
         val now = ExactTimeStamp.now
 
@@ -780,28 +761,6 @@ open class DomainFactory(
         updateNotifications(now)
 
         save(0, source)
-
-        notifyCloud(instance.project)
-    }
-
-    @Synchronized
-    fun setInstanceAddHourActivity(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
-        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        val instance = getInstance(instanceKey)
-
-        val now = ExactTimeStamp.now
-        val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
-
-        val date = Date(calendar)
-        val hourMinute = HourMinute(calendar)
-
-        instance.setInstanceDateTime(date, TimePair(hourMinute), now)
-
-        updateNotifications(now)
-
-        save(dataId, source)
 
         notifyCloud(instance.project)
     }

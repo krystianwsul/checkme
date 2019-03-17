@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
-import com.krystianwsul.checkme.gui.instances.EditInstanceActivity
 import com.krystianwsul.checkme.gui.instances.EditInstancesActivity
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
@@ -151,20 +150,12 @@ class GroupListFragment @JvmOverloads constructor(
                 R.id.action_group_edit_instance -> {
                     check(selectedDatas.isNotEmpty())
                     val instanceDatas = selectedDatas.map { it as InstanceData }
+                    check(instanceDatas.isNotEmpty())
+                    check(instanceDatas.all { it.isRootInstance })
 
-                    if (instanceDatas.size == 1) {
-                        val instanceData = instanceDatas.single()
-                        check(instanceData.isRootInstance)
+                    val instanceKeys = ArrayList(instanceDatas.map { it.instanceKey })
 
-                        activity.startActivity(EditInstanceActivity.getIntent(instanceData.instanceKey))
-                    } else {
-                        check(instanceDatas.size > 1)
-                        check(instanceDatas.all { it.isRootInstance })
-
-                        val instanceKeys = ArrayList(instanceDatas.map { it.instanceKey })
-
-                        activity.startActivity(EditInstancesActivity.getIntent(instanceKeys))
-                    }
+                    activity.startActivity(EditInstancesActivity.getIntent(instanceKeys))
                 }
                 R.id.action_group_share -> Utils.share(activity, getShareData(selectedDatas))
                 R.id.action_group_show_task -> {

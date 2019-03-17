@@ -80,7 +80,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                             check(!it.done)
                             check(it.isRootInstance)
 
-                            startActivity(EditInstanceActivity.getIntent(instanceKey))
+                            startActivity(EditInstancesActivity.getIntent(instanceKey))
                         }
                         R.id.instanceMenuNotify -> {
                             check(!it.done)

@@ -71,8 +71,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".gui.instances.EditInstanceActivity"/>
-
         <activity android:name=".gui.instances.EditInstancesActivity"/>
 
         <activity

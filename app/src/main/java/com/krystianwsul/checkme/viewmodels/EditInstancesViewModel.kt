@@ -18,7 +18,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
     }
 
     fun start(instanceKeys: List<InstanceKey>) {
-        check(instanceKeys.size > 1)
+        check(instanceKeys.isNotEmpty())
 
         this.instanceKeys = instanceKeys
 
@@ -31,7 +31,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
             val showHour: Boolean) : DomainData() {
 
         init {
-            check(instanceDatas.size > 1)
+            check(instanceDatas.isNotEmpty())
         }
     }
 

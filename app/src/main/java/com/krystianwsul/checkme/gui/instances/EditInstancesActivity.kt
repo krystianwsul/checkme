@@ -25,7 +25,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.synthetic.main.activity_edit_instance.*
+import kotlinx.android.synthetic.main.activity_edit_instances.*
 import java.util.*
 
 class EditInstancesActivity : AbstractActivity() {
@@ -44,11 +44,13 @@ class EditInstancesActivity : AbstractActivity() {
         private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
         private const val DISCARD_TAG = "discard"
 
-        fun getIntent(instanceKeys: ArrayList<InstanceKey>): Intent {
+        fun getIntent(instanceKey: InstanceKey) = getIntent(listOf(instanceKey))
+
+        fun getIntent(instanceKeys: List<InstanceKey>): Intent {
             check(instanceKeys.isNotEmpty())
 
             return Intent(MyApplication.instance, EditInstancesActivity::class.java).apply {
-                putParcelableArrayListExtra(INSTANCE_KEYS, instanceKeys)
+                putParcelableArrayListExtra(INSTANCE_KEYS, ArrayList(instanceKeys))
             }
         }
     }
@@ -154,7 +156,7 @@ class EditInstancesActivity : AbstractActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_instance)
+        setContentView(R.layout.activity_edit_instances)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         checkNotNull(toolbar)

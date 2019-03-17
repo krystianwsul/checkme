@@ -122,6 +122,8 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
         updateFields()
     }
 
+    private var first = true
+
     //cached data doesn't contain new custom time
     private val isValid: Boolean
         get() {
@@ -405,6 +407,19 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
             initialize()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        if (first) {
+            first = false
+
+            BottomSheetBehavior.from(dialog!!.window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
+                if (state == BottomSheetBehavior.STATE_COLLAPSED)
+                    state = BottomSheetBehavior.STATE_HALF_EXPANDED
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
 
@@ -459,13 +474,6 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
         }
 
         updateFields()
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        val bottomSheetBehavior = BottomSheetBehavior.from(dialog!!.window!!.findViewById<View>(R.id.design_bottom_sheet))
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
     }
 
     override fun onPause() {

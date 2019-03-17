@@ -2064,7 +2064,7 @@ open class DomainFactory(
 
         val instanceShownPairs = localFactory.instanceShownRecords
                 .filter { it.notificationShown }
-                .map { Pair(it, remoteProjectFactory.getRemoteProjectIfPresent(it.projectId)) }
+                .map { Pair(it, remoteProjectFactory.getRemoteProjectIfPresent(it.projectId)?.getRemoteTaskIfPresent(it.taskId)) }
 
         instanceShownPairs.filter { it.second == null }.forEach { (instanceShownRecord, _) ->
             val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
@@ -2092,7 +2092,7 @@ open class DomainFactory(
             instanceShownRecord.notificationShown = false
         }
 
-        instanceShownPairs.filter { it.second != null }.forEach { (instanceShownRecord, project) ->
+        instanceShownPairs.filter { it.second != null }.forEach { (instanceShownRecord, task) ->
             val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
             val remoteCustomTimeId = instanceShownRecord.scheduleCustomTimeId
 
@@ -2102,7 +2102,9 @@ open class DomainFactory(
                 check(instanceShownRecord.scheduleHour == null)
                 check(instanceShownRecord.scheduleMinute == null)
 
-                customTimeKey = getCustomTimeKey(instanceShownRecord.projectId, project!!.getRemoteCustomTimeId(remoteCustomTimeId))
+                val project = task!!.project
+
+                customTimeKey = getCustomTimeKey(instanceShownRecord.projectId, project.getRemoteCustomTimeId(remoteCustomTimeId))
                 hourMinute = null
             } else {
                 checkNotNull(instanceShownRecord.scheduleHour)

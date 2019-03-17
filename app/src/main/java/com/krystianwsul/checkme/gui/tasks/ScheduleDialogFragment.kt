@@ -11,12 +11,12 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.DatePickerDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
@@ -32,7 +32,7 @@ import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.util.*
 
-class ScheduleDialogFragment : AbstractDialogFragment() {
+class ScheduleDialogFragment : BottomSheetDialogFragment() {
 
     companion object {
 
@@ -172,6 +172,11 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             mScheduleDialogMonthEnd = scheduleDialogMonthEnd
             mScheduleDialogTimeLayout = scheduleDialogTimeLayout
             mScheduleDialogTime = scheduleDialogTime
+        }
+
+        return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
+            setCancelable(true)
+            setContentView(view)
         }
 
         return MaterialAlertDialogBuilder(requireContext()).setView(view)
@@ -392,7 +397,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     override fun onStart() {
         super.onStart()
 
-        mButton = (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)!!
+        //mButton = (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)!! todo
     }
 
     override fun onResume() {

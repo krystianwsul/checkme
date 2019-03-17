@@ -66,7 +66,7 @@ class EditInstanceActivity : AbstractActivity() {
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
         override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
-            check(data != null)
+            checkNotNull(data)
 
             timePairPersist!!.customTimeKey = customTimeKey
 
@@ -76,7 +76,7 @@ class EditInstanceActivity : AbstractActivity() {
         }
 
         override fun onOtherSelected() {
-            check(data != null)
+            checkNotNull(data)
 
             TimePickerDialogFragment.newInstance(timePairPersist!!.hourMinute).also {
                 it.listener = timePickerDialogFragmentListener
@@ -88,7 +88,7 @@ class EditInstanceActivity : AbstractActivity() {
     }
 
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
-        check(data != null)
+        checkNotNull(data)
 
         timePairPersist!!.hourMinute = hourMinute
         updateTimeText()
@@ -97,7 +97,7 @@ class EditInstanceActivity : AbstractActivity() {
 
     private val discardDialogListener = this::finish
 
-    private val datePickerDialogFragment = { date: Date ->
+    private val datePickerDialogFragmentListener = { date: Date ->
         this.date = date
         updateDateText()
     }
@@ -118,7 +118,7 @@ class EditInstanceActivity : AbstractActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_edit_instance_hour -> {
-                check(data != null)
+                checkNotNull(data)
                 check(data!!.showHour)
 
                 editInstanceViewModel.stop()
@@ -128,8 +128,8 @@ class EditInstanceActivity : AbstractActivity() {
                 finish()
             }
             R.id.action_edit_instance_save -> {
-                check(date != null)
-                check(data != null)
+                checkNotNull(date)
+                checkNotNull(data)
 
                 if (isValidDateTime) {
                     editInstanceViewModel.stop()
@@ -150,7 +150,7 @@ class EditInstanceActivity : AbstractActivity() {
         setContentView(R.layout.activity_edit_instance)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        check(toolbar != null)
+        checkNotNull(toolbar)
 
         setSupportActionBar(toolbar)
 
@@ -164,19 +164,19 @@ class EditInstanceActivity : AbstractActivity() {
 
         editInstanceDate.setOnClickListener {
             val datePickerDialogFragment = DatePickerDialogFragment.newInstance(date!!)
-            datePickerDialogFragment.listener = this.datePickerDialogFragment
+            datePickerDialogFragment.listener = datePickerDialogFragmentListener
             datePickerDialogFragment.show(supportFragmentManager, DATE_FRAGMENT_TAG)
         }
         val datePickerDialogFragment = supportFragmentManager.findFragmentByTag(DATE_FRAGMENT_TAG) as? DatePickerDialogFragment
-        datePickerDialogFragment?.listener = this.datePickerDialogFragment
+        datePickerDialogFragment?.listener = datePickerDialogFragmentListener
 
-        if (this.savedInstanceState != null && this.savedInstanceState!!.containsKey(DATE_KEY)) {
-            date = this.savedInstanceState!!.getParcelable(DATE_KEY)
-            check(date != null)
+        if (savedInstanceState != null && savedInstanceState.containsKey(DATE_KEY)) {
+            date = savedInstanceState.getParcelable(DATE_KEY)
+            checkNotNull(date)
 
-            check(this.savedInstanceState!!.containsKey(TIME_PAIR_PERSIST_KEY))
-            timePairPersist = this.savedInstanceState!!.getParcelable(TIME_PAIR_PERSIST_KEY)
-            check(timePairPersist != null)
+            check(savedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY))
+            timePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY)
+            checkNotNull(timePairPersist)
         }
 
         val instanceKey = intent.getParcelableExtra<InstanceKey>(INSTANCE_KEY)!!
@@ -217,10 +217,10 @@ class EditInstanceActivity : AbstractActivity() {
         super.onSaveInstanceState(outState)
 
         if (data != null) {
-            check(date != null)
+            checkNotNull(date)
             outState.putParcelable(DATE_KEY, date)
 
-            check(timePairPersist != null)
+            checkNotNull(timePairPersist)
             outState.putParcelable(TIME_PAIR_PERSIST_KEY, timePairPersist)
         }
     }
@@ -262,8 +262,8 @@ class EditInstanceActivity : AbstractActivity() {
         timePickerDialogFragment?.listener = timePickerDialogFragmentListener
 
         editInstanceTime.setOnClickListener {
-            check(this.data != null)
-            val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(this.data!!.customTimeDatas
+            checkNotNull(data)
+            val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(data.customTimeDatas
                     .values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
                     .sortedBy { it.hourMinutes[date!!.dayOfWeek] }
@@ -281,6 +281,8 @@ class EditInstanceActivity : AbstractActivity() {
     }
 
     private fun updateDateText() {
+        checkNotNull(date)
+
         editInstanceDate.setText(date!!.getDisplayText())
 
         updateTimeText()
@@ -290,9 +292,9 @@ class EditInstanceActivity : AbstractActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun updateTimeText() {
-        check(timePairPersist != null)
-        check(data != null)
-        check(date != null)
+        checkNotNull(timePairPersist)
+        checkNotNull(data)
+        checkNotNull(date)
 
         if (timePairPersist!!.customTimeKey != null) {
             val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!)

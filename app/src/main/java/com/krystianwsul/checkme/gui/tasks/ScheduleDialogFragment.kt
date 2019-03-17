@@ -427,6 +427,7 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
                     }
                 })
 
+                // todo consider expanding in portrait too
                 if (state == BottomSheetBehavior.STATE_COLLAPSED && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
                     state = BottomSheetBehavior.STATE_EXPANDED
             }

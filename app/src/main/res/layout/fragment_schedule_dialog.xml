@@ -53,37 +53,37 @@
             <CheckBox
                 android:id="@+id/scheduleDialogSunday"
                 android:layout_width="match_parent"
-                android:layout_height="32dp" />
+                android:layout_height="wrap_content" />
 
             <CheckBox
                 android:id="@+id/scheduleDialogMonday"
                 android:layout_width="match_parent"
-                android:layout_height="32dp" />
+                android:layout_height="wrap_content" />
 
             <CheckBox
                 android:id="@+id/scheduleDialogTuesday"
                 android:layout_width="match_parent"
-                android:layout_height="32dp" />
+                android:layout_height="wrap_content" />
 
             <CheckBox
                 android:id="@+id/scheduleDialogWednesday"
                 android:layout_width="match_parent"
-                android:layout_height="32dp" />
+                android:layout_height="wrap_content" />
 
             <CheckBox
                 android:id="@+id/scheduleDialogThursday"
                 android:layout_width="match_parent"
-                android:layout_height="32dp" />
+                android:layout_height="wrap_content" />
 
             <CheckBox
                 android:id="@+id/scheduleDialogFriday"
                 android:layout_width="match_parent"
-                android:layout_height="32dp" />
+                android:layout_height="wrap_content" />
 
             <CheckBox
                 android:id="@+id/scheduleDialogSaturday"
                 android:layout_width="match_parent"
-                android:layout_height="32dp" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 

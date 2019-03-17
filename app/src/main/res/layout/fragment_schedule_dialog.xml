@@ -1,135 +1,23 @@
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="@dimen/activity_horizontal_margin"
-    tools:context=".gui.tasks.ScheduleDialogFragment"
-    android:baselineAligned="false">
+    android:layout_height="wrap_content"
+    tools:context=".gui.tasks.ScheduleDialogFragment">
 
-    <Spinner
-        android:id="@+id/scheduleType"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Spinner.Underlined"/>
+        android:baselineAligned="false"
+        android:orientation="vertical"
+        android:padding="@dimen/activity_horizontal_margin">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
+        <Spinner
+            android:id="@+id/scheduleType"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            android:orientation="vertical">
-
-            <RadioGroup
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        android:textSize="@dimen/textPrimary"
-                        tools:ignore="LabelFor,TextFields"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"
-                        android:text="@string/monthDay"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        android:textSize="@dimen/textPrimary"
-                        tools:ignore="LabelFor,TextFields"/>
-
-                    <Spinner
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Spinner
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
-
-                    <Spinner
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"
-                        android:text="@string/monthDayEnd"/>
-
-                </LinearLayout>
-
-            </RadioGroup>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:hintEnabled="false"
-                app:errorEnabled="true"
-                style="@style/OldTextInput">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    tools:ignore="Deprecated,LabelFor,TextFields"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </LinearLayout>
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -138,13 +26,13 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/scheduleDialogDateLayout"
+                style="@style/OldTextInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="27dp"
-                app:hintEnabled="false"
-                app:errorEnabled="true"
                 android:visibility="gone"
-                style="@style/OldTextInput">
+                app:errorEnabled="true"
+                app:hintEnabled="false">
 
                 <EditText
                     android:id="@+id/scheduleDialogDate"
@@ -154,9 +42,10 @@
                     android:cursorVisible="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                    android:importantForAutofill="no"
                     android:inputType="textNoSuggestions"
                     android:textSize="@dimen/textPrimary"
-                    tools:ignore="LabelFor,TextFields"/>
+                    tools:ignore="LabelFor,TextFields,UnusedAttribute" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -164,44 +53,43 @@
                 android:id="@+id/scheduleDialogDayLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="27dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
                 <CheckBox
                     android:id="@+id/scheduleDialogSunday"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="36dp" />
 
                 <CheckBox
                     android:id="@+id/scheduleDialogMonday"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="36dp" />
 
                 <CheckBox
                     android:id="@+id/scheduleDialogTuesday"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="36dp" />
 
                 <CheckBox
                     android:id="@+id/scheduleDialogWednesday"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="36dp" />
 
                 <CheckBox
                     android:id="@+id/scheduleDialogThursday"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="36dp" />
 
                 <CheckBox
                     android:id="@+id/scheduleDialogFriday"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="36dp" />
 
                 <CheckBox
                     android:id="@+id/scheduleDialogSaturday"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="36dp" />
 
             </LinearLayout>
 
@@ -220,21 +108,21 @@
                     <RadioButton
                         android:id="@+id/scheduleDialogMonthDayRadio"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content" />
 
                     <Spinner
                         android:id="@+id/scheduleDialogMonthDayNumber"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
+                        android:layout_height="wrap_content" />
 
                     <TextView
                         android:id="@+id/scheduleDialogMonthDayLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/textPrimary"
+                        android:text="@string/monthDay"
                         android:textColor="@color/textPrimary"
-                        android:text="@string/monthDay"/>
+                        android:textSize="@dimen/textPrimary" />
 
                 </LinearLayout>
 
@@ -246,19 +134,19 @@
                     <RadioButton
                         android:id="@+id/scheduleDialogMonthWeekRadio"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content" />
 
                     <Spinner
                         android:id="@+id/scheduleDialogMonthWeekNumber"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
+                        android:layout_height="wrap_content" />
 
                     <Spinner
                         android:id="@+id/scheduleDialogMonthWeekDay"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
+                        android:layout_height="wrap_content" />
 
                 </LinearLayout>
 
@@ -270,40 +158,35 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/textPrimary"
+                        android:text="@string/monthDayStart"
                         android:textColor="@color/textPrimary"
-                        android:text="@string/monthDayStart"/>
+                        android:textSize="@dimen/textPrimary" />
 
                     <Spinner
                         android:id="@+id/scheduleDialogMonthEnd"
+                        style="@style/Widget.AppCompat.Spinner.Underlined"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"/>
+                        android:layout_height="wrap_content" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="@dimen/textPrimary"
+                        android:text="@string/monthDayEnd"
                         android:textColor="@color/textPrimary"
-                        android:text="@string/monthDayEnd"/>
+                        android:textSize="@dimen/textPrimary" />
 
                 </LinearLayout>
 
             </RadioGroup>
 
-            <View
-                android:id="@+id/scheduleDialogDailyPadding"
-                android:layout_width="match_parent"
-                android:layout_height="27dp"/>
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/scheduleDialogTimeLayout"
+                style="@style/OldTextInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:hintEnabled="false"
                 app:errorEnabled="true"
-                style="@style/OldTextInput">
+                app:hintEnabled="false">
 
                 <EditText
                     android:id="@+id/scheduleDialogTime"
@@ -313,15 +196,16 @@
                     android:cursorVisible="false"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                    android:importantForAutofill="no"
                     android:inputType="textNoSuggestions"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
-                    tools:ignore="Deprecated,LabelFor,TextFields"/>
+                    tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
 
-    </FrameLayout>
+    </LinearLayout>
 
-</LinearLayout>
+</ScrollView>

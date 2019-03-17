@@ -56,7 +56,7 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private lateinit var mScheduleDialogDateLayout: TextInputLayout
     private lateinit var mScheduleDialogDate: TextView
 
-    private lateinit var mScheduleDialogDayLayout: LinearLayout
+    private lateinit var mScheduleDialogDayLayout: View
     private val mScheduleDialogDays = mutableMapOf<DayOfWeek, CheckBox>()
 
     private lateinit var mScheduleDialogMonthLayout: RadioGroup
@@ -70,8 +70,6 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
     private lateinit var mScheduleDialogMonthWeekDay: Spinner
 
     private lateinit var mScheduleDialogMonthEnd: Spinner
-
-    private lateinit var mScheduleDialogDailyPadding: View
 
     private lateinit var mScheduleDialogTimeLayout: TextInputLayout
     private lateinit var mScheduleDialogTime: TextView
@@ -172,7 +170,6 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
             mScheduleDialogMonthWeekNumber = scheduleDialogMonthWeekNumber
             mScheduleDialogMonthWeekDay = scheduleDialogMonthWeekDay
             mScheduleDialogMonthEnd = scheduleDialogMonthEnd
-            mScheduleDialogDailyPadding = scheduleDialogDailyPadding
             mScheduleDialogTimeLayout = scheduleDialogTimeLayout
             mScheduleDialogTime = scheduleDialogTime
         }
@@ -425,7 +422,6 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogDateLayout.visibility = View.VISIBLE
                 mScheduleDialogDayLayout.visibility = View.GONE
                 mScheduleDialogMonthLayout.visibility = View.GONE
-                mScheduleDialogDailyPadding.visibility = View.GONE
                 mScheduleDialogTimeLayout.visibility = View.VISIBLE
                 mScheduleDialogTimeLayout.isErrorEnabled = true
             }
@@ -433,7 +429,6 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogDateLayout.visibility = View.GONE
                 mScheduleDialogDayLayout.visibility = View.GONE
                 mScheduleDialogMonthLayout.visibility = View.GONE
-                mScheduleDialogDailyPadding.visibility = View.VISIBLE
                 mScheduleDialogTimeLayout.visibility = View.VISIBLE
                 mScheduleDialogTimeLayout.isErrorEnabled = false
             }
@@ -441,7 +436,6 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogDateLayout.visibility = View.GONE
                 mScheduleDialogDayLayout.visibility = View.VISIBLE
                 mScheduleDialogMonthLayout.visibility = View.GONE
-                mScheduleDialogDailyPadding.visibility = View.VISIBLE
                 mScheduleDialogTimeLayout.visibility = View.VISIBLE
                 mScheduleDialogTimeLayout.isErrorEnabled = false
             }
@@ -449,7 +443,6 @@ class ScheduleDialogFragment : AbstractDialogFragment() {
                 mScheduleDialogDateLayout.visibility = View.GONE
                 mScheduleDialogDayLayout.visibility = View.GONE
                 mScheduleDialogMonthLayout.visibility = View.VISIBLE
-                mScheduleDialogDailyPadding.visibility = View.GONE
                 mScheduleDialogTimeLayout.visibility = View.VISIBLE
                 mScheduleDialogTimeLayout.isErrorEnabled = false
             }

@@ -14,7 +14,6 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.DatePickerDialogFragment
@@ -74,7 +73,8 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
     private lateinit var mScheduleDialogTimeLayout: TextInputLayout
     private lateinit var mScheduleDialogTime: TextView
 
-    private var mButton: Button? = null
+    private lateinit var mScheduleDialogSave: Button
+    private lateinit var mScheduleDialogRemove: Button
 
     private var customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>? = null
     private var scheduleDialogListener: ScheduleDialogListener? = null
@@ -172,27 +172,37 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
             mScheduleDialogMonthEnd = scheduleDialogMonthEnd
             mScheduleDialogTimeLayout = scheduleDialogTimeLayout
             mScheduleDialogTime = scheduleDialogTime
+
+            mScheduleDialogSave = scheduleDialogSave
+            mScheduleDialogRemove = scheduleDialogRemove
+
+            mScheduleDialogSave.setOnClickListener {
+                check(customTimeDatas != null)
+                check(scheduleDialogListener != null)
+                check(isValid)
+
+                scheduleDialogListener!!.onScheduleDialogResult(scheduleDialogData)
+
+                dismiss()
+            }
+
+            if (arguments!!.getBoolean(SHOW_DELETE_KEY)) {
+                mScheduleDialogRemove.apply {
+                    visibility = View.VISIBLE
+
+                    setOnClickListener {
+                        scheduleDialogListener!!.onScheduleDialogDelete()
+
+                        dismiss()
+                    }
+                }
+            }
         }
 
         return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
             setCancelable(true)
             setContentView(view)
         }
-
-        return MaterialAlertDialogBuilder(requireContext()).setView(view)
-                .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.cancel() }
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    check(customTimeDatas != null)
-                    check(scheduleDialogListener != null)
-                    check(isValid)
-
-                    scheduleDialogListener!!.onScheduleDialogResult(scheduleDialogData)
-                }
-                .apply {
-                    if (arguments!!.getBoolean(SHOW_DELETE_KEY))
-                        setNeutralButton(R.string.delete) { _, _ -> scheduleDialogListener!!.onScheduleDialogDelete() }
-                }
-                .create()
     }
 
     @SuppressLint("SetTextI18n")
@@ -394,12 +404,6 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
             initialize()
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        //mButton = (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)!! todo
-    }
-
     override fun onResume() {
         super.onResume()
 
@@ -513,13 +517,13 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
         }
 
         if (isValid) {
-            mButton?.isEnabled = true
+            mScheduleDialogSave.isEnabled = true
 
             mScheduleDialogDateLayout.error = null
             mScheduleDialogTimeLayout.error = null
         } else {
             check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
-            mButton?.isEnabled = false
+            mScheduleDialogSave.isEnabled = false
 
             if (scheduleDialogData.date >= Date.today()) {
                 mScheduleDialogDateLayout.error = null

@@ -1,5 +1,4 @@
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -19,192 +18,199 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <LinearLayout
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/scheduleDialogDateLayout"
+            style="@style/OldTextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_marginTop="27dp"
+            android:visibility="gone"
+            app:errorEnabled="true"
+            app:hintEnabled="false">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/scheduleDialogDateLayout"
-                style="@style/OldTextInput"
+            <EditText
+                android:id="@+id/scheduleDialogDate"
+                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="27dp"
-                android:visibility="gone"
-                app:errorEnabled="true"
-                app:hintEnabled="false">
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:importantForAutofill="no"
+                android:inputType="textNoSuggestions"
+                android:textSize="@dimen/textPrimary"
+                tools:ignore="LabelFor,TextFields,UnusedAttribute" />
 
-                <EditText
-                    android:id="@+id/scheduleDialogDate"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:importantForAutofill="no"
-                    android:inputType="textNoSuggestions"
-                    android:textSize="@dimen/textPrimary"
-                    tools:ignore="LabelFor,TextFields,UnusedAttribute" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-            </com.google.android.material.textfield.TextInputLayout>
+        <LinearLayout
+            android:id="@+id/scheduleDialogDayLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <CheckBox
+                android:id="@+id/scheduleDialogSunday"
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <CheckBox
+                android:id="@+id/scheduleDialogMonday"
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <CheckBox
+                android:id="@+id/scheduleDialogTuesday"
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <CheckBox
+                android:id="@+id/scheduleDialogWednesday"
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <CheckBox
+                android:id="@+id/scheduleDialogThursday"
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <CheckBox
+                android:id="@+id/scheduleDialogFriday"
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+            <CheckBox
+                android:id="@+id/scheduleDialogSaturday"
+                android:layout_width="match_parent"
+                android:layout_height="32dp" />
+
+        </LinearLayout>
+
+        <RadioGroup
+            android:id="@+id/scheduleDialogMonthLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <LinearLayout
-                android:id="@+id/scheduleDialogDayLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:orientation="horizontal">
 
-                <CheckBox
-                    android:id="@+id/scheduleDialogSunday"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp" />
+                <RadioButton
+                    android:id="@+id/scheduleDialogMonthDayRadio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-                <CheckBox
-                    android:id="@+id/scheduleDialogMonday"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp" />
+                <Spinner
+                    android:id="@+id/scheduleDialogMonthDayNumber"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-                <CheckBox
-                    android:id="@+id/scheduleDialogTuesday"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp" />
-
-                <CheckBox
-                    android:id="@+id/scheduleDialogWednesday"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp" />
-
-                <CheckBox
-                    android:id="@+id/scheduleDialogThursday"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp" />
-
-                <CheckBox
-                    android:id="@+id/scheduleDialogFriday"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp" />
-
-                <CheckBox
-                    android:id="@+id/scheduleDialogSaturday"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp" />
+                <TextView
+                    android:id="@+id/scheduleDialogMonthDayLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/monthDay"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="@dimen/textPrimary" />
 
             </LinearLayout>
 
-            <RadioGroup
-                android:id="@+id/scheduleDialogMonthLayout"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/scheduleDialogMonthWeekRadio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-                    <RadioButton
-                        android:id="@+id/scheduleDialogMonthDayRadio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <Spinner
-                        android:id="@+id/scheduleDialogMonthDayNumber"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/scheduleDialogMonthDayLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/monthDay"
-                        android:textColor="@color/textPrimary"
-                        android:textSize="@dimen/textPrimary" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/scheduleDialogMonthWeekRadio"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <Spinner
-                        android:id="@+id/scheduleDialogMonthWeekNumber"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <Spinner
-                        android:id="@+id/scheduleDialogMonthWeekDay"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/monthDayStart"
-                        android:textColor="@color/textPrimary"
-                        android:textSize="@dimen/textPrimary" />
-
-                    <Spinner
-                        android:id="@+id/scheduleDialogMonthEnd"
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/monthDayEnd"
-                        android:textColor="@color/textPrimary"
-                        android:textSize="@dimen/textPrimary" />
-
-                </LinearLayout>
-
-            </RadioGroup>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/scheduleDialogTimeLayout"
-                style="@style/OldTextInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:errorEnabled="true"
-                app:hintEnabled="false">
-
-                <EditText
-                    android:id="@+id/scheduleDialogTime"
+                <Spinner
+                    android:id="@+id/scheduleDialogMonthWeekNumber"
                     style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <Spinner
+                    android:id="@+id/scheduleDialogMonthWeekDay"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:importantForAutofill="no"
-                    android:inputType="textNoSuggestions"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute" />
+                    android:text="@string/monthDayStart"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="@dimen/textPrimary" />
 
-            </com.google.android.material.textfield.TextInputLayout>
+                <Spinner
+                    android:id="@+id/scheduleDialogMonthEnd"
+                    style="@style/Widget.AppCompat.Spinner.Underlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-        </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/monthDayEnd"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="@dimen/textPrimary" />
+
+            </LinearLayout>
+
+        </RadioGroup>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/scheduleDialogTimeLayout"
+            style="@style/OldTextInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:errorEnabled="true"
+            app:hintEnabled="false">
+
+            <EditText
+                android:id="@+id/scheduleDialogTime"
+                style="@style/Widget.AppCompat.Spinner.Underlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:importantForAutofill="no"
+                android:inputType="textNoSuggestions"
+                android:singleLine="true"
+                android:textSize="@dimen/textPrimary"
+                tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/scheduleDialogSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/save" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/scheduleDialogRemove"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/delete"
+            android:visibility="gone" />
 
     </LinearLayout>
 

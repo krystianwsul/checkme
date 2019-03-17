@@ -12,6 +12,7 @@ import android.os.Parcelable
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.textfield.TextInputLayout
@@ -458,6 +459,13 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
         }
 
         updateFields()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        val bottomSheetBehavior = BottomSheetBehavior.from(dialog!!.window!!.findViewById<View>(R.id.design_bottom_sheet))
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
     }
 
     override fun onPause() {

@@ -7,18 +7,16 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.DatePickerDialogFragment
+import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
@@ -33,7 +31,7 @@ import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.util.*
 
-class ScheduleDialogFragment : BottomSheetDialogFragment() {
+class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     companion object {
 
@@ -122,8 +120,6 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
         scheduleDialogData.date = date
         updateFields()
     }
-
-    private var first = true
 
     //cached data doesn't contain new custom time
     private val isValid: Boolean
@@ -410,32 +406,6 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
 
         if (customTimeDatas != null)
             initialize()
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        if (first) {
-            first = false
-
-            BottomSheetBehavior.from(dialog!!.window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
-                skipCollapsed = true
-
-                setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-
-                    override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
-
-                    override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        if (newState == BottomSheetBehavior.STATE_HIDDEN)
-                            dialog!!.cancel()
-                    }
-                })
-
-                // todo consider expanding in portrait too
-                if (state == BottomSheetBehavior.STATE_COLLAPSED && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-                    state = BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
     }
 
     override fun onResume() {

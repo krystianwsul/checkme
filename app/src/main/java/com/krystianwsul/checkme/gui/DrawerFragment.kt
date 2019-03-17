@@ -1,17 +1,16 @@
-package com.krystianwsul.checkme
+package com.krystianwsul.checkme.gui
 
 import android.os.Bundle
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.TutorialActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 
-class DrawerFragment : BottomSheetDialogFragment() {
+class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
     companion object {
 

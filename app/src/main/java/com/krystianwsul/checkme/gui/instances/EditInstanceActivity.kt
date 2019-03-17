@@ -171,12 +171,10 @@ class EditInstanceActivity : AbstractActivity() {
         datePickerDialogFragment?.listener = datePickerDialogFragmentListener
 
         if (savedInstanceState != null && savedInstanceState.containsKey(DATE_KEY)) {
-            date = savedInstanceState.getParcelable(DATE_KEY)
-            checkNotNull(date)
+            date = savedInstanceState.getParcelable(DATE_KEY)!!
 
             check(savedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY))
-            timePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY)
-            checkNotNull(timePairPersist)
+            timePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY)!!
         }
 
         val instanceKey = intent.getParcelableExtra<InstanceKey>(INSTANCE_KEY)!!

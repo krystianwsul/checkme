@@ -35,7 +35,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
         }
     }
 
-    data class InstanceData(val instanceDateTime: DateTime, val name: String) {
+    data class InstanceData(val instanceDateTime: DateTime, val name: String, val done: Boolean) {
 
         init {
             check(name.isNotEmpty())

@@ -45,7 +45,7 @@ class EditInstancesActivity : AbstractActivity() {
         private const val DISCARD_TAG = "discard"
 
         fun getIntent(instanceKeys: ArrayList<InstanceKey>): Intent {
-            check(instanceKeys.size > 1)
+            check(instanceKeys.isNotEmpty())
 
             return Intent(MyApplication.instance, EditInstancesActivity::class.java).apply {
                 putParcelableArrayListExtra(INSTANCE_KEYS, instanceKeys)
@@ -178,20 +178,16 @@ class EditInstancesActivity : AbstractActivity() {
         datePickerDialogFragment?.listener = datePickerDialogFragmentListener
 
         if (savedInstanceState != null && savedInstanceState.containsKey(DATE_KEY)) {
-            date = savedInstanceState.getParcelable(DATE_KEY)
-            checkNotNull(date)
+            date = savedInstanceState.getParcelable(DATE_KEY)!!
 
             check(savedInstanceState.containsKey(TIME_PAIR_PERSIST_KEY))
-            timePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY)
-            checkNotNull(timePairPersist)
+            timePairPersist = savedInstanceState.getParcelable(TIME_PAIR_PERSIST_KEY)!!
 
             check(savedInstanceState.containsKey(INITIAL_HOUR_MINUTE_KEY))
-            initialTimePair = savedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY)
-            checkNotNull(initialTimePair)
+            initialTimePair = savedInstanceState.getParcelable(INITIAL_HOUR_MINUTE_KEY)!!
 
             check(savedInstanceState.containsKey(INITIAL_DATE_KEY))
-            initialDate = savedInstanceState.getParcelable(INITIAL_DATE_KEY)
-            checkNotNull(initialDate)
+            initialDate = savedInstanceState.getParcelable(INITIAL_DATE_KEY)!!
         }
 
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCE_KEYS)!!
@@ -249,6 +245,16 @@ class EditInstancesActivity : AbstractActivity() {
 
     private fun onLoadFinished(data: EditInstancesViewModel.Data) {
         this.data = data
+
+        if (data.instanceDatas.any { it.value.done }) {
+            AbstractActivity.setSnackbar(object : SnackbarData {
+
+                override fun show(snackbarListener: SnackbarListener) = snackbarListener.showInstanceMarkedDone()
+            })
+
+            finish()
+            return
+        }
 
         editInstanceLayout.visibility = View.VISIBLE
 

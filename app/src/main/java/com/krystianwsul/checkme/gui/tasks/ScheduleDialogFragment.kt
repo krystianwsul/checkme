@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
@@ -415,8 +416,8 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
             first = false
 
             BottomSheetBehavior.from(dialog!!.window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
-                if (state == BottomSheetBehavior.STATE_COLLAPSED)
-                    state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                if (state == BottomSheetBehavior.STATE_COLLAPSED && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    state = BottomSheetBehavior.STATE_EXPANDED
 
                 setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
 

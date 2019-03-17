@@ -9,6 +9,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
@@ -416,6 +417,20 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
             BottomSheetBehavior.from(dialog!!.window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
                 if (state == BottomSheetBehavior.STATE_COLLAPSED)
                     state = BottomSheetBehavior.STATE_HALF_EXPANDED
+
+                setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+
+                    override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                        Log.e("asdf", "offset $slideOffset")
+                    }
+
+                    override fun onStateChanged(bottomSheet: View, newState: Int) {
+                        Log.e("asdf", "state $newState")
+
+                        if (newState == BottomSheetBehavior.STATE_HIDDEN)
+                            dialog!!.cancel()
+                    }
+                })
             }
         }
     }

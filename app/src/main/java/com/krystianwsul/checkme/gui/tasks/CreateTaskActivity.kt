@@ -157,6 +157,7 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     private val scheduleDialogListener = object : ScheduleDialogFragment.ScheduleDialogListener {
+
         override fun onScheduleDialogResult(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
             checkNotNull(data)
 

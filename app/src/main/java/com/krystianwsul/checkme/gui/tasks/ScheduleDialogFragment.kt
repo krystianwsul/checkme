@@ -201,6 +201,10 @@ class ScheduleDialogFragment : BottomSheetDialogFragment() {
                     }
                 }
             }
+
+            scheduleDialogCancel.setOnClickListener {
+                dialog!!.cancel()
+            }
         }
 
         return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {

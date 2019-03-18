@@ -614,7 +614,7 @@ class GroupListFragment @JvmOverloads constructor(
                 all { it.instanceTimeStamp.toExactTimeStamp() < now }
             }
 
-    fun addHour(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+    fun addHour() {
         check(canAddHour())
 
         addHour(parameters.dataWrapper.instanceDatas.map { it.key })

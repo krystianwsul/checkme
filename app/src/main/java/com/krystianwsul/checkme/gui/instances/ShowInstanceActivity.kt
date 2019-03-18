@@ -93,7 +93,11 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                         R.id.instanceMenuHour -> {
                             check(showHour())
 
-                            DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, listOf(instanceKey))
+                            val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, listOf(instanceKey))
+
+                            showSnackbarHour(hourUndoData.instanceDateTimes.size) {
+                                DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, hourUndoData)
+                            }
                         }
                         R.id.instanceMenuEditInstance -> {
                             check(!it.done)

@@ -44,8 +44,6 @@ class EditInstancesActivity : AbstractActivity() {
         private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
         private const val DISCARD_TAG = "discard"
 
-        fun getIntent(instanceKey: InstanceKey) = getIntent(listOf(instanceKey))
-
         fun getIntent(instanceKeys: List<InstanceKey>): Intent {
             check(instanceKeys.isNotEmpty())
 

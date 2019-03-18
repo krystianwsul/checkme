@@ -147,8 +147,15 @@ class GroupListFragment @JvmOverloads constructor(
             }
 
             when (itemId) {
+                R.id.actionGroupHour -> {
+                    check(showHour(selectedDatas))
+                    val instanceKeys = selectedDatas.map { (it as InstanceData).instanceKey }
+
+                    DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
+                }
                 R.id.action_group_edit_instance -> {
                     check(selectedDatas.isNotEmpty())
+
                     val instanceDatas = selectedDatas.map { it as InstanceData }
                     check(instanceDatas.isNotEmpty())
                     check(instanceDatas.all { it.isRootInstance })
@@ -308,21 +315,24 @@ class GroupListFragment @JvmOverloads constructor(
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) = listener.onDestroyGroupActionMode()
 
+        private fun showHour(selectedDatas: Collection<SelectedData>) = selectedDatas.all { it is InstanceData && it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now }
+
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
             checkNotNull(actionMode)
 
-            val instanceDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
-            check(instanceDatas.isNotEmpty())
+            val selectedDatas = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true)
+            check(selectedDatas.isNotEmpty())
 
             val itemVisibilities = mutableListOf(
-                    R.id.action_group_mark_done to instanceDatas.all { it is InstanceData && it.done == null },
-                    R.id.action_group_mark_not_done to instanceDatas.all { it is InstanceData && it.done != null },
-                    R.id.action_group_edit_instance to instanceDatas.all { it is InstanceData && it.isRootInstance && it.done == null },
-                    R.id.action_group_notify to instanceDatas.all { it is InstanceData && it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown }
+                    R.id.action_group_notify to selectedDatas.all { it is InstanceData && it.isRootInstance && it.done == null && it.instanceTimeStamp <= TimeStamp.now && !it.notificationShown },
+                    R.id.actionGroupHour to showHour(selectedDatas),
+                    R.id.action_group_edit_instance to selectedDatas.all { it is InstanceData && it.isRootInstance && it.done == null },
+                    R.id.action_group_mark_done to selectedDatas.all { it is InstanceData && it.done == null },
+                    R.id.action_group_mark_not_done to selectedDatas.all { it is InstanceData && it.done != null }
             )
 
-            if (instanceDatas.size == 1) {
-                val instanceData = instanceDatas.single()
+            if (selectedDatas.size == 1) {
+                val instanceData = selectedDatas.single()
 
                 itemVisibilities.addAll(listOf(
                         R.id.action_group_show_task to instanceData.taskCurrent,
@@ -332,7 +342,7 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_add_task to instanceData.taskCurrent
                 ))
             } else {
-                check(instanceDatas.size > 1)
+                check(selectedDatas.size > 1)
 
                 itemVisibilities.addAll(listOf(
                         R.id.action_group_show_task to false,
@@ -340,8 +350,8 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_add_task to false
                 ))
 
-                if (instanceDatas.all { it.taskCurrent }) {
-                    val projectIdCount = instanceDatas.asSequence()
+                if (selectedDatas.all { it.taskCurrent }) {
+                    val projectIdCount = selectedDatas.asSequence()
                             .map { it.taskKey.remoteProjectId }
                             .distinct()
                             .count()

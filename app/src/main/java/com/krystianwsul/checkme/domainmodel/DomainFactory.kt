@@ -765,7 +765,7 @@ open class DomainFactory(
         notifyCloud(instance.project)
     }
 
-    @Synchronized
+    @Synchronized // todo add undo snackbar
     fun setInstancesAddHourActivity(dataId: Int, source: SaveService.Source, instanceKeys: Collection<InstanceKey>): DateTime {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()

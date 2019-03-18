@@ -100,8 +100,6 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                             check(it.isRootInstance)
 
                             EditInstancesFragment.newInstance(listOf(instanceKey)).show(supportFragmentManager, EDIT_INSTANCES_TAG)
-
-                            //startActivity(EditInstancesActivity.getIntent(instanceKey))
                         }
                         R.id.instanceMenuCheck -> {
                             if (!it.done)

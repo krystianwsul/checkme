@@ -76,16 +76,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
             menuInflater.inflate(R.menu.show_instance_menu_top, menu)
 
             setOnMenuItemClickListener { item ->
-                data!!.let {
+                data!!.also {
                     when (item.itemId) { // todo add hour
-                        R.id.instanceMenuEditInstance -> {
-                            check(!it.done)
-                            check(it.isRootInstance)
-
-                            EditInstancesFragment.newInstance(listOf(instanceKey)).show(supportFragmentManager, EDIT_INSTANCES_TAG)
-
-                            //startActivity(EditInstancesActivity.getIntent(instanceKey))
-                        }
                         R.id.instanceMenuNotify -> {
                             check(!it.done)
                             check(it.instanceDateTime.timeStamp <= TimeStamp.now)
@@ -97,6 +89,19 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
                                 updateTopMenu()
                             }
+                        }
+                        R.id.instanceMenuHour -> {
+                            check(showHour())
+
+                            DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, listOf(instanceKey))
+                        }
+                        R.id.instanceMenuEditInstance -> {
+                            check(!it.done)
+                            check(it.isRootInstance)
+
+                            EditInstancesFragment.newInstance(listOf(instanceKey)).show(supportFragmentManager, EDIT_INSTANCES_TAG)
+
+                            //startActivity(EditInstancesActivity.getIntent(instanceKey))
                         }
                         R.id.instanceMenuCheck -> {
                             if (!it.done)
@@ -133,10 +138,13 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         }
     }
 
+    private fun showHour() = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now } == true
+
     private fun updateTopMenu() {
         toolbar.menu.apply {
             findItem(R.id.instanceMenuEditInstance).isVisible = data?.run { !done && isRootInstance } == true
-            findItem(R.id.instanceMenuNotify).isVisible = data?.run { !done && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown && isRootInstance } == true
+            findItem(R.id.instanceMenuNotify).isVisible = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now && !notificationShown } == true
+            findItem(R.id.instanceMenuHour).isVisible = showHour()
             findItem(R.id.instanceMenuCheck).isVisible = data?.done == false
             findItem(R.id.instanceMenuUncheck).isVisible = data?.done == true
         }

@@ -12,10 +12,18 @@
         android:visible="false" />
 
     <item
+        android:id="@+id/instanceMenuHour"
+        android:title="@string/hour"
+        android:orderInCategory="150"
+        android:icon="@drawable/ic_plus_one_white_24dp"
+        app:showAsAction="ifRoom"
+        android:visible="false" />
+
+    <item
         android:id="@+id/instanceMenuEditInstance"
         android:title="@string/edit_instance"
         android:orderInCategory="200"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:icon="@drawable/ic_alarm_white_24dp"
         android:visible="false" />
 

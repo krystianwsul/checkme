@@ -77,7 +77,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
             setOnMenuItemClickListener { item ->
                 data!!.also {
-                    when (item.itemId) { // todo add hour
+                    when (item.itemId) {
                         R.id.instanceMenuNotify -> {
                             check(!it.done)
                             check(it.instanceDateTime.timeStamp <= TimeStamp.now)

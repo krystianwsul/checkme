@@ -2,14 +2,14 @@ package com.krystianwsul.checkme.gui.instances
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
@@ -22,7 +22,7 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.fragment_edit_instances.*
+import kotlinx.android.synthetic.main.fragment_edit_instances.view.*
 import java.util.*
 
 class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
@@ -40,7 +40,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TIME_FRAGMENT_TAG = "timeFragment"
         private const val TIME_DIALOG_FRAGMENT_TAG = "timeDialogFragment"
 
-        // todo add hour button wherever this is called
         fun newInstance(instanceKeys: List<InstanceKey>) = EditInstancesFragment().apply {
             check(instanceKeys.isNotEmpty())
 
@@ -55,7 +54,13 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private var savedInstanceState: Bundle? = null
 
-    private var broadcastReceiver: BroadcastReceiver? = null
+    private val broadcastReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context, intent: Intent) {
+            if (data != null)
+                updateError()
+        }
+    }
 
     private var timePairPersist: TimePairPersist? = null
 
@@ -103,6 +108,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private lateinit var editInstancesViewModel: EditInstancesViewModel
 
+    private lateinit var myView: View
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -128,43 +135,47 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         check(instanceKeys.isNotEmpty())
 
         editInstancesViewModel = getViewModel<EditInstancesViewModel>().apply { start(instanceKeys) }
+    }
 
-        broadcastReceiver = object : BroadcastReceiver() { // todo just move to assignment
+    @SuppressLint("InflateParams")
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        myView = requireActivity().layoutInflater
+                .inflate(R.layout.fragment_edit_instances, null)
+                .apply {
+                    editInstanceDate.setOnClickListener {
+                        val datePickerDialogFragment = DatePickerDialogFragment.newInstance(date!!)
+                        datePickerDialogFragment.listener = datePickerDialogFragmentListener
+                        datePickerDialogFragment.show(childFragmentManager, DATE_FRAGMENT_TAG)
+                    }
 
-            override fun onReceive(context: Context, intent: Intent) {
-                if (data != null)
-                    updateError()
-            }
+                    editInstanceSave.setOnClickListener {
+                        checkNotNull(date)
+                        checkNotNull(data)
+
+                        if (isValidDateTime) {
+                            editInstancesViewModel.stop()
+
+                            DomainFactory.instance.setInstancesDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceDatas.keys, date!!, timePairPersist!!.timePair)
+
+                            dismiss()
+                        }
+                    }
+
+                    editInstanceCancel.setOnClickListener { dialog!!.cancel() }
+                }
+
+        return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
+            setCancelable(true)
+            setContentView(myView)
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_edit_instances, container, false)!!
+    override fun onStart() {
+        super.onStart()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        editInstanceDate.setOnClickListener {
-            val datePickerDialogFragment = DatePickerDialogFragment.newInstance(date!!)
-            datePickerDialogFragment.listener = datePickerDialogFragmentListener
-            datePickerDialogFragment.show(childFragmentManager, DATE_FRAGMENT_TAG)
-        }
-
-        editInstancesViewModel.data.subscribe { onLoadFinished(it) }.addTo(viewCreatedDisposable)
-
-        editInstanceSave.setOnClickListener {
-            checkNotNull(date)
-            checkNotNull(data)
-
-            if (isValidDateTime) {
-                editInstancesViewModel.stop()
-
-                DomainFactory.instance.setInstancesDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceDatas.keys, date!!, timePairPersist!!.timePair)
-
-                dismiss()
-            }
-        }
-
-        editInstanceCancel.setOnClickListener { dialog!!.cancel() }
+        editInstancesViewModel.data
+                .subscribe { onLoadFinished(it) }
+                .addTo(startDisposable)
     }
 
     override fun onResume() {
@@ -213,7 +224,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             return
         }
 
-        editInstanceLayout.visibility = View.VISIBLE
+        myView.editInstanceLayout.visibility = View.VISIBLE
 
         if (first && (savedInstanceState == null || !savedInstanceState!!.containsKey(DATE_KEY))) {
             check(date == null)
@@ -242,7 +253,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         val timePickerDialogFragment = childFragmentManager.findFragmentByTag(TIME_FRAGMENT_TAG) as? TimePickerDialogFragment
         timePickerDialogFragment?.listener = timePickerDialogFragmentListener
 
-        editInstanceTime.setOnClickListener {
+        myView.editInstanceTime.setOnClickListener {
             checkNotNull(data)
             val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(data.customTimeDatas.values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
@@ -263,7 +274,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private fun updateDateText() {
         checkNotNull(date)
 
-        editInstanceDate.setText(date!!.getDisplayText())
+        myView.editInstanceDate.setText(date!!.getDisplayText())
 
         updateTimeText()
 
@@ -279,9 +290,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         if (timePairPersist!!.customTimeKey != null) {
             val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!)
 
-            editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date!!.dayOfWeek] + ")")
+            myView.editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date!!.dayOfWeek] + ")")
         } else {
-            editInstanceTime.setText(timePairPersist!!.hourMinute.toString())
+            myView.editInstanceTime.setText(timePairPersist!!.hourMinute.toString())
         }
     }
 
@@ -309,11 +320,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private fun updateError() {
         if (isValidDate) {
-            editInstanceDateLayout.error = null
-            editInstanceTimeLayout.error = if (isValidDateTime) null else getString(R.string.error_time)
+            myView.editInstanceDateLayout.error = null
+            myView.editInstanceTimeLayout.error = if (isValidDateTime) null else getString(R.string.error_time)
         } else {
-            editInstanceDateLayout.error = getString(R.string.error_date)
-            editInstanceTimeLayout.error = null
+            myView.editInstanceDateLayout.error = getString(R.string.error_date)
+            myView.editInstanceTimeLayout.error = null
         }
     }
 

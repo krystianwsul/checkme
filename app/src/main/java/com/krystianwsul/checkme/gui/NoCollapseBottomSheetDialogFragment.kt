@@ -11,7 +11,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
 
     private var first = true
 
-    protected val viewCreatedDisposable = CompositeDisposable()
+    protected val startDisposable = CompositeDisposable()
 
     override fun onStart() {
         super.onStart()
@@ -38,9 +38,9 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
         }
     }
 
-    override fun onDestroyView() {
-        viewCreatedDisposable.clear()
+    override fun onStop() {
+        startDisposable.clear()
 
-        super.onDestroyView()
+        super.onStop()
     }
 }

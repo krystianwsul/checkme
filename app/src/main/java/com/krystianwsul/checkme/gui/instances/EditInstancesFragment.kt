@@ -151,14 +151,14 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                     editInstanceSave.setOnClickListener {
                         checkNotNull(date)
                         checkNotNull(data)
+                        check(isValidDate)
+                        check(isValidDateTime)
 
-                        if (isValidDateTime) {
-                            editInstancesViewModel.stop()
+                        editInstancesViewModel.stop()
 
-                            DomainFactory.instance.setInstancesDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceDatas.keys, date!!, timePairPersist!!.timePair)
+                        DomainFactory.instance.setInstancesDateTime(data!!.dataId, SaveService.Source.GUI, data!!.instanceDatas.keys, date!!, timePairPersist!!.timePair)
 
-                            dismiss()
-                        }
+                        dismiss()
                     }
 
                     editInstanceCancel.setOnClickListener { dialog!!.cancel() }
@@ -299,8 +299,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val isValidDate: Boolean
         get() = if (data != null) date!! >= Date.today() else false
 
-    private //cached data doesn't contain new custom time
-    val isValidDateTime: Boolean
+    //cached data doesn't contain new custom time
+    private val isValidDateTime: Boolean
         get() {
             if (data != null) {
                 val hourMinute = if (timePairPersist!!.customTimeKey != null) {
@@ -326,6 +326,8 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             myView.editInstanceDateLayout.error = getString(R.string.error_date)
             myView.editInstanceTimeLayout.error = null
         }
+
+        myView.editInstanceSave.isEnabled = isValidDateTime
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

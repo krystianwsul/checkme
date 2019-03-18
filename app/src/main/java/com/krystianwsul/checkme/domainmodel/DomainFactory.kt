@@ -765,8 +765,8 @@ open class DomainFactory(
         notifyCloud(instance.project)
     }
 
-    @Synchronized // todo add undo snackbar
-    fun setInstancesAddHourActivity(dataId: Int, source: SaveService.Source, instanceKeys: Collection<InstanceKey>): DateTime {
+    @Synchronized
+    fun setInstancesAddHourActivity(dataId: Int, source: SaveService.Source, instanceKeys: Collection<InstanceKey>): HourUndoData {
         MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -779,6 +779,8 @@ open class DomainFactory(
 
         val instances = instanceKeys.map(this::getInstance)
 
+        val instanceDateTimes = instances.associate { it.instanceKey to it.instanceDateTime }
+
         instances.forEach { it.setInstanceDateTime(date, timePair, now) }
 
         updateNotifications(now)
@@ -789,7 +791,29 @@ open class DomainFactory(
 
         notifyCloud(remoteProjects)
 
-        return getDateTime(date, timePair)
+        return HourUndoData(instanceDateTimes)
+    }
+
+    @Synchronized
+    fun undoInstancesAddHour(dataId: Int, source: SaveService.Source, hourUndoData: HourUndoData) {
+        MyCrashlytics.log("DomainFactory.setInstanceAddHourActivity")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        val now = ExactTimeStamp.now
+
+        val pairs = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) -> Pair(getInstance(instanceKey), instanceDateTime) }
+
+        pairs.forEach { (instance, instanceDateTime) ->
+            instance.setInstanceDateTime(instanceDateTime.date, instanceDateTime.time.timePair, now)
+        }
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        val remoteProjects = pairs.map { it.first.project }.toSet()
+
+        notifyCloud(remoteProjects)
     }
 
     @Synchronized
@@ -2255,6 +2279,8 @@ open class DomainFactory(
         val scheduleIds = mutableSetOf<ScheduleId>()
         val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
     }
+
+    class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 
     class ReadTimes(start: ExactTimeStamp, read: ExactTimeStamp, stop: ExactTimeStamp) {
 

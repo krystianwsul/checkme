@@ -82,4 +82,5 @@
     <string name="filterMonth">Miesiąc</string>
     <string name="snackbarDone">Oznaczono %1$s jako zrobione</string>
     <string name="snackbarNotDone">Oznaczono %1$s jako nie zrobione</string>
+    <string name="snackbarHour">%1$s przełożone</string>
 </resources>

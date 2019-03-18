@@ -152,7 +152,7 @@ class GroupListFragment @JvmOverloads constructor(
                     check(showHour(selectedDatas))
                     val instanceKeys = selectedDatas.map { (it as InstanceData).instanceKey }
 
-                    DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
+                    addHour(instanceKeys)
                 }
                 R.id.action_group_edit_instance -> {
                     check(selectedDatas.isNotEmpty())
@@ -617,21 +617,15 @@ class GroupListFragment @JvmOverloads constructor(
     fun addHour(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         check(canAddHour())
 
-        parameters.dataWrapper
-                .instanceDatas
-                .run {
-                    val instanceDateTime = DomainFactory.instance.setInstancesAddHourActivity(parameters.dataId, SaveService.Source.GUI, keys)
-                    val instanceTimeStamp = instanceDateTime.timeStamp
-                    val displayText = instanceDateTime.getDisplayText()
+        addHour(parameters.dataWrapper.instanceDatas.map { it.key })
+    }
 
-                    values.forEach {
-                        it.instanceTimeStamp = instanceTimeStamp
-                        if (it.isRootInstance)
-                            it.displayText = displayText
-                    }
+    private fun addHour(instanceKeys: Collection<InstanceKey>) {
+        val hourUndoData = DomainFactory.instance.setInstancesAddHourActivity(0, SaveService.Source.GUI, instanceKeys)
 
-                    setGroupMenuItemVisibility()
-                }
+        listener.showSnackbarHour(hourUndoData.instanceDateTimes.size) {
+            DomainFactory.instance.undoInstancesAddHour(0, SaveService.Source.GUI, hourUndoData)
+        }
     }
 
     fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)

@@ -37,6 +37,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         private const val INSTANCE_KEY = "instanceKey"
         private const val NOTIFICATION_ID_KEY = "notificationId"
 
+        private const val EDIT_INSTANCES_TAG = "editInstances"
+
         fun getIntent(context: Context, instanceKey: InstanceKey) = Intent(context, ShowInstanceActivity::class.java).apply { putExtra(INSTANCE_KEY, instanceKey as Parcelable) }
 
         fun getNotificationIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, ShowInstanceActivity::class.java).apply {
@@ -75,12 +77,14 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
             setOnMenuItemClickListener { item ->
                 data!!.let {
-                    when (item.itemId) {
+                    when (item.itemId) { // todo add hour
                         R.id.instanceMenuEditInstance -> {
                             check(!it.done)
                             check(it.isRootInstance)
 
-                            startActivity(EditInstancesActivity.getIntent(instanceKey))
+                            EditInstancesFragment.newInstance(listOf(instanceKey)).show(supportFragmentManager, EDIT_INSTANCES_TAG)
+
+                            //startActivity(EditInstancesActivity.getIntent(instanceKey))
                         }
                         R.id.instanceMenuNotify -> {
                             check(!it.done)

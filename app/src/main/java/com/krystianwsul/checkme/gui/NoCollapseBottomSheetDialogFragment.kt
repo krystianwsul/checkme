@@ -5,10 +5,13 @@ import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.krystianwsul.checkme.R
+import io.reactivex.disposables.CompositeDisposable
 
 abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private var first = true
+
+    protected val viewCreatedDisposable = CompositeDisposable()
 
     override fun onStart() {
         super.onStart()
@@ -33,5 +36,11 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
                     state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
+    }
+
+    override fun onDestroyView() {
+        viewCreatedDisposable.clear()
+
+        super.onDestroyView()
     }
 }

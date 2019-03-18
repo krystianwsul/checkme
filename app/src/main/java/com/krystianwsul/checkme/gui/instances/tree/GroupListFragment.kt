@@ -22,7 +22,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
-import com.krystianwsul.checkme.gui.instances.EditInstancesActivity
+import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -53,6 +53,7 @@ class GroupListFragment @JvmOverloads constructor(
         private const val SUPER_STATE_KEY = "superState"
         const val EXPANSION_STATE_KEY = "expansionState"
         private const val LAYOUT_MANAGER_STATE = "layoutManagerState"
+        private const val EDIT_INSTANCES_TAG = "editInstances"
 
         private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
             check(position >= 0)
@@ -162,7 +163,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val instanceKeys = ArrayList(instanceDatas.map { it.instanceKey })
 
-                    activity.startActivity(EditInstancesActivity.getIntent(instanceKeys))
+                    EditInstancesFragment.newInstance(instanceKeys).show(activity.supportFragmentManager, EDIT_INSTANCES_TAG)
                 }
                 R.id.action_group_share -> Utils.share(activity, getShareData(selectedDatas))
                 R.id.action_group_show_task -> {

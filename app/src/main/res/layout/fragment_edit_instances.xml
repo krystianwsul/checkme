@@ -41,7 +41,7 @@
         style="@style/OldTextInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="9dp"
+        android:layout_marginBottom="18dp"
         app:errorEnabled="true"
         app:hintEnabled="false">
 

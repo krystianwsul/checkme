@@ -19,7 +19,8 @@
         style="@style/OldTextInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:errorEnabled="true">
+        app:errorEnabled="true"
+        app:hintEnabled="false">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editInstanceDate"
@@ -39,7 +40,9 @@
         android:id="@+id/editInstanceTimeLayout"
         style="@style/OldTextInput"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:errorEnabled="true"
+        app:hintEnabled="false">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editInstanceTime"

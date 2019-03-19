@@ -23,7 +23,7 @@
             style="@style/OldTextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="27dp"
+            android:layout_marginTop="17dp"
             android:visibility="gone"
             app:errorEnabled="true"
             app:hintEnabled="false">
@@ -178,11 +178,11 @@
             style="@style/OldTextInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             app:errorEnabled="true"
-            app:hintEnabled="false">
+            app:hintEnabled="false"
+            android:visibility="gone">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/scheduleDialogTime"
                 style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:layout_width="match_parent"

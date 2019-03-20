@@ -21,7 +21,7 @@ class SingleSchedule(
 
     override fun getScheduleText() = dateTime.getDisplayText()
 
-    private fun getInstance(task: Task) = domainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
+    fun getInstance(task: Task) = domainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 

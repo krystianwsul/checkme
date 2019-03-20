@@ -1700,12 +1700,36 @@ open class DomainFactory(
                     .toList()
                     .toMap()
 
+    private fun Task.showAsParent(now: ExactTimeStamp, excludedTaskKeys: List<TaskKey>): Boolean {
+        if (excludedTaskKeys.contains(taskKey))
+            return false
+
+        if (!current(now))
+            return false
+
+        if (!isVisible(now))
+            return false
+
+        if (!isRootTask(now))
+            return false
+
+        // todo consider using this for main task list as well
+        if (getCurrentSchedules(now).all {
+                    (it as? SingleSchedule)?.getInstance(this)
+                            ?.done
+                            ?.let { it < now } == true
+                })
+            return false
+
+        return true
+    }
+
     private fun getParentTreeDatas(now: ExactTimeStamp, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         val parentTreeDatas = mutableMapOf<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>()
 
         parentTreeDatas.putAll(remoteProjectFactory.remotePrivateProject
                 .tasks
-                .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
+                .filter { it.showAsParent(now, excludedTaskKeys) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
@@ -1732,7 +1756,7 @@ open class DomainFactory(
 
     private fun getProjectTaskTreeDatas(now: ExactTimeStamp, remoteProject: RemoteProject<*>, excludedTaskKeys: List<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         return remoteProject.tasks
-                .filter { !excludedTaskKeys.contains(it.taskKey) && it.current(now) && it.isVisible(now) && it.isRootTask(now) }
+                .filter { it.showAsParent(now, excludedTaskKeys) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))

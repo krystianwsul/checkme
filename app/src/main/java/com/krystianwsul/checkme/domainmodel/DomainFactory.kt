@@ -603,6 +603,10 @@ open class DomainFactory(
 
             taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName)
 
+            /* todo
+            check if change for allowing edits to done instances, combined with hiding done single
+            tasks from parent list, can cause the current parent to be missing from here
+             */
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys)
         } else {
             var projectId: String? = null

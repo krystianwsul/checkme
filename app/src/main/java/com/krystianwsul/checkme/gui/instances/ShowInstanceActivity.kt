@@ -264,7 +264,6 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                                 Utils.share(this@ShowInstanceActivity, it.name + "\n" + shareData)
                         }
                         R.id.instance_menu_show_task -> {
-                            check(!it.done)
                             check(it.taskCurrent)
 
                             showInstanceViewModel.stop()
@@ -272,7 +271,6 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                             startActivityForResult(ShowTaskActivity.newIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)
                         }
                         R.id.instance_menu_edit_task -> {
-                            check(!it.done)
                             check(it.taskCurrent)
 
                             showInstanceViewModel.stop()

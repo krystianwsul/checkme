@@ -406,7 +406,7 @@ class CreateTaskActivity : AbstractActivity() {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         createTaskViewModel = getViewModel<CreateTaskViewModel>().apply {
-            start(taskKey, taskKeys)
+            start(taskKey, taskKeys, parentTaskKeyHint)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }

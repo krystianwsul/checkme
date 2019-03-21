@@ -283,7 +283,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                             if (!it.exists)
                                 showInstanceViewModel.stop()
 
-                            val todoTaskData = DomainFactory.instance.setTaskEndTimeStamp(it.dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                            val undoTaskData = DomainFactory.instance.setTaskEndTimeStamp(it.dataId, SaveService.Source.GUI, instanceKey.taskKey)
 
                             if (it.exists) {
                                 it.taskCurrent = false
@@ -295,10 +295,10 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
                                     updateBottomMenu()
 
-                                    DomainFactory.instance.clearTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, todoTaskData)
+                                    DomainFactory.instance.clearTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, undoTaskData)
                                 }
                             } else {
-                                setSnackbar(todoTaskData)
+                                setSnackbar(undoTaskData)
 
                                 finish()
                             }

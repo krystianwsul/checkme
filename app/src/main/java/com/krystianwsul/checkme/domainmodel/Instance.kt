@@ -159,8 +159,8 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract fun setDone(done: Boolean, now: ExactTimeStamp)
 
-    fun isVisible(now: ExactTimeStamp): Boolean {
-        val isVisible = isVisibleHelper(now)
+    fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
+        val isVisible = isVisibleHelper(now, hack24)
 
         if (isVisible) {
             val task = task
@@ -180,13 +180,18 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         return isVisible
     }
 
-    private fun isVisibleHelper(now: ExactTimeStamp): Boolean {
-        val calendar = now.calendar
-        calendar.add(Calendar.DAY_OF_YEAR, -1) // 24 hack
-        val twentyFourHoursAgo = ExactTimeStamp(calendar)
+    private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
+        return getParentInstance(now)?.isVisible(now, hack24) ?: (done?.let {
+            val cutoff = if (hack24) {
+                now.calendar
+                        .apply { add(Calendar.DAY_OF_YEAR, -1) }
+                        .toExactTimeStamp()
+            } else {
+                ExactTimeStamp.now
+            }
 
-        val parentInstance = getParentInstance(now)
-        return parentInstance?.isVisible(now) ?: done?.let { it > twentyFourHoursAgo } ?: true
+            (it > cutoff)
+        } ?: true)
     }
 
     fun getParentInstance(now: ExactTimeStamp): Instance? {

@@ -391,7 +391,7 @@ open class DomainFactory(
         val customTimeDatas = getCurrentRemoteCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
 
         val taskDatas = if (position == 0) {
-            getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
+            getTasks().filter { it.current(now) && it.isVisible(now, true) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
                     .map { GroupListFragment.TaskData(it.taskKey, it.name, getGroupListChildTaskDatas(it, now), it.startExactTimeStamp, it.note) }
                     .toList()
         } else {
@@ -1634,7 +1634,7 @@ open class DomainFactory(
             }
         }
 
-        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now) }
+        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
     }
 
     private fun getTime(timePair: TimePair): Time {
@@ -1711,7 +1711,7 @@ open class DomainFactory(
 
         if (includedTaskKeys.contains(taskKey)) {
             check(current(now))
-            check(isVisible(now))
+            check(isVisible(now, true))
 
             return true
         }
@@ -1722,15 +1722,7 @@ open class DomainFactory(
         if (excludedTaskKeys.contains(taskKey))
             return false
 
-        if (!isVisible(now))
-            return false
-
-        // todo consider using this for main task list as well
-        if (getCurrentSchedules(now).all {
-                    (it as? SingleSchedule)?.getInstance(this)
-                            ?.done
-                            ?.let { it < now } == true
-                })
+        if (!isVisible(now, false))
             return false
 
         return true
@@ -1909,7 +1901,7 @@ open class DomainFactory(
             }
 
     fun getMainData(now: ExactTimeStamp): TaskListFragment.TaskData {
-        val childTaskDatas = getTasks().filter { it.current(now) && it.isVisible(now) && it.isRootTask(now) }
+        val childTaskDatas = getTasks().filter { it.current(now) && it.isVisible(now, false) && it.isRootTask(now) }
                 .map { TaskListFragment.ChildTaskData(it.name, it.getScheduleText(now), getTaskListChildTaskDatas(it, now), it.note, it.startExactTimeStamp, it.taskKey, null) }
                 .sortedDescending()
                 .toMutableList()
@@ -1960,14 +1952,14 @@ open class DomainFactory(
                 .toMutableMap()
 
         tasks.asSequence()
-                .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now) }
+                .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now, true) }
                 .map { taskRelevances.getValue(it.taskKey) }.toList()
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         existingInstances.asSequence()
-                .filter { it.isRootInstance(now) && it.isVisible(now) }
+                .filter { it.isRootInstance(now) && it.isVisible(now, true) }
                 .map { instanceRelevances[it.instanceKey]!! }.toList()
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
@@ -1977,7 +1969,7 @@ open class DomainFactory(
         val irrelevantTasks = tasks.toMutableList()
         irrelevantTasks.removeAll(relevantTasks)
 
-        check(irrelevantTasks.none { it.isVisible(now) })
+        check(irrelevantTasks.none { it.isVisible(now, true) })
 
         val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
         val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
@@ -1993,7 +1985,7 @@ open class DomainFactory(
         val irrelevantExistingInstances = ArrayList<Instance>(existingInstances)
         irrelevantExistingInstances.removeAll(relevantExistingInstances)
 
-        check(irrelevantExistingInstances.none { it.isVisible(now) })
+        check(irrelevantExistingInstances.none { it.isVisible(now, true) })
 
         irrelevantExistingInstances.apply { Log.e("asdf", "irrelevant instances $size") }.forEach { it.delete() }
         irrelevantTasks.apply { Log.e("asdf", "irrelevant tasks $size") }.forEach { it.delete() }

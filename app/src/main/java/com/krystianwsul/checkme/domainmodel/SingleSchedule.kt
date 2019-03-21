@@ -46,9 +46,9 @@ class SingleSchedule(
         return instances
     }
 
-    override fun isVisible(task: Task, now: ExactTimeStamp): Boolean {
+    override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {
         check(current(now))
 
-        return getInstance(task).isVisible(now)
+        return getInstance(task).isVisible(now, hack24)
     }
 }

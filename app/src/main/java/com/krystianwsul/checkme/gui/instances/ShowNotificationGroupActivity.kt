@@ -50,11 +50,7 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
 
             setOnMenuItemClickListener { item ->
                 when (item.itemId) {
-                    R.id.action_notification_group_hour -> {
-                        groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                            groupListFragment.addHour(TreeViewAdapter.Placeholder)
-                        }
-                    }
+                    R.id.action_notification_group_hour -> groupListFragment.addHour()
                     else -> throw IllegalArgumentException()
                 }
 

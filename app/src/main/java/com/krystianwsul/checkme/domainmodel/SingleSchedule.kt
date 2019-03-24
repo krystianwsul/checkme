@@ -21,7 +21,7 @@ class SingleSchedule(
 
     override fun getScheduleText() = dateTime.getDisplayText()
 
-    private fun getInstance(task: Task) = domainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
+    fun getInstance(task: Task) = domainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 
@@ -46,9 +46,9 @@ class SingleSchedule(
         return instances
     }
 
-    override fun isVisible(task: Task, now: ExactTimeStamp): Boolean {
+    override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {
         check(current(now))
 
-        return getInstance(task).isVisible(now)
+        return getInstance(task).isVisible(now, hack24)
     }
 }

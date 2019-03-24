@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
+import java.util.*
 
 fun Set<DayOfWeek>.prettyPrint(): String {
     check(isNotEmpty())
@@ -181,3 +182,5 @@ fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenu
 }
 
 fun Context.normalizedId(@IdRes id: Int) = if (id == View.NO_ID) "NO_ID" else resources.getResourceName(id)!!
+
+fun Calendar.toExactTimeStamp() = ExactTimeStamp(this)

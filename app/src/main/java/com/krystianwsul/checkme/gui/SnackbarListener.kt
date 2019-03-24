@@ -34,6 +34,8 @@ interface SnackbarListener {
 
     fun showInstanceMarkedDone() = showSnackbar(snackbarParent.context.getString(R.string.instanceMarkedDone), Snackbar.LENGTH_LONG)
 
+    fun showSnackbarHour(count: Int, action: () -> Unit) = showSnackbar(R.string.snackbarHour, count, Snackbar.LENGTH_SHORT, action)
+
     fun showText(message: String, duration: Int) = showSnackbar(message, duration)
 
     private fun showSnackbar(@StringRes messageId: Int, count: Int, duration: Int, action: () -> Unit) = showSnackbar(snackbarParent.context.getString(messageId, count.toString()), duration, true, action)

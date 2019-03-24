@@ -34,6 +34,14 @@ class TutorialFragment : AbstractFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        tutorialImage.setImageResource(when (position) {
+            0 -> R.drawable.tutorial_1
+            1 -> R.drawable.tutorial_2
+            2 -> R.drawable.tutorial_3
+            3 -> R.drawable.tutorial_4
+            else -> throw IllegalArgumentException()
+        })
+
         tutorialText.setText(when (position) {
             0 -> R.string.tutorial1
             1 -> R.string.tutorial2

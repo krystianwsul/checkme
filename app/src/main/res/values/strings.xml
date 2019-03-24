@@ -67,10 +67,10 @@
     <string name="projects_empty">Add a project by clicking the plus at the bottom.</string>
     <string name="parentProject">Project</string>
     <string name="showInstances">Show reminders</string>
-    <string name="tutorial1">Start out by creating a task.  A task can have a name, notes, and subtasks.</string>
+    <string name="tutorial1">Begin by creating a task.  A task can have a name, notes, and subtasks.</string>
     <string name="tutorial2">You can also add reminders to a task, to get notified about it at a specific time. You can be notified once, on certain days of the week, or on a certain day of every month.</string>
     <string name="tutorial3">You can set a reminder for a specific hour.  Also, you can add a named time of day as a shortcut, if you often have things to do at a specific time.</string>
-    <string name="tutorial4">Sign into your Google account to share tasks with other users.  Start out by searching for users by e-mail address to add them as friends.  Next, create a project, and add friends to it.  Finally, when creating or editing a task, set the project as its parent.</string>
+    <string name="tutorial4">Sign into your Google account to share tasks with other users.  Start out by searching for users by e-mail address to add them as friends.  Create a project, and add friends to it.  Finally, when creating or editing a task, set the project as its parent.</string>
     <string name="tutorial">Tutorial</string>
     <string name="open">Open</string>
     <string name="snackbarRemoved">%1$s removed</string>

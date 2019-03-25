@@ -17,6 +17,8 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
         fun newInstance() = DrawerFragment()
     }
 
+    override val alwaysExpand = true
+
     private val mainActivity get() = activity as MainActivity
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {

@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
 import androidx.appcompat.view.ActionMode
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
@@ -325,21 +326,25 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        check(requestCode == ShowTaskActivity.REQUEST_EDIT_TASK)
+        if (requestCode == ShowTaskActivity.REQUEST_EDIT_TASK) {
+            if (resultCode == Activity.RESULT_OK) {
+                check(data!!.hasExtra(ShowTaskActivity.TASK_KEY_KEY))
 
-        if (resultCode == Activity.RESULT_OK) {
-            check(data!!.hasExtra(ShowTaskActivity.TASK_KEY_KEY))
+                val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
 
-            val taskKey = data.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-
-            instanceKey = InstanceKey(taskKey, instanceKey.scheduleKey.scheduleDate, TimePair(instanceKey.scheduleKey.scheduleTimePair.customTimeKey, instanceKey.scheduleKey.scheduleTimePair.hourMinute))
-        } else if (resultCode == ShowTaskActivity.RESULT_DELETE) {
-            if (!this.data!!.exists) {
-                finish()
-                return
+                instanceKey = InstanceKey(taskKey, instanceKey.scheduleKey.scheduleDate, TimePair(instanceKey.scheduleKey.scheduleTimePair.customTimeKey, instanceKey.scheduleKey.scheduleTimePair.hourMinute))
+            } else if (resultCode == ShowTaskActivity.RESULT_DELETE) {
+                if (!this.data!!.exists) {
+                    finish()
+                    return
+                }
             }
-        }
 
-        showInstanceViewModel.start(instanceKey)
+            showInstanceViewModel.start(instanceKey)
+        } else {
+            MyCrashlytics.logException(WrongRequestCodeException("code: $requestCode"))
+        }
     }
+
+    private class WrongRequestCodeException(message: String) : Exception(message)
 }

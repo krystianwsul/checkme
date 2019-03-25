@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".gui.TutorialActivity"
+    android:id="@+id/tutorialCoordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/tutorialCoordinator">
+    tools:context=".gui.TutorialActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -23,29 +22,37 @@
                 android:layout_height="0dp"
                 android:layout_weight="1">
 
-                <androidx.viewpager.widget.ViewPager
-                    android:id="@+id/tutorialPager"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
 
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/tutorialDots"
-                    android:layout_alignParentBottom="true"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:tabBackground="@drawable/tab_selector"
-                    app:tabGravity="center"
-                    app:tabIndicatorHeight="0dp" />
+                    <androidx.viewpager.widget.ViewPager
+                        android:id="@+id/tutorialPager"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <com.google.android.material.tabs.TabLayout
+                        android:id="@+id/tutorialDots"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/fabMargin"
+                        app:tabBackground="@drawable/tab_selector"
+                        app:tabGravity="center"
+                        app:tabIndicatorHeight="0dp" />
+
+                </LinearLayout>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/tutorialFab"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
                     android:layout_margin="@dimen/fabMargin"
                     android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
                     android:tint="@android:color/white"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap" />
 
             </RelativeLayout>

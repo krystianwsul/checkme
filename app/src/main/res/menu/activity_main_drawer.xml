@@ -49,6 +49,12 @@
             android:title="@string/tutorial" />
 
         <item
+            android:id="@+id/main_drawer_about"
+            android:checkable="false"
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:title="@string/about" />
+
+        <item
             android:id="@+id/main_drawer_sign_out"
             android:checkable="false"
             android:icon="@drawable/ic_account_circle_black_24dp"

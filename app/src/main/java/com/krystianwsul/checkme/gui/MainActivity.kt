@@ -67,6 +67,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     private lateinit var projectListFragment: ProjectListFragment
     private lateinit var showCustomTimesFragment: ShowCustomTimesFragment
     private lateinit var friendListFragment: FriendListFragment
+    private lateinit var aboutFragment: AboutFragment
 
     private var onPageChangeDisposable: Disposable? = null
 
@@ -261,12 +262,14 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             projectListFragment = supportFragmentManager.findFragmentById(R.id.mainProjectListFrame) as ProjectListFragment
             showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
             friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
+            aboutFragment = supportFragmentManager.findFragmentById(R.id.mainAboutFrame) as AboutFragment
         } else {
             debugFragment = DebugFragment.newInstance()
             taskListFragment = TaskListFragment.newInstance()
             projectListFragment = ProjectListFragment.newInstance()
             showCustomTimesFragment = ShowCustomTimesFragment.newInstance()
             friendListFragment = FriendListFragment.newInstance()
+            aboutFragment = AboutFragment.newInstance()
 
             supportFragmentManager.beginTransaction()
                     .add(R.id.mainDebugFrame, debugFragment)
@@ -274,7 +277,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                     .add(R.id.mainProjectListFrame, projectListFragment)
                     .add(R.id.mainFriendListFrame, friendListFragment)
                     .add(R.id.mainCustomTimesFrame, showCustomTimesFragment)
-                    .add(R.id.mainAboutFrame, AboutFragment.newInstance())
+                    .add(R.id.mainAboutFrame, aboutFragment)
                     .commit()
         }
 
@@ -507,10 +510,12 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             hideViews.add(mainDebugFrame)
         }
 
-        if (tab == Tab.ABOUT)
+        if (tab == Tab.ABOUT) {
             showViews.add(mainAboutFrame)
-        else
+            aboutFragment.onShown()
+        } else {
             hideViews.add(mainAboutFrame)
+        }
 
         mainActivityToolbar.title = when (tab) {
             MainActivity.Tab.INSTANCES -> null

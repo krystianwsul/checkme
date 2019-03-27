@@ -13,6 +13,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.krystianwsul.checkme.BuildConfig
 import com.krystianwsul.checkme.R
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_about.*
 import mehdi.sakout.aboutpage.AboutPage
@@ -39,8 +40,6 @@ class AboutFragment : AbstractFragment() {
             setConfigSettings(FirebaseRemoteConfigSettings.Builder().setDeveloperModeEnabled(BuildConfig.DEBUG).build())
             setDefaults(mapOf(BENIA_URL_KEY to "https://www.linkedin.com/in/bernardakaluza/"))
         }
-
-        // todo delayed scroll?
 
         fun update() = element.setIntent(Intent(Intent.ACTION_VIEW, Uri.parse(config.getString(BENIA_URL_KEY))))
         update()
@@ -69,5 +68,13 @@ class AboutFragment : AbstractFragment() {
                         }
                     }
                 })
+    }
+
+    fun onShown() {
+        Observable.just(Unit)
+                .delay(3, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { aboutRoot.apply { smoothScrollTo(0, bottom) } }
+                .addTo(viewCreatedDisposable)
     }
 }

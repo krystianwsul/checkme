@@ -13,4 +13,5 @@
     <dimen name="bottom_sheet_top_padding">8dp</dimen>
     <dimen name="splashWidth">149dp</dimen>
     <dimen name="splashHeight">166dp</dimen>
+    <dimen name="aboutPadding">112dp</dimen>
 </resources>

@@ -32,10 +32,13 @@ class TutorialActivity : AbstractActivity() {
 
     private val tutorialViewModel by lazy { getViewModel<TutorialViewModel>() }
 
+    var help: Boolean = false
+        private set
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val help = intent.hasExtra(HELP_KEY)
+        help = intent.hasExtra(HELP_KEY)
 
         if (!help && FirebaseAuth.getInstance().currentUser != null) {
             startMain()

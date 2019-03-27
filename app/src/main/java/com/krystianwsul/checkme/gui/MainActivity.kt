@@ -20,6 +20,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
@@ -70,7 +71,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
     private var onPageChangeDisposable: Disposable? = null
 
-    val visibleTab = BehaviorRelay.createDefault(Tab.INSTANCES)
+    val visibleTab = BehaviorRelay.createDefault(Tab.values()[Preferences.tab])
     private val daysPosition = BehaviorRelay.create<Int>()
 
     override lateinit var hostEvents: Observable<DayFragment.Event>
@@ -97,14 +98,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
     private lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
 
-    override fun getBottomBar() = bottomAppBar!!
-
-    fun getState(pair: Pair<TimeRange, Int>) = states[pair]
-
-    fun setState(pair: Pair<TimeRange, Int>, bundle: Bundle) {
-        states[pair] = bundle
-    }
-
     val selectAllRelay = PublishRelay.create<Unit>()
 
     override val search by lazy {
@@ -114,6 +107,14 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     }
 
     private var actionMode: ActionMode? = null
+
+    override fun getBottomBar() = bottomAppBar!!
+
+    fun getState(pair: Pair<TimeRange, Int>) = states[pair]
+
+    fun setState(pair: Pair<TimeRange, Int>, bundle: Bundle) {
+        states[pair] = bundle
+    }
 
     fun updateBottomMenu() {
         bottomAppBar.menu
@@ -294,7 +295,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             updateCalendarHeight()
         }
 
-        showTab(visibleTab.value!!)
+        showTab(visibleTab.value!!, true)
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {
@@ -455,7 +456,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    fun showTab(tab: Tab) {
+    fun showTab(tab: Tab, immediate: Boolean = false) {
         val density = resources.displayMetrics.density
 
         fun setVisible(visible: Boolean) = mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visible)
@@ -467,6 +468,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             showViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
             setVisible(true)
+
+            Preferences.tab = tab.ordinal
         } else {
             hideViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
@@ -476,6 +479,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         if (tab == Tab.TASKS) {
             showViews.add(mainTaskListFrame)
+
+            Preferences.tab = tab.ordinal
         } else {
             hideViews.add(mainTaskListFrame)
             closeSearch()
@@ -561,7 +566,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         visibleTab.accept(tab)
 
-        animateVisibility(showViews, hideViews, duration = resources.getInteger(android.R.integer.config_shortAnimTime))
+        animateVisibility(showViews, hideViews, immediate, resources.getInteger(android.R.integer.config_shortAnimTime))
 
         updateCalendarHeight()
         updateSearchMenu()

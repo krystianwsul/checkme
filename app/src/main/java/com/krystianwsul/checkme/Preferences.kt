@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme
 
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import kotlin.properties.Delegates
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -9,6 +10,7 @@ object Preferences {
 
     private const val LAST_TICK_KEY = "lastTick"
     private const val TICK_LOG = "tickLog"
+    private const val TAB_KEY = "tab"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -19,6 +21,12 @@ object Preferences {
                 .apply()
 
     var tickLog by ReadWriteStrPref(TICK_LOG)
+
+    var tab by Delegates.observable(sharedPreferences.getInt(TAB_KEY, 0)) { _, _, newValue ->
+        sharedPreferences.edit()
+                .putInt(TAB_KEY, newValue)
+                .apply()
+    }
 
     fun logLineDate(line: String) {
         logLine("")

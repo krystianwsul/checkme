@@ -39,7 +39,6 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                 })
 
                 setNavigationItemSelectedListener {
-
                     when (it.itemId) {
                         R.id.main_drawer_instances -> showTab(MainActivity.Tab.INSTANCES)
                         R.id.main_drawer_tasks -> showTab(MainActivity.Tab.TASKS)

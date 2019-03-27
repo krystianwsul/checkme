@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.common.collect.HashMultiset
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -510,6 +511,7 @@ class CreateTaskActivity : AbstractActivity() {
                 } else if (parentTaskKeyHint != null) {
                     check(taskKey == null)
 
+                    MyCrashlytics.log("CreateTaskActivity.parentTaskKeyHint: $parentTaskKeyHint")
                     parent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(parentTaskKeyHint!!))
                 }
 

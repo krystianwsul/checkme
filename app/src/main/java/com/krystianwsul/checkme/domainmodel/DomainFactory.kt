@@ -562,7 +562,7 @@ open class DomainFactory(
 
     @Synchronized
     fun getCreateTaskData(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?, parentTaskKeyHint: TaskKey?): CreateTaskViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getCreateTaskData")
+        MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
 
         check(taskKey == null || joinTaskKeys == null)
 
@@ -577,6 +577,13 @@ open class DomainFactory(
         }
 
         val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
+
+        fun checkHintPresent(taskParentKey: CreateTaskViewModel.ParentKey.TaskParentKey, parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>): Boolean {
+            return parentTreeDatas.containsKey(taskParentKey) || parentTreeDatas.any { checkHintPresent(taskParentKey, it.value.parentTreeDatas) }
+        }
+
+        fun checkHintPresent(parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>) = parentTaskKeyHint?.let { checkHintPresent(CreateTaskViewModel.ParentKey.TaskParentKey(it), parentTreeDatas) }
+                ?: true
 
         var taskData: CreateTaskViewModel.TaskData? = null
         val parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>
@@ -607,6 +614,7 @@ open class DomainFactory(
             taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName)
 
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
+            check(checkHintPresent(parentTreeDatas))
         } else {
             var projectId: String? = null
             if (joinTaskKeys != null) {
@@ -624,6 +632,7 @@ open class DomainFactory(
             } else {
                 getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             }
+            check(checkHintPresent(parentTreeDatas))
         }
 
         val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) }

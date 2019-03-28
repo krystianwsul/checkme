@@ -1715,18 +1715,20 @@ open class DomainFactory(
     private fun Task.showAsParent(now: ExactTimeStamp, excludedTaskKeys: Set<TaskKey>, includedTaskKeys: Set<TaskKey>): Boolean {
         check(excludedTaskKeys.intersect(includedTaskKeys).isEmpty())
 
+        if (!current(now)) {
+            check(!includedTaskKeys.contains(taskKey))
+
+            return false
+        }
+
         if (!isRootTask(now))
             return false
 
         if (includedTaskKeys.contains(taskKey)) {
-            check(current(now))
             check(isVisible(now, true))
 
             return true
         }
-
-        if (!current(now))
-            return false
 
         if (excludedTaskKeys.contains(taskKey))
             return false

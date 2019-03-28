@@ -511,7 +511,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
 
         mainActivityToolbar.title = when (tab) {
-            MainActivity.Tab.INSTANCES -> null
+            MainActivity.Tab.INSTANCES -> getString(R.string.instances)
             MainActivity.Tab.TASKS -> getString(R.string.tasks)
             MainActivity.Tab.PROJECTS -> getString(R.string.projects)
             MainActivity.Tab.CUSTOM_TIMES -> getString(R.string.times)

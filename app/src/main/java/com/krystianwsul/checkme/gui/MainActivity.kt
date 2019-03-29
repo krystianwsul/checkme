@@ -132,9 +132,10 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    private fun closeSearch() {
+    private fun closeSearch(switchingTab: Boolean) {
         restoreInstances?.let {
-            check(visibleTab.value!! == Tab.TASKS)
+            if (!switchingTab)
+                check(visibleTab.value!! == Tab.TASKS)
 
             restoreInstances = null
 
@@ -145,11 +146,11 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 text = null
             }
 
-            if (it)
-                showTab(Tab.INSTANCES, closingSearch = true)
+            if (it && !switchingTab)
+                showTab(Tab.INSTANCES, changingSearch = true)
         }
 
-        updateTopMenu()
+        updateTopMenu(true)
         hideKeyboard()
     }
 
@@ -252,13 +253,13 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                             updateCalendarHeight()
                         }
-                        R.id.actionMainClose -> closeSearch()
+                        R.id.actionMainClose -> closeSearch(false)
                         R.id.actionMainSearch -> {
                             check(restoreInstances == null)
 
                             restoreInstances = when (visibleTab.value!!) {
                                 Tab.INSTANCES -> {
-                                    showTab(Tab.TASKS)
+                                    showTab(Tab.TASKS, changingSearch = true)
                                     true
                                 }
                                 Tab.TASKS -> {
@@ -274,7 +275,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
                             }
 
-                            updateTopMenu()
+                            updateTopMenu(true)
                         }
                         else -> throw IllegalArgumentException()
                     }
@@ -447,7 +448,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    private fun updateTopMenu() {
+    private fun updateTopMenu(changingSearch: Boolean) {
         val searching = restoreInstances != null
         if (searching)
             check(mainActivitySearch.visibility == View.VISIBLE)
@@ -474,7 +475,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             )
         }
 
-        mainActivityToolbar.animateItems(itemVisibilities, true)
+        mainActivityToolbar.animateItems(itemVisibilities, changingSearch) {
+            mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visibleTab.value!! == Tab.INSTANCES)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -497,10 +500,10 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    fun showTab(tab: Tab, immediate: Boolean = false, closingSearch: Boolean = false) {
-        val density = resources.displayMetrics.density
+    fun showTab(tab: Tab, immediate: Boolean = false, changingSearch: Boolean = false) {
+        var closeSearch = false
 
-        fun setVisible(visible: Boolean) = mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visible)
+        val density = resources.displayMetrics.density
 
         val showViews = mutableListOf<View>()
         val hideViews = mutableListOf<View>()
@@ -508,13 +511,11 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         if (tab == Tab.INSTANCES) {
             showViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
-            setVisible(true)
 
             Preferences.tab = tab.ordinal
         } else {
             hideViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
-            setVisible(false)
             calendarOpen = false
         }
 
@@ -525,8 +526,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         } else {
             hideViews.add(mainTaskListFrame)
 
-            if (!closingSearch)
-                closeSearch()
+            if (!changingSearch)
+                closeSearch = true
         }
 
         if (tab == Tab.PROJECTS) {
@@ -612,7 +613,12 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         animateVisibility(showViews, hideViews, immediate, resources.getInteger(android.R.integer.config_shortAnimTime))
 
         updateCalendarHeight()
-        updateTopMenu()
+        if (!changingSearch) {
+            if (closeSearch)
+                closeSearch(true)
+            else
+                updateTopMenu(false)
+        }
     }
 
     override fun onDestroy() {

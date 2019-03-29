@@ -178,6 +178,7 @@ fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenu
         }
     } else {
         itemVisibilities.forEach { menu.findItem(it.first)?.isVisible = it.second }
+        onEnd?.invoke()
     }
 }
 

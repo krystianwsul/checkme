@@ -522,7 +522,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         if (tab == Tab.TASKS) {
             showViews.add(mainTaskListFrame)
 
-            Preferences.tab = tab.ordinal
+            if (!changingSearch)
+                Preferences.tab = tab.ordinal
         } else {
             hideViews.add(mainTaskListFrame)
 

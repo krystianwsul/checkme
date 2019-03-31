@@ -35,12 +35,31 @@
         android:enabled="true"
         tools:ignore="UnusedAttribute"
         android:icon="@drawable/ic_search_black_24dp"
-        android:shortcutShortLabel="@string/tasks">
+        android:shortcutShortLabel="@string/search">
 
         <intent
             android:action="com.krystianwsul.checkme.SEARCH"
             android:targetPackage="com.krystianwsul.checkme"
             android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
+
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="add"
+        android:enabled="true"
+        tools:ignore="UnusedAttribute"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:shortcutShortLabel="@string/add_task">
+
+        <intent
+            android:action="com.krystianwsul.checkme.MAIN"
+            android:targetPackage="com.krystianwsul.checkme"
+            android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
+
+        <intent
+            android:action="com.krystianwsul.checkme.VIEW"
+            android:targetPackage="com.krystianwsul.checkme"
+            android:targetClass="com.krystianwsul.checkme.gui.tasks.CreateTaskActivity" />
 
     </shortcut>
 

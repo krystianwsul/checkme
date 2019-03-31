@@ -29,7 +29,7 @@
         android:icon="@drawable/ic_delete_white_24dp"/>
     <item
         android:id="@+id/action_task_add"
-        android:title="@string/add_task"
+        android:title="@string/add_subtask"
         android:orderInCategory="300"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_add_white_24dp"/>

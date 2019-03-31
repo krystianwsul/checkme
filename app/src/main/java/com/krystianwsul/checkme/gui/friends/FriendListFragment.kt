@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +22,7 @@ import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.synthetic.main.empty_text.*
 import java.util.*
 
 class FriendListFragment : AbstractFragment(), FabUser {
@@ -36,7 +36,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private lateinit var friendListProgress: ProgressBar
     private lateinit var friendListRecycler: RecyclerView
-    private lateinit var emptyText: TextView
 
     lateinit var treeViewAdapter: TreeViewAdapter
         private set
@@ -105,8 +104,6 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         friendListRecycler.layoutManager = LinearLayoutManager(activity)
 
-        emptyText = view.findViewById<View>(R.id.emptyText) as TextView
-
         if (savedInstanceState?.containsKey(SELECTED_IDS_KEY) == true)
             selectedIds = savedInstanceState.getStringArrayList(SELECTED_IDS_KEY)!!
 
@@ -144,12 +141,12 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         if (data.userListDatas.isEmpty()) {
             hide.add(friendListRecycler)
-            show = emptyText
+            show = emptyTextLayout
 
             emptyText.setText(R.string.friends_empty)
         } else {
             show = friendListRecycler
-            hide.add(emptyText)
+            hide.add(emptyTextLayout)
         }
 
         animateVisibility(listOf(show), hide)

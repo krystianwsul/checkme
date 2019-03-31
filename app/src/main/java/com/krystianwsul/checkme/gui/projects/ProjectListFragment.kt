@@ -145,12 +145,12 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         if (data.projectDatas.isEmpty()) {
             hide.add(projectListRecycler)
-            show = emptyText
+            show = emptyTextLayout
 
             emptyText.setText(R.string.projects_empty)
         } else {
             show = projectListRecycler
-            hide.add(emptyText)
+            hide.add(emptyTextLayout)
         }
 
         animateVisibility(listOf(show), hide, data.immediate)

@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +21,7 @@ import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.synthetic.main.empty_text.*
 import java.util.*
 
 class ShowCustomTimesFragment : AbstractFragment(), FabUser {
@@ -37,8 +37,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     lateinit var treeViewAdapter: TreeViewAdapter
         private set
-
-    private lateinit var emptyText: TextView
 
     private var selectedCustomTimeIds: List<RemoteCustomTimeId.Private>? = null
 
@@ -107,8 +105,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         showTimesList = view.findViewById(R.id.show_times_list)
         showTimesList.layoutManager = LinearLayoutManager(activity)
 
-        emptyText = view.findViewById(R.id.emptyText)!!
-
         if (savedInstanceState?.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY) == true) {
             selectedCustomTimeIds = savedInstanceState.getParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY)!!
             check(!selectedCustomTimeIds!!.isEmpty())
@@ -145,11 +141,11 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         if (data.entries.isEmpty()) {
             showTimesList.visibility = View.GONE
-            emptyText.visibility = View.VISIBLE
+            emptyTextLayout.visibility = View.VISIBLE
             emptyText.setText(R.string.custom_times_empty)
         } else {
             showTimesList.visibility = View.VISIBLE
-            emptyText.visibility = View.GONE
+            emptyTextLayout.visibility = View.GONE
         }
 
         updateSelectAll()

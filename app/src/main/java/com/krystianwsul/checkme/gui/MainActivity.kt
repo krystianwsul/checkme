@@ -396,6 +396,12 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 override fun onTabUnselected(tab: TabLayout.Tab?) = Unit
             })
         }
+
+        mainActivitySearch.apply {
+            addOneShotGlobalLayoutListener {
+                layoutParams = layoutParams.apply { width = mainActivityToolbar.width - dpToPx(64).toInt() }
+            }
+        }
     }
 
     override fun initBottomBar() {

@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -17,11 +16,13 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.empty_text.*
+import kotlinx.android.synthetic.main.fragment_show_custom_times.*
 import java.util.*
 
 class ShowCustomTimesFragment : AbstractFragment(), FabUser {
@@ -32,8 +33,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         fun newInstance() = ShowCustomTimesFragment()
     }
-
-    private lateinit var showTimesList: RecyclerView
 
     lateinit var treeViewAdapter: TreeViewAdapter
         private set
@@ -58,9 +57,15 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             when (itemId) {
                 R.id.action_custom_times_delete -> {
-                    (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).removeSelected(x)
+                    val selectedCustomTimeIds = (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).customTimeWrappers
+                            .filter { it.treeNode.isSelected }
+                            .map { it.customTimeData.id }
 
-                    updateSelectAll()
+                    DomainFactory.instance.setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeIds, false)
+
+                    customTimesListListener.showSnackbarRemoved(selectedCustomTimeIds.size) {
+                        DomainFactory.instance.setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeIds, true)
+                    }
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -102,7 +107,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        showTimesList = view.findViewById(R.id.show_times_list)
         showTimesList.layoutManager = LinearLayoutManager(activity)
 
         if (savedInstanceState?.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY) == true) {
@@ -139,14 +143,18 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
+        val show: View
+        val hide: View
         if (data.entries.isEmpty()) {
-            showTimesList.visibility = View.GONE
-            emptyTextLayout.visibility = View.VISIBLE
+            show = emptyTextLayout
+            hide = showTimesList
             emptyText.setText(R.string.custom_times_empty)
         } else {
-            showTimesList.visibility = View.VISIBLE
-            emptyTextLayout.visibility = View.GONE
+            show = showTimesList
+            hide = emptyTextLayout
         }
+
+        animateVisibility(show, hide, immediate = data.immediate)
 
         updateSelectAll()
 
@@ -169,7 +177,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private fun updateSelectAll() = (activity as CustomTimesListListener).setCustomTimesSelectAllVisibility(treeViewAdapter.itemCount != 0)
+    private fun updateSelectAll() = (activity as CustomTimesListListener).setCustomTimesSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
     fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 
@@ -197,8 +205,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private inner class CustomTimesAdapter : TreeModelAdapter {
 
-        private val dataId get() = data.dataId
-
         lateinit var customTimeWrappers: MutableList<CustomTimeNode>
             private set
 
@@ -224,31 +230,6 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(layoutInflater.inflate(R.layout.row_list, parent, false)!!)
-
-        fun removeSelected(@Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
-            val selectedCustomTimeWrappers = customTimeWrappers.filter { it.treeNode.isSelected }
-            customTimeWrappers.removeAll(selectedCustomTimeWrappers)
-
-            selectedCustomTimeWrappers.map { it.treeNode }.forEach { treeNodeCollection.remove(it, x) }
-
-            val customTimeDatas = selectedCustomTimeWrappers.map { it.customTimeData }
-            data.entries.removeAll(customTimeDatas)
-
-            val selectedCustomTimeIds = customTimeDatas.map { it.id }
-
-            DomainFactory.instance.setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, false)
-
-            customTimesListListener.showSnackbarRemoved(selectedCustomTimeIds.size) {
-                onLoadFinished(data.apply {
-                    entries.apply {
-                        addAll(customTimeDatas)
-                        sortBy { it.id }
-                    }
-                })
-
-                DomainFactory.instance.setCustomTimesCurrent(dataId, SaveService.Source.GUI, selectedCustomTimeIds, true)
-            }
-        }
     }
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) : GroupHolderNode(0) {

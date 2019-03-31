@@ -164,7 +164,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
     private fun updateSelectAll() {
         checkNotNull(treeViewAdapter)
 
-        (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.itemCount != 0)
+        (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
     }
 
     fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)

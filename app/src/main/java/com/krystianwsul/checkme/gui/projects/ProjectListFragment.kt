@@ -212,7 +212,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     private fun updateSelectAll() {
         checkNotNull(treeViewAdapter)
 
-        mainActivity.setProjectSelectAllVisibility(treeViewAdapter.itemCount != 0)
+        mainActivity.setProjectSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
     }
 
     override fun clearFab() {

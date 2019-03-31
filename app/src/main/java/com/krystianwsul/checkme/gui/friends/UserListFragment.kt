@@ -252,7 +252,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     private fun updateSelectAll() {
         checkNotNull(treeViewAdapter)
 
-        listener.setUserSelectAllVisibility(treeViewAdapter.itemCount != 0)
+        listener.setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
     }
 
     inner class FriendListAdapter : TreeModelAdapter {

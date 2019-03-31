@@ -6,7 +6,7 @@
         android:shortcutId="instances"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@drawable/ic_notifications_black_24dp"
+        android:icon="@drawable/ic_notifications_orange_24dp"
         android:shortcutShortLabel="@string/instances">
 
         <intent
@@ -20,7 +20,7 @@
         android:shortcutId="tasks"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@drawable/ic_assignment_black_24dp"
+        android:icon="@drawable/ic_assignment_orange_24dp"
         android:shortcutShortLabel="@string/tasks">
 
         <intent
@@ -34,7 +34,7 @@
         android:shortcutId="search"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@drawable/ic_search_black_24dp"
+        android:icon="@drawable/ic_search_orange_24dp"
         android:shortcutShortLabel="@string/search">
 
         <intent
@@ -48,7 +48,7 @@
         android:shortcutId="add"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@drawable/ic_add_black_24dp"
+        android:icon="@drawable/ic_add_orange_24dp"
         android:shortcutShortLabel="@string/add_task">
 
         <intent

@@ -6,7 +6,7 @@
         android:shortcutId="instances"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@drawable/ic_notifications_orange_24dp"
+        android:icon="@mipmap/launcher_instances"
         android:shortcutShortLabel="@string/instances">
 
         <intent
@@ -20,7 +20,7 @@
         android:shortcutId="tasks"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@drawable/ic_assignment_orange_24dp"
+        android:icon="@mipmap/launcher_tasks"
         android:shortcutShortLabel="@string/tasks">
 
         <intent
@@ -34,7 +34,7 @@
         android:shortcutId="search"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@drawable/ic_search_orange_24dp"
+        android:icon="@mipmap/launcher_search"
         android:shortcutShortLabel="@string/search">
 
         <intent
@@ -48,13 +48,8 @@
         android:shortcutId="add"
         android:enabled="true"
         tools:ignore="UnusedAttribute"
-        android:icon="@drawable/ic_add_orange_24dp"
+        android:icon="@mipmap/launcher_add"
         android:shortcutShortLabel="@string/add_task">
-
-        <intent
-            android:action="com.krystianwsul.checkme.MAIN"
-            android:targetPackage="com.krystianwsul.checkme"
-            android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
 
         <intent
             android:action="com.krystianwsul.checkme.VIEW"

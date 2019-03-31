@@ -62,6 +62,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         private const val DRAWER_TAG = "drawer"
 
+        private const val ACTION_INSTANCES = "com.krystianwsul.checkme.INSTANCES"
+        private const val ACTION_TASKS = "com.krystianwsul.checkme.TASKS"
+
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
     }
 
@@ -327,7 +330,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             updateCalendarHeight()
         }
 
-        showTab(visibleTab.value!!, true)
+        showTab(visibleTab.value!!, true) // todo action magic
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {

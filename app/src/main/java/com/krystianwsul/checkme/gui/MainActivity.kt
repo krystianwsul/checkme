@@ -64,6 +64,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         private const val ACTION_INSTANCES = "com.krystianwsul.checkme.INSTANCES"
         private const val ACTION_TASKS = "com.krystianwsul.checkme.TASKS"
+        private const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
 
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
     }
@@ -209,6 +210,24 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             }
         } else {
             states = mutableMapOf()
+
+            when (intent.action) {
+                ACTION_INSTANCES -> visibleTab.accept(Tab.INSTANCES)
+                ACTION_TASKS -> visibleTab.accept(Tab.TASKS)
+                ACTION_SEARCH -> {
+                    check(restoreInstances == null)
+
+                    restoreInstances = false
+                    visibleTab.accept(Tab.TASKS)
+
+                    mainActivitySearch.apply {
+                        visibility = View.VISIBLE
+                        requestFocus()
+
+                        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                    }
+                }
+            }
         }
 
         mainActivityToolbar.apply {
@@ -330,7 +349,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             updateCalendarHeight()
         }
 
-        showTab(visibleTab.value!!, true) // todo action magic
+        showTab(visibleTab.value!!, true)
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {

@@ -30,4 +30,18 @@
 
     </shortcut>
 
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        tools:ignore="UnusedAttribute"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:shortcutShortLabel="@string/tasks">
+
+        <intent
+            android:action="com.krystianwsul.checkme.SEARCH"
+            android:targetPackage="com.krystianwsul.checkme"
+            android:targetClass="com.krystianwsul.checkme.gui.MainActivity" />
+
+    </shortcut>
+
 </shortcuts>

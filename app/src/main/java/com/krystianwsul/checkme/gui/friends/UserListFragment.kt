@@ -78,6 +78,12 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        emptyTextPadding.visibility = View.VISIBLE
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -165,12 +171,12 @@ class UserListFragment : AbstractFragment(), FabUser {
         val show: View
         if ((treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.isEmpty()) {
             hide.add(friendListRecycler)
-            show = emptyText
+            show = emptyTextLayout
 
             emptyText.setText(R.string.friends_empty)
         } else {
             show = friendListRecycler
-            hide.add(emptyText)
+            hide.add(emptyTextLayout)
         }
 
         animateVisibility(listOf(show), hide, immediate)
@@ -246,7 +252,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     private fun updateSelectAll() {
         checkNotNull(treeViewAdapter)
 
-        listener.setUserSelectAllVisibility(treeViewAdapter.itemCount != 0)
+        listener.setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
     }
 
     inner class FriendListAdapter : TreeModelAdapter {

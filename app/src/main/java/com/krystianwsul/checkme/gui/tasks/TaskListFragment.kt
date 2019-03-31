@@ -341,7 +341,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         if (data!!.taskData.childTaskDatas.isEmpty() && data!!.taskData.note.isNullOrEmpty()) {
             hide.add(taskListRecycler)
-            show = emptyText
+            show = emptyTextLayout
 
             emptyText.setText(if (taskKey != null) {
                 R.string.empty_child
@@ -350,7 +350,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             })
         } else {
             show = taskListRecycler
-            hide.add(emptyText)
+            hide.add(emptyTextLayout)
         }
 
         animateVisibility(listOf(show), hide, immediate = data!!.immediate)

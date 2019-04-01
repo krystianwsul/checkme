@@ -8,34 +8,24 @@
     android:paddingBottom="@dimen/toolbarHeight"
     android:visibility="gone">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="4"
-        android:layout_margin="20dp">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="200dp"
-            android:adjustViewBounds="true"
-            android:src="@drawable/empty"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true" />
-
-    </RelativeLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_margin="20dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/empty" />
 
     <TextView
         android:id="@+id/emptyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginBottom="@dimen/toolbarHeight"
         android:gravity="center_horizontal"
+        android:paddingBottom="20dp"
         android:textColor="@color/textDisabled"
-        android:textSize="@dimen/textPrimary"
-        android:paddingBottom="20dp" />
+        android:textSize="@dimen/textPrimary" />
 
     <View
         android:id="@+id/emptyTextPadding"

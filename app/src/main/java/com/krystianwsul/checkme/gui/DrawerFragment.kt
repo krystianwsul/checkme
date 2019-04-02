@@ -1,6 +1,9 @@
 package com.krystianwsul.checkme.gui
 
+import android.net.Uri
 import android.os.Bundle
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -14,10 +17,22 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
     companion object {
 
-        fun newInstance() = DrawerFragment()
+        private const val KEY_URI = "uri"
+
+        fun newInstance(photo: Uri?) = DrawerFragment().apply {
+            arguments = Bundle().apply { putParcelable(KEY_URI, photo) }
+        }
     }
 
     private val mainActivity get() = activity as MainActivity
+
+    private var uri: Uri? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        uri = arguments!!.getParcelable<Uri>(KEY_URI)
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
         setCancelable(true)
@@ -52,7 +67,6 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                             domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
 
                             MyApplication.instance.googleSigninClient.signOut()
-
                             FirebaseAuth.getInstance().signOut()
 
                             finish()
@@ -84,6 +98,11 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         updateDebug()
                         true
                     }
+
+                    Glide.with(this)
+                            .load(uri)
+                            .apply(RequestOptions.circleCropTransform())
+                            .into(navHeaderPhoto)
 
                     FirebaseAuth.getInstance()
                             .currentUser!!

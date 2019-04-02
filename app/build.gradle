@@ -61,6 +61,7 @@ kapt {
 ext {
     powermockVersion = '1.6.6'
     lifecycleVersion = '2.0.0'
+    glideVersion = '4.9.0'
 }
 
 androidExtensions {
@@ -118,6 +119,11 @@ dependencies {
     implementation 'com.androidhuman.rxfirebase2:firebase-database-kotlin:16.0.3.0'
     implementation 'com.androidhuman.rxfirebase2:firebase-auth:16.1.0.0'
     implementation 'com.androidhuman.rxfirebase2:firebase-auth-kotlin:16.1.0.0'
+
+    implementation "com.github.bumptech.glide:glide:$glideVersion"
+    annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
+
+    implementation 'jp.wasabeef:glide-transformations:4.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

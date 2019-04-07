@@ -143,6 +143,8 @@ object DatabaseWrapper {
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
+    fun updateUser(key: String, values: Map<String, Any?>) = rootReference.child("$USERS_KEY/$key").updateChildren(values)
+
     fun getUserSingle(key: String) = rootReference.child("$USERS_KEY/$key").data()
 
     fun getUserObservable(key: String) = rootReference.child("$USERS_KEY/$key").dataChanges()

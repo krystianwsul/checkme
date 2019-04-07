@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.firebase.UserData
 
 data class UserInfo(
-        private val email: String,
+        val email: String,
         val name: String,
         val token: String?) {
 

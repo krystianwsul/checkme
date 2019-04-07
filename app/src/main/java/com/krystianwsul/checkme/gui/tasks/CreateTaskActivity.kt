@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.common.collect.HashMultiset
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -39,10 +38,10 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
+import com.miguelbcr.ui.rx_paparazzo2.entities.Response
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_create_task.*
@@ -51,7 +50,6 @@ import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.io.File
-import java.util.*
 
 
 @Suppress("CascadeIf")
@@ -245,10 +243,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
-    private val cameraClicks = PublishRelay.create<Unit>()
-    private val galleryClicks = PublishRelay.create<Unit>()
-
-    private val fileData = BehaviorRelay.createDefault(NullableWrapper<FileData>()) // todo saveInstanceState
+    private val imageUrl = BehaviorRelay.createDefault(NullableWrapper<String>()) // todo saveInstanceState
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -431,28 +426,16 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         setupParent(createTaskRoot)
+    }
 
-        listOf(
-                cameraClicks.switchMap {
-                    RxPaparazzo.single(this)
-                            .size(ScreenSize())
-                            .useInternalStorage()
-                            .usingCamera()
-                },
-                galleryClicks.switchMap {
-                    RxPaparazzo.single(this)
-                            .size(ScreenSize())
-                            .useInternalStorage()
-                            .usingGallery()
-                }
-        ).merge()
-                .subscribe {
-                    if (it.resultCode() == Activity.RESULT_OK)
-                        it.targetUI()
-                                .fileData
-                                .accept(NullableWrapper(it.data()))
-                }
-                .addTo(createDisposable)
+    @SuppressLint("CheckResult")
+    private fun getImage(single: Observable<Response<CreateTaskActivity, FileData>>) {
+        single.subscribe {
+            if (it.resultCode() == Activity.RESULT_OK)
+                it.targetUI()
+                        .imageUrl
+                        .accept(NullableWrapper(it.data().file.absolutePath))
+        }
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
@@ -936,8 +919,22 @@ class CreateTaskActivity : AbstractActivity() {
                 }
                 elementsBeforeSchedules + scheduleEntries.size + 2 -> {
                     (holder as ImageHolder).run {
-                        imageCamera.setOnClickListener { cameraClicks.accept(Unit) }
-                        imageGallery.setOnClickListener { galleryClicks.accept(Unit) }
+                        imageCamera.setOnClickListener {
+                            getImage(
+                                    RxPaparazzo.single(this@CreateTaskActivity)
+                                            .size(ScreenSize())
+                                            .useInternalStorage()
+                                            .usingCamera()
+                            )
+                        }
+                        imageGallery.setOnClickListener {
+                            getImage(
+                                    RxPaparazzo.single(this@CreateTaskActivity)
+                                            .size(ScreenSize())
+                                            .useInternalStorage()
+                                            .usingGallery()
+                            )
+                        }
                     }
                 }
                 else -> throw IllegalArgumentException()
@@ -948,10 +945,9 @@ class CreateTaskActivity : AbstractActivity() {
             super.onViewAttachedToWindow(holder)
 
             (holder as? ImageHolder)?.run {
-                compositeDisposable += fileData.subscribe {
+                compositeDisposable += imageUrl.subscribe {
                     if (it.value != null) {
-                        val filename = it.value.file.absolutePath
-                        Log.e("asdf", "image filename: " + filename)
+                        Log.e("asdf", "image filename: " + it.value)
 
                         val paparazzo = filesDir.absolutePath + "/RxPaparazzo/" // todo probably should clear this anyway
                         Log.e("asdf", "image paparazzo: " + paparazzo)
@@ -964,7 +960,7 @@ class CreateTaskActivity : AbstractActivity() {
                         imageLayout.visibility = View.GONE
 
                         Glide.with(this@CreateTaskActivity)
-                                .load(filename)
+                                .load(it.value)
                                 .into(imageImage)
                     } else {
                         imageImage.visibility = View.GONE

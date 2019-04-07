@@ -14,6 +14,8 @@ open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord
 
     val userJson get() = remoteRootUserRecord.userJson
 
+    open val photoUrl get() = remoteRootUserRecord.photoUrl
+
     fun removeFriend(friendId: String) {
         check(!TextUtils.isEmpty(friendId))
 

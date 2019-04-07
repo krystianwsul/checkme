@@ -16,4 +16,16 @@ class RemoteMyUserRecord(
 
         addValue("$key/$USER_DATA/tokens/$uuid", token)
     }
+
+    override var photoUrl
+        get() = super.photoUrl
+        set(value) {
+            if (value == userJson.photoUrl)
+                return
+
+            check(!value.isNullOrEmpty())
+
+            userJson.photoUrl = value
+            addValue("$key/$USER_DATA/photoUrl", value)
+        }
 }

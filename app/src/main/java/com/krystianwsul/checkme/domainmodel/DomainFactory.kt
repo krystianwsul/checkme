@@ -1469,7 +1469,16 @@ open class DomainFactory(
         save(0, source)
     }
 
-    // todo updatePhotoUrl
+    @Synchronized
+    fun updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
+        MyCrashlytics.log("DomainFactory.updatePhotoUrl")
+        if (remoteUserFactory.isSaved || remoteProjectFactory.isSharedSaved) throw SavedFactoryException()
+
+        remoteUserFactory.remoteUser.photoUrl = photoUrl
+        remoteProjectFactory.updatePhotoUrl(userInfo, photoUrl)
+
+        save(0, source)
+    }
 
     @Synchronized
     fun updateProject(dataId: Int, source: SaveService.Source, projectId: String, name: String, addedFriends: Set<String>, removedFriends: Set<String>) {

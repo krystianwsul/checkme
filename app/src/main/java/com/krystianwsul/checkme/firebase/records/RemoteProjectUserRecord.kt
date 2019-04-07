@@ -39,8 +39,8 @@ class RemoteProjectUserRecord(
 
             check(!value.isNullOrEmpty())
 
-            createObject.photoUrl = photoUrl
-            addValue("$key/photoUrl", photoUrl)
+            createObject.photoUrl = value
+            addValue("$key/photoUrl", value)
         }
 
     fun setToken(token: String?, uuid: String) {

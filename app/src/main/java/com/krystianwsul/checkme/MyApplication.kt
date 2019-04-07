@@ -17,8 +17,11 @@ import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
 
@@ -116,6 +119,22 @@ class MyApplication : Application() {
             ANRWatchDog()//.setReportMainThreadOnly()
                     .setANRListener { MyCrashlytics.logException(it) }
                     .start()
+
+        userInfoRelay.switchMapMaybe {
+            it.value?.let {
+                googleSigninClient.silentSignIn()
+                        .toSingle()
+                        .toMaybe()
+            } ?: Maybe.empty()
+        }.subscribe {
+            it.value
+                    ?.photoUrl
+                    ?.let { url ->
+                        DomainFactory.addFirebaseListener {
+                            it.updatePhotoUrl(SaveService.Source.GUI, url.toString())
+                        }
+                    }
+        }
     }
 
     /*

@@ -31,6 +31,8 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
     val email by lazy { userJson.email }
 
+    open val photoUrl get() = userJson.photoUrl
+
     fun removeFriendOf(friendId: String) {
         check(!TextUtils.isEmpty(friendId))
 

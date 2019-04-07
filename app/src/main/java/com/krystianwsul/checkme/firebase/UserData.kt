@@ -10,7 +10,10 @@ import kotlinx.android.parcel.Parcelize
 
 @IgnoreExtraProperties
 @Parcelize
-data class UserData(val email: String = "", val name: String = "") : Parcelable {
+data class UserData(
+        val email: String = "",
+        val name: String = "",
+        val photoUrl: String? = null) : Parcelable {
 
     val key: String
         @Exclude

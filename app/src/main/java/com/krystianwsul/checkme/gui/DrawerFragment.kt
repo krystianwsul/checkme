@@ -1,8 +1,6 @@
 package com.krystianwsul.checkme.gui
 
 import android.os.Bundle
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -10,6 +8,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.viewmodels.DrawerViewModel
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.nav_header_main.view.*
@@ -95,11 +94,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
                     drawerViewModel.data
                             .subscribe {
-                                Glide.with(this)
-                                        .load(it.photoUrl)
-                                        .apply(RequestOptions.circleCropTransform())
-                                        .into(navHeaderPhoto)
-
+                                navHeaderPhoto.loadPhoto(it.photoUrl)
                                 navHeaderName.text = it.name
                                 navHeaderEmail.text = it.email
                             }

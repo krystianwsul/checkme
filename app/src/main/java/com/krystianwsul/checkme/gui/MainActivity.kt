@@ -4,7 +4,6 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
@@ -115,8 +114,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     private var actionMode: ActionMode? = null
 
     private var restoreInstances: Boolean? = null
-
-    private var photo: Uri? = null
 
     override fun getBottomBar() = bottomAppBar!!
 
@@ -427,13 +424,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 layoutParams = layoutParams.apply { width = mainActivityToolbar.width - dpToPx(64).toInt() }
             }
         }
-
-        MyApplication.instance
-                .googleSigninClient
-                .silentSignIn()
-                .toSingle()
-                .subscribe { account -> photo = account.value?.photoUrl }
-                .addTo(createDisposable)
     }
 
     override fun initBottomBar() {
@@ -441,7 +431,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             setNavigationIcon(R.drawable.ic_menu_white_24dp)
             setNavigationOnClickListener {
                 actionMode?.finish()
-                DrawerFragment.newInstance(photo).show(supportFragmentManager, DRAWER_TAG)
+                DrawerFragment.newInstance().show(supportFragmentManager, DRAWER_TAG)
             }
 
             animateReplaceMenu(R.menu.menu_select_all) { updateBottomMenu() }

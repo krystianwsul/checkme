@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui
 
-import android.net.Uri
 import android.os.Bundle
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -11,27 +10,25 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.viewmodels.DrawerViewModel
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 
 class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
     companion object {
 
-        private const val KEY_URI = "uri"
-
-        fun newInstance(photo: Uri?) = DrawerFragment().apply {
-            arguments = Bundle().apply { putParcelable(KEY_URI, photo) }
-        }
+        fun newInstance() = DrawerFragment()
     }
 
     private val mainActivity get() = activity as MainActivity
 
-    private var uri: Uri? = null
+    private val drawerViewModel by lazy { DrawerViewModel() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        uri = arguments!!.getParcelable<Uri>(KEY_URI)
+        drawerViewModel.start()
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
@@ -96,17 +93,17 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         true
                     }
 
-                    Glide.with(this)
-                            .load(uri)
-                            .apply(RequestOptions.circleCropTransform())
-                            .into(navHeaderPhoto)
+                    drawerViewModel.data
+                            .subscribe {
+                                Glide.with(this)
+                                        .load(it.photoUrl)
+                                        .apply(RequestOptions.circleCropTransform())
+                                        .into(navHeaderPhoto)
 
-                    FirebaseAuth.getInstance()
-                            .currentUser!!
-                            .let {
-                                navHeaderName.text = it.displayName
+                                navHeaderName.text = it.name
                                 navHeaderEmail.text = it.email
                             }
+                            .addTo(startDisposable)
                 }
             }
         }

@@ -676,6 +676,13 @@ open class DomainFactory(
     }
 
     @Synchronized
+    fun getDrawerData(): DrawerViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getDrawerData")
+
+        return remoteUserFactory.remoteUser.run { DrawerViewModel.Data(name, email, photoUrl) }
+    }
+
+    @Synchronized
     fun getProjectListData(): ProjectListViewModel.Data {
         MyCrashlytics.log("DomainFactory.getProjectListData")
 

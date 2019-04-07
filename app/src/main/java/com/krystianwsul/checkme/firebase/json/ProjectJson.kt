@@ -8,5 +8,4 @@ interface ProjectJson {
     var tasks: MutableMap<String, TaskJson>
     var taskHierarchies: MutableMap<String, TaskHierarchyJson>
     val customTimes: Map<String, CustomTimeJson>
-    var users: MutableMap<String, UserJson>
 }

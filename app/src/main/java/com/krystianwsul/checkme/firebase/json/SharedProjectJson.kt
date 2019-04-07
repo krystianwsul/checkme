@@ -7,4 +7,4 @@ class SharedProjectJson @JvmOverloads constructor(
         override var tasks: MutableMap<String, TaskJson> = mutableMapOf(),
         override var taskHierarchies: MutableMap<String, TaskHierarchyJson> = mutableMapOf(),
         override var customTimes: MutableMap<String, SharedCustomTimeJson> = mutableMapOf(),
-        override var users: MutableMap<String, UserJson> = mutableMapOf()) : ProjectJson
+        var users: MutableMap<String, UserJson> = mutableMapOf()) : ProjectJson

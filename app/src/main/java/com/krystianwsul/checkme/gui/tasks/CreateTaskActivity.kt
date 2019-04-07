@@ -929,6 +929,8 @@ class CreateTaskActivity : AbstractActivity() {
                 }
                 elementsBeforeSchedules + scheduleEntries.size + 2 -> {
                     (holder as ImageHolder).run {
+                        imageRemove.setOnClickListener { imageUrl.accept(NullableWrapper()) }
+
                         imageCamera.setOnClickListener {
                             getImage(
                                     RxPaparazzo.single(this@CreateTaskActivity)
@@ -937,6 +939,7 @@ class CreateTaskActivity : AbstractActivity() {
                                             .usingCamera()
                             )
                         }
+
                         imageGallery.setOnClickListener {
                             getImage(
                                     RxPaparazzo.single(this@CreateTaskActivity)
@@ -968,6 +971,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                         imageImage.visibility = View.VISIBLE
                         imageLayout.visibility = View.GONE
+                        imageRemove.visibility = View.VISIBLE
 
                         Glide.with(this@CreateTaskActivity)
                                 .load(it.value)
@@ -975,6 +979,7 @@ class CreateTaskActivity : AbstractActivity() {
                     } else {
                         imageImage.visibility = View.GONE
                         imageLayout.visibility = View.VISIBLE
+                        imageRemove.visibility = View.GONE
                     }
                 }
             }
@@ -1047,6 +1052,7 @@ class CreateTaskActivity : AbstractActivity() {
 
             val imageImage = itemView.imageImage!!
             val imageLayout = itemView.imageLayout!!
+            val imageRemove = itemView.imageRemove!!
             val imageCamera = itemView.imageCamera!!
             val imageGallery = itemView.imageGallery!!
         }

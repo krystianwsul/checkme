@@ -59,10 +59,6 @@ class RemotePrivateProjectRecord(
             customTimes = remoteCustomTimeRecords.values
                     .associateBy({ it.id.value }, { it.createObject })
                     .toMutableMap()
-
-            users = remoteUserRecords.values
-                    .associateBy({ it.id }, { it.createObject })
-                    .toMutableMap()
         }
 
     override val createObject get() = createProjectJson

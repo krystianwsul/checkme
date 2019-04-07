@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.firebase.json.UserJson
 
 class RemoteProjectUserRecord(
         create: Boolean,
-        private val remoteProjectRecord: RemoteProjectRecord<*>,
+        private val remoteProjectRecord: RemoteSharedProjectRecord,
         override val createObject: UserJson) : RemoteRecord(create) {
 
     companion object {

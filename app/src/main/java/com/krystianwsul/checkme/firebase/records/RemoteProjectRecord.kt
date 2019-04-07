@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.json.ProjectJson
 import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
-import com.krystianwsul.checkme.firebase.json.UserJson
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
@@ -44,16 +43,6 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
                 .toMutableMap()
     }
 
-    val remoteUserRecords by lazy {
-        projectJson.users
-                .mapValues { (id, userJson) ->
-                    check(!TextUtils.isEmpty(id))
-
-                    RemoteProjectUserRecord(create, this, userJson)
-                }
-                .toMutableMap()
-    }
-
     override val key get() = id
 
     abstract val childKey: String
@@ -85,8 +74,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
     override val children
         get() = remoteTaskRecords.values +
                 remoteTaskHierarchyRecords.values +
-                remoteCustomTimeRecords.values +
-                remoteUserRecords.values
+                remoteCustomTimeRecords.values
 
     fun newRemoteTaskRecord(domainFactory: DomainFactory, taskJson: TaskJson): RemoteTaskRecord<T> {
         val remoteTaskRecord = RemoteTaskRecord(domainFactory, this, taskJson)
@@ -102,14 +90,6 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
 
         remoteTaskHierarchyRecords[remoteTaskHierarchyRecord.id] = remoteTaskHierarchyRecord
         return remoteTaskHierarchyRecord
-    }
-
-    fun newRemoteUserRecord(userJson: UserJson): RemoteProjectUserRecord {
-        val remoteProjectUserRecord = RemoteProjectUserRecord(true, this, userJson)
-        check(!remoteUserRecords.containsKey(remoteProjectUserRecord.id))
-
-        remoteUserRecords[remoteProjectUserRecord.id] = remoteProjectUserRecord
-        return remoteProjectUserRecord
     }
 
     abstract fun getTaskHierarchyRecordId(): String

@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.checkme.firebase.json.UserJson
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
@@ -27,6 +28,18 @@ class RemoteSharedProjectRecord(
             }
             .toMap()
             .toMutableMap()
+
+    val remoteUserRecords by lazy {
+        projectJson.users
+                .mapValues { (id, userJson) ->
+                    check(!TextUtils.isEmpty(id))
+
+                    RemoteProjectUserRecord(create, this, userJson)
+                }
+                .toMutableMap()
+    }
+
+    override val children get() = super.children + remoteUserRecords.values
 
     constructor(remoteSharedProjectManager: RemoteSharedProjectManager, domainFactory: DomainFactory, id: String, jsonWrapper: JsonWrapper) : this(
             remoteSharedProjectManager,
@@ -62,6 +75,14 @@ class RemoteSharedProjectRecord(
 
         remoteCustomTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
         return remoteCustomTimeRecord
+    }
+
+    fun newRemoteUserRecord(userJson: UserJson): RemoteProjectUserRecord {
+        val remoteProjectUserRecord = RemoteProjectUserRecord(true, this, userJson)
+        check(!remoteUserRecords.containsKey(remoteProjectUserRecord.id))
+
+        remoteUserRecords[remoteProjectUserRecord.id] = remoteProjectUserRecord
+        return remoteProjectUserRecord
     }
 
     private val createProjectJson

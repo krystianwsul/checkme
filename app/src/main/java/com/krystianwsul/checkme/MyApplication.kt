@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
@@ -30,7 +31,6 @@ class MyApplication : Application() {
     companion object {
 
         private const val TOKEN_KEY = "token"
-        private const val DEFAULT_REMOTE_KEY = "defaultRemote"
 
         @SuppressLint("StaticFieldLeak")
         lateinit var instance: MyApplication
@@ -135,6 +135,8 @@ class MyApplication : Application() {
                         }
                     }
         }
+
+        RxPaparazzo.register(this)
     }
 
     /*

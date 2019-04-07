@@ -194,9 +194,8 @@ fun Context.normalizedId(@IdRes id: Int) = if (id == View.NO_ID) "NO_ID" else re
 
 fun Calendar.toExactTimeStamp() = ExactTimeStamp(this)
 
-fun ImageView.loadPhoto(url: String?) =
-        Glide.with(this)
-                .load(url)
-                .placeholder(R.drawable.ic_person_black_24dp)
-                .apply(RequestOptions.circleCropTransform())
-                .into(this)
+fun ImageView.loadPhoto(url: String?) = Glide.with(this)
+        .load(url)
+        .placeholder(R.drawable.ic_person_black_24dp)
+        .apply(RequestOptions.circleCropTransform())
+        .into(this)

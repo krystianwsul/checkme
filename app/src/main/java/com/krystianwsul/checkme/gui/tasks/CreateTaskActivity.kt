@@ -9,12 +9,16 @@ import android.os.Parcelable
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.common.collect.HashMultiset
+import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -31,13 +35,22 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
+import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_create_task.*
+import kotlinx.android.synthetic.main.row_image.view.*
 import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
+import java.io.File
 import java.util.*
 
 
@@ -232,6 +245,11 @@ class CreateTaskActivity : AbstractActivity() {
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
+    private val cameraClicks = PublishRelay.create<Unit>()
+    private val galleryClicks = PublishRelay.create<Unit>()
+
+    private val fileData = BehaviorRelay.createDefault(NullableWrapper<FileData>()) // todo saveInstanceState
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true
@@ -413,6 +431,28 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         setupParent(createTaskRoot)
+
+        listOf(
+                cameraClicks.switchMap {
+                    RxPaparazzo.single(this)
+                            .size(ScreenSize())
+                            .useInternalStorage()
+                            .usingCamera()
+                },
+                galleryClicks.switchMap {
+                    RxPaparazzo.single(this)
+                            .size(ScreenSize())
+                            .useInternalStorage()
+                            .usingGallery()
+                }
+        ).merge()
+                .subscribe {
+                    if (it.resultCode() == Activity.RESULT_OK)
+                        it.targetUI()
+                                .fileData
+                                .accept(NullableWrapper(it.data()))
+                }
+                .addTo(createDisposable)
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
@@ -896,11 +936,48 @@ class CreateTaskActivity : AbstractActivity() {
                 }
                 elementsBeforeSchedules + scheduleEntries.size + 2 -> {
                     (holder as ImageHolder).run {
-
+                        imageCamera.setOnClickListener { cameraClicks.accept(Unit) }
+                        imageGallery.setOnClickListener { galleryClicks.accept(Unit) }
                     }
                 }
                 else -> throw IllegalArgumentException()
             }
+        }
+
+        override fun onViewAttachedToWindow(holder: Holder) {
+            super.onViewAttachedToWindow(holder)
+
+            (holder as? ImageHolder)?.run {
+                compositeDisposable += fileData.subscribe {
+                    if (it.value != null) {
+                        val filename = it.value.file.absolutePath
+                        Log.e("asdf", "image filename: " + filename)
+
+                        val paparazzo = filesDir.absolutePath + "/RxPaparazzo/" // todo probably should clear this anyway
+                        Log.e("asdf", "image paparazzo: " + paparazzo)
+
+                        File(paparazzo).listFiles().forEach {
+                            Log.e("asdf", "image file: " + it.absolutePath)
+                        }
+
+                        imageImage.visibility = View.VISIBLE
+                        imageLayout.visibility = View.GONE
+
+                        Glide.with(this@CreateTaskActivity)
+                                .load(filename)
+                                .into(imageImage)
+                    } else {
+                        imageImage.visibility = View.GONE
+                        imageLayout.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
+
+        override fun onViewDetachedFromWindow(holder: Holder) {
+            holder.compositeDisposable.clear()
+
+            super.onViewDetachedFromWindow(holder)
         }
 
         fun elementsBeforeSchedules() = 1
@@ -928,7 +1005,10 @@ class CreateTaskActivity : AbstractActivity() {
             notifyItemInserted(position)
         }
 
-        abstract inner class Holder(view: View) : RecyclerView.ViewHolder(view)
+        abstract inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
+
+            val compositeDisposable = CompositeDisposable()
+        }
 
         inner class ScheduleHolder(scheduleRow: View) : Holder(scheduleRow) {
 
@@ -957,6 +1037,12 @@ class CreateTaskActivity : AbstractActivity() {
             val mNoteText = itemView.noteText!!
         }
 
-        inner class ImageHolder(itemView: View) : Holder(itemView)
+        inner class ImageHolder(itemView: View) : Holder(itemView) {
+
+            val imageImage = itemView.imageImage!!
+            val imageLayout = itemView.imageLayout!!
+            val imageCamera = itemView.imageCamera!!
+            val imageGallery = itemView.imageGallery!!
+        }
     }
 }

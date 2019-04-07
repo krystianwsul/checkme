@@ -13,7 +13,11 @@ class FriendListViewModel : DomainViewModel<FriendListViewModel.Data>() {
 
     data class Data(val userListDatas: MutableSet<UserListData>) : DomainData()
 
-    data class UserListData(val name: String, val email: String, val id: String) {
+    data class UserListData(
+            val name: String,
+            val email: String,
+            val id: String,
+            val photoUrl: String?) {
 
         init {
             check(name.isNotEmpty())

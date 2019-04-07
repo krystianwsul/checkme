@@ -4,7 +4,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="textPrimary">16sp</dimen>
     <dimen name="textSecondary">14sp</dimen>
-    <dimen name="listVerticalPadding">5dp</dimen>
+    <dimen name="listVerticalPadding">8dp</dimen>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="fabMargin">18dp</dimen>

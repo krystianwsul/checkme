@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
@@ -263,6 +264,8 @@ class FriendListFragment : AbstractFragment(), FabUser {
         override val isSeparatorVisibleWhenNotExpanded = false
 
         override val isVisibleDuringActionMode = true
+
+        override val image = NullableWrapper(userListData.photoUrl)
 
         override fun onClick() = Unit
 

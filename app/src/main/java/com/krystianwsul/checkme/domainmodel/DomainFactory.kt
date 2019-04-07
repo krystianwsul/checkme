@@ -708,7 +708,7 @@ open class DomainFactory(
 
         val friends = remoteFriendFactory.friends
 
-        val userListDatas = friends.map { FriendListViewModel.UserListData(it.name, it.email, it.id) }.toMutableSet()
+        val userListDatas = friends.map { FriendListViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }.toMutableSet()
 
         return FriendListViewModel.Data(userListDatas)
     }

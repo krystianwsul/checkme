@@ -12,7 +12,9 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
@@ -46,6 +48,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
     protected open val checkBoxVisibility = View.GONE
 
     protected open val checkBoxChecked = false
+
+    protected open val image: NullableWrapper<String>? = null
 
     protected open fun checkBoxOnClickListener() = Unit
 
@@ -208,7 +212,17 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 }
             }
 
-            rowMargin.visibility = if (checkBoxVisibility == View.GONE) View.VISIBLE else View.GONE
+            rowImage.run {
+                if (image != null) {
+                    visibility = View.VISIBLE
+
+                    loadPhoto(image!!.value)
+                } else {
+                    visibility = View.GONE
+                }
+            }
+
+            rowMargin.visibility = if (checkBoxVisibility == View.GONE && image == null) View.VISIBLE else View.GONE
 
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
 

@@ -101,7 +101,7 @@ class MyApplication : Application() {
                 DomainFactory::updatePrivateProjectRecord,
                 DomainFactory::updateSharedProjectRecords,
                 DomainFactory::setFriendRecords,
-                DomainFactory::setUserRecord
+                DomainFactory::updateUserRecord
                 //, { Log.e("asdf", "FactoryListener:\n$it")}
         ).domainFactoryObservable.subscribe(DomainFactory.instanceRelay)
 

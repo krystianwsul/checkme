@@ -12,8 +12,6 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
-import com.krystianwsul.checkme.firebase.json.UserWrapper
-import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
@@ -101,7 +99,7 @@ open class DomainFactory(
     var remoteProjectFactory: RemoteProjectFactory
         private set
 
-    private var remoteRootUser: RemoteRootUser
+    private val remoteUserFactory: RemoteUserFactory
 
     var remoteFriendFactory: RemoteFriendFactory
         private set
@@ -125,18 +123,16 @@ open class DomainFactory(
 
         localReadTimes = ReadTimes(start, localRead, stop)
 
-        setUserHelper()
-
         val remoteRead = ExactTimeStamp.now
 
         Log.e("asdf", "set task records $sharedSnapshot")
 
-        this.remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, userInfo, remoteRead)
+        remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, userInfo, remoteRead)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 
-        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, userSnapshot.getValue(UserWrapper::class.java)
-                ?: UserWrapper()))
+        remoteUserFactory = RemoteUserFactory(this, userSnapshot, userInfo)
+        remoteUserFactory.remoteUser.setToken(userInfo.token)
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
@@ -166,14 +162,13 @@ open class DomainFactory(
 
         val localChanges = localFactory.save(source)
         val remoteChanges = remoteProjectFactory.save()
+        val userChanges = remoteUserFactory.save()
 
-        if (localChanges || remoteChanges)
+        if (localChanges || remoteChanges || userChanges)
             domainChanged.accept(dataIds)
     }
 
     // firebase
-
-    private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid).checkError(this, "DomainFactory.setUserHelper")
 
     @Synchronized
     fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
@@ -247,8 +242,19 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun setUserRecord(dataSnapshot: DataSnapshot) {
-        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
+    fun updateUserRecord(dataSnapshot: DataSnapshot) {
+        MyCrashlytics.log("updateUserRecord")
+        Log.e("asdf", "update user record $dataSnapshot")
+
+        if (remoteUserFactory.isSaved) {
+            remoteUserFactory.isSaved = false
+            Log.e("asdf", "skipping remote user record")
+            return
+        }
+
+        remoteUserFactory.onNewSnapshot(dataSnapshot)
+
+        tryNotifyListeners("DomainFactory.updateUserRecord")
     }
 
     @Synchronized
@@ -1451,16 +1457,14 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun updateUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
-        MyCrashlytics.log("DomainFactory.updateUserInfo")
+    fun updateToken(source: SaveService.Source, token: String?) {
+        MyCrashlytics.log("DomainFactory.updateToken")
+        if (remoteUserFactory.isSaved || remoteProjectFactory.isSharedSaved) throw SavedFactoryException()
 
-        if (userInfo == newUserInfo)
-            return
+        userInfo.token = token
 
-        userInfo = newUserInfo
-        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid).checkError(this, "DomainFactory.updateUserInfo")
-
-        remoteProjectFactory.updateUserInfo(newUserInfo)
+        remoteUserFactory.remoteUser.setToken(token)
+        remoteProjectFactory.updateToken(token)
 
         save(0, source)
     }
@@ -1502,7 +1506,7 @@ open class DomainFactory(
         check(!recordOf.contains(key))
         recordOf.add(key)
 
-        val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteRootUser)
+        val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteUserFactory.remoteUser)
 
         save(dataId, source)
 
@@ -2329,5 +2333,5 @@ open class DomainFactory(
         val instantiateMillis = stop.long - read.long
     }
 
-    private inner class SavedFactoryException : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved)
+    private inner class SavedFactoryException : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved + ", user.isSaved == " + remoteUserFactory.isSaved)
 }

@@ -1,12 +1,10 @@
 package com.krystianwsul.checkme
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.persistencemodel.SaveService
 
 
@@ -39,11 +37,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         MyApplication.instance.token = token
 
-        val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
-
-        val userInfo = UserInfo(firebaseUser, token)
-
-        DomainFactory.addFirebaseListener { it.updateUserInfo(SaveService.Source.SERVICE, userInfo) }
+        DomainFactory.addFirebaseListener { it.updateToken(SaveService.Source.SERVICE, token) }
     }
 
     private class UnknownMessageException(data: Map<String, String>) : Exception(getMessage(data)) {

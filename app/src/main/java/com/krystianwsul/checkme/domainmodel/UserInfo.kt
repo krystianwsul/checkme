@@ -5,9 +5,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.krystianwsul.checkme.firebase.UserData
 
 data class UserInfo(
-        private val email: String,
+        val email: String,
         val name: String,
-        val token: String?) {
+        var token: String?) {
 
     constructor(firebaseUser: FirebaseUser, token: String?) : this(
             firebaseUser.email!!,
@@ -20,9 +20,4 @@ data class UserInfo(
         check(!TextUtils.isEmpty(email))
         check(!TextUtils.isEmpty(name))
     }
-
-    fun getValues(uuid: String) = mapOf(
-            "email" to email,
-            "name" to name,
-            "tokens/$uuid" to token)
 }

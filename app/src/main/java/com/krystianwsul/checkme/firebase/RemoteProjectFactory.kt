@@ -190,7 +190,7 @@ class RemoteProjectFactory(
         return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId)
     }
 
-    fun updateUserInfo(userInfo: UserInfo) = remoteSharedProjects.values.forEach { it.updateUserInfo(userInfo, uuid) }
+    fun updateToken(token: String?) = remoteSharedProjects.values.forEach { it.updateUserInfo(userInfo.key, uuid, token) }
 
     fun updatePhotoUrl(userInfo: UserInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(userInfo, photoUrl) }
 

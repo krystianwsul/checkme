@@ -61,10 +61,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         R.id.main_drawer_custom_times -> showTab(MainActivity.Tab.CUSTOM_TIMES)
                         R.id.main_drawer_friends -> showTab(MainActivity.Tab.FRIENDS)
                         R.id.main_drawer_sign_out -> {
-                            val domainFactory = DomainFactory.instance
-                            val userInfo = MyApplication.instance.userInfo
-
-                            domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
+                            DomainFactory.instance.updateToken(SaveService.Source.GUI, null)
 
                             MyApplication.instance.googleSigninClient.signOut()
                             FirebaseAuth.getInstance().signOut()

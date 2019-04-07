@@ -789,6 +789,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         private val TYPE_SCHEDULE = 0
         private val TYPE_NOTE = 1
+        private val TYPE_IMAGE = 2
 
         private val mNameListener = object : TextWatcher {
 
@@ -808,12 +809,15 @@ class CreateTaskActivity : AbstractActivity() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
             TYPE_SCHEDULE -> ScheduleHolder(layoutInflater.inflate(R.layout.row_schedule, parent, false)!!)
             TYPE_NOTE -> NoteHolder(layoutInflater.inflate(R.layout.row_note, parent, false)!!)
+            TYPE_IMAGE -> ImageHolder(layoutInflater.inflate(R.layout.row_image, parent, false)!!)
             else -> throw UnsupportedOperationException()
         }
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
-            if (position < elementsBeforeSchedules()) {
-                (holder as ScheduleHolder).run {
+            val elementsBeforeSchedules = elementsBeforeSchedules()
+
+            when (position) {
+                in (0 until elementsBeforeSchedules) -> (holder as ScheduleHolder).run {
                     mScheduleMargin.visibility = if (position == 0) View.VISIBLE else View.GONE
 
                     mScheduleLayout.run {
@@ -839,8 +843,7 @@ class CreateTaskActivity : AbstractActivity() {
                         }
                     }
                 }
-            } else if (position < elementsBeforeSchedules() + scheduleEntries.size) {
-                (holder as ScheduleHolder).run {
+                in (elementsBeforeSchedules until (elementsBeforeSchedules + scheduleEntries.size)) -> (holder as ScheduleHolder).run {
                     val scheduleEntry = scheduleEntries[position - elementsBeforeSchedules()]
 
                     mScheduleMargin.visibility = View.GONE
@@ -857,8 +860,7 @@ class CreateTaskActivity : AbstractActivity() {
                         setOnClickListener { onTextClick() }
                     }
                 }
-            } else if (position == elementsBeforeSchedules() + scheduleEntries.size) {
-                (holder as ScheduleHolder).run {
+                elementsBeforeSchedules + scheduleEntries.size -> (holder as ScheduleHolder).run {
                     mScheduleMargin.visibility = View.GONE
 
                     mScheduleLayout.run {
@@ -880,38 +882,43 @@ class CreateTaskActivity : AbstractActivity() {
                         }
                     }
                 }
-            } else {
-                check(position == elementsBeforeSchedules() + scheduleEntries.size + 1)
+                elementsBeforeSchedules + scheduleEntries.size + 1 -> {
+                    (holder as NoteHolder).run {
+                        mNoteLayout.isHintAnimationEnabled = data != null
 
-                (holder as NoteHolder).run {
-                    mNoteLayout.isHintAnimationEnabled = data != null
-
-                    mNoteText.run {
-                        setText(note)
-                        removeTextChangedListener(mNameListener)
-                        addTextChangedListener(mNameListener)
-                        setOnFocusChangeListener { _, hasFocus -> noteHasFocus = hasFocus }
+                        mNoteText.run {
+                            setText(note)
+                            removeTextChangedListener(mNameListener)
+                            addTextChangedListener(mNameListener)
+                            setOnFocusChangeListener { _, hasFocus -> noteHasFocus = hasFocus }
+                        }
                     }
                 }
+                elementsBeforeSchedules + scheduleEntries.size + 2 -> {
+                    (holder as ImageHolder).run {
+
+                    }
+                }
+                else -> throw IllegalArgumentException()
             }
         }
 
         fun elementsBeforeSchedules() = 1
 
-        override fun getItemCount() = elementsBeforeSchedules() + scheduleEntries.size + 1 + 1
+        override fun getItemCount() = elementsBeforeSchedules() + scheduleEntries.size + 3
 
-        override fun getItemViewType(position: Int) = if (position == 0) {
-            TYPE_SCHEDULE
-        } else if (position < elementsBeforeSchedules()) {
-            TYPE_SCHEDULE
-        } else if (position < elementsBeforeSchedules() + scheduleEntries.size) {
-            TYPE_SCHEDULE
-        } else if (position == elementsBeforeSchedules() + scheduleEntries.size) {
-            TYPE_SCHEDULE
-        } else {
-            check(position == elementsBeforeSchedules() + scheduleEntries.size + 1)
+        override fun getItemViewType(position: Int): Int {
+            val elementsBeforeSchedules = elementsBeforeSchedules()
 
-            TYPE_NOTE
+            return when (position) {
+                0 -> TYPE_SCHEDULE
+                in (1 until elementsBeforeSchedules) -> TYPE_SCHEDULE
+                in (elementsBeforeSchedules until elementsBeforeSchedules + scheduleEntries.size) -> TYPE_SCHEDULE
+                elementsBeforeSchedules + scheduleEntries.size -> TYPE_SCHEDULE
+                elementsBeforeSchedules + scheduleEntries.size + 1 -> TYPE_NOTE
+                elementsBeforeSchedules + scheduleEntries.size + 2 -> TYPE_IMAGE
+                else -> throw IllegalArgumentException()
+            }
         }
 
         fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
@@ -921,9 +928,9 @@ class CreateTaskActivity : AbstractActivity() {
             notifyItemInserted(position)
         }
 
-        internal abstract inner class Holder(view: View) : RecyclerView.ViewHolder(view)
+        abstract inner class Holder(view: View) : RecyclerView.ViewHolder(view)
 
-        internal inner class ScheduleHolder(scheduleRow: View) : Holder(scheduleRow) {
+        inner class ScheduleHolder(scheduleRow: View) : Holder(scheduleRow) {
 
             val mScheduleMargin = itemView.schedule_margin!!
             val mScheduleLayout = itemView.schedule_layout!!
@@ -944,10 +951,12 @@ class CreateTaskActivity : AbstractActivity() {
             }
         }
 
-        internal inner class NoteHolder(scheduleRow: View) : Holder(scheduleRow) {
+        inner class NoteHolder(scheduleRow: View) : Holder(scheduleRow) {
 
             val mNoteLayout = itemView.noteLayout!!
             val mNoteText = itemView.noteText!!
         }
+
+        inner class ImageHolder(itemView: View) : Holder(itemView)
     }
 }

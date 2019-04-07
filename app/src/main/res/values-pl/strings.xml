@@ -84,4 +84,5 @@
     <string name="snackbarNotDone">Oznaczono %1$s jako nie zrobione</string>
     <string name="snackbarHour">%1$s przełożone</string>
     <string name="add_task">Dodaj zadanie</string>
+    <string name="add_an_image">Dodaj obraz</string>
 </resources>

@@ -107,7 +107,7 @@ class UserListFragment : AbstractFragment(), FabUser {
                 .values
                 .asSequence()
                 .filterNot { userIds.contains(it.id) }
-                .map { FriendPickerFragment.FriendData(it.id, it.name, it.email) }
+                .map { FriendPickerFragment.FriendData(it.id, it.name, it.email, it.photoUrl) }
                 .toList()
 
         friendPickerFragment.initialize(FriendPickerFragment.Data(data!!.immediate, friendDatas)) { friendId ->
@@ -345,7 +345,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val isVisibleWhenEmpty = true
 
-        override val image = NullableWrapper<String>(userListData.photoUrl)
+        override val image = NullableWrapper(userListData.photoUrl)
 
         override fun onClick() = Unit
 

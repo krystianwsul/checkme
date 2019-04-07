@@ -12,8 +12,6 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
-import com.krystianwsul.checkme.firebase.json.UserWrapper
-import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
@@ -101,7 +99,7 @@ open class DomainFactory(
     var remoteProjectFactory: RemoteProjectFactory
         private set
 
-    private var remoteRootUser: RemoteRootUser
+    private val remoteUserFactory: RemoteUserFactory
 
     var remoteFriendFactory: RemoteFriendFactory
         private set
@@ -135,8 +133,7 @@ open class DomainFactory(
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 
-        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, userSnapshot.getValue(UserWrapper::class.java)
-                ?: UserWrapper()))
+        remoteUserFactory = RemoteUserFactory(this, userSnapshot, userInfo)
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
@@ -247,9 +244,7 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun setUserRecord(dataSnapshot: DataSnapshot) {
-        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
-    }
+    fun setUserRecord(dataSnapshot: DataSnapshot) = remoteUserFactory.onNewSnapshot(dataSnapshot)
 
     @Synchronized
     fun setFriendRecords(dataSnapshot: DataSnapshot) {
@@ -1500,7 +1495,7 @@ open class DomainFactory(
         check(!recordOf.contains(key))
         recordOf.add(key)
 
-        val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteRootUser)
+        val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteUserFactory.remoteUser)
 
         save(dataId, source)
 

@@ -21,6 +21,14 @@ class RemoteProjectUser(
 
     val email = remoteProjectUserRecord.email
 
+    var photoUrl
+        get() = remoteProjectUserRecord.photoUrl
+        set(value) {
+            check(!value.isNullOrEmpty())
+
+            remoteProjectUserRecord.photoUrl = value
+        }
+
     fun delete() {
         remoteProject.deleteUser(this)
 

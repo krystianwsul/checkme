@@ -82,6 +82,15 @@ class RemoteSharedProject(
         remoteProjectUser.setToken(userInfo.token, uuid)
     }
 
+    fun updatePhotoUrl(userInfo: UserInfo, photoUrl: String) {
+        val key = userInfo.key
+        check(remoteUsers.containsKey(key))
+
+        val remoteProjectUser = remoteUsers.getValue(key)
+
+        remoteProjectUser.photoUrl = photoUrl
+    }
+
     override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) {
         remoteProjectRecord.updateRecordOf(addedFriends.asSequence().map { it.id }.toSet(), removedFriends)
 

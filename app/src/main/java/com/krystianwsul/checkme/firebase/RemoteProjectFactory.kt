@@ -192,6 +192,8 @@ class RemoteProjectFactory(
 
     fun updateUserInfo(userInfo: UserInfo) = remoteSharedProjects.values.forEach { it.updateUserInfo(userInfo, uuid) }
 
+    fun updatePhotoUrl(userInfo: UserInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(userInfo, photoUrl) }
+
     fun getRemoteProjectForce(projectId: String): RemoteProject<*> {
         check(!TextUtils.isEmpty(projectId))
         check(remoteProjects.containsKey(projectId))

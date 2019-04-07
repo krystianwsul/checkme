@@ -31,6 +31,18 @@ class RemoteProjectUserRecord(
 
     val email by lazy { createObject.email }
 
+    var photoUrl: String?
+        get() = createObject.photoUrl
+        set(value) {
+            if (value == createObject.photoUrl)
+                return
+
+            check(!value.isNullOrEmpty())
+
+            createObject.photoUrl = photoUrl
+            addValue("$key/photoUrl", photoUrl)
+        }
+
     fun setToken(token: String?, uuid: String) {
         check(!TextUtils.isEmpty(uuid))
 

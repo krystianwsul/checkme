@@ -718,7 +718,7 @@ open class DomainFactory(
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
         val friendDatas = remoteFriendFactory.friends
-                .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
+                .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
                 .associateBy { it.id }
 
         val name: String?
@@ -730,7 +730,7 @@ open class DomainFactory(
 
             userListDatas = remoteProject.users
                     .filterNot { it.id == userInfo.key }
-                    .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
+                    .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
                     .toSet()
         } else {
             name = null

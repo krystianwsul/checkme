@@ -22,7 +22,11 @@ class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
             val userListDatas: Set<UserListData>,
             val friendDatas: Map<String, UserListData>) : DomainData()
 
-    data class UserListData(val name: String, val email: String, val id: String) {
+    data class UserListData(
+            val name: String,
+            val email: String,
+            val id: String,
+            val photoUrl: String?) {
 
         init {
             check(name.isNotEmpty())

@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.treeadapter.*
 import kotlinx.android.parcel.Parcelize
@@ -343,6 +344,8 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val isVisibleDuringActionMode = true
 
         override val isVisibleWhenEmpty = true
+
+        override val image = NullableWrapper<String>(userListData.photoUrl)
 
         override fun onClick() = Unit
 

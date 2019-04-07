@@ -72,6 +72,7 @@ class CreateTaskActivity : AbstractActivity() {
         private const val SCHEDULE_ENTRIES_KEY = "scheduleEntries"
         private const val NOTE_KEY = "note"
         private const val NOTE_HAS_FOCUS_KEY = "noteHasFocus"
+        private const val IMAGE_URL_KEY = "imageUrl"
 
         private const val SCHEDULE_DIALOG_TAG = "scheduleDialog"
 
@@ -243,7 +244,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
-    private val imageUrl = BehaviorRelay.createDefault(NullableWrapper<String>()) // todo saveInstanceState
+    private val imageUrl = BehaviorRelay.createDefault(NullableWrapper<String>())
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -377,6 +378,11 @@ class CreateTaskActivity : AbstractActivity() {
 
         this.savedInstanceState = savedInstanceState
 
+        savedInstanceState?.run {
+            if (containsKey(IMAGE_URL_KEY))
+                imageUrl.accept(NullableWrapper(getString(IMAGE_URL_KEY)))
+        }
+
         scheduleRecycler.layoutManager = LinearLayoutManager(this)
 
         intent.run {
@@ -459,6 +465,10 @@ class CreateTaskActivity : AbstractActivity() {
                     putString(NOTE_KEY, note)
 
                 putBoolean(NOTE_HAS_FOCUS_KEY, noteHasFocus)
+
+                imageUrl.value!!
+                        .value
+                        ?.let { putString(IMAGE_URL_KEY, it) }
             }
         }
     }

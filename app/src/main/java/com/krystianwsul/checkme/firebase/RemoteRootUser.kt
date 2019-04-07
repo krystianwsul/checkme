@@ -4,7 +4,7 @@ import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 
 
-class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {
+open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {
 
     val id by lazy { remoteRootUserRecord.id }
 

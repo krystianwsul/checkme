@@ -14,20 +14,20 @@ import kotlin.properties.Delegates
 class RemoteUserManager(
         private val domainFactory: DomainFactory,
         private val userInfo: UserInfo,
-        uuid: String,
+        private val uuid: String,
         dataSnapshot: DataSnapshot) {
 
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemoteUserManager.isSaved = $value") }
 
     var remoteUserRecord = if (dataSnapshot.value == null) {
         val userWrapper = UserWrapper(mutableMapOf(), UserJson(userInfo.email, userInfo.name, mutableMapOf(uuid to userInfo.token)))
-        RemoteRootUserRecord(true, userWrapper)
+        RemoteMyUserRecord(true, userWrapper, uuid)
     } else {
         dataSnapshot.toRecord()
     }
         private set
 
-    private fun DataSnapshot.toRecord() = RemoteRootUserRecord(false, getValue(UserWrapper::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemoteMyUserRecord(false, getValue(UserWrapper::class.java)!!, uuid)
 
     fun newSnapshot(dataSnapshot: DataSnapshot): RemoteRootUserRecord {
         remoteUserRecord = dataSnapshot.toRecord()

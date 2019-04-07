@@ -13,7 +13,7 @@ import kotlin.properties.Delegates
 
 class RemoteUserManager(
         private val domainFactory: DomainFactory,
-        private val userInfo: UserInfo,
+        userInfo: UserInfo,
         private val uuid: String,
         dataSnapshot: DataSnapshot) {
 
@@ -29,7 +29,7 @@ class RemoteUserManager(
 
     private fun DataSnapshot.toRecord() = RemoteMyUserRecord(false, getValue(UserWrapper::class.java)!!, uuid)
 
-    fun newSnapshot(dataSnapshot: DataSnapshot): RemoteRootUserRecord {
+    fun newSnapshot(dataSnapshot: DataSnapshot): RemoteMyUserRecord {
         remoteUserRecord = dataSnapshot.toRecord()
         return remoteUserRecord
     }
@@ -45,7 +45,7 @@ class RemoteUserManager(
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.updateUser(userInfo.key, values).checkError(domainFactory, "RemoteUserManager.save", values)
+            DatabaseWrapper.updateFriends(values).checkError(domainFactory, "RemoteUserManager.save", values)
         }
 
         return isSaved

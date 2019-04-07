@@ -7,7 +7,6 @@ import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.records.*
 
 
@@ -32,8 +31,6 @@ object DatabaseWrapper {
     }
 
     fun getRootRecordId() = rootReference.child(RECORDS_KEY).push().key!!
-
-    fun setUserInfo(userInfo: UserInfo, uuid: String) = rootReference.child("$USERS_KEY/${userInfo.key}/userData").updateChildren(userInfo.getValues(uuid))
 
     fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 

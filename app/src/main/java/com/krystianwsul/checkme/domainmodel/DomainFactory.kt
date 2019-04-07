@@ -123,8 +123,6 @@ open class DomainFactory(
 
         localReadTimes = ReadTimes(start, localRead, stop)
 
-        setUserHelper()
-
         val remoteRead = ExactTimeStamp.now
 
         Log.e("asdf", "set task records $sharedSnapshot")
@@ -134,6 +132,7 @@ open class DomainFactory(
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 
         remoteUserFactory = RemoteUserFactory(this, userSnapshot, userInfo)
+        remoteUserFactory.remoteUser.setToken(userInfo.token)
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
@@ -163,14 +162,13 @@ open class DomainFactory(
 
         val localChanges = localFactory.save(source)
         val remoteChanges = remoteProjectFactory.save()
+        val userChanges = remoteUserFactory.save()
 
-        if (localChanges || remoteChanges)
+        if (localChanges || remoteChanges || userChanges)
             domainChanged.accept(dataIds)
     }
 
     // firebase
-
-    private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid).checkError(this, "DomainFactory.setUserHelper")
 
     @Synchronized
     fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
@@ -244,7 +242,20 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun setUserRecord(dataSnapshot: DataSnapshot) = remoteUserFactory.onNewSnapshot(dataSnapshot)
+    fun updateUserRecord(dataSnapshot: DataSnapshot) {
+        MyCrashlytics.log("updateUserRecord")
+        Log.e("asdf", "update user record $dataSnapshot")
+
+        if (remoteUserFactory.isSaved) {
+            remoteUserFactory.isSaved = false
+            Log.e("asdf", "skipping remote user record")
+            return
+        }
+
+        remoteUserFactory.onNewSnapshot(dataSnapshot)
+
+        tryNotifyListeners("DomainFactory.updateUserRecord")
+    }
 
     @Synchronized
     fun setFriendRecords(dataSnapshot: DataSnapshot) {
@@ -1446,16 +1457,14 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun updateUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
-        MyCrashlytics.log("DomainFactory.updateUserInfo")
+    fun updateToken(source: SaveService.Source, token: String?) {
+        MyCrashlytics.log("DomainFactory.updateToken")
+        if (remoteUserFactory.isSaved || remoteProjectFactory.isSharedSaved) throw SavedFactoryException()
 
-        if (userInfo == newUserInfo)
-            return
+        userInfo.token = token
 
-        userInfo = newUserInfo
-        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid).checkError(this, "DomainFactory.updateUserInfo")
-
-        remoteProjectFactory.updateUserInfo(newUserInfo)
+        remoteUserFactory.remoteUser.setToken(token)
+        remoteProjectFactory.updateToken(token)
 
         save(0, source)
     }
@@ -2322,5 +2331,5 @@ open class DomainFactory(
         val instantiateMillis = stop.long - read.long
     }
 
-    private inner class SavedFactoryException : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved)
+    private inner class SavedFactoryException : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved + ", user.isSaved == " + remoteUserFactory.isSaved)
 }

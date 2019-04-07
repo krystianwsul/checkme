@@ -12,7 +12,7 @@ class RemoteUserFactory(
 
     private val remoteUserManager = RemoteUserManager(domainFactory, userInfo, domainFactory.uuid, userSnapshot)
 
-    var remoteUser = RemoteRootUser(remoteUserManager.remoteUserRecord)
+    var remoteUser = RemoteMyUser(remoteUserManager.remoteUserRecord)
         private set
 
     var isSaved
@@ -24,7 +24,7 @@ class RemoteUserFactory(
     fun onNewSnapshot(dataSnapshot: DataSnapshot) {
         val remoteUserRecord = remoteUserManager.newSnapshot(dataSnapshot)
 
-        remoteUser = RemoteRootUser(remoteUserRecord)
+        remoteUser = RemoteMyUser(remoteUserRecord)
     }
 
     fun save() = remoteUserManager.save()

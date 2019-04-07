@@ -190,7 +190,7 @@ class RemoteProjectFactory(
         return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId)
     }
 
-    fun updateUserInfo(userInfo: UserInfo) = remoteSharedProjects.values.forEach { it.updateUserInfo(userInfo, uuid) }
+    fun updateToken(token: String?) = remoteSharedProjects.values.forEach { it.updateUserInfo(userInfo.key, uuid, token) }
 
     fun getRemoteProjectForce(projectId: String): RemoteProject<*> {
         check(!TextUtils.isEmpty(projectId))

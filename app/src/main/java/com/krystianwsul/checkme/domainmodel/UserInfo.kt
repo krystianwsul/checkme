@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.text.TextUtils
 import com.google.firebase.auth.FirebaseUser
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.firebase.UserData
 
 data class UserInfo(
@@ -10,10 +9,10 @@ data class UserInfo(
         val name: String,
         val token: String?) {
 
-    constructor(firebaseUser: FirebaseUser) : this(
+    constructor(firebaseUser: FirebaseUser, token: String?) : this(
             firebaseUser.email!!,
             firebaseUser.displayName!!,
-            MyApplication.instance.token)
+            token)
 
     val key by lazy { UserData.getKey(email) }
 

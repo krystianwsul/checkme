@@ -75,7 +75,7 @@ class MyApplication : Application() {
                 .authStateChanges()
                 .map { NullableWrapper(it.currentUser) }
                 .startWith(NullableWrapper(FirebaseAuth.getInstance().currentUser))
-                .map { NullableWrapper(it.value?.let { UserInfo(it) }) }
+                .map { NullableWrapper(it.value?.let { UserInfo(it, token) }) }
                 .distinctUntilChanged()
                 .subscribe(userInfoRelay)
 

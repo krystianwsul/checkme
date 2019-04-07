@@ -41,7 +41,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
 
-        val userInfo = UserInfo(firebaseUser)
+        val userInfo = UserInfo(firebaseUser, token)
 
         DomainFactory.addFirebaseListener { it.updateUserInfo(SaveService.Source.SERVICE, userInfo) }
     }

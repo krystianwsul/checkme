@@ -5,11 +5,11 @@ import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.firebase.json.UserWrapper
 
 
-class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create) {
+open class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create) {
 
     companion object {
 
-        private const val USER_DATA = "userData"
+        const val USER_DATA = "userData"
         private const val FRIEND_OF = "friendOf"
     }
 
@@ -30,6 +30,8 @@ class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapp
         }
 
     val email by lazy { userJson.email }
+
+    open val photoUrl get() = userJson.photoUrl
 
     fun removeFriendOf(friendId: String) {
         check(!TextUtils.isEmpty(friendId))

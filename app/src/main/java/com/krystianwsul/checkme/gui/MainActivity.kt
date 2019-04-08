@@ -20,6 +20,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
@@ -54,11 +55,16 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         private const val SEARCH_KEY = "search"
         private const val CALENDAR_KEY = "calendar"
         private const val DAY_STATES_KEY = "dayStates"
+        private const val RESTORE_INSTANCES_KEY = "restoreInstances"
 
         private const val NORMAL_ELEVATION = 6f
         private const val INSTANCES_ELEVATION = 0f
 
         private const val DRAWER_TAG = "drawer"
+
+        private const val ACTION_INSTANCES = "com.krystianwsul.checkme.INSTANCES"
+        private const val ACTION_TASKS = "com.krystianwsul.checkme.TASKS"
+        private const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
 
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
     }
@@ -71,7 +77,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
     private var onPageChangeDisposable: Disposable? = null
 
-    val visibleTab = BehaviorRelay.createDefault(Tab.INSTANCES)
+    val visibleTab = BehaviorRelay.createDefault(Tab.values()[Preferences.tab])
     private val daysPosition = BehaviorRelay.create<Int>()
 
     override lateinit var hostEvents: Observable<DayFragment.Event>
@@ -98,14 +104,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
     private lateinit var states: MutableMap<Pair<TimeRange, Int>, Bundle>
 
-    override fun getBottomBar() = bottomAppBar!!
-
-    fun getState(pair: Pair<TimeRange, Int>) = states[pair]
-
-    fun setState(pair: Pair<TimeRange, Int>, bundle: Bundle) {
-        states[pair] = bundle
-    }
-
     val selectAllRelay = PublishRelay.create<Unit>()
 
     override val search by lazy {
@@ -115,6 +113,16 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     }
 
     private var actionMode: ActionMode? = null
+
+    private var restoreInstances: Boolean? = null
+
+    override fun getBottomBar() = bottomAppBar!!
+
+    fun getState(pair: Pair<TimeRange, Int>) = states[pair]
+
+    fun setState(pair: Pair<TimeRange, Int>, bundle: Bundle) {
+        states[pair] = bundle
+    }
 
     fun updateBottomMenu() {
         bottomAppBar.menu
@@ -130,12 +138,25 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    private fun closeSearch() {
-        mainActivitySearch.apply {
-            visibility = View.GONE
-            text = null
+    private fun closeSearch(switchingTab: Boolean) {
+        restoreInstances?.let {
+            if (!switchingTab)
+                check(visibleTab.value!! == Tab.TASKS)
+
+            restoreInstances = null
+
+            mainActivitySearch.apply {
+                check(visibility == View.VISIBLE)
+
+                animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
+                text = null
+            }
+
+            if (it && !switchingTab)
+                showTab(Tab.INSTANCES, changingSearch = true)
         }
-        updateSearchMenu()
+
+        updateTopMenu(true)
         hideKeyboard()
     }
 
@@ -174,6 +195,10 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                         visibility = View.VISIBLE
                         setText(getString(SEARCH_KEY))
                     }
+
+                    restoreInstances = getBoolean(RESTORE_INSTANCES_KEY)
+                } else {
+                    check(!containsKey(RESTORE_INSTANCES_KEY))
                 }
 
                 calendarOpen = getBoolean(CALENDAR_KEY)
@@ -187,6 +212,24 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             }
         } else {
             states = mutableMapOf()
+
+            when (intent.action) {
+                ACTION_INSTANCES -> visibleTab.accept(Tab.INSTANCES)
+                ACTION_TASKS -> visibleTab.accept(Tab.TASKS)
+                ACTION_SEARCH -> {
+                    check(restoreInstances == null)
+
+                    restoreInstances = false
+                    visibleTab.accept(Tab.TASKS)
+
+                    mainActivitySearch.apply {
+                        visibility = View.VISIBLE
+                        requestFocus()
+
+                        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                    }
+                }
+            }
         }
 
         mainActivityToolbar.apply {
@@ -234,17 +277,29 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                             updateCalendarHeight()
                         }
-                        R.id.actionMainClose -> closeSearch()
+                        R.id.actionMainClose -> closeSearch(false)
                         R.id.actionMainSearch -> {
+                            check(restoreInstances == null)
+
+                            restoreInstances = when (visibleTab.value!!) {
+                                Tab.INSTANCES -> {
+                                    showTab(Tab.TASKS, changingSearch = true)
+                                    true
+                                }
+                                Tab.TASKS -> {
+                                    false
+                                }
+                                else -> throw IllegalArgumentException()
+                            }
+
                             mainActivitySearch.apply {
-                                check(visibility == View.GONE)
-                                visibility = View.VISIBLE
+                                animateVisibility(listOf(this), listOf(), duration = MyBottomBar.duration)
                                 requestFocus()
 
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
                             }
 
-                            updateSearchMenu()
+                            updateTopMenu(true)
                         }
                         else -> throw IllegalArgumentException()
                     }
@@ -299,7 +354,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             updateCalendarHeight()
         }
 
-        showTab(visibleTab.value!!)
+        showTab(visibleTab.value!!, true)
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {
@@ -368,6 +423,12 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 override fun onTabUnselected(tab: TabLayout.Tab?) = Unit
             })
         }
+
+        mainActivitySearch.apply {
+            addOneShotGlobalLayoutListener {
+                layoutParams = layoutParams.apply { width = mainActivityToolbar.width - dpToPx(64).toInt() }
+            }
+        }
     }
 
     override fun initBottomBar() {
@@ -420,23 +481,35 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    private fun updateSearchMenu() {
-        mainActivityToolbar.menu.apply {
-            findItem(R.id.actionMainCalendar).isVisible = if (visibleTab.value!! == Tab.INSTANCES) {
-                (timeRange == TimeRange.DAY)
-            } else {
-                false
-            }
+    private fun updateTopMenu(changingSearch: Boolean) {
+        val searching = restoreInstances != null
+        if (searching)
+            check(mainActivitySearch.visibility == View.VISIBLE)
 
-            if (visibleTab.value!! == Tab.TASKS) {
-                val searching = mainActivitySearch.visibility == View.VISIBLE
+        val itemVisibilities = when (visibleTab.value!!) {
+            Tab.INSTANCES -> {
+                check(!searching)
 
-                findItem(R.id.actionMainClose).isVisible = searching
-                findItem(R.id.actionMainSearch).isVisible = !searching
-            } else {
-                findItem(R.id.actionMainClose).isVisible = false
-                findItem(R.id.actionMainSearch).isVisible = false
+                listOf(
+                        R.id.actionMainCalendar to (timeRange == TimeRange.DAY),
+                        R.id.actionMainClose to false,
+                        R.id.actionMainSearch to true
+                )
             }
+            Tab.TASKS -> listOf(
+                    R.id.actionMainCalendar to false,
+                    R.id.actionMainClose to searching,
+                    R.id.actionMainSearch to !searching
+            )
+            else -> listOf(
+                    R.id.actionMainCalendar to false,
+                    R.id.actionMainClose to false,
+                    R.id.actionMainSearch to false
+            )
+        }
+
+        mainActivityToolbar.animateItems(itemVisibilities, changingSearch) {
+            mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visibleTab.value!! == Tab.INSTANCES)
         }
     }
 
@@ -448,9 +521,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
 
-            mainActivitySearch.run {
-                if (visibility == View.VISIBLE)
-                    putString(SEARCH_KEY, text.toString())
+            if (restoreInstances != null) {
+                putBoolean(RESTORE_INSTANCES_KEY, restoreInstances!!)
+                putString(SEARCH_KEY, mainActivitySearch.text.toString())
             }
 
             putBoolean(CALENDAR_KEY, calendarOpen)
@@ -460,10 +533,10 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    fun showTab(tab: Tab) {
-        val density = resources.displayMetrics.density
+    fun showTab(tab: Tab, immediate: Boolean = false, changingSearch: Boolean = false) {
+        var closeSearch = false
 
-        fun setVisible(visible: Boolean) = mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visible)
+        val density = resources.displayMetrics.density
 
         val showViews = mutableListOf<View>()
         val hideViews = mutableListOf<View>()
@@ -471,19 +544,24 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         if (tab == Tab.INSTANCES) {
             showViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
-            setVisible(true)
+
+            Preferences.tab = tab.ordinal
         } else {
             hideViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
-            setVisible(false)
             calendarOpen = false
         }
 
         if (tab == Tab.TASKS) {
             showViews.add(mainTaskListFrame)
+
+            if (!changingSearch)
+                Preferences.tab = tab.ordinal
         } else {
             hideViews.add(mainTaskListFrame)
-            closeSearch()
+
+            if (!changingSearch)
+                closeSearch = true
         }
 
         if (tab == Tab.PROJECTS) {
@@ -518,7 +596,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
 
         mainActivityToolbar.title = when (tab) {
-            MainActivity.Tab.INSTANCES -> null
+            MainActivity.Tab.INSTANCES -> getString(R.string.instances)
             MainActivity.Tab.TASKS -> getString(R.string.tasks)
             MainActivity.Tab.PROJECTS -> getString(R.string.projects)
             MainActivity.Tab.CUSTOM_TIMES -> getString(R.string.times)
@@ -574,10 +652,15 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         visibleTab.accept(tab)
 
-        animateVisibility(showViews, hideViews, duration = resources.getInteger(android.R.integer.config_shortAnimTime))
+        animateVisibility(showViews, hideViews, immediate, resources.getInteger(android.R.integer.config_shortAnimTime))
 
         updateCalendarHeight()
-        updateSearchMenu()
+        if (!changingSearch) {
+            if (closeSearch)
+                closeSearch(true)
+            else
+                updateTopMenu(false)
+        }
     }
 
     override fun onDestroy() {

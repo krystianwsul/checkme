@@ -45,30 +45,44 @@
             android:id="@+id/findFriendUserLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/findFriendUserName"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="@color/textPrimary"
-                tools:ignore="Deprecated" />
+            <ImageView
+                android:id="@+id/findFriendUserPhoto"
+                android:layout_width="@dimen/listImage"
+                android:layout_height="@dimen/listImage"
+                android:layout_marginEnd="16dp" />
 
-            <TextView
-                android:id="@+id/findFriendUserEmail"
-                android:singleLine="true"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@color/textSecondary"
-                tools:ignore="Deprecated" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/findFriendUserName"
+                    android:singleLine="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="@color/textPrimary"
+                    tools:ignore="Deprecated" />
+
+                <TextView
+                    android:id="@+id/findFriendUserEmail"
+                    android:singleLine="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/textSecondary"
+                    tools:ignore="Deprecated" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

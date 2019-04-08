@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.treeadapter.*
 import kotlinx.android.parcel.Parcelize
@@ -78,6 +79,12 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        emptyTextPadding.visibility = View.VISIBLE
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -100,7 +107,7 @@ class UserListFragment : AbstractFragment(), FabUser {
                 .values
                 .asSequence()
                 .filterNot { userIds.contains(it.id) }
-                .map { FriendPickerFragment.FriendData(it.id, it.name, it.email) }
+                .map { FriendPickerFragment.FriendData(it.id, it.name, it.email, it.photoUrl) }
                 .toList()
 
         friendPickerFragment.initialize(FriendPickerFragment.Data(data!!.immediate, friendDatas)) { friendId ->
@@ -165,12 +172,12 @@ class UserListFragment : AbstractFragment(), FabUser {
         val show: View
         if ((treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.isEmpty()) {
             hide.add(friendListRecycler)
-            show = emptyText
+            show = emptyTextLayout
 
             emptyText.setText(R.string.friends_empty)
         } else {
             show = friendListRecycler
-            hide.add(emptyText)
+            hide.add(emptyTextLayout)
         }
 
         animateVisibility(listOf(show), hide, immediate)
@@ -246,7 +253,7 @@ class UserListFragment : AbstractFragment(), FabUser {
     private fun updateSelectAll() {
         checkNotNull(treeViewAdapter)
 
-        listener.setUserSelectAllVisibility(treeViewAdapter.itemCount != 0)
+        listener.setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
     }
 
     inner class FriendListAdapter : TreeModelAdapter {
@@ -337,6 +344,8 @@ class UserListFragment : AbstractFragment(), FabUser {
         override val isVisibleDuringActionMode = true
 
         override val isVisibleWhenEmpty = true
+
+        override val image = NullableWrapper(userListData.photoUrl)
 
         override fun onClick() = Unit
 

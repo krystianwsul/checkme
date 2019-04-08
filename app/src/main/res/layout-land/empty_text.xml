@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/emptyTextLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/toolbarHeight"
+    android:visibility="gone">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="@dimen/toolbarHeight"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            tools:ignore="NestedWeights">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="200dp"
+                android:layout_margin="20dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/empty"
+                android:layout_centerInParent="true" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/emptyText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:gravity="center"
+            android:textColor="@color/textDisabled"
+            android:textSize="@dimen/textPrimary" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/emptyTextPadding"
+        android:layout_width="match_parent"
+        android:layout_height="73dp"
+        android:visibility="gone" />
+
+</LinearLayout>

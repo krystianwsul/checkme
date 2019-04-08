@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.checkme.utils.loadPhoto
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_find_friend.*
 
@@ -166,6 +167,7 @@ class FindFriendActivity : AbstractActivity() {
                 show.add(findFriendUserLayout)
                 hide.add(findFriendProgress)
 
+                findFriendUserPhoto.loadPhoto(userData!!.photoUrl)
                 findFriendUserName.text = userData!!.name
                 findFriendUserEmail.text = userData!!.email
             }

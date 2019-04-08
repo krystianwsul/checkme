@@ -4,7 +4,7 @@ import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 
 
-class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {
+open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {
 
     val id by lazy { remoteRootUserRecord.id }
 
@@ -13,6 +13,8 @@ class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {
     val email get() = remoteRootUserRecord.email
 
     val userJson get() = remoteRootUserRecord.userJson
+
+    open val photoUrl get() = remoteRootUserRecord.photoUrl
 
     fun removeFriend(friendId: String) {
         check(!TextUtils.isEmpty(friendId))

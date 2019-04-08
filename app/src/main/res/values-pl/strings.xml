@@ -43,7 +43,7 @@
     <string name="share">Udostępnij</string>
     <string name="sendTo">Prześlij do:</string>
     <string name="nameError">Wprowadź nazwę</string>
-    <string name="add_task">Dodaj zadanie podrzędne</string>
+    <string name="add_subtask">Dodaj zadanie podrzędne</string>
     <string name="noReminder">Bez przypomnienia</string>
     <string name="addReminder">Dodaj przypomnienie</string>
     <string name="selectAll">Zaznacz wszystko</string>
@@ -83,6 +83,7 @@
     <string name="snackbarDone">Oznaczono %1$s jako zrobione</string>
     <string name="snackbarNotDone">Oznaczono %1$s jako nie zrobione</string>
     <string name="snackbarHour">%1$s przełożone</string>
+    <string name="add_task">Dodaj zadanie</string>
     <string name="about">O aplikacji</string>
     <string name="aboutDescription">Ta aplikacja jest zbiorem wszystkich funkcji których mi brakowało w innych aplikacjach tego rozaju.  Oprócz podstaw, zawiera projekty dzielone między użytkownikami, zagnieżdżone zadania, zaawansowane opcje edycji struktur zadań, dostosowywanie pór dnia, pojedyncze przypomnienia, jak i dzienne, tygodniowe i miesięczne harmonogramy przypomnień, i wkrótce więcej!</string>
     <string name="designBy">Grafika - Bernarda Kałuża</string>

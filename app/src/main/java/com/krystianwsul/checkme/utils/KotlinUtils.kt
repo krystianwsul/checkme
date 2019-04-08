@@ -8,8 +8,11 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayout
 import com.krystianwsul.checkme.MyApplication
@@ -122,6 +125,11 @@ fun Context.dpToPx(dp: Int): Float {
     return dp * density
 }
 
+fun View.dpToPx(dp: Int): Float {
+    val density = resources.displayMetrics.density
+    return dp * density
+}
+
 fun Context.startTicks(receiver: BroadcastReceiver) {
     registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
 }
@@ -178,9 +186,17 @@ fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenu
         }
     } else {
         itemVisibilities.forEach { menu.findItem(it.first)?.isVisible = it.second }
+        onEnd?.invoke()
     }
 }
 
 fun Context.normalizedId(@IdRes id: Int) = if (id == View.NO_ID) "NO_ID" else resources.getResourceName(id)!!
 
 fun Calendar.toExactTimeStamp() = ExactTimeStamp(this)
+
+fun ImageView.loadPhoto(url: String?) =
+        Glide.with(this)
+                .load(url)
+                .placeholder(R.drawable.ic_person_black_24dp)
+                .apply(RequestOptions.circleCropTransform())
+                .into(this)

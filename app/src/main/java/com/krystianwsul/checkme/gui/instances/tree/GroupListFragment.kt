@@ -576,14 +576,14 @@ class GroupListFragment @JvmOverloads constructor(
             hide.add(groupListRecycler)
 
             if (emptyTextId != null) {
-                show.add(emptyText)
+                show.add(emptyTextLayout)
                 emptyText.setText(emptyTextId)
             } else {
-                hide.add(emptyText)
+                hide.add(emptyTextLayout)
             }
         } else {
             show.add(groupListRecycler)
-            hide.add(emptyText)
+            hide.add(emptyTextLayout)
         }
 
         animateVisibility(show, hide, immediate = parameters.immediate)

@@ -8,6 +8,9 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.checkme.viewmodels.DrawerViewModel
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.nav_header_main.view.*
 
 class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
@@ -20,6 +23,14 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
     override val alwaysExpand = true
 
     private val mainActivity get() = activity as MainActivity
+
+    private val drawerViewModel by lazy { DrawerViewModel() }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        drawerViewModel.start()
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
         setCancelable(true)
@@ -42,7 +53,6 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                 })
 
                 setNavigationItemSelectedListener {
-
                     when (it.itemId) {
                         R.id.main_drawer_instances -> showTab(MainActivity.Tab.INSTANCES)
                         R.id.main_drawer_tasks -> showTab(MainActivity.Tab.TASKS)
@@ -50,13 +60,9 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         R.id.main_drawer_custom_times -> showTab(MainActivity.Tab.CUSTOM_TIMES)
                         R.id.main_drawer_friends -> showTab(MainActivity.Tab.FRIENDS)
                         R.id.main_drawer_sign_out -> {
-                            val domainFactory = DomainFactory.instance
-                            val userInfo = MyApplication.instance.userInfo
-
-                            domainFactory.updateUserInfo(SaveService.Source.GUI, userInfo.copy(token = null))
+                            DomainFactory.instance.updateToken(SaveService.Source.GUI, null)
 
                             MyApplication.instance.googleSigninClient.signOut()
-
                             FirebaseAuth.getInstance().signOut()
 
                             finish()
@@ -90,12 +96,13 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         true
                     }
 
-                    FirebaseAuth.getInstance()
-                            .currentUser!!
-                            .let {
-                                navHeaderName.text = it.displayName
+                    drawerViewModel.data
+                            .subscribe {
+                                navHeaderPhoto.loadPhoto(it.photoUrl)
+                                navHeaderName.text = it.name
                                 navHeaderEmail.text = it.email
                             }
+                            .addTo(startDisposable)
                 }
             }
         }

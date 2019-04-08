@@ -34,6 +34,10 @@ class TutorialFragment : AbstractFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        tutorialSignIn?.apply {
+            visibility = if ((activity as TutorialActivity).help) View.GONE else View.INVISIBLE
+        }
+
         tutorialImage.setImageResource(when (position) {
             0 -> R.drawable.tutorial_1
             1 -> R.drawable.tutorial_2

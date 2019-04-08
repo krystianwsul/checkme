@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.firebase.json.UserJson
 
 class RemoteProjectUserRecord(
         create: Boolean,
-        private val remoteProjectRecord: RemoteProjectRecord<*>,
+        private val remoteProjectRecord: RemoteSharedProjectRecord,
         override val createObject: UserJson) : RemoteRecord(create) {
 
     companion object {
@@ -30,6 +30,18 @@ class RemoteProjectUserRecord(
         }
 
     val email by lazy { createObject.email }
+
+    var photoUrl: String?
+        get() = createObject.photoUrl
+        set(value) {
+            if (value == createObject.photoUrl)
+                return
+
+            check(!value.isNullOrEmpty())
+
+            createObject.photoUrl = value
+            addValue("$key/photoUrl", value)
+        }
 
     fun setToken(token: String?, uuid: String) {
         check(!TextUtils.isEmpty(uuid))

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,7 +16,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.loadPhoto
 import kotlinx.android.synthetic.main.fragment_friend_picker.view.*
+import kotlinx.android.synthetic.main.row_friend.view.*
 
 
 class FriendPickerFragment : AbstractDialogFragment() {
@@ -81,23 +84,28 @@ class FriendPickerFragment : AbstractDialogFragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendListAdapter.FriendHolder {
             val friendRow = requireActivity().layoutInflater.inflate(R.layout.row_friend, parent, false)
 
+            val friendImage = friendRow.friendImage
             val friendName = friendRow.findViewById<View>(R.id.friendName) as TextView
-
             val friendEmail = friendRow.findViewById<View>(R.id.friendEmail) as TextView
 
-            return FriendHolder(friendRow, friendName, friendEmail)
+            return FriendHolder(friendRow, friendImage, friendName, friendEmail)
         }
 
         override fun onBindViewHolder(friendHolder: FriendListAdapter.FriendHolder, position: Int) {
             val friendData = data!!.friendDatas[position]
 
+            friendHolder.friendImage.loadPhoto(friendData.photoUrl)
             friendHolder.friendName.text = friendData.name
             friendHolder.friendEmail.text = friendData.email
 
             friendHolder.friendRow.setOnClickListener { friendHolder.onRowClick() }
         }
 
-        private inner class FriendHolder(val friendRow: View, val friendName: TextView, val friendEmail: TextView) : RecyclerView.ViewHolder(friendRow) {
+        private inner class FriendHolder(
+                val friendRow: View,
+                val friendImage: ImageView,
+                val friendName: TextView,
+                val friendEmail: TextView) : RecyclerView.ViewHolder(friendRow) {
 
             fun onRowClick() {
                 val friendData = data!!.friendDatas[adapterPosition]
@@ -111,7 +119,11 @@ class FriendPickerFragment : AbstractDialogFragment() {
 
     data class Data(val immediate: Boolean, val friendDatas: List<FriendData>)
 
-    class FriendData(val id: String, val name: String, val email: String) {
+    class FriendData(
+            val id: String,
+            val name: String,
+            val email: String,
+            val photoUrl: String?) {
 
         init {
             check(!TextUtils.isEmpty(id))

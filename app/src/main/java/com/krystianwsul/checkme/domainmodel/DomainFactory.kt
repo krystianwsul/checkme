@@ -12,8 +12,6 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
-import com.krystianwsul.checkme.firebase.json.UserWrapper
-import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
@@ -101,7 +99,7 @@ open class DomainFactory(
     var remoteProjectFactory: RemoteProjectFactory
         private set
 
-    private var remoteRootUser: RemoteRootUser
+    private val remoteUserFactory: RemoteUserFactory
 
     var remoteFriendFactory: RemoteFriendFactory
         private set
@@ -125,18 +123,16 @@ open class DomainFactory(
 
         localReadTimes = ReadTimes(start, localRead, stop)
 
-        setUserHelper()
-
         val remoteRead = ExactTimeStamp.now
 
         Log.e("asdf", "set task records $sharedSnapshot")
 
-        this.remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, userInfo, remoteRead)
+        remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, userInfo, remoteRead)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 
-        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, userSnapshot.getValue(UserWrapper::class.java)
-                ?: UserWrapper()))
+        remoteUserFactory = RemoteUserFactory(this, userSnapshot, userInfo)
+        remoteUserFactory.remoteUser.setToken(userInfo.token)
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
@@ -166,14 +162,13 @@ open class DomainFactory(
 
         val localChanges = localFactory.save(source)
         val remoteChanges = remoteProjectFactory.save()
+        val userChanges = remoteUserFactory.save()
 
-        if (localChanges || remoteChanges)
+        if (localChanges || remoteChanges || userChanges)
             domainChanged.accept(dataIds)
     }
 
     // firebase
-
-    private fun setUserHelper() = DatabaseWrapper.setUserInfo(userInfo, localFactory.uuid).checkError(this, "DomainFactory.setUserHelper")
 
     @Synchronized
     fun clearUserInfo() = updateNotifications(ExactTimeStamp.now, true)
@@ -247,8 +242,19 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun setUserRecord(dataSnapshot: DataSnapshot) {
-        remoteRootUser = RemoteRootUser(RemoteRootUserRecord(false, dataSnapshot.getValue(UserWrapper::class.java)!!))
+    fun updateUserRecord(dataSnapshot: DataSnapshot) {
+        MyCrashlytics.log("updateUserRecord")
+        Log.e("asdf", "update user record $dataSnapshot")
+
+        if (remoteUserFactory.isSaved) {
+            remoteUserFactory.isSaved = false
+            Log.e("asdf", "skipping remote user record")
+            return
+        }
+
+        remoteUserFactory.onNewSnapshot(dataSnapshot)
+
+        tryNotifyListeners("DomainFactory.updateUserRecord")
     }
 
     @Synchronized
@@ -562,7 +568,7 @@ open class DomainFactory(
 
     @Synchronized
     fun getCreateTaskData(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?, parentTaskKeyHint: TaskKey?): CreateTaskViewModel.Data {
-        MyCrashlytics.log("DomainFactory.getCreateTaskData")
+        MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
 
         check(taskKey == null || joinTaskKeys == null)
 
@@ -577,6 +583,13 @@ open class DomainFactory(
         }
 
         val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
+
+        fun checkHintPresent(taskParentKey: CreateTaskViewModel.ParentKey.TaskParentKey, parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>): Boolean {
+            return parentTreeDatas.containsKey(taskParentKey) || parentTreeDatas.any { checkHintPresent(taskParentKey, it.value.parentTreeDatas) }
+        }
+
+        fun checkHintPresent(parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>) = parentTaskKeyHint?.let { checkHintPresent(CreateTaskViewModel.ParentKey.TaskParentKey(it), parentTreeDatas) }
+                ?: true
 
         var taskData: CreateTaskViewModel.TaskData? = null
         val parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>
@@ -607,6 +620,7 @@ open class DomainFactory(
             taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName)
 
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
+            check(checkHintPresent(parentTreeDatas))
         } else {
             var projectId: String? = null
             if (joinTaskKeys != null) {
@@ -624,6 +638,7 @@ open class DomainFactory(
             } else {
                 getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             }
+            check(checkHintPresent(parentTreeDatas))
         }
 
         val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) }
@@ -661,6 +676,13 @@ open class DomainFactory(
     }
 
     @Synchronized
+    fun getDrawerData(): DrawerViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getDrawerData")
+
+        return remoteUserFactory.remoteUser.run { DrawerViewModel.Data(name, email, photoUrl) }
+    }
+
+    @Synchronized
     fun getProjectListData(): ProjectListViewModel.Data {
         MyCrashlytics.log("DomainFactory.getProjectListData")
 
@@ -686,7 +708,7 @@ open class DomainFactory(
 
         val friends = remoteFriendFactory.friends
 
-        val userListDatas = friends.map { FriendListViewModel.UserListData(it.name, it.email, it.id) }.toMutableSet()
+        val userListDatas = friends.map { FriendListViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }.toMutableSet()
 
         return FriendListViewModel.Data(userListDatas)
     }
@@ -696,7 +718,7 @@ open class DomainFactory(
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
         val friendDatas = remoteFriendFactory.friends
-                .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
+                .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
                 .associateBy { it.id }
 
         val name: String?
@@ -708,7 +730,7 @@ open class DomainFactory(
 
             userListDatas = remoteProject.users
                     .filterNot { it.id == userInfo.key }
-                    .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id) }
+                    .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
                     .toSet()
         } else {
             name = null
@@ -1442,16 +1464,25 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun updateUserInfo(source: SaveService.Source, newUserInfo: UserInfo) {
-        MyCrashlytics.log("DomainFactory.updateUserInfo")
+    fun updateToken(source: SaveService.Source, token: String?) {
+        MyCrashlytics.log("DomainFactory.updateToken")
+        if (remoteUserFactory.isSaved || remoteProjectFactory.isSharedSaved) throw SavedFactoryException()
 
-        if (userInfo == newUserInfo)
-            return
+        userInfo.token = token
 
-        userInfo = newUserInfo
-        DatabaseWrapper.setUserInfo(newUserInfo, localFactory.uuid).checkError(this, "DomainFactory.updateUserInfo")
+        remoteUserFactory.remoteUser.setToken(token)
+        remoteProjectFactory.updateToken(token)
 
-        remoteProjectFactory.updateUserInfo(newUserInfo)
+        save(0, source)
+    }
+
+    @Synchronized
+    fun updatePhotoUrl(source: SaveService.Source, photoUrl: String) {
+        MyCrashlytics.log("DomainFactory.updatePhotoUrl")
+        if (remoteUserFactory.isSaved || remoteProjectFactory.isSharedSaved) throw SavedFactoryException()
+
+        remoteUserFactory.remoteUser.photoUrl = photoUrl
+        remoteProjectFactory.updatePhotoUrl(userInfo, photoUrl)
 
         save(0, source)
     }
@@ -1491,7 +1522,7 @@ open class DomainFactory(
         check(!recordOf.contains(key))
         recordOf.add(key)
 
-        val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteRootUser)
+        val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteUserFactory.remoteUser)
 
         save(dataId, source)
 
@@ -1706,18 +1737,20 @@ open class DomainFactory(
     private fun Task.showAsParent(now: ExactTimeStamp, excludedTaskKeys: Set<TaskKey>, includedTaskKeys: Set<TaskKey>): Boolean {
         check(excludedTaskKeys.intersect(includedTaskKeys).isEmpty())
 
+        if (!current(now)) {
+            check(!includedTaskKeys.contains(taskKey))
+
+            return false
+        }
+
         if (!isRootTask(now))
             return false
 
         if (includedTaskKeys.contains(taskKey)) {
-            check(current(now))
             check(isVisible(now, true))
 
             return true
         }
-
-        if (!current(now))
-            return false
 
         if (excludedTaskKeys.contains(taskKey))
             return false
@@ -2316,5 +2349,5 @@ open class DomainFactory(
         val instantiateMillis = stop.long - read.long
     }
 
-    private inner class SavedFactoryException : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved)
+    private inner class SavedFactoryException : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved + ", user.isSaved == " + remoteUserFactory.isSaved)
 }

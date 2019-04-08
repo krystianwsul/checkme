@@ -72,7 +72,7 @@ class AboutFragment : AbstractFragment() {
 
     fun onShown() {
         Observable.just(Unit)
-                .delay(3, TimeUnit.SECONDS)
+                .delay(1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { aboutRoot.apply { smoothScrollTo(0, bottom) } }
                 .addTo(viewCreatedDisposable)

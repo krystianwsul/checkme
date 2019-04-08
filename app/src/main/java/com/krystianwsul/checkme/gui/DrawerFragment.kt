@@ -20,6 +20,8 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
         fun newInstance() = DrawerFragment()
     }
 
+    override val alwaysExpand = true
+
     private val mainActivity get() = activity as MainActivity
 
     private val drawerViewModel by lazy { DrawerViewModel() }
@@ -47,6 +49,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                     MainActivity.Tab.CUSTOM_TIMES -> R.id.main_drawer_custom_times
                     MainActivity.Tab.FRIENDS -> R.id.main_drawer_friends
                     MainActivity.Tab.DEBUG -> R.id.main_drawer_debug
+                    MainActivity.Tab.ABOUT -> R.id.main_drawer_about
                 })
 
                 setNavigationItemSelectedListener {
@@ -68,6 +71,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         }
                         R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newHelpIntent())
                         R.id.main_drawer_debug -> showTab(MainActivity.Tab.DEBUG)
+                        R.id.main_drawer_about -> showTab(MainActivity.Tab.ABOUT)
                         else -> throw IndexOutOfBoundsException()
                     }
 

@@ -13,6 +13,8 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
 
     protected val startDisposable = CompositeDisposable()
 
+    protected open val alwaysExpand = false
+
     override fun onStart() {
         super.onStart()
 
@@ -32,7 +34,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             if (first) {
                 first = false
 
-                if (state == BottomSheetBehavior.STATE_COLLAPSED && resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+                if (state == BottomSheetBehavior.STATE_COLLAPSED && (alwaysExpand || resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE))
                     state = BottomSheetBehavior.STATE_EXPANDED
             }
         }

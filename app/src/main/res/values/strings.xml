@@ -84,5 +84,8 @@
     <string name="snackbarDone">%1$s marked as done</string>
     <string name="snackbarNotDone">%1$s marked as not done</string>
     <string name="snackbarHour">%1$s rescheduled</string>
+    <string name="about">About</string>
+    <string name="aboutDescription">This app is a growing collection of all the features I thought were missing from other applications of its kind.  Apart from the basics, it has multi-user projects, nested tasks, advanced task structure editing, custom time presets, single reminders, as well as daily, weekly, and monthly reminder schedules, and more to come!</string>
+    <string name="designBy">Design by Bernarda Kałuża</string>
     <string name="add_an_image">Add an image</string>
 </resources>

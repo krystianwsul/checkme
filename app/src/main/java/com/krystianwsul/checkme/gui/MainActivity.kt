@@ -73,6 +73,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     private lateinit var projectListFragment: ProjectListFragment
     private lateinit var showCustomTimesFragment: ShowCustomTimesFragment
     private lateinit var friendListFragment: FriendListFragment
+    private lateinit var aboutFragment: AboutFragment
 
     private var onPageChangeDisposable: Disposable? = null
 
@@ -133,6 +134,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             Tab.FRIENDS -> userSelectAllVisible
             Tab.PROJECTS -> projectSelectAllVisible
             Tab.DEBUG -> false
+            Tab.ABOUT -> false
         }
     }
 
@@ -315,12 +317,14 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             projectListFragment = supportFragmentManager.findFragmentById(R.id.mainProjectListFrame) as ProjectListFragment
             showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
             friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
+            aboutFragment = supportFragmentManager.findFragmentById(R.id.mainAboutFrame) as AboutFragment
         } else {
             debugFragment = DebugFragment.newInstance()
             taskListFragment = TaskListFragment.newInstance()
             projectListFragment = ProjectListFragment.newInstance()
             showCustomTimesFragment = ShowCustomTimesFragment.newInstance()
             friendListFragment = FriendListFragment.newInstance()
+            aboutFragment = AboutFragment.newInstance()
 
             supportFragmentManager.beginTransaction()
                     .add(R.id.mainDebugFrame, debugFragment)
@@ -328,6 +332,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                     .add(R.id.mainProjectListFrame, projectListFragment)
                     .add(R.id.mainFriendListFrame, friendListFragment)
                     .add(R.id.mainCustomTimesFrame, showCustomTimesFragment)
+                    .add(R.id.mainAboutFrame, aboutFragment)
                     .commit()
         }
 
@@ -583,6 +588,13 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             hideViews.add(mainDebugFrame)
         }
 
+        if (tab == Tab.ABOUT) {
+            showViews.add(mainAboutFrame)
+            aboutFragment.onShown()
+        } else {
+            hideViews.add(mainAboutFrame)
+        }
+
         mainActivityToolbar.title = when (tab) {
             MainActivity.Tab.INSTANCES -> getString(R.string.instances)
             MainActivity.Tab.TASKS -> getString(R.string.tasks)
@@ -590,6 +602,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             MainActivity.Tab.CUSTOM_TIMES -> getString(R.string.times)
             MainActivity.Tab.FRIENDS -> getString(R.string.friends)
             MainActivity.Tab.DEBUG -> "Debug"
+            MainActivity.Tab.ABOUT -> getString(R.string.about)
         }
 
         when (tab) {
@@ -627,7 +640,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                 friendListFragment.setFab(bottomFab)
             }
-            MainActivity.Tab.DEBUG -> {
+            MainActivity.Tab.DEBUG, MainActivity.Tab.ABOUT -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
@@ -789,7 +802,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         PROJECTS,
         CUSTOM_TIMES,
         FRIENDS,
-        DEBUG
+        DEBUG,
+        ABOUT
     }
 
     enum class TimeRange {

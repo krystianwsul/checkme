@@ -248,10 +248,5 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     fun generateInstance(scheduleDateTime: DateTime, instanceShownRecord: InstanceShownRecord?) = RemoteInstance(domainFactory, remoteProject, this, scheduleDateTime, instanceShownRecord)
 
-    class ImageData(val uuid: String, val uploading: Boolean) {
-
-        val image by lazy { if (uploading) uuid + TMP_SUFFIX else uuid }
-    }
-
     class MissingDayException(message: String) : Exception(message)
 }

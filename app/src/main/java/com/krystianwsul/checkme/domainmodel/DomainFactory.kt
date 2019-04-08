@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
@@ -940,13 +941,15 @@ open class DomainFactory(
         save(0, source)
     }
 
-    fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): Task {
+    fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?, imagePath: String?): Task {
         check(name.isNotEmpty())
         check(!scheduleDatas.isEmpty())
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
 
-        val task = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId)
+        val uuid = imagePath?.let { newUuid() }
+
+        val task = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId, uuid)
 
         updateNotifications(now)
 
@@ -954,17 +957,21 @@ open class DomainFactory(
 
         notifyCloud(task.project)
 
+        uuid?.let {
+            Uploader.addUpload(task.taskKey, it, imagePath)
+        }
+
         return task
     }
 
     @Synchronized
-    fun createScheduleRootTask(dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?) {
+    fun createScheduleRootTask(dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?, imagePath: String?) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
-        createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId)
+        createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId, imagePath)
     }
 
     fun updateScheduleTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
@@ -1023,7 +1030,7 @@ open class DomainFactory(
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-        val newParentTask = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId)
+        val newParentTask = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId, null) // todo image
 
         joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
 
@@ -1041,7 +1048,7 @@ open class DomainFactory(
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
 
-        val task = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
+        val task = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId, null) // todo image
 
         updateNotifications(now)
 
@@ -1079,7 +1086,7 @@ open class DomainFactory(
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-        val newParentTask = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId)
+        val newParentTask = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId, null) // todo image
 
         joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
 
@@ -1573,6 +1580,21 @@ open class DomainFactory(
         save(dataId, source)
 
         notifyCloud(remoteProjects)
+    }
+
+    @Synchronized
+    fun setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageData: ImageData) {
+        MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        val task = getTaskForce(taskKey)
+        check(task.image == imageData)
+
+        task.image = imageData.copy(uploading = false)
+
+        save(0, source)
+
+        notifyCloud(task.project)
     }
 
     // internal

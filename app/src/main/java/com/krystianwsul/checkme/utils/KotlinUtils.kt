@@ -199,3 +199,5 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .placeholder(R.drawable.ic_person_black_24dp)
         .apply(RequestOptions.circleCropTransform())
         .into(this)
+
+fun newUuid() = UUID.randomUUID().toString()

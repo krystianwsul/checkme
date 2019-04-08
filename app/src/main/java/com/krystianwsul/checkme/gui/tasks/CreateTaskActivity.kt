@@ -271,6 +271,8 @@ class CreateTaskActivity : AbstractActivity() {
 
                     createTaskViewModel.stop()
 
+                    val imagePath = imageUrl.value!!.value
+
                     if (hasValueSchedule()) {
                         check(!hasValueParentTask())
 
@@ -295,7 +297,7 @@ class CreateTaskActivity : AbstractActivity() {
                         } else {
                             check(data!!.taskData == null)
 
-                            DomainFactory.instance.createScheduleRootTask(data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, note, projectId)
+                            DomainFactory.instance.createScheduleRootTask(data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, note, projectId, imagePath)
 
                             finish()
                         }

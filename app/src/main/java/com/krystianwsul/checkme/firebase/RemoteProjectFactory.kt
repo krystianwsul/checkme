@@ -117,12 +117,13 @@ class RemoteProjectFactory(
         remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectRecord, uuid, now)
     }
 
-    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String) = createRemoteTaskHelper(now, name, note, projectId).apply {
+    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
         createSchedules(now, scheduleDatas)
     }
 
-    fun createRemoteTaskHelper(now: ExactTimeStamp, name: String, note: String?, projectId: String): RemoteTask<*> {
-        val taskJson = TaskJson(name, now.long, null, null, null, null, note)
+    fun createRemoteTaskHelper(now: ExactTimeStamp, name: String, note: String?, projectId: String, uuid: String?): RemoteTask<*> {
+        val image = uuid?.let { ImageData(uuid, true).image }
+        val taskJson = TaskJson(name, now.long, null, null, null, null, note, image = image)
 
         return getRemoteProjectForce(projectId).newRemoteTask(taskJson, now)
     }

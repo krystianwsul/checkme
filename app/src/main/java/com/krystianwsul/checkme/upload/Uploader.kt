@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.ImageData
+import com.krystianwsul.checkme.gui.instances.tree.ImageNode
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import java.io.FileInputStream
@@ -38,4 +39,6 @@ object Uploader {
 
         // todo delete tmp files
     }
+
+    fun getReference(imageData: ImageNode.Data.Remote) = storage.child(imageData.uuid)
 }

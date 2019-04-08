@@ -285,7 +285,7 @@ class NotDoneGroupNode(
     }
 
     override fun compareTo(other: ModelNode) = when (other) {
-        is NoteNode -> 1
+        is NoteNode, is ImageNode -> 1
         is NotDoneGroupNode -> {
 
             val timeStampComparison = exactTimeStamp.compareTo(other.exactTimeStamp)
@@ -298,12 +298,8 @@ class NotDoneGroupNode(
                 singleInstanceData.compareTo(other.singleInstanceData)
             }
         }
-        is UnscheduledNode -> -1
-        else -> {
-            check(other is DividerNode)
-
-            -1
-        }
+        is UnscheduledNode, is DividerNode -> -1
+        else -> throw IllegalArgumentException()
     }
 
     fun addInstanceData(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) {

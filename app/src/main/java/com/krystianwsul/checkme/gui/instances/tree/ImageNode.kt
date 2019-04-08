@@ -5,7 +5,7 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import java.util.*
 
-class ImageNode(data: Data) : GroupHolderNode(0) { // todo image add for tasks
+class ImageNode(override val imageData: Data) : GroupHolderNode(0) { // todo image add for tasks
 
     override lateinit var treeNode: TreeNode
         private set
@@ -17,6 +17,8 @@ class ImageNode(data: Data) : GroupHolderNode(0) { // todo image add for tasks
     data class Id(val id: Any)
 
     override val name: Triple<String, Int, Boolean>? = null
+
+    override val isSeparatorVisibleWhenNotExpanded = true // todo why not working?
 
     fun initialize(nodeContainer: NodeContainer): TreeNode {
         this.nodeContainer = nodeContainer
@@ -34,7 +36,7 @@ class ImageNode(data: Data) : GroupHolderNode(0) { // todo image add for tasks
 
     sealed class Data {
 
-        class Local(val path: String) : Data()
-        class Remote(val uuid: String) : Data()
+        data class Local(val path: String) : Data()
+        data class Remote(val uuid: String) : Data()
     }
 }

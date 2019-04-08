@@ -8,10 +8,8 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.*
+import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -61,7 +59,20 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     open val ripple = false
 
-    final override val state get() = State(id, name, details, children, indentation, treeNode.expandVisible, treeNode.isExpanded, checkBoxVisibility, checkBoxChecked)
+    protected open val imageData: ImageNode.Data? = null
+
+    final override val state
+        get() = State(
+                id,
+                name,
+                details,
+                children,
+                indentation,
+                treeNode.expandVisible,
+                treeNode.isExpanded,
+                checkBoxVisibility,
+                checkBoxChecked,
+                imageData)
 
     protected open val colorBackground = GroupHolderNode.colorBackground
 
@@ -74,7 +85,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             val expandVisible: Boolean,
             val isExpanded: Boolean,
             val checkboxVisibility: Int,
-            val checkboxChecked: Boolean) : ModelState {
+            val checkboxChecked: Boolean,
+            val imageData: ImageNode.Data?) : ModelState {
 
         override fun same(other: ModelState) = (other as State).id == id
     }
@@ -94,156 +106,168 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         checkStale()
 
         groupHolder.run {
-            val checkBoxVisibility = checkBoxVisibility
-            val widthKey = Triple(indentation, checkBoxVisibility == View.GONE, rowContainer.orientation)
+            if (imageData != null) {
+                rowContainer.visibility = View.GONE
+                rowBigImage.visibility = View.VISIBLE
 
-            rowContainer.setIndent(indentation)
+                GlideApp.with(itemView)
+                        .load(Uploader.getReference(imageData as ImageNode.Data.Remote)) // todo image local
+                        .into(rowBigImage)
+            } else {
+                rowContainer.visibility = View.VISIBLE
+                rowBigImage.visibility = View.GONE
 
-            textWidth = textWidths[widthKey]
+                val checkBoxVisibility = checkBoxVisibility
+                val widthKey = Triple(indentation, checkBoxVisibility == View.GONE, rowContainer.orientation)
 
-            val minLines = 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0)
-            var remainingLines = TOTAL_LINES - minLines
+                rowContainer.setIndent(indentation)
 
-            fun TextView.allocateLines() {
-                val wantLines = Rect().run {
-                    val currentSize = textSize
-                    Log.e("asdf", "lines currentSize $currentSize")
+                textWidth = textWidths[widthKey]
 
-                    Paint().let {
-                        it.textSize = currentSize
-                        it.getTextBounds(text.toString(), 0, text.length, this)
+                val minLines = 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0)
+                var remainingLines = TOTAL_LINES - minLines
+
+                fun TextView.allocateLines() {
+                    val wantLines = Rect().run {
+                        val currentSize = textSize
+                        Log.e("asdf", "lines currentSize $currentSize")
+
+                        Paint().let {
+                            it.textSize = currentSize
+                            it.getTextBounds(text.toString(), 0, text.length, this)
+                        }
+
+                        Log.e("asdf", "lines bounds width " + width())
+                        Log.e("asdf", "lines textView width $textWidth")
+                        Log.e("asdf", "result lines " + Math.ceil(width().toDouble() / (textWidth
+                                ?: 0)).toInt())
+
+                        Math.ceil(width().toDouble() / (textWidth ?: 0)).toInt()
                     }
 
-                    Log.e("asdf", "lines bounds width " + width())
-                    Log.e("asdf", "lines textView width $textWidth")
-                    Log.e("asdf", "result lines " + Math.ceil(width().toDouble() / (textWidth
-                            ?: 0)).toInt())
+                    val lines = listOf(wantLines, remainingLines + 1).min()!!
 
-                    Math.ceil(width().toDouble() / (textWidth ?: 0)).toInt()
-                }
+                    remainingLines -= (lines - 1)
 
-                val lines = listOf(wantLines, remainingLines + 1).min()!!
-
-                remainingLines -= (lines - 1)
-
-                if (lines == 1) {
-                    setSingleLine()
-                } else {
-                    setSingleLine(false)
-                    maxLines = lines
-                }
-            }
-
-            rowName.run {
-                name.let {
-                    if (it != null) {
-                        visibility = View.VISIBLE
-                        text = it.first
-                        setTextColor(it.second)
-
-                        allocateLines()
-                    } else {
-                        visibility = View.INVISIBLE
-
+                    if (lines == 1) {
                         setSingleLine()
+                    } else {
+                        setSingleLine(false)
+                        maxLines = lines
                     }
-
-                    setTextIsSelectable(textSelectable)
                 }
-            }
 
-            rowDetails.run {
-                details.let {
-                    if (it != null) {
+                rowName.run {
+                    name.let {
+                        if (it != null) {
+                            visibility = View.VISIBLE
+                            text = it.first
+                            setTextColor(it.second)
+
+                            allocateLines()
+                        } else {
+                            visibility = View.INVISIBLE
+
+                            setSingleLine()
+                        }
+
+                        setTextIsSelectable(textSelectable)
+                    }
+                }
+
+                rowDetails.run {
+                    details.let {
+                        if (it != null) {
+                            visibility = View.VISIBLE
+                            text = it.first
+                            setTextColor(it.second)
+
+                            allocateLines()
+                        } else {
+                            visibility = View.GONE
+                        }
+                    }
+                }
+
+                rowChildren.run {
+                    children.let {
+                        if (it != null) {
+                            visibility = View.VISIBLE
+                            text = it.first
+                            setTextColor(it.second)
+
+                            allocateLines()
+                        } else {
+                            visibility = View.GONE
+                        }
+                    }
+                }
+
+                rowTextLayout.apply {
+                    viewTreeObserver.addOnGlobalLayoutListener {
+                        val width = measuredWidth
+                        textWidth = width
+                        textWidths[widthKey] = width
+                    }
+                }
+
+                rowExpand.run {
+                    visibility = if (treeNode.expandVisible) View.VISIBLE else View.INVISIBLE
+                    setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
+
+                    setOnClickListener {
+                        checkStale()
+
+                        Preferences.logLineHour("expanding node " + this@GroupHolderNode)
+                        treeNode.onExpandClick()
+                    }
+                }
+
+                rowCheckBox.run {
+                    visibility = checkBoxVisibility
+                    isChecked = checkBoxChecked
+
+                    setOnClickListener {
+                        checkStale()
+
+                        setOnClickListener(null)
+                        checkBoxOnClickListener()
+                    }
+                }
+
+                rowImage.run {
+                    if (image != null) {
                         visibility = View.VISIBLE
-                        text = it.first
-                        setTextColor(it.second)
 
-                        allocateLines()
+                        loadPhoto(image!!.value)
                     } else {
                         visibility = View.GONE
                     }
                 }
-            }
 
-            rowChildren.run {
-                children.let {
-                    if (it != null) {
-                        visibility = View.VISIBLE
-                        text = it.first
-                        setTextColor(it.second)
+                rowMargin.visibility = if (checkBoxVisibility == View.GONE && image == null) View.VISIBLE else View.GONE
 
-                        allocateLines()
-                    } else {
-                        visibility = View.GONE
+                rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
+
+                itemView.run {
+                    setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
+
+                    setOnLongClickListener {
+                        checkStale()
+
+                        onLongClick(viewHolder)
+                        true
                     }
+                    setOnClickListener {
+                        checkStale()
+
+                        Preferences.logLineHour("clicking node " + this@GroupHolderNode)
+                        treeNode.onClick()
+                    }
+
+                    @SuppressWarnings("TargetApi")
+                    foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
                 }
-            }
-
-            rowTextLayout.apply {
-                viewTreeObserver.addOnGlobalLayoutListener {
-                    val width = measuredWidth
-                    textWidth = width
-                    textWidths[widthKey] = width
-                }
-            }
-
-            rowExpand.run {
-                visibility = if (treeNode.expandVisible) View.VISIBLE else View.INVISIBLE
-                setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
-
-                setOnClickListener {
-                    checkStale()
-
-                    Preferences.logLineHour("expanding node " + this@GroupHolderNode)
-                    treeNode.onExpandClick()
-                }
-            }
-
-            rowCheckBox.run {
-                visibility = checkBoxVisibility
-                isChecked = checkBoxChecked
-
-                setOnClickListener {
-                    checkStale()
-
-                    setOnClickListener(null)
-                    checkBoxOnClickListener()
-                }
-            }
-
-            rowImage.run {
-                if (image != null) {
-                    visibility = View.VISIBLE
-
-                    loadPhoto(image!!.value)
-                } else {
-                    visibility = View.GONE
-                }
-            }
-
-            rowMargin.visibility = if (checkBoxVisibility == View.GONE && image == null) View.VISIBLE else View.GONE
-
-            rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
-
-            itemView.run {
-                setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
-
-                setOnLongClickListener {
-                    checkStale()
-
-                    onLongClick(viewHolder)
-                    true
-                }
-                setOnClickListener {
-                    checkStale()
-
-                    Preferences.logLineHour("clicking node " + this@GroupHolderNode)
-                    treeNode.onClick()
-                }
-
-                @SuppressWarnings("TargetApi")
-                foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
             }
         }
     }

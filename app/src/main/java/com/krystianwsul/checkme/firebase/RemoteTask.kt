@@ -22,6 +22,11 @@ class RemoteTask<T : RemoteCustomTimeId>(
         private val remoteTaskRecord: RemoteTaskRecord<T>,
         now: ExactTimeStamp) : Task(domainFactory) {
 
+    companion object {
+
+        const val TMP_SUFFIX = "-tmp"
+    }
+
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
             .map { RemoteInstance(domainFactory, remoteProject, this, it, domainFactory.localFactory.getInstanceShownRecord(this.remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
@@ -45,6 +50,19 @@ class RemoteTask<T : RemoteCustomTimeId>(
     override val existingInstances get() = existingRemoteInstances
 
     override val project get() = remoteProject
+
+    var image: ImageData?
+        get() {
+            val image = remoteTaskRecord.image ?: return null
+
+            return if (image.endsWith(TMP_SUFFIX))
+                ImageData(image.removeSuffix(TMP_SUFFIX), true)
+            else
+                ImageData(image, false)
+        }
+        set(value) {
+            remoteTaskRecord.image = value?.image
+        }
 
     init {
         remoteSchedules.addAll(remoteTaskRecord.remoteSingleScheduleRecords
@@ -228,7 +246,12 @@ class RemoteTask<T : RemoteCustomTimeId>(
             domainFactory.convertRemoteToRemote(now, this, projectId)
     }
 
-    class MissingDayException(message: String) : Exception(message)
-
     fun generateInstance(scheduleDateTime: DateTime, instanceShownRecord: InstanceShownRecord?) = RemoteInstance(domainFactory, remoteProject, this, scheduleDateTime, instanceShownRecord)
+
+    class ImageData(val uuid: String, val uploading: Boolean) {
+
+        val image by lazy { if (uploading) uuid + TMP_SUFFIX else uuid }
+    }
+
+    class MissingDayException(message: String) : Exception(message)
 }

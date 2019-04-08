@@ -266,7 +266,6 @@ class CreateTaskActivity : AbstractActivity() {
                 checkNotNull(toolbarEditText)
 
                 if (!updateError()) {
-
                     val name = toolbarEditText.text.toString().trim { it <= ' ' }
                     check(!TextUtils.isEmpty(name))
 

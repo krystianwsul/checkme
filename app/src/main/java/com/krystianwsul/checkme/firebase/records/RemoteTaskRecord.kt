@@ -120,6 +120,16 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                 }
                 .min()
 
+    var image
+        get() = taskJson.image
+        set(value) {
+            if (value == taskJson.image)
+                return
+
+            taskJson.image = value
+            addValue("$key/image", value)
+        }
+
     constructor(domainFactory: DomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord<T>, taskJson: TaskJson) : this(
             false,
             domainFactory,

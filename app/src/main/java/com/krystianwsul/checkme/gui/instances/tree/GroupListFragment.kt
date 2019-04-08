@@ -536,12 +536,32 @@ class GroupListFragment @JvmOverloads constructor(
             state = (treeViewAdapter.treeModelAdapter as GroupAdapter).state
 
             treeViewAdapter.updateDisplayedNodes(true) {
-                (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
+                (treeViewAdapter.treeModelAdapter as GroupAdapter).initialize(
+                        parameters.dataId,
+                        parameters.dataWrapper.customTimeDatas,
+                        useGroups(),
+                        parameters.dataWrapper
+                                .instanceDatas
+                                .values,
+                        state,
+                        parameters.dataWrapper.taskDatas,
+                        parameters.dataWrapper.note,
+                        parameters.dataWrapper.imageData)
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }
         } else {
             val groupAdapter = GroupAdapter(this)
-            groupAdapter.initialize(parameters.dataId, parameters.dataWrapper.customTimeDatas, useGroups(), parameters.dataWrapper.instanceDatas.values, state, parameters.dataWrapper.taskDatas, parameters.dataWrapper.note)
+            groupAdapter.initialize(
+                    parameters.dataId,
+                    parameters.dataWrapper.customTimeDatas,
+                    useGroups(),
+                    parameters.dataWrapper
+                            .instanceDatas
+                            .values,
+                    state,
+                    parameters.dataWrapper.taskDatas,
+                    parameters.dataWrapper.note,
+                    parameters.dataWrapper.imageData)
             treeViewAdapter = groupAdapter.treeViewAdapter
             groupListRecycler.adapter = treeViewAdapter
 
@@ -742,7 +762,15 @@ class GroupListFragment @JvmOverloads constructor(
         lateinit var customTimeDatas: List<CustomTimeData>
             private set
 
-        fun initialize(dataId: Int, customTimeDatas: List<CustomTimeData>, useGroups: Boolean, instanceDatas: Collection<InstanceData>, state: GroupListFragment.State, taskDatas: List<TaskData>, note: String?) {
+        fun initialize(
+                dataId: Int,
+                customTimeDatas: List<CustomTimeData>,
+                useGroups: Boolean,
+                instanceDatas: Collection<InstanceData>,
+                state: GroupListFragment.State,
+                taskDatas: List<TaskData>,
+                note: String?,
+                imageData: ImageNode.Data?) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
 
@@ -753,7 +781,18 @@ class GroupListFragment @JvmOverloads constructor(
 
             nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 
-            treeNodeCollection.nodes = nodeCollection.initialize(instanceDatas, state.expandedGroups, state.expandedInstances, state.doneExpanded, state.selectedInstances, state.selectedGroups, taskDatas, state.unscheduledExpanded, state.expandedTaskKeys, state.selectedTaskKeys)
+            treeNodeCollection.nodes = nodeCollection.initialize(
+                    instanceDatas,
+                    state.expandedGroups,
+                    state.expandedInstances,
+                    state.doneExpanded,
+                    state.selectedInstances,
+                    state.selectedGroups,
+                    taskDatas,
+                    state.unscheduledExpanded,
+                    state.expandedTaskKeys,
+                    state.selectedTaskKeys,
+                    imageData)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
         }
 
@@ -797,7 +836,8 @@ class GroupListFragment @JvmOverloads constructor(
             val taskEditable: Boolean?,
             val taskDatas: List<TaskData>,
             val note: String?,
-            val instanceDatas: MutableMap<InstanceKey, InstanceData>) : InstanceDataParent
+            val instanceDatas: MutableMap<InstanceKey, InstanceData>,
+            val imageData: ImageNode.Data?) : InstanceDataParent
 
     interface SelectedData {
 

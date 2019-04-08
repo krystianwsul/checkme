@@ -78,7 +78,20 @@ class NotDoneGroupNode(
         if (instanceDatas.size == 1) {
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
-            treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(instanceDatas.single().children.values, expandedGroups, expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf(), listOf()))
+            treeNode.setChildTreeNodes(singleInstanceNodeCollection!!.initialize(
+                    instanceDatas.single()
+                            .children
+                            .values,
+                    expandedGroups,
+                    expandedInstances,
+                    doneExpanded,
+                    selectedInstances,
+                    selectedGroups,
+                    listOf(),
+                    false,
+                    listOf(),
+                    listOf(),
+                    null))
         } else {
             val notDoneInstanceTreeNodes = instanceDatas.map {
                 val childSelected = selectedInstances.contains(it.instanceKey)
@@ -254,7 +267,18 @@ class NotDoneGroupNode(
 
             singleInstanceNodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
 
-            val childTreeNodes = singleInstanceNodeCollection!!.initialize(instanceDatas[0].children.values, listOf(), mapOf(), false, listOf(), listOf(), listOf(), false, listOf(), listOf())
+            val childTreeNodes = singleInstanceNodeCollection!!.initialize(
+                    instanceDatas[0].children.values,
+                    listOf(),
+                    mapOf(),
+                    false,
+                    listOf(),
+                    listOf(),
+                    listOf(),
+                    false,
+                    listOf(),
+                    listOf(),
+                    null)
 
             childTreeNodes.forEach { treeNode.add(it, x) }
         }
@@ -395,7 +419,18 @@ class NotDoneGroupNode(
             treeNode = TreeNode(this, notDoneGroupTreeNode, expanded, selected)
 
             nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, treeNode, null)
-            treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, listOf(), expandedInstances, doneExpanded, selectedInstances, selectedGroups, listOf(), false, listOf(), listOf()))
+            treeNode.setChildTreeNodes(nodeCollection.initialize(
+                    instanceData.children.values,
+                    listOf(),
+                    expandedInstances,
+                    doneExpanded,
+                    selectedInstances,
+                    selectedGroups,
+                    listOf(),
+                    false,
+                    listOf(),
+                    listOf(),
+                    null))
 
             return this.treeNode
         }

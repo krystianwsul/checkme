@@ -326,6 +326,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == ShowTaskActivity.REQUEST_EDIT_TASK) {
             if (resultCode == Activity.RESULT_OK) {
                 check(data!!.hasExtra(ShowTaskActivity.TASK_KEY_KEY))

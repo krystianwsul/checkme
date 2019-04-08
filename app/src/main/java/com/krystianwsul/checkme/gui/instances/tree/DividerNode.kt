@@ -69,7 +69,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), x)
 
     override fun compareTo(other: ModelNode): Int {
-        check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode)
+        check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode || other is ImageNode)
         return 1
     }
 

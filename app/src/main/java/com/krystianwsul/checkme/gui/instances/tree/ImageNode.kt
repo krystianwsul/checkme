@@ -5,7 +5,7 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import java.util.*
 
-class NoteNode(private val note: String) : GroupHolderNode(0) {
+class ImageNode(data: Data) : GroupHolderNode(0) { // todo image add for tasks
 
     override lateinit var treeNode: TreeNode
         private set
@@ -16,9 +16,7 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
 
     data class Id(val id: Any)
 
-    init {
-        check(note.isNotEmpty())
-    }
+    override val name: Triple<String, Int, Boolean>? = null
 
     fun initialize(nodeContainer: NodeContainer): TreeNode {
         this.nodeContainer = nodeContainer
@@ -28,17 +26,15 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
         return treeNode
     }
 
-    override val name get() = Triple(note, colorPrimary, false)
+    override fun compareTo(other: ModelNode) = when (other) {
+        is NoteNode -> 1
+        is NotDoneGroupNode, is UnscheduledNode, is DividerNode -> -1
+        else -> throw IllegalArgumentException()
+    }
 
-    override val isVisibleDuringActionMode = false
+    sealed class Data {
 
-    override val isSeparatorVisibleWhenNotExpanded = true
-
-    override val textSelectable = true
-
-    override fun compareTo(other: ModelNode): Int {
-        check(other is NotDoneGroupNode || other is UnscheduledNode || other is DividerNode || other is ImageNode)
-
-        return -1
+        class Local(val path: String) : Data()
+        class Remote(val uuid: String) : Data()
     }
 }

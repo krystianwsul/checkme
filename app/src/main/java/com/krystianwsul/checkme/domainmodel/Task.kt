@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.firebase.ImageData
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
@@ -30,6 +31,8 @@ abstract class Task(protected val domainFactory: DomainFactory) {
     abstract val existingInstances: Map<ScheduleKey, Instance>
 
     abstract val project: RemoteProject<*>
+
+    abstract var image: ImageData?
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {
         val startExactTimeStamp = startExactTimeStamp

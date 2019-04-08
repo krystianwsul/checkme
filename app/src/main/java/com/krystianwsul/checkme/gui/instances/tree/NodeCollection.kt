@@ -7,7 +7,12 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 
 
-class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFragment.GroupAdapter, val useGroups: Boolean, val nodeContainer: NodeContainer, private val note: String?) {
+class NodeCollection(
+        private val indentation: Int,
+        val groupAdapter: GroupListFragment.GroupAdapter,
+        val useGroups: Boolean,
+        val nodeContainer: NodeContainer,
+        private val note: String?) {
 
     lateinit var notDoneGroupCollection: NotDoneGroupCollection
         private set
@@ -25,7 +30,7 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
 
     val doneExpanded get() = dividerNode.expanded()
 
-    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, doneExpanded: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, taskDatas: List<GroupListFragment.TaskData>, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>): List<TreeNode> {
+    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, doneExpanded: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, taskDatas: List<GroupListFragment.TaskData>, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>, imageData: ImageNode.Data?): List<TreeNode> {
         val notDoneInstanceDatas = instanceDatas.filter { it.done == null }
         val doneInstanceDatas = instanceDatas.filter { it.done != null }
 
@@ -34,6 +39,12 @@ class NodeCollection(private val indentation: Int, val groupAdapter: GroupListFr
                 check(indentation == 0)
 
                 add(NoteNode(note).initialize(nodeContainer))
+            }
+
+            imageData?.let {
+                check(indentation == 0)
+
+                add(ImageNode(it).initialize(nodeContainer))
             }
 
             notDoneGroupCollection = NotDoneGroupCollection(indentation, this@NodeCollection, nodeContainer)

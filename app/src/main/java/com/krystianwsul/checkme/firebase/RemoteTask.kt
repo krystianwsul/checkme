@@ -24,7 +24,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     companion object {
 
-        const val TMP_SUFFIX = "-tmp"
+        const val TMP_SUFFIX = "-tmp" // todo image add uploader uuid
     }
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
@@ -51,7 +51,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override val project get() = remoteProject
 
-    var image: ImageData?
+    override var image: ImageData?
         get() {
             val image = remoteTaskRecord.image ?: return null
 

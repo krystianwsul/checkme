@@ -32,7 +32,7 @@ class DoneInstanceNode(
         val doneExpanded: Boolean
         if (expandedInstances.containsKey(instanceData.instanceKey) && !instanceData.children.isEmpty()) {
             expanded = true
-            doneExpanded = expandedInstances[instanceData.instanceKey]!!
+            doneExpanded = expandedInstances.getValue(instanceData.instanceKey)
         } else {
             expanded = false
             doneExpanded = false
@@ -41,7 +41,18 @@ class DoneInstanceNode(
         treeNode = TreeNode(this, dividerTreeNode, expanded, selected)
 
         nodeCollection = NodeCollection(indentation + 1, groupAdapter, false, this.treeNode, null)
-        treeNode.setChildTreeNodes(nodeCollection.initialize(instanceData.children.values, listOf(), expandedInstances, doneExpanded, listOf(), listOf(), listOf(), false, listOf(), listOf()))
+        treeNode.setChildTreeNodes(nodeCollection.initialize(
+                instanceData.children.values,
+                listOf(),
+                expandedInstances,
+                doneExpanded,
+                listOf(),
+                listOf(),
+                listOf(),
+                false,
+                listOf(),
+                listOf(),
+                null))
 
         return treeNode
     }

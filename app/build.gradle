@@ -130,7 +130,7 @@ dependencies {
     annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
 
     implementation 'com.github.medyo:android-about-page:1.2.5'
-    compile "com.github.miguelbcr:RxPaparazzo:0.6.1-2.x"
+    implementation "com.github.miguelbcr:RxPaparazzo:0.6.1-2.x"
 }
 
 apply plugin: 'com.google.gms.google-services'

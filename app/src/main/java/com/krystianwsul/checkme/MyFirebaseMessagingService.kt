@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme
 
-import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -16,8 +15,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.e("asdf", "remoteMessage.getData: " + remoteMessage.data)
-
         val data = remoteMessage.data!!
 
         if (data.containsKey(REFRESH_KEY)) {
@@ -33,8 +30,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        Log.e("asdf", "onTokenRefresh $token")
-
         MyApplication.instance.token = token
 
         DomainFactory.addFirebaseListener { it.updateToken(SaveService.Source.SERVICE, token) }

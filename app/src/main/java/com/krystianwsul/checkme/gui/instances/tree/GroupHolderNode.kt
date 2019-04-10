@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Paint
 import android.graphics.Rect
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorRes
@@ -130,17 +129,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 fun TextView.allocateLines() {
                     val wantLines = Rect().run {
                         val currentSize = textSize
-                        Log.e("asdf", "lines currentSize $currentSize")
 
                         Paint().let {
                             it.textSize = currentSize
                             it.getTextBounds(text.toString(), 0, text.length, this)
                         }
-
-                        Log.e("asdf", "lines bounds width " + width())
-                        Log.e("asdf", "lines textView width $textWidth")
-                        Log.e("asdf", "result lines " + Math.ceil(width().toDouble() / (textWidth
-                                ?: 0)).toInt())
 
                         Math.ceil(width().toDouble() / (textWidth ?: 0)).toInt()
                     }

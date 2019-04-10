@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.friends
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -167,7 +166,6 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateVisibility(immediate: Boolean) {
-        Log.e("asdf", "wtf " + friendListProgress.visibility)
         val hide = mutableListOf<View>(friendListProgress)
         val show: View
         if ((treeViewAdapter.treeModelAdapter as FriendListAdapter).userNodes.isEmpty()) {

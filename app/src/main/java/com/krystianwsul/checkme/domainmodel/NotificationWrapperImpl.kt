@@ -9,7 +9,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
@@ -46,11 +45,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         } else {
             lastNotificationBeeps.values.max()
                     ?.takeIf { SystemClock.elapsedRealtime() - it < 5000 }
-                    ?.let {
-                        Log.e("asdf", "skipping notification sound for " + instance.name)
-
-                        true
-                    } ?: false
+                    ?.let { true } ?: false
         }
 
         notifyInstanceHelper(instance, reallySilent, now)

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
 import android.os.Build
-import android.util.Log
 import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.google.firebase.database.DataSnapshot
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -127,8 +126,6 @@ open class DomainFactory(
 
         val remoteRead = ExactTimeStamp.now
 
-        Log.e("asdf", "set task records $sharedSnapshot")
-
         remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, userInfo, remoteRead)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
@@ -178,13 +175,11 @@ open class DomainFactory(
     @Synchronized
     fun updatePrivateProjectRecord(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("updatePrivateProjectRecord")
-        Log.e("asdf", "update private project record $dataSnapshot")
 
         val start = ExactTimeStamp.now
 
         if (remoteProjectFactory.isPrivateSaved) {
             remoteProjectFactory.isPrivateSaved = false
-            Log.e("asdf", "skipping private project records")
             return
         }
 
@@ -202,11 +197,9 @@ open class DomainFactory(
     @Synchronized
     fun updateSharedProjectRecords(childEvent: ChildEvent) {
         MyCrashlytics.log("updateSharedProjectRecord")
-        Log.e("asdf", "update task records $childEvent")
 
         if (remoteProjectFactory.isSharedSaved) {
             remoteProjectFactory.isSharedSaved = false
-            Log.e("asdf", "skipping remote task records")
             return
         }
 
@@ -228,7 +221,6 @@ open class DomainFactory(
 
         val tickData = TickHolder.getTickData()
         if (tickData == null) {
-            Log.e("asdf", "tickData null")
             updateNotifications(firstTaskEvent, ExactTimeStamp.now, listOf(), source)
         } else {
             updateNotificationsTick(SaveService.Source.GUI, tickData.silent, tickData.source)
@@ -246,11 +238,9 @@ open class DomainFactory(
     @Synchronized
     fun updateUserRecord(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("updateUserRecord")
-        Log.e("asdf", "update user record $dataSnapshot")
 
         if (remoteUserFactory.isSaved) {
             remoteUserFactory.isSaved = false
-            Log.e("asdf", "skipping remote user record")
             return
         }
 
@@ -263,7 +253,6 @@ open class DomainFactory(
     fun setFriendRecords(dataSnapshot: DataSnapshot) {
         if (remoteFriendFactory.isSaved) {
             remoteFriendFactory.isSaved = false
-            Log.e("asdf", "skipping setFriendRecords")
             return
         }
 
@@ -423,7 +412,6 @@ open class DomainFactory(
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 
-        Log.e("asdf", "getGroupListData returning $data")
         return data
     }
 
@@ -2058,9 +2046,9 @@ open class DomainFactory(
 
         check(irrelevantExistingInstances.none { it.isVisible(now, true) })
 
-        irrelevantExistingInstances.apply { Log.e("asdf", "irrelevant instances $size") }.forEach { it.delete() }
-        irrelevantTasks.apply { Log.e("asdf", "irrelevant tasks $size") }.forEach { it.delete() }
-        irrelevantTaskHierarchies.apply { Log.e("asdf", "irrelevant task hierarchies $size") }.forEach { it.delete() }
+        irrelevantExistingInstances.forEach { it.delete() }
+        irrelevantTasks.forEach { it.delete() }
+        irrelevantTaskHierarchies.forEach { it.delete() }
 
         val remoteCustomTimes = remoteProjectFactory.remoteCustomTimes
         val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()

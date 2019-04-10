@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.os.Build
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
@@ -44,8 +43,6 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
         } else {
             if (statusBarNotifications.size != 1)
                 return
-
-            Log.e("asdf", "cleaning group")
 
             check(statusBarNotifications.single().id == 0)
 

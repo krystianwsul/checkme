@@ -196,7 +196,7 @@ fun Calendar.toExactTimeStamp() = ExactTimeStamp(this)
 
 fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .load(url)
-        .placeholder(R.drawable.ic_person_black_24dp)
+        .placeholder(R.drawable.ic_account_circle_black_24dp)
         .apply(RequestOptions.circleCropTransform())
         .into(this)
 

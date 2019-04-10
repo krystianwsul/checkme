@@ -235,15 +235,14 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     }
                 }
 
-                rowImage.run {
-                    if (image != null) {
-                        visibility = View.VISIBLE
-
-                        loadPhoto(image!!.value)
-                    } else {
-                        visibility = View.GONE
-                    }
+            if (image != null) {
+                rowImage!!.run {
+                    visibility = View.VISIBLE
+                    loadPhoto(image!!.value)
                 }
+            } else {
+                rowImage?.visibility = View.GONE
+            }
 
                 rowMargin.visibility = if (checkBoxVisibility == View.GONE && image == null) View.VISIBLE else View.GONE
 

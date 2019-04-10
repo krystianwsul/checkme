@@ -18,7 +18,7 @@ class ImageNode(override val imageData: Data) : GroupHolderNode(0) { // todo ima
 
     override val name: Triple<String, Int, Boolean>? = null
 
-    override val isSeparatorVisibleWhenNotExpanded = true // todo why not working?
+    override val isSeparatorVisibleWhenNotExpanded = true
 
     fun initialize(nodeContainer: NodeContainer): TreeNode {
         this.nodeContainer = nodeContainer

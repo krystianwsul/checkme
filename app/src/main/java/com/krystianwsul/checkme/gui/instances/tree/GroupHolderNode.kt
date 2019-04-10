@@ -246,8 +246,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
                 rowMargin.visibility = if (checkBoxVisibility == View.GONE && image == null) View.VISIBLE else View.GONE
 
-                rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
-
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
 
@@ -268,6 +266,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
                 }
             }
+
+            rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
         }
     }
 

@@ -592,7 +592,7 @@ class GroupListFragment @JvmOverloads constructor(
         val hide = mutableListOf<View>(groupListProgress)
         val show = mutableListOf<View>()
 
-        if (parameters.dataWrapper.instanceDatas.isEmpty() && parameters.dataWrapper.note.isNullOrEmpty() && parameters.dataWrapper.taskDatas.isNullOrEmpty()) {
+        if (parameters.dataWrapper.run { instanceDatas.isEmpty() && note.isNullOrEmpty() && taskDatas.isNullOrEmpty() && imageData == null }) { // todo image do same for task
             hide.add(groupListRecycler)
 
             if (emptyTextId != null) {

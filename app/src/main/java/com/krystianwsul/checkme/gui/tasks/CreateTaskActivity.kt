@@ -959,7 +959,7 @@ class CreateTaskActivity : AbstractActivity() {
                     if (it.value != null) {
                         Log.e("asdf", "image filename: " + it.value)
 
-                        val paparazzo = filesDir.absolutePath + "/RxPaparazzo/" // todo probably should clear this anyway
+                        val paparazzo = filesDir.absolutePath + "/RxPaparazzo/" // todo image probably should clear this anyway
                         Log.e("asdf", "image paparazzo: " + paparazzo)
 
                         File(paparazzo).listFiles().forEach {

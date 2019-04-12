@@ -122,7 +122,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                                 .load(Uploader.getReference(taskImage))
                                 .into(rowBigImage)
                     is ImageState.Uploading -> {
-                        // todo show progress
+                        // todo image show progress
                     }
                 }
 

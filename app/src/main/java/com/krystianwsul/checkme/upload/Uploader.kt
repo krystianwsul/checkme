@@ -41,7 +41,7 @@ object Uploader {
                     }
                 }
 
-        // todo delete tmp files
+        // todo image delete tmp files
     }
 
     fun getReference(imageData: ImageState.Remote) = storage.child(imageData.uuid)

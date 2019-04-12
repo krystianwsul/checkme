@@ -106,7 +106,7 @@ class CreateTaskActivity : AbstractActivity() {
     private var taskKey: TaskKey? = null
     private var taskKeys: List<TaskKey>? = null
 
-    private var scheduleHint: CreateTaskActivity.ScheduleHint? = null
+    private var scheduleHint: ScheduleHint? = null
     private var parentTaskKeyHint: TaskKey? = null
     private var nameHint: String? = null
 
@@ -147,14 +147,10 @@ class CreateTaskActivity : AbstractActivity() {
 
     private fun setupParent(view: View) {
         if (view !is EditText) {
-            view.setOnTouchListener(object : View.OnTouchListener {
-
-                @SuppressLint("ClickableViewAccessibility")
-                override fun onTouch(v: View, event: MotionEvent): Boolean {
-                    hideSoftKeyboard()
-                    return false
-                }
-            })
+            view.setOnTouchListener { _, _ ->
+                hideSoftKeyboard()
+                false
+            }
         }
 
         if (view is ViewGroup) {
@@ -565,7 +561,7 @@ class CreateTaskActivity : AbstractActivity() {
             this.data!!.run {
                 if (taskData != null) {
                     if (taskData.scheduleDatas != null) {
-                        check(!taskData.scheduleDatas.isEmpty())
+                        check(taskData.scheduleDatas.isNotEmpty())
 
                         scheduleEntries = taskData.scheduleDatas
                                 .asSequence()
@@ -780,7 +776,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private fun hasValueParentTask() = parent?.parentKey?.type == CreateTaskViewModel.ParentType.TASK
 
-    private fun hasValueSchedule() = !scheduleEntries.isEmpty()
+    private fun hasValueSchedule() = scheduleEntries.isNotEmpty()
 
     private fun firstScheduleEntry() = SingleScheduleEntry(scheduleHint)
 

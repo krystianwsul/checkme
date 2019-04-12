@@ -52,7 +52,6 @@ import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.io.File
 
 
-@Suppress("CascadeIf")
 class CreateTaskActivity : AbstractActivity() {
 
     companion object {
@@ -269,88 +268,88 @@ class CreateTaskActivity : AbstractActivity() {
 
                     val imagePath = imageUrl.value!!.value
 
-                    if (hasValueSchedule()) {
-                        check(!hasValueParentTask())
+                    when {
+                        hasValueSchedule() -> {
+                            check(!hasValueParentTask())
 
-                        val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
+                            val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
 
-                        if (taskKey != null) {
-                            checkNotNull(data!!.taskData)
-                            check(taskKeys == null)
+                            when {
+                                taskKey != null -> {
+                                    checkNotNull(data!!.taskData)
+                                    check(taskKeys == null)
 
-                            val taskKey = DomainFactory.instance.updateScheduleTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, scheduleDatas, note, projectId)
+                                    val taskKey = DomainFactory.instance.updateScheduleTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, scheduleDatas, note, projectId)
 
-                            setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
+                                    setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
+                                }
+                                taskKeys != null -> {
+                                    check(data!!.taskData == null)
+                                    check(taskKeys!!.size > 1)
 
-                            finish()
-                        } else if (taskKeys != null) {
-                            check(data!!.taskData == null)
-                            check(taskKeys!!.size > 1)
+                                    DomainFactory.instance.createScheduleJoinRootTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, taskKeys!!, note, projectId)
+                                }
+                                else -> {
+                                    check(data!!.taskData == null)
 
-                            DomainFactory.instance.createScheduleJoinRootTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, taskKeys!!, note, projectId)
-
-                            finish()
-                        } else {
-                            check(data!!.taskData == null)
-
-                            DomainFactory.instance.createScheduleRootTask(data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, note, projectId, imagePath)
-
-                            finish()
+                                    DomainFactory.instance.createScheduleRootTask(data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, note, projectId, imagePath)
+                                }
+                            }
                         }
-                    } else if (hasValueParentTask()) {
-                        checkNotNull(parent)
+                        hasValueParentTask() -> {
+                            checkNotNull(parent)
 
-                        val parentTaskKey = (parent!!.parentKey as CreateTaskViewModel.ParentKey.TaskParentKey).taskKey
+                            val parentTaskKey = (parent!!.parentKey as CreateTaskViewModel.ParentKey.TaskParentKey).taskKey
 
-                        if (taskKey != null) {
-                            checkNotNull(data!!.taskData)
-                            check(taskKeys == null)
+                            when {
+                                taskKey != null -> {
+                                    checkNotNull(data!!.taskData)
+                                    check(taskKeys == null)
 
-                            val taskKey = DomainFactory.instance.updateChildTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, taskKey!!, name, parentTaskKey, note)
+                                    val taskKey = DomainFactory.instance.updateChildTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, taskKey!!, name, parentTaskKey, note)
 
-                            setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
+                                    setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
+                                }
+                                taskKeys != null -> {
+                                    check(data!!.taskData == null)
+                                    check(taskKeys!!.size > 1)
 
-                            finish()
-                        } else if (taskKeys != null) {
-                            check(data!!.taskData == null)
-                            check(taskKeys!!.size > 1)
+                                    DomainFactory.instance.createJoinChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, taskKeys!!, note)
+                                }
+                                else -> {
+                                    check(data!!.taskData == null)
 
-                            DomainFactory.instance.createJoinChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, taskKeys!!, note)
-
-                            finish()
-                        } else {
-                            check(data!!.taskData == null)
-
-                            DomainFactory.instance.createChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, note)
-
-                            finish()
+                                    DomainFactory.instance.createChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, note)
+                                }
+                            }
                         }
-                    } else {  // no reminder
-                        val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
+                        else -> {  // no reminder
+                            val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
 
-                        if (taskKey != null) {
-                            checkNotNull(data!!.taskData)
-                            check(taskKeys == null)
+                            when {
+                                taskKey != null -> {
+                                    checkNotNull(data!!.taskData)
+                                    check(taskKeys == null)
 
-                            val taskKey = DomainFactory.instance.updateRootTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, note, projectId)
+                                    val taskKey = DomainFactory.instance.updateRootTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, note, projectId)
 
-                            setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
+                                    setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
+                                }
+                                taskKeys != null -> {
+                                    check(data!!.taskData == null)
 
-                            finish()
-                        } else if (taskKeys != null) {
-                            check(data!!.taskData == null)
+                                    DomainFactory.instance.createJoinRootTask(data!!.dataId, SaveService.Source.GUI, name, taskKeys!!, note, projectId)
+                                }
+                                else -> {
+                                    check(data!!.taskData == null)
 
-                            DomainFactory.instance.createJoinRootTask(data!!.dataId, SaveService.Source.GUI, name, taskKeys!!, note, projectId)
-
-                            finish()
-                        } else {
-                            check(data!!.taskData == null)
-
-                            DomainFactory.instance.createRootTask(data!!.dataId, SaveService.Source.GUI, name, note, projectId)
-
-                            finish()
+                                    DomainFactory.instance.createRootTask(data!!.dataId, SaveService.Source.GUI, name, note, projectId)
+                                }
+                            }
                         }
                     }
+
+                    finish()
                 }
             }
             android.R.id.home -> {
@@ -703,18 +702,20 @@ class CreateTaskActivity : AbstractActivity() {
             if (!Utils.stringEquals(note, data!!.taskData!!.note))
                 return true
 
-            if (data!!.taskData!!.parentKey != null) {
-                if (!hasValueParentInGeneral())
-                    return true
+            when {
+                data!!.taskData!!.parentKey != null -> {
+                    if (!hasValueParentInGeneral())
+                        return true
 
-                return parent!!.parentKey != data!!.taskData!!.parentKey
-            } else if (data!!.taskData!!.scheduleDatas != null) {
-                if (!hasValueSchedule())
-                    return true
+                    return parent!!.parentKey != data!!.taskData!!.parentKey
+                }
+                data!!.taskData!!.scheduleDatas != null -> {
+                    if (!hasValueSchedule())
+                        return true
 
-                return scheduleDataChanged()
-            } else {
-                return hasValueParentInGeneral() || hasValueSchedule()
+                    return scheduleDataChanged()
+                }
+                else -> return hasValueParentInGeneral() || hasValueSchedule()
             }
         } else {
             if (!TextUtils.isEmpty(toolbarEditText.text))
@@ -960,7 +961,7 @@ class CreateTaskActivity : AbstractActivity() {
                         Log.e("asdf", "image filename: " + it.value)
 
                         val paparazzo = filesDir.absolutePath + "/RxPaparazzo/" // todo image probably should clear this anyway
-                        Log.e("asdf", "image paparazzo: " + paparazzo)
+                        Log.e("asdf", "image paparazzo: $paparazzo")
 
                         File(paparazzo).listFiles().forEach {
                             Log.e("asdf", "image file: " + it.absolutePath)

@@ -69,7 +69,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val selected = treeViewAdapter.selectedNodes
-            check(!selected.isEmpty())
+            check(selected.isNotEmpty())
 
             val taskWrappers = selected.map { it.modelNode as TaskAdapter.TaskWrapper }
             val childTaskDatas = taskWrappers.map { it.childTaskData }
@@ -159,7 +159,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         override fun getItemVisibilities(): List<Pair<Int, Boolean>> {
             val selectedNodes = treeViewAdapter.selectedNodes
-            check(!selectedNodes.isEmpty())
+            check(selectedNodes.isNotEmpty())
 
             val single = selectedNodes.size < 2
 
@@ -205,7 +205,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private val taskListListener get() = activity as TaskListListener
 
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
-        check(!childTaskDatas.isEmpty())
+        check(childTaskDatas.isNotEmpty())
 
         mutableListOf<ChildTaskData>().apply {
             childTaskDatas.filterNot { inTree(this, it) }.forEach { this.add(it) }
@@ -239,12 +239,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
         savedInstanceState?.run {
             if (containsKey(SELECTED_TASK_KEYS_KEY)) {
                 selectedTaskKeys = getParcelableArrayList(SELECTED_TASK_KEYS_KEY)!!
-                check(!selectedTaskKeys!!.isEmpty())
+                check(selectedTaskKeys!!.isNotEmpty())
             }
 
             if (containsKey(EXPANDED_TASK_KEYS_KEY)) {
                 expandedTaskIds = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
-                check(!expandedTaskIds!!.isEmpty())
+                check(expandedTaskIds!!.isNotEmpty())
             }
 
             query = getString(QUERY_KEY)!!
@@ -265,7 +265,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
         check(taskKey == null)
 
         allTasks = true
-
         this.data = data
 
         initialize()
@@ -275,7 +274,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
         check(!allTasks)
 
         this.taskKey = taskKey
-
         this.data = data
 
         initialize()
@@ -359,10 +357,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     private fun updateSelectAll() {
-        checkNotNull(treeViewAdapter)
         val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter
 
-        (activity as TaskListListener).setTaskSelectAllVisibility(!taskAdapter.taskWrappers.isEmpty())
+        (activity as TaskListListener).setTaskSelectAllVisibility(taskAdapter.taskWrappers.isNotEmpty())
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -372,18 +369,18 @@ class TaskListFragment : AbstractFragment(), FabUser {
             if (this@TaskListFragment::treeViewAdapter.isInitialized) {
                 val selected = treeViewAdapter.selectedNodes
 
-                if (!selected.isEmpty()) {
+                if (selected.isNotEmpty()) {
                     check(selectionCallback.hasActionMode)
 
                     val taskKeys = ArrayList(selected.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey })
-                    check(!taskKeys.isEmpty())
+                    check(taskKeys.isNotEmpty())
 
                     putParcelableArrayList(SELECTED_TASK_KEYS_KEY, taskKeys)
                 }
 
                 val expandedTaskKeys = (treeViewAdapter.treeModelAdapter as TaskAdapter).expandedTaskKeys
 
-                if (!expandedTaskKeys.isEmpty())
+                if (expandedTaskKeys.isNotEmpty())
                     putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedTaskKeys))
             }
 
@@ -523,14 +520,14 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             fun initialize(selectedTaskKeys: List<TaskKey>?, nodeContainer: NodeContainer, expandedTaskKeys: List<TaskKey>?): TreeNode {
                 val selected = if (selectedTaskKeys != null) {
-                    check(!selectedTaskKeys.isEmpty())
+                    check(selectedTaskKeys.isNotEmpty())
                     selectedTaskKeys.contains(childTaskData.taskKey)
                 } else {
                     false
                 }
 
                 val expanded = if (expandedTaskKeys != null) {
-                    check(!expandedTaskKeys.isEmpty())
+                    check(expandedTaskKeys.isNotEmpty())
                     expandedTaskKeys.contains(childTaskData.taskKey)
                 } else {
                     false
@@ -557,7 +554,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
                     null
                 } else {
-                    val text = if (!childTaskData.children.isEmpty() && !treeNode.isExpanded) {
+                    val text = if (childTaskData.children.isNotEmpty() && !treeNode.isExpanded) {
                         childTaskData.children.joinToString(", ") { it.name }
                     } else {
                         check(!childTaskData.note.isNullOrEmpty())

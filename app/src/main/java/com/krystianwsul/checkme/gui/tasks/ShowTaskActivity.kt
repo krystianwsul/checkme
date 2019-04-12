@@ -77,6 +77,8 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
         check(requestCode == REQUEST_EDIT_TASK)
 
         if (resultCode == Activity.RESULT_OK) {
@@ -85,7 +87,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
             taskKey = data.getParcelableExtra(TASK_KEY_KEY)!!
 
             setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable)
+                putExtra(TASK_KEY_KEY, taskKey as Parcelable)
             })
         }
 

@@ -472,7 +472,7 @@ open class DomainFactory(
     fun getShowNotificationGroupData(instanceKeys: Set<InstanceKey>): ShowNotificationGroupViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowNotificationGroupData")
 
-        check(!instanceKeys.isEmpty())
+        check(instanceKeys.isNotEmpty())
 
         val now = ExactTimeStamp.now
 
@@ -608,7 +608,7 @@ open class DomainFactory(
 
                 parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.ProjectParentKey(it.id) }
 
-                if (!schedules.isEmpty()) {
+                if (schedules.isNotEmpty()) {
                     val pair = getScheduleDatas(schedules, now)
                     customTimes.putAll(pair.first)
                     scheduleDatas = pair.second.keys.toList()
@@ -667,7 +667,12 @@ open class DomainFactory(
                 }
                 .sorted()
 
-        return ShowTaskViewModel.Data(task.name, task.getScheduleText(now, true), TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note), task.existingInstances.values.isNotEmpty() || task.getInstances(null, now, now).isNotEmpty())
+        return ShowTaskViewModel.Data(
+                task.name,
+                task.getScheduleText(now, true),
+                TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
+                task.existingInstances.values.isNotEmpty() || task.getInstances(null, now, now).isNotEmpty(),
+                task.image)
     }
 
     @Synchronized
@@ -936,7 +941,7 @@ open class DomainFactory(
         MyCrashlytics.log("DomainFactory.setInstancesNotified")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
-        check(!instanceKeys.isEmpty())
+        check(instanceKeys.isNotEmpty())
 
         for (instanceKey in instanceKeys)
             setInstanceNotified(instanceKey)
@@ -946,7 +951,7 @@ open class DomainFactory(
 
     fun createScheduleRootTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?, imagePath: String?): Task {
         check(name.isNotEmpty())
-        check(!scheduleDatas.isEmpty())
+        check(scheduleDatas.isNotEmpty())
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
 

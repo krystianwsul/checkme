@@ -11,8 +11,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.ImageNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.instances.tree.NoteNode
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -40,9 +42,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         fun newInstance() = TaskListFragment()
     }
 
-    private var allTasks: Boolean = false
-
-    private var taskKey: TaskKey? = null
+    private var rootTaskData: RootTaskData? = null
 
     private var data: Data? = null
 
@@ -84,10 +84,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     startActivity(CreateTaskActivity.getEditIntent(childTaskData.taskKey))
                 }
                 R.id.action_task_join -> {
-                    startActivity(if (taskKey == null)
+                    startActivity(if (rootTaskData == null)
                         CreateTaskActivity.getJoinIntent(taskKeys)
                     else
-                        CreateTaskActivity.getJoinIntent(taskKeys, taskKey!!))
+                        CreateTaskActivity.getJoinIntent(taskKeys, rootTaskData!!.taskKey))
                 }
                 R.id.action_task_delete -> {
                     checkNotNull(data)
@@ -128,13 +128,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
                         data!!.taskData
                                 .childTaskDatas
                                 .apply {
-                            addAll(removeTaskDatas)
+                                    addAll(removeTaskDatas)
 
-                            if (taskKey != null)
-                                sort()
-                            else
-                                sortDescending()
-                        }
+                                    if (rootTaskData != null)
+                                        sort()
+                                    else
+                                        sortDescending()
+                                }
 
                         initialize()
                     }
@@ -263,18 +263,16 @@ class TaskListFragment : AbstractFragment(), FabUser {
     }
 
     fun setAllTasks(data: Data) {
-        check(taskKey == null)
+        check(rootTaskData == null)
 
-        allTasks = true
+        rootTaskData = null
         this.data = data
 
         initialize()
     }
 
-    fun setTaskKey(taskKey: TaskKey, data: Data) {
-        check(!allTasks)
-
-        this.taskKey = taskKey
+    fun setTaskKey(rootTaskData: RootTaskData, data: Data) {
+        this.rootTaskData = rootTaskData
         this.data = data
 
         initialize()
@@ -338,11 +336,11 @@ class TaskListFragment : AbstractFragment(), FabUser {
         val hide = mutableListOf<View>(taskListProgress)
         val show: View
 
-        if (data!!.taskData.childTaskDatas.isEmpty() && data!!.taskData.note.isNullOrEmpty()) {
+        if (treeViewAdapter.displayedNodes.isEmpty()) {
             hide.add(taskListRecycler)
             show = emptyTextLayout
 
-            emptyText.setText(if (taskKey != null) {
+            emptyText.setText(if (rootTaskData != null) {
                 R.string.empty_child
             } else {
                 R.string.tasks_empty_root
@@ -395,10 +393,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = floatingActionButton
 
         taskListFragmentFab!!.setOnClickListener {
-            if (taskKey == null)
+            if (rootTaskData == null)
                 startActivity(CreateTaskActivity.getCreateIntent(context!!))
             else
-                startActivity(CreateTaskActivity.getCreateIntent(taskKey!!))
+                startActivity(CreateTaskActivity.getCreateIntent(rootTaskData!!.taskKey))
         }
 
         updateFabVisibility()
@@ -454,6 +452,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 treeNodes.add(noteNode.initialize(treeNodeCollection))
             }
+
+            taskListFragment.rootTaskData
+                    ?.imageState
+                    ?.let { treeNodes.add(ImageNode(it).initialize(treeNodeCollection)) }
 
             taskWrappers = mutableListOf()
             for (childTaskData in taskData.childTaskDatas) {
@@ -572,7 +574,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
                 val treeNodeCollection = taskAdapter.treeNodeCollection
 
-                if (taskListFragment.taskKey != null && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded }) {
+                if (taskListFragment.rootTaskData != null && treeNodeCollection.selectedChildren.isEmpty() && indentation == 0 && treeNodeCollection.nodes.none { it.isExpanded }) {
                     taskListFragment.dragHelper.startDrag(viewHolder)
                     treeNode.onLongClickSelect(viewHolder, true)
                 } else {
@@ -596,7 +598,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 val taskListFragment = taskListFragment
 
                 var comparison = childTaskData.compareTo(other.childTaskData)
-                if (taskListFragment.taskKey == null && indentation == 0)
+                if (taskListFragment.rootTaskData == null && indentation == 0)
                     comparison = -comparison
 
                 comparison
@@ -679,4 +681,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         fun initBottomBar()
     }
+
+    data class RootTaskData(val taskKey: TaskKey, val imageState: ImageState?)
 }

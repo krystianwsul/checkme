@@ -31,9 +31,5 @@ class ImageNode(override val imageState: ImageState) : GroupHolderNode(0) { // t
         return treeNode
     }
 
-    override fun compareTo(other: ModelNode) = when (other) {
-        is NoteNode -> 1
-        is NotDoneGroupNode, is UnscheduledNode, is DividerNode -> -1
-        else -> throw IllegalArgumentException()
-    }
+    override fun compareTo(other: ModelNode) = if (other is NoteNode) 1 else -1
 }

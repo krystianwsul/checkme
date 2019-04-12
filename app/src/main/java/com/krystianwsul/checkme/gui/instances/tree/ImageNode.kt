@@ -1,11 +1,12 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import java.util.*
 
-class ImageNode(override val imageData: Data) : GroupHolderNode(0) { // todo image add for tasks
+class ImageNode(override val imageState: ImageState) : GroupHolderNode(0) { // todo image add for tasks
 
     override lateinit var treeNode: TreeNode
         private set
@@ -32,11 +33,5 @@ class ImageNode(override val imageData: Data) : GroupHolderNode(0) { // todo ima
         is NoteNode -> 1
         is NotDoneGroupNode, is UnscheduledNode, is DividerNode -> -1
         else -> throw IllegalArgumentException()
-    }
-
-    sealed class Data {
-
-        data class Local(val path: String) : Data()
-        data class Remote(val uuid: String) : Data()
     }
 }

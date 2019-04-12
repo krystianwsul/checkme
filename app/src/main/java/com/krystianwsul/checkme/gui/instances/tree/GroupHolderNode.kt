@@ -7,7 +7,9 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.krystianwsul.checkme.*
+import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
@@ -46,7 +48,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val checkBoxChecked = false
 
-    protected open val image: NullableWrapper<String>? = null
+    protected open val avatarImage: NullableWrapper<String>? = null
 
     protected open fun checkBoxOnClickListener() = Unit
 
@@ -58,7 +60,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     open val ripple = false
 
-    protected open val imageData: ImageNode.Data? = null
+    protected open val imageState: ImageState? = null
 
     final override val state
         get() = State(
@@ -71,7 +73,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 treeNode.isExpanded,
                 checkBoxVisibility,
                 checkBoxChecked,
-                imageData)
+                imageState)
 
     protected open val colorBackground = GroupHolderNode.colorBackground
 
@@ -85,7 +87,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
             val isExpanded: Boolean,
             val checkboxVisibility: Int,
             val checkboxChecked: Boolean,
-            val imageData: ImageNode.Data?) : ModelState {
+            val imageState: ImageState?) : ModelState {
 
         override fun same(other: ModelState) = (other as State).id == id
     }
@@ -105,13 +107,25 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         checkStale()
 
         groupHolder.run {
-            if (imageData != null) {
+            val taskImage = imageState
+
+            if (taskImage != null) {
                 rowContainer.visibility = View.GONE
                 rowBigImage.visibility = View.VISIBLE
 
-                GlideApp.with(itemView)
-                        .load(Uploader.getReference(imageData as ImageNode.Data.Remote)) // todo image local
-                        .into(rowBigImage)
+                when (taskImage) {
+                    is ImageState.Local -> Glide.with(itemView)
+                            .load(Uploader.getPath(taskImage))
+                            .into(rowBigImage)
+                    is ImageState.Remote ->
+                        GlideApp.with(itemView)
+                                .load(Uploader.getReference(taskImage))
+                                .into(rowBigImage)
+                    is ImageState.Uploading -> {
+                        // todo show progress
+                    }
+                }
+
             } else {
                 rowContainer.visibility = View.VISIBLE
                 rowBigImage.visibility = View.GONE
@@ -228,16 +242,16 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     }
                 }
 
-            if (image != null) {
-                rowImage!!.run {
-                    visibility = View.VISIBLE
-                    loadPhoto(image!!.value)
+                if (avatarImage != null) {
+                    rowImage!!.run {
+                        visibility = View.VISIBLE
+                        loadPhoto(avatarImage!!.value)
+                    }
+                } else {
+                    rowImage?.visibility = View.GONE
                 }
-            } else {
-                rowImage?.visibility = View.GONE
-            }
 
-                rowMargin.visibility = if (checkBoxVisibility == View.GONE && image == null) View.VISIBLE else View.GONE
+                rowMargin.visibility = if (checkBoxVisibility == View.GONE && avatarImage == null) View.VISIBLE else View.GONE
 
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)

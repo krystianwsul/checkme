@@ -265,7 +265,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val isVisibleDuringActionMode = true
 
-        override val image = NullableWrapper(userListData.photoUrl)
+        override val avatarImage = NullableWrapper(userListData.photoUrl)
 
         override fun onClick() = Unit
 

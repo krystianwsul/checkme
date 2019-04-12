@@ -133,7 +133,7 @@ dependencies {
 
     implementation "com.github.miguelbcr:RxPaparazzo:0.6.1-2.x"
 
-    implementation 'io.paperdb:paperdb:2.6'
+    implementation 'com.github.pakoito:RxPaper2:1.4.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

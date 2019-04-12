@@ -22,11 +22,6 @@ class RemoteTask<T : RemoteCustomTimeId>(
         private val remoteTaskRecord: RemoteTaskRecord<T>,
         now: ExactTimeStamp) : Task(domainFactory) {
 
-    companion object {
-
-        const val TMP_SUFFIX = "-tmp" // todo image add uploader uuid
-    }
-
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
             .map { RemoteInstance(domainFactory, remoteProject, this, it, domainFactory.localFactory.getInstanceShownRecord(this.remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
@@ -51,17 +46,28 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override val project get() = remoteProject
 
-    override var image: ImageData?
+    private val uuid get() = remoteProject.uuid
+
+    override var image: ImageState?
         get() {
             val image = remoteTaskRecord.image ?: return null
 
-            return if (image.endsWith(TMP_SUFFIX))
-                ImageData(image.removeSuffix(TMP_SUFFIX), true)
-            else
-                ImageData(image, false)
+            return if (image.uploaderUuid != null) {
+                if (image.uploaderUuid == uuid)
+                    ImageState.Local(image.imageUuid)
+                else
+                    ImageState.Uploading
+            } else {
+                ImageState.Remote(image.imageUuid)
+            }
         }
         set(value) {
-            remoteTaskRecord.image = value?.image
+            remoteTaskRecord.image = when (value) {
+                null -> null
+                is ImageState.Remote -> TaskJson.Image(value.uuid)
+                is ImageState.Local -> TaskJson.Image(value.uuid, uuid)
+                is ImageState.Uploading -> throw IllegalArgumentException()
+            }
         }
 
     init {

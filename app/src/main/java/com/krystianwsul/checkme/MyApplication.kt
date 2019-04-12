@@ -18,10 +18,12 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
+import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
@@ -137,6 +139,10 @@ class MyApplication : Application() {
         }
 
         RxPaparazzo.register(this)
+
+        RxPaperBook.init(this)
+
+        Queue.init()
     }
 
     /*

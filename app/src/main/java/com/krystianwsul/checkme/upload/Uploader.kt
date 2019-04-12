@@ -5,8 +5,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.checkme.firebase.ImageData
-import com.krystianwsul.checkme.gui.instances.tree.ImageNode
+import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import java.io.FileInputStream
@@ -22,10 +21,9 @@ object Uploader {
 
         val task = DomainFactory.instance.getTaskForce(taskKey)
 
-        val imageData = ImageData(uuid, true)
-        check(task.image == imageData)
+        check(task.image == ImageState.Local(uuid))
 
-        // todo add to queue
+        val entry = Queue.addEntry(uuid, path)
 
         val stream = FileInputStream(path)
 
@@ -34,8 +32,11 @@ object Uploader {
                 .addOnFailureListener { MyCrashlytics.logException(it) }
                 .addOnSuccessListener {
                     Log.e("asdf", "image upload complete")
+
+                    Queue.removeEntry(entry)
+
                     DomainFactory.addFirebaseListener {
-                        it.setTaskImageUploaded(SaveService.Source.GUI, taskKey, imageData)
+                        it.setTaskImageUploaded(SaveService.Source.GUI, taskKey, uuid)
                         Log.e("asdf", "image upload written")
                     }
                 }
@@ -43,5 +44,6 @@ object Uploader {
         // todo delete tmp files
     }
 
-    fun getReference(imageData: ImageNode.Data.Remote) = storage.child(imageData.uuid)
+    fun getReference(imageData: ImageState.Remote) = storage.child(imageData.uuid)
+    fun getPath(imageData: ImageState.Local) = Queue.getPath(imageData.uuid)
 }

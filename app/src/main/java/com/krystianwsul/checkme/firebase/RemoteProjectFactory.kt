@@ -121,8 +121,8 @@ class RemoteProjectFactory(
         createSchedules(now, scheduleDatas)
     }
 
-    fun createRemoteTaskHelper(now: ExactTimeStamp, name: String, note: String?, projectId: String, uuid: String?): RemoteTask<*> {
-        val image = uuid?.let { ImageData(uuid, true).image }
+    fun createRemoteTaskHelper(now: ExactTimeStamp, name: String, note: String?, projectId: String, imageUuid: String?): RemoteTask<*> {
+        val image = imageUuid?.let { TaskJson.Image(imageUuid, uuid) }
         val taskJson = TaskJson(name, now.long, null, null, null, null, note, image = image)
 
         return getRemoteProjectForce(projectId).newRemoteTask(taskJson, now)

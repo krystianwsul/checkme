@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
@@ -767,10 +768,10 @@ class GroupListFragment @JvmOverloads constructor(
                 customTimeDatas: List<CustomTimeData>,
                 useGroups: Boolean,
                 instanceDatas: Collection<InstanceData>,
-                state: GroupListFragment.State,
+                state: State,
                 taskDatas: List<TaskData>,
                 note: String?,
-                imageData: ImageNode.Data?) {
+                imageState: ImageState?) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
 
@@ -792,7 +793,7 @@ class GroupListFragment @JvmOverloads constructor(
                     state.unscheduledExpanded,
                     state.expandedTaskKeys,
                     state.selectedTaskKeys,
-                    imageData)
+                    imageState)
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
         }
 
@@ -837,7 +838,7 @@ class GroupListFragment @JvmOverloads constructor(
             val taskDatas: List<TaskData>,
             val note: String?,
             val instanceDatas: MutableMap<InstanceKey, InstanceData>,
-            val imageData: ImageNode.Data?) : InstanceDataParent
+            val imageData: ImageState?) : InstanceDataParent
 
     interface SelectedData {
 

@@ -343,7 +343,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val isVisibleWhenEmpty = true
 
-        override val image = NullableWrapper(userListData.photoUrl)
+        override val avatarImage = NullableWrapper(userListData.photoUrl)
 
         override fun onClick() = Unit
 

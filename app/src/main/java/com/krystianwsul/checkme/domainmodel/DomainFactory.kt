@@ -15,7 +15,6 @@ import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.gui.instances.tree.ImageNode
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -1587,14 +1586,14 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageData: ImageData) {
+    fun setTaskImageUploaded(source: SaveService.Source, taskKey: TaskKey, imageUuid: String) {
         MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val task = getTaskForce(taskKey)
-        check(task.image == imageData)
+        check(task.image == ImageState.Local(imageUuid))
 
-        task.image = imageData.copy(uploading = false)
+        task.image = ImageState.Remote(imageUuid)
 
         save(0, source)
 
@@ -2347,7 +2346,7 @@ open class DomainFactory(
                 .toMap()
                 .toMutableMap()
 
-        val imageData = if (showImage) task.image?.uuid?.let { ImageNode.Data.Remote(it) } else null // todo image local
+        val imageState = if (showImage) task.image else null
 
         val dataWrapper = GroupListFragment.DataWrapper(
                 customTimeDatas,
@@ -2355,7 +2354,7 @@ open class DomainFactory(
                 listOf(),
                 task.note,
                 instanceDatas,
-                imageData)
+                imageState)
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 

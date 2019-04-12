@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
+import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.TimeStamp
@@ -30,7 +31,7 @@ class NodeCollection(
 
     val doneExpanded get() = dividerNode.expanded()
 
-    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, doneExpanded: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, taskDatas: List<GroupListFragment.TaskData>, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>, imageData: ImageNode.Data?): List<TreeNode> {
+    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, doneExpanded: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, taskDatas: List<GroupListFragment.TaskData>, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>, imageState: ImageState?): List<TreeNode> {
         val notDoneInstanceDatas = instanceDatas.filter { it.done == null }
         val doneInstanceDatas = instanceDatas.filter { it.done != null }
 
@@ -41,7 +42,7 @@ class NodeCollection(
                 add(NoteNode(note).initialize(nodeContainer))
             }
 
-            imageData?.let {
+            imageState?.let {
                 check(indentation == 0)
 
                 add(ImageNode(it).initialize(nodeContainer))

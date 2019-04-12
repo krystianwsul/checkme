@@ -11,5 +11,9 @@ class TaskJson @JvmOverloads constructor(
         var instances: MutableMap<String, InstanceJson> = mutableMapOf(),
         var schedules: MutableMap<String, ScheduleWrapper> = mutableMapOf(),
         val oldestVisible: MutableMap<String, OldestVisibleJson> = mutableMapOf(),
-        var image: String? = null) {
+        var image: Image? = null) {
+
+    data class Image(
+            val imageUuid: String = "",
+            val uploaderUuid: String? = null)
 }

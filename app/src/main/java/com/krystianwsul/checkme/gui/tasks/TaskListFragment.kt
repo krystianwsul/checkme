@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.gui.instances.tree.NoteNode
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
@@ -431,12 +432,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private class TaskAdapter(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {
 
-        companion object {
-
-            private const val TYPE_TASK = 0
-            private const val TYPE_NOTE = 1
-        }
-
         lateinit var taskWrappers: MutableList<TaskWrapper>
             private set
 
@@ -585,8 +580,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 }
             }
 
-            override val itemViewType = TYPE_TASK
-
             override val isSelectable = true
 
             override fun onClick() {
@@ -608,8 +601,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 comparison
             } else {
-                check(other is NoteNode)
-
                 1
             }
 
@@ -634,43 +625,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)
-        }
-
-        private class NoteNode(private val note: String) : GroupHolderNode(0) {
-
-            override lateinit var treeNode: TreeNode
-                private set
-
-            private lateinit var nodeContainer: NodeContainer
-
-            override val id get() = Id(nodeContainer.id)
-
-            data class Id(val id: Any)
-
-            init {
-                check(note.isNotEmpty())
-            }
-
-            fun initialize(nodeContainer: NodeContainer): TreeNode {
-                this.nodeContainer = nodeContainer
-
-                treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
-                treeNode.setChildTreeNodes(listOf())
-
-                return treeNode
-            }
-
-            override val textSelectable = true
-
-            override val name get() = Triple(note, colorPrimary, false)
-
-            override val itemViewType = TYPE_NOTE
-
-            override val isVisibleDuringActionMode = false
-
-            override val isSeparatorVisibleWhenNotExpanded = true
-
-            override fun compareTo(other: ModelNode) = -1
         }
     }
 

@@ -2,7 +2,9 @@ package com.krystianwsul.treeadapter
 
 import java.util.*
 
-class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter, private val logger: ((List<String>) -> Unit)? = null) : NodeContainer {
+class TreeNodeCollection(
+        val treeViewAdapter: TreeViewAdapter,
+        private val logger: ((List<String>) -> Unit)? = null) : NodeContainer {
 
     private lateinit var treeNodes: MutableList<TreeNode>
 

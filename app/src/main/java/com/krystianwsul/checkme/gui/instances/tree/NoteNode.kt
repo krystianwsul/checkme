@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import java.util.*
 
 class NoteNode(private val note: String) : GroupHolderNode(0) {
 
@@ -22,11 +21,14 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
 
     fun initialize(nodeContainer: NodeContainer): TreeNode {
         this.nodeContainer = nodeContainer
-        treeNode = TreeNode(this, nodeContainer, false, false)
 
-        treeNode.setChildTreeNodes(ArrayList())
+        treeNode = TreeNode(this, nodeContainer, false, false)
+        treeNode.setChildTreeNodes(listOf())
+
         return treeNode
     }
+
+    override val textSelectable = true
 
     override val name get() = Triple(note, colorPrimary, false)
 
@@ -34,11 +36,5 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override val textSelectable = true
-
-    override fun compareTo(other: ModelNode): Int {
-        check(other is NotDoneGroupNode || other is UnscheduledNode || other is DividerNode || other is ImageNode)
-
-        return -1
-    }
+    override fun compareTo(other: ModelNode) = -1
 }

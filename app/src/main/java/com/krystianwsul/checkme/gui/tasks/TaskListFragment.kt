@@ -641,14 +641,20 @@ class TaskListFragment : AbstractFragment(), FabUser {
             override lateinit var treeNode: TreeNode
                 private set
 
-            override val id = Unit
+            private lateinit var nodeContainer: NodeContainer
+
+            override val id get() = Id(nodeContainer.id)
+
+            data class Id(val id: Any)
 
             init {
                 check(note.isNotEmpty())
             }
 
-            fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
-                treeNode = TreeNode(this, treeNodeCollection, expanded = false, selected = false)
+            fun initialize(nodeContainer: NodeContainer): TreeNode {
+                this.nodeContainer = nodeContainer
+
+                treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
                 treeNode.setChildTreeNodes(listOf())
 
                 return treeNode
@@ -660,21 +666,11 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override val itemViewType = TYPE_NOTE
 
-            override val isSelectable = false
-
-            override fun onClick() = Unit
-
-            override val isVisibleWhenEmpty = true
-
             override val isVisibleDuringActionMode = false
 
             override val isSeparatorVisibleWhenNotExpanded = true
 
-            override fun compareTo(other: ModelNode): Int {
-                check(other is TaskWrapper)
-
-                return -1
-            }
+            override fun compareTo(other: ModelNode) = -1
         }
     }
 

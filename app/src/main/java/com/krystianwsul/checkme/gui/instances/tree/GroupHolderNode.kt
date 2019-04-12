@@ -116,18 +116,18 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 when (taskImage) {
                     is ImageState.Local -> Glide.with(itemView)
                             .load(Uploader.getPath(taskImage))
-                            .into(rowBigImage)
+                            .into(rowBigImage!!)
                     is ImageState.Remote ->
                         GlideApp.with(itemView)
                                 .load(Uploader.getReference(taskImage))
-                                .into(rowBigImage)
+                                .into(rowBigImage!!)
                     is ImageState.Uploading -> {
                     }
                 }
 
             } else {
                 rowContainer.visibility = View.VISIBLE
-                rowBigImage.visibility = View.GONE
+                rowBigImageLayout?.visibility = View.GONE
 
                 val checkBoxVisibility = checkBoxVisibility
                 val widthKey = Triple(indentation, checkBoxVisibility == View.GONE, rowContainer.orientation)

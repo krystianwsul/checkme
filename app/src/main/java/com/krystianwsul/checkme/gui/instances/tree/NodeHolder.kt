@@ -17,7 +17,7 @@ class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
     val rowCheckBox = itemView.rowCheckbox!!
     val rowMargin = itemView.rowMargin!!
     val rowImage: ImageView? = itemView.rowImage
-    val rowBigImage = itemView.rowBigImage!!
+    val rowBigImage: ImageView? = itemView.rowBigImage
     val rowBigImageLayout: RelativeLayout? = itemView.rowBigImageLayout
     val rowSeparator = itemView.rowSeparator!!
 

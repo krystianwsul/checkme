@@ -47,9 +47,9 @@ class TreeViewAdapter(
 
     fun hasActionMode() = treeModelAdapter.hasActionMode
 
-    fun incrementSelected(x: TreeViewAdapter.Placeholder) = treeModelAdapter.incrementSelected(x)
+    fun incrementSelected(x: Placeholder) = treeModelAdapter.incrementSelected(x)
 
-    fun decrementSelected(x: TreeViewAdapter.Placeholder) = treeModelAdapter.decrementSelected(x)
+    fun decrementSelected(x: Placeholder) = treeModelAdapter.decrementSelected(x)
 
     fun updateDisplayedNodes(action: () -> Unit) = updateDisplayedNodes(false, action)
 
@@ -106,14 +106,14 @@ class TreeViewAdapter(
         updates.accept(Unit)
     }
 
-    fun unselect(x: TreeViewAdapter.Placeholder) {
+    fun unselect(x: Placeholder) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
         treeNodeCollection!!.unselect(x)
     }
 
-    fun selectAll(x: TreeViewAdapter.Placeholder) {
+    fun selectAll(x: Placeholder) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
@@ -161,7 +161,7 @@ class TreeViewAdapter(
             treeNodeCollection!!.getItemViewType(position)
     }
 
-    fun moveItem(from: Int, to: Int, x: TreeViewAdapter.Placeholder) {
+    fun moveItem(from: Int, to: Int, x: Placeholder) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 

@@ -72,7 +72,7 @@ class TreeNode(
             return true
         }
 
-    val state get() = State(isExpanded, isSelected, expandVisible, separatorVisible, modelNode.state, treeNodeCollection.stale)
+    val state get() = State(isExpanded, isSelected, expandVisible, separatorVisible, modelNode.state, modelNode.ignoreStale || treeNodeCollection.stale)
 
     // hiding
     // showing
@@ -284,7 +284,7 @@ class TreeNode(
 
         val selected = selectedNodes
 
-        if (!selected.isEmpty()) {
+        if (selected.isNotEmpty()) {
             check(expanded)
 
             selected.forEach { it.unselect(x) }
@@ -304,7 +304,7 @@ class TreeNode(
         }
 
         if (expanded) {
-            check(!childTreeNodes!!.isEmpty())
+            check(childTreeNodes!!.isNotEmpty())
 
             childTreeNodes!!.forEach { it.selectAll(x) }
         }

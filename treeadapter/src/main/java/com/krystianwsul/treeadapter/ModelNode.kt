@@ -29,4 +29,6 @@ interface ModelNode : Comparable<ModelNode> {
     val deselectParent get() = false
 
     fun ordinalDesc(): String? = null
+
+    val ignoreStale: Boolean get() = false // this is a workaround for not diffing the nodes when a remote change comes in
 }

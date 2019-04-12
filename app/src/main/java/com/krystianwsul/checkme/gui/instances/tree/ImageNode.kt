@@ -21,6 +21,8 @@ class ImageNode(override val imageState: ImageState) : GroupHolderNode(0) { // t
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
+    override val ignoreStale = true
+
     fun initialize(nodeContainer: NodeContainer): TreeNode {
         this.nodeContainer = nodeContainer
         treeNode = TreeNode(this, nodeContainer, false, false)

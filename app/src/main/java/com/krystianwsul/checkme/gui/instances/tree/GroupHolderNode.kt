@@ -98,9 +98,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         fun checkStale() {
             if (treeNode.treeNodeCollection.stale) {
                 if (MyCrashlytics.enabled)
-                    throw StaleTreeNodeException()
-                else
                     MyCrashlytics.logException(StaleTreeNodeException())
+                else
+                    throw StaleTreeNodeException()
             }
         }
 

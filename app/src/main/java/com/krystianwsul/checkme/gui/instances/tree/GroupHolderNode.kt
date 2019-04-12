@@ -111,7 +111,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
             if (taskImage != null) {
                 rowContainer.visibility = View.GONE
-                rowBigImage.visibility = View.VISIBLE
+                rowBigImageLayout!!.visibility = View.VISIBLE
 
                 when (taskImage) {
                     is ImageState.Local -> Glide.with(itemView)
@@ -122,7 +122,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                                 .load(Uploader.getReference(taskImage))
                                 .into(rowBigImage)
                     is ImageState.Uploading -> {
-                        // todo image show progress
                     }
                 }
 

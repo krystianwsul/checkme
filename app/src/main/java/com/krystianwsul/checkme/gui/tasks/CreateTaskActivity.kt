@@ -282,7 +282,15 @@ class CreateTaskActivity : AbstractActivity() {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
 
-                                    val taskKey = DomainFactory.instance.updateScheduleTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, scheduleDatas, note, projectId)
+                                    val taskKey = DomainFactory.instance.updateScheduleTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            taskKey!!,
+                                            name,
+                                            scheduleDatas,
+                                            note,
+                                            projectId,
+                                            writeImagePath)
 
                                     setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
                                 }
@@ -325,7 +333,15 @@ class CreateTaskActivity : AbstractActivity() {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
 
-                                    val taskKey = DomainFactory.instance.updateChildTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, taskKey!!, name, parentTaskKey, note)
+                                    val taskKey = DomainFactory.instance.updateChildTask(
+                                            ExactTimeStamp.now,
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            taskKey!!,
+                                            name,
+                                            parentTaskKey,
+                                            note,
+                                            writeImagePath)
 
                                     setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
                                 }
@@ -363,7 +379,14 @@ class CreateTaskActivity : AbstractActivity() {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
 
-                                    val taskKey = DomainFactory.instance.updateRootTask(data!!.dataId, SaveService.Source.GUI, taskKey!!, name, note, projectId)
+                                    val taskKey = DomainFactory.instance.updateRootTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            taskKey!!,
+                                            name,
+                                            note,
+                                            projectId,
+                                            writeImagePath)
 
                                     setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
                                 }

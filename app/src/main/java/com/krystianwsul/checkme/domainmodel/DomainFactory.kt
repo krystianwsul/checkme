@@ -990,7 +990,16 @@ open class DomainFactory(
         createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId, imagePath)
     }
 
-    fun updateScheduleTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
+    fun updateScheduleTask(
+            now: ExactTimeStamp,
+            dataId: Int,
+            source: SaveService.Source,
+            taskKey: TaskKey,
+            name: String,
+            scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
+            note: String?,
+            projectId: String?,
+            imagePath: NullableWrapper<String>?): TaskKey {
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
 
@@ -1008,17 +1017,33 @@ open class DomainFactory(
 
         task.updateSchedules(scheduleDatas, now)
 
+        val imageUuid = imagePath?.value?.let { newUuid() }
+        if (imagePath != null)
+            task.image = imageUuid?.let { ImageState.Local(imageUuid) }
+
         updateNotifications(now)
 
         save(dataId, source)
 
         notifyCloud(task.project)
 
+        imageUuid?.let {
+            Uploader.addUpload(task.taskKey, it, imagePath.value)
+        }
+
         return task.taskKey
     }
 
     @Synchronized
-    fun updateScheduleTask(dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
+    fun updateScheduleTask(
+            dataId: Int,
+            source: SaveService.Source,
+            taskKey: TaskKey,
+            name: String,
+            scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
+            note: String?,
+            projectId: String?,
+            imagePath: NullableWrapper<String>?): TaskKey {
         MyCrashlytics.log("DomainFactory.updateScheduleTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1027,7 +1052,7 @@ open class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId)
+        return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId, imagePath)
     }
 
     @Synchronized
@@ -1163,7 +1188,14 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun updateRootTask(dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, note: String?, projectId: String?): TaskKey {
+    fun updateRootTask(
+            dataId: Int,
+            source: SaveService.Source,
+            taskKey: TaskKey,
+            name: String,
+            note: String?,
+            projectId: String?,
+            imagePath: NullableWrapper<String>?): TaskKey {
         MyCrashlytics.log("DomainFactory.updateRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1184,11 +1216,19 @@ open class DomainFactory(
 
         task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
 
+        val imageUuid = imagePath?.value?.let { newUuid() }
+        if (imagePath != null)
+            task.image = imageUuid?.let { ImageState.Local(imageUuid) }
+
         updateNotifications(now)
 
         save(dataId, source)
 
         notifyCloud(task.project)
+
+        imageUuid?.let {
+            Uploader.addUpload(task.taskKey, it, imagePath.value)
+        }
 
         return task.taskKey
     }
@@ -1281,7 +1321,15 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun updateChildTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, parentTaskKey: TaskKey, note: String?): TaskKey {
+    fun updateChildTask(
+            now: ExactTimeStamp,
+            dataId: Int,
+            source: SaveService.Source,
+            taskKey: TaskKey,
+            name: String,
+            parentTaskKey: TaskKey,
+            note: String?,
+            imagePath: NullableWrapper<String>?): TaskKey {
         MyCrashlytics.log("DomainFactory.updateChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1306,11 +1354,19 @@ open class DomainFactory(
             newParentTask.addChild(task, now)
         }
 
+        val imageUuid = imagePath?.value?.let { newUuid() }
+        if (imagePath != null)
+            task.image = imageUuid?.let { ImageState.Local(imageUuid) }
+
         updateNotifications(now)
 
         save(dataId, source)
 
-        notifyCloud(task.project)
+        notifyCloud(task.project) // todo image on server, purge images after this call
+
+        imageUuid?.let {
+            Uploader.addUpload(task.taskKey, it, imagePath.value)
+        }
 
         return task.taskKey
     }

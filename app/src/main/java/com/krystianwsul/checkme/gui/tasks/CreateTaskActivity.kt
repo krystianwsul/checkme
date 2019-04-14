@@ -1137,7 +1137,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         data class Existing(val imageState: ImageState) : State() {
 
-            override val loader = imageState::load
+            override val loader get() = imageState::load
         }
 
         object Removed : State() {
@@ -1151,7 +1151,8 @@ class CreateTaskActivity : AbstractActivity() {
 
             override val dontOverwrite = true
 
-            override val loader = { imageView: ImageView ->
+            override val loader
+                get() = { imageView: ImageView ->
                 Glide.with(imageView)
                         .load(url)
                         .into(imageView)

@@ -6,7 +6,7 @@ import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 import java.util.*
 
-class ImageNode(override val imageState: ImageState) : GroupHolderNode(0) { // todo image prevent updating from local to remote
+class ImageNode(override val imageState: ImageState) : GroupHolderNode(0) {
 
     override lateinit var treeNode: TreeNode
         private set

@@ -1,8 +1,10 @@
 package com.krystianwsul.checkme.upload
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
@@ -48,6 +50,40 @@ object Uploader {
                         Log.e("asdf", "image upload written")
                     }
                 }
+    }
+
+    @SuppressLint("CheckResult")
+    fun resume() {
+        Queue.ready.subscribe {
+            Queue.getEntries()
+                    .toMutableList()
+                    .forEach { entry ->
+                        val task = DomainFactory.instance.getTaskIfPresent(entry.taskKey)
+                                ?: return@forEach
+
+                        if (task.image != ImageState.Local(entry.uuid))
+                            return@forEach
+
+                        Log.e("asdf", "image upload start")
+
+                        storage.child(entry.uuid)
+                                .putFile(entry.fileUri, StorageMetadata.Builder().build(), entry.sessionUri)
+                                .addOnFailureListener {
+                                    Log.e("asdf", "image upload error", it)
+                                    MyCrashlytics.logException(it)
+                                }
+                                .addOnSuccessListener {
+                                    Log.e("asdf", "image upload complete")
+
+                                    Queue.removeEntry(entry)
+
+                                    DomainFactory.addFirebaseListener {
+                                        it.setTaskImageUploaded(SaveService.Source.GUI, entry.taskKey, entry.uuid)
+                                        Log.e("asdf", "image upload written")
+                                    }
+                                }
+                    }
+        }
     }
 
     fun getReference(imageData: ImageState.Remote) = storage.child(imageData.uuid)

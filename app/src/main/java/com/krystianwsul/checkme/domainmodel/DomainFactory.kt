@@ -1746,8 +1746,10 @@ open class DomainFactory(
         MyCrashlytics.log("DomainFactory.clearProjectEndTimeStamps")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
-        val task = getTaskForce(taskKey)
-        check(task.image == ImageState.Local(imageUuid))
+        val task = getTaskIfPresent(taskKey) ?: return
+
+        if (task.image != ImageState.Local(imageUuid))
+            return
 
         task.image = ImageState.Remote(imageUuid)
 
@@ -2075,6 +2077,8 @@ open class DomainFactory(
     private val customTimes get() = remoteProjectFactory.remoteCustomTimes
 
     fun getTaskForce(taskKey: TaskKey) = remoteProjectFactory.getTaskForce(taskKey)
+
+    fun getTaskIfPresent(taskKey: TaskKey) = remoteProjectFactory.getTaskIfPresent(taskKey)
 
     fun getChildTaskHierarchies(parentTask: Task, exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
         check(parentTask.current(exactTimeStamp))

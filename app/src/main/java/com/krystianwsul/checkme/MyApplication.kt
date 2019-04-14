@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
+import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -146,6 +147,8 @@ class MyApplication : Application() {
         Queue.init()
 
         Queue.ready.subscribe { clearPaparazzo() }
+
+        Uploader.resume()
     }
 
     private fun clearPaparazzo() {

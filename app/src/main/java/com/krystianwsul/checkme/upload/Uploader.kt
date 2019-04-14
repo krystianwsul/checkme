@@ -11,6 +11,8 @@ import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.Observables
 
 object Uploader {
 
@@ -54,11 +56,17 @@ object Uploader {
 
     @SuppressLint("CheckResult")
     fun resume() {
-        Queue.ready.subscribe {
+        Observables.combineLatest(
+                Queue.ready,
+                DomainFactory.instanceRelay
+                        .filter { it.value != null }
+                        .map { it.value!! }
+        ).observeOn(AndroidSchedulers.mainThread())
+                .subscribe { (_, domainFactory) ->
             Queue.getEntries()
                     .toMutableList()
                     .forEach { entry ->
-                        val task = DomainFactory.instance.getTaskIfPresent(entry.taskKey)
+                        val task = domainFactory.getTaskIfPresent(entry.taskKey)
                                 ?: return@forEach
 
                         if (task.image != ImageState.Local(entry.uuid))

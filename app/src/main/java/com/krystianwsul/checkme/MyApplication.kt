@@ -158,7 +158,7 @@ class MyApplication : Application() {
 
         val queued = Queue.getEntries().map { it.path }
 
-        File(paparazzo).listFiles()
+        (File(paparazzo).listFiles() ?: arrayOf())
                 .filterNot { it.absolutePath in queued }
                 .forEach {
                     try {

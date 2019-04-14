@@ -8,6 +8,14 @@
     android:layout_marginRight="@dimen/activity_horizontal_margin"
     android:orientation="horizontal">
 
+    <ProgressBar
+        android:id="@+id/imageProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone" />
+
     <ImageView
         android:id="@+id/imageImage"
         android:layout_width="match_parent"

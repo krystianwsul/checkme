@@ -621,7 +621,7 @@ open class DomainFactory(
 
             val projectName = task.project.name
 
-            taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName)
+            taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName, task.image)
 
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             check(checkHintPresent(parentTreeDatas))
@@ -984,7 +984,7 @@ open class DomainFactory(
 
     fun updateScheduleTask(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, taskKey: TaskKey, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?): TaskKey {
         check(name.isNotEmpty())
-        check(!scheduleDatas.isEmpty())
+        check(scheduleDatas.isNotEmpty())
 
         var task = getTaskForce(taskKey)
         check(task.current(now))
@@ -1015,7 +1015,7 @@ open class DomainFactory(
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
-        check(!scheduleDatas.isEmpty())
+        check(scheduleDatas.isNotEmpty())
 
         val now = ExactTimeStamp.now
 
@@ -1028,7 +1028,7 @@ open class DomainFactory(
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         check(name.isNotEmpty())
-        check(!scheduleDatas.isEmpty())
+        check(scheduleDatas.isNotEmpty())
         check(joinTaskKeys.size > 1)
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() }
@@ -1300,7 +1300,7 @@ open class DomainFactory(
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
-        check(!taskKeys.isEmpty())
+        check(taskKeys.isNotEmpty())
 
         val now = ExactTimeStamp.now
 
@@ -1436,7 +1436,7 @@ open class DomainFactory(
         MyCrashlytics.log("DomainFactory.setCustomTimesCurrent")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
-        check(!customTimeIds.isEmpty())
+        check(customTimeIds.isNotEmpty())
 
         for (remoteCustomTimeId in customTimeIds) {
             val remotePrivateCustomTime = remoteProjectFactory.remotePrivateProject.getRemoteCustomTime(remoteCustomTimeId)
@@ -1548,7 +1548,7 @@ open class DomainFactory(
     fun setProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectIds: Set<String>): ProjectUndoData {
         MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
-        check(!projectIds.isEmpty())
+        check(projectIds.isNotEmpty())
 
         val now = ExactTimeStamp.now
 
@@ -1836,9 +1836,6 @@ open class DomainFactory(
     fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*> {
         check(projectId.isNotEmpty())
 
-        checkNotNull(remoteProjectFactory)
-        checkNotNull(userInfo)
-
         val remoteToRemoteConversion = RemoteToRemoteConversion<T>()
         val startProject = startingRemoteTask.remoteProject
         startProject.convertRemoteToRemoteHelper(remoteToRemoteConversion, startingRemoteTask)
@@ -1850,15 +1847,11 @@ open class DomainFactory(
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
-            checkNotNull(pair)
-
             val remoteTask = remoteProject.copyTask(pair.first, pair.second, now)
             remoteToRemoteConversion.endTasks[pair.first.id] = remoteTask
         }
 
         for (startTaskHierarchy in remoteToRemoteConversion.startTaskHierarchies) {
-            checkNotNull(startTaskHierarchy)
-
             val parentRemoteTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.parentTaskId]!!
             val childRemoteTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.childTaskId]!!
 
@@ -2104,11 +2097,8 @@ open class DomainFactory(
     private fun notifyCloud(remoteProject: RemoteProject<*>) = notifyCloud(setOf(remoteProject))
 
     private fun notifyCloud(remoteProjects: Set<RemoteProject<*>>) {
-        if (!remoteProjects.isEmpty()) {
-            checkNotNull(userInfo)
-
+        if (remoteProjects.isNotEmpty())
             notifyCloudPrivateFixed(remoteProjects.toMutableSet(), userInfo, mutableListOf())
-        }
     }
 
     private fun notifyCloud(remoteProject: RemoteProject<*>, userKeys: Collection<String>) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userInfo, userKeys.toMutableList())
@@ -2209,11 +2199,9 @@ open class DomainFactory(
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             if (notificationInstances.size > TickJobIntentService.MAX_NOTIFICATIONS) { // show group
                 if (shownInstanceKeys.size > TickJobIntentService.MAX_NOTIFICATIONS) { // group shown
-                    if (!showInstanceKeys.isEmpty() || !hideInstanceKeys.isEmpty()) {
-                        NotificationWrapper.instance.notifyGroup(notificationInstances.values, silent, now)
-                    } else {
-                        NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
-                    }
+                    val silentParam = if (showInstanceKeys.isNotEmpty() || hideInstanceKeys.isNotEmpty()) silent else true
+
+                    NotificationWrapper.instance.notifyGroup(notificationInstances.values, silentParam, now)
                 } else { // instances shown
                     for (shownInstanceKey in shownInstanceKeys)
                         NotificationWrapper.instance.cancelNotification(getInstance(shownInstanceKey).notificationId)

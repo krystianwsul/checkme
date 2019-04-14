@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import android.os.Parcelable
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
@@ -78,7 +79,8 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             val parentKey: ParentKey?,
             val scheduleDatas: List<ScheduleData>?,
             val note: String?,
-            val projectName: String?)
+            val projectName: String?,
+            val imageState: ImageState?)
 
     data class ParentTreeData(
             val name: String,

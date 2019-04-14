@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -22,6 +23,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -34,7 +36,6 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
@@ -50,6 +51,7 @@ import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.io.File
+import java.io.Serializable
 
 
 class CreateTaskActivity : AbstractActivity() {
@@ -239,7 +241,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
-    private val imageUrl = BehaviorRelay.createDefault(NullableWrapper<String>())
+    private val imageUrl = BehaviorRelay.createDefault<State>(State.None)
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -266,7 +268,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                     createTaskViewModel.stop()
 
-                    val imagePath = imageUrl.value!!.value
+                    val imagePath = (imageUrl.value!! as? State.Selected)?.url // todo handle other cases
 
                     when {
                         hasValueSchedule() -> {
@@ -375,8 +377,7 @@ class CreateTaskActivity : AbstractActivity() {
         this.savedInstanceState = savedInstanceState
 
         savedInstanceState?.run {
-            if (containsKey(IMAGE_URL_KEY))
-                imageUrl.accept(NullableWrapper(getString(IMAGE_URL_KEY)))
+            imageUrl.accept(getSerializable(IMAGE_URL_KEY) as State)
         }
 
         scheduleRecycler.layoutManager = LinearLayoutManager(this)
@@ -436,7 +437,7 @@ class CreateTaskActivity : AbstractActivity() {
             if (it.resultCode() == Activity.RESULT_OK)
                 it.targetUI()
                         .imageUrl
-                        .accept(NullableWrapper(it.data().file.absolutePath))
+                        .accept(State.Selected(it.data().file.absolutePath))
         }
     }
 
@@ -461,16 +462,19 @@ class CreateTaskActivity : AbstractActivity() {
                     putString(NOTE_KEY, note)
 
                 putBoolean(NOTE_HAS_FOCUS_KEY, noteHasFocus)
-
-                imageUrl.value!!
-                        .value
-                        ?.let { putString(IMAGE_URL_KEY, it) }
             }
+
+            putSerializable(IMAGE_URL_KEY, imageUrl.value!!)
         }
     }
 
     private fun onLoadFinished(data: CreateTaskViewModel.Data) {
         this.data = data
+
+        data.taskData
+                ?.imageState
+                ?.takeUnless { imageUrl.value!!.dontOverwrite }
+                ?.let { imageUrl.accept(State.Existing(it)) }
 
         toolbarLayout.run {
             visibility = View.VISIBLE
@@ -927,7 +931,7 @@ class CreateTaskActivity : AbstractActivity() {
                 }
                 elementsBeforeSchedules + scheduleEntries.size + 2 -> {
                     (holder as ImageHolder).run {
-                        imageRemove.setOnClickListener { imageUrl.accept(NullableWrapper()) }
+                        imageRemove.setOnClickListener { imageUrl.accept(State.Removed) }
 
                         imageCamera.setOnClickListener {
                             getImage(
@@ -957,9 +961,7 @@ class CreateTaskActivity : AbstractActivity() {
 
             (holder as? ImageHolder)?.run {
                 compositeDisposable += imageUrl.subscribe {
-                    if (it.value != null) {
-                        Log.e("asdf", "image filename: " + it.value)
-
+                    if (it.loader != null) {
                         val paparazzo = filesDir.absolutePath + "/RxPaparazzo/" // todo image probably should clear this anyway
                         Log.e("asdf", "image paparazzo: $paparazzo")
 
@@ -967,14 +969,14 @@ class CreateTaskActivity : AbstractActivity() {
                             Log.e("asdf", "image file: " + it.absolutePath)
                         }
 
+                        imageProgress.visibility = View.VISIBLE
                         imageImage.visibility = View.VISIBLE
                         imageLayout.visibility = View.GONE
                         imageRemove.visibility = View.VISIBLE
 
-                        Glide.with(this@CreateTaskActivity)
-                                .load(it.value)
-                                .into(imageImage)
+                        it.loader!!(imageImage)
                     } else {
+                        imageProgress.visibility = View.GONE
                         imageImage.visibility = View.GONE
                         imageLayout.visibility = View.VISIBLE
                         imageRemove.visibility = View.GONE
@@ -1049,10 +1051,41 @@ class CreateTaskActivity : AbstractActivity() {
         inner class ImageHolder(itemView: View) : Holder(itemView) {
 
             val imageImage = itemView.imageImage!!
+            val imageProgress = itemView.imageProgress!!
             val imageLayout = itemView.imageLayout!!
             val imageRemove = itemView.imageRemove!!
             val imageCamera = itemView.imageCamera!!
             val imageGallery = itemView.imageGallery!!
+        }
+    }
+
+    private sealed class State : Serializable {
+
+        open val dontOverwrite = false
+
+        open val loader: ((ImageView) -> Any)? = null
+
+        object None : State()
+
+        data class Existing(val imageState: ImageState) : State() {
+
+            override val loader = imageState::load
+        }
+
+        object Removed : State() {
+
+            override val dontOverwrite = true
+        }
+
+        data class Selected(val url: String) : State() {
+
+            override val dontOverwrite = true
+
+            override val loader = { imageView: ImageView ->
+                Glide.with(imageView)
+                        .load(url)
+                        .into(imageView)
+            }
         }
     }
 }

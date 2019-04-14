@@ -7,10 +7,11 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.krystianwsul.checkme.*
+import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.firebase.ImageState
-import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -113,18 +114,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 rowContainer.visibility = View.GONE
                 rowBigImageLayout!!.visibility = View.VISIBLE
 
-                when (taskImage) {
-                    is ImageState.Local -> Glide.with(itemView)
-                            .load(Uploader.getPath(taskImage))
-                            .into(rowBigImage!!)
-                    is ImageState.Remote ->
-                        GlideApp.with(itemView)
-                                .load(Uploader.getReference(taskImage))
-                                .into(rowBigImage!!)
-                    is ImageState.Uploading -> {
-                    }
-                }
-
+                taskImage.load(rowBigImage!!)
             } else {
                 rowContainer.visibility = View.VISIBLE
                 rowBigImageLayout?.visibility = View.GONE

@@ -40,8 +40,6 @@ object Uploader {
                         Log.e("asdf", "image upload written")
                     }
                 }
-
-        // todo image delete tmp files
     }
 
     fun getReference(imageData: ImageState.Remote) = storage.child(imageData.uuid)

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.upload
 
 import android.annotation.SuppressLint
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.pacoworks.rxpaper2.RxPaperBook
 
 object Queue {
@@ -11,10 +12,18 @@ object Queue {
 
     private lateinit var entries: MutableList<Entry>
 
+    val ready = BehaviorRelay.create<Unit>()
+
     @SuppressLint("CheckResult")
     fun init() {
+        check(!ready.hasValue())
+
         book.read(KEY, mutableListOf<Entry>()).subscribe { entries ->
+            check(!ready.hasValue())
+
             this.entries = entries
+
+            ready.accept(Unit)
         }
     }
 

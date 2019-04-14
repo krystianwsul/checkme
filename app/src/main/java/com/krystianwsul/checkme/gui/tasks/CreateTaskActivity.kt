@@ -9,7 +9,6 @@ import android.os.Parcelable
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -51,7 +50,6 @@ import kotlinx.android.synthetic.main.row_image.view.*
 import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
-import java.io.File
 import java.io.Serializable
 
 
@@ -1028,13 +1026,6 @@ class CreateTaskActivity : AbstractActivity() {
             (holder as? ImageHolder)?.run {
                 compositeDisposable += imageUrl.subscribe {
                     if (it.loader != null) {
-                        val paparazzo = filesDir.absolutePath + "/RxPaparazzo/" // todo image probably should clear this anyway
-                        Log.e("asdf", "image paparazzo: $paparazzo")
-
-                        File(paparazzo).listFiles().forEach {
-                            Log.e("asdf", "image file: " + it.absolutePath)
-                        }
-
                         imageProgress.visibility = View.VISIBLE
                         imageImage.visibility = View.VISIBLE
                         imageLayout.visibility = View.GONE

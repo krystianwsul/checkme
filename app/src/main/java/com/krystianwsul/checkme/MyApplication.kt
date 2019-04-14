@@ -27,6 +27,7 @@ import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
+import java.io.File
 
 class MyApplication : Application() {
 
@@ -143,6 +144,26 @@ class MyApplication : Application() {
         RxPaperBook.init(this)
 
         Queue.init()
+
+        Queue.ready.subscribe { clearPaparazzo() }
+    }
+
+    private fun clearPaparazzo() {
+        val paparazzo = MyApplication.instance
+                .filesDir
+                .absolutePath + "/RxPaparazzo/"
+
+        val queued = Queue.getEntries().map { it.path }
+
+        File(paparazzo).listFiles()
+                .filterNot { it.absolutePath in queued }
+                .forEach {
+                    try {
+                        it.delete()
+                    } catch (e: Exception) {
+                        MyCrashlytics.logException(e)
+                    }
+                }
     }
 
     /*

@@ -36,6 +36,7 @@ import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
@@ -268,7 +269,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                     createTaskViewModel.stop()
 
-                    val imagePath = (imageUrl.value!! as? State.Selected)?.url // todo handle other cases
+                    val writeImagePath = imageUrl.value!!.writeImagePath
 
                     when {
                         hasValueSchedule() -> {
@@ -289,12 +290,28 @@ class CreateTaskActivity : AbstractActivity() {
                                     check(data!!.taskData == null)
                                     check(taskKeys!!.size > 1)
 
-                                    DomainFactory.instance.createScheduleJoinRootTask(ExactTimeStamp.now, data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, taskKeys!!, note, projectId)
+                                    DomainFactory.instance.createScheduleJoinRootTask(
+                                            ExactTimeStamp.now,
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            name,
+                                            scheduleDatas,
+                                            taskKeys!!,
+                                            note,
+                                            projectId,
+                                            writeImagePath?.value)
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
 
-                                    DomainFactory.instance.createScheduleRootTask(data!!.dataId, SaveService.Source.GUI, name, scheduleDatas, note, projectId, imagePath)
+                                    DomainFactory.instance.createScheduleRootTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            name,
+                                            scheduleDatas,
+                                            note,
+                                            projectId,
+                                            writeImagePath?.value)
                                 }
                             }
                         }
@@ -316,12 +333,25 @@ class CreateTaskActivity : AbstractActivity() {
                                     check(data!!.taskData == null)
                                     check(taskKeys!!.size > 1)
 
-                                    DomainFactory.instance.createJoinChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, taskKeys!!, note)
+                                    DomainFactory.instance.createJoinChildTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            parentTaskKey,
+                                            name,
+                                            taskKeys!!,
+                                            note,
+                                            writeImagePath?.value)
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
 
-                                    DomainFactory.instance.createChildTask(data!!.dataId, SaveService.Source.GUI, parentTaskKey, name, note)
+                                    DomainFactory.instance.createChildTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            parentTaskKey,
+                                            name,
+                                            note,
+                                            writeImagePath?.value)
                                 }
                             }
                         }
@@ -340,12 +370,25 @@ class CreateTaskActivity : AbstractActivity() {
                                 taskKeys != null -> {
                                     check(data!!.taskData == null)
 
-                                    DomainFactory.instance.createJoinRootTask(data!!.dataId, SaveService.Source.GUI, name, taskKeys!!, note, projectId)
+                                    DomainFactory.instance.createJoinRootTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            name,
+                                            taskKeys!!,
+                                            note,
+                                            projectId,
+                                            writeImagePath?.value)
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
 
-                                    DomainFactory.instance.createRootTask(data!!.dataId, SaveService.Source.GUI, name, note, projectId)
+                                    DomainFactory.instance.createRootTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            name,
+                                            note,
+                                            projectId,
+                                            writeImagePath?.value)
                                 }
                             }
                         }
@@ -1065,6 +1108,8 @@ class CreateTaskActivity : AbstractActivity() {
 
         open val loader: ((ImageView) -> Any)? = null
 
+        open val writeImagePath: NullableWrapper<String>? = null
+
         object None : State()
 
         data class Existing(val imageState: ImageState) : State() {
@@ -1075,6 +1120,8 @@ class CreateTaskActivity : AbstractActivity() {
         object Removed : State() {
 
             override val dontOverwrite = true
+
+            override val writeImagePath = NullableWrapper<String>(null)
         }
 
         data class Selected(val url: String) : State() {
@@ -1086,6 +1133,8 @@ class CreateTaskActivity : AbstractActivity() {
                         .load(url)
                         .into(imageView)
             }
+
+            override val writeImagePath = NullableWrapper(url)
         }
     }
 }

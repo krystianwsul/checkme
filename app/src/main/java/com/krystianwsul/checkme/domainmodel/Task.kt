@@ -148,7 +148,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         setMyEndExactTimeStamp(null)
     }
 
-    abstract fun createChildTask(now: ExactTimeStamp, name: String, note: String?): Task
+    abstract fun createChildTask(now: ExactTimeStamp, name: String, note: String?, imageUuid: String?): Task
 
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         check(notDeleted(exactTimeStamp))

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
+import android.net.Uri
 import android.os.Build
 import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.google.firebase.database.DataSnapshot
@@ -957,7 +958,7 @@ open class DomainFactory(
             scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
             note: String?,
             projectId: String?,
-            imagePath: String?): Task {
+            imagePath: Pair<String, Uri>?): Task {
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
 
@@ -981,7 +982,14 @@ open class DomainFactory(
     }
 
     @Synchronized
-    fun createScheduleRootTask(dataId: Int, source: SaveService.Source, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String?, imagePath: String?) {
+    fun createScheduleRootTask(
+            dataId: Int,
+            source: SaveService.Source,
+            name: String,
+            scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
+            note: String?,
+            projectId: String?,
+            imagePath: Pair<String, Uri>?) {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -999,7 +1007,7 @@ open class DomainFactory(
             scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
             note: String?,
             projectId: String?,
-            imagePath: NullableWrapper<String>?): TaskKey {
+            imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
 
@@ -1043,7 +1051,7 @@ open class DomainFactory(
             scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
             note: String?,
             projectId: String?,
-            imagePath: NullableWrapper<String>?): TaskKey {
+            imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
         MyCrashlytics.log("DomainFactory.updateScheduleTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1065,7 +1073,7 @@ open class DomainFactory(
             joinTaskKeys: List<TaskKey>,
             note: String?,
             projectId: String?,
-            imagePath: String?) {
+            imagePath: Pair<String, Uri>?) {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1106,7 +1114,7 @@ open class DomainFactory(
             name: String,
             note: String?,
             projectId: String?,
-            imagePath: String?): Task {
+            imagePath: Pair<String, Uri>?): Task {
         check(name.isNotEmpty())
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
@@ -1135,7 +1143,7 @@ open class DomainFactory(
             name: String,
             note: String?,
             projectId: String?,
-            imagePath: String?) {
+            imagePath: Pair<String, Uri>?) {
         MyCrashlytics.log("DomainFactory.createRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1152,7 +1160,7 @@ open class DomainFactory(
             joinTaskKeys: List<TaskKey>,
             note: String?,
             projectId: String?,
-            imagePath: String?) {
+            imagePath: Pair<String, Uri>?) {
         MyCrashlytics.log("DomainFactory.createJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1195,7 +1203,7 @@ open class DomainFactory(
             name: String,
             note: String?,
             projectId: String?,
-            imagePath: NullableWrapper<String>?): TaskKey {
+            imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
         MyCrashlytics.log("DomainFactory.updateRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1240,7 +1248,7 @@ open class DomainFactory(
             parentTaskKey: TaskKey,
             name: String,
             note: String?,
-            imagePath: String?): Task {
+            imagePath: Pair<String, Uri>?): Task {
         check(name.isNotEmpty())
 
         val parentTask = getTaskForce(parentTaskKey)
@@ -1270,7 +1278,7 @@ open class DomainFactory(
             parentTaskKey: TaskKey,
             name: String,
             note: String?,
-            imagePath: String?) {
+            imagePath: Pair<String, Uri>?) {
         MyCrashlytics.log("DomainFactory.createChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1287,7 +1295,7 @@ open class DomainFactory(
             name: String,
             joinTaskKeys: List<TaskKey>,
             note: String?,
-            imagePath: String?) {
+            imagePath: Pair<String, Uri>?) {
         MyCrashlytics.log("DomainFactory.createJoinChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1329,7 +1337,7 @@ open class DomainFactory(
             name: String,
             parentTaskKey: TaskKey,
             note: String?,
-            imagePath: NullableWrapper<String>?): TaskKey {
+            imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
         MyCrashlytics.log("DomainFactory.updateChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 

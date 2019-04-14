@@ -1,7 +1,9 @@
 package com.krystianwsul.checkme.upload
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.utils.TaskKey
 import com.pacoworks.rxpaper2.RxPaperBook
 
 object Queue {
@@ -27,12 +29,12 @@ object Queue {
         }
     }
 
-    private fun write() {
+    fun write() {
         book.write(KEY, entries).subscribe()
     }
 
-    fun addEntry(uuid: String, path: String): Entry {
-        val entry = Entry(uuid, path)
+    fun addEntry(taskKey: TaskKey, uuid: String, path: String, uri: Uri): Entry {
+        val entry = Entry(taskKey, uuid, path, uri, null)
         entries.add(entry)
         write()
         return entry
@@ -48,6 +50,9 @@ object Queue {
     fun getPath(uuid: String) = entries.single { it.uuid == uuid }.path
 
     data class Entry(
+            val taskKey: TaskKey,
             val uuid: String,
-            val path: String)
+            val path: String,
+            val fileUri: Uri,
+            var sessionUri: Uri?)
 }

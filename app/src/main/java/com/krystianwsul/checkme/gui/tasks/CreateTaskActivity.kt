@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -498,10 +499,12 @@ class CreateTaskActivity : AbstractActivity() {
     @SuppressLint("CheckResult")
     private fun getImage(single: Observable<Response<CreateTaskActivity, FileData>>) {
         single.subscribe {
-            if (it.resultCode() == Activity.RESULT_OK)
+            if (it.resultCode() == Activity.RESULT_OK) {
+                val file = it.data().file
                 it.targetUI()
                         .imageUrl
-                        .accept(State.Selected(it.data().file.absolutePath))
+                        .accept(State.Selected(file.absolutePath, file.toURI().toString()))
+            }
         }
     }
 
@@ -1122,7 +1125,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         open val loader: ((ImageView) -> Any)? = null
 
-        open val writeImagePath: NullableWrapper<String>? = null
+        open val writeImagePath: NullableWrapper<Pair<String, Uri>>? = null
 
         object None : State()
 
@@ -1135,21 +1138,21 @@ class CreateTaskActivity : AbstractActivity() {
 
             override val dontOverwrite = true
 
-            override val writeImagePath = NullableWrapper<String>(null)
+            override val writeImagePath = NullableWrapper<Pair<String, Uri>>(null)
         }
 
-        data class Selected(val url: String) : State() {
+        data class Selected(val path: String, val uri: String) : State() {
 
             override val dontOverwrite = true
 
             override val loader
                 get() = { imageView: ImageView ->
                 Glide.with(imageView)
-                        .load(url)
+                        .load(path)
                         .into(imageView)
             }
 
-            override val writeImagePath = NullableWrapper(url)
+            override val writeImagePath = NullableWrapper(Pair(path, Uri.parse(uri)))
         }
     }
 }

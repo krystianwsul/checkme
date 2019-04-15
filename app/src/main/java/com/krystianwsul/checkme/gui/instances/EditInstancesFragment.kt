@@ -231,7 +231,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
             check(timePairPersist == null)
             check(initialTimePair == null)
             check(initialDate == null)
-            check(!data.instanceDatas.isEmpty())
+            check(data.instanceDatas.isNotEmpty())
 
             first = false
 
@@ -254,7 +254,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         timePickerDialogFragment?.listener = timePickerDialogFragmentListener
 
         myView.editInstanceTime.setOnClickListener {
-            checkNotNull(data)
             val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(data.customTimeDatas.values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
                     .sortedBy { it.hourMinutes[date!!.dayOfWeek] }
@@ -288,7 +287,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         checkNotNull(date)
 
         if (timePairPersist!!.customTimeKey != null) {
-            val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!)
+            val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!) // todo crashes on adding time through menu
 
             myView.editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date!!.dayOfWeek] + ")")
         } else {

@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
 import androidx.appcompat.view.ActionMode
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.NotificationWrapper
@@ -343,10 +342,6 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
             }
 
             showInstanceViewModel.start(instanceKey)
-        } else {
-            MyCrashlytics.logException(WrongRequestCodeException("code: $requestCode"))
         }
     }
-
-    private class WrongRequestCodeException(message: String) : Exception(message)
 }

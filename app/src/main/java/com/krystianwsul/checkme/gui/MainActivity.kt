@@ -371,8 +371,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             val date = LocalDate(year, month + 1, dayOfMonth)
 
             val position = Days.daysBetween(LocalDate.now(), date).days
-            //mainDaysPager.scrollToPosition(position)
-            mainTabLayout.select(position)
+            mainDaysPager.smoothScrollToPosition(position)
 
             actionMode?.finish()
 
@@ -446,26 +445,26 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                 when (item.itemId) {
                     R.id.action_select_all -> when (visibleTab.value!!) {
-                        MainActivity.Tab.INSTANCES -> selectAllRelay.accept(Unit)
-                        MainActivity.Tab.TASKS -> {
+                        Tab.INSTANCES -> selectAllRelay.accept(Unit)
+                        Tab.TASKS -> {
                             val taskListFragment = supportFragmentManager.findFragmentById(R.id.mainTaskListFrame) as TaskListFragment
                             taskListFragment.treeViewAdapter.updateDisplayedNodes {
                                 taskListFragment.selectAll(TreeViewAdapter.Placeholder)
                             }
                         }
-                        MainActivity.Tab.CUSTOM_TIMES -> {
+                        Tab.CUSTOM_TIMES -> {
                             val showCustomTimesFragment = supportFragmentManager.findFragmentById(R.id.mainCustomTimesFrame) as ShowCustomTimesFragment
                             showCustomTimesFragment.treeViewAdapter.updateDisplayedNodes {
                                 showCustomTimesFragment.selectAll(TreeViewAdapter.Placeholder)
                             }
                         }
-                        MainActivity.Tab.FRIENDS -> {
+                        Tab.FRIENDS -> {
                             val friendListFragment = supportFragmentManager.findFragmentById(R.id.mainFriendListFrame) as FriendListFragment
                             friendListFragment.treeViewAdapter.updateDisplayedNodes {
                                 friendListFragment.selectAll(TreeViewAdapter.Placeholder)
                             }
                         }
-                        MainActivity.Tab.PROJECTS -> {
+                        Tab.PROJECTS -> {
                             val projectListFragment = supportFragmentManager.findFragmentById(R.id.mainProjectListFrame) as ProjectListFragment
                             projectListFragment.treeViewAdapter.updateDisplayedNodes {
                                 projectListFragment.treeViewAdapter.selectAll(TreeViewAdapter.Placeholder)
@@ -596,51 +595,51 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
 
         mainActivityToolbar.title = when (tab) {
-            MainActivity.Tab.INSTANCES -> getString(R.string.instances)
-            MainActivity.Tab.TASKS -> getString(R.string.tasks)
-            MainActivity.Tab.PROJECTS -> getString(R.string.projects)
-            MainActivity.Tab.CUSTOM_TIMES -> getString(R.string.times)
-            MainActivity.Tab.FRIENDS -> getString(R.string.friends)
-            MainActivity.Tab.DEBUG -> "Debug"
-            MainActivity.Tab.ABOUT -> getString(R.string.about)
+            Tab.INSTANCES -> getString(R.string.instances)
+            Tab.TASKS -> getString(R.string.tasks)
+            Tab.PROJECTS -> getString(R.string.projects)
+            Tab.CUSTOM_TIMES -> getString(R.string.times)
+            Tab.FRIENDS -> getString(R.string.friends)
+            Tab.DEBUG -> "Debug"
+            Tab.ABOUT -> getString(R.string.about)
         }
 
         when (tab) {
-            MainActivity.Tab.INSTANCES -> {
+            Tab.INSTANCES -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
             }
-            MainActivity.Tab.TASKS -> {
+            Tab.TASKS -> {
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
                 taskListFragment.setFab(bottomFab)
             }
-            MainActivity.Tab.PROJECTS -> {
+            Tab.PROJECTS -> {
                 taskListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
                 friendListFragment.clearFab()
 
                 projectListFragment.setFab(bottomFab)
             }
-            MainActivity.Tab.CUSTOM_TIMES -> {
+            Tab.CUSTOM_TIMES -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 friendListFragment.clearFab()
 
                 showCustomTimesFragment.setFab(bottomFab)
             }
-            MainActivity.Tab.FRIENDS -> {
+            Tab.FRIENDS -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()
 
                 friendListFragment.setFab(bottomFab)
             }
-            MainActivity.Tab.DEBUG, MainActivity.Tab.ABOUT -> {
+            Tab.DEBUG, Tab.ABOUT -> {
                 taskListFragment.clearFab()
                 projectListFragment.clearFab()
                 showCustomTimesFragment.clearFab()

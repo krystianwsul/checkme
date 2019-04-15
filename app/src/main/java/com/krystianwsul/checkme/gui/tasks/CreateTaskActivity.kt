@@ -997,7 +997,7 @@ class CreateTaskActivity : AbstractActivity() {
                 }
                 elementsBeforeSchedules + scheduleEntries.size + 2 -> {
                     (holder as ImageHolder).run {
-                        listOf(imageLayoutText, imageImage).forEach {
+                        listOf(imageLayoutText, imageImage, imageEdit).forEach {
                             it.setOnClickListener {
                                 CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
                             }
@@ -1017,12 +1017,14 @@ class CreateTaskActivity : AbstractActivity() {
                         imageProgress.visibility = View.VISIBLE
                         imageImage.visibility = View.VISIBLE
                         imageLayout.visibility = View.GONE
+                        imageEdit.visibility = View.VISIBLE
 
                         it.loader!!(imageImage)
                     } else {
                         imageProgress.visibility = View.GONE
                         imageImage.visibility = View.GONE
                         imageLayout.visibility = View.VISIBLE
+                        imageEdit.visibility = View.GONE
                     }
                 }
             }
@@ -1097,6 +1099,7 @@ class CreateTaskActivity : AbstractActivity() {
             val imageProgress = itemView.imageProgress!!
             val imageLayout = itemView.imageLayout!!
             val imageLayoutText = itemView.imageLayoutText!!
+            val imageEdit = itemView.imageEdit!!
         }
     }
 

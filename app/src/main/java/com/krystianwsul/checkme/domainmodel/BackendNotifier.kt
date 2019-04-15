@@ -16,7 +16,7 @@ object BackendNotifier {
     private const val PREFIX = "https://check-me-add47.appspot.com/notify?"
 
     fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String?): String {
-        check(!projects.isEmpty() || !userKeys.isEmpty())
+        check(projects.isNotEmpty() || !userKeys.isEmpty())
 
         val parameters = projects.map { "projects=$it" }.toMutableSet()
 
@@ -31,9 +31,8 @@ object BackendNotifier {
     }
 
     fun notify(remoteProjects: Set<RemoteProject<*>>, userInfo: UserInfo, userKeys: Collection<String>) {
-        val root = DatabaseWrapper.root
 
-        val production = when (root) {
+        val production = when (DatabaseWrapper.root) {
             "development" -> false
             "production" -> true
             else -> throw IllegalArgumentException()
@@ -54,7 +53,7 @@ object BackendNotifier {
 
         val stringRequest = StringRequest(
                 Request.Method.GET, url,
-                { Log.e("asdf", "BackendNotifier response:$it") }
+                { Log.e("asdf", "BackendNotifier response: $it") }
                 , {
             if (it is TimeoutError || it is NoConnectionError) {
                 Log.e("asdf", "BackendNotifier error", it)

@@ -88,4 +88,7 @@
     <string name="aboutDescription">Ta aplikacja jest zbiorem wszystkich funkcji których mi brakowało w innych aplikacjach tego rozaju.  Oprócz podstaw, zawiera projekty dzielone między użytkownikami, zagnieżdżone zadania, zaawansowane opcje edycji struktur zadań, dostosowywanie pór dnia, pojedyncze przypomnienia, jak i dzienne, tygodniowe i miesięczne harmonogramy przypomnień, i wkrótce więcej!</string>
     <string name="designBy">Grafika - Bernarda Kałuża</string>
     <string name="add_an_image">Dodaj obraz</string>
+    <string name="camera">Zrób zdjęcie</string>
+    <string name="gallery">Wybierz obraz</string>
+    <string name="remove">Usuń obraz</string>
 </resources>

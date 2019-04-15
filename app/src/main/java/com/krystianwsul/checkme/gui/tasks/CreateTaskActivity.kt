@@ -76,6 +76,7 @@ class CreateTaskActivity : AbstractActivity() {
         private const val IMAGE_URL_KEY = "imageUrl"
 
         private const val SCHEDULE_DIALOG_TAG = "scheduleDialog"
+        private const val TAG_CAMERA_GALLERY = "cameraGallery"
 
         fun getCreateIntent(context: Context) = Intent(context, CreateTaskActivity::class.java)
 
@@ -998,6 +999,10 @@ class CreateTaskActivity : AbstractActivity() {
                 }
                 elementsBeforeSchedules + scheduleEntries.size + 2 -> {
                     (holder as ImageHolder).run {
+                        imageLayoutText.setOnClickListener {
+                            CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
+                        }
+
                         imageRemove.setOnClickListener { imageUrl.accept(State.Removed) }
 
                         imageCamera.setOnClickListener {
@@ -1113,6 +1118,7 @@ class CreateTaskActivity : AbstractActivity() {
             val imageImage = itemView.imageImage!!
             val imageProgress = itemView.imageProgress!!
             val imageLayout = itemView.imageLayout!!
+            val imageLayoutText = itemView.imageLayoutText!!
             val imageRemove = itemView.imageRemove!!
             val imageCamera = itemView.imageCamera!!
             val imageGallery = itemView.imageGallery!!

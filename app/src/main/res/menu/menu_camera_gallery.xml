@@ -3,12 +3,18 @@
 
     <item
         android:id="@+id/camera_gallery_camera"
-        android:icon="@drawable/ic_info_outline_black_24dp"
-        android:title="@string/about" />
+        android:icon="@drawable/ic_camera_black_24dp"
+        android:title="@string/camera" />
 
     <item
         android:id="@+id/camera_gallery_gallery"
-        android:icon="@drawable/ic_account_circle_black_24dp"
-        android:title="@string/signOut" />
+        android:icon="@drawable/ic_photo_black_24dp"
+        android:title="@string/gallery" />
+
+    <item
+        android:id="@+id/camera_gallery_remove"
+        android:icon="@drawable/ic_remove_circle_outline_black_24dp"
+        android:title="@string/remove"
+        android:visible="false" />
 
 </menu>

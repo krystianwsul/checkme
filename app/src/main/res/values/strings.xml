@@ -87,5 +87,8 @@
     <string name="about">About</string>
     <string name="aboutDescription">This app is a growing collection of all the features I thought were missing from other applications of its kind.  Apart from the basics, it has multi-user projects, nested tasks, advanced task structure editing, custom time presets, single reminders, as well as daily, weekly, and monthly reminder schedules, and more to come!</string>
     <string name="designBy">Design by Bernarda Kałuża</string>
-    <string name="add_an_image">Add an image</string>
+    <string name="add_an_image">Add image</string>
+    <string name="camera">Take photo</string>
+    <string name="gallery">Choose image</string>
+    <string name="remove">Remove image</string>
 </resources>

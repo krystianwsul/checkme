@@ -5,6 +5,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
+import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
+import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
 
 class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -21,6 +23,8 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
 
     private var showRemove = false
 
+    private val createTaskActivity get() = activity as CreateTaskActivity
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -35,9 +39,37 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onStart() {
         super.onStart()
 
-        dialog!!.findViewById<NavigationView>(R.id.cameraGalleryNavigation)
-                .menu
-                .findItem(R.id.camera_gallery_remove)
-                .isVisible = showRemove
+        dialog!!.findViewById<NavigationView>(R.id.cameraGalleryNavigation).apply {
+            menu.findItem(R.id.camera_gallery_remove).isVisible = showRemove
+
+            setNavigationItemSelectedListener {
+                when (it.itemId) {
+                    R.id.camera_gallery_camera -> {
+                        createTaskActivity.getImage(
+                                RxPaparazzo.single(createTaskActivity)
+                                        .size(ScreenSize())
+                                        .useInternalStorage()
+                                        .usingCamera()
+                        )
+
+                    }
+                    R.id.camera_gallery_gallery -> {
+                        createTaskActivity.getImage(
+                                RxPaparazzo.single(createTaskActivity)
+                                        .size(ScreenSize())
+                                        .useInternalStorage()
+                                        .usingGallery()
+                        )
+
+                    }
+                    R.id.camera_gallery_remove -> createTaskActivity.imageUrl.accept(CreateTaskActivity.State.Removed)
+                    else -> throw IllegalArgumentException()
+                }
+
+                dismiss()
+
+                true
+            }
+        }
     }
 }

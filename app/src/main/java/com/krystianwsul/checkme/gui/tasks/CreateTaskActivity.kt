@@ -38,10 +38,8 @@ import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
-import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
@@ -242,7 +240,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
-    private val imageUrl = BehaviorRelay.createDefault<State>(State.None)
+    val imageUrl = BehaviorRelay.createDefault<State>(State.None)
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -498,7 +496,7 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     @SuppressLint("CheckResult")
-    private fun getImage(single: Observable<Response<CreateTaskActivity, FileData>>) {
+    fun getImage(single: Observable<Response<CreateTaskActivity, FileData>>) {
         single.subscribe {
             if (it.resultCode() == Activity.RESULT_OK) {
                 val file = it.data().file
@@ -999,28 +997,10 @@ class CreateTaskActivity : AbstractActivity() {
                 }
                 elementsBeforeSchedules + scheduleEntries.size + 2 -> {
                     (holder as ImageHolder).run {
-                        imageLayoutText.setOnClickListener {
-                            CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
-                        }
-
-                        imageRemove.setOnClickListener { imageUrl.accept(State.Removed) }
-
-                        imageCamera.setOnClickListener {
-                            getImage(
-                                    RxPaparazzo.single(this@CreateTaskActivity)
-                                            .size(ScreenSize())
-                                            .useInternalStorage()
-                                            .usingCamera()
-                            )
-                        }
-
-                        imageGallery.setOnClickListener {
-                            getImage(
-                                    RxPaparazzo.single(this@CreateTaskActivity)
-                                            .size(ScreenSize())
-                                            .useInternalStorage()
-                                            .usingGallery()
-                            )
+                        listOf(imageLayoutText, imageImage).forEach {
+                            it.setOnClickListener {
+                                CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
+                            }
                         }
                     }
                 }
@@ -1037,14 +1017,12 @@ class CreateTaskActivity : AbstractActivity() {
                         imageProgress.visibility = View.VISIBLE
                         imageImage.visibility = View.VISIBLE
                         imageLayout.visibility = View.GONE
-                        imageRemove.visibility = View.VISIBLE
 
                         it.loader!!(imageImage)
                     } else {
                         imageProgress.visibility = View.GONE
                         imageImage.visibility = View.GONE
                         imageLayout.visibility = View.VISIBLE
-                        imageRemove.visibility = View.GONE
                     }
                 }
             }
@@ -1119,13 +1097,10 @@ class CreateTaskActivity : AbstractActivity() {
             val imageProgress = itemView.imageProgress!!
             val imageLayout = itemView.imageLayout!!
             val imageLayoutText = itemView.imageLayoutText!!
-            val imageRemove = itemView.imageRemove!!
-            val imageCamera = itemView.imageCamera!!
-            val imageGallery = itemView.imageGallery!!
         }
     }
 
-    private sealed class State : Serializable {
+    sealed class State : Serializable {
 
         open val dontOverwrite = false
 
@@ -1158,7 +1133,7 @@ class CreateTaskActivity : AbstractActivity() {
                         .into(imageView)
             }
 
-            override val writeImagePath = NullableWrapper(Pair(path, Uri.parse(uri)))
+            override val writeImagePath get() = NullableWrapper(Pair(path, Uri.parse(uri)))
         }
     }
 }

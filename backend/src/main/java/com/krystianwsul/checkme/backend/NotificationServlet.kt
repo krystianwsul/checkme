@@ -157,6 +157,10 @@ class NotificationServlet : HttpServlet() {
 
             resp.writer.println("response: $response")
             resp.writer.println()
+
+            val parsedResponse = gson.fromJson<Response>(response, Response::class.java)
+            resp.writer.println("parsed response: $parsedResponse")
+            resp.writer.println()
         } else {
             resp.writer.println("error: " + httpURLConnection.responseCode + " " + httpURLConnection.responseMessage)
 

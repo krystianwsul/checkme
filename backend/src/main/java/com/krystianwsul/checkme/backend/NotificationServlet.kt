@@ -9,6 +9,7 @@ package com.krystianwsul.checkme.backend
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.common.base.Joiner
 import com.google.gson.Gson
+import com.krystianwsul.common.firebase.UserJson
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import java.io.BufferedReader
@@ -68,7 +69,7 @@ class NotificationServlet : HttpServlet() {
                 resp.writer.println()
 
                 val usersReader = BufferedReader(InputStreamReader(usersUrl.openStream()))
-                val users = gson.fromJson<HashMap<String, Map<String, Map<String, String>>>>(usersReader, HashMap<String, Map<String, Map<String, String>>>().javaClass)
+                val users = gson.fromJson<HashMap<String, UserJson>>(usersReader, HashMap<String, UserJson>().javaClass)
                 usersReader.close()
 
                 if (users == null)
@@ -79,12 +80,7 @@ class NotificationServlet : HttpServlet() {
                 resp.writer.println("user keys after removing sender: " + Joiner.on(", ").join(users.keys))
 
                 for (user in users.values) {
-                    val userTokenMap = user["tokens"]
-
-                    if (userTokenMap == null) {
-                        resp.writer.println("user/tokens is null")
-                        continue
-                    }
+                    val userTokenMap = user.tokens
 
                     val tokens = ArrayList<String>(userTokenMap.values)
 

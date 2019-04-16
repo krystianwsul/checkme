@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.firebase.json
 
+import com.krystianwsul.common.firebase.UserJson
+
 class SharedProjectJson @JvmOverloads constructor(
         override var name: String = "",
         override val startTime: Long = 0,

@@ -5,9 +5,9 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
 import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
-import com.krystianwsul.checkme.firebase.json.UserJson
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.common.firebase.UserJson
 
 class RemoteSharedProjectRecord(
         private val remoteSharedProjectManager: RemoteSharedProjectManager,
@@ -106,7 +106,7 @@ class RemoteSharedProjectRecord(
 
     override val createObject get() = jsonWrapper.apply { projectJson = createProjectJson }
 
-    override val childKey get() = key + "/" + RemoteProjectRecord.PROJECT_JSON
+    override val childKey get() = "$key/$PROJECT_JSON"
 
     override fun deleteFromParent() = check(remoteSharedProjectManager.remoteProjectRecords.remove(id) == this)
 

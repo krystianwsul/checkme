@@ -41,6 +41,7 @@ import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
 import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
@@ -497,7 +498,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     @SuppressLint("CheckResult")
     fun getImage(single: Observable<Response<CreateTaskActivity, FileData>>) {
-        single.subscribe {
+        single.observeOn(AndroidSchedulers.mainThread()).subscribe {
             if (it.resultCode() == Activity.RESULT_OK) {
                 val file = it.data().file
                 it.targetUI()

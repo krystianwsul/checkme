@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.utils.loadPhoto
@@ -214,7 +213,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     setOnClickListener {
                         checkStale()
 
-                        Preferences.logLineHour("expanding node " + this@GroupHolderNode)
                         treeNode.onExpandClick()
                     }
                 }
@@ -254,7 +252,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     setOnClickListener {
                         checkStale()
 
-                        Preferences.logLineHour("clicking node " + this@GroupHolderNode)
                         treeNode.onClick()
                     }
 

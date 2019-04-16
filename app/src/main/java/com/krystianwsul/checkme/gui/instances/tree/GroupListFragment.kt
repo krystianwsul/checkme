@@ -18,7 +18,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ImageState
@@ -774,11 +773,6 @@ class GroupListFragment @JvmOverloads constructor(
                 imageState: ImageState?) {
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
-
-            treeNodeCollection = TreeNodeCollection(treeViewAdapter) {
-                Preferences.logLineDate("logging ordinals")
-                it.forEach { Preferences.logLineHour(it) }
-            }
 
             nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 

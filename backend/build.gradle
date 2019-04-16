@@ -27,7 +27,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 dependencies {
     appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.48'
     compile 'javax.servlet:servlet-api:2.5'
-    compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.48'
+    compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.73'
 
     compile 'com.google.api-client:google-api-client-appengine:1.27.0'
 
@@ -38,6 +38,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     compile project(path: ':common')
+
+    implementation 'com.google.firebase:firebase-admin:6.7.0'
 }
 
 appengine {

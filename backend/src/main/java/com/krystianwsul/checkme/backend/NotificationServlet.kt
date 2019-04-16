@@ -6,13 +6,12 @@
 
 package com.krystianwsul.checkme.backend
 
-import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.appengine.repackaged.com.google.gson.Gson
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.common.base.Joiner
+import com.google.gson.Gson
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import java.io.BufferedReader
-import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
@@ -34,16 +33,10 @@ class NotificationServlet : HttpServlet() {
 
         val prefix = if (production) "production" else "development"
 
-        val googleCred = GoogleCredential.fromStream(FileInputStream("WEB-INF/check-me-add47-firebase-adminsdk-5hvuz-436ce98200.json"))
-        checkNotNull(googleCred)
-
-        val scoped = googleCred.createScoped(
-                Arrays.asList(
-                        "https://www.googleapis.com/auth/firebase.database",
-                        "https://www.googleapis.com/auth/userinfo.email"
-                )
-        )
-        checkNotNull(scoped)
+        val scoped = GoogleCredential.getApplicationDefault().createScoped(listOf(
+                "https://www.googleapis.com/auth/firebase.database",
+                "https://www.googleapis.com/auth/userinfo.email"
+        ))
 
         scoped.refreshToken()
         val firebaseToken = scoped.accessToken

@@ -774,6 +774,8 @@ class GroupListFragment @JvmOverloads constructor(
             this.dataId = dataId
             this.customTimeDatas = customTimeDatas
 
+            treeNodeCollection = TreeNodeCollection(treeViewAdapter)
+
             nodeCollection = NodeCollection(0, this, useGroups, treeNodeCollection, note)
 
             treeNodeCollection.nodes = nodeCollection.initialize(

@@ -2,9 +2,7 @@ package com.krystianwsul.treeadapter
 
 import java.util.*
 
-class TreeNodeCollection(
-        val treeViewAdapter: TreeViewAdapter,
-        private val logger: ((List<String>) -> Unit)? = null) : NodeContainer {
+class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
 
     private lateinit var treeNodes: MutableList<TreeNode>
 
@@ -40,8 +38,6 @@ class TreeNodeCollection(
 
         if (lines.isEmpty())
             return
-
-        logger?.invoke(lines)
     }
 
     fun getNode(position: Int): TreeNode {

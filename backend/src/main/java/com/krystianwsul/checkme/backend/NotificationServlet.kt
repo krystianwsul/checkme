@@ -9,6 +9,7 @@ package com.krystianwsul.checkme.backend
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.common.base.Joiner
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.krystianwsul.common.firebase.UserJson
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
@@ -22,6 +23,8 @@ import javax.net.ssl.HttpsURLConnection
 import javax.servlet.http.HttpServlet
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import kotlin.collections.HashMap
+
 
 class NotificationServlet : HttpServlet() {
 
@@ -43,21 +46,36 @@ class NotificationServlet : HttpServlet() {
         val firebaseToken = scoped.accessToken
         check(!StringUtils.isEmpty(firebaseToken))
 
-        resp.writer.println("firebase token: $firebaseToken")
-        resp.writer.println()
+        /*
+        val resource = servletContext.getResource("/WEB-INF/check-me-add47-firebase-adminsdk-ajfq4-dfade3b2a9.json")
+        val file = File(resource.toURI())
+        val input = FileInputStream(file)
+
+        val options = FirebaseOptions.Builder()
+                .setCredentials(GoogleCredentials.fromStream(input))
+                .setDatabaseUrl("https://check-me-add47.firebaseio.com/")
+                .build()
+
+        try {
+            FirebaseApp.initializeApp(options)
+        } catch (e : IllegalStateException) {
+            // already initialized
+        }
+        val defaultDatabase = FirebaseDatabase.getInstance()
+        */
 
         val gson = Gson()
 
         val senderToken = req.getParameter("senderToken")
-        resp.writer.println("sender token: $senderToken")
-        resp.writer.println()
+
+        val projectTokenData = mutableMapOf<String, Triple<String, String, String>>()
 
         val userTokens = HashSet<String>()
         if (req.getParameterValues("projects") != null) {
             val projects = HashSet(Arrays.asList(*req.getParameterValues("projects")))
             check(projects.isNotEmpty())
 
-            resp.writer.print("projects: " + Joiner.on(", ").join(projects))
+            resp.writer.println("projects: $projects")
             resp.writer.println()
 
             for (project in projects) {
@@ -65,36 +83,35 @@ class NotificationServlet : HttpServlet() {
 
                 val usersUrl = URL("https://check-me-add47.firebaseio.com/$prefix/records/$project/projectJson/users.json?access_token=$firebaseToken")
 
-                resp.writer.println(usersUrl.toString())
-                resp.writer.println()
-
                 val usersReader = BufferedReader(InputStreamReader(usersUrl.openStream()))
-                val users = gson.fromJson<HashMap<String, UserJson>>(usersReader, HashMap<String, UserJson>().javaClass)
+                val typeToken = object : TypeToken<HashMap<String, UserJson>>() {}.type
+                val users = gson.fromJson<HashMap<String, UserJson>>(usersReader, typeToken)
                 usersReader.close()
 
                 if (users == null)
                     throw NoUsersException(usersUrl.toString())
 
-                resp.writer.println("user keys before removing sender: " + Joiner.on(", ").join(users.keys))
+                resp.writer.println("project user keys: " + Joiner.on(", ").join(users.keys))
 
-                resp.writer.println("user keys after removing sender: " + Joiner.on(", ").join(users.keys))
-
-                for (user in users.values) {
+                for ((userKey, user) in users) {
                     val userTokenMap = user.tokens
 
                     val tokens = ArrayList<String>(userTokenMap.values)
 
-                    resp.writer.println("user/tokens: $tokens")
+                    projectTokenData.putAll(userTokenMap.entries.associate { (uuid, token) -> token!! to Triple(project, userKey, uuid) })
+
                     userTokens.addAll(tokens)
                 }
             }
         }
 
+        val userTokenData = mutableMapOf<String, Pair<String, String>>()
+
         if (req.getParameterValues("userKeys") != null) {
             val userKeys = HashSet(Arrays.asList(*req.getParameterValues("userKeys")))
             check(userKeys.isNotEmpty())
 
-            resp.writer.print("userKeys: " + Joiner.on(", ").join(userKeys))
+            resp.writer.print("root user keys: " + Joiner.on(", ").join(userKeys))
             resp.writer.println()
 
             for (userKey in userKeys) {
@@ -116,6 +133,8 @@ class NotificationServlet : HttpServlet() {
 
                 val tokens = ArrayList<String>(userTokenMap.values)
 
+                userTokenData.putAll(userTokenMap.entries.associate { (uuid, token) -> token to Pair(userKey, uuid) })
+
                 resp.writer.println("user tokens: $tokens")
                 userTokens.addAll(tokens)
             }
@@ -123,17 +142,12 @@ class NotificationServlet : HttpServlet() {
 
         val prunedUserTokens = ArrayList(userTokens)
 
-        resp.writer.println("user tokens before removing sender: $prunedUserTokens")
-
         prunedUserTokens.remove(senderToken)
-
-        resp.writer.println("user tokens after removing sender: $prunedUserTokens")
 
         if (prunedUserTokens.isEmpty()) {
             resp.writer.println("no user tokens, exiting")
             return
         }
-
 
         val fcmUrl = URL("https://fcm.googleapis.com/fcm/send")
         val urlConnection = fcmUrl.openConnection()
@@ -155,12 +169,36 @@ class NotificationServlet : HttpServlet() {
             val response = IOUtils.toString(reader)
             IOUtils.closeQuietly(reader)
 
-            resp.writer.println("response: $response")
-            resp.writer.println()
-
             val parsedResponse = gson.fromJson<Response>(response, Response::class.java)
             resp.writer.println("parsed response: $parsedResponse")
             resp.writer.println()
+
+            /*
+            val removeTokens = parsedResponse.results
+                    .mapIndexed { index, result -> Pair(index, result) }
+                    .filterNot { it.second.error.isNullOrEmpty() }
+                    .map { prunedUserTokens[it.first] }
+
+            resp.writer.println("tokens to remove: $removeTokens")
+
+            val removeProjectUsers = removeTokens.mapNotNull { projectTokenData[it] }.map { (project, userKey, uuid) ->
+                "$prefix/records/$project/projectJson/users/$userKey/tokens/$uuid"
+            }
+
+            val removeRootUsers = removeTokens.mapNotNull { userTokenData[it] }.map { (userKey, uuid) ->
+                "$prefix/users/$userKey/userData/tokens/$uuid"
+            }
+
+            resp.writer.println("project users to remove:\n" + removeProjectUsers.joinToString("\n"))
+            resp.writer.println()
+
+            resp.writer.println("root users to remove:\n" + removeRootUsers.joinToString("\n"))
+            resp.writer.println()
+
+            val map = (removeProjectUsers + removeRootUsers).associate { it to null }
+
+            defaultDatabase.reference.updateChildrenAsync(map).get()
+            */
         } else {
             resp.writer.println("error: " + httpURLConnection.responseCode + " " + httpURLConnection.responseMessage)
 

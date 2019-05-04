@@ -241,7 +241,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
     override fun onDestroyGroupActionMode() = Unit
 
-    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
+    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
 
         updateBottomMenu()

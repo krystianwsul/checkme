@@ -619,25 +619,10 @@ class GroupListFragment @JvmOverloads constructor(
             if (this@GroupListFragment::treeViewAdapter.isInitialized)
                 setGroupMenuItemVisibility(
                         position,
-                        treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable },
-                        canAddHour())
+                        treeViewAdapter.displayedNodes.any { it.modelNode.isSelectable })
             else
-                setGroupMenuItemVisibility(position, selectAllVisible = false, addHourVisible = false)
+                setGroupMenuItemVisibility(position, false)
         }
-    }
-
-    private fun canAddHour() = parameters.dataWrapper
-            .instanceDatas
-            .values
-            .run {
-                val now = ExactTimeStamp.now
-                all { it.instanceTimeStamp.toExactTimeStamp() < now }
-            }
-
-    fun addHour() {
-        check(canAddHour())
-
-        addHour(parameters.dataWrapper.instanceDatas.map { it.key })
     }
 
     private fun addHour(instanceKeys: Collection<InstanceKey>) {
@@ -821,7 +806,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         fun onDestroyGroupActionMode()
 
-        fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean)
+        fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean)
 
         fun getBottomBar(): MyBottomBar
 

@@ -694,7 +694,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         onPageChangeDisposable = null
     }
 
-    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
+    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
         position?.let {
             groupSelectAllVisible[it] = selectAllVisible
         }

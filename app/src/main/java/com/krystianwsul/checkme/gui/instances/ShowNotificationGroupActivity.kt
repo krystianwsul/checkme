@@ -14,7 +14,6 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_notification_group.*
 import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 
 class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
@@ -24,7 +23,7 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
         private const val INSTANCES_KEY = "instanceKeys"
 
         fun getIntent(context: Context, instanceKeys: ArrayList<InstanceKey>) = Intent(context, ShowNotificationGroupActivity::class.java).apply {
-            check(!instanceKeys.isEmpty())
+            check(instanceKeys.isNotEmpty())
 
             putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys)
         }
@@ -33,7 +32,6 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
     private lateinit var instanceKeys: Set<InstanceKey>
 
     private var selectAllVisible = false
-    private var addHourVisible = false
 
     private lateinit var showNotificationGroupViewModel: ShowNotificationGroupViewModel
 
@@ -43,25 +41,10 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_show_notification_group)
 
-        toolbar.apply {
-            title = null
-
-            menuInflater.inflate(R.menu.menu_show_notification_group_top, menu)
-
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.action_notification_group_hour -> groupListFragment.addHour()
-                    else -> throw IllegalArgumentException()
-                }
-
-                true
-            }
-        }
-
         check(intent.hasExtra(INSTANCES_KEY))
 
         val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!
-        check(!instanceKeys.isEmpty())
+        check(instanceKeys.isNotEmpty())
 
         this.instanceKeys = HashSet(instanceKeys)
 
@@ -78,18 +61,10 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
 
     override fun onDestroyGroupActionMode() = Unit
 
-    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean, addHourVisible: Boolean) {
+    override fun setGroupMenuItemVisibility(position: Int?, selectAllVisible: Boolean) {
         this.selectAllVisible = selectAllVisible
-        this.addHourVisible = addHourVisible
 
-        updateTopBar()
         updateBottomBar()
-    }
-
-    private fun updateTopBar() {
-        toolbar.menu
-                .findItem(R.id.action_notification_group_hour)
-                .isVisible = addHourVisible
     }
 
     private fun updateBottomBar() {

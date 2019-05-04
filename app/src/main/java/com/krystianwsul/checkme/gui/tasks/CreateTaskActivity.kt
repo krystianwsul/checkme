@@ -77,6 +77,8 @@ class CreateTaskActivity : AbstractActivity() {
         private const val SCHEDULE_DIALOG_TAG = "scheduleDialog"
         private const val TAG_CAMERA_GALLERY = "cameraGallery"
 
+        private const val REQUEST_CREATE_PARENT = 982
+
         fun getCreateIntent(context: Context) = Intent(context, CreateTaskActivity::class.java)
 
         fun getCreateIntent(context: Context, scheduleHint: ScheduleHint) = Intent(context, CreateTaskActivity::class.java).apply { putExtra(SCHEDULE_HINT_KEY, scheduleHint) }
@@ -124,6 +126,7 @@ class CreateTaskActivity : AbstractActivity() {
     private var first = true
 
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
+
         override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
             if (parentTreeData.parentKey.type == CreateTaskViewModel.ParentType.TASK)
                 clearSchedules()
@@ -144,6 +147,8 @@ class CreateTaskActivity : AbstractActivity() {
 
             scheduleHolder.mScheduleText.text = null
         }
+
+        override fun onNewParent() = startActivityForResult(getCreateIntent(this@CreateTaskActivity), REQUEST_CREATE_PARENT)
     }
 
     private fun setupParent(view: View) {
@@ -270,7 +275,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                     val writeImagePath = imageUrl.value!!.writeImagePath
 
-                    when {
+                    val taskKey: TaskKey = when {
                         hasValueSchedule() -> {
                             check(!hasValueParentTask())
 
@@ -281,7 +286,7 @@ class CreateTaskActivity : AbstractActivity() {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
 
-                                    val taskKey = DomainFactory.instance.updateScheduleTask(
+                                    DomainFactory.instance.updateScheduleTask(
                                             data!!.dataId,
                                             SaveService.Source.GUI,
                                             taskKey!!,
@@ -290,8 +295,6 @@ class CreateTaskActivity : AbstractActivity() {
                                             note,
                                             projectId,
                                             writeImagePath)
-
-                                    setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
                                 }
                                 taskKeys != null -> {
                                     check(data!!.taskData == null)
@@ -332,7 +335,7 @@ class CreateTaskActivity : AbstractActivity() {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
 
-                                    val taskKey = DomainFactory.instance.updateChildTask(
+                                    DomainFactory.instance.updateChildTask(
                                             ExactTimeStamp.now,
                                             data!!.dataId,
                                             SaveService.Source.GUI,
@@ -341,8 +344,6 @@ class CreateTaskActivity : AbstractActivity() {
                                             parentTaskKey,
                                             note,
                                             writeImagePath)
-
-                                    setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
                                 }
                                 taskKeys != null -> {
                                     check(data!!.taskData == null)
@@ -378,7 +379,7 @@ class CreateTaskActivity : AbstractActivity() {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
 
-                                    val taskKey = DomainFactory.instance.updateRootTask(
+                                    DomainFactory.instance.updateRootTask(
                                             data!!.dataId,
                                             SaveService.Source.GUI,
                                             taskKey!!,
@@ -386,8 +387,6 @@ class CreateTaskActivity : AbstractActivity() {
                                             note,
                                             projectId,
                                             writeImagePath)
-
-                                    setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
                                 }
                                 taskKeys != null -> {
                                     check(data!!.taskData == null)
@@ -415,6 +414,8 @@ class CreateTaskActivity : AbstractActivity() {
                             }
                         }
                     }
+
+                    setResult(Activity.RESULT_OK, Intent().apply { putExtra(ShowTaskActivity.TASK_KEY_KEY, taskKey as Parcelable) })
 
                     finish()
                 }
@@ -878,6 +879,19 @@ class CreateTaskActivity : AbstractActivity() {
         checkNotNull(scheduleRecycler)
 
         scheduleRecycler.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CREATE_PARENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                clearSchedules()
+
+                val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
+                parent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(taskKey))
+            }
+        }
     }
 
     @Parcelize

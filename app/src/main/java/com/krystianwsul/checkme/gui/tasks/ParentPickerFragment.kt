@@ -78,6 +78,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         return MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.parent_dialog_title)
                 .setView(view)
+                .setPositiveButton(R.string.add_task) { _, _ -> listener.onNewParent() }
                 .setNegativeButton(android.R.string.cancel, null)
                 .apply {
                     @Suppress("DEPRECATION")
@@ -349,8 +350,11 @@ class ParentPickerFragment : AbstractDialogFragment() {
     }
 
     interface Listener {
+
         fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData)
 
         fun onTaskDeleted()
+
+        fun onNewParent()
     }
 }

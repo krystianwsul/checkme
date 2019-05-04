@@ -989,13 +989,13 @@ open class DomainFactory(
             scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?) {
+            imagePath: Pair<String, Uri>?): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
-        createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId, imagePath)
+        return createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId, imagePath).taskKey
     }
 
     fun updateScheduleTask(
@@ -1073,7 +1073,7 @@ open class DomainFactory(
             joinTaskKeys: List<TaskKey>,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?) {
+            imagePath: Pair<String, Uri>?): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1105,6 +1105,8 @@ open class DomainFactory(
         imageUuid?.let {
             Uploader.addUpload(newParentTask.taskKey, it, imagePath)
         }
+
+        return newParentTask.taskKey
     }
 
     fun createRootTask(
@@ -1143,13 +1145,13 @@ open class DomainFactory(
             name: String,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?) {
+            imagePath: Pair<String, Uri>?): TaskKey {
         MyCrashlytics.log("DomainFactory.createRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
-        createRootTask(now, dataId, source, name, note, projectId, imagePath)
+        return createRootTask(now, dataId, source, name, note, projectId, imagePath).taskKey
     }
 
     @Synchronized
@@ -1160,7 +1162,7 @@ open class DomainFactory(
             joinTaskKeys: List<TaskKey>,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?) {
+            imagePath: Pair<String, Uri>?): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1193,6 +1195,8 @@ open class DomainFactory(
         imageUuid?.let {
             Uploader.addUpload(newParentTask.taskKey, it, imagePath)
         }
+
+        return newParentTask.taskKey
     }
 
     @Synchronized
@@ -1278,13 +1282,13 @@ open class DomainFactory(
             parentTaskKey: TaskKey,
             name: String,
             note: String?,
-            imagePath: Pair<String, Uri>?) {
+            imagePath: Pair<String, Uri>?): TaskKey {
         MyCrashlytics.log("DomainFactory.createChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val now = ExactTimeStamp.now
 
-        createChildTask(now, dataId, source, parentTaskKey, name, note, imagePath)
+        return createChildTask(now, dataId, source, parentTaskKey, name, note, imagePath).taskKey
     }
 
     @Synchronized
@@ -1295,7 +1299,7 @@ open class DomainFactory(
             name: String,
             joinTaskKeys: List<TaskKey>,
             note: String?,
-            imagePath: Pair<String, Uri>?) {
+            imagePath: Pair<String, Uri>?): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1326,6 +1330,8 @@ open class DomainFactory(
         uuid?.let {
             Uploader.addUpload(childTask.taskKey, it, imagePath)
         }
+
+        return childTask.taskKey
     }
 
     @Synchronized

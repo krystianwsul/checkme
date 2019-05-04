@@ -61,7 +61,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         savedInstanceState?.apply {
             if (containsKey(EXPANDED_TASK_KEYS_KEY)) {
                 expandedParentKeys = getParcelableArrayList(EXPANDED_TASK_KEYS_KEY)!!
-                check(!expandedParentKeys!!.isEmpty())
+                check(expandedParentKeys!!.isNotEmpty())
             }
 
             query = getString(QUERY_KEY)!!
@@ -166,7 +166,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
         if (treeViewAdapter != null) {
             val expandedParentKeys = (treeViewAdapter!!.treeModelAdapter as TaskAdapter).expandedParentKeys
 
-            if (!expandedParentKeys.isEmpty())
+            if (expandedParentKeys.isNotEmpty())
                 outState.putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedParentKeys))
         }
 
@@ -274,7 +274,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             fun initialize(nodeContainer: NodeContainer, expandedParentKeys: List<CreateTaskViewModel.ParentKey>?): TreeNode {
                 var expanded = false
                 if (expandedParentKeys != null) {
-                    check(!expandedParentKeys.isEmpty())
+                    check(expandedParentKeys.isNotEmpty())
                     expanded = expandedParentKeys.contains(parentTreeData.parentKey)
                 }
 
@@ -310,7 +310,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 get() = if ((parentTreeData.parentTreeDatas.isEmpty() || treeNode.isExpanded) && TextUtils.isEmpty(parentTreeData.note)) {
                     null
                 } else {
-                    val text = if (!parentTreeData.parentTreeDatas.isEmpty() && !treeNode.isExpanded) {
+                    val text = if (parentTreeData.parentTreeDatas.isNotEmpty() && !treeNode.isExpanded) {
                         parentTreeData.parentTreeDatas
                                 .values
                                 .joinToString(", ") { it.name }

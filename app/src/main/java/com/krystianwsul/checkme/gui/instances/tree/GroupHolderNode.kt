@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Paint
 import android.graphics.Rect
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorRes
@@ -114,7 +115,14 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 rowContainer.visibility = View.GONE
                 rowBigImageLayout!!.visibility = View.VISIBLE
 
-                taskImage.imageState.load(rowBigImage!!) // todo don't reload on local -> remote switch
+                // todo not working
+                if (imageTag != taskImage.imageState.tag) {
+                    Log.e("asdf", "tag " + imageTag + " " + taskImage.imageState.tag)
+
+                    imageTag = taskImage.imageState.tag
+
+                    taskImage.imageState.load(rowBigImage!!)
+                }
 
                 itemView.apply {
                     setOnLongClickListener(null)

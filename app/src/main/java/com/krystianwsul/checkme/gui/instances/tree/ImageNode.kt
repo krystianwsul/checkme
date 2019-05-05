@@ -24,6 +24,8 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
 
     override val ignoreStale = true
 
+    override val itemViewType = GroupListFragment.GroupAdapter.TYPE_IMAGE
+
     fun initialize(nodeContainer: NodeContainer): TreeNode {
         this.nodeContainer = nodeContainer
         treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)

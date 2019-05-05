@@ -22,4 +22,5 @@ class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
     val rowSeparator = itemView.rowSeparator!!
 
     var textWidth: Int? = null
+    var imageTag: Any? = null
 }

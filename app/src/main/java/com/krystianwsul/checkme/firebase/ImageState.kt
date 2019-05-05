@@ -10,6 +10,8 @@ sealed class ImageState : Serializable {
 
     abstract fun load(imageView: ImageView)
 
+    abstract val tag: Any
+
     data class Local(val uuid: String) : ImageState() {
 
         override fun load(imageView: ImageView) {
@@ -17,6 +19,8 @@ sealed class ImageState : Serializable {
                     .load(Uploader.getPath(this))
                     .into(imageView)
         }
+
+        override val tag = uuid
     }
 
     data class Remote(val uuid: String) : ImageState() {
@@ -26,10 +30,14 @@ sealed class ImageState : Serializable {
                     .load(Uploader.getReference(this))
                     .into(imageView)
         }
+
+        override val tag = uuid
     }
 
     object Uploading : ImageState() {
 
         override fun load(imageView: ImageView) = Unit
+
+        override val tag get() = Unit
     }
 }

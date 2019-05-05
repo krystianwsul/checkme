@@ -24,6 +24,7 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.removeFromGetter
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
+import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -38,6 +39,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         private const val SELECTED_TASK_KEYS_KEY = "selectedTaskKeys"
         private const val EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys"
         private const val QUERY_KEY = "query"
+        private const val KEY_IMAGE_STATE = "imageState"
 
         fun newInstance() = TaskListFragment()
     }
@@ -205,6 +207,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private val taskListListener get() = activity as TaskListListener
 
+    private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
+
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
 
@@ -249,6 +253,18 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             query = getString(QUERY_KEY)!!
+
+            if (containsKey(KEY_IMAGE_STATE)) {
+                val imageState = getSerializable(KEY_IMAGE_STATE) as ImageState
+
+                val viewer = StfalconImageViewer.Builder(context, listOf(imageState)) { view, image ->
+                    image.load(view)
+                }.show()
+
+                check(imageViewerData == null)
+
+                imageViewerData = Pair(imageState, viewer)
+            }
         }
     }
 
@@ -384,6 +400,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             }
 
             putString(QUERY_KEY, query)
+
+            imageViewerData?.let { putSerializable(KEY_IMAGE_STATE, it.first) }
         }
     }
 
@@ -456,8 +474,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
             taskListFragment.rootTaskData
                     ?.imageState
                     ?.let {
-                        treeNodes.add(ImageNode(ImageNode.ImageData(it) {
-                            // todo
+                        treeNodes.add(ImageNode(ImageNode.ImageData(it) { viewer ->
+                            check(taskListFragment.imageViewerData == null)
+
+                            taskListFragment.imageViewerData = Pair(it, viewer)
                         }).initialize(treeNodeCollection))
                     }
 

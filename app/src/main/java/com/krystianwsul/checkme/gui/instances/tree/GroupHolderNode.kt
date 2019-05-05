@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
+import com.stfalcon.imageviewer.StfalconImageViewer
 
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
@@ -114,6 +115,18 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 rowBigImageLayout!!.visibility = View.VISIBLE
 
                 taskImage.load(rowBigImage!!)
+
+                itemView.apply {
+                    setOnLongClickListener(null)
+
+                    setOnClickListener {
+                        StfalconImageViewer.Builder(context, listOf(taskImage)) { view, image ->
+                            image.load(view)
+                        }
+                                .withTransitionFrom(rowBigImage)
+                                .show() // todo hide on rotate, restore
+                    }
+                }
             } else {
                 rowContainer.visibility = View.VISIBLE
                 rowBigImageLayout?.visibility = View.GONE

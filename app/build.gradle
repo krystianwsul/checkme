@@ -135,6 +135,8 @@ dependencies {
 
     implementation 'com.github.pakoito:RxPaper2:1.4.0'
 
+    implementation 'com.github.stfalcon:stfalcon-imageviewer:0.1.0'
+
     compile project(path: ':common')
 }
 

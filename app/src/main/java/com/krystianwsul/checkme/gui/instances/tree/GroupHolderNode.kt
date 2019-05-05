@@ -114,12 +114,14 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 rowContainer.visibility = View.GONE
                 rowBigImageLayout!!.visibility = View.VISIBLE
 
-                taskImage.imageState.load(rowBigImage!!)
+                taskImage.imageState.load(rowBigImage!!) // todo don't reload on local -> remote switch
 
                 itemView.apply {
                     setOnLongClickListener(null)
 
                     setOnClickListener {
+                        checkStale()
+
                         val viewer = StfalconImageViewer.Builder(context, listOf(taskImage.imageState)) { view, image ->
                             image.load(view)
                         }
@@ -127,8 +129,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                                 .show()
 
                         taskImage.onImageShown(viewer)
-
-                        // todo this doesn't get updated after the upload finishes
                     }
                 }
             } else {

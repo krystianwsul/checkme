@@ -10,29 +10,12 @@ sealed class ImageState : Serializable {
 
     abstract fun load(imageView: ImageView)
 
-    class Local(val uuid: String) : ImageState() {
+    data class Local(val uuid: String) : ImageState() {
 
         override fun load(imageView: ImageView) {
             Glide.with(imageView)
                     .load(Uploader.getPath(this))
                     .into(imageView)
-        }
-
-        override fun hashCode() = uuid.hashCode()
-
-        override fun equals(other: Any?): Boolean {
-            if (other === this)
-                return true
-
-            return if (other is ImageState) {
-                when (other) {
-                    is Local -> uuid == other.uuid
-                    is Remote -> uuid == other.uuid
-                    is Uploading -> false
-                }
-            } else {
-                false
-            }
         }
     }
 
@@ -42,23 +25,6 @@ sealed class ImageState : Serializable {
             GlideApp.with(imageView)
                     .load(Uploader.getReference(this))
                     .into(imageView)
-        }
-
-        override fun hashCode() = uuid.hashCode()
-
-        override fun equals(other: Any?): Boolean {
-            if (other === this)
-                return true
-
-            return if (other is ImageState) {
-                when (other) {
-                    is Local -> uuid == other.uuid
-                    is Remote -> uuid == other.uuid
-                    is Uploading -> false
-                }
-            } else {
-                false
-            }
         }
     }
 

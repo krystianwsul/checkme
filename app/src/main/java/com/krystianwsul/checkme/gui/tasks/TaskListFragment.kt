@@ -455,7 +455,11 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             taskListFragment.rootTaskData
                     ?.imageState
-                    ?.let { treeNodes.add(ImageNode(it).initialize(treeNodeCollection)) }
+                    ?.let {
+                        treeNodes.add(ImageNode(ImageNode.ImageData(it) {
+                            // todo
+                        }).initialize(treeNodeCollection))
+                    }
 
             taskWrappers = mutableListOf()
             for (childTaskData in taskData.childTaskDatas) {

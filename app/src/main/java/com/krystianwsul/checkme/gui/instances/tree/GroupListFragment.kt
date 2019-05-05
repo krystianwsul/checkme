@@ -33,6 +33,7 @@ import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
+import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -54,6 +55,7 @@ class GroupListFragment @JvmOverloads constructor(
         const val EXPANSION_STATE_KEY = "expansionState"
         private const val LAYOUT_MANAGER_STATE = "layoutManagerState"
         private const val EDIT_INSTANCES_TAG = "editInstances"
+        private const val KEY_IMAGE_STATE = "imageState"
 
         private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
             check(position >= 0)
@@ -410,6 +412,8 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
+    private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
+
     private fun getShareData(selectedDatas: Collection<SelectedData>): String {
         check(selectedDatas.isNotEmpty())
 
@@ -462,6 +466,18 @@ class GroupListFragment @JvmOverloads constructor(
                     this@GroupListFragment.state = getParcelable(EXPANSION_STATE_KEY)!!
 
                 groupListRecycler.layoutManager!!.onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
+
+                if (containsKey(KEY_IMAGE_STATE)) {
+                    val imageState = getSerializable(KEY_IMAGE_STATE) as ImageState
+
+                    val viewer = StfalconImageViewer.Builder(context, listOf(imageState)) { view, image ->
+                        image.load(view)
+                    }.show()
+
+                    check(imageViewerData == null)
+
+                    imageViewerData = Pair(imageState, viewer)
+                }
             }
 
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -528,6 +544,8 @@ class GroupListFragment @JvmOverloads constructor(
                 putParcelable(EXPANSION_STATE_KEY, (treeViewAdapter.treeModelAdapter as GroupAdapter).state)
 
             putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
+
+            imageViewerData?.let { putSerializable(KEY_IMAGE_STATE, it.first) }
         }
     }
 
@@ -774,7 +792,13 @@ class GroupListFragment @JvmOverloads constructor(
                     state.unscheduledExpanded,
                     state.expandedTaskKeys,
                     state.selectedTaskKeys,
-                    imageState)
+                    imageState?.let {
+                        ImageNode.ImageData(it) { viewer ->
+                            check(groupListFragment.imageViewerData == null)
+
+                            groupListFragment.imageViewerData = Pair(it, viewer)
+                        }
+                    })
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
         }
 

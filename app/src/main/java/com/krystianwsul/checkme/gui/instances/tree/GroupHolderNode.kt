@@ -61,7 +61,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     open val ripple = false
 
-    protected open val imageState: ImageState? = null
+    protected open val imageData: ImageNode.ImageData? = null
 
     final override val state
         get() = State(
@@ -74,7 +74,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 treeNode.isExpanded,
                 checkBoxVisibility,
                 checkBoxChecked,
-                imageState)
+                imageData?.imageState)
 
     protected open val colorBackground = GroupHolderNode.colorBackground
 
@@ -108,23 +108,27 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         checkStale()
 
         groupHolder.run {
-            val taskImage = imageState
+            val taskImage = imageData
 
             if (taskImage != null) {
                 rowContainer.visibility = View.GONE
                 rowBigImageLayout!!.visibility = View.VISIBLE
 
-                taskImage.load(rowBigImage!!)
+                taskImage.imageState.load(rowBigImage!!)
 
                 itemView.apply {
                     setOnLongClickListener(null)
 
                     setOnClickListener {
-                        StfalconImageViewer.Builder(context, listOf(taskImage)) { view, image ->
+                        val viewer = StfalconImageViewer.Builder(context, listOf(taskImage.imageState)) { view, image ->
                             image.load(view)
                         }
                                 .withTransitionFrom(rowBigImage)
-                                .show() // todo hide on rotate, restore
+                                .show()
+
+                        taskImage.onImageShown(viewer)
+
+                        // todo this doesn't get updated after the upload finishes
                     }
                 }
             } else {

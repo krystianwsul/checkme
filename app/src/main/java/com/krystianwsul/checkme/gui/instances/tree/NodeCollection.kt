@@ -1,12 +1,10 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-
 
 class NodeCollection(
         private val indentation: Int,
@@ -31,7 +29,18 @@ class NodeCollection(
 
     val doneExpanded get() = dividerNode.expanded()
 
-    fun initialize(instanceDatas: Collection<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, doneExpanded: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, taskDatas: List<GroupListFragment.TaskData>, unscheduledExpanded: Boolean, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>, imageState: ImageState?): List<TreeNode> {
+    fun initialize(
+            instanceDatas: Collection<GroupListFragment.InstanceData>,
+            expandedGroups: List<TimeStamp>,
+            expandedInstances: Map<InstanceKey, Boolean>,
+            doneExpanded: Boolean,
+            selectedInstances: List<InstanceKey>,
+            selectedGroups: List<Long>,
+            taskDatas: List<GroupListFragment.TaskData>,
+            unscheduledExpanded: Boolean,
+            expandedTaskKeys: List<TaskKey>,
+            selectedTaskKeys: List<TaskKey>,
+            imageData: ImageNode.ImageData?): List<TreeNode> {
         val notDoneInstanceDatas = instanceDatas.filter { it.done == null }
         val doneInstanceDatas = instanceDatas.filter { it.done != null }
 
@@ -42,7 +51,7 @@ class NodeCollection(
                 add(NoteNode(note).initialize(nodeContainer))
             }
 
-            imageState?.let {
+            imageData?.let {
                 check(indentation == 0)
 
                 add(ImageNode(it).initialize(nodeContainer))
@@ -61,7 +70,7 @@ class NodeCollection(
 
             dividerNode = DividerNode(indentation, this@NodeCollection)
 
-            add(dividerNode.initialize(doneExpanded && !doneInstanceDatas.isEmpty(), nodeContainer, doneInstanceDatas, expandedInstances, selectedInstances))
+            add(dividerNode.initialize(doneExpanded && doneInstanceDatas.isNotEmpty(), nodeContainer, doneInstanceDatas, expandedInstances, selectedInstances))
         }
     }
 

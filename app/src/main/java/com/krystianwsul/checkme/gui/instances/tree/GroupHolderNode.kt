@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Paint
 import android.graphics.Rect
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorRes
@@ -19,7 +18,6 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
-
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
@@ -115,25 +113,17 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 rowContainer.visibility = View.GONE
                 rowBigImageLayout!!.visibility = View.VISIBLE
 
-                // todo not working
-                if (imageTag != taskImage.imageState.tag) {
-                    Log.e("asdf", "tag " + imageTag + " " + taskImage.imageState.tag)
-
-                    imageTag = taskImage.imageState.tag
-
-                    taskImage.imageState.load(rowBigImage!!)
-                }
+                taskImage.imageState.load(rowBigImage!!)
 
                 itemView.apply {
                     setOnLongClickListener(null)
 
                     setOnClickListener {
-                        checkStale()
-
                         val viewer = StfalconImageViewer.Builder(context, listOf(taskImage.imageState)) { view, image ->
                             image.load(view)
                         }
                                 .withTransitionFrom(rowBigImage)
+                                .withDismissListener { taskImage.onDismiss() }
                                 .show()
 
                         taskImage.onImageShown(viewer)

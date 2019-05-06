@@ -10,34 +10,67 @@ sealed class ImageState : Serializable {
 
     abstract fun load(imageView: ImageView)
 
-    abstract val tag: Any
-
     data class Local(val uuid: String) : ImageState() {
 
         override fun load(imageView: ImageView) {
-            Glide.with(imageView)
-                    .load(Uploader.getPath(this))
-                    .into(imageView)
+            Uploader.getPath(this)?.let {
+                Glide.with(imageView)
+                        .load(it)
+                        .into(imageView)
+            } ?: Remote.load(imageView, uuid)
         }
 
-        override val tag = uuid
+        override fun hashCode() = uuid.hashCode()
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this)
+                return true
+
+            return if (other is ImageState) {
+                when (other) {
+                    is Local -> uuid == other.uuid
+                    is Remote -> uuid == other.uuid
+                    is Uploading -> false
+                }
+            } else {
+                false
+            }
+        }
     }
 
     data class Remote(val uuid: String) : ImageState() {
 
-        override fun load(imageView: ImageView) {
-            GlideApp.with(imageView)
-                    .load(Uploader.getReference(this))
-                    .into(imageView)
+        companion object {
+
+            fun load(imageView: ImageView, uuid: String) {
+                GlideApp.with(imageView)
+                        .load(Uploader.getReference(uuid))
+                        .into(imageView)
+            }
         }
 
-        override val tag = uuid
+        override fun load(imageView: ImageView) = load(imageView, uuid)
+
+        override fun hashCode() = uuid.hashCode()
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this)
+                return true
+
+            return if (other is ImageState) {
+                when (other) {
+                    is Local -> uuid == other.uuid
+                    is Remote -> uuid == other.uuid
+                    is Uploading -> false
+                }
+            } else {
+                false
+            }
+        }
     }
 
     object Uploading : ImageState() {
 
         override fun load(imageView: ImageView) = Unit
-
-        override val tag get() = Unit
     }
 }

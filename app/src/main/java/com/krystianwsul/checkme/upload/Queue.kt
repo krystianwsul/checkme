@@ -47,7 +47,7 @@ object Queue {
 
     fun getEntries(): List<Entry> = entries
 
-    fun getPath(uuid: String) = entries.single { it.uuid == uuid }.path
+    fun getPath(uuid: String) = entries.singleOrNull { it.uuid == uuid }?.path
 
     data class Entry(
             val taskKey: TaskKey,

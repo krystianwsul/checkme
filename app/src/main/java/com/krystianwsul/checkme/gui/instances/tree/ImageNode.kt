@@ -36,5 +36,8 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
 
     override fun compareTo(other: ModelNode) = if (other is NoteNode) 1 else -1
 
-    class ImageData(val imageState: ImageState, val onImageShown: (StfalconImageViewer<ImageState>) -> Unit)
+    class ImageData(
+            val imageState: ImageState,
+            val onImageShown: (StfalconImageViewer<ImageState>) -> Unit,
+            val onDismiss: () -> Unit)
 }

@@ -94,6 +94,6 @@ object Uploader {
         }
     }
 
-    fun getReference(imageData: ImageState.Remote) = storage.child(imageData.uuid)
+    fun getReference(uuid: String) = storage.child(uuid)
     fun getPath(imageData: ImageState.Local) = Queue.getPath(imageData.uuid)
 }

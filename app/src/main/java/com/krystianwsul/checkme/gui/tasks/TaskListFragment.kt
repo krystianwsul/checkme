@@ -259,7 +259,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
                 val viewer = StfalconImageViewer.Builder(context, listOf(imageState)) { view, image ->
                     image.load(view)
-                }.show()
+                }
+                        .withDismissListener {
+                            checkNotNull(imageViewerData)
+
+                            imageViewerData = null
+                        }
+                        .show()
 
                 check(imageViewerData == null)
 
@@ -474,11 +480,15 @@ class TaskListFragment : AbstractFragment(), FabUser {
             taskListFragment.rootTaskData
                     ?.imageState
                     ?.let {
-                        treeNodes.add(ImageNode(ImageNode.ImageData(it) { viewer ->
+                        treeNodes.add(ImageNode(ImageNode.ImageData(it, { viewer ->
                             check(taskListFragment.imageViewerData == null)
 
                             taskListFragment.imageViewerData = Pair(it, viewer)
-                        }).initialize(treeNodeCollection))
+                        }, {
+                            checkNotNull(taskListFragment.imageViewerData)
+
+                            taskListFragment.imageViewerData = null
+                        })).initialize(treeNodeCollection))
                     }
 
             taskWrappers = mutableListOf()

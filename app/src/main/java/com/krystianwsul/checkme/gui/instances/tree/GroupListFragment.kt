@@ -472,7 +472,13 @@ class GroupListFragment @JvmOverloads constructor(
 
                     val viewer = StfalconImageViewer.Builder(context, listOf(imageState)) { view, image ->
                         image.load(view)
-                    }.show()
+                    }
+                            .withDismissListener {
+                                checkNotNull(imageViewerData)
+
+                                imageViewerData = null
+                            }
+                            .show()
 
                     check(imageViewerData == null)
 
@@ -794,11 +800,16 @@ class GroupListFragment @JvmOverloads constructor(
                     state.expandedTaskKeys,
                     state.selectedTaskKeys,
                     imageState?.let {
-                        ImageNode.ImageData(it) { viewer ->
+                        ImageNode.ImageData(it, { viewer ->
                             check(groupListFragment.imageViewerData == null)
 
                             groupListFragment.imageViewerData = Pair(it, viewer)
-                        }
+                        },
+                                {
+                                    checkNotNull(groupListFragment.imageViewerData)
+
+                                    groupListFragment.imageViewerData = null
+                                })
                     })
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
         }

@@ -25,12 +25,14 @@ class DoneInstanceNode(
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
+    override val thumbnail = instanceData.imageState
+
     fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
         val expanded: Boolean
         val doneExpanded: Boolean
-        if (expandedInstances.containsKey(instanceData.instanceKey) && !instanceData.children.isEmpty()) {
+        if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
             expanded = true
             doneExpanded = expandedInstances.getValue(instanceData.instanceKey)
         } else {

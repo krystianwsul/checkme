@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 
-
 class TaskNode(
         indentation: Int,
         val taskData: GroupListFragment.TaskData,
@@ -72,7 +71,7 @@ class TaskNode(
         get() = if ((taskData.children.isEmpty() || expanded()) && taskData.note.isNullOrEmpty()) {
             null
         } else {
-            val text = if (!expanded() && !taskData.children.isEmpty()) {
+            val text = if (!expanded() && taskData.children.isNotEmpty()) {
                 taskData.children
                         .sortedBy { it.startExactTimeStamp }
                         .joinToString(", ") { it.name }
@@ -94,4 +93,6 @@ class TaskNode(
     override val checkBoxVisibility = View.INVISIBLE
 
     override val isSelectable = true
+
+    override val thumbnail = taskData.imageState
 }

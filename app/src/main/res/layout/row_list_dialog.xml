@@ -66,6 +66,13 @@
         </LinearLayout>
 
         <ImageView
+            android:id="@+id/rowThumbnail"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone" />
+
+        <ImageView
             android:id="@+id/rowExpand"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

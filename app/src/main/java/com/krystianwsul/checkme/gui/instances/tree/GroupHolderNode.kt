@@ -62,6 +62,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val imageData: ImageNode.ImageData? = null
 
+    protected open val thumbnail: ImageState? = null
+
     final override val state
         get() = State(
                 id,
@@ -218,6 +220,16 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                         val width = measuredWidth
                         textWidth = width
                         textWidths[widthKey] = width
+                    }
+                }
+
+                rowThumbnail.apply {
+                    if (thumbnail != null) {
+                        visibility = View.VISIBLE
+
+                        thumbnail!!.load(this)
+                    } else {
+                        visibility = View.GONE
                     }
                 }
 

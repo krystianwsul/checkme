@@ -881,7 +881,8 @@ class GroupListFragment @JvmOverloads constructor(
             val children: MutableMap<InstanceKey, InstanceData>,
             val hierarchyData: HierarchyData?,
             var ordinal: Double,
-            var notificationShown: Boolean) : InstanceDataParent, Comparable<InstanceData>, SelectedData {
+            var notificationShown: Boolean,
+            val imageState: ImageState?) : InstanceDataParent, Comparable<InstanceData>, SelectedData {
 
         lateinit var instanceDataParent: InstanceDataParent
 
@@ -925,7 +926,8 @@ class GroupListFragment @JvmOverloads constructor(
             override val name: String,
             val children: List<TaskData>,
             val startExactTimeStamp: ExactTimeStamp,
-            override val note: String?) : SelectedData {
+            override val note: String?,
+            val imageState: ImageState?) : SelectedData {
 
         init {
             check(name.isNotEmpty())

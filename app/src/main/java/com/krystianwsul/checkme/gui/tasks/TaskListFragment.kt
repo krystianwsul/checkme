@@ -628,6 +628,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             override val isSeparatorVisibleWhenNotExpanded = false
 
+            override val thumbnail = childTaskData.imageState
+
             override fun compareTo(other: ModelNode) = if (other is TaskWrapper) {
                 val taskListFragment = taskListFragment
 
@@ -681,7 +683,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
             val note: String?,
             private val startExactTimeStamp: ExactTimeStamp,
             val taskKey: TaskKey,
-            val hierarchyData: HierarchyData?) : Comparable<ChildTaskData> {
+            val hierarchyData: HierarchyData?,
+            val imageState: ImageState?) : Comparable<ChildTaskData> {
 
         override fun compareTo(other: ChildTaskData) = if (hierarchyData != null) {
             hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)

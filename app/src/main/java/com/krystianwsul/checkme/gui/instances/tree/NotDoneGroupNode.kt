@@ -36,8 +36,10 @@ class NotDoneGroupNode(
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
+    override val thumbnail get() = if (singleInstance()) singleInstanceData.imageState else null
+
     init {
-        check(!instanceDatas.isEmpty())
+        check(instanceDatas.isNotEmpty())
 
         exactTimeStamp = instanceDatas.map { it.instanceTimeStamp }
                 .distinct()
@@ -105,7 +107,7 @@ class NotDoneGroupNode(
     }
 
     fun singleInstance(): Boolean {
-        check(!instanceDatas.isEmpty())
+        check(instanceDatas.isNotEmpty())
 
         return instanceDatas.size == 1
     }
@@ -248,7 +250,7 @@ class NotDoneGroupNode(
 
         treeNode.remove(childTreeNode, x)
 
-        check(!instanceDatas.isEmpty())
+        check(instanceDatas.isNotEmpty())
         if (instanceDatas.size == 1) {
             val notDoneInstanceNode1 = notDoneInstanceNodes.single()
             notDoneInstanceNodes.remove(notDoneInstanceNode1)
@@ -305,7 +307,7 @@ class NotDoneGroupNode(
     fun addInstanceData(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) {
         check(instanceData.instanceTimeStamp.toExactTimeStamp() == exactTimeStamp)
 
-        check(!instanceDatas.isEmpty())
+        check(instanceDatas.isNotEmpty())
         if (instanceDatas.size == 1) {
             check(notDoneInstanceNodes.isEmpty())
 
@@ -484,6 +486,8 @@ class NotDoneGroupNode(
         override val id = Id(instanceData.instanceKey)
 
         override val deselectParent get() = true
+
+        override val thumbnail = instanceData.imageState
 
         data class Id(val instanceKey: InstanceKey)
     }

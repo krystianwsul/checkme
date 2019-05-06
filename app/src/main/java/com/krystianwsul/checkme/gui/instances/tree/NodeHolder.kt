@@ -13,6 +13,7 @@ class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
     val rowName = itemView.rowName!!
     val rowDetails = itemView.rowDetails!!
     val rowChildren = itemView.rowChildren!!
+    val rowThumbnail = itemView.rowThumbnail!!
     val rowExpand = itemView.rowExpand!!
     val rowCheckBox = itemView.rowCheckbox!!
     val rowMargin = itemView.rowMargin!!
@@ -22,5 +23,4 @@ class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
     val rowSeparator = itemView.rowSeparator!!
 
     var textWidth: Int? = null
-    var imageTag: Any? = null
 }

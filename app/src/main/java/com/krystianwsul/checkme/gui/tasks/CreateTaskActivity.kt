@@ -27,10 +27,7 @@ import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
@@ -64,6 +61,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         private const val PARENT_TASK_KEY_HINT_KEY = "parentTaskKeyHint"
         private const val SCHEDULE_HINT_KEY = "scheduleHint"
+        private const val KEY_REMOVE_INSTANCE_KEYS = "removeInstanceKeys"
 
         private const val PARENT_KEY_KEY = "parentKey"
         private const val PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment"
@@ -92,11 +90,15 @@ class CreateTaskActivity : AbstractActivity() {
             putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable)
         }
 
-        fun getJoinIntent(joinTaskKeys: List<TaskKey>, scheduleHint: ScheduleHint? = null) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+        fun getJoinIntent(
+                joinTaskKeys: List<TaskKey>,
+                scheduleHint: ScheduleHint? = null,
+                removeInstanceKeys: List<InstanceKey> = listOf()) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             check(joinTaskKeys.size > 1)
 
             putParcelableArrayListExtra(TASK_KEYS_KEY, ArrayList(joinTaskKeys))
             scheduleHint?.let { putExtra(SCHEDULE_HINT_KEY, scheduleHint) }
+            putParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS, ArrayList(removeInstanceKeys))
         }
 
         fun getEditIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
@@ -145,7 +147,7 @@ class CreateTaskActivity : AbstractActivity() {
 
             val scheduleHolder = scheduleRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
 
-            scheduleHolder.mScheduleText.text = null
+            scheduleHolder.scheduleText.text = null
         }
 
         override fun onNewParent() = startActivityForResult(getCreateIntent(this@CreateTaskActivity), REQUEST_CREATE_PARENT)
@@ -248,6 +250,8 @@ class CreateTaskActivity : AbstractActivity() {
 
     val imageUrl = BehaviorRelay.createDefault<State>(State.None)
 
+    private lateinit var removeInstanceKeys: List<InstanceKey>
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
         return true
@@ -285,6 +289,7 @@ class CreateTaskActivity : AbstractActivity() {
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
+                                    check(removeInstanceKeys.isEmpty())
 
                                     DomainFactory.instance.updateScheduleTask(
                                             data!!.dataId,
@@ -309,10 +314,12 @@ class CreateTaskActivity : AbstractActivity() {
                                             taskKeys!!,
                                             note,
                                             projectId,
-                                            writeImagePath?.value)
+                                            writeImagePath?.value,
+                                            removeInstanceKeys)
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
+                                    check(removeInstanceKeys.isEmpty())
 
                                     DomainFactory.instance.createScheduleRootTask(
                                             data!!.dataId,
@@ -334,6 +341,7 @@ class CreateTaskActivity : AbstractActivity() {
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
+                                    check(removeInstanceKeys.isEmpty())
 
                                     DomainFactory.instance.updateChildTask(
                                             ExactTimeStamp.now,
@@ -356,10 +364,12 @@ class CreateTaskActivity : AbstractActivity() {
                                             name,
                                             taskKeys!!,
                                             note,
-                                            writeImagePath?.value)
+                                            writeImagePath?.value,
+                                            removeInstanceKeys)
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
+                                    check(removeInstanceKeys.isEmpty())
 
                                     DomainFactory.instance.createChildTask(
                                             data!!.dataId,
@@ -378,6 +388,7 @@ class CreateTaskActivity : AbstractActivity() {
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
+                                    check(removeInstanceKeys.isEmpty())
 
                                     DomainFactory.instance.updateRootTask(
                                             data!!.dataId,
@@ -398,10 +409,12 @@ class CreateTaskActivity : AbstractActivity() {
                                             taskKeys!!,
                                             note,
                                             projectId,
-                                            writeImagePath?.value)
+                                            writeImagePath?.value,
+                                            removeInstanceKeys)
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
+                                    check(removeInstanceKeys.isEmpty())
 
                                     DomainFactory.instance.createRootTask(
                                             data!!.dataId,
@@ -472,6 +485,8 @@ class CreateTaskActivity : AbstractActivity() {
                     scheduleHint = getParcelableExtra(SCHEDULE_HINT_KEY)!!
                 }
             }
+
+            removeInstanceKeys = getParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS) ?: listOf()
         }
 
         savedInstanceState?.run {
@@ -752,7 +767,7 @@ class CreateTaskActivity : AbstractActivity() {
         check(index >= 0)
 
         scheduleRecycler.getChildAt(index + createTaskAdapter.elementsBeforeSchedules())?.let {
-            (scheduleRecycler.getChildViewHolder(it) as CreateTaskAdapter.ScheduleHolder).mScheduleLayout.error = scheduleEntry.error
+            (scheduleRecycler.getChildViewHolder(it) as CreateTaskAdapter.ScheduleHolder).scheduleLayout.error = scheduleEntry.error
         }
     }
 
@@ -842,7 +857,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         val scheduleHolder = scheduleRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
 
-        scheduleHolder.mScheduleText.setText(if (parent != null) parent!!.name else null)
+        scheduleHolder.scheduleText.setText(if (parent != null) parent!!.name else null)
     }
 
     private fun hasValueParentInGeneral() = parent != null
@@ -934,9 +949,9 @@ class CreateTaskActivity : AbstractActivity() {
 
             when (position) {
                 in (0 until elementsBeforeSchedules) -> (holder as ScheduleHolder).run {
-                    mScheduleMargin.visibility = if (position == 0) View.VISIBLE else View.GONE
+                    scheduleMargin.visibility = if (position == 0) View.VISIBLE else View.GONE
 
-                    mScheduleLayout.run {
+                    scheduleLayout.run {
                         hint = getString(R.string.parentTask)
                         error = null
                         isHintAnimationEnabled = false
@@ -946,10 +961,8 @@ class CreateTaskActivity : AbstractActivity() {
                         }
                     }
 
-                    mScheduleText.run {
+                    scheduleText.run {
                         setText(this@CreateTaskActivity.parent?.name)
-
-                        isEnabled = data!!.parentTreeDatas.isNotEmpty()
 
                         setOnClickListener {
                             ParentPickerFragment.newInstance(this@CreateTaskActivity.parent != null).let {
@@ -962,32 +975,30 @@ class CreateTaskActivity : AbstractActivity() {
                 in (elementsBeforeSchedules until (elementsBeforeSchedules + scheduleEntries.size)) -> (holder as ScheduleHolder).run {
                     val scheduleEntry = scheduleEntries[position - elementsBeforeSchedules()]
 
-                    mScheduleMargin.visibility = View.GONE
+                    scheduleMargin.visibility = View.GONE
 
-                    mScheduleLayout.run {
+                    scheduleLayout.run {
                         hint = null
                         error = scheduleEntry.error
                         isHintAnimationEnabled = false
                     }
 
-                    mScheduleText.run {
+                    scheduleText.run {
                         setText(scheduleEntry.getText(data!!.customTimeDatas, this@CreateTaskActivity))
-                        isEnabled = true
                         setOnClickListener { onTextClick() }
                     }
                 }
                 elementsBeforeSchedules + scheduleEntries.size -> (holder as ScheduleHolder).run {
-                    mScheduleMargin.visibility = View.GONE
+                    scheduleMargin.visibility = View.GONE
 
-                    mScheduleLayout.run {
+                    scheduleLayout.run {
                         hint = getString(R.string.addReminder)
                         error = null
                         isHintAnimationEnabled = false
                     }
 
-                    mScheduleText.run {
+                    scheduleText.run {
                         text = null
-                        isEnabled = true
                         setOnClickListener {
                             check(hourMinutePickerPosition == null)
 
@@ -1083,9 +1094,9 @@ class CreateTaskActivity : AbstractActivity() {
 
         inner class ScheduleHolder(scheduleRow: View) : Holder(scheduleRow) {
 
-            val mScheduleMargin = itemView.schedule_margin!!
-            val mScheduleLayout = itemView.schedule_layout!!
-            val mScheduleText = itemView.schedule_text!!
+            val scheduleMargin = itemView.scheduleMargin!!
+            val scheduleLayout = itemView.scheduleLayout!!
+            val scheduleText = itemView.scheduleText!!
 
             fun onTextClick() {
                 checkNotNull(data)

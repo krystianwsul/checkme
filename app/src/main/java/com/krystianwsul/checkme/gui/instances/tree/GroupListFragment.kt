@@ -204,16 +204,18 @@ class GroupListFragment @JvmOverloads constructor(
                     if (parameters is Parameters.InstanceKey) {
                         activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, (parameters as Parameters.InstanceKey).instanceKey.taskKey))
                     } else {
-                        val scheduleHint = selectedDatas.filterIsInstance<InstanceData>()
-                                .minBy { it.instanceTimeStamp }
-                                ?.let {
-                                    val date = it.instanceTimeStamp.date
-                                    val timePair = it.instanceTimePair
+                        val instanceDatas = selectedDatas.filterIsInstance<InstanceData>()
 
-                                    CreateTaskActivity.ScheduleHint(date, timePair)
-                                }
+                        val scheduleHint = instanceDatas.minBy { it.instanceTimeStamp }?.let {
+                            val date = it.instanceTimeStamp.date
+                            val timePair = it.instanceTimePair
 
-                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, scheduleHint))
+                            CreateTaskActivity.ScheduleHint(date, timePair)
+                        }
+
+                        val removeInstanceKeys = instanceDatas.map { it.instanceKey }
+
+                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, scheduleHint, removeInstanceKeys))
                     }
                 }
                 R.id.action_group_mark_done -> {

@@ -10,12 +10,12 @@
     android:orientation="vertical">
 
     <View
-        android:id="@+id/schedule_margin"
+        android:id="@+id/scheduleMargin"
         android:layout_width="match_parent"
         android:layout_height="@dimen/activity_vertical_margin"/>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/schedule_layout"
+        android:id="@+id/scheduleLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/parentTask"
@@ -25,7 +25,7 @@
         style="@style/OldTextInput">
 
         <EditText
-            android:id="@+id/schedule_text"
+            android:id="@+id/scheduleText"
             style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

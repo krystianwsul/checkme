@@ -88,7 +88,7 @@ class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSe
         check(context is Host)
 
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        orientation = LinearLayoutCompat.VERTICAL
+        orientation = VERTICAL
 
         View.inflate(context, R.layout.fragment_day, this)
 

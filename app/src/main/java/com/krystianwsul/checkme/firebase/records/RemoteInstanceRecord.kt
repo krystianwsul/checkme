@@ -208,5 +208,15 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             addValue("$key/ordinal", ordinal)
         }
 
+    override var hidden
+        get() = createObject.hidden
+        set(value) {
+            if (value == createObject.hidden)
+                return
+
+            createObject.hidden = value
+            addValue("$key/hidden", value)
+        }
+
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
 }

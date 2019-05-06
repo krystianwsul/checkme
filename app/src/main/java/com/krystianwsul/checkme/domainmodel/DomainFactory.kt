@@ -1147,7 +1147,8 @@ open class DomainFactory(
             joinTaskKeys: List<TaskKey>,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
+            imagePath: Pair<String, Uri>?,
+            removeInstanceKeys: List<InstanceKey>): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1168,7 +1169,7 @@ open class DomainFactory(
 
         joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
 
-        joinTasks(newParentTask, joinTasks, now)
+        joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
 
@@ -1236,7 +1237,8 @@ open class DomainFactory(
             joinTaskKeys: List<TaskKey>,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
+            imagePath: Pair<String, Uri>?,
+            removeInstanceKeys: List<InstanceKey>): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1258,7 +1260,7 @@ open class DomainFactory(
 
         joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
 
-        joinTasks(newParentTask, joinTasks, now)
+        joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
 
@@ -1373,7 +1375,8 @@ open class DomainFactory(
             name: String,
             joinTaskKeys: List<TaskKey>,
             note: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
+            imagePath: Pair<String, Uri>?,
+            removeInstanceKeys: List<InstanceKey>): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1393,7 +1396,7 @@ open class DomainFactory(
 
         val childTask = parentTask.createChildTask(now, name, note, uuid)
 
-        joinTasks(childTask, joinTasks, now)
+        joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
 
@@ -2122,7 +2125,11 @@ open class DomainFactory(
         return remoteToRemoteConversion.endTasks[startingRemoteTask.id]!!
     }
 
-    private fun joinTasks(newParentTask: Task, joinTasks: List<Task>, now: ExactTimeStamp) {
+    private fun joinTasks(
+            newParentTask: Task,
+            joinTasks: List<Task>,
+            now: ExactTimeStamp,
+            removeInstanceKeys: List<InstanceKey>) {
         check(newParentTask.current(now))
         check(joinTasks.size > 1)
 
@@ -2139,6 +2146,10 @@ open class DomainFactory(
 
             newParentTask.addChild(joinTask, now)
         }
+
+        removeInstanceKeys.map(::getInstance)
+                .filter { it.getParentInstance(now)?.task != newParentTask && it.isVisible(now, true) }
+                .forEach { it.hide(now) }
     }
 
     fun getParentTaskHierarchy(childTask: Task, exactTimeStamp: ExactTimeStamp): TaskHierarchy? {

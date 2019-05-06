@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.InstanceData
-import com.krystianwsul.checkme.utils.InstanceData.VirtualInstanceData
+import com.krystianwsul.checkme.utils.InstanceData.Virtual
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.time.*
 
@@ -21,8 +21,8 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     private val taskId
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord.taskId
-                is VirtualInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.taskId
+                is InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord.taskId
+                is Virtual<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.taskId
             }
         }
 
@@ -45,11 +45,11 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override val scheduleCustomTimeKey
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord
+                is InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord
                         .scheduleKey
                         .scheduleTimePair
                         .customTimeKey
-                is VirtualInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.scheduleDateTime
+                is Virtual<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.scheduleDateTime
                         .time
                         .timePair
                         .customTimeKey
@@ -61,7 +61,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override val project get() = remoteProject
 
     override val customTimeKey // scenario already covered by task/schedule relevance
-        get() = (instanceData as? RemoteRealInstanceData<T>)?.instanceRecord
+        get() = (instanceData as? RemoteReal<T>)?.instanceRecord
                 ?.instanceJsonTime
                 ?.let { (it as? JsonTime.Custom)?.let { Pair(remoteProject.id, it.id) } }
 
@@ -74,7 +74,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             now: ExactTimeStamp) : super(domainFactory) {
         this.remoteProject = remoteProject
         task = remoteTask
-        val realInstanceData = RemoteRealInstanceData(this, remoteInstanceRecord)
+        val realInstanceData = RemoteReal(this, remoteInstanceRecord)
         instanceData = realInstanceData
         this.instanceShownRecord = instanceShownRecord
 
@@ -92,7 +92,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             instanceShownRecord: InstanceShownRecord?) : super(domainFactory) {
         this.remoteProject = remoteProject
         task = remoteTask
-        instanceData = VirtualInstanceData(task.id, scheduleDateTime)
+        instanceData = Virtual(task.id, scheduleDateTime)
         this.instanceShownRecord = instanceShownRecord
     }
 
@@ -101,7 +101,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
         createInstanceHierarchy(now)
 
-        (instanceData as RemoteRealInstanceData).instanceRecord.let {
+        (instanceData as RemoteReal).instanceRecord.let {
             it.instanceDate = date
 
             it.instanceJsonTime = timePair.run {
@@ -127,34 +127,34 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
         val scheduleDateTime = scheduleDateTime
 
-        instanceData = RemoteRealInstanceData(this, task.createRemoteInstanceRecord(this, scheduleDateTime))
+        instanceData = RemoteReal(this, task.createRemoteInstanceRecord(this, scheduleDateTime))
     }
 
     override fun setDone(done: Boolean, now: ExactTimeStamp) {
         if (done) {
             createInstanceHierarchy(now)
 
-            (instanceData as RemoteRealInstanceData).instanceRecord.done = now.long
+            (instanceData as RemoteReal).instanceRecord.done = now.long
 
             instanceShownRecord?.notified = false
         } else {
-            (instanceData as RemoteRealInstanceData).instanceRecord.done = null
+            (instanceData as RemoteReal).instanceRecord.done = null
         }
     }
 
     override fun delete() {
-        checkNotNull(instanceData is RemoteRealInstanceData<T>)
+        checkNotNull(instanceData is RemoteReal<T>)
 
         task.deleteInstance(this)
 
-        (instanceData as RemoteRealInstanceData<T>).instanceRecord.delete()
+        (instanceData as RemoteReal<T>).instanceRecord.delete()
     }
 
     override fun belongsToRemoteProject() = true
 
-    override fun getNullableOrdinal() = (instanceData as? RemoteRealInstanceData<T>)?.instanceRecord?.ordinal
+    override fun getNullableOrdinal() = (instanceData as? RemoteReal<T>)?.instanceRecord?.ordinal
 
-    private class RemoteRealInstanceData<T : RemoteCustomTimeId>(private val remoteInstance: RemoteInstance<T>, remoteInstanceRecord: RemoteInstanceRecord<T>) : InstanceData.RealInstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
+    private class RemoteReal<T : RemoteCustomTimeId>(private val remoteInstance: RemoteInstance<T>, remoteInstanceRecord: RemoteInstanceRecord<T>) : InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
 
         override fun getCustomTime(customTimeId: RemoteCustomTimeId) = remoteInstance.remoteProject.getRemoteCustomTime(customTimeId)
 

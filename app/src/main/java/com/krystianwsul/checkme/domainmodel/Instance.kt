@@ -63,8 +63,8 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     private val scheduleHourMinute
         get() = instanceData.let {
             when (it) {
-                is InstanceData.RealInstanceData<*, *, *> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
-                is InstanceData.VirtualInstanceData<*, *, *> -> it.scheduleDateTime
+                is InstanceData.Real<*, *, *> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
+                is InstanceData.Virtual<*, *, *> -> it.scheduleDateTime
                         .time
                         .timePair
                         .hourMinute
@@ -106,7 +106,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract val instanceShownRecord: InstanceShownRecord?
 
-    fun exists() = (instanceData is InstanceData.RealInstanceData)
+    fun exists() = (instanceData is InstanceData.Real)
 
     fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
@@ -118,8 +118,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         val taskHierarchies = task.getTaskHierarchiesByParentTaskKey(task.taskKey)
         val childInstances = HashMap<InstanceKey, Pair<Instance, TaskHierarchy>>()
         for (taskHierarchy in taskHierarchies) {
-            checkNotNull(taskHierarchy)
-
             val childTaskKey = taskHierarchy.childTaskKey
 
             if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {
@@ -147,7 +145,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     abstract fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp)
 
     fun createInstanceHierarchy(now: ExactTimeStamp) {
-        if (instanceData is InstanceData.RealInstanceData)
+        if (instanceData is InstanceData.Real)
             return
 
         getParentInstance(now)?.createInstanceHierarchy(now)
@@ -181,7 +179,8 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     }
 
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        return getParentInstance(now)?.isVisible(now, hack24) ?: (done?.let {
+        return !instanceData.hidden && (getParentInstance(now)?.isVisible(now, hack24)
+                ?: (done?.let {
             val cutoff = if (hack24) {
                 now.calendar
                         .apply { add(Calendar.DAY_OF_YEAR, -1) }
@@ -191,7 +190,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
             }
 
             (it > cutoff)
-        } ?: true)
+                } ?: true))
     }
 
     fun getParentInstance(now: ExactTimeStamp): Instance? {
@@ -226,6 +225,14 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     fun setOrdinal(ordinal: Double, now: ExactTimeStamp) {
         createInstanceHierarchy(now)
 
-        (instanceData as InstanceData.RealInstanceData).instanceRecord.ordinal = ordinal
+        (instanceData as InstanceData.Real).instanceRecord.ordinal = ordinal
+    }
+
+    fun hide(now: ExactTimeStamp) {
+        check(!instanceData.hidden)
+
+        createInstanceHierarchy(now)
+
+        (instanceData as InstanceData.Real).instanceRecord.hidden = true
     }
 }

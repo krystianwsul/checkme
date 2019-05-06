@@ -20,4 +20,6 @@ interface InstanceRecord<out T> {
     val done: Long?
 
     var ordinal: Double?
+
+    var hidden: Boolean
 }

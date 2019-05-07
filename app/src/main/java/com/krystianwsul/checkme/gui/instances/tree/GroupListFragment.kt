@@ -55,7 +55,7 @@ class GroupListFragment @JvmOverloads constructor(
         const val EXPANSION_STATE_KEY = "expansionState"
         private const val LAYOUT_MANAGER_STATE = "layoutManagerState"
         private const val EDIT_INSTANCES_TAG = "editInstances"
-        private const val KEY_IMAGE_STATE = "imageState"
+        private const val KEY_SHOW_IMAGE = "showImage"
 
         private fun rangePositionToDate(timeRange: MainActivity.TimeRange, position: Int): Date {
             check(position >= 0)
@@ -414,6 +414,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
+    private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
     private fun getShareData(selectedDatas: Collection<SelectedData>): String {
@@ -469,23 +470,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                 groupListRecycler.layoutManager!!.onRestoreInstanceState(state.getParcelable(LAYOUT_MANAGER_STATE))
 
-                if (containsKey(KEY_IMAGE_STATE)) {
-                    val imageState = getSerializable(KEY_IMAGE_STATE) as ImageState
-
-                    val viewer = StfalconImageViewer.Builder(context, listOf(imageState)) { view, image ->
-                        image.load(view)
-                    }
-                            .withDismissListener {
-                                checkNotNull(imageViewerData)
-
-                                imageViewerData = null
-                            }
-                            .show()
-
-                    check(imageViewerData == null)
-
-                    imageViewerData = Pair(imageState, viewer)
-                }
+                showImage = getBoolean(KEY_SHOW_IMAGE)
             }
 
             super.onRestoreInstanceState(state.getParcelable(SUPER_STATE_KEY))
@@ -553,7 +538,7 @@ class GroupListFragment @JvmOverloads constructor(
 
             putParcelable(LAYOUT_MANAGER_STATE, groupListRecycler.layoutManager!!.onSaveInstanceState())
 
-            imageViewerData?.let { putSerializable(KEY_IMAGE_STATE, it.first) }
+            putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
         }
     }
 
@@ -802,18 +787,23 @@ class GroupListFragment @JvmOverloads constructor(
                     state.expandedTaskKeys,
                     state.selectedTaskKeys,
                     imageState?.let {
-                        ImageNode.ImageData(it, { viewer ->
-                            check(groupListFragment.imageViewerData == null)
+                        ImageNode.ImageData(
+                                it,
+                                { viewer ->
+                                    check(groupListFragment.imageViewerData == null)
 
-                            groupListFragment.imageViewerData = Pair(it, viewer)
-                        },
+                                    groupListFragment.imageViewerData = Pair(it, viewer)
+                                },
                                 {
                                     checkNotNull(groupListFragment.imageViewerData)
 
                                     groupListFragment.imageViewerData = null
-                                })
+                                },
+                                groupListFragment.showImage)
                     })
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
+
+            groupListFragment.showImage = false
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(LayoutInflater.from(parent.context).inflate(R.layout.row_list, parent, false))

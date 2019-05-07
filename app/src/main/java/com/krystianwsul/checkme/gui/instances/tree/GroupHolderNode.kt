@@ -119,17 +119,22 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
                 taskImage.imageState.load(rowBigImage!!)
 
+                fun showImage() {
+                    val viewer = StfalconImageViewer.Builder(rowBigImage.context, listOf(taskImage.imageState), MyImageLoader)
+                            .withTransitionFrom(rowBigImage)
+                            .withDismissListener { taskImage.onDismiss() }
+                            .show()
+
+                    taskImage.onImageShown(viewer)
+                }
+
+                if (taskImage.showImage)
+                    showImage()
+
                 itemView.apply {
                     setOnLongClickListener(null)
 
-                    setOnClickListener {
-                        val viewer = StfalconImageViewer.Builder(context, listOf(taskImage.imageState), MyImageLoader)
-                                .withTransitionFrom(rowBigImage)
-                                .withDismissListener { taskImage.onDismiss() }
-                                .show()
-
-                        taskImage.onImageShown(viewer)
-                    }
+                    setOnClickListener { showImage() }
                 }
             } else {
                 rowContainer.visibility = View.VISIBLE
@@ -293,7 +298,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     private class StaleTreeNodeException : Exception()
 
-    private object MyImageLoader : ImageLoader<ImageState> {
+    object MyImageLoader : ImageLoader<ImageState> {
 
         override fun loadImage(imageView: ImageView?, image: ImageState?) {
             image!!.load(imageView!!)

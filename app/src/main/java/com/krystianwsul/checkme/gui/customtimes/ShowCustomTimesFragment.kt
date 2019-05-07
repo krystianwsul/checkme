@@ -53,7 +53,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val customTimeIds = selectedIds
-            check(!customTimeIds.isEmpty())
+            check(customTimeIds.isNotEmpty())
 
             when (itemId) {
                 R.id.action_custom_times_delete -> {
@@ -111,7 +111,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         if (savedInstanceState?.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY) == true) {
             selectedCustomTimeIds = savedInstanceState.getParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY)!!
-            check(!selectedCustomTimeIds!!.isEmpty())
+            check(selectedCustomTimeIds!!.isNotEmpty())
         }
 
         showCustomTimesViewModel = getViewModel<ShowCustomTimesViewModel>().apply {
@@ -172,7 +172,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         if (this::treeViewAdapter.isInitialized) {
             val selectedCustomTimeIds = selectedIds
-            if (!selectedCustomTimeIds.isEmpty())
+            if (selectedCustomTimeIds.isNotEmpty())
                 outState.putParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY, ArrayList(selectedCustomTimeIds))
         }
     }

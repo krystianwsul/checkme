@@ -25,7 +25,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
     private val groupListFragment get() = groupAdapter.groupListFragment
 
     fun initialize(expanded: Boolean, nodeContainer: NodeContainer, doneInstanceDatas: List<GroupListFragment.InstanceData>, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
-        check(!expanded || !doneInstanceDatas.isEmpty())
+        check(!expanded || doneInstanceDatas.isNotEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
 

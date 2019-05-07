@@ -15,7 +15,7 @@ class TickJobIntentService : JobIntentService() {
 
     companion object {
 
-        fun start(intent: Intent) = JobIntentService.enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
+        fun start(intent: Intent) = enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
 
         const val MAX_NOTIFICATIONS = 3
         const val GROUP_KEY = "group"
@@ -27,12 +27,12 @@ class TickJobIntentService : JobIntentService() {
 
         fun startServiceSilent(context: Context, source: String) {
             Preferences.logLineDate("TickJobIntentService.startServiceSilent from $source")
-            TickJobIntentService.start(getIntent(context, true, source))
+            start(getIntent(context, true, source))
         }
 
         fun startServiceNormal(context: Context, source: String) {
             Preferences.logLineDate("TickJobIntentService.startServiceNormal from $source")
-            TickJobIntentService.start(getIntent(context, false, source))
+            start(getIntent(context, false, source))
         }
 
         private fun getIntent(context: Context, silent: Boolean, source: String): Intent {

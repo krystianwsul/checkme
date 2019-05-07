@@ -41,7 +41,7 @@ class NotDoneGroupCollection(private val indentation: Int, val nodeCollection: N
     }
 
     private fun newNotDoneGroupNode(notDoneGroupCollection: NotDoneGroupCollection, instanceDatas: MutableList<GroupListFragment.InstanceData>, expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>): TreeNode {
-        check(!instanceDatas.isEmpty())
+        check(instanceDatas.isNotEmpty())
 
         val notDoneGroupNode = NotDoneGroupNode(indentation, notDoneGroupCollection, instanceDatas)
 

@@ -9,7 +9,7 @@ sealed class RemoteCustomTimeId : Serializable {
     abstract val value: String
 
     @Parcelize
-    data class Private(override val value: String) : RemoteCustomTimeId(), Parcelable, Comparable<RemoteCustomTimeId.Private> {
+    data class Private(override val value: String) : RemoteCustomTimeId(), Parcelable, Comparable<Private> {
 
         override fun toString() = value
 

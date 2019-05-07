@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 class ShowCustomTimesViewModel : DomainViewModel<ShowCustomTimesViewModel.Data>() {
 
-    override val domainListener = object : DomainListener<ShowCustomTimesViewModel.Data>() {
+    override val domainListener = object : DomainListener<Data>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getShowCustomTimesData()
     }

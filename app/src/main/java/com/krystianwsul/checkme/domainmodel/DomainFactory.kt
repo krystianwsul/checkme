@@ -2284,7 +2284,7 @@ open class DomainFactory(
         val taskHierarchies = remoteProjectFactory.remoteProjects
                 .map { it.value.taskHierarchies }
                 .flatten()
-        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(this, it) }
+        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
         val existingInstances = getExistingInstances()
         val rootInstances = getRootInstances(null, now.plusOne(), now)

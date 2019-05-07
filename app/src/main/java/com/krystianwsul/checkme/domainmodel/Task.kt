@@ -266,7 +266,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
         removeSchedules.forEach { it.setEndExactTimeStamp(now) }
 
-        if (!addScheduleDatas.isEmpty())
+        if (addScheduleDatas.isNotEmpty())
             addSchedules(addScheduleDatas, now)
     }
 

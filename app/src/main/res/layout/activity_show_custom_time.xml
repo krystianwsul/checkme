@@ -137,13 +137,14 @@
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields"
+                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_tuesday_time"
                         android:singleLine="true"
                         android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"/>
+                        android:textColor="@color/textPrimary"
+                        android:importantForAutofill="no" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -179,13 +180,14 @@
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields"
+                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_wednesday_time"
                         android:singleLine="true"
                         android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"/>
+                        android:textColor="@color/textPrimary"
+                        android:importantForAutofill="no" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -221,13 +223,14 @@
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields"
+                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_thursday_time"
                         android:singleLine="true"
                         android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"/>
+                        android:textColor="@color/textPrimary"
+                        android:importantForAutofill="no" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -263,13 +266,14 @@
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields"
+                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_friday_time"
                         android:singleLine="true"
                         android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"/>
+                        android:textColor="@color/textPrimary"
+                        android:importantForAutofill="no" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -305,13 +309,14 @@
                         android:focusable="false"
                         android:focusableInTouchMode="false"
                         android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields"
+                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_saturday_time"
                         android:singleLine="true"
                         android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"/>
+                        android:textColor="@color/textPrimary"
+                        android:importantForAutofill="no" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 

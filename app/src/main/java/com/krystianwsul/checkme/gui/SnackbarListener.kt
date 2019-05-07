@@ -19,7 +19,7 @@ interface SnackbarListener {
 
     val snackbarParent: CoordinatorLayout
 
-    val anchor get() = snackbarParent.findViewById<View>(R.id.bottomAnchor)
+    val anchor get() = snackbarParent.findViewById<View>(R.id.bottomAnchor)!!
 
     /*
     SHORT = 1500

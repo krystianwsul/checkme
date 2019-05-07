@@ -78,7 +78,7 @@ class SingleScheduleEntry : ScheduleEntry {
         return mDate.getDisplayText() + ", " + if (mTimePair.customTimeKey != null) {
             check(mTimePair.hourMinute == null)
 
-            val customTimeData = customTimeDatas[mTimePair.customTimeKey]!!
+            val customTimeData = customTimeDatas.getValue(mTimePair.customTimeKey)
 
             customTimeData.name + " (" + customTimeData.hourMinutes[mDate.dayOfWeek] + ")"
         } else {

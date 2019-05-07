@@ -134,7 +134,7 @@ fun Context.startTicks(receiver: BroadcastReceiver) {
     registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
 }
 
-fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }
+fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }!!
 
 fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: Any? = null) {
     fun getTaskKeys() = Pair(ExactTimeStamp.now, domainFactory.remoteProjectFactory

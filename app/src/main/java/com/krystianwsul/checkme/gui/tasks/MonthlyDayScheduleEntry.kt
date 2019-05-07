@@ -18,6 +18,7 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
 
     companion object {
 
+        @Suppress("unused")
         @JvmField
         val CREATOR: Parcelable.Creator<MonthlyDayScheduleEntry> = object : Parcelable.Creator<MonthlyDayScheduleEntry> {
 
@@ -74,7 +75,7 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
         return "$day, " + if (timePair.customTimeKey != null) {
             check(timePair.hourMinute == null)
 
-            val customTimeData = customTimeDatas[timePair.customTimeKey]!!
+            val customTimeData = customTimeDatas.getValue(timePair.customTimeKey)
 
             customTimeData.name
         } else {

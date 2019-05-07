@@ -14,7 +14,7 @@ class ShowNotificationGroupViewModel : DomainViewModel<ShowNotificationGroupView
     }
 
     fun start(instanceKeys: Set<InstanceKey>) {
-        check(!instanceKeys.isEmpty())
+        check(instanceKeys.isNotEmpty())
 
         this.instanceKeys = instanceKeys
 

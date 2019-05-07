@@ -18,7 +18,7 @@ class RemoteFriendManager(private val domainFactory: DomainFactory, children: It
 
         remoteRootUserRecords.values.forEach { it.getValues(values) }
 
-        if (!values.isEmpty()) {
+        if (values.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = true

@@ -13,7 +13,7 @@ class EditInstanceViewModel : DomainViewModel<EditInstanceViewModel.Data>() {
 
     private lateinit var instanceKey: InstanceKey
 
-    override val domainListener = object : DomainListener<EditInstanceViewModel.Data>() {
+    override val domainListener = object : DomainListener<Data>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getEditInstanceData(instanceKey)
     }

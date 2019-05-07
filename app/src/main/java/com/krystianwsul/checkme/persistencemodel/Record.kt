@@ -65,7 +65,7 @@ abstract class Record(private var created: Boolean) {
 
             changed = false
 
-            return UpdateCommand(commandTable, contentValues, commandIdColumn + " = " + commandId)
+            return UpdateCommand(commandTable, contentValues, "$commandIdColumn = $commandId")
         }
 
     val deleteCommand: DeleteCommand
@@ -77,7 +77,7 @@ abstract class Record(private var created: Boolean) {
 
             deleted = false
 
-            return DeleteCommand(commandTable, commandIdColumn + " = " + commandId)
+            return DeleteCommand(commandTable, "$commandIdColumn = $commandId")
         }
 
     fun needsInsert() = !created

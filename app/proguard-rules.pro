@@ -49,3 +49,6 @@
 -keep class com.google.firebase.** { *; }
 
 -dontwarn com.google.auto.value.AutoValue
+
+-dontwarn com.androidhuman.rxfirebase2.auth.FetchProvidersForEmailObserver
+-dontwarn com.androidhuman.rxfirebase2.auth.FetchProvidersForEmailObserver$Listener

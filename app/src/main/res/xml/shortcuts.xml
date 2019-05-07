@@ -58,4 +58,9 @@
 
     </shortcut>
 
+    <share-target android:targetClass="com.krystianwsul.checkme.gui.tasks.CreateTaskActivity">
+        <data android:mimeType="text/plain" />
+        <category android:name="ADD_TO_LIST" />
+    </share-target>
+
 </shortcuts>

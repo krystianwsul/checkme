@@ -91,4 +91,5 @@
     <string name="camera">Zrób zdjęcie</string>
     <string name="gallery">Wybierz obraz</string>
     <string name="remove">Usuń obraz</string>
+    <string name="addTo">Dodaj do</string>
 </resources>

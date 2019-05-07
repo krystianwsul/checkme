@@ -2,12 +2,16 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.net.Uri
 import android.os.Build
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.google.firebase.database.DataSnapshot
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.*
@@ -16,6 +20,7 @@ import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -136,6 +141,8 @@ open class DomainFactory(
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
         tryNotifyListeners("DomainFactory.init")
+
+        updateShortcuts()
     }
 
     private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
@@ -167,6 +174,36 @@ open class DomainFactory(
             domainChanged.accept(dataIds)
     }
 
+    private fun updateShortcuts() {
+        val now = ExactTimeStamp.now
+
+        val allKeys = Preferences.shortcuts.map { TaskKey.fromShortcut(it) }
+        val shortcutTasks = allKeys.mapNotNull(::getTaskIfPresent).filter { it.current(now) }
+
+        val removeKeys = allKeys - shortcutTasks.map { it.taskKey }
+        Preferences.shortcuts = Preferences.shortcuts - removeKeys.map { it.toShortcut() }
+
+        val shortcuts = shortcutTasks.map {
+            val taskKey = it.taskKey
+
+            ShortcutInfoCompat.Builder(MyApplication.instance, taskKey.toShortcut())
+                    .setShortLabel(MyApplication.instance.getString(R.string.addTo) + " " + it.name)
+                    .setIcon(IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add))
+                    .setCategories(setOf("ADD_TO_LIST"))
+                    .setIntent(CreateTaskActivity.getShortcutIntent(taskKey))
+                    .build()
+        }
+
+        /* todo 29 remove shortcuts selectively
+        val allShortcuts = ShortcutManagerCompat.getDynamicShortcuts(MyApplication.instance).map { it.id }
+        val removeShortcuts = allShortcuts - shortcuts.map { it.id }
+        */
+
+        ShortcutManagerCompat.removeAllDynamicShortcuts(MyApplication.instance)
+
+        ShortcutManagerCompat.addDynamicShortcuts(MyApplication.instance, shortcuts)
+    }
+
     // firebase
 
     @Synchronized
@@ -175,6 +212,8 @@ open class DomainFactory(
     @Synchronized
     fun updatePrivateProjectRecord(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("updatePrivateProjectRecord")
+
+        updateShortcuts()
 
         val start = ExactTimeStamp.now
 
@@ -197,6 +236,8 @@ open class DomainFactory(
     @Synchronized
     fun updateSharedProjectRecords(childEvent: ChildEvent) {
         MyCrashlytics.log("updateSharedProjectRecord")
+
+        updateShortcuts()
 
         if (remoteProjectFactory.isSharedSaved) {
             remoteProjectFactory.isSharedSaved = false

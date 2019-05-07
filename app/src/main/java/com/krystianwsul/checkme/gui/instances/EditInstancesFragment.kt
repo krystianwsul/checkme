@@ -287,7 +287,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         checkNotNull(date)
 
         if (timePairPersist!!.customTimeKey != null) {
-            val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!) // todo crashes on adding time through menu
+            val customTimeData = data!!.customTimeDatas.getValue(timePairPersist!!.customTimeKey!!)
 
             myView.editInstanceTime.setText(customTimeData.name + " (" + customTimeData.hourMinutes[date!!.dayOfWeek] + ")")
         } else {

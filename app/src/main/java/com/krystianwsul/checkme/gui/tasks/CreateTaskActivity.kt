@@ -10,6 +10,7 @@ import android.os.Parcelable
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -21,6 +22,7 @@ import com.google.common.collect.HashMultiset
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ImageState
@@ -62,6 +64,9 @@ class CreateTaskActivity : AbstractActivity() {
         private const val PARENT_TASK_KEY_HINT_KEY = "parentTaskKeyHint"
         private const val SCHEDULE_HINT_KEY = "scheduleHint"
         private const val KEY_REMOVE_INSTANCE_KEYS = "removeInstanceKeys"
+        private const val KEY_PARENT_PROJECT = "parentProject"
+        private const val KEY_PARENT_TASK = "parentTask"
+        private const val KEY_SHORTCUT_ID = "android.intent.extra.shortcut.ID"
 
         private const val PARENT_KEY_KEY = "parentKey"
         private const val PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment"
@@ -82,6 +87,12 @@ class CreateTaskActivity : AbstractActivity() {
         fun getCreateIntent(context: Context, scheduleHint: ScheduleHint) = Intent(context, CreateTaskActivity::class.java).apply { putExtra(SCHEDULE_HINT_KEY, scheduleHint) }
 
         fun getCreateIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable) }
+
+        fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+            action = Intent.ACTION_DEFAULT
+            putExtra(KEY_PARENT_PROJECT, parentTaskKeyHint.remoteProjectId)
+            putExtra(KEY_PARENT_TASK, parentTaskKeyHint.remoteTaskId)
+        }
 
         fun getJoinIntent(joinTaskKeys: List<TaskKey>, parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             check(joinTaskKeys.size > 1)
@@ -337,6 +348,9 @@ class CreateTaskActivity : AbstractActivity() {
 
                             val parentTaskKey = (parent!!.parentKey as CreateTaskViewModel.ParentKey.TaskParentKey).taskKey
 
+                            if (intent.action == Intent.ACTION_SEND)
+                                Preferences.shortcuts = Preferences.shortcuts + parentTaskKey.toShortcut()
+
                             when {
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
@@ -463,26 +477,51 @@ class CreateTaskActivity : AbstractActivity() {
 
         intent.run {
             if (hasExtra(TASK_KEY_KEY)) {
+                Log.e("asdf", "shortcut a")
                 check(!hasExtra(TASK_KEYS_KEY))
                 check(!hasExtra(PARENT_TASK_KEY_HINT_KEY))
                 check(!hasExtra(SCHEDULE_HINT_KEY))
 
                 taskKey = getParcelableExtra(TASK_KEY_KEY)!!
-            } else if (action == Intent.ACTION_SEND) {
-                check(type == "text/plain")
-
-                nameHint = getStringExtra(Intent.EXTRA_TEXT)!!
-                check(!nameHint.isNullOrEmpty())
             } else {
+                Log.e("asdf", "shortcut b")
+                if (action == Intent.ACTION_SEND) {
+                    Log.e("asdf", "shortcut c")
+                    check(type == "text/plain")
+
+                    nameHint = getStringExtra(Intent.EXTRA_TEXT)!!
+                    check(!nameHint.isNullOrEmpty())
+                }
+
+                Log.e("asdf", "shortcut keys: " + extras?.keySet()?.joinToString(","))
+
                 if (hasExtra(TASK_KEYS_KEY))
                     taskKeys = getParcelableArrayListExtra<TaskKey>(TASK_KEYS_KEY)!!.apply { check(size > 1) }
 
-                if (hasExtra(PARENT_TASK_KEY_HINT_KEY)) {
-                    check(!hasExtra(SCHEDULE_HINT_KEY))
+                when {
+                    hasExtra(PARENT_TASK_KEY_HINT_KEY) -> {
+                        Log.e("asdf", "shortcut d")
+                        check(!hasExtra(KEY_PARENT_PROJECT))
+                        check(!hasExtra(KEY_PARENT_TASK))
+                        check(!hasExtra(SCHEDULE_HINT_KEY))
+                        check(!hasExtra(KEY_SHORTCUT_ID))
 
-                    parentTaskKeyHint = getParcelableExtra(PARENT_TASK_KEY_HINT_KEY)!!
-                } else if (hasExtra(SCHEDULE_HINT_KEY)) {
-                    scheduleHint = getParcelableExtra(SCHEDULE_HINT_KEY)!!
+                        parentTaskKeyHint = getParcelableExtra(PARENT_TASK_KEY_HINT_KEY)!!
+                    }
+                    hasExtra(KEY_PARENT_PROJECT) -> {
+                        Log.e("asdf", "shortcut e")
+                        check(hasExtra(KEY_PARENT_TASK))
+                        check(!hasExtra(SCHEDULE_HINT_KEY))
+                        check(!hasExtra(KEY_SHORTCUT_ID))
+
+                        parentTaskKeyHint = TaskKey(getStringExtra(KEY_PARENT_PROJECT), getStringExtra(KEY_PARENT_TASK))
+                    }
+                    hasExtra(KEY_SHORTCUT_ID) -> {
+                        check(!hasExtra(SCHEDULE_HINT_KEY))
+
+                        parentTaskKeyHint = TaskKey.fromShortcut(getStringExtra(KEY_SHORTCUT_ID))
+                    }
+                    hasExtra(SCHEDULE_HINT_KEY) -> scheduleHint = getParcelableExtra(SCHEDULE_HINT_KEY)!!
                 }
             }
 
@@ -573,7 +612,6 @@ class CreateTaskActivity : AbstractActivity() {
                 } else if (!TextUtils.isEmpty(nameHint)) {
                     check(taskKey == null)
                     check(taskKeys == null)
-                    check(parentTaskKeyHint == null)
                     check(scheduleHint == null)
 
                     setText(nameHint)

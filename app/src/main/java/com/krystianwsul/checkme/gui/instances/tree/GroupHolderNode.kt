@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -18,6 +19,7 @@ import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
+import com.stfalcon.imageviewer.loader.ImageLoader
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
@@ -121,9 +123,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     setOnLongClickListener(null)
 
                     setOnClickListener {
-                        val viewer = StfalconImageViewer.Builder(context, listOf(taskImage.imageState)) { view, image ->
-                            image.load(view)
-                        }
+                        val viewer = StfalconImageViewer.Builder(context, listOf(taskImage.imageState), MyImageLoader)
                                 .withTransitionFrom(rowBigImage)
                                 .withDismissListener { taskImage.onDismiss() }
                                 .show()
@@ -292,4 +292,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
     }
 
     private class StaleTreeNodeException : Exception()
+
+    private object MyImageLoader : ImageLoader<ImageState> {
+
+        override fun loadImage(imageView: ImageView?, image: ImageState?) {
+            image!!.load(imageView!!)
+        }
+    }
 }

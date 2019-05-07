@@ -39,5 +39,6 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
     class ImageData(
             val imageState: ImageState,
             val onImageShown: (StfalconImageViewer<ImageState>) -> Unit,
-            val onDismiss: () -> Unit)
+            val onDismiss: () -> Unit,
+            val showImage: Boolean)
 }

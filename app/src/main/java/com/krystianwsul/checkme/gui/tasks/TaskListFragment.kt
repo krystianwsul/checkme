@@ -39,7 +39,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         private const val SELECTED_TASK_KEYS_KEY = "selectedTaskKeys"
         private const val EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys"
         private const val QUERY_KEY = "query"
-        private const val KEY_IMAGE_STATE = "imageState"
+        private const val KEY_SHOW_IMAGE = "showImage"
 
         fun newInstance() = TaskListFragment()
     }
@@ -207,6 +207,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
     private val taskListListener get() = activity as TaskListListener
 
+    private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
@@ -254,23 +255,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             query = getString(QUERY_KEY)!!
 
-            if (containsKey(KEY_IMAGE_STATE)) {
-                val imageState = getSerializable(KEY_IMAGE_STATE) as ImageState
-
-                val viewer = StfalconImageViewer.Builder(context, listOf(imageState)) { view, image ->
-                    image.load(view)
-                }
-                        .withDismissListener {
-                            checkNotNull(imageViewerData)
-
-                            imageViewerData = null
-                        }
-                        .show()
-
-                check(imageViewerData == null)
-
-                imageViewerData = Pair(imageState, viewer)
-            }
+            showImage = getBoolean(KEY_SHOW_IMAGE)
         }
     }
 
@@ -407,7 +392,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             putString(QUERY_KEY, query)
 
-            imageViewerData?.let { putSerializable(KEY_IMAGE_STATE, it.first) }
+            putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
         }
     }
 
@@ -480,16 +465,22 @@ class TaskListFragment : AbstractFragment(), FabUser {
             taskListFragment.rootTaskData
                     ?.imageState
                     ?.let {
-                        treeNodes.add(ImageNode(ImageNode.ImageData(it, { viewer ->
-                            check(taskListFragment.imageViewerData == null)
+                        treeNodes.add(ImageNode(ImageNode.ImageData(
+                                it,
+                                { viewer ->
+                                    check(taskListFragment.imageViewerData == null)
 
-                            taskListFragment.imageViewerData = Pair(it, viewer)
-                        }, {
-                            checkNotNull(taskListFragment.imageViewerData)
+                                    taskListFragment.imageViewerData = Pair(it, viewer)
+                                },
+                                {
+                                    checkNotNull(taskListFragment.imageViewerData)
 
-                            taskListFragment.imageViewerData = null
-                        })).initialize(treeNodeCollection))
+                                    taskListFragment.imageViewerData = null
+                                },
+                                taskListFragment.showImage)).initialize(treeNodeCollection))
                     }
+
+            taskListFragment.showImage = false
 
             taskWrappers = mutableListOf()
             for (childTaskData in taskData.childTaskDatas) {

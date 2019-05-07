@@ -21,9 +21,9 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
         }
     }
 
-    override fun onHandleIntent(intent: Intent) {
-        val instanceKeys = intent.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!
-        check(!instanceKeys.isEmpty())
+    override fun onHandleIntent(intent: Intent?) {
+        val instanceKeys = intent!!.getParcelableArrayListExtra<InstanceKey>(INSTANCES_KEY)!!
+        check(instanceKeys.isNotEmpty())
 
         DomainFactory.addFirebaseListener { it.setInstancesNotified(SaveService.Source.SERVICE, instanceKeys) }
     }

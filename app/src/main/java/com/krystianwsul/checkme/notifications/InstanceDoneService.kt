@@ -22,8 +22,8 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         }
     }
 
-    override fun onHandleIntent(intent: Intent) {
-        check(intent.hasExtra(INSTANCE_KEY))
+    override fun onHandleIntent(intent: Intent?) {
+        check(intent!!.hasExtra(INSTANCE_KEY))
         check(intent.hasExtra(NOTIFICATION_ID_KEY))
 
         val instanceKey = intent.getParcelableExtra<InstanceKey>(INSTANCE_KEY)!!

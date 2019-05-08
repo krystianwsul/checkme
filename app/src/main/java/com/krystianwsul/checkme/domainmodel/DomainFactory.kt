@@ -183,7 +183,7 @@ open class DomainFactory(
         val removeKeys = allKeys - shortcutTasks.map { it.taskKey }
         Preferences.shortcuts = Preferences.shortcuts - removeKeys.map { it.toShortcut() }
 
-        val shortcuts = shortcutTasks.map {
+        val shortcuts = shortcutTasks.filter { it.isVisible(now, true) }.map {
             val taskKey = it.taskKey
 
             ShortcutInfoCompat.Builder(MyApplication.instance, taskKey.toShortcut())

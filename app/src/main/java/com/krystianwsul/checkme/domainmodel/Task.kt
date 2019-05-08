@@ -71,17 +71,18 @@ abstract class Task(protected val domainFactory: DomainFactory) {
     }
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        if (current(now)) {
-            val rootTask = getRootTask(now)
+        if (!current(now))
+            return false
 
-            val schedules = rootTask.getCurrentSchedules(now)
+        val rootTask = getRootTask(now)
 
-            if (schedules.isEmpty())
-                return true
+        val schedules = rootTask.getCurrentSchedules(now)
 
-            if (schedules.any { it.isVisible(this, now, hack24) })
-                return true
-        }
+        if (schedules.isEmpty())
+            return true
+
+        if (schedules.any { it.isVisible(this, now, hack24) })
+            return true
 
         return false
     }// bo inheritance i testy

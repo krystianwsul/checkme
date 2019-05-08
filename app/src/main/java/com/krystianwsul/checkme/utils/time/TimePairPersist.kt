@@ -9,6 +9,7 @@ class TimePairPersist private constructor(var customTimeKey: CustomTimeKey<*>?, 
 
     companion object {
 
+        @Suppress("unused")
         @JvmField
         val CREATOR: Parcelable.Creator<TimePairPersist> = object : Parcelable.Creator<TimePairPersist> {
             override fun createFromParcel(source: Parcel): TimePairPersist {

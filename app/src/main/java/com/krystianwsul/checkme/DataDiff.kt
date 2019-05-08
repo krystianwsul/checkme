@@ -26,7 +26,7 @@ object DataDiff {
 
         for (instanceKey in instanceKeys) {
             if (!oldInstanceDatas.keys.contains(instanceKey)) {
-                sDiff.add(indent + newInstanceDatas[instanceKey]!!.name + " missing from oldData")
+                sDiff.add(indent + newInstanceDatas.getValue(instanceKey).name + " missing from oldData")
                 continue
             }
 

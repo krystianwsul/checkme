@@ -81,7 +81,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
 
         override fun getItemCount() = data!!.friendDatas.size
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendListAdapter.FriendHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendHolder {
             val friendRow = requireActivity().layoutInflater.inflate(R.layout.row_friend, parent, false)
 
             val friendImage = friendRow.friendImage
@@ -91,7 +91,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
             return FriendHolder(friendRow, friendImage, friendName, friendEmail)
         }
 
-        override fun onBindViewHolder(friendHolder: FriendListAdapter.FriendHolder, position: Int) {
+        override fun onBindViewHolder(friendHolder: FriendHolder, position: Int) {
             val friendData = data!!.friendDatas[position]
 
             friendHolder.friendImage.loadPhoto(friendData.photoUrl)

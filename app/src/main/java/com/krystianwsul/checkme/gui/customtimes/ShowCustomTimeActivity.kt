@@ -97,7 +97,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_save -> {
-                check(!hourMinutes.isEmpty())
+                check(hourMinutes.isNotEmpty())
 
                 updateError()
 
@@ -213,7 +213,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        if (!hourMinutes.isEmpty()) {
+        if (hourMinutes.isNotEmpty()) {
             outState.run {
                 putParcelable(HOUR_MINUTE_SUNDAY_KEY, hourMinutes[DayOfWeek.SUNDAY])
                 putParcelable(HOUR_MINUTE_MONDAY_KEY, hourMinutes[DayOfWeek.MONDAY])
@@ -229,7 +229,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
     }
 
     private fun updateGui() {
-        check(!hourMinutes.isEmpty())
+        check(hourMinutes.isNotEmpty())
 
         toolbarLayout.visibility = View.VISIBLE
         showCustomTimeContainer.visibility = View.VISIBLE

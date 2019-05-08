@@ -39,7 +39,7 @@ data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
 
     override fun compareTo(other: TimeStamp) = long.compareTo(other.long)
 
-    override fun toString() = date.toString() + " " + hourMinute
+    override fun toString() = "$date $hourMinute"
 
     fun toExactTimeStamp() = ExactTimeStamp(long)
 }

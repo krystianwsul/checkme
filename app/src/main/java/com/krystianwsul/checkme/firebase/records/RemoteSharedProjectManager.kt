@@ -46,7 +46,7 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
 
         MyCrashlytics.log("RemoteSharedProjectManager.save values: $values")
 
-        if (!values.isEmpty()) {
+        if (values.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = true

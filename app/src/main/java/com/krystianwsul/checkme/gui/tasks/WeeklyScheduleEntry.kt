@@ -59,7 +59,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
         return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
             check(timePair.hourMinute == null)
 
-            customTimeDatas[timePair.customTimeKey]!!.name
+            customTimeDatas.getValue(timePair.customTimeKey).name
         } else {
             timePair.hourMinute!!.toString()
         }

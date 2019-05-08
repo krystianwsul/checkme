@@ -107,7 +107,7 @@ abstract class DragHelper(callback: MyCallback = MyCallback()) : ItemTouchHelper
         }
     }
 
-    class MyCallback : SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+    class MyCallback : SimpleCallback(UP or DOWN, 0) {
 
         lateinit var dragHelper: DragHelper
 

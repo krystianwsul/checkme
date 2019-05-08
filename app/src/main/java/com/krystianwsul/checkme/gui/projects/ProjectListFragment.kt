@@ -55,7 +55,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val selected = treeViewAdapter.selectedNodes
-            check(!selected.isEmpty())
+            check(selected.isNotEmpty())
 
             val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
             val projectDatas = projectNodes.map { it.projectData }
@@ -209,11 +209,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private fun updateSelectAll() {
-        checkNotNull(treeViewAdapter)
-
-        mainActivity.setProjectSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
-    }
+    private fun updateSelectAll() = mainActivity.setProjectSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
     override fun clearFab() {
         projectListFab = null

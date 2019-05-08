@@ -59,7 +59,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val selectedUserDataEmails = treeViewAdapter.selectedNodes
-            check(!selectedUserDataEmails.isEmpty())
+            check(selectedUserDataEmails.isNotEmpty())
 
             when (itemId) {
                 R.id.action_friends_delete -> {
@@ -162,11 +162,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
             treeViewAdapter.let { outState.putStringArrayList(SELECTED_IDS_KEY, ArrayList(getSelectedIds())) }
     }
 
-    private fun updateSelectAll() {
-        checkNotNull(treeViewAdapter)
-
-        (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
-    }
+    private fun updateSelectAll() = (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
     fun selectAll(x: TreeViewAdapter.Placeholder) = treeViewAdapter.selectAll(x)
 

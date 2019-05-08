@@ -84,7 +84,7 @@ class TutorialActivity : AbstractActivity() {
                         TutorialViewModel.State.Initial -> animateVisibility(tutorialLayout, tutorialProgress)
                         TutorialViewModel.State.Progress -> animateVisibility(tutorialProgress, tutorialLayout)
                         is TutorialViewModel.State.Success -> {
-                            AbstractActivity.setSnackbar(object : SnackbarData {
+                            setSnackbar(object : SnackbarData {
 
                                 override fun show(snackbarListener: SnackbarListener) {
                                     snackbarListener.showText(getString(R.string.signInAs) + " " + it.displayName, Snackbar.LENGTH_SHORT)

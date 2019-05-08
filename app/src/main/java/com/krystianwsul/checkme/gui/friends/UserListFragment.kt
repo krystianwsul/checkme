@@ -194,10 +194,10 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
-        if (!saveState.addedIds.isEmpty())
+        if (saveState.addedIds.isNotEmpty())
             return true
 
-        return !saveState.removedIds.isEmpty()
+        return saveState.removedIds.isNotEmpty()
     }
 
     fun save(name: String) {
@@ -248,11 +248,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private fun getSelected() = treeViewAdapter.selectedNodes.map { (it.modelNode as UserNode) }
 
-    private fun updateSelectAll() {
-        checkNotNull(treeViewAdapter)
-
-        listener.setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
-    }
+    private fun updateSelectAll() = listener.setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
     inner class FriendListAdapter : TreeModelAdapter {
 
@@ -270,7 +266,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
             saveState.removedIds.forEach { userListMap.remove(it) }
 
-            if (!saveState.addedIds.isEmpty()) {
+            if (saveState.addedIds.isNotEmpty()) {
                 userListMap.putAll(data!!.friendDatas.values
                         .filter { saveState.addedIds.contains(it.id) }
                         .associateBy { it.id })

@@ -21,22 +21,22 @@ class InstanceShownRecord(
 
     companion object {
 
-        val TABLE_INSTANCES_SHOWN = "instancesShown"
+        const val TABLE_INSTANCES_SHOWN = "instancesShown"
 
-        val COLUMN_ID = "_id"
-        val COLUMN_TASK_ID = "taskId"
-        val COLUMN_SCHEDULE_YEAR = "scheduleYear"
-        val COLUMN_SCHEDULE_MONTH = "scheduleMonth"
-        val COLUMN_SCHEDULE_DAY = "scheduleDay"
-        val COLUMN_SCHEDULE_CUSTOM_TIME_ID = "scheduleCustomTimeId"
-        val COLUMN_SCHEDULE_HOUR = "scheduleHour"
-        val COLUMN_SCHEDULE_MINUTE = "scheduleMinute"
-        val COLUMN_NOTIFIED = "notified"
-        val COLUMN_NOTIFICATION_SHOWN = "notificationShown"
-        val COLUMN_PROJECT_ID = "projectId"
+        const val COLUMN_ID = "_id"
+        const val COLUMN_TASK_ID = "taskId"
+        const val COLUMN_SCHEDULE_YEAR = "scheduleYear"
+        const val COLUMN_SCHEDULE_MONTH = "scheduleMonth"
+        const val COLUMN_SCHEDULE_DAY = "scheduleDay"
+        const val COLUMN_SCHEDULE_CUSTOM_TIME_ID = "scheduleCustomTimeId"
+        const val COLUMN_SCHEDULE_HOUR = "scheduleHour"
+        const val COLUMN_SCHEDULE_MINUTE = "scheduleMinute"
+        const val COLUMN_NOTIFIED = "notified"
+        const val COLUMN_NOTIFICATION_SHOWN = "notificationShown"
+        const val COLUMN_PROJECT_ID = "projectId"
 
-        val INDEX_HOUR_MINUTE = "instanceShownIndexTaskScheduleHourMinute"
-        val INDEX_CUSTOM_TIME_ID = "instanceShownIndexTaskScheduleCustomTimeId"
+        private const val INDEX_HOUR_MINUTE = "instanceShownIndexTaskScheduleHourMinute"
+        private const val INDEX_CUSTOM_TIME_ID = "instanceShownIndexTaskScheduleCustomTimeId"
 
         fun onCreate(sqLiteDatabase: SQLiteDatabase) {
             sqLiteDatabase.execSQL("CREATE TABLE $TABLE_INSTANCES_SHOWN " +
@@ -93,7 +93,7 @@ class InstanceShownRecord(
             InstanceShownRecord(true, id, taskId, scheduleYear, scheduleMonth, scheduleDay, scheduleCustomTimeId, scheduleHour, scheduleMinute, notified, notificationShown, projectId)
         }
 
-        fun getMaxId(sqLiteDatabase: SQLiteDatabase) = Record.getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID)
+        fun getMaxId(sqLiteDatabase: SQLiteDatabase) = getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID)
     }
 
     var notified by observable(mNotified) { _, _, _ -> changed = true }

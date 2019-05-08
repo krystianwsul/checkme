@@ -40,7 +40,7 @@ class RemotePrivateProjectManager(
 
         MyCrashlytics.log("RemotePrivateProjectManager.save values: $values")
 
-        if (!values.isEmpty()) {
+        if (values.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = true

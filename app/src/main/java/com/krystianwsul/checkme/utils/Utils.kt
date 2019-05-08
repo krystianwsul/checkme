@@ -31,7 +31,7 @@ object Utils {
         return if (beginningOfMonth) {
             Date(year, month, dayOfMonth)
         } else {
-            Date(year, month, Utils.getDaysInMonth(year, month) - dayOfMonth + 1)
+            Date(year, month, getDaysInMonth(year, month) - dayOfMonth + 1)
         }
     }
 
@@ -102,4 +102,4 @@ fun <T> Task<T>.toSingle() = Single.create<NullableWrapper<T>> { subscriber ->
             null
         }))
     }
-}
+}!!

@@ -41,7 +41,7 @@ class RemoteUserManager(
 
         MyCrashlytics.log("RemoteUserManager.save values: $values")
 
-        if (!values.isEmpty()) {
+        if (values.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = true

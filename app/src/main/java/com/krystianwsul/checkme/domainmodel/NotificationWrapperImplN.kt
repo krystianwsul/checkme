@@ -51,7 +51,7 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
     }
 
     override fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
-        check(!lines.isEmpty())
+        check(lines.isNotEmpty())
 
         val max = 5
 

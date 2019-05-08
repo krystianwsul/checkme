@@ -15,7 +15,7 @@ class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteSer
         private const val INSTANCES_KEY = "instanceKeys"
 
         fun getIntent(context: Context, instanceKeys: ArrayList<InstanceKey>) = Intent(context, GroupNotificationDeleteService::class.java).apply {
-            check(!instanceKeys.isEmpty())
+            check(instanceKeys.isNotEmpty())
 
             putParcelableArrayListExtra(INSTANCES_KEY, instanceKeys)
         }

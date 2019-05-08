@@ -22,7 +22,7 @@ class BackendNotifierTest {
         PowerMockito.`when`<String>(TextUtils.join(any(String::class.java), any(List::class.java))).thenAnswer { invocation ->
             val separator = invocation.arguments[0] as String
             val list = invocation.arguments[1] as List<*>
-            Assert.assertTrue(!list.isEmpty())
+            Assert.assertTrue(list.isNotEmpty())
 
             val answer = StringBuilder()
             answer.append(list[0])

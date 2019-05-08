@@ -22,7 +22,7 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
     fun initialize(nodeContainer: NodeContainer): TreeNode {
         this.nodeContainer = nodeContainer
 
-        treeNode = TreeNode(this, nodeContainer, false, false)
+        treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
         treeNode.setChildTreeNodes(listOf())
 
         return treeNode

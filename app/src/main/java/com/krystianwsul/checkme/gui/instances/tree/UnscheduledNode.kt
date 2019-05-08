@@ -25,7 +25,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
     private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
     fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>): TreeNode {
-        check(!expanded || !taskDatas.isEmpty())
+        check(!expanded || taskDatas.isNotEmpty())
 
         this.taskDatas = taskDatas
 

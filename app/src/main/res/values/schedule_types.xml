@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="schedule_types">
-        <item>Single</item>
+        <item>Once</item>
         <item>Weekly</item>
         <item>Monthly</item>
     </string-array>

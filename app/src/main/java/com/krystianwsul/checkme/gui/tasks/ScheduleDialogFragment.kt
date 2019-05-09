@@ -15,10 +15,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.DatePickerDialogFragment
-import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
-import com.krystianwsul.checkme.gui.TimeDialogFragment
-import com.krystianwsul.checkme.gui.TimePickerDialogFragment
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
@@ -50,7 +47,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    private lateinit var mScheduleType: Spinner
+    private lateinit var mScheduleType: MySpinner
 
     private lateinit var mScheduleDialogDateLayout: TextInputLayout
     private lateinit var mScheduleDialogDate: TextView
@@ -142,6 +139,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             return TimeStamp(scheduleDialogData.date, hourMinute) > TimeStamp.now
         }
 
+    private fun AutoCompleteTextView.makeSpinner(items: List<*>) {
+        setAdapter(ArrayAdapter(requireContext(), R.layout.cat_exposed_dropdown_popup_item, items))
+    }
+
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         check(arguments!!.containsKey(SHOW_DELETE_KEY))
@@ -151,8 +152,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             mScheduleDialogDateLayout = scheduleDialogDateLayout
             mScheduleDialogDate = scheduleDialogDate
             mScheduleDialogDayLayout = scheduleDialogDayLayout
-
-            magic.setAdapter(ArrayAdapter(requireContext(), R.layout.cat_exposed_dropdown_popup_item, (1..28).map { Utils.ordinal(it) }))
 
             mScheduleDialogDays[DayOfWeek.SUNDAY] = scheduleDialogSunday
             mScheduleDialogDays[DayOfWeek.MONDAY] = scheduleDialogMonday
@@ -219,16 +218,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 ?: arguments!!).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
 
         mScheduleType.run {
-            adapter = ArrayAdapter.createFromResource(requireContext(), R.array.schedule_types, R.layout.spinner_no_padding).apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+            text.makeSpinner(resources.getStringArray(R.array.schedule_types).toList())
 
-            setSelection(when (scheduleDialogData.scheduleType) {
+            text.setSelection(when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> 0
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> 1
                 ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 2
             })
 
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            text.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, i: Int, l: Long) {
                     scheduleDialogData.scheduleType = when (i) {
                         0 -> ScheduleType.SINGLE

@@ -56,4 +56,6 @@
     <style name="BottomNavigationDrawer" parent="Widget.Design.NavigationView">
         <item name="android:listDivider">@color/navigationDivider</item>
     </style>
+
+    <style name="MySpinner" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu" />
 </resources>

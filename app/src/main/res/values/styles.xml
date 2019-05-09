@@ -68,5 +68,7 @@
         <item name="android:singleLine">true</item>
         <item name="android:textSize">@dimen/textPrimary</item>
         <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:cursorVisible">false</item>
     </style>
+
 </resources>

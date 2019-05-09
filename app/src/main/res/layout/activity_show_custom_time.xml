@@ -45,14 +45,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
+                    <AutoCompleteTextView
+                        android:editable="false"
                         tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -87,14 +83,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
+                    <AutoCompleteTextView
+                        android:editable="false"
                         tools:ignore="Deprecated,LabelFor,TextFields"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -129,14 +121,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
+                    <AutoCompleteTextView
+                        android:editable="false"
                         tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -172,14 +160,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
+                    <AutoCompleteTextView
+                        android:editable="false"
                         tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -215,14 +199,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
+                    <AutoCompleteTextView
+                        android:editable="false"
                         tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -258,14 +238,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
+                    <AutoCompleteTextView
+                        android:editable="false"
                         tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -301,14 +277,10 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
+                    <AutoCompleteTextView
+                        android:editable="false"
                         tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

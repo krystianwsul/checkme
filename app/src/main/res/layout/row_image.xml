@@ -37,12 +37,8 @@
             android:id="@+id/imageLayoutText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
-            android:importantForAutofill="no"
-            android:singleLine="true"
-            android:textSize="@dimen/textPrimary"
-            tools:ignore="Deprecated,LabelFor,TextFields"
-            tools:targetApi="o" />
+            style="@style/MySpinnerText"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

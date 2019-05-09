@@ -60,4 +60,13 @@
     </style>
 
     <style name="MySpinner" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu" />
+
+    <style name="MySpinnerText">
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="android:focusableInTouchMode">false</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">@dimen/textPrimary</item>
+        <item name="android:textColor">@color/textPrimary</item>
+    </style>
 </resources>

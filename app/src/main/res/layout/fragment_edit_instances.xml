@@ -25,9 +25,8 @@
             android:id="@+id/editInstanceDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
-            android:textSize="@dimen/textPrimary"
-            tools:ignore="Deprecated,LabelFor,TextFields" />
+            style="@style/MySpinnerText"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -44,10 +43,8 @@
             android:id="@+id/editInstanceTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
-            android:singleLine="true"
-            android:textSize="@dimen/textPrimary"
-            tools:ignore="Deprecated,LabelFor,TextFields" />
+            style="@style/MySpinnerText"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

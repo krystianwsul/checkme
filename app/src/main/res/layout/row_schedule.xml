@@ -27,12 +27,8 @@
             android:id="@+id/scheduleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"
-            android:singleLine="true"
-            android:textSize="@dimen/textPrimary"
-            tools:ignore="Deprecated,LabelFor,TextFields"
-            android:importantForAutofill="no"
-            tools:targetApi="o" />
+            style="@style/MySpinnerText"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

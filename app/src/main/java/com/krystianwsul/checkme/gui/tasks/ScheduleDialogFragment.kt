@@ -450,7 +450,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private fun updateFields() {
         check(customTimeDatas != null)
 
-        when (scheduleDialogData.scheduleType) {
+        when (scheduleDialogData.scheduleType) { // todo unify
             ScheduleType.SINGLE -> {
                 customView.scheduleDialogDate.setText(scheduleDialogData.date.getDisplayText())
 
@@ -468,9 +468,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 scheduleDialogData.timePairPersist.hourMinute.toString()
             })
             ScheduleType.WEEKLY -> customView.scheduleDialogTime.setText(if (scheduleDialogData.timePairPersist.customTimeKey != null) {
-                val customTimeData = customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!)
-
-                customTimeData.name
+                customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!).name
             } else {
                 scheduleDialogData.timePairPersist.hourMinute.toString()
             })

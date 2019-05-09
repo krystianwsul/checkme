@@ -28,7 +28,7 @@ import com.krystianwsul.checkme.viewmodels.*
 import java.util.*
 
 @Suppress("LeakingThis")
-open class DomainFactory(
+class DomainFactory(
         persistenceManager: PersistenceManager,
         private var userInfo: UserInfo,
         remoteStart: ExactTimeStamp,
@@ -2410,11 +2410,22 @@ open class DomainFactory(
     private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String, clear: Boolean = false) {
         Preferences.logLineDate("updateNotifications start $sourceName")
 
-        val notificationInstances = if (clear) mapOf() else getRootInstances(null, now.plusOne(), now /* 24 hack */).filter { it.done == null && !it.notified && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now && !removedTaskKeys.contains(it.taskKey) }.associateBy { it.instanceKey }
+        val notificationInstances = if (clear)
+            mapOf()
+        else
+            getRootInstances(null, now.plusOne(), now /* 24 hack */).filter {
+                it.done == null
+                        && !it.notified
+                        && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now
+                        && !removedTaskKeys.contains(it.taskKey)
+            }.associateBy { it.instanceKey }
 
-        val shownInstanceKeys = getExistingInstances().filter { it.notificationShown }
-                .map { it.instanceKey }
-                .toMutableSet()
+        Preferences.logLineHour("notification instances: " + notificationInstances.values.joinToString(", ") { it.name })
+
+        val shownInstances = getExistingInstances().filter { it.notificationShown }
+        Preferences.logLineHour("shown instances: " + shownInstances.joinToString(", ") { it.name })
+
+        val shownInstanceKeys = shownInstances.map { it.instanceKey }.toMutableSet()
 
         val instanceShownPairs = localFactory.instanceShownRecords
                 .filter { it.notificationShown }

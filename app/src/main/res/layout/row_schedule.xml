@@ -19,19 +19,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/parentTask"
-        android:textColorHint="@color/textDisabled"
         app:errorEnabled="true"
         app:hintAnimationEnabled="false"
-        style="@style/OldTextInput">
+        style="@style/MySpinner">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/scheduleText"
-            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:cursorVisible="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
+            android:editable="false"
             android:singleLine="true"
             android:textSize="@dimen/textPrimary"
             tools:ignore="Deprecated,LabelFor,TextFields"

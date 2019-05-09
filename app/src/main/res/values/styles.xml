@@ -53,6 +53,8 @@
 
     <style name="OldTextInput" parent="@style/Widget.Design.TextInputLayout" />
 
+    <style name="NewTextInput" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" />
+
     <style name="BottomNavigationDrawer" parent="Widget.Design.NavigationView">
         <item name="android:listDivider">@color/navigationDivider</item>
     </style>

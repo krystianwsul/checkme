@@ -152,6 +152,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             mScheduleDialogDate = scheduleDialogDate
             mScheduleDialogDayLayout = scheduleDialogDayLayout
 
+            magic.setAdapter(ArrayAdapter(requireContext(), R.layout.cat_exposed_dropdown_popup_item, (1..28).map { Utils.ordinal(it) }))
+
             mScheduleDialogDays[DayOfWeek.SUNDAY] = scheduleDialogSunday
             mScheduleDialogDays[DayOfWeek.MONDAY] = scheduleDialogMonday
             mScheduleDialogDays[DayOfWeek.TUESDAY] = scheduleDialogTuesday

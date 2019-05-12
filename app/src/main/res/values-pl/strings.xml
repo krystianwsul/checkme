@@ -91,5 +91,8 @@
     <string name="camera">Zrób zdjęcie</string>
     <string name="gallery">Wybierz obraz</string>
     <string name="remove">Usuń obraz</string>
-    <string name="settings">Settings</string>
+    <string name="settings">Ustawienia</string>
+    <string name="account">Konto</string>
+    <string name="accountDetails">Profil</string>
+    <string name="accountUpdate">Zaktualizuj swój profil na podstawie konta Google</string>
 </resources>

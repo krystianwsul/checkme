@@ -32,6 +32,11 @@
             android:title="@string/friends" />
 
         <item
+            android:id="@+id/main_drawer_about"
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:title="@string/about" />
+
+        <item
             android:id="@+id/main_drawer_debug"
             android:icon="@drawable/ic_build_black_24dp"
             android:title="Debug"
@@ -47,12 +52,6 @@
             android:checkable="false"
             android:icon="@drawable/ic_help_black_24dp"
             android:title="@string/tutorial" />
-
-        <item
-            android:id="@+id/main_drawer_about"
-            android:checkable="false"
-            android:icon="@drawable/ic_info_outline_black_24dp"
-            android:title="@string/about" />
 
         <item
             android:id="@+id/main_drawer_sign_out"

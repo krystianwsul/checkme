@@ -95,6 +95,7 @@
     <string name="account">Account</string>
     <string name="accountDetails">Profile</string>
     <string name="accountUpdate">Update your profile based on your Google account</string>
+    <string name="profileUpdated">Profile updated</string>
 
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>

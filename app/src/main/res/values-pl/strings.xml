@@ -95,4 +95,5 @@
     <string name="account">Konto</string>
     <string name="accountDetails">Profil</string>
     <string name="accountUpdate">Zaktualizuj swój profil na podstawie konta Google</string>
+    <string name="profileUpdated">Zaktualizowano profil</string>
 </resources>

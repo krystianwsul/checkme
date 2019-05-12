@@ -1,13 +1,20 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:id="@+id/settingsRoot">
 
-    <include layout="@layout/toolbar" />
-
-    <FrameLayout
-        android:id="@+id/settingsFrame"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-</LinearLayout>
+        <include layout="@layout/toolbar" />
+
+        <FrameLayout
+            android:id="@+id/settingsFrame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

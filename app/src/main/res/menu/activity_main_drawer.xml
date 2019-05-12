@@ -48,6 +48,12 @@
     <group android:id="@+id/mainDrawerOther">
 
         <item
+            android:id="@+id/main_drawer_settings"
+            android:checkable="false"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/settings" />
+
+        <item
             android:id="@+id/main_drawer_tutorial"
             android:checkable="false"
             android:icon="@drawable/ic_help_black_24dp"

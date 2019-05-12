@@ -22,7 +22,7 @@
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
             android:name=".gui.SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/settings" />
         <activity android:name=".gui.TutorialActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

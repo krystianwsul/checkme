@@ -2,12 +2,12 @@ package com.krystianwsul.checkme.gui
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import kotlinx.android.synthetic.main.toolbar.*
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : AbstractActivity() {
 
     companion object {
 
@@ -17,11 +17,15 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
+
+        setSupportActionBar(toolbar)
+
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
         supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.settings, SettingsFragment())
+                .replace(R.id.settingsFrame, SettingsFragment())
                 .commit()
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {

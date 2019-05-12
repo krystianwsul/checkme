@@ -19,7 +19,7 @@
     <PreferenceCategory app:title="Account">
 
         <Preference
-            app:key="updateAccount"
+            app:key="@string/accountDetails"
             app:title="@string/accountDetails"
             app:summary="@string/accountUpdate" />
 

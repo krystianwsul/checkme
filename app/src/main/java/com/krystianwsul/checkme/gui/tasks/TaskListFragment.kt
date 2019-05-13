@@ -135,7 +135,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 R.id.action_task_add -> {
                     val childTaskData = childTaskDatas.single()
 
-                    startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Parent(childTaskData.taskKey)))
+                    startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(childTaskData.taskKey)))
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -399,7 +399,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         updateFabVisibility()
     }
 
-    private fun hint() = rootTaskData?.let { CreateTaskActivity.Hint.Parent(it.taskKey) }
+    private fun hint() = rootTaskData?.let { CreateTaskActivity.Hint.Task(it.taskKey) }
 
     private fun updateFabVisibility() {
         taskListFragmentFab?.run {

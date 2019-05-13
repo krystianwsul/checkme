@@ -106,22 +106,12 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
     sealed class ParentKey : Parcelable {
 
-        abstract val type: ParentType
+        @Parcelize
+        data class Project(val projectId: String) : ParentKey()
 
         @Parcelize
-        data class ProjectParentKey(val projectId: String) : ParentKey() {
-
-            override val type get() = ParentType.PROJECT
-        }
-
-        @Parcelize
-        data class TaskParentKey(val taskKey: TaskKey) : ParentKey() {
-
-            override val type get() = ParentType.TASK
-        }
+        data class Task(val taskKey: TaskKey) : ParentKey()
     }
-
-    enum class ParentType { PROJECT, TASK }
 
     sealed class SortKey : Comparable<SortKey> {
 

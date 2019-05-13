@@ -195,14 +195,14 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceData = selectedDatas.single()
                     check(instanceData.taskCurrent)
 
-                    activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Parent(instanceData.taskKey)))
+                    activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(instanceData.taskKey)))
                 }
                 R.id.action_group_join -> {
                     val taskKeys = ArrayList(selectedDatas.map { it.taskKey })
                     check(taskKeys.size > 1)
 
                     if (parameters is Parameters.InstanceKey) {
-                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.Hint.Parent((parameters as Parameters.InstanceKey).instanceKey.taskKey)))
+                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.Hint.Task((parameters as Parameters.InstanceKey).instanceKey.taskKey)))
                     } else {
                         val instanceDatas = selectedDatas.filterIsInstance<InstanceData>()
 
@@ -670,7 +670,7 @@ class GroupListFragment @JvmOverloads constructor(
                     }
                 }
                 is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
-                is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Parent(parameters.instanceKey.taskKey)))
+                is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(parameters.instanceKey.taskKey)))
                 else -> throw IllegalStateException()
             }
         }

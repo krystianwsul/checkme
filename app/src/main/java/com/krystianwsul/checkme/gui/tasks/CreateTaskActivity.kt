@@ -117,7 +117,7 @@ class CreateTaskActivity : AbstractActivity() {
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
 
         override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
-            if (parentTreeData.parentKey.type == CreateTaskViewModel.ParentType.TASK)
+            if (parentTreeData.parentKey is CreateTaskViewModel.ParentKey.Task)
                 clearSchedules()
 
             parent = parentTreeData
@@ -270,7 +270,7 @@ class CreateTaskActivity : AbstractActivity() {
                         hasValueSchedule() -> {
                             check(!hasValueParentTask())
 
-                            val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
+                            val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
 
                             when {
                                 taskKey != null -> {
@@ -322,7 +322,7 @@ class CreateTaskActivity : AbstractActivity() {
                         hasValueParentTask() -> {
                             checkNotNull(parent)
 
-                            val parentTaskKey = (parent!!.parentKey as CreateTaskViewModel.ParentKey.TaskParentKey).taskKey
+                            val parentTaskKey = (parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
 
                             when {
                                 taskKey != null -> {
@@ -369,7 +369,7 @@ class CreateTaskActivity : AbstractActivity() {
                             }
                         }
                         else -> {  // no reminder
-                            val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.ProjectParentKey).projectId else null
+                            val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
 
                             when {
                                 taskKey != null -> {
@@ -485,7 +485,7 @@ class CreateTaskActivity : AbstractActivity() {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         createTaskViewModel = getViewModel<CreateTaskViewModel>().apply {
-            start(taskKey, taskKeys, (hint as? Hint.Parent)?.taskKey)
+            start(taskKey, taskKeys, (hint as? Hint.Task)?.taskKey)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -579,7 +579,7 @@ class CreateTaskActivity : AbstractActivity() {
             })
         }
 
-        val parentHint = (hint as? Hint.Parent)?.taskKey
+        val parentHint = (hint as? Hint.Task)?.taskKey
 
         if (savedInstanceState?.containsKey(SCHEDULE_ENTRIES_KEY) == true) {
             savedInstanceState!!.run {
@@ -610,7 +610,7 @@ class CreateTaskActivity : AbstractActivity() {
                     check(taskKey == null)
 
                     MyCrashlytics.log("CreateTaskActivity.parentTaskKeyHint: $parentHint")
-                    parent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(parentHint))
+                    parent = findTaskData(CreateTaskViewModel.ParentKey.Task(parentHint))
                 }
 
                 taskData?.let { note = it.note }
@@ -792,13 +792,13 @@ class CreateTaskActivity : AbstractActivity() {
             if (!TextUtils.isEmpty(note))
                 return true
 
-            val parentHint = (hint as? Hint.Parent)?.taskKey
+            val parentHint = (hint as? Hint.Task)?.taskKey
 
             if (parentHint != null) {
                 if (!hasValueParentTask())
                     return true
 
-                return parent == null || parent!!.parentKey != CreateTaskViewModel.ParentKey.TaskParentKey(parentHint)
+                return parent == null || parent!!.parentKey != CreateTaskViewModel.ParentKey.Task(parentHint)
             } else {
                 if (!hasValueSchedule())
                     return true
@@ -824,7 +824,7 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     private fun clearParent() {
-        if (parent == null || parent!!.parentKey.type == CreateTaskViewModel.ParentType.PROJECT)
+        if (parent == null || parent!!.parentKey is CreateTaskViewModel.ParentKey.Project)
             return
 
         parent = null
@@ -843,7 +843,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private fun hasValueParentInGeneral() = parent != null
 
-    private fun hasValueParentTask() = parent?.parentKey?.type == CreateTaskViewModel.ParentType.TASK
+    private fun hasValueParentTask() = parent?.parentKey is CreateTaskViewModel.ParentKey.Task
 
     private fun hasValueSchedule() = scheduleEntries.isNotEmpty()
 
@@ -885,7 +885,7 @@ class CreateTaskActivity : AbstractActivity() {
                 clearSchedules()
 
                 val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-                parent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(taskKey))
+                parent = findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
             }
         }
     }
@@ -897,7 +897,7 @@ class CreateTaskActivity : AbstractActivity() {
             constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
         }
 
-        class Parent(val taskKey: TaskKey) : Hint()
+        class Task(val taskKey: TaskKey) : Hint()
     }
 
     @Suppress("PrivatePropertyName")

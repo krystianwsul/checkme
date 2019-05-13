@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.gms.auth.api.Auth
@@ -37,6 +38,14 @@ class SettingsActivity : AbstractActivity() {
             if (findFragmentById(R.id.settingsFrame) == null)
                 beginTransaction().replace(R.id.settingsFrame, SettingsFragment()).commit()
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        check(item.itemId == android.R.id.home)
+
+        finish()
+
+        return true
     }
 
     private fun updateFromAccount(googleSignInAccount: GoogleSignInAccount) {

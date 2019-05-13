@@ -310,7 +310,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                         }
                         R.id.instance_menu_add_task -> {
                             data!!.instanceDateTime.let {
-                                startActivity(CreateTaskActivity.getCreateIntent(this@ShowInstanceActivity, CreateTaskActivity.ScheduleHint(it.date, it.time.timePair)))
+                                startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.ScheduleHint(it.date, it.time.timePair)))
                             }
                         }
                         else -> throw UnsupportedOperationException()

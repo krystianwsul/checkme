@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.tasks
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -77,9 +76,9 @@ class CreateTaskActivity : AbstractActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
-        fun getCreateIntent(context: Context) = Intent(context, CreateTaskActivity::class.java)
+        fun getCreateIntent() = Intent(MyApplication.instance, CreateTaskActivity::class.java)
 
-        fun getCreateIntent(context: Context, scheduleHint: ScheduleHint) = Intent(context, CreateTaskActivity::class.java).apply { putExtra(SCHEDULE_HINT_KEY, scheduleHint) }
+        fun getCreateIntent(scheduleHint: ScheduleHint) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(SCHEDULE_HINT_KEY, scheduleHint) }
 
         fun getCreateIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable) }
 
@@ -150,7 +149,7 @@ class CreateTaskActivity : AbstractActivity() {
             scheduleHolder.scheduleText.text = null
         }
 
-        override fun onNewParent() = startActivityForResult(getCreateIntent(this@CreateTaskActivity), REQUEST_CREATE_PARENT)
+        override fun onNewParent() = startActivityForResult(getCreateIntent(), REQUEST_CREATE_PARENT)
     }
 
     private fun setupParent(view: View) {

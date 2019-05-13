@@ -660,16 +660,16 @@ class GroupListFragment @JvmOverloads constructor(
                         nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).map { it as InstanceData }.let {
                             (it.firstOrNull { it.instanceTimePair.customTimeKey != null }
                                     ?: it.first()).let {
-                                activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(it.instanceTimeStamp.date, it.instanceTimePair)))
+                                activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.ScheduleHint(it.instanceTimeStamp.date, it.instanceTimePair)))
                             }
                         }
 
                         actionMode.finish()
                     } else {
-                        activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
+                        activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
                     }
                 }
-                is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(activity, CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
+                is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
                 is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
                 else -> throw IllegalStateException()
             }

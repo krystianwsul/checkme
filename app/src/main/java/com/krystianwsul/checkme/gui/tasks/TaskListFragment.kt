@@ -403,7 +403,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         taskListFragmentFab!!.setOnClickListener {
             if (rootTaskData == null)
-                startActivity(CreateTaskActivity.getCreateIntent(context!!))
+                startActivity(CreateTaskActivity.getCreateIntent())
             else
                 startActivity(CreateTaskActivity.getCreateIntent(rootTaskData!!.taskKey))
         }

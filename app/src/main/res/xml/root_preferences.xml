@@ -9,6 +9,7 @@
 
     </PreferenceCategory>
 
+    <!--
     <PreferenceCategory app:title="@string/messages_header">
 
         <EditTextPreference
@@ -40,5 +41,6 @@
             app:title="@string/attachment_title" />
 
     </PreferenceCategory>
+    -->
 
 </androidx.preference.PreferenceScreen>

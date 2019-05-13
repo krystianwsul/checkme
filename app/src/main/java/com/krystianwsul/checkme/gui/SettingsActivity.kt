@@ -11,7 +11,10 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.toSingle
+import com.krystianwsul.checkme.viewmodels.SettingsViewModel
+import com.krystianwsul.checkme.viewmodels.getViewModel
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.settings_activity.*
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -55,20 +58,24 @@ class SettingsActivity : AbstractActivity() {
 
         private val settingsActivity get() = (activity as SettingsActivity)
 
+        private val settingsViewModel by lazy { getViewModel<SettingsViewModel>() }
+
+        private val createDisposable = CompositeDisposable()
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
+            settingsViewModel.relay
+                    .subscribe {
+                        if (it.value != null)
+                            settingsActivity.updateFromAccount(it.value)
+                        else
+                            startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
+                    }
+                    .addTo(createDisposable)
+
             findPreference<Preference>(getString(R.string.accountDetails))!!.setOnPreferenceClickListener {
-                MyApplication.instance
-                        .googleSigninClient
-                        .silentSignIn()
-                        .toSingle()
-                        .subscribe { wrapper ->
-                            if (wrapper.value != null)
-                                settingsActivity.updateFromAccount(wrapper.value)
-                            else
-                                startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
-                        }
+                settingsViewModel.silentSignIn()
 
                 true
             }
@@ -83,6 +90,12 @@ class SettingsActivity : AbstractActivity() {
                     .getSignInResultFromIntent(data)!!
                     .signInAccount
                     ?.let { settingsActivity.updateFromAccount(it) }
+        }
+
+        override fun onDestroy() {
+            createDisposable.dispose()
+
+            super.onDestroy()
         }
     }
 }

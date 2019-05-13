@@ -80,17 +80,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
             when (itemId) {
                 R.id.action_task_share -> Utils.share(requireActivity(), getShareData(childTaskDatas))
-                R.id.action_task_edit -> {
-                    val childTaskData = childTaskDatas.single()
-
-                    startActivity(CreateTaskActivity.getEditIntent(childTaskData.taskKey))
-                }
-                R.id.action_task_join -> {
-                    startActivity(if (rootTaskData == null)
-                        CreateTaskActivity.getJoinIntent(taskKeys)
-                    else
-                        CreateTaskActivity.getJoinIntent(taskKeys, rootTaskData!!.taskKey))
-                }
+                R.id.action_task_edit -> startActivity(CreateTaskActivity.getEditIntent(childTaskDatas.single().taskKey))
+                R.id.action_task_join -> startActivity(CreateTaskActivity.getJoinIntent(taskKeys, hint()))
                 R.id.action_task_delete -> {
                     checkNotNull(data)
 
@@ -144,7 +135,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
                 R.id.action_task_add -> {
                     val childTaskData = childTaskDatas.single()
 
-                    startActivity(CreateTaskActivity.getCreateIntent(childTaskData.taskKey))
+                    startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Parent(childTaskData.taskKey)))
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -402,14 +393,13 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = floatingActionButton
 
         taskListFragmentFab!!.setOnClickListener {
-            if (rootTaskData == null)
-                startActivity(CreateTaskActivity.getCreateIntent())
-            else
-                startActivity(CreateTaskActivity.getCreateIntent(rootTaskData!!.taskKey))
+            startActivity(CreateTaskActivity.getCreateIntent(hint()))
         }
 
         updateFabVisibility()
     }
+
+    private fun hint() = rootTaskData?.let { CreateTaskActivity.Hint.Parent(it.taskKey) }
 
     private fun updateFabVisibility() {
         taskListFragmentFab?.run {

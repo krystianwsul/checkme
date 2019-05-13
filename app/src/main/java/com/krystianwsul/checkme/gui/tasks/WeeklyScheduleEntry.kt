@@ -67,7 +67,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
 
     override val scheduleData get() = CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, timePair)
 
-    override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.ScheduleHint?): ScheduleDialogFragment.ScheduleDialogData {
+    override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
         val date = scheduleHint?.date ?: today
 
         var monthDayNumber = date.day

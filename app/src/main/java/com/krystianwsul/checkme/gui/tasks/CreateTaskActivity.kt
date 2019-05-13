@@ -40,7 +40,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
-import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_create_task.*
 import kotlinx.android.synthetic.main.row_image.view.*
 import kotlinx.android.synthetic.main.row_note.view.*
@@ -58,8 +57,7 @@ class CreateTaskActivity : AbstractActivity() {
         private const val TASK_KEY_KEY = "taskKey"
         private const val TASK_KEYS_KEY = "taskKeys"
 
-        private const val PARENT_TASK_KEY_HINT_KEY = "parentTaskKeyHint"
-        private const val SCHEDULE_HINT_KEY = "scheduleHint"
+        private const val KEY_HINT = "hint"
         private const val KEY_REMOVE_INSTANCE_KEYS = "removeInstanceKeys"
 
         private const val PARENT_KEY_KEY = "parentKey"
@@ -76,27 +74,18 @@ class CreateTaskActivity : AbstractActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
-        fun getCreateIntent() = Intent(MyApplication.instance, CreateTaskActivity::class.java)
-
-        fun getCreateIntent(scheduleHint: ScheduleHint) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(SCHEDULE_HINT_KEY, scheduleHint) }
-
-        fun getCreateIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable) }
-
-        fun getJoinIntent(joinTaskKeys: List<TaskKey>, parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
-            check(joinTaskKeys.size > 1)
-
-            putParcelableArrayListExtra(TASK_KEYS_KEY, ArrayList(joinTaskKeys))
-            putExtra(PARENT_TASK_KEY_HINT_KEY, parentTaskKeyHint as Parcelable)
+        fun getCreateIntent(hint: Hint? = null) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+            hint?.let { putExtra(KEY_HINT, hint) }
         }
 
         fun getJoinIntent(
                 joinTaskKeys: List<TaskKey>,
-                scheduleHint: ScheduleHint? = null,
+                hint: Hint? = null,
                 removeInstanceKeys: List<InstanceKey> = listOf()) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             check(joinTaskKeys.size > 1)
 
             putParcelableArrayListExtra(TASK_KEYS_KEY, ArrayList(joinTaskKeys))
-            scheduleHint?.let { putExtra(SCHEDULE_HINT_KEY, scheduleHint) }
+            hint?.let { putExtra(KEY_HINT, hint) }
             putParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS, ArrayList(removeInstanceKeys))
         }
 
@@ -110,8 +99,7 @@ class CreateTaskActivity : AbstractActivity() {
     private var taskKey: TaskKey? = null
     private var taskKeys: List<TaskKey>? = null
 
-    private var scheduleHint: ScheduleHint? = null
-    private var parentTaskKeyHint: TaskKey? = null
+    private var hint: Hint? = null
     private var nameHint: String? = null
 
     private var data: CreateTaskViewModel.Data? = null
@@ -463,8 +451,7 @@ class CreateTaskActivity : AbstractActivity() {
         intent.run {
             if (hasExtra(TASK_KEY_KEY)) {
                 check(!hasExtra(TASK_KEYS_KEY))
-                check(!hasExtra(PARENT_TASK_KEY_HINT_KEY))
-                check(!hasExtra(SCHEDULE_HINT_KEY))
+                check(!hasExtra(KEY_HINT))
 
                 taskKey = getParcelableExtra(TASK_KEY_KEY)!!
             } else if (action == Intent.ACTION_SEND) {
@@ -476,13 +463,8 @@ class CreateTaskActivity : AbstractActivity() {
                 if (hasExtra(TASK_KEYS_KEY))
                     taskKeys = getParcelableArrayListExtra<TaskKey>(TASK_KEYS_KEY)!!.apply { check(size > 1) }
 
-                if (hasExtra(PARENT_TASK_KEY_HINT_KEY)) {
-                    check(!hasExtra(SCHEDULE_HINT_KEY))
-
-                    parentTaskKeyHint = getParcelableExtra(PARENT_TASK_KEY_HINT_KEY)!!
-                } else if (hasExtra(SCHEDULE_HINT_KEY)) {
-                    scheduleHint = getParcelableExtra(SCHEDULE_HINT_KEY)!!
-                }
+                if (hasExtra(KEY_HINT))
+                    hint = getSerializableExtra(KEY_HINT) as Hint
             }
 
             removeInstanceKeys = getParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS) ?: listOf()
@@ -503,7 +485,7 @@ class CreateTaskActivity : AbstractActivity() {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
 
         createTaskViewModel = getViewModel<CreateTaskViewModel>().apply {
-            start(taskKey, taskKeys, parentTaskKeyHint)
+            start(taskKey, taskKeys, (hint as? Hint.Parent)?.taskKey)
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
@@ -572,8 +554,7 @@ class CreateTaskActivity : AbstractActivity() {
                 } else if (!TextUtils.isEmpty(nameHint)) {
                     check(taskKey == null)
                     check(taskKeys == null)
-                    check(parentTaskKeyHint == null)
-                    check(scheduleHint == null)
+                    check(hint == null)
 
                     setText(nameHint)
                 }
@@ -598,6 +579,8 @@ class CreateTaskActivity : AbstractActivity() {
             })
         }
 
+        val parentHint = (hint as? Hint.Parent)?.taskKey
+
         if (savedInstanceState?.containsKey(SCHEDULE_ENTRIES_KEY) == true) {
             savedInstanceState!!.run {
                 if (containsKey(PARENT_KEY_KEY)) {
@@ -618,16 +601,16 @@ class CreateTaskActivity : AbstractActivity() {
         } else {
             this.data!!.run {
                 if (taskData?.parentKey != null) {
-                    check(parentTaskKeyHint == null)
+                    check(parentHint == null)
                     check(taskKeys == null)
                     checkNotNull(taskKey)
 
                     parent = findTaskData(taskData.parentKey)
-                } else if (parentTaskKeyHint != null) {
+                } else if (parentHint != null) {
                     check(taskKey == null)
 
-                    MyCrashlytics.log("CreateTaskActivity.parentTaskKeyHint: $parentTaskKeyHint")
-                    parent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(parentTaskKeyHint!!))
+                    MyCrashlytics.log("CreateTaskActivity.parentTaskKeyHint: $parentHint")
+                    parent = findTaskData(CreateTaskViewModel.ParentKey.TaskParentKey(parentHint))
                 }
 
                 taskData?.let { note = it.note }
@@ -661,7 +644,7 @@ class CreateTaskActivity : AbstractActivity() {
                                 .toMutableList()
                     }
                 } else {
-                    if (parentTaskKeyHint == null)
+                    if (parentHint == null)
                         scheduleEntries.add(firstScheduleEntry())
                 }
             }
@@ -779,8 +762,7 @@ class CreateTaskActivity : AbstractActivity() {
         if (taskKey != null) {
             checkNotNull(data!!.taskData)
             check(taskKeys == null)
-            check(parentTaskKeyHint == null)
-            check(scheduleHint == null)
+            check(hint == null)
 
             if (toolbarEditText.text.toString() != data!!.taskData!!.name)
                 return true
@@ -810,13 +792,13 @@ class CreateTaskActivity : AbstractActivity() {
             if (!TextUtils.isEmpty(note))
                 return true
 
-            if (parentTaskKeyHint != null) {
-                check(scheduleHint == null)
+            val parentHint = (hint as? Hint.Parent)?.taskKey
 
+            if (parentHint != null) {
                 if (!hasValueParentTask())
                     return true
 
-                return parent == null || parent!!.parentKey != CreateTaskViewModel.ParentKey.TaskParentKey(parentTaskKeyHint!!)
+                return parent == null || parent!!.parentKey != CreateTaskViewModel.ParentKey.TaskParentKey(parentHint)
             } else {
                 if (!hasValueSchedule())
                     return true
@@ -865,7 +847,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private fun hasValueSchedule() = scheduleEntries.isNotEmpty()
 
-    private fun firstScheduleEntry() = SingleScheduleEntry(scheduleHint)
+    private fun firstScheduleEntry() = SingleScheduleEntry((hint as? Hint.Schedule))
 
     private fun scheduleDataChanged(): Boolean {
         if (data == null)
@@ -908,10 +890,14 @@ class CreateTaskActivity : AbstractActivity() {
         }
     }
 
-    @Parcelize
-    class ScheduleHint(val date: Date, val timePair: TimePair? = null) : Parcelable {
+    sealed class Hint : Serializable {
 
-        constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
+        class Schedule(val date: Date, val timePair: TimePair? = null) : Hint() {
+
+            constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
+        }
+
+        class Parent(val taskKey: TaskKey) : Hint()
     }
 
     @Suppress("PrivatePropertyName")
@@ -1001,7 +987,7 @@ class CreateTaskActivity : AbstractActivity() {
                         setOnClickListener {
                             check(hourMinutePickerPosition == null)
 
-                            ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), scheduleHint), false).let {
+                            ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)), false).let {
                                 it.initialize(data!!.customTimeDatas, scheduleDialogListener)
                                 it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                             }
@@ -1105,7 +1091,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                 val scheduleEntry = scheduleEntries[hourMinutePickerPosition!! - createTaskAdapter.elementsBeforeSchedules()]
 
-                ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), scheduleHint), true).let {
+                ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), hint as? Hint.Schedule), true).let {
                     it.initialize(data!!.customTimeDatas, scheduleDialogListener)
                     it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                 }

@@ -195,14 +195,14 @@ class GroupListFragment @JvmOverloads constructor(
                     val instanceData = selectedDatas.single()
                     check(instanceData.taskCurrent)
 
-                    activity.startActivity(CreateTaskActivity.getCreateIntent(instanceData.taskKey))
+                    activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Parent(instanceData.taskKey)))
                 }
                 R.id.action_group_join -> {
                     val taskKeys = ArrayList(selectedDatas.map { it.taskKey })
                     check(taskKeys.size > 1)
 
                     if (parameters is Parameters.InstanceKey) {
-                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, (parameters as Parameters.InstanceKey).instanceKey.taskKey))
+                        activity.startActivity(CreateTaskActivity.getJoinIntent(taskKeys, CreateTaskActivity.Hint.Parent((parameters as Parameters.InstanceKey).instanceKey.taskKey)))
                     } else {
                         val instanceDatas = selectedDatas.filterIsInstance<InstanceData>()
 
@@ -210,7 +210,7 @@ class GroupListFragment @JvmOverloads constructor(
                             val date = it.instanceTimeStamp.date
                             val timePair = it.instanceTimePair
 
-                            CreateTaskActivity.ScheduleHint(date, timePair)
+                            CreateTaskActivity.Hint.Schedule(date, timePair)
                         }
 
                         val removeInstanceKeys = instanceDatas.map { it.instanceKey }
@@ -660,17 +660,17 @@ class GroupListFragment @JvmOverloads constructor(
                         nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).map { it as InstanceData }.let {
                             (it.firstOrNull { it.instanceTimePair.customTimeKey != null }
                                     ?: it.first()).let {
-                                activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.ScheduleHint(it.instanceTimeStamp.date, it.instanceTimePair)))
+                                activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(it.instanceTimeStamp.date, it.instanceTimePair)))
                             }
                         }
 
                         actionMode.finish()
                     } else {
-                        activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.ScheduleHint(rangePositionToDate(parameters.timeRange, parameters.position))))
+                        activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position))))
                     }
                 }
-                is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.ScheduleHint(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
-                is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(parameters.instanceKey.taskKey))
+                is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
+                is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Parent(parameters.instanceKey.taskKey)))
                 else -> throw IllegalStateException()
             }
         }

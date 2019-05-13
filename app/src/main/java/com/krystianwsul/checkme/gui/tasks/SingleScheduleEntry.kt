@@ -41,7 +41,7 @@ class SingleScheduleEntry : ScheduleEntry {
         mTimePair = singleScheduleData.timePair.copy()
     }
 
-    constructor(scheduleHint: CreateTaskActivity.ScheduleHint?) {
+    constructor(scheduleHint: CreateTaskActivity.Hint.Schedule?) {
         when {
             scheduleHint == null -> { // new for task
                 val pair = HourMinute.nextHour
@@ -88,7 +88,7 @@ class SingleScheduleEntry : ScheduleEntry {
 
     override val scheduleData get() = CreateTaskViewModel.ScheduleData.SingleScheduleData(mDate, mTimePair)
 
-    override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.ScheduleHint?): ScheduleDialogFragment.ScheduleDialogData {
+    override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
         var monthDayNumber = mDate.day
         var beginningOfMonth = true
         if (monthDayNumber > 28) {

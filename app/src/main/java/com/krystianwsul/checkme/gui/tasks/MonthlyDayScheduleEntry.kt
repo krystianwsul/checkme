@@ -83,7 +83,7 @@ class MonthlyDayScheduleEntry : ScheduleEntry {
         }
     }
 
-    override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.ScheduleHint?): ScheduleDialogFragment.ScheduleDialogData {
+    override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
         var date = scheduleHint?.date ?: today
 
         date = Utils.getDateInMonth(date.year, date.month, monthDayNumber, beginningOfMonth)

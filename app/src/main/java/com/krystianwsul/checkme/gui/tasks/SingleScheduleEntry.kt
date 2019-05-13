@@ -1,8 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks
 
 import android.content.Context
-import android.os.Parcel
-import android.os.Parcelable
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
@@ -14,24 +12,6 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
 class SingleScheduleEntry : ScheduleEntry {
-
-    companion object {
-
-        @Suppress("unused")
-        @JvmField
-        val CREATOR: Parcelable.Creator<SingleScheduleEntry> = object : Parcelable.Creator<SingleScheduleEntry> {
-
-            override fun createFromParcel(parcel: Parcel) = parcel.run {
-                val date = readParcelable<Date>(Date::class.java.classLoader)!!
-                val timePair = readParcelable<TimePair>(TimePair::class.java.classLoader)!!
-                val error = readString()
-
-                SingleScheduleEntry(date, timePair, error)
-            }
-
-            override fun newArray(size: Int) = arrayOfNulls<SingleScheduleEntry>(size)
-        }
-    }
 
     val mDate: Date
     val mTimePair: TimePair
@@ -60,11 +40,6 @@ class SingleScheduleEntry : ScheduleEntry {
                 mTimePair = TimePair(pair.second)
             }
         }
-    }
-
-    private constructor(date: Date, timePair: TimePair, error: String?) : super(error) {
-        mDate = date
-        mTimePair = timePair
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
@@ -101,14 +76,4 @@ class SingleScheduleEntry : ScheduleEntry {
     }
 
     override val scheduleType = ScheduleType.SINGLE
-
-    override fun describeContents() = 0
-
-    override fun writeToParcel(parcel: Parcel, i: Int) {
-        parcel.run {
-            writeParcelable(mDate, 0)
-            writeParcelable(mTimePair, 0)
-            writeString(error)
-        }
-    }
 }

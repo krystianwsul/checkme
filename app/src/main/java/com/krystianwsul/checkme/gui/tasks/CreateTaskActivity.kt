@@ -472,7 +472,8 @@ class CreateTaskActivity : AbstractActivity() {
 
         savedInstanceState?.run {
             if (containsKey(SCHEDULE_ENTRIES_KEY)) {
-                scheduleEntries = getParcelableArrayList(SCHEDULE_ENTRIES_KEY)!!
+                @Suppress("UNCHECKED_CAST")
+                scheduleEntries = getSerializable(SCHEDULE_ENTRIES_KEY) as ArrayList<ScheduleEntry>
 
                 if (containsKey(HOUR_MINUTE_PICKER_POSITION_KEY))
                     hourMinutePickerPosition = getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -1).also { check(it > 0) }
@@ -510,7 +511,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         outState.run {
             if (data != null) {
-                putParcelableArrayList(SCHEDULE_ENTRIES_KEY, ArrayList(scheduleEntries))
+                putSerializable(SCHEDULE_ENTRIES_KEY, ArrayList(scheduleEntries))
 
                 hourMinutePickerPosition?.let {
                     check(it >= createTaskAdapter.elementsBeforeSchedules())

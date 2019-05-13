@@ -1,13 +1,13 @@
 package com.krystianwsul.checkme.gui.tasks
 
 import android.content.Context
-import android.os.Parcelable
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import java.io.Serializable
 
-abstract class ScheduleEntry(var error: String?) : Parcelable {
+abstract class ScheduleEntry(var error: String?) : Serializable {
 
     companion object {
 

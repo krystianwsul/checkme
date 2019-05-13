@@ -1,8 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks
 
 import android.content.Context
-import android.os.Parcel
-import android.os.Parcelable
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
@@ -16,36 +14,12 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 class WeeklyScheduleEntry : ScheduleEntry {
 
-    companion object {
-
-        @Suppress("unused")
-        @JvmField
-        val CREATOR: Parcelable.Creator<WeeklyScheduleEntry> = object : Parcelable.Creator<WeeklyScheduleEntry> {
-
-            override fun createFromParcel(parcel: Parcel) = parcel.run {
-                @Suppress("UNCHECKED_CAST")
-                val daysOfWeek = readSerializable() as HashSet<DayOfWeek>
-                val timePair = readParcelable<TimePair>(TimePair::class.java.classLoader)!!
-                val error = readString()
-
-                WeeklyScheduleEntry(daysOfWeek, timePair, error)
-            }
-
-            override fun newArray(size: Int) = arrayOfNulls<WeeklyScheduleEntry>(size)
-        }
-    }
-
     private val daysOfWeek: Set<DayOfWeek>
     private val timePair: TimePair
 
     constructor(weeklyScheduleData: CreateTaskViewModel.ScheduleData.WeeklyScheduleData) {
         daysOfWeek = weeklyScheduleData.daysOfWeek
         timePair = weeklyScheduleData.timePair.copy()
-    }
-
-    private constructor(daysOfWeek: Set<DayOfWeek>, timePair: TimePair, error: String?) : super(error) {
-        this.daysOfWeek = daysOfWeek
-        this.timePair = timePair
     }
 
     constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
@@ -82,14 +56,4 @@ class WeeklyScheduleEntry : ScheduleEntry {
     }
 
     override val scheduleType = ScheduleType.WEEKLY
-
-    override fun describeContents() = 0
-
-    override fun writeToParcel(parcel: Parcel, i: Int) {
-        parcel.run {
-            writeSerializable(HashSet(daysOfWeek))
-            writeParcelable(timePair, 0)
-            writeString(error)
-        }
-    }
 }

@@ -135,6 +135,7 @@ class CreateTaskActivity : AbstractActivity() {
             scheduleHolder.scheduleText.text = null
         }
 
+        // todo pass own hint or own parent (project or task)
         override fun onNewParent() = startActivityForResult(getCreateIntent(), REQUEST_CREATE_PARENT)
     }
 
@@ -624,7 +625,7 @@ class CreateTaskActivity : AbstractActivity() {
             
             val schedules = mutableListOf<ScheduleEntry>()
 
-            this.data!!.run {
+            data.run {
                 if (taskData != null) {
                     if (taskData.scheduleDatas != null) {
                         check(taskData.scheduleDatas.isNotEmpty())
@@ -641,7 +642,7 @@ class CreateTaskActivity : AbstractActivity() {
             }
 
             tmpState = ParentScheduleState(parentKey, schedules)
-            initialState = ParentScheduleState(parentKey, ArrayList(tmpState!!.schedules))
+            initialState = ParentScheduleState(parentKey, ArrayList(schedules))
         }
 
         stateData = ParentScheduleData(tmpState!!)

@@ -848,7 +848,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private fun hasValueSchedule() = scheduleEntries.isNotEmpty()
 
-    private fun firstScheduleEntry() = SingleScheduleEntry((hint as? Hint.Schedule))
+    private fun firstScheduleEntry() = hintToSchedule(hint as? Hint.Schedule)
 
     private fun scheduleDataChanged(): Boolean {
         if (data == null)
@@ -889,6 +889,26 @@ class CreateTaskActivity : AbstractActivity() {
                 parent = findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
             }
         }
+    }
+
+    private fun hintToSchedule(scheduleHint: Hint.Schedule?): SingleScheduleEntry {
+        val (date, timePair) = when {
+            scheduleHint == null -> { // new for task
+                val pair = HourMinute.nextHour
+
+                Pair(pair.first, TimePair(pair.second))
+            }
+            scheduleHint.timePair != null -> { // for instance group or instance join
+                Pair(scheduleHint.date, scheduleHint.timePair.copy())
+            }
+            else -> { // for group root
+                val pair = HourMinute.getNextHour(scheduleHint.date)
+
+                Pair(pair.first, TimePair(pair.second))
+            }
+        }
+
+        return SingleScheduleEntry(CreateTaskViewModel.ScheduleData.Single(date, timePair))
     }
 
     sealed class Hint : Serializable {

@@ -5,42 +5,15 @@ import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
-class SingleScheduleEntry : ScheduleEntry {
+class SingleScheduleEntry(single: CreateTaskViewModel.ScheduleData.Single) : ScheduleEntry() {
 
     val mDate: Date
     val mTimePair: TimePair
-
-    constructor(single: CreateTaskViewModel.ScheduleData.Single) {
-        mDate = single.date
-        mTimePair = single.timePair.copy()
-    }
-
-    constructor(scheduleHint: CreateTaskActivity.Hint.Schedule?) {
-        when {
-            scheduleHint == null -> { // new for task
-                val pair = HourMinute.nextHour
-
-                mDate = pair.first
-                mTimePair = TimePair(pair.second)
-            }
-            scheduleHint.timePair != null -> { // for instance group or instance join
-                mDate = scheduleHint.date
-                mTimePair = scheduleHint.timePair.copy()
-            }
-            else -> { // for group root
-                val pair = HourMinute.getNextHour(scheduleHint.date)
-
-                mDate = pair.first
-                mTimePair = TimePair(pair.second)
-            }
-        }
-    }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return mDate.getDisplayText() + ", " + if (mTimePair.customTimeKey != null) {
@@ -69,4 +42,9 @@ class SingleScheduleEntry : ScheduleEntry {
     }
 
     override val scheduleType = ScheduleType.SINGLE
+
+    init {
+        mDate = single.date
+        mTimePair = single.timePair.copy()
+    }
 }

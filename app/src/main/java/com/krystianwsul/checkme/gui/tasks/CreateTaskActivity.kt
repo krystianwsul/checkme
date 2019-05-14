@@ -625,17 +625,17 @@ class CreateTaskActivity : AbstractActivity() {
         invalidateOptionsMenu()
 
         if (!this::state.isInitialized && (savedInstanceState == null || !savedInstanceState!!.containsKey(KEY_STATE))) {
-            state = ParentScheduleState()
+            val schedules = mutableListOf<ScheduleEntry>()
 
             this.data!!.run {
                 if (taskData != null) {
                     if (taskData.scheduleDatas != null) {
                         check(taskData.scheduleDatas.isNotEmpty())
 
-                        state.schedules = taskData.scheduleDatas
+                        schedules.addAll(taskData.scheduleDatas
                                 .asSequence()
                                 .map { ScheduleEntry(it) }
-                                .toMutableList()
+                                .toMutableList())
                     }
                 } else {
                     if (parentHint == null)
@@ -643,6 +643,7 @@ class CreateTaskActivity : AbstractActivity() {
                 }
             }
 
+            state = ParentScheduleState(schedules)
             initialState = ParentScheduleState(ArrayList(state.schedules))
         }
 

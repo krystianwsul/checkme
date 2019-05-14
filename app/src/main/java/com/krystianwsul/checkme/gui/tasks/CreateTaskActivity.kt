@@ -16,7 +16,6 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.common.collect.HashMultiset
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
@@ -25,7 +24,10 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.ScheduleType
+import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
@@ -755,6 +757,9 @@ class CreateTaskActivity : AbstractActivity() {
 
         check(!hasValueParentTask() || !hasValueSchedule())
 
+        if (initialState != stateData.state)
+            return true
+
         if (taskKey != null) {
             checkNotNull(data!!.taskData)
             check(taskKeys == null)
@@ -763,45 +768,17 @@ class CreateTaskActivity : AbstractActivity() {
             if (toolbarEditText.text.toString() != data!!.taskData!!.name)
                 return true
 
-            if (!Utils.stringEquals(note, data!!.taskData!!.note))
+            if (note != data!!.taskData!!.note)
                 return true
-
-            when {
-                data!!.taskData!!.parentKey != null -> {
-                    if (!hasValueParentInGeneral())
-                        return true
-
-                    return stateData.parent!!.parentKey != data!!.taskData!!.parentKey
-                }
-                data!!.taskData!!.scheduleDatas != null -> {
-                    if (!hasValueSchedule())
-                        return true
-
-                    return scheduleDataChanged()
-                }
-                else -> return hasValueParentInGeneral() || hasValueSchedule()
-            }
         } else {
             if (!TextUtils.isEmpty(toolbarEditText.text))
                 return true
 
             if (!TextUtils.isEmpty(note))
                 return true
-
-            val parentHint = (hint as? Hint.Task)?.taskKey
-
-            if (parentHint != null) {
-                if (!hasValueParentTask())
-                    return true
-
-                return stateData.parent == null || stateData.parent!!.parentKey != CreateTaskViewModel.ParentKey.Task(parentHint)
-            } else {
-                if (!hasValueSchedule())
-                    return true
-
-                return scheduleDataChanged()
-            }
         }
+
+        return false
     }
 
     private fun findTaskData(parentKey: CreateTaskViewModel.ParentKey): CreateTaskViewModel.ParentTreeData {
@@ -846,16 +823,6 @@ class CreateTaskActivity : AbstractActivity() {
             .isNotEmpty()
 
     private fun firstScheduleEntry() = hintToSchedule(hint as? Hint.Schedule)
-
-    private fun scheduleDataChanged(): Boolean {
-        if (data == null)
-            return false
-
-        val oldScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(initialState.schedules.map { it.scheduleData })
-        val newScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(stateData.state.schedules.map { it.scheduleData })
-
-        return oldScheduleDatas != newScheduleDatas
-    }
 
     private fun removeListenerHelper() { // keyboard hack
         checkNotNull(scheduleRecycler)
@@ -1121,7 +1088,22 @@ class CreateTaskActivity : AbstractActivity() {
     @Parcelize
     private class ParentScheduleState(
             var parentKey: CreateTaskViewModel.ParentKey?,
-            val schedules: MutableList<ScheduleEntry> = mutableListOf()) : Parcelable
+            val schedules: MutableList<ScheduleEntry> = mutableListOf()) : Parcelable {
+
+        override fun hashCode() = (parentKey?.hashCode() ?: 0) * 32 + schedules.hashCode()
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this)
+                return true
+
+            if (other !is ParentScheduleState)
+                return false
+
+            fun ParentScheduleState.scheduleDatas() = schedules.map { it.scheduleData }
+
+            return (parentKey == other.parentKey && scheduleDatas() == other.scheduleDatas())
+        }
+    }
 
     private inner class ParentScheduleData(val state: ParentScheduleState) {
 

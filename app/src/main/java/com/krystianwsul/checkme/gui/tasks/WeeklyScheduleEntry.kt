@@ -10,10 +10,10 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
-class WeeklyScheduleEntry(weekly: CreateTaskViewModel.ScheduleData.Weekly) : ScheduleEntry() {
+class WeeklyScheduleEntry(override val scheduleData: CreateTaskViewModel.ScheduleData.Weekly) : ScheduleEntry() {
 
-    private val daysOfWeek = weekly.daysOfWeek
-    private val timePair = weekly.timePair
+    private val daysOfWeek = scheduleData.daysOfWeek
+    private val timePair = scheduleData.timePair
 
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
@@ -24,8 +24,6 @@ class WeeklyScheduleEntry(weekly: CreateTaskViewModel.ScheduleData.Weekly) : Sch
             timePair.hourMinute!!.toString()
         }
     }
-
-    override val scheduleData get() = CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, timePair)
 
     override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
         val date = scheduleHint?.date ?: today
@@ -40,6 +38,4 @@ class WeeklyScheduleEntry(weekly: CreateTaskViewModel.ScheduleData.Weekly) : Sch
 
         return ScheduleDialogFragment.ScheduleDialogData(date, daysOfWeek.toMutableSet(), true, monthDayNumber, monthWeekNumber, date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.WEEKLY)
     }
-
-    override val scheduleType = ScheduleType.WEEKLY
 }

@@ -10,16 +10,11 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
-class MonthlyDayScheduleEntry(monthlyDay: CreateTaskViewModel.ScheduleData.MonthlyDay) : ScheduleEntry() {
+class MonthlyDayScheduleEntry(override val scheduleData: CreateTaskViewModel.ScheduleData.MonthlyDay) : ScheduleEntry() {
 
-    private val monthDayNumber = monthlyDay.dayOfMonth
-    private val beginningOfMonth = monthlyDay.beginningOfMonth
-    private val timePair = monthlyDay.timePair
-
-    override val scheduleData: CreateTaskViewModel.ScheduleData
-        get() = CreateTaskViewModel.ScheduleData.MonthlyDay(monthDayNumber, beginningOfMonth, timePair)
-
-    override val scheduleType = ScheduleType.MONTHLY_DAY
+    private val monthDayNumber = scheduleData.dayOfMonth
+    private val beginningOfMonth = scheduleData.beginningOfMonth
+    private val timePair = scheduleData.timePair
 
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         val day = Utils.ordinal(monthDayNumber) + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)

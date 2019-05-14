@@ -12,17 +12,12 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
-class MonthlyWeekScheduleEntry(monthlyWeek: CreateTaskViewModel.ScheduleData.MonthlyWeek) : ScheduleEntry() {
+class MonthlyWeekScheduleEntry(override val scheduleData: CreateTaskViewModel.ScheduleData.MonthlyWeek) : ScheduleEntry() {
 
-    private val monthWeekNumber: Int = monthlyWeek.dayOfMonth
-    private val monthWeekDay: DayOfWeek = monthlyWeek.dayOfWeek
-    private val beginningOfMonth: Boolean = monthlyWeek.beginningOfMonth
-    private val timePair: TimePair = monthlyWeek.timePair.copy()
-
-    override val scheduleData: CreateTaskViewModel.ScheduleData
-        get() = CreateTaskViewModel.ScheduleData.MonthlyWeek(monthWeekNumber, monthWeekDay, beginningOfMonth, timePair)
-
-    override val scheduleType = ScheduleType.MONTHLY_WEEK
+    private val monthWeekNumber: Int = scheduleData.dayOfMonth
+    private val monthWeekDay: DayOfWeek = scheduleData.dayOfWeek
+    private val beginningOfMonth: Boolean = scheduleData.beginningOfMonth
+    private val timePair: TimePair = scheduleData.timePair.copy()
 
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         val day = Utils.ordinal(monthWeekNumber) + " " + monthWeekDay + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)

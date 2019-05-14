@@ -701,31 +701,29 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         for (scheduleEntry in scheduleEntries) {
-            if (scheduleEntry.scheduleType != ScheduleType.SINGLE)
+            if (scheduleEntry !is SingleScheduleEntry)
                 continue
-
-            val singleScheduleEntry = scheduleEntry as SingleScheduleEntry
 
             if (data!!.taskData != null && data!!.taskData!!.scheduleDatas != null && data!!.taskData!!.scheduleDatas!!.contains(scheduleEntry.scheduleData))
                 continue
 
-            if (singleScheduleEntry.date > Date.today())
+            if (scheduleEntry.scheduleData.date > Date.today())
                 continue
 
-            if (singleScheduleEntry.date < Date.today()) {
+            if (scheduleEntry.scheduleData.date < Date.today()) {
                 setScheduleEntryError(scheduleEntry, R.string.error_date)
 
                 hasError = true
                 continue
             }
 
-            val timePair = singleScheduleEntry.timePair
+            val timePair = scheduleEntry.scheduleData.timePair
             val hourMinute = if (timePair.customTimeKey != null) {
                 check(timePair.hourMinute == null)
 
                 data!!.customTimeDatas
                         .getValue(timePair.customTimeKey)
-                        .hourMinutes[singleScheduleEntry.date.dayOfWeek]
+                        .hourMinutes[scheduleEntry.scheduleData.date.dayOfWeek]
             } else {
                 checkNotNull(timePair.hourMinute)
 

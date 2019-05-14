@@ -9,10 +9,10 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
-class SingleScheduleEntry(single: CreateTaskViewModel.ScheduleData.Single) : ScheduleEntry() {
+class SingleScheduleEntry(override val scheduleData: CreateTaskViewModel.ScheduleData.Single) : ScheduleEntry() {
 
-    val date = single.date
-    val timePair = single.timePair
+    private val date = scheduleData.date
+    private val timePair = scheduleData.timePair
 
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return date.getDisplayText() + ", " + if (timePair.customTimeKey != null) {
@@ -26,8 +26,6 @@ class SingleScheduleEntry(single: CreateTaskViewModel.ScheduleData.Single) : Sch
         }
     }
 
-    override val scheduleData get() = CreateTaskViewModel.ScheduleData.Single(date, timePair)
-
     override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
         var monthDayNumber = date.day
         var beginningOfMonth = true
@@ -39,6 +37,4 @@ class SingleScheduleEntry(single: CreateTaskViewModel.ScheduleData.Single) : Sch
 
         return ScheduleDialogFragment.ScheduleDialogData(date, mutableSetOf(date.dayOfWeek), true, monthDayNumber, monthWeekNumber, date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.SINGLE)
     }
-
-    override val scheduleType = ScheduleType.SINGLE
 }

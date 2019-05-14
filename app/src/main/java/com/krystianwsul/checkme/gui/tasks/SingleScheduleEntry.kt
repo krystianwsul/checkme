@@ -16,9 +16,9 @@ class SingleScheduleEntry : ScheduleEntry {
     val mDate: Date
     val mTimePair: TimePair
 
-    constructor(singleScheduleData: CreateTaskViewModel.ScheduleData.SingleScheduleData) {
-        mDate = singleScheduleData.date
-        mTimePair = singleScheduleData.timePair.copy()
+    constructor(single: CreateTaskViewModel.ScheduleData.Single) {
+        mDate = single.date
+        mTimePair = single.timePair.copy()
     }
 
     constructor(scheduleHint: CreateTaskActivity.Hint.Schedule?) {
@@ -42,13 +42,6 @@ class SingleScheduleEntry : ScheduleEntry {
         }
     }
 
-    constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
-
-        mDate = scheduleDialogData.date
-        mTimePair = scheduleDialogData.timePairPersist.timePair
-    }
-
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return mDate.getDisplayText() + ", " + if (mTimePair.customTimeKey != null) {
             check(mTimePair.hourMinute == null)
@@ -61,7 +54,7 @@ class SingleScheduleEntry : ScheduleEntry {
         }
     }
 
-    override val scheduleData get() = CreateTaskViewModel.ScheduleData.SingleScheduleData(mDate, mTimePair)
+    override val scheduleData get() = CreateTaskViewModel.ScheduleData.Single(mDate, mTimePair)
 
     override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
         var monthDayNumber = mDate.day

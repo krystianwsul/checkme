@@ -567,10 +567,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         fun toScheduleEntry() = when (scheduleType) {
-            ScheduleType.SINGLE -> SingleScheduleEntry(this)
-            ScheduleType.WEEKLY -> WeeklyScheduleEntry(this)
-            ScheduleType.MONTHLY_DAY -> MonthlyDayScheduleEntry(this)
-            ScheduleType.MONTHLY_WEEK -> MonthlyWeekScheduleEntry(this)
+            ScheduleType.SINGLE -> SingleScheduleEntry(CreateTaskViewModel.ScheduleData.Single(date, timePairPersist.timePair))
+            ScheduleType.WEEKLY -> WeeklyScheduleEntry(CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair))
+            ScheduleType.MONTHLY_DAY -> MonthlyDayScheduleEntry(CreateTaskViewModel.ScheduleData.MonthlyDay(monthDayNumber, beginningOfMonth, timePairPersist.timePair))
+            ScheduleType.MONTHLY_WEEK -> MonthlyWeekScheduleEntry(CreateTaskViewModel.ScheduleData.MonthlyWeek(monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist.timePair))
             else -> throw UnsupportedOperationException()
         }
     }

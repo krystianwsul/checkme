@@ -12,21 +12,14 @@ import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
-class WeeklyScheduleEntry : ScheduleEntry {
+class WeeklyScheduleEntry(weekly: CreateTaskViewModel.ScheduleData.Weekly) : ScheduleEntry() {
 
     private val daysOfWeek: Set<DayOfWeek>
     private val timePair: TimePair
 
-    constructor(weeklyScheduleData: CreateTaskViewModel.ScheduleData.WeeklyScheduleData) {
-        daysOfWeek = weeklyScheduleData.daysOfWeek
-        timePair = weeklyScheduleData.timePair.copy()
-    }
-
-    constructor(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-        check(scheduleDialogData.scheduleType == ScheduleType.WEEKLY)
-
-        daysOfWeek = scheduleDialogData.daysOfWeek
-        timePair = scheduleDialogData.timePairPersist.timePair
+    init {
+        daysOfWeek = weekly.daysOfWeek
+        timePair = weekly.timePair.copy()
     }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
@@ -39,7 +32,7 @@ class WeeklyScheduleEntry : ScheduleEntry {
         }
     }
 
-    override val scheduleData get() = CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, timePair)
+    override val scheduleData get() = CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, timePair)
 
     override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
         val date = scheduleHint?.date ?: today

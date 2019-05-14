@@ -603,7 +603,7 @@ class DomainFactory(
 
             when (schedule) {
                 is SingleSchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.SingleScheduleData(schedule.date, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.Single(schedule.date, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
@@ -616,12 +616,12 @@ class DomainFactory(
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
                 is MonthlyDaySchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData(schedule.dayOfMonth, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyDay(schedule.dayOfMonth, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
                 is MonthlyWeekSchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData(schedule.dayOfMonth, schedule.dayOfWeek, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyWeek(schedule.dayOfMonth, schedule.dayOfWeek, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
@@ -631,7 +631,7 @@ class DomainFactory(
 
         for ((key, value) in weeklySchedules) {
             val daysOfWeek = value.flatMap { it.daysOfWeek }.toSet()
-            scheduleDatas[CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, key)] = ArrayList<Schedule>(value)
+            scheduleDatas[CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, key)] = ArrayList<Schedule>(value)
         }
 
         return Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>>(customTimes, scheduleDatas)

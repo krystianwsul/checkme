@@ -636,10 +636,10 @@ class CreateTaskActivity : AbstractActivity() {
                                 .asSequence()
                                 .map { scheduleData ->
                                     when (scheduleData) {
-                                        is CreateTaskViewModel.ScheduleData.SingleScheduleData -> SingleScheduleEntry(scheduleData)
-                                        is CreateTaskViewModel.ScheduleData.WeeklyScheduleData -> WeeklyScheduleEntry(scheduleData)
-                                        is CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData -> MonthlyDayScheduleEntry(scheduleData)
-                                        is CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData -> MonthlyWeekScheduleEntry(scheduleData)
+                                        is CreateTaskViewModel.ScheduleData.Single -> SingleScheduleEntry(scheduleData)
+                                        is CreateTaskViewModel.ScheduleData.Weekly -> WeeklyScheduleEntry(scheduleData)
+                                        is CreateTaskViewModel.ScheduleData.MonthlyDay -> MonthlyDayScheduleEntry(scheduleData)
+                                        is CreateTaskViewModel.ScheduleData.MonthlyWeek -> MonthlyWeekScheduleEntry(scheduleData)
                                     }
                                 }
                                 .toMutableList()

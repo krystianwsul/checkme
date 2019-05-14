@@ -5,7 +5,6 @@ import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
@@ -33,35 +32,22 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
     sealed class ScheduleData {
 
-        abstract val scheduleType: ScheduleType
         abstract val timePair: TimePair
 
-        data class SingleScheduleData(val date: Date, override val timePair: TimePair) : ScheduleData() {
+        data class Single(val date: Date, override val timePair: TimePair) : ScheduleData()
 
-            override val scheduleType = ScheduleType.SINGLE
-        }
+        data class Weekly(val daysOfWeek: Set<DayOfWeek>, override val timePair: TimePair) : ScheduleData()
 
-        data class WeeklyScheduleData(val daysOfWeek: Set<DayOfWeek>, override val timePair: TimePair) : ScheduleData() {
-
-            override val scheduleType = ScheduleType.WEEKLY
-        }
-
-        data class MonthlyDayScheduleData(
+        data class MonthlyDay(
                 val dayOfMonth: Int,
                 val beginningOfMonth: Boolean,
-                override val timePair: TimePair) : ScheduleData() {
+                override val timePair: TimePair) : ScheduleData()
 
-            override val scheduleType = ScheduleType.MONTHLY_DAY
-        }
-
-        data class MonthlyWeekScheduleData(
+        data class MonthlyWeek(
                 val dayOfMonth: Int,
                 val dayOfWeek: DayOfWeek,
                 val beginningOfMonth: Boolean,
-                override val timePair: TimePair) : ScheduleData() {
-
-            override val scheduleType = ScheduleType.MONTHLY_WEEK
-        }
+                override val timePair: TimePair) : ScheduleData()
     }
 
     data class Data(

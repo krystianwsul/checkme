@@ -116,9 +116,6 @@ class CreateTaskActivity : AbstractActivity() {
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
 
         override fun onTaskSelected(parentTreeData: CreateTaskViewModel.ParentTreeData) {
-            if (parentTreeData.parentKey is CreateTaskViewModel.ParentKey.Task)
-                clearSchedules()
-
             stateData.parent = parentTreeData
 
             updateParentView()
@@ -860,15 +857,6 @@ class CreateTaskActivity : AbstractActivity() {
         return oldScheduleDatas != newScheduleDatas
     }
 
-    private fun clearSchedules() { // todo merge into state
-        val scheduleCount = stateData.state
-                .schedules
-                .size
-
-        stateData.state.schedules = ArrayList()
-        createTaskAdapter.notifyItemRangeRemoved(createTaskAdapter.elementsBeforeSchedules(), scheduleCount)
-    }
-
     private fun removeListenerHelper() { // keyboard hack
         checkNotNull(scheduleRecycler)
 
@@ -880,8 +868,6 @@ class CreateTaskActivity : AbstractActivity() {
 
         if (requestCode == REQUEST_CREATE_PARENT) {
             if (resultCode == Activity.RESULT_OK) {
-                clearSchedules()
-
                 val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
                 stateData.parent = findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
             }
@@ -1135,12 +1121,19 @@ class CreateTaskActivity : AbstractActivity() {
     @Parcelize
     private class ParentScheduleState(
             var parentKey: CreateTaskViewModel.ParentKey?,
-            var schedules: MutableList<ScheduleEntry> = mutableListOf()) : Parcelable
+            val schedules: MutableList<ScheduleEntry> = mutableListOf()) : Parcelable
 
     private inner class ParentScheduleData(val state: ParentScheduleState) {
 
         var parent by observable(state.parentKey?.let { findTaskData(it) }) { _, _, newValue ->
             state.parentKey = newValue?.parentKey
+
+            if (newValue?.parentKey is CreateTaskViewModel.ParentKey.Task) {
+                val scheduleCount = state.schedules.size
+
+                state.schedules.clear()
+                createTaskAdapter.notifyItemRangeRemoved(createTaskAdapter.elementsBeforeSchedules(), scheduleCount)
+            }
         }
     }
 

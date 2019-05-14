@@ -46,6 +46,7 @@ import kotlinx.android.synthetic.main.row_note.view.*
 import kotlinx.android.synthetic.main.row_schedule.view.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.io.Serializable
+import kotlin.properties.Delegates.observable
 
 
 class CreateTaskActivity : AbstractActivity() {
@@ -60,7 +61,6 @@ class CreateTaskActivity : AbstractActivity() {
         private const val KEY_HINT = "hint"
         private const val KEY_REMOVE_INSTANCE_KEYS = "removeInstanceKeys"
 
-        private const val PARENT_KEY_KEY = "parentKey"
         private const val PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment"
 
         private const val HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition"
@@ -105,8 +105,6 @@ class CreateTaskActivity : AbstractActivity() {
 
     private var data: CreateTaskViewModel.Data? = null
 
-    private var parent: CreateTaskViewModel.ParentTreeData? = null
-
     private lateinit var createTaskAdapter: CreateTaskAdapter
 
     private var hourMinutePickerPosition: Int? = null
@@ -121,15 +119,15 @@ class CreateTaskActivity : AbstractActivity() {
             if (parentTreeData.parentKey is CreateTaskViewModel.ParentKey.Task)
                 clearSchedules()
 
-            parent = parentTreeData
+            stateData.parent = parentTreeData
 
             updateParentView()
         }
 
         override fun onTaskDeleted() {
-            checkNotNull(parent)
+            checkNotNull(stateData.parent)
 
-            parent = null
+            stateData.parent = null
 
             val view = scheduleRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)!!
 
@@ -277,7 +275,7 @@ class CreateTaskActivity : AbstractActivity() {
                         hasValueSchedule() -> {
                             check(!hasValueParentTask())
 
-                            val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
+                            val projectId = if (hasValueParentInGeneral()) (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
 
                             when {
                                 taskKey != null -> {
@@ -327,9 +325,9 @@ class CreateTaskActivity : AbstractActivity() {
                             }
                         }
                         hasValueParentTask() -> {
-                            checkNotNull(parent)
+                            checkNotNull(stateData.parent)
 
-                            val parentTaskKey = (parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
+                            val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
 
                             when {
                                 taskKey != null -> {
@@ -376,7 +374,7 @@ class CreateTaskActivity : AbstractActivity() {
                             }
                         }
                         else -> {  // no reminder
-                            val projectId = if (hasValueParentInGeneral()) (parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
+                            val projectId = if (hasValueParentInGeneral()) (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
 
                             when {
                                 taskKey != null -> {
@@ -528,10 +526,6 @@ class CreateTaskActivity : AbstractActivity() {
                     putInt(HOUR_MINUTE_PICKER_POSITION_KEY, it)
                 }
 
-                if (parent != null) {
-                    putParcelable(PARENT_KEY_KEY, parent!!.parentKey)
-                }
-
                 if (!note.isNullOrEmpty())
                     putString(NOTE_KEY, note)
 
@@ -590,15 +584,10 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         val parentHint = (hint as? Hint.Task)?.taskKey
+        var parentKey: CreateTaskViewModel.ParentKey? = null
 
         if (savedInstanceState?.containsKey(KEY_STATE) == true) {
             savedInstanceState!!.run {
-                if (containsKey(PARENT_KEY_KEY)) {
-                    val parentKey = getParcelable<CreateTaskViewModel.ParentKey>(PARENT_KEY_KEY)!!
-
-                    parent = findTaskData(parentKey)
-                }
-
                 if (containsKey(NOTE_KEY)) {
                     note = getString(NOTE_KEY)!!
                     check(!note.isNullOrEmpty())
@@ -615,12 +604,12 @@ class CreateTaskActivity : AbstractActivity() {
                     check(taskKeys == null)
                     checkNotNull(taskKey)
 
-                    parent = findTaskData(taskData.parentKey)
+                    parentKey = taskData.parentKey
                 } else if (parentHint != null) {
                     check(taskKey == null)
 
                     MyCrashlytics.log("CreateTaskActivity.parentTaskKeyHint: $parentHint")
-                    parent = findTaskData(CreateTaskViewModel.ParentKey.Task(parentHint))
+                    parentKey = CreateTaskViewModel.ParentKey.Task(parentHint)
                 }
 
                 taskData?.let { note = it.note }
@@ -631,7 +620,9 @@ class CreateTaskActivity : AbstractActivity() {
 
         invalidateOptionsMenu()
 
-        if (tmpState == null && (savedInstanceState == null || !savedInstanceState!!.containsKey(KEY_STATE))) {
+        if (!this::initialState.isInitialized) {
+            check(!this::stateData.isInitialized)
+            
             val schedules = mutableListOf<ScheduleEntry>()
 
             this.data!!.run {
@@ -650,8 +641,8 @@ class CreateTaskActivity : AbstractActivity() {
                 }
             }
 
-            tmpState = ParentScheduleState(schedules)
-            initialState = ParentScheduleState(ArrayList(tmpState!!.schedules))
+            tmpState = ParentScheduleState(parentKey, schedules)
+            initialState = ParentScheduleState(parentKey, ArrayList(tmpState!!.schedules))
         }
 
         stateData = ParentScheduleData(tmpState!!)
@@ -783,7 +774,7 @@ class CreateTaskActivity : AbstractActivity() {
                     if (!hasValueParentInGeneral())
                         return true
 
-                    return parent!!.parentKey != data!!.taskData!!.parentKey
+                    return stateData.parent!!.parentKey != data!!.taskData!!.parentKey
                 }
                 data!!.taskData!!.scheduleDatas != null -> {
                     if (!hasValueSchedule())
@@ -806,7 +797,7 @@ class CreateTaskActivity : AbstractActivity() {
                 if (!hasValueParentTask())
                     return true
 
-                return parent == null || parent!!.parentKey != CreateTaskViewModel.ParentKey.Task(parentHint)
+                return stateData.parent == null || stateData.parent!!.parentKey != CreateTaskViewModel.ParentKey.Task(parentHint)
             } else {
                 if (!hasValueSchedule())
                     return true
@@ -832,10 +823,10 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     private fun clearParentTask() {
-        if (parent == null || parent!!.parentKey is CreateTaskViewModel.ParentKey.Project)
+        if (stateData.parent == null || stateData.parent!!.parentKey is CreateTaskViewModel.ParentKey.Project)
             return
 
-        parent = null
+        stateData.parent = null
 
         updateParentView()
     }
@@ -846,12 +837,12 @@ class CreateTaskActivity : AbstractActivity() {
 
         val scheduleHolder = scheduleRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
 
-        scheduleHolder.scheduleText.setText(if (parent != null) parent!!.name else null)
+        scheduleHolder.scheduleText.setText(if (stateData.parent != null) stateData.parent!!.name else null)
     }
 
-    private fun hasValueParentInGeneral() = parent != null
+    private fun hasValueParentInGeneral() = stateData.parent != null
 
-    private fun hasValueParentTask() = parent?.parentKey is CreateTaskViewModel.ParentKey.Task
+    private fun hasValueParentTask() = stateData.parent?.parentKey is CreateTaskViewModel.ParentKey.Task
 
     private fun hasValueSchedule() = stateData.state
             .schedules
@@ -869,7 +860,7 @@ class CreateTaskActivity : AbstractActivity() {
         return oldScheduleDatas != newScheduleDatas
     }
 
-    private fun clearSchedules() {
+    private fun clearSchedules() { // todo merge into state
         val scheduleCount = stateData.state
                 .schedules
                 .size
@@ -892,7 +883,7 @@ class CreateTaskActivity : AbstractActivity() {
                 clearSchedules()
 
                 val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)!!
-                parent = findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
+                stateData.parent = findTaskData(CreateTaskViewModel.ParentKey.Task(taskKey))
             }
         }
     }
@@ -974,10 +965,10 @@ class CreateTaskActivity : AbstractActivity() {
                     }
 
                     scheduleText.run {
-                        setText(this@CreateTaskActivity.parent?.name)
+                        setText(this@CreateTaskActivity.stateData.parent?.name)
 
                         setOnClickListener {
-                            ParentPickerFragment.newInstance(this@CreateTaskActivity.parent != null).let {
+                            ParentPickerFragment.newInstance(this@CreateTaskActivity.stateData.parent != null).let {
                                 it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
                                 it.initialize(data!!.parentTreeDatas, parentFragmentListener)
                             }
@@ -1143,16 +1134,14 @@ class CreateTaskActivity : AbstractActivity() {
 
     @Parcelize
     private class ParentScheduleState(
-            //var parentKey: CreateTaskViewModel.ParentKey?,
+            var parentKey: CreateTaskViewModel.ParentKey?,
             var schedules: MutableList<ScheduleEntry> = mutableListOf()) : Parcelable
 
     private inner class ParentScheduleData(val state: ParentScheduleState) {
 
-        /*
         var parent by observable(state.parentKey?.let { findTaskData(it) }) { _, _, newValue ->
             state.parentKey = newValue?.parentKey
         }
-        */
     }
 
     sealed class ImageState : Serializable {

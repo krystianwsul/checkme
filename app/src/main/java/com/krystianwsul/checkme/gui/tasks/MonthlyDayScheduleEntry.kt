@@ -6,28 +6,20 @@ import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
 class MonthlyDayScheduleEntry(monthlyDay: CreateTaskViewModel.ScheduleData.MonthlyDay) : ScheduleEntry() {
 
-    private val monthDayNumber: Int
-    private val beginningOfMonth: Boolean
-
-    private val timePair: TimePair
+    private val monthDayNumber = monthlyDay.dayOfMonth
+    private val beginningOfMonth = monthlyDay.beginningOfMonth
+    private val timePair = monthlyDay.timePair
 
     override val scheduleData: CreateTaskViewModel.ScheduleData
         get() = CreateTaskViewModel.ScheduleData.MonthlyDay(monthDayNumber, beginningOfMonth, timePair)
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
-
-    init {
-        monthDayNumber = monthlyDay.dayOfMonth
-        beginningOfMonth = monthlyDay.beginningOfMonth
-        timePair = monthlyDay.timePair.copy()
-    }
 
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         val day = Utils.ordinal(monthDayNumber) + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)

@@ -6,21 +6,14 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DayOfWeek
-import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.utils.time.TimePairPersist
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 
 
 class WeeklyScheduleEntry(weekly: CreateTaskViewModel.ScheduleData.Weekly) : ScheduleEntry() {
 
-    private val daysOfWeek: Set<DayOfWeek>
-    private val timePair: TimePair
-
-    init {
-        daysOfWeek = weekly.daysOfWeek
-        timePair = weekly.timePair.copy()
-    }
+    private val daysOfWeek = weekly.daysOfWeek
+    private val timePair = weekly.timePair
 
     override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String {
         return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {

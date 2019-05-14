@@ -709,23 +709,23 @@ class CreateTaskActivity : AbstractActivity() {
             if (data!!.taskData != null && data!!.taskData!!.scheduleDatas != null && data!!.taskData!!.scheduleDatas!!.contains(scheduleEntry.scheduleData))
                 continue
 
-            if (singleScheduleEntry.mDate > Date.today())
+            if (singleScheduleEntry.date > Date.today())
                 continue
 
-            if (singleScheduleEntry.mDate < Date.today()) {
+            if (singleScheduleEntry.date < Date.today()) {
                 setScheduleEntryError(scheduleEntry, R.string.error_date)
 
                 hasError = true
                 continue
             }
 
-            val timePair = singleScheduleEntry.mTimePair
+            val timePair = singleScheduleEntry.timePair
             val hourMinute = if (timePair.customTimeKey != null) {
                 check(timePair.hourMinute == null)
 
                 data!!.customTimeDatas
                         .getValue(timePair.customTimeKey)
-                        .hourMinutes[singleScheduleEntry.mDate.dayOfWeek]
+                        .hourMinutes[singleScheduleEntry.date.dayOfWeek]
             } else {
                 checkNotNull(timePair.hourMinute)
 

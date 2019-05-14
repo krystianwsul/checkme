@@ -630,7 +630,7 @@ class DomainFactory(
         }
 
         for ((key, value) in weeklySchedules) {
-            val daysOfWeek = value.flatMap { it.daysOfWeek }.toSet()
+            val daysOfWeek = value.flatMap { it.daysOfWeek }.toHashSet()
             scheduleDatas[CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, key)] = ArrayList<Schedule>(value)
         }
 

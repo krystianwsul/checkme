@@ -634,14 +634,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                         scheduleEntries = taskData.scheduleDatas
                                 .asSequence()
-                                .map { scheduleData ->
-                                    when (scheduleData) {
-                                        is CreateTaskViewModel.ScheduleData.Single -> SingleScheduleEntry(scheduleData)
-                                        is CreateTaskViewModel.ScheduleData.Weekly -> WeeklyScheduleEntry(scheduleData)
-                                        is CreateTaskViewModel.ScheduleData.MonthlyDay -> MonthlyDayScheduleEntry(scheduleData)
-                                        is CreateTaskViewModel.ScheduleData.MonthlyWeek -> MonthlyWeekScheduleEntry(scheduleData)
-                                    }
-                                }
+                                .map { ScheduleEntry(it) }
                                 .toMutableList()
                     }
                 } else {
@@ -701,7 +694,7 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         for (scheduleEntry in scheduleEntries) {
-            if (scheduleEntry !is SingleScheduleEntry)
+            if (scheduleEntry.scheduleData !is CreateTaskViewModel.ScheduleData.Single)
                 continue
 
             if (data!!.taskData != null && data!!.taskData!!.scheduleDatas != null && data!!.taskData!!.scheduleDatas!!.contains(scheduleEntry.scheduleData))
@@ -889,7 +882,7 @@ class CreateTaskActivity : AbstractActivity() {
         }
     }
 
-    private fun hintToSchedule(scheduleHint: Hint.Schedule?): SingleScheduleEntry {
+    private fun hintToSchedule(scheduleHint: Hint.Schedule?): ScheduleEntry {
         val (date, timePair) = when {
             scheduleHint == null -> { // new for task
                 val pair = HourMinute.nextHour
@@ -906,7 +899,7 @@ class CreateTaskActivity : AbstractActivity() {
             }
         }
 
-        return SingleScheduleEntry(CreateTaskViewModel.ScheduleData.Single(date, timePair))
+        return ScheduleEntry(CreateTaskViewModel.ScheduleData.Single(date, timePair))
     }
 
     sealed class Hint : Serializable {
@@ -988,7 +981,7 @@ class CreateTaskActivity : AbstractActivity() {
                     }
 
                     scheduleText.run {
-                        setText(scheduleEntry.getText(data!!.customTimeDatas, this@CreateTaskActivity))
+                        setText(scheduleEntry.scheduleData.getText(data!!.customTimeDatas, this@CreateTaskActivity))
                         setOnClickListener { onTextClick() }
                     }
                 }
@@ -1006,7 +999,7 @@ class CreateTaskActivity : AbstractActivity() {
                         setOnClickListener {
                             check(hourMinutePickerPosition == null)
 
-                            ScheduleDialogFragment.newInstance(firstScheduleEntry().getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)), false).let {
+                            ScheduleDialogFragment.newInstance(firstScheduleEntry().scheduleData.getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)), false).let {
                                 it.initialize(data!!.customTimeDatas, scheduleDialogListener)
                                 it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                             }
@@ -1110,7 +1103,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                 val scheduleEntry = scheduleEntries[hourMinutePickerPosition!! - createTaskAdapter.elementsBeforeSchedules()]
 
-                ScheduleDialogFragment.newInstance(scheduleEntry.getScheduleDialogData(Date.today(), hint as? Hint.Schedule), true).let {
+                ScheduleDialogFragment.newInstance(scheduleEntry.scheduleData.getScheduleDialogData(Date.today(), hint as? Hint.Schedule), true).let {
                     it.initialize(data!!.customTimeDatas, scheduleDialogListener)
                     it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                 }

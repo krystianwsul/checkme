@@ -565,6 +565,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             check(monthWeekNumber > 0)
             check(monthWeekNumber < 5)
         }
+
+        fun toScheduleEntry() = when (scheduleType) {
+            ScheduleType.SINGLE -> SingleScheduleEntry(this)
+            ScheduleType.WEEKLY -> WeeklyScheduleEntry(this)
+            ScheduleType.MONTHLY_DAY -> MonthlyDayScheduleEntry(this)
+            ScheduleType.MONTHLY_WEEK -> MonthlyWeekScheduleEntry(this)
+            else -> throw UnsupportedOperationException()
+        }
     }
 
     interface ScheduleDialogListener {

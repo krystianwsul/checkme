@@ -174,12 +174,12 @@ class CreateTaskActivity : AbstractActivity() {
             if (hourMinutePickerPosition == null) {
                 clearParent()
 
-                createTaskAdapter.addScheduleEntry(ScheduleEntry.fromScheduleDialogData(scheduleDialogData))
+                createTaskAdapter.addScheduleEntry(scheduleDialogData.toScheduleEntry())
             } else {
                 hourMinutePickerPosition!!.let {
                     check(it >= createTaskAdapter.elementsBeforeSchedules())
 
-                    scheduleEntries[it - createTaskAdapter.elementsBeforeSchedules()] = ScheduleEntry.fromScheduleDialogData(scheduleDialogData)
+                    scheduleEntries[it - createTaskAdapter.elementsBeforeSchedules()] = scheduleDialogData.toScheduleEntry()
 
                     createTaskAdapter.notifyItemChanged(it)
 

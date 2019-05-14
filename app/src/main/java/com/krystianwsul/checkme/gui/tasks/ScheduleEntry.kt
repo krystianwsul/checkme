@@ -7,26 +7,11 @@ import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import java.io.Serializable
 
-abstract class ScheduleEntry(var error: String?) : Serializable {
-
-    companion object {
-
-        fun fromScheduleDialogData(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData): ScheduleEntry {
-            return when (scheduleDialogData.scheduleType) {
-                ScheduleType.SINGLE -> SingleScheduleEntry(scheduleDialogData)
-                ScheduleType.WEEKLY -> WeeklyScheduleEntry(scheduleDialogData)
-                ScheduleType.MONTHLY_DAY -> MonthlyDayScheduleEntry(scheduleDialogData)
-                ScheduleType.MONTHLY_WEEK -> MonthlyWeekScheduleEntry(scheduleDialogData)
-                else -> throw UnsupportedOperationException()
-            }
-        }
-    }
+abstract class ScheduleEntry(var error: String? = null) : Serializable {
 
     abstract val scheduleData: CreateTaskViewModel.ScheduleData
 
     abstract val scheduleType: ScheduleType
-
-    constructor() : this(null)
 
     abstract fun getText(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, context: Context): String
 

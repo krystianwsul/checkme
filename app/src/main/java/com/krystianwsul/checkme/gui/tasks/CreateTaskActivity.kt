@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -40,6 +39,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_create_task.*
 import kotlinx.android.synthetic.main.row_image.view.*
 import kotlinx.android.synthetic.main.row_note.view.*
@@ -64,7 +64,8 @@ class CreateTaskActivity : AbstractActivity() {
         private const val PARENT_PICKER_FRAGMENT_TAG = "parentPickerFragment"
 
         private const val HOUR_MINUTE_PICKER_POSITION_KEY = "hourMinutePickerPosition"
-        private const val SCHEDULE_ENTRIES_KEY = "scheduleEntries"
+        private const val KEY_INITIAL_STATE = "initialState"
+        private const val KEY_STATE = "state"
         private const val NOTE_KEY = "note"
         private const val NOTE_HAS_FOCUS_KEY = "noteHasFocus"
         private const val IMAGE_URL_KEY = "imageUrl"
@@ -110,9 +111,8 @@ class CreateTaskActivity : AbstractActivity() {
 
     private var hourMinutePickerPosition: Int? = null
 
-    private lateinit var scheduleEntries: MutableList<ScheduleEntry>
-
-    private var first = true
+    private lateinit var initialState: ParentScheduleState
+    private lateinit var state: ParentScheduleState
 
     private val parentFragmentListener = object : ParentPickerFragment.Listener {
 
@@ -172,14 +172,14 @@ class CreateTaskActivity : AbstractActivity() {
             }
 
             if (hourMinutePickerPosition == null) {
-                clearParent()
+                clearParentTask()
 
                 createTaskAdapter.addScheduleEntry(scheduleDialogData.toScheduleEntry())
             } else {
                 hourMinutePickerPosition!!.let {
                     check(it >= createTaskAdapter.elementsBeforeSchedules())
 
-                    scheduleEntries[it - createTaskAdapter.elementsBeforeSchedules()] = scheduleDialogData.toScheduleEntry()
+                    state.schedules[it - createTaskAdapter.elementsBeforeSchedules()] = scheduleDialogData.toScheduleEntry()
 
                     createTaskAdapter.notifyItemChanged(it)
 
@@ -193,7 +193,7 @@ class CreateTaskActivity : AbstractActivity() {
                 check(it >= createTaskAdapter.elementsBeforeSchedules())
                 checkNotNull(data)
 
-                scheduleEntries.removeAt(it - createTaskAdapter.elementsBeforeSchedules())
+                state.schedules.removeAt(it - createTaskAdapter.elementsBeforeSchedules())
 
                 createTaskAdapter.notifyItemRemoved(it)
 
@@ -231,11 +231,11 @@ class CreateTaskActivity : AbstractActivity() {
         override fun onChildViewDetachedFromWindow(view: View) = Unit
     }
 
-    private val scheduleDatas get() = scheduleEntries.map { it.scheduleData }.apply { check(!isEmpty()) }
+    private val scheduleDatas get() = state.schedules.map { it.scheduleData }.apply { check(!isEmpty()) }
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
-    val imageUrl = BehaviorRelay.createDefault<State>(State.None)
+    val imageUrl = BehaviorRelay.createDefault<ImageState>(ImageState.None)
 
     private lateinit var removeInstanceKeys: List<InstanceKey>
 
@@ -443,7 +443,7 @@ class CreateTaskActivity : AbstractActivity() {
         this.savedInstanceState = savedInstanceState
 
         savedInstanceState?.run {
-            imageUrl.accept(getSerializable(IMAGE_URL_KEY) as State)
+            imageUrl.accept(getSerializable(IMAGE_URL_KEY) as ImageState)
         }
 
         scheduleRecycler.layoutManager = LinearLayoutManager(this)
@@ -471,9 +471,10 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         savedInstanceState?.run {
-            if (containsKey(SCHEDULE_ENTRIES_KEY)) {
-                @Suppress("UNCHECKED_CAST")
-                scheduleEntries = getSerializable(SCHEDULE_ENTRIES_KEY) as ArrayList<ScheduleEntry>
+            @Suppress("UNCHECKED_CAST")
+            if (containsKey(KEY_INITIAL_STATE)) {
+                initialState = getParcelable(KEY_INITIAL_STATE)!!
+                state = getParcelable(KEY_STATE)!!
 
                 if (containsKey(HOUR_MINUTE_PICKER_POSITION_KEY))
                     hourMinutePickerPosition = getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -1).also { check(it > 0) }
@@ -501,7 +502,7 @@ class CreateTaskActivity : AbstractActivity() {
                 val file = it.data().file
                 it.targetUI()
                         .imageUrl
-                        .accept(State.Selected(file.absolutePath, file.toURI().toString()))
+                        .accept(ImageState.Selected(file.absolutePath, file.toURI().toString()))
             }
         }
     }
@@ -511,7 +512,8 @@ class CreateTaskActivity : AbstractActivity() {
 
         outState.run {
             if (data != null) {
-                putSerializable(SCHEDULE_ENTRIES_KEY, ArrayList(scheduleEntries))
+                putParcelable(KEY_STATE, state)
+                putParcelable(KEY_INITIAL_STATE, initialState)
 
                 hourMinutePickerPosition?.let {
                     check(it >= createTaskAdapter.elementsBeforeSchedules())
@@ -539,7 +541,7 @@ class CreateTaskActivity : AbstractActivity() {
         data.taskData
                 ?.imageState
                 ?.takeUnless { imageUrl.value!!.dontOverwrite }
-                ?.let { imageUrl.accept(State.Existing(it)) }
+                ?.let { imageUrl.accept(ImageState.Existing(it)) }
 
         toolbarLayout.run {
             visibility = View.VISIBLE
@@ -582,7 +584,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         val parentHint = (hint as? Hint.Task)?.taskKey
 
-        if (savedInstanceState?.containsKey(SCHEDULE_ENTRIES_KEY) == true) {
+        if (savedInstanceState?.containsKey(KEY_STATE) == true) {
             savedInstanceState!!.run {
                 if (containsKey(PARENT_KEY_KEY)) {
                     val parentKey = getParcelable<CreateTaskViewModel.ParentKey>(PARENT_KEY_KEY)!!
@@ -622,26 +624,26 @@ class CreateTaskActivity : AbstractActivity() {
 
         invalidateOptionsMenu()
 
-        if (first && (savedInstanceState == null || !savedInstanceState!!.containsKey(SCHEDULE_ENTRIES_KEY))) {
-            first = false
-
-            scheduleEntries = ArrayList()
+        if (!this::state.isInitialized && (savedInstanceState == null || !savedInstanceState!!.containsKey(KEY_STATE))) {
+            state = ParentScheduleState()
 
             this.data!!.run {
                 if (taskData != null) {
                     if (taskData.scheduleDatas != null) {
                         check(taskData.scheduleDatas.isNotEmpty())
 
-                        scheduleEntries = taskData.scheduleDatas
+                        state.schedules = taskData.scheduleDatas
                                 .asSequence()
                                 .map { ScheduleEntry(it) }
                                 .toMutableList()
                     }
                 } else {
                     if (parentHint == null)
-                        scheduleEntries.add(firstScheduleEntry())
+                        state.schedules.add(firstScheduleEntry())
                 }
             }
+
+            initialState = ParentScheduleState(ArrayList(state.schedules))
         }
 
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(this.data!!.customTimeDatas, scheduleDialogListener)
@@ -650,7 +652,7 @@ class CreateTaskActivity : AbstractActivity() {
         scheduleRecycler.adapter = createTaskAdapter
 
         if (noteHasFocus) { // keyboard hack
-            val notePosition = scheduleEntries.size + 1 + createTaskAdapter.elementsBeforeSchedules()
+            val notePosition = state.schedules.size + 1 + createTaskAdapter.elementsBeforeSchedules()
 
             scheduleRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
 
@@ -693,7 +695,7 @@ class CreateTaskActivity : AbstractActivity() {
             toolbarLayout.error = null
         }
 
-        for (scheduleEntry in scheduleEntries) {
+        for (scheduleEntry in state.schedules) {
             if (scheduleEntry.scheduleData !is CreateTaskViewModel.ScheduleData.Single)
                 continue
 
@@ -737,7 +739,7 @@ class CreateTaskActivity : AbstractActivity() {
         scheduleEntry.error = getString(stringId)
         check(!TextUtils.isEmpty(scheduleEntry.error))
 
-        val index = scheduleEntries.indexOf(scheduleEntry)
+        val index = state.schedules.indexOf(scheduleEntry)
         check(index >= 0)
 
         scheduleRecycler.getChildAt(index + createTaskAdapter.elementsBeforeSchedules())?.let {
@@ -815,7 +817,7 @@ class CreateTaskActivity : AbstractActivity() {
                 .flatten()
     }
 
-    private fun clearParent() {
+    private fun clearParentTask() {
         if (parent == null || parent!!.parentKey is CreateTaskViewModel.ParentKey.Project)
             return
 
@@ -837,7 +839,7 @@ class CreateTaskActivity : AbstractActivity() {
 
     private fun hasValueParentTask() = parent?.parentKey is CreateTaskViewModel.ParentKey.Task
 
-    private fun hasValueSchedule() = scheduleEntries.isNotEmpty()
+    private fun hasValueSchedule() = state.schedules.isNotEmpty()
 
     private fun firstScheduleEntry() = hintToSchedule(hint as? Hint.Schedule)
 
@@ -845,21 +847,16 @@ class CreateTaskActivity : AbstractActivity() {
         if (data == null)
             return false
 
-        val oldScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(if (data!!.taskData != null) {
-            data!!.taskData!!.scheduleDatas ?: listOf()
-        } else {
-            listOf(firstScheduleEntry().scheduleData)
-        })
-
-        val newScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(scheduleEntries.map { it.scheduleData })
+        val oldScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(initialState.schedules.map { it.scheduleData })
+        val newScheduleDatas = HashMultiset.create<CreateTaskViewModel.ScheduleData>(state.schedules.map { it.scheduleData })
 
         return oldScheduleDatas != newScheduleDatas
     }
 
     private fun clearSchedules() {
-        val scheduleCount = scheduleEntries.size
+        val scheduleCount = state.schedules.size
 
-        scheduleEntries = ArrayList()
+        state.schedules = ArrayList()
         createTaskAdapter.notifyItemRangeRemoved(createTaskAdapter.elementsBeforeSchedules(), scheduleCount)
     }
 
@@ -969,8 +966,8 @@ class CreateTaskActivity : AbstractActivity() {
                         }
                     }
                 }
-                in (elementsBeforeSchedules until (elementsBeforeSchedules + scheduleEntries.size)) -> (holder as ScheduleHolder).run {
-                    val scheduleEntry = scheduleEntries[position - elementsBeforeSchedules()]
+                in (elementsBeforeSchedules until (elementsBeforeSchedules + state.schedules.size)) -> (holder as ScheduleHolder).run {
+                    val scheduleEntry = state.schedules[position - elementsBeforeSchedules()]
 
                     scheduleMargin.visibility = View.GONE
 
@@ -985,7 +982,7 @@ class CreateTaskActivity : AbstractActivity() {
                         setOnClickListener { onTextClick() }
                     }
                 }
-                elementsBeforeSchedules + scheduleEntries.size -> (holder as ScheduleHolder).run {
+                elementsBeforeSchedules + state.schedules.size -> (holder as ScheduleHolder).run {
                     scheduleMargin.visibility = View.GONE
 
                     scheduleLayout.run {
@@ -1006,7 +1003,7 @@ class CreateTaskActivity : AbstractActivity() {
                         }
                     }
                 }
-                elementsBeforeSchedules + scheduleEntries.size + 1 -> {
+                elementsBeforeSchedules + state.schedules.size + 1 -> {
                     (holder as NoteHolder).run {
                         mNoteLayout.isHintAnimationEnabled = data != null
 
@@ -1018,7 +1015,7 @@ class CreateTaskActivity : AbstractActivity() {
                         }
                     }
                 }
-                elementsBeforeSchedules + scheduleEntries.size + 2 -> {
+                elementsBeforeSchedules + state.schedules.size + 2 -> {
                     (holder as ImageHolder).run {
                         listOf(imageLayoutText, imageImage, imageEdit).forEach {
                             it.setOnClickListener {
@@ -1061,7 +1058,7 @@ class CreateTaskActivity : AbstractActivity() {
 
         fun elementsBeforeSchedules() = 1
 
-        override fun getItemCount() = elementsBeforeSchedules() + scheduleEntries.size + 3
+        override fun getItemCount() = elementsBeforeSchedules() + state.schedules.size + 3
 
         override fun getItemViewType(position: Int): Int {
             val elementsBeforeSchedules = elementsBeforeSchedules()
@@ -1069,18 +1066,18 @@ class CreateTaskActivity : AbstractActivity() {
             return when (position) {
                 0 -> TYPE_SCHEDULE
                 in (1 until elementsBeforeSchedules) -> TYPE_SCHEDULE
-                in (elementsBeforeSchedules until elementsBeforeSchedules + scheduleEntries.size) -> TYPE_SCHEDULE
-                elementsBeforeSchedules + scheduleEntries.size -> TYPE_SCHEDULE
-                elementsBeforeSchedules + scheduleEntries.size + 1 -> TYPE_NOTE
-                elementsBeforeSchedules + scheduleEntries.size + 2 -> TYPE_IMAGE
+                in (elementsBeforeSchedules until elementsBeforeSchedules + state.schedules.size) -> TYPE_SCHEDULE
+                elementsBeforeSchedules + state.schedules.size -> TYPE_SCHEDULE
+                elementsBeforeSchedules + state.schedules.size + 1 -> TYPE_NOTE
+                elementsBeforeSchedules + state.schedules.size + 2 -> TYPE_IMAGE
                 else -> throw IllegalArgumentException()
             }
         }
 
         fun addScheduleEntry(scheduleEntry: ScheduleEntry) {
-            val position = elementsBeforeSchedules() + scheduleEntries.size
+            val position = elementsBeforeSchedules() + state.schedules.size
 
-            scheduleEntries.add(scheduleEntry)
+            state.schedules.add(scheduleEntry)
             notifyItemInserted(position)
         }
 
@@ -1101,7 +1098,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                 hourMinutePickerPosition = adapterPosition
 
-                val scheduleEntry = scheduleEntries[hourMinutePickerPosition!! - createTaskAdapter.elementsBeforeSchedules()]
+                val scheduleEntry = state.schedules[hourMinutePickerPosition!! - createTaskAdapter.elementsBeforeSchedules()]
 
                 ScheduleDialogFragment.newInstance(scheduleEntry.scheduleData.getScheduleDialogData(Date.today(), hint as? Hint.Schedule), true).let {
                     it.initialize(data!!.customTimeDatas, scheduleDialogListener)
@@ -1126,7 +1123,10 @@ class CreateTaskActivity : AbstractActivity() {
         }
     }
 
-    sealed class State : Serializable {
+    @Parcelize
+    private class ParentScheduleState(var schedules: MutableList<ScheduleEntry> = mutableListOf()) : Parcelable
+
+    sealed class ImageState : Serializable {
 
         open val dontOverwrite = false
 
@@ -1134,30 +1134,30 @@ class CreateTaskActivity : AbstractActivity() {
 
         open val writeImagePath: NullableWrapper<Pair<String, Uri>>? = null
 
-        object None : State()
+        object None : ImageState()
 
-        data class Existing(val imageState: ImageState) : State() {
+        data class Existing(val imageState: com.krystianwsul.checkme.firebase.ImageState) : ImageState() {
 
             override val loader get() = imageState::load
         }
 
-        object Removed : State() {
+        object Removed : ImageState() {
 
             override val dontOverwrite = true
 
             override val writeImagePath = NullableWrapper<Pair<String, Uri>>(null)
         }
 
-        data class Selected(val path: String, val uri: String) : State() {
+        data class Selected(val path: String, val uri: String) : ImageState() {
 
             override val dontOverwrite = true
 
             override val loader
                 get() = { imageView: ImageView ->
-                Glide.with(imageView)
-                        .load(path)
-                        .into(imageView)
-            }
+                    Glide.with(imageView)
+                            .load(path)
+                            .into(imageView)
+                }
 
             override val writeImagePath get() = NullableWrapper(Pair(path, Uri.parse(uri)))
         }

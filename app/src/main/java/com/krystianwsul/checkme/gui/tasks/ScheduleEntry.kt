@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui.tasks
 
+import android.os.Parcelable
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import java.io.Serializable
+import kotlinx.android.parcel.Parcelize
 
-class ScheduleEntry(val scheduleData: CreateTaskViewModel.ScheduleData, var error: String? = null) : Serializable
+@Parcelize
+class ScheduleEntry(val scheduleData: CreateTaskViewModel.ScheduleData, var error: String? = null) : Parcelable

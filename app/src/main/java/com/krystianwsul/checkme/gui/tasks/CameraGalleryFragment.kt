@@ -62,7 +62,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
                         )
 
                     }
-                    R.id.camera_gallery_remove -> createTaskActivity.imageUrl.accept(CreateTaskActivity.State.Removed)
+                    R.id.camera_gallery_remove -> createTaskActivity.imageUrl.accept(CreateTaskActivity.ImageState.Removed)
                     else -> throw IllegalArgumentException()
                 }
 

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel

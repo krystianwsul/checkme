@@ -10,6 +10,7 @@ import android.text.TextUtils
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService

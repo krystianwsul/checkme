@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domainmodel.schedules
 
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId

@@ -1,5 +1,8 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domainmodel.schedules
 
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMilli

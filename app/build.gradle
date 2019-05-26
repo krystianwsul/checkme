@@ -25,8 +25,8 @@ android {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 22
         targetSdkVersion 28
-        versionCode 172
-        versionName "0.17.4"
+        versionCode 174
+        versionName "0.17.6"
     }
     buildTypes {
         release {
@@ -115,7 +115,7 @@ dependencies {
 
     implementation 'com.google.guava:guava:27.0.1-android'
 
-    implementation('com.crashlytics.sdk.android:crashlytics:2.10.0@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
         transitive = true
     }
 

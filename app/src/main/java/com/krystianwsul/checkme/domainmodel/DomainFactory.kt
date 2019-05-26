@@ -603,7 +603,7 @@ class DomainFactory(
 
             when (schedule) {
                 is SingleSchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.SingleScheduleData(schedule.date, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.Single(schedule.date, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
@@ -616,12 +616,12 @@ class DomainFactory(
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
                 is MonthlyDaySchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData(schedule.dayOfMonth, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyDay(schedule.dayOfMonth, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
                 is MonthlyWeekSchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData(schedule.dayOfMonth, schedule.dayOfWeek, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyWeek(schedule.dayOfMonth, schedule.dayOfWeek, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
@@ -630,8 +630,8 @@ class DomainFactory(
         }
 
         for ((key, value) in weeklySchedules) {
-            val daysOfWeek = value.flatMap { it.daysOfWeek }.toSet()
-            scheduleDatas[CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, key)] = ArrayList<Schedule>(value)
+            val daysOfWeek = value.flatMap { it.daysOfWeek }.toHashSet()
+            scheduleDatas[CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, key)] = ArrayList<Schedule>(value)
         }
 
         return Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>>(customTimes, scheduleDatas)
@@ -655,11 +655,11 @@ class DomainFactory(
 
         val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
 
-        fun checkHintPresent(taskParentKey: CreateTaskViewModel.ParentKey.TaskParentKey, parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>): Boolean {
-            return parentTreeDatas.containsKey(taskParentKey) || parentTreeDatas.any { checkHintPresent(taskParentKey, it.value.parentTreeDatas) }
+        fun checkHintPresent(task: CreateTaskViewModel.ParentKey.Task, parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>): Boolean {
+            return parentTreeDatas.containsKey(task) || parentTreeDatas.any { checkHintPresent(task, it.value.parentTreeDatas) }
         }
 
-        fun checkHintPresent(parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>) = parentTaskKeyHint?.let { checkHintPresent(CreateTaskViewModel.ParentKey.TaskParentKey(it), parentTreeDatas) }
+        fun checkHintPresent(parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>) = parentTaskKeyHint?.let { checkHintPresent(CreateTaskViewModel.ParentKey.Task(it), parentTreeDatas) }
                 ?: true
 
         var taskData: CreateTaskViewModel.TaskData? = null
@@ -673,7 +673,7 @@ class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.ProjectParentKey(it.id) }
+                parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
                 if (schedules.isNotEmpty()) {
                     val pair = getScheduleDatas(schedules, now)
@@ -682,7 +682,7 @@ class DomainFactory(
                 }
             } else {
                 val parentTask = task.getParentTask(now)!!
-                parentKey = CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.taskKey)
+                parentKey = CreateTaskViewModel.ParentKey.Task(parentTask.taskKey)
                 includeTaskKeys.add(parentTask.taskKey)
             }
 
@@ -2012,8 +2012,8 @@ class DomainFactory(
                     .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
                     .map {
                         val childTask = it.childTask
-                        val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.childTaskKey)
-                        val parentTreeData = CreateTaskViewModel.ParentTreeData(childTask.name, getTaskListChildTaskDatas(now, childTask, excludedTaskKeys), CreateTaskViewModel.ParentKey.TaskParentKey(childTask.taskKey), childTask.getScheduleText(now), childTask.note, CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp))
+                        val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.childTaskKey)
+                        val parentTreeData = CreateTaskViewModel.ParentTreeData(childTask.name, getTaskListChildTaskDatas(now, childTask, excludedTaskKeys), CreateTaskViewModel.ParentKey.Task(childTask.taskKey), childTask.getScheduleText(now), childTask.note, CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp))
 
                         taskParentKey to parentTreeData
                     }
@@ -2054,7 +2054,7 @@ class DomainFactory(
                 .tasks
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
-                    val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
+                    val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.taskKey)
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
 
                     taskParentKey to parentTreeData
@@ -2065,7 +2065,7 @@ class DomainFactory(
                 .values
                 .filter { it.current(now) }
                 .map {
-                    val projectParentKey = CreateTaskViewModel.ParentKey.ProjectParentKey(it.id)
+                    val projectParentKey = CreateTaskViewModel.ParentKey.Project(it.id)
 
                     val users = it.users.joinToString(", ") { it.name }
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getProjectTaskTreeDatas(now, it, excludedTaskKeys, includedTaskKeys), projectParentKey, users, null, CreateTaskViewModel.SortKey.ProjectSortKey(it.id))
@@ -2081,7 +2081,7 @@ class DomainFactory(
         return remoteProject.tasks
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
-                    val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
+                    val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.taskKey)
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
 
                     taskParentKey to parentTreeData

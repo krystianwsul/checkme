@@ -96,4 +96,6 @@
     <string name="accountDetails">Profil</string>
     <string name="accountUpdate">Zaktualizuj swój profil na podstawie konta Google</string>
     <string name="profileUpdated">Zaktualizowano profil</string>
+    <string name="startPage">Strona startowa</string>
+    <string name="general">Ogólne</string>
 </resources>

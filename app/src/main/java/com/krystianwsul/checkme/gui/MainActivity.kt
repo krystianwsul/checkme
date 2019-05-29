@@ -543,8 +543,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         if (tab == Tab.INSTANCES) {
             showViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
-
-            Preferences.tab = tab.ordinal
         } else {
             hideViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
@@ -553,9 +551,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         if (tab == Tab.TASKS) {
             showViews.add(mainTaskListFrame)
-
-            if (!changingSearch)
-                Preferences.tab = tab.ordinal
         } else {
             hideViews.add(mainTaskListFrame)
 

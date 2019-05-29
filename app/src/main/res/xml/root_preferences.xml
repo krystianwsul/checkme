@@ -9,6 +9,17 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/general">
+
+        <ListPreference
+            app:entries="@array/start_screen_entries"
+            app:entryValues="@array/start_screen_values"
+            app:key="@string/startPage"
+            app:title="@string/startPage"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
     <!--
     <PreferenceCategory app:title="@string/messages_header">
 

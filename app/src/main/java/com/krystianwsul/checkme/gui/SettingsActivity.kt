@@ -3,12 +3,14 @@ package com.krystianwsul.checkme.gui
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -87,6 +89,28 @@ class SettingsActivity : AbstractActivity() {
                 settingsViewModel.silentSignIn()
 
                 true
+            }
+
+            findPreference<ListPreference>(getString(R.string.startPage))!!.apply {
+                val initialTab = MainActivity.Tab.values()[Preferences.tab]
+
+                value = getString(when (initialTab) {
+                    MainActivity.Tab.INSTANCES -> R.string.instances
+                    MainActivity.Tab.TASKS -> R.string.tasks
+                    else -> throw IllegalArgumentException()
+                })
+
+                setOnPreferenceChangeListener { _, newValue ->
+                    val newTab = when (newValue) {
+                        getString(R.string.instances) -> MainActivity.Tab.INSTANCES
+                        getString(R.string.tasks) -> MainActivity.Tab.TASKS
+                        else -> throw IllegalArgumentException()
+                    }
+
+                    Preferences.tab = newTab.ordinal
+
+                    true
+                }
             }
         }
 

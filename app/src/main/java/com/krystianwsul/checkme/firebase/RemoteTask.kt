@@ -1,7 +1,10 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.Task
+import com.krystianwsul.checkme.domainmodel.TaskHierarchy
+import com.krystianwsul.checkme.domainmodel.schedules.*
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord

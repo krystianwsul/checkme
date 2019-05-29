@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.MonthlyDayScheduleBridge
+import com.krystianwsul.checkme.domainmodel.schedules.MonthlyDayScheduleBridge
 import com.krystianwsul.checkme.firebase.records.RemoteMonthlyDayScheduleRecord
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleId

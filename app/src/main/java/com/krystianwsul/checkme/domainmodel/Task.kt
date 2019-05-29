@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.domainmodel.schedules.Schedule
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.ScheduleKey

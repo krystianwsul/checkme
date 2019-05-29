@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -636,7 +637,7 @@ class CreateTaskActivity : AbstractActivity() {
                                 .toMutableList())
                     }
                 } else {
-                    if (parentHint == null)
+                    if (parentHint == null && Preferences.defaultReminder)
                         schedules.add(firstScheduleEntry())
                 }
             }

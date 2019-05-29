@@ -6,6 +6,7 @@ import android.view.MenuItem
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.snackbar.Snackbar
@@ -108,6 +109,16 @@ class SettingsActivity : AbstractActivity() {
                     }
 
                     Preferences.tab = newTab.ordinal
+
+                    true
+                }
+            }
+
+            findPreference<SwitchPreferenceCompat>(getString(R.string.defaultReminder))!!.apply {
+                isChecked = Preferences.defaultReminder
+
+                setOnPreferenceChangeListener { _, newValue ->
+                    Preferences.defaultReminder = newValue as Boolean
 
                     true
                 }

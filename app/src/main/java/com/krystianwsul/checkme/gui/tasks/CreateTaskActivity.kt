@@ -559,7 +559,7 @@ class CreateTaskActivity : AbstractActivity() {
                 } else if (!TextUtils.isEmpty(nameHint)) {
                     check(taskKey == null)
                     check(taskKeys == null)
-                    check(hint == null)
+                    check(this@CreateTaskActivity.hint == null)
 
                     setText(nameHint)
                 }

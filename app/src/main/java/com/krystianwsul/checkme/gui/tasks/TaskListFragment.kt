@@ -1,7 +1,10 @@
 package com.krystianwsul.checkme.gui.tasks
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -201,6 +204,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
+    private var scrollToTaskKey: TaskKey? = null
+
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
 
@@ -351,6 +356,27 @@ class TaskListFragment : AbstractFragment(), FabUser {
         animateVisibility(listOf(show), hide, immediate = data!!.immediate)
 
         updateSelectAll()
+
+        Log.e("asdf", "scroll checking $scrollToTaskKey")
+        scrollToTaskKey?.let {
+            check(tryScroll(it))
+
+            scrollToTaskKey = null
+        }
+    }
+
+    private fun tryScroll(taskKey: TaskKey): Boolean {
+        val target = treeViewAdapter.getTreeNodeCollection()
+                .nodes
+                .mapIndexed { index: Int, treeNode: TreeNode -> Pair(index, treeNode.modelNode) }
+                .firstOrNull {
+                    (it.second as? TaskAdapter.TaskWrapper)?.childTaskData?.taskKey == taskKey
+                } ?: return false
+
+        Log.e("asdf", "scrolling to " + target.first)
+        taskListRecycler.smoothScrollToPosition(target.first)
+
+        return true
     }
 
     private fun updateSelectAll() {
@@ -393,7 +419,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = floatingActionButton
 
         taskListFragmentFab!!.setOnClickListener {
-            startActivity(CreateTaskActivity.getCreateIntent(hint()))
+            Log.e("asdf", "scroll startActivityForResult")
+            startActivityForResult(CreateTaskActivity.getCreateIntent(hint()), CreateTaskActivity.REQUEST_CREATE_TASK)
         }
 
         updateFabVisibility()
@@ -425,6 +452,23 @@ class TaskListFragment : AbstractFragment(), FabUser {
         super.onDestroyView()
 
         initializeDisposable.clear()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        Log.e("asdf", "scroll requestCode $requestCode, resultCode $resultCode")
+        if (requestCode == CreateTaskActivity.REQUEST_CREATE_TASK) {
+            if (resultCode == Activity.RESULT_OK) {
+                check(scrollToTaskKey == null)
+
+                Log.e("asdf", "scroll setting")
+                val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)
+
+                if (!tryScroll(taskKey))
+                    scrollToTaskKey = taskKey
+            }
+        }
     }
 
     private class TaskAdapter(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {

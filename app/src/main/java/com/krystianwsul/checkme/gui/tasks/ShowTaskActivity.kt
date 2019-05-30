@@ -79,19 +79,19 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        check(requestCode == REQUEST_EDIT_TASK)
+        if (requestCode == REQUEST_EDIT_TASK) {
+            if (resultCode == Activity.RESULT_OK) {
+                check(data!!.hasExtra(TASK_KEY_KEY))
 
-        if (resultCode == Activity.RESULT_OK) {
-            check(data!!.hasExtra(TASK_KEY_KEY))
+                taskKey = data.getParcelableExtra(TASK_KEY_KEY)!!
 
-            taskKey = data.getParcelableExtra(TASK_KEY_KEY)!!
+                setResult(Activity.RESULT_OK, Intent().apply {
+                    putExtra(TASK_KEY_KEY, taskKey as Parcelable)
+                })
+            }
 
-            setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra(TASK_KEY_KEY, taskKey as Parcelable)
-            })
+            showTaskViewModel.start(taskKey)
         }
-
-        showTaskViewModel.start(taskKey)
     }
 
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {

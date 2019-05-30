@@ -78,6 +78,8 @@ class CreateTaskActivity : AbstractActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
+        const val REQUEST_CREATE_TASK = 983
+
         fun getCreateIntent(hint: Hint? = null) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             hint?.let { putExtra(KEY_HINT, hint) }
         }

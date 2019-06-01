@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.krystianwsul.checkme">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.krystianwsul.checkme">
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission
         android:name="android.permission.READ_PHONE_STATE"
-        tools:node="remove"/>
+        tools:node="remove" />
 
     <application
         android:name=".MyApplication"
@@ -20,53 +20,46 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-
+        <activity
+            android:name=".gui.SettingsActivity"
+            android:label="@string/settings" />
         <activity android:name=".gui.TutorialActivity">
-
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
-
         </activity>
-
         <activity
             android:name=".gui.MainActivity"
-            android:theme="@style/AppTheme.Toolbar"
             android:launchMode="singleTask"
+            android:theme="@style/AppTheme.Toolbar"
             android:windowSoftInputMode="adjustNothing" />
-
         <activity
             android:name=".gui.tasks.ShowTaskActivity"
-            android:theme="@style/AppTheme.Toolbar"/>
-
+            android:theme="@style/AppTheme.Toolbar" />
         <activity
             android:name=".gui.instances.ShowGroupActivity"
-            android:theme="@style/AppTheme.Toolbar"/>
-
+            android:theme="@style/AppTheme.Toolbar" />
         <activity
             android:name=".gui.instances.ShowNotificationGroupActivity"
             android:launchMode="singleTask"
-            android:theme="@style/AppTheme.Toolbar"/>
-
+            android:theme="@style/AppTheme.Toolbar" />
         <activity
             android:name=".gui.instances.ShowInstanceActivity"
-            android:theme="@style/AppTheme.Toolbar"/>
-
+            android:theme="@style/AppTheme.Toolbar" />
         <activity
             android:name=".gui.instances.ShowTaskInstancesActivity"
-            android:theme="@style/AppTheme.Toolbar"/>
-
-        <activity android:name=".gui.customtimes.ShowCustomTimeActivity"/>
-
+            android:theme="@style/AppTheme.Toolbar" />
+        <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
         <activity
             android:name=".gui.tasks.CreateTaskActivity"
-            android:windowSoftInputMode="stateHidden"
-            android:theme="@style/AppTheme.NoSplash"> <!-- keyboard hack -->
+            android:theme="@style/AppTheme.NoSplash"
+            android:windowSoftInputMode="stateHidden"> <!-- keyboard hack -->
 
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
@@ -79,78 +72,68 @@
                 android:value="androidx.sharetarget.ChooserTargetServiceCompat" />
 
         </activity>
-
         <activity
             android:name=".gui.projects.ShowProjectActivity"
             android:theme="@style/AppTheme.Toolbar"
             android:windowSoftInputMode="adjustNothing" />
-
         <activity
             android:name=".gui.friends.FindFriendActivity"
-            android:windowSoftInputMode="stateVisible"/>
+            android:windowSoftInputMode="stateVisible" />
 
         <receiver
             android:name=".notifications.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".notifications.TimeChangeReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.TIME_SET"/>
-                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".notifications.AlarmReceiver"
-            android:enabled="true"/>
+            android:enabled="true" />
 
         <service
             android:name=".notifications.TickJobIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".notifications.GroupNotificationDeleteService"
-            android:exported="false"/>
-
+            android:exported="false" />
         <service
             android:name=".notifications.InstanceDoneService"
-            android:exported="false"/>
-
+            android:exported="false" />
         <service
             android:name=".notifications.InstanceHourService"
-            android:exported="false"/>
-
+            android:exported="false" />
         <service
             android:name=".notifications.InstanceNotificationDeleteService"
-            android:exported="false"/>
-
+            android:exported="false" />
         <service
             android:name=".MyFirebaseMessagingService"
             tools:ignore="ExportedService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service
             android:name=".notifications.FirebaseTickService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="e6ad996c53b8b11ff453660591b423b7ac73008d"/>
+            android:value="e6ad996c53b8b11ff453660591b423b7ac73008d" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -161,7 +144,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_provider_paths" />
         </provider>
-
     </application>
 
 </manifest>

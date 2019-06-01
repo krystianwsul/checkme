@@ -7,7 +7,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.46'
+        classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.3'
+
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -19,20 +20,19 @@ repositories {
 apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'war'
-apply plugin: 'appengine'
+apply plugin: 'com.google.cloud.tools.appengine'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.48'
     compile 'javax.servlet:servlet-api:2.5'
     compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.73'
 
     compile 'com.google.api-client:google-api-client-appengine:1.27.0'
 
     compile 'com.google.guava:guava:24.1-jre'
-    compile 'com.google.code.gson:gson:2.8.2'
+    compile 'com.google.code.gson:gson:2.8.5'
     compile 'org.apache.commons:commons-io:1.3.2'
     compile 'org.apache.commons:commons-lang3:3.5'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -43,10 +43,6 @@ dependencies {
 }
 
 appengine {
-    downloadSdk = true
-    appcfg {
-        oauth2 = true
-    }
 }
 compileKotlin {
     kotlinOptions {

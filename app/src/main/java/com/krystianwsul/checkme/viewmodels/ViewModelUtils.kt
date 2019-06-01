@@ -8,4 +8,4 @@ import androidx.lifecycle.ViewModelProviders
 
 inline fun <reified T : ViewModel> FragmentActivity.getViewModel() = ViewModelProviders.of(this)[T::class.java]
 
-inline fun <reified T : DomainViewModel<*>> Fragment.getViewModel() = ViewModelProviders.of(this)[T::class.java]
+inline fun <reified T : ViewModel> Fragment.getViewModel() = ViewModelProviders.of(this)[T::class.java]

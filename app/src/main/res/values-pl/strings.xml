@@ -92,4 +92,14 @@
     <string name="gallery">Wybierz obraz</string>
     <string name="remove">Usuń obraz</string>
     <string name="addTo">Dodaj do</string>
+    <string name="settings">Ustawienia</string>
+    <string name="account">Konto</string>
+    <string name="accountDetails">Profil</string>
+    <string name="accountUpdate">Zaktualizuj swój profil na podstawie konta Google</string>
+    <string name="profileUpdated">Zaktualizowano profil</string>
+    <string name="startPage">Strona startowa</string>
+    <string name="general">Ogólne</string>
+    <string name="defaultReminder">Domyślne przypomnienie</string>
+    <string name="defaultReminderSummaryOn">Automatycznie dodawaj przypomnienie do nowych zadań</string>
+    <string name="defaultReminderSummaryOff">Nie dodawaj przypomnienia do nowych zadań</string>
 </resources>

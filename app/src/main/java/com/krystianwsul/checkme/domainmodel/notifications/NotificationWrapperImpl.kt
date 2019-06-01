@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.app.AlarmManager
 import android.app.Notification
@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.notifications.*

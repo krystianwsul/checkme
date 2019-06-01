@@ -1,14 +1,16 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.krystianwsul.checkme.domainmodel.*
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.Task
+import com.krystianwsul.checkme.domainmodel.TaskHierarchy
+import com.krystianwsul.checkme.domainmodel.schedules.*
 import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
-import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DateTime
@@ -169,33 +171,30 @@ class RemoteTask<T : RemoteCustomTimeId>(
             val timePair = scheduleData.timePair
             val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteProject)
 
-            when (scheduleData.scheduleType) {
-                ScheduleType.SINGLE -> {
-                    val date = (scheduleData as CreateTaskViewModel.ScheduleData.SingleScheduleData).date
+            when (scheduleData) {
+                is CreateTaskViewModel.ScheduleData.Single -> {
+                    val date = scheduleData.date
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, null, date.year, date.month, date.day, remoteCustomTimeId?.value, hour, minute)))
 
                     remoteSchedules.add(SingleSchedule(domainFactory, RemoteSingleScheduleBridge(domainFactory, remoteSingleScheduleRecord)))
                 }
-                ScheduleType.DAILY -> throw UnsupportedOperationException()
-                ScheduleType.WEEKLY -> {
-                    val daysOfWeek = (scheduleData as CreateTaskViewModel.ScheduleData.WeeklyScheduleData).daysOfWeek
-
-                    for (dayOfWeek in daysOfWeek) {
+                is CreateTaskViewModel.ScheduleData.Weekly -> {
+                    for (dayOfWeek in scheduleData.daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(now.long, null, dayOfWeek.ordinal, remoteCustomTimeId?.value, hour, minute)))
 
                         remoteSchedules.add(WeeklySchedule(domainFactory, RemoteWeeklyScheduleBridge(domainFactory, remoteWeeklyScheduleRecord)))
                     }
                 }
-                ScheduleType.MONTHLY_DAY -> {
-                    val (dayOfMonth, beginningOfMonth, _) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData
+                is CreateTaskViewModel.ScheduleData.MonthlyDay -> {
+                    val (dayOfMonth, beginningOfMonth, _) = scheduleData
 
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(now.long, null, dayOfMonth, beginningOfMonth, remoteCustomTimeId?.value, hour, minute)))
 
                     remoteSchedules.add(MonthlyDaySchedule(domainFactory, RemoteMonthlyDayScheduleBridge(domainFactory, remoteMonthlyDayScheduleRecord)))
                 }
-                ScheduleType.MONTHLY_WEEK -> {
-                    val (dayOfMonth, dayOfWeek, beginningOfMonth, _) = scheduleData as CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData
+                is CreateTaskViewModel.ScheduleData.MonthlyWeek -> {
+                    val (dayOfMonth, dayOfWeek, beginningOfMonth, _) = scheduleData
 
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(now.long, null, dayOfMonth, dayOfWeek.ordinal, beginningOfMonth, remoteCustomTimeId?.value, hour, minute)))
 

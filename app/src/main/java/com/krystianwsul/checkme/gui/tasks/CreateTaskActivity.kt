@@ -489,15 +489,18 @@ class CreateTaskActivity : AbstractActivity() {
                 if (hasExtra(TASK_KEYS_KEY))
                     taskKeys = getParcelableArrayListExtra<TaskKey>(TASK_KEYS_KEY)!!.apply { check(size > 1) }
 
-                if (hasExtra(KEY_HINT))
-                    hint = getSerializableExtra(KEY_HINT) as Hint
-                else if (hasExtra(KEY_PARENT_PROJECT)) {
-                    Log.e("asdf", "shortcut e")
-                    check(hasExtra(KEY_PARENT_TASK))
-                    check(!hasExtra(SCHEDULE_HINT_KEY))
+                if (hasExtra(KEY_HINT)) {
                     check(!hasExtra(KEY_SHORTCUT_ID))
 
-                    parentTaskKeyHint = TaskKey(getStringExtra(KEY_PARENT_PROJECT), getStringExtra(KEY_PARENT_TASK))
+                    hint = getSerializableExtra(KEY_HINT) as Hint
+                } else if (hasExtra(KEY_SHORTCUT_ID)) {
+                    hint = Hint.Task(TaskKey.fromShortcut(getStringExtra(KEY_SHORTCUT_ID)!!))
+                } else if (hasExtra(KEY_PARENT_PROJECT)) {
+                    Log.e("asdf", "shortcut e")
+                    check(hasExtra(KEY_PARENT_TASK))
+                    check(!hasExtra(KEY_SHORTCUT_ID))
+
+                    hint = Hint.Task(TaskKey(getStringExtra(KEY_PARENT_PROJECT)!!, getStringExtra(KEY_PARENT_TASK)!!))
                 }
             }
 
@@ -587,7 +590,6 @@ class CreateTaskActivity : AbstractActivity() {
                 } else if (!TextUtils.isEmpty(nameHint)) {
                     check(taskKey == null)
                     check(taskKeys == null)
-                    check(this@CreateTaskActivity.hint == null)
 
                     setText(nameHint)
                 }

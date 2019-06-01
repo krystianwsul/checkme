@@ -179,29 +179,37 @@ class DomainFactory(
     private fun updateShortcuts() {
         val now = ExactTimeStamp.now
 
-        val allKeys = Preferences.shortcuts.map { TaskKey.fromShortcut(it) }
-        val shortcutTasks = allKeys.mapNotNull(::getTaskIfPresent).filter { it.current(now) }
+        val shortcutTasks = ShortcutManager.getShortcuts()
+                .map { Pair(it.value, getTaskIfPresent(it.key)) }
+                .filter { it.second?.current(now) == true }
+                .map { Pair(it.first, it.second!!) }
 
-        val removeKeys = allKeys - shortcutTasks.map { it.taskKey }
-        Preferences.shortcuts = Preferences.shortcuts - removeKeys.map { it.toShortcut() }
+        ShortcutManager.keepShortcuts(shortcutTasks.map { it.second.taskKey })
 
-        val shortcuts = shortcutTasks.filter { it.isVisible(now, true) }.map {
-            val taskKey = it.taskKey
+        ShortcutManagerCompat.removeAllDynamicShortcuts(MyApplication.instance)
 
-            ShortcutInfoCompat.Builder(MyApplication.instance, taskKey.toShortcut())
-                    .setShortLabel(MyApplication.instance.getString(R.string.addTo) + " " + it.name)
-                    .setIcon(IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add))
-                    .setCategories(setOf("ADD_TO_LIST"))
-                    .setIntent(CreateTaskActivity.getShortcutIntent(taskKey))
-                    .build()
-        }
+        val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(MyApplication.instance) - 4
+        if (maxShortcuts <= 0)
+            return
+
+        val shortcuts = shortcutTasks.filter { it.second.isVisible(now, true) }
+                .sortedBy { it.first }
+                .takeLast(maxShortcuts)
+                .map {
+                    val taskKey = it.second.taskKey
+
+                    ShortcutInfoCompat.Builder(MyApplication.instance, taskKey.toShortcut())
+                            .setShortLabel(MyApplication.instance.getString(R.string.addTo) + " " + it.second.name)
+                            .setIcon(IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add))
+                            .setCategories(setOf("ADD_TO_LIST"))
+                            .setIntent(CreateTaskActivity.getShortcutIntent(taskKey))
+                            .build()
+                }
 
         /* todo 29 remove shortcuts selectively
         val allShortcuts = ShortcutManagerCompat.getDynamicShortcuts(MyApplication.instance).map { it.id }
         val removeShortcuts = allShortcuts - shortcuts.map { it.id }
         */
-
-        ShortcutManagerCompat.removeAllDynamicShortcuts(MyApplication.instance)
 
         ShortcutManagerCompat.addDynamicShortcuts(MyApplication.instance, shortcuts)
     }

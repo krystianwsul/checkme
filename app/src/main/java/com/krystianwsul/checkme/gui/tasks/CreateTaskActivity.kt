@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.ShortcutManager
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -341,7 +342,7 @@ class CreateTaskActivity : AbstractActivity() {
                             val parentTaskKey = (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Task).taskKey
 
                             if (intent.action == Intent.ACTION_SEND)
-                                Preferences.shortcuts = Preferences.shortcuts + parentTaskKey.toShortcut()
+                                ShortcutManager.addShortcut(parentTaskKey)
 
                             when {
                                 taskKey != null -> {

@@ -1,6 +1,12 @@
 package com.krystianwsul.checkme
 
+import com.google.gson.*
+import com.google.gson.reflect.TypeToken
+import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import org.joda.time.LocalDateTime
+import org.joda.time.format.DateTimeFormat
+import java.lang.reflect.Type
 import kotlin.properties.Delegates.observable
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -11,10 +17,14 @@ object Preferences {
     private const val LAST_TICK_KEY = "lastTick"
     private const val TICK_LOG = "tickLog"
     private const val TAB_KEY = "tab"
-    private const val KEY_SHORTCUTS = "shortcuts"
+    private const val KEY_SHORTCUTS = "shortcuts2"
     private const val KEY_DEFAULT_REMINDER = "defaultReminder"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
+
+    private val gson by lazy {
+        GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeTypeConverter()).create()!!
+    }
 
     var lastTick
         get() = sharedPreferences.getLong(LAST_TICK_KEY, -1)
@@ -30,10 +40,19 @@ object Preferences {
                 .apply()
     }
 
-    var shortcuts: Set<String> by observable(sharedPreferences.getStringSet(KEY_SHORTCUTS, setOf())!!) { _, _, newValue ->
+    private var shortcutString: String by observable(sharedPreferences.getString(KEY_SHORTCUTS, "")!!) { _, _, newValue ->
         sharedPreferences.edit()
-                .putStringSet(KEY_SHORTCUTS, newValue)
+                .putString(KEY_SHORTCUTS, newValue)
                 .apply()
+    }
+
+    private val shortcutTypeToken by lazy {
+        object : TypeToken<Map<TaskKey, LocalDateTime>>() {}.type
+    }
+
+    var shortcuts: Map<TaskKey, LocalDateTime> by observable(gson.fromJson(shortcutString, shortcutTypeToken)
+            ?: mapOf()) { _, _, newValue ->
+        shortcutString = gson.toJson(newValue)
     }
 
     var defaultReminder by observable(sharedPreferences.getBoolean(KEY_DEFAULT_REMINDER, true)) { _, _, newValue ->
@@ -70,5 +89,17 @@ object Preferences {
         override fun setValue(thisRef: Any, property: KProperty<*>, value: String) = sharedPreferences.edit()
                 .putString(key, value)
                 .apply()
+    }
+
+    private class LocalDateTimeTypeConverter : JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+
+        companion object {
+
+            private const val PATTERN = "yyyy-MM-dd HH:mm:ss"
+        }
+
+        override fun serialize(src: LocalDateTime, srcType: Type, context: JsonSerializationContext) = JsonPrimitive(src.toString(PATTERN)!!)
+
+        override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext) = DateTimeFormat.forPattern(PATTERN).parseLocalDateTime(json.asString)!!
     }
 }

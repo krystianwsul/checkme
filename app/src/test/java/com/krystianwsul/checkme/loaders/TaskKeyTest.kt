@@ -13,7 +13,7 @@ import org.powermock.modules.junit4.PowerMockRunner
 
 @RunWith(PowerMockRunner::class)
 @PrepareForTest(value = [(TextUtils::class)])
-class ParentKeyTest {
+class TaskKeyTest {
 
     @Before
     fun setUp() {
@@ -30,8 +30,8 @@ class ParentKeyTest {
     fun testEquals() {
         val projectId = "asdf"
 
-        val parentKey1 = CreateTaskViewModel.ParentKey.ProjectParentKey(projectId)
-        val parentKey2 = CreateTaskViewModel.ParentKey.ProjectParentKey(projectId)
+        val parentKey1 = CreateTaskViewModel.ParentKey.Project(projectId)
+        val parentKey2 = CreateTaskViewModel.ParentKey.Project(projectId)
 
         Assert.assertTrue(parentKey1 == parentKey2)
     }

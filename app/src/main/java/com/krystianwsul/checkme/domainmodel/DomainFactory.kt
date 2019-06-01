@@ -9,7 +9,9 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.relevance.*
+import com.krystianwsul.checkme.domainmodel.schedules.*
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.gui.HierarchyData
@@ -603,7 +605,7 @@ class DomainFactory(
 
             when (schedule) {
                 is SingleSchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.SingleScheduleData(schedule.date, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.Single(schedule.date, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
@@ -616,12 +618,12 @@ class DomainFactory(
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
                 is MonthlyDaySchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyDayScheduleData(schedule.dayOfMonth, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyDay(schedule.dayOfMonth, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
                 is MonthlyWeekSchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyWeekScheduleData(schedule.dayOfMonth, schedule.dayOfWeek, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
+                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyWeek(schedule.dayOfMonth, schedule.dayOfWeek, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
 
                     schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
                 }
@@ -630,8 +632,8 @@ class DomainFactory(
         }
 
         for ((key, value) in weeklySchedules) {
-            val daysOfWeek = value.flatMap { it.daysOfWeek }.toSet()
-            scheduleDatas[CreateTaskViewModel.ScheduleData.WeeklyScheduleData(daysOfWeek, key)] = ArrayList<Schedule>(value)
+            val daysOfWeek = value.flatMap { it.daysOfWeek }.toHashSet()
+            scheduleDatas[CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, key)] = ArrayList<Schedule>(value)
         }
 
         return Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>>(customTimes, scheduleDatas)
@@ -655,11 +657,11 @@ class DomainFactory(
 
         val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
 
-        fun checkHintPresent(taskParentKey: CreateTaskViewModel.ParentKey.TaskParentKey, parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>): Boolean {
-            return parentTreeDatas.containsKey(taskParentKey) || parentTreeDatas.any { checkHintPresent(taskParentKey, it.value.parentTreeDatas) }
+        fun checkHintPresent(task: CreateTaskViewModel.ParentKey.Task, parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>): Boolean {
+            return parentTreeDatas.containsKey(task) || parentTreeDatas.any { checkHintPresent(task, it.value.parentTreeDatas) }
         }
 
-        fun checkHintPresent(parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>) = parentTaskKeyHint?.let { checkHintPresent(CreateTaskViewModel.ParentKey.TaskParentKey(it), parentTreeDatas) }
+        fun checkHintPresent(parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>) = parentTaskKeyHint?.let { checkHintPresent(CreateTaskViewModel.ParentKey.Task(it), parentTreeDatas) }
                 ?: true
 
         var taskData: CreateTaskViewModel.TaskData? = null
@@ -673,7 +675,7 @@ class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.ProjectParentKey(it.id) }
+                parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
                 if (schedules.isNotEmpty()) {
                     val pair = getScheduleDatas(schedules, now)
@@ -682,7 +684,7 @@ class DomainFactory(
                 }
             } else {
                 val parentTask = task.getParentTask(now)!!
-                parentKey = CreateTaskViewModel.ParentKey.TaskParentKey(parentTask.taskKey)
+                parentKey = CreateTaskViewModel.ParentKey.Task(parentTask.taskKey)
                 includeTaskKeys.add(parentTask.taskKey)
             }
 
@@ -756,7 +758,22 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        return MainViewModel.Data(getMainData(now))
+        val childTaskDatas = getTasks().filter { it.current(now) && it.isVisible(now, false) && it.isRootTask(now) }
+                .map {
+                    TaskListFragment.ChildTaskData(
+                            it.name,
+                            it.getScheduleText(now),
+                            getTaskListChildTaskDatas(it, now),
+                            it.note,
+                            it.startExactTimeStamp,
+                            it.taskKey,
+                            null,
+                            it.image)
+                }
+                .sortedDescending()
+                .toMutableList()
+
+        return MainViewModel.Data(TaskListFragment.TaskData(childTaskDatas, null))
     }
 
     @Synchronized
@@ -951,7 +968,15 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val instance = setInstanceDone(now, dataId, source, instanceKey, done)
+        val instance = getInstance(instanceKey)
+
+        instance.setDone(done, now)
+
+        updateNotifications(now)
+
+        save(dataId, source)
+
+        notifyCloud(instance.project)
 
         return instance.done
     }
@@ -1024,15 +1049,20 @@ class DomainFactory(
         save(0, source)
     }
 
+    @Synchronized
     fun createScheduleRootTask(
-            now: ExactTimeStamp,
             dataId: Int,
             source: SaveService.Source,
             name: String,
             scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?): Task {
+            imagePath: Pair<String, Uri>?): TaskKey {
+        MyCrashlytics.log("DomainFactory.createScheduleRootTask")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        val now = ExactTimeStamp.now
+
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
 
@@ -1052,28 +1082,11 @@ class DomainFactory(
             Uploader.addUpload(task.taskKey, it, imagePath)
         }
 
-        return task
+        return task.taskKey
     }
 
     @Synchronized
-    fun createScheduleRootTask(
-            dataId: Int,
-            source: SaveService.Source,
-            name: String,
-            scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
-            note: String?,
-            projectId: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
-        MyCrashlytics.log("DomainFactory.createScheduleRootTask")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        return createScheduleRootTask(now, dataId, source, name, scheduleDatas, note, projectId, imagePath).taskKey
-    }
-
     fun updateScheduleTask(
-            now: ExactTimeStamp,
             dataId: Int,
             source: SaveService.Source,
             taskKey: TaskKey,
@@ -1082,6 +1095,14 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
+        MyCrashlytics.log("DomainFactory.updateScheduleTask")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        check(name.isNotEmpty())
+        check(scheduleDatas.isNotEmpty())
+
+        val now = ExactTimeStamp.now
+
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
 
@@ -1114,27 +1135,6 @@ class DomainFactory(
         }
 
         return task.taskKey
-    }
-
-    @Synchronized
-    fun updateScheduleTask(
-            dataId: Int,
-            source: SaveService.Source,
-            taskKey: TaskKey,
-            name: String,
-            scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
-            note: String?,
-            projectId: String?,
-            imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
-        MyCrashlytics.log("DomainFactory.updateScheduleTask")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        check(name.isNotEmpty())
-        check(scheduleDatas.isNotEmpty())
-
-        val now = ExactTimeStamp.now
-
-        return updateScheduleTask(now, dataId, source, taskKey, name, scheduleDatas, note, projectId, imagePath)
     }
 
     @Synchronized
@@ -1184,14 +1184,20 @@ class DomainFactory(
         return newParentTask.taskKey
     }
 
+    @Synchronized
     fun createRootTask(
-            now: ExactTimeStamp,
             dataId: Int,
             source: SaveService.Source,
             name: String,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?): Task {
+            imagePath: Pair<String, Uri>?): TaskKey {
+        MyCrashlytics.log("DomainFactory.createRootTask")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        val now = ExactTimeStamp.now
+
+
         check(name.isNotEmpty())
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
@@ -1210,23 +1216,7 @@ class DomainFactory(
             Uploader.addUpload(task.taskKey, it, imagePath)
         }
 
-        return task
-    }
-
-    @Synchronized
-    fun createRootTask(
-            dataId: Int,
-            source: SaveService.Source,
-            name: String,
-            note: String?,
-            projectId: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
-        MyCrashlytics.log("DomainFactory.createRootTask")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        return createRootTask(now, dataId, source, name, note, projectId, imagePath).taskKey
+        return task.taskKey
     }
 
     @Synchronized
@@ -1321,14 +1311,19 @@ class DomainFactory(
         return task.taskKey
     }
 
+    @Synchronized
     fun createChildTask(
-            now: ExactTimeStamp,
             dataId: Int,
             source: SaveService.Source,
             parentTaskKey: TaskKey,
             name: String,
             note: String?,
-            imagePath: Pair<String, Uri>?): Task {
+            imagePath: Pair<String, Uri>?): TaskKey {
+        MyCrashlytics.log("DomainFactory.createChildTask")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        val now = ExactTimeStamp.now
+
         check(name.isNotEmpty())
 
         val parentTask = getTaskForce(parentTaskKey)
@@ -1348,23 +1343,7 @@ class DomainFactory(
             Uploader.addUpload(childTask.taskKey, it, imagePath)
         }
 
-        return childTask
-    }
-
-    @Synchronized
-    fun createChildTask(
-            dataId: Int,
-            source: SaveService.Source,
-            parentTaskKey: TaskKey,
-            name: String,
-            note: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
-        MyCrashlytics.log("DomainFactory.createChildTask")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        return createChildTask(now, dataId, source, parentTaskKey, name, note, imagePath).taskKey
+        return childTask.taskKey
     }
 
     @Synchronized
@@ -1680,18 +1659,6 @@ class DomainFactory(
         save(dataId, source)
     }
 
-    fun updateNotificationsTick(now: ExactTimeStamp, source: SaveService.Source, silent: Boolean, sourceName: String): Irrelevant {
-        updateNotifications(silent, now, listOf(), sourceName)
-
-        val irrelevant = setIrrelevant(now)
-
-        remoteProjectFactory.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
-
-        save(0, source)
-
-        return irrelevant
-    }
-
     @Synchronized
     fun updateNotificationsTick(source: SaveService.Source, silent: Boolean, sourceName: String) {
         MyCrashlytics.log("DomainFactory.updateNotificationsTick source: $sourceName")
@@ -1699,7 +1666,13 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        updateNotificationsTick(now, source, silent, sourceName)
+        updateNotifications(silent, now, listOf(), sourceName)
+
+        setIrrelevant(now)
+
+        remoteProjectFactory.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
+
+        save(0, source)
     }
 
     @Synchronized
@@ -2012,8 +1985,8 @@ class DomainFactory(
                     .filterNot { excludedTaskKeys.contains(it.childTaskKey) }
                     .map {
                         val childTask = it.childTask
-                        val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.childTaskKey)
-                        val parentTreeData = CreateTaskViewModel.ParentTreeData(childTask.name, getTaskListChildTaskDatas(now, childTask, excludedTaskKeys), CreateTaskViewModel.ParentKey.TaskParentKey(childTask.taskKey), childTask.getScheduleText(now), childTask.note, CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp))
+                        val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.childTaskKey)
+                        val parentTreeData = CreateTaskViewModel.ParentTreeData(childTask.name, getTaskListChildTaskDatas(now, childTask, excludedTaskKeys), CreateTaskViewModel.ParentKey.Task(childTask.taskKey), childTask.getScheduleText(now), childTask.note, CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp))
 
                         taskParentKey to parentTreeData
                     }
@@ -2054,7 +2027,7 @@ class DomainFactory(
                 .tasks
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
-                    val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
+                    val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.taskKey)
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
 
                     taskParentKey to parentTreeData
@@ -2065,7 +2038,7 @@ class DomainFactory(
                 .values
                 .filter { it.current(now) }
                 .map {
-                    val projectParentKey = CreateTaskViewModel.ParentKey.ProjectParentKey(it.id)
+                    val projectParentKey = CreateTaskViewModel.ParentKey.Project(it.id)
 
                     val users = it.users.joinToString(", ") { it.name }
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getProjectTaskTreeDatas(now, it, excludedTaskKeys, includedTaskKeys), projectParentKey, users, null, CreateTaskViewModel.SortKey.ProjectSortKey(it.id))
@@ -2081,7 +2054,7 @@ class DomainFactory(
         return remoteProject.tasks
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
-                    val taskParentKey = CreateTaskViewModel.ParentKey.TaskParentKey(it.taskKey)
+                    val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.taskKey)
                     val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
 
                     taskParentKey to parentTreeData
@@ -2236,152 +2209,116 @@ class DomainFactory(
                         childTask.image)
             }
 
-    fun getMainData(now: ExactTimeStamp): TaskListFragment.TaskData {
-        val childTaskDatas = getTasks().filter { it.current(now) && it.isVisible(now, false) && it.isRootTask(now) }
-                .map {
-                    TaskListFragment.ChildTaskData(
-                            it.name,
-                            it.getScheduleText(now),
-                            getTaskListChildTaskDatas(it, now),
-                            it.note,
-                            it.startExactTimeStamp,
-                            it.taskKey,
-                            null,
-                            it.image)
-                }
-                .sortedDescending()
-                .toMutableList()
+    private fun setIrrelevant(now: ExactTimeStamp) {
+        if (!SnackbarListener.deleting) {
+            val tasks = getTasks()
 
-        return TaskListFragment.TaskData(childTaskDatas, null)
-    }
+            for (task in tasks)
+                task.updateOldestVisible(now)
 
-    fun setInstanceDone(now: ExactTimeStamp, dataId: Int, source: SaveService.Source, instanceKey: InstanceKey, done: Boolean): Instance {
-        val instance = getInstance(instanceKey)
+            // relevant hack
+            val taskRelevances = tasks.map { it.taskKey to TaskRelevance(this, it) }.toMap()
 
-        instance.setDone(done, now)
+            val taskHierarchies = remoteProjectFactory.remoteProjects
+                    .map { it.value.taskHierarchies }
+                    .flatten()
+            val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
-        updateNotifications(now)
+            val existingInstances = getExistingInstances()
+            val rootInstances = getRootInstances(null, now.plusOne(), now)
 
-        save(dataId, source)
+            val instanceRelevances = (existingInstances + rootInstances)
+                    .asSequence()
+                    .distinct()
+                    .map { it.instanceKey to InstanceRelevance(it) }
+                    .toList()
+                    .toMap()
+                    .toMutableMap()
 
-        notifyCloud(instance.project)
+            tasks.asSequence()
+                    .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now, true) }
+                    .map { taskRelevances.getValue(it.taskKey) }.toList()
+                    .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-        return instance
-    }
+            rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-    fun setIrrelevant(now: ExactTimeStamp): Irrelevant {
-        if (SnackbarListener.deleting)
-            return Irrelevant(listOf(), listOf(), listOf(), listOf())
+            existingInstances.asSequence()
+                    .filter { it.isRootInstance(now) && it.isVisible(now, true) }
+                    .map { instanceRelevances[it.instanceKey]!! }.toList()
+                    .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-        val tasks = getTasks()
+            val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
+            val relevantTasks = relevantTaskRelevances.map { it.task }
 
-        for (task in tasks)
-            task.updateOldestVisible(now)
+            val irrelevantTasks = tasks.toMutableList()
+            irrelevantTasks.removeAll(relevantTasks)
 
-        // relevant hack
-        val taskRelevances = tasks.map { it.taskKey to TaskRelevance(this, it) }.toMap()
+            check(irrelevantTasks.none { it.isVisible(now, true) })
 
-        val taskHierarchies = remoteProjectFactory.remoteProjects
-                .map { it.value.taskHierarchies }
-                .flatten()
-        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
+            val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
+            val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
 
-        val existingInstances = getExistingInstances()
-        val rootInstances = getRootInstances(null, now.plusOne(), now)
+            val irrelevantTaskHierarchies = taskHierarchies.toMutableList().apply { removeAll(relevantTaskHierarchies) }
 
-        val instanceRelevances = (existingInstances + rootInstances)
-                .asSequence()
-                .distinct()
-                .map { it.instanceKey to InstanceRelevance(it) }
-                .toList()
-                .toMap()
-                .toMutableMap()
+            val relevantInstances = instanceRelevances.values
+                    .filter { it.relevant }
+                    .map { it.instance }
 
-        tasks.asSequence()
-                .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now, true) }
-                .map { taskRelevances.getValue(it.taskKey) }.toList()
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+            val relevantExistingInstances = relevantInstances.filter { it.exists() }
 
-        rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+            val irrelevantExistingInstances = ArrayList<Instance>(existingInstances)
+            irrelevantExistingInstances.removeAll(relevantExistingInstances)
 
-        existingInstances.asSequence()
-                .filter { it.isRootInstance(now) && it.isVisible(now, true) }
-                .map { instanceRelevances[it.instanceKey]!! }.toList()
-                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+            check(irrelevantExistingInstances.none { it.isVisible(now, true) })
 
-        val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
-        val relevantTasks = relevantTaskRelevances.map { it.task }
+            irrelevantExistingInstances.forEach { it.delete() }
+            irrelevantTasks.forEach { it.delete() }
+            irrelevantTaskHierarchies.forEach { it.delete() }
 
-        val irrelevantTasks = tasks.toMutableList()
-        irrelevantTasks.removeAll(relevantTasks)
+            val remoteCustomTimes = remoteProjectFactory.remoteCustomTimes
+            val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
 
-        check(irrelevantTasks.none { it.isVisible(now, true) })
+            remoteProjectFactory.remotePrivateProject
+                    .customTimes
+                    .filter { it.current }
+                    .forEach { remoteCustomTimeRelevances.getValue(Pair(it.projectId, it.id)).setRelevant() }
 
-        val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
-        val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
+            val remoteProjects = remoteProjectFactory.remoteProjects.values
+            val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()
 
-        val irrelevantTaskHierarchies = taskHierarchies.toMutableList().apply { removeAll(relevantTaskHierarchies) }
+            remoteProjects.filter { it.current(now) }
+                    .map { remoteProjectRelevances.getValue(it.id) }
+                    .forEach { it.setRelevant() }
 
-        val relevantInstances = instanceRelevances.values
-                .filter { it.relevant }
-                .map { it.instance }
+            taskRelevances.values
+                    .filter { it.relevant }
+                    .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
 
-        val relevantExistingInstances = relevantInstances.filter { it.exists() }
+            instanceRelevances.values
+                    .filter { it.relevant }
+                    .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
 
-        val irrelevantExistingInstances = ArrayList<Instance>(existingInstances)
-        irrelevantExistingInstances.removeAll(relevantExistingInstances)
+            val relevantRemoteCustomTimes = remoteCustomTimeRelevances.values
+                    .filter { it.relevant }
+                    .map { it.remoteCustomTime }
 
-        check(irrelevantExistingInstances.none { it.isVisible(now, true) })
+            val irrelevantRemoteCustomTimes = ArrayList(remoteCustomTimes)
+            irrelevantRemoteCustomTimes.removeAll(relevantRemoteCustomTimes)
+            irrelevantRemoteCustomTimes.forEach { it.delete() }
 
-        irrelevantExistingInstances.forEach { it.delete() }
-        irrelevantTasks.forEach { it.delete() }
-        irrelevantTaskHierarchies.forEach { it.delete() }
+            val relevantRemoteProjects = remoteProjectRelevances.values
+                    .filter { it.relevant }
+                    .map { it.remoteProject }
 
-        val remoteCustomTimes = remoteProjectFactory.remoteCustomTimes
-        val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
+            val irrelevantRemoteProjects = ArrayList(remoteProjects)
+            irrelevantRemoteProjects.removeAll(relevantRemoteProjects)
+            irrelevantRemoteProjects.forEach { it.delete() }
 
-        remoteProjectFactory.remotePrivateProject
-                .customTimes
-                .filter { it.current }
-                .forEach { remoteCustomTimeRelevances.getValue(Pair(it.projectId, it.id)).setRelevant() }
-
-        val remoteProjects = remoteProjectFactory.remoteProjects.values
-        val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()
-
-        remoteProjects.filter { it.current(now) }
-                .map { remoteProjectRelevances.getValue(it.id) }
-                .forEach { it.setRelevant() }
-
-        taskRelevances.values
-                .filter { it.relevant }
-                .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
-
-        instanceRelevances.values
-                .filter { it.relevant }
-                .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
-
-        val relevantRemoteCustomTimes = remoteCustomTimeRelevances.values
-                .filter { it.relevant }
-                .map { it.remoteCustomTime }
-
-        val irrelevantRemoteCustomTimes = ArrayList(remoteCustomTimes)
-        irrelevantRemoteCustomTimes.removeAll(relevantRemoteCustomTimes)
-        irrelevantRemoteCustomTimes.forEach { it.delete() }
-
-        val relevantRemoteProjects = remoteProjectRelevances.values
-                .filter { it.relevant }
-                .map { it.remoteProject }
-
-        val irrelevantRemoteProjects = ArrayList(remoteProjects)
-        irrelevantRemoteProjects.removeAll(relevantRemoteProjects)
-        irrelevantRemoteProjects.forEach { it.delete() }
-
-        val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
-                .toMutableList()
-                .apply { removeAll(relevantInstances.map { it.instanceShownRecord }) }
-        irrelevantInstanceShownRecords.forEach { it.delete() }
-
-        return Irrelevant(irrelevantTasks, irrelevantExistingInstances, irrelevantRemoteCustomTimes, irrelevantRemoteProjects)
+            val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
+                    .toMutableList()
+                    .apply { removeAll(relevantInstances.map { it.instanceShownRecord }) }
+            irrelevantInstanceShownRecords.forEach { it.delete() }
+        }
     }
 
     private fun notifyCloud(remoteProject: RemoteProject<*>) = notifyCloud(setOf(remoteProject))

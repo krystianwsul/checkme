@@ -500,7 +500,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     @Parcelize
     class ScheduleDialogData(
             var date: Date,
-            var daysOfWeek: MutableSet<DayOfWeek>,
+            var daysOfWeek: HashSet<DayOfWeek>,
             var monthlyDay: Boolean,
             var monthDayNumber: Int,
             var monthWeekNumber: Int,
@@ -515,6 +515,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             check(monthWeekNumber > 0)
             check(monthWeekNumber < 5)
         }
+
+        fun toScheduleEntry() = ScheduleEntry(when (scheduleType) {
+            ScheduleType.SINGLE -> CreateTaskViewModel.ScheduleData.Single(date, timePairPersist.timePair)
+            ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair)
+            ScheduleType.MONTHLY_DAY -> CreateTaskViewModel.ScheduleData.MonthlyDay(monthDayNumber, beginningOfMonth, timePairPersist.timePair)
+            ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleData.MonthlyWeek(monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist.timePair)
+            else -> throw UnsupportedOperationException()
+        })
     }
 
     interface ScheduleDialogListener {

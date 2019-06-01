@@ -1,0 +1,63 @@
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Account">
+
+        <Preference
+            app:key="@string/accountDetails"
+            app:title="@string/accountDetails"
+            app:summary="@string/accountUpdate" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/general">
+
+        <ListPreference
+            app:entries="@array/start_screen_entries"
+            app:entryValues="@array/start_screen_values"
+            app:key="@string/startPage"
+            app:title="@string/startPage"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            app:key="@string/defaultReminder"
+            app:title="@string/defaultReminder"
+            app:summaryOn="@string/defaultReminderSummaryOn"
+            app:summaryOff="@string/defaultReminderSummaryOff" />
+
+    </PreferenceCategory>
+
+    <!--
+    <PreferenceCategory app:title="@string/messages_header">
+
+        <EditTextPreference
+            app:key="signature"
+            app:title="@string/signature_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="reply"
+            app:entries="@array/reply_entries"
+            app:entryValues="@array/reply_values"
+            app:key="reply"
+            app:title="@string/reply_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sync_header">
+
+        <SwitchPreferenceCompat
+            app:key="sync"
+            app:title="@string/sync_title" />
+
+        <SwitchPreferenceCompat
+            app:dependency="sync"
+            app:key="attachment"
+            app:summaryOff="@string/attachment_summary_off"
+            app:summaryOn="@string/attachment_summary_on"
+            app:title="@string/attachment_title" />
+
+    </PreferenceCategory>
+    -->
+
+</androidx.preference.PreferenceScreen>

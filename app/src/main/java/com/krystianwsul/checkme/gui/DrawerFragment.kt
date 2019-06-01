@@ -59,6 +59,10 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         R.id.main_drawer_projects -> showTab(MainActivity.Tab.PROJECTS)
                         R.id.main_drawer_custom_times -> showTab(MainActivity.Tab.CUSTOM_TIMES)
                         R.id.main_drawer_friends -> showTab(MainActivity.Tab.FRIENDS)
+                        R.id.main_drawer_about -> showTab(MainActivity.Tab.ABOUT)
+                        R.id.main_drawer_debug -> showTab(MainActivity.Tab.DEBUG)
+                        R.id.main_drawer_settings -> startActivity(SettingsActivity.newIntent())
+                        R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newHelpIntent())
                         R.id.main_drawer_sign_out -> {
                             DomainFactory.instance.updateToken(SaveService.Source.GUI, null)
 
@@ -69,9 +73,6 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
 
                             startActivity(TutorialActivity.newLoginIntent())
                         }
-                        R.id.main_drawer_tutorial -> startActivity(TutorialActivity.newHelpIntent())
-                        R.id.main_drawer_debug -> showTab(MainActivity.Tab.DEBUG)
-                        R.id.main_drawer_about -> showTab(MainActivity.Tab.ABOUT)
                         else -> throw IndexOutOfBoundsException()
                     }
 

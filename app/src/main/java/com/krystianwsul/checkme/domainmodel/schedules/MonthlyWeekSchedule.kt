@@ -1,28 +1,33 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domainmodel.schedules
 
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import java.util.*
 
-class MonthlyDaySchedule(
+class MonthlyWeekSchedule(
         domainFactory: DomainFactory,
-        private val monthlyDayScheduleBridge: MonthlyDayScheduleBridge) : RepeatingSchedule(domainFactory) {
+        private val monthlyWeekScheduleBridge: MonthlyWeekScheduleBridge) : RepeatingSchedule(domainFactory) {
 
-    override val scheduleBridge get() = monthlyDayScheduleBridge
+    override val scheduleBridge get() = monthlyWeekScheduleBridge
 
-    val dayOfMonth get() = monthlyDayScheduleBridge.dayOfMonth
+    val dayOfMonth get() = monthlyWeekScheduleBridge.dayOfMonth
 
-    val beginningOfMonth get() = monthlyDayScheduleBridge.beginningOfMonth
+    val dayOfWeek get() = DayOfWeek.values()[monthlyWeekScheduleBridge.dayOfWeek]
 
-    override val scheduleType = ScheduleType.MONTHLY_DAY
+    val beginningOfMonth get() = monthlyWeekScheduleBridge.beginningOfMonth
+
+    override val scheduleType get() = ScheduleType.MONTHLY_WEEK
 
     override fun getScheduleText(): String {
         val context = MyApplication.instance
-        val day = monthlyDayScheduleBridge.dayOfMonth.toString() + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (monthlyDayScheduleBridge.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
+        val day = monthlyWeekScheduleBridge.dayOfMonth.toString() + " " + dayOfWeek + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (monthlyWeekScheduleBridge.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
         return "$day: $time"
     }
@@ -76,5 +81,5 @@ class MonthlyDaySchedule(
         }
     }
 
-    private fun getDate(year: Int, month: Int) = Utils.getDateInMonth(year, month, monthlyDayScheduleBridge.dayOfMonth, monthlyDayScheduleBridge.beginningOfMonth)
+    private fun getDate(year: Int, month: Int) = Utils.getDateInMonth(year, month, monthlyWeekScheduleBridge.dayOfMonth, dayOfWeek, monthlyWeekScheduleBridge.beginningOfMonth)
 }

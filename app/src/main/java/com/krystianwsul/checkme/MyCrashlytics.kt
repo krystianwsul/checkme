@@ -2,6 +2,7 @@ package com.krystianwsul.checkme
 
 import android.util.Log
 import com.crashlytics.android.Crashlytics
+import com.crashlytics.android.answers.Answers
 import io.fabric.sdk.android.Fabric
 
 object MyCrashlytics {
@@ -12,7 +13,7 @@ object MyCrashlytics {
 
     init {
         if (enabled)
-            Fabric.with(MyApplication.instance, Crashlytics())
+            Fabric.with(MyApplication.instance, Answers(), Crashlytics())
     }
 
     fun log(message: String) {
@@ -46,4 +47,6 @@ object MyCrashlytics {
 
         log(obj.javaClass.simpleName + "." + method + " " + obj.hashCode() + ": $message")
     }
+
+    val answers get() = if (enabled) Answers.getInstance() else null
 }

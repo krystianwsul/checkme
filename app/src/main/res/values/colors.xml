@@ -25,4 +25,5 @@
     <color name="materialBackground">#FFF</color>
 
     <color name="navigationDivider">#DEDEDE</color>
+    <color name="textInputIcon">#666666</color>
 </resources>

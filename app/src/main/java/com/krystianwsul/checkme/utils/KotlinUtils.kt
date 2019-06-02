@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.AutoCompleteTextView
 import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
@@ -201,3 +202,5 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .into(this)
 
 fun newUuid() = UUID.randomUUID().toString()
+
+fun AutoCompleteTextView.fixClicks() = setOnTouchListener { _, _ -> false }

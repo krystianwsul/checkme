@@ -11,6 +11,7 @@ import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -130,10 +131,13 @@ class SettingsActivity : AbstractActivity() {
 
             check(requestCode == RC_SIGN_IN)
 
-            Auth.GoogleSignInApi
-                    .getSignInResultFromIntent(data)!!
-                    .signInAccount
-                    ?.let { settingsActivity.updateFromAccount(it) }
+            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
+            val account = result.signInAccount
+
+            if (account != null)
+                settingsActivity.updateFromAccount(account)
+            else
+                MyCrashlytics.logException(SettingsSignInException(result.status.toString()))
         }
 
         override fun onDestroy() {
@@ -142,4 +146,6 @@ class SettingsActivity : AbstractActivity() {
             super.onDestroy()
         }
     }
+
+    private class SettingsSignInException(message: String) : Exception(message)
 }

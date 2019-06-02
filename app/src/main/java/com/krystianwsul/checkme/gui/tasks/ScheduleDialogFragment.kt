@@ -118,15 +118,26 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             return TimeStamp(scheduleDialogData.date, hourMinute) > TimeStamp.now
         }
 
-    private fun AutoCompleteTextView.makeSpinner(items: List<*>) {
-        setAdapter(ArrayAdapter(requireContext(), R.layout.cat_exposed_dropdown_popup_item, items))
+    private fun <T> AutoCompleteTextView.makeSpinner(items: List<T>) {
+        setAdapter(object : ArrayAdapter<T>(requireContext(), R.layout.cat_exposed_dropdown_popup_item, items) {
+
+            override fun getFilter() = object : Filter() {
+
+                override fun performFiltering(constraint: CharSequence?) = FilterResults().apply {
+                    values = items
+                    count = items.size
+                }
+
+                override fun publishResults(constraint: CharSequence?, results: FilterResults?) = notifyDataSetChanged()
+            }
+        })
     }
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         check(arguments!!.containsKey(SHOW_DELETE_KEY))
 
-        val customView = requireActivity().layoutInflater.inflate(R.layout.fragment_schedule_dialog, null).apply {
+        customView = requireActivity().layoutInflater.inflate(R.layout.fragment_schedule_dialog, null).apply {
             scheduleDialogDays = mapOf(
                     DayOfWeek.SUNDAY to scheduleDialogSunday,
                     DayOfWeek.MONDAY to scheduleDialogMonday,
@@ -182,7 +193,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         customView.scheduleType.run {
             text.makeSpinner(resources.getStringArray(R.array.schedule_types).toList())
 
-            text.setSelection(when (scheduleDialogData.scheduleType) {
+            setSelection(when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> 0
                 ScheduleType.DAILY -> throw UnsupportedOperationException()
                 ScheduleType.WEEKLY -> 1

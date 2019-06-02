@@ -14,4 +14,8 @@ class MySpinner @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     val text by lazy { mySpinnerText!! }
+
+    fun setSelection(position: Int) {
+        text.setText(text.adapter.getItem(position).toString())
+    }
 }

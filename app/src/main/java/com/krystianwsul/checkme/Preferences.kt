@@ -11,7 +11,6 @@ object Preferences {
     private const val LAST_TICK_KEY = "lastTick"
     private const val TICK_LOG = "tickLog"
     private const val TAB_KEY = "tab"
-    private const val KEY_DEFAULT_REMINDER = "defaultReminder"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -26,12 +25,6 @@ object Preferences {
     var tab by observable(sharedPreferences.getInt(TAB_KEY, 0)) { _, _, newValue ->
         sharedPreferences.edit()
                 .putInt(TAB_KEY, newValue)
-                .apply()
-    }
-
-    var defaultReminder by observable(sharedPreferences.getBoolean(KEY_DEFAULT_REMINDER, true)) { _, _, newValue ->
-        sharedPreferences.edit()
-                .putBoolean(KEY_DEFAULT_REMINDER, newValue)
                 .apply()
     }
 

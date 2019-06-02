@@ -19,7 +19,6 @@ import com.bumptech.glide.Glide
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
@@ -561,7 +560,7 @@ class CreateTaskActivity : AbstractActivity() {
                 } else if (!TextUtils.isEmpty(nameHint)) {
                     check(taskKey == null)
                     check(taskKeys == null)
-                    check(hint == null)
+                    check(this@CreateTaskActivity.hint == null)
 
                     setText(nameHint)
                 }
@@ -639,7 +638,7 @@ class CreateTaskActivity : AbstractActivity() {
                                 .toMutableList())
                     }
                 } else {
-                    if (parentHint == null && Preferences.defaultReminder)
+                    if (parentHint == null && defaultReminder)
                         schedules.add(firstScheduleEntry())
                 }
             }

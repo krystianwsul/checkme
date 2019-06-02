@@ -383,6 +383,14 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             start()
 
             createDisposable += data.subscribe { taskListFragment.setAllTasks(TaskListFragment.Data(it.dataId, it.immediate, it.taskData)) }
+
+            if (savedInstanceState == null) {
+                data.firstOrError()
+                        .subscribe { mainData ->
+                            visibleTab.accept(Tab.values()[mainData.defaultTab])
+                        }
+                        .addTo(createDisposable)
+            }
         }
 
         dayViewModel = getViewModel()

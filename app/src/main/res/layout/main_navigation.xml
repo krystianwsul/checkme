@@ -11,6 +11,9 @@
         android:layout_height="wrap_content"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer"
-        android:theme="@style/BottomNavigationDrawer" />
+        android:theme="@style/BottomNavigationDrawer"
+        app:itemShapeFillColor="@color/navigation_color_background"
+        app:itemTextColor="@color/navigation_color_text"
+        app:itemIconTint="@color/navigation_color_text" />
 
 </FrameLayout>

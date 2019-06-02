@@ -1,14 +1,15 @@
 package com.krystianwsul.checkme.firebase.records
 
+import com.krystianwsul.checkme.firebase.RemoteMyUserInterface
 import com.krystianwsul.checkme.firebase.json.UserWrapper
 
 
 class RemoteMyUserRecord(
         create: Boolean,
         createObject: UserWrapper,
-        private val uuid: String) : RemoteRootUserRecord(create, createObject) {
+        private val uuid: String) : RemoteRootUserRecord(create, createObject), RemoteMyUserInterface {
 
-    fun setToken(token: String?) {
+    override fun setToken(token: String?) {
         if (token == userJson.tokens[uuid])
             return
 
@@ -27,5 +28,25 @@ class RemoteMyUserRecord(
 
             userJson.photoUrl = value
             addValue("$key/$USER_DATA/photoUrl", value)
+        }
+
+    override var defaultReminder: Boolean
+        get() = createObject.defaultReminder
+        set(value) {
+            if (value == createObject.defaultReminder)
+                return
+
+            createObject.defaultReminder = value
+            addValue("$key/defaultReminder", value)
+        }
+
+    override var defaultTab: Int
+        get() = createObject.defaultTab
+        set(value) {
+            if (value == createObject.defaultTab)
+                return
+
+            createObject.defaultTab = value
+            addValue("$key/defaultTab", value)
         }
 }

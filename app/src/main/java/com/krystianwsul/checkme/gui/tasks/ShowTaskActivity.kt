@@ -183,4 +183,6 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
             }
         }
     }
+
+    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
 }

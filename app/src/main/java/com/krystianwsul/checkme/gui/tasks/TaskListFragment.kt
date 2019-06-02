@@ -8,10 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -22,7 +20,10 @@ import com.krystianwsul.checkme.gui.instances.tree.ImageNode
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.instances.tree.NoteNode
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.animateVisibility
+import com.krystianwsul.checkme.utils.removeFromGetter
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
@@ -370,23 +371,15 @@ class TaskListFragment : AbstractFragment(), FabUser {
                     (it.second as? TaskAdapter.TaskWrapper)?.childTaskData?.taskKey == taskKey
                 } ?: return false
 
-        val targetView = taskListRecycler.layoutManager!!.getChildAt(target.first)!!
-        val listPaddingHeight = resources.getDimension(R.dimen.listPaddingHeight).toInt()
+        val linearLayoutManager = taskListRecycler.layoutManager as LinearLayoutManager
 
-        val targetPosition = targetView.top + targetView.height + listPaddingHeight
-
-        val nestedScrollView = view!!.parent as NestedScrollView
-
-        val appBarLayout = nestedScrollView.rootView.findViewById<View>(R.id.toolbar).parent as AppBarLayout
-        appBarLayout.setExpanded(false)
-
-        nestedScrollView.scrollTo(0, targetPosition)
-
-        nestedScrollView.children
-                .first()
-                .addOneShotScrollChangedListener {
-                    nestedScrollView.smoothScrollTo(0, targetPosition)
-                }
+        if (target.first <= linearLayoutManager.findFirstCompletelyVisibleItemPosition()) {
+            taskListListener.setToolbarExpanded(true)
+            taskListRecycler.smoothScrollToPosition(target.first)
+        } else {
+            taskListListener.setToolbarExpanded(false)
+            taskListRecycler.smoothScrollToPosition(target.first + 1)
+        }
 
         return true
     }
@@ -751,6 +744,8 @@ class TaskListFragment : AbstractFragment(), FabUser {
         fun getBottomBar(): MyBottomBar
 
         fun initBottomBar()
+
+        fun setToolbarExpanded(expanded: Boolean)
     }
 
     data class RootTaskData(val taskKey: TaskKey, val imageState: ImageState?)

@@ -678,6 +678,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         updateBottomMenu()
     }
 
+    override fun setToolbarExpanded(expanded: Boolean) = mainActivityAppBarLayout.setExpanded(expanded)
+
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
         onCreateActionMode(actionMode)
 

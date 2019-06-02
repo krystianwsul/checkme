@@ -1710,6 +1710,16 @@ class DomainFactory(
     }
 
     @Synchronized
+    fun updateDefaultReminder(dataId: Int, source: SaveService.Source, defaultReminder: Boolean) {
+        MyCrashlytics.log("DomainFactory.updateDefaultReminder")
+        if (remoteUserFactory.isSaved) throw SavedFactoryException()
+
+        remoteUserFactory.remoteUser.defaultReminder = defaultReminder
+
+        save(dataId, source)
+    }
+
+    @Synchronized
     fun updateProject(dataId: Int, source: SaveService.Source, projectId: String, name: String, addedFriends: Set<String>, removedFriends: Set<String>) {
         MyCrashlytics.log("DomainFactory.updateProject")
 

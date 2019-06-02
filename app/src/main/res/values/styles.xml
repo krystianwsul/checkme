@@ -56,4 +56,8 @@
     <style name="BottomNavigationDrawer" parent="Widget.Design.NavigationView">
         <item name="android:listDivider">@color/navigationDivider</item>
     </style>
+
+    <style name="BottomNavigationDrawerItem">
+        <item name="android:itemBackground">#F00</item>
+    </style>
 </resources>

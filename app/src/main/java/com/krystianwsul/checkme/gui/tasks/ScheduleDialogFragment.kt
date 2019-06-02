@@ -10,7 +10,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.CheckBox
+import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.krystianwsul.checkme.R
@@ -118,21 +121,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             return TimeStamp(scheduleDialogData.date, hourMinute) > TimeStamp.now
         }
 
-    private fun <T> AutoCompleteTextView.makeSpinner(items: List<T>) {
-        setAdapter(object : ArrayAdapter<T>(requireContext(), R.layout.cat_exposed_dropdown_popup_item, items) {
-
-            override fun getFilter() = object : Filter() {
-
-                override fun performFiltering(constraint: CharSequence?) = FilterResults().apply {
-                    values = items
-                    count = items.size
-                }
-
-                override fun publishResults(constraint: CharSequence?, results: FilterResults?) = notifyDataSetChanged()
-            }
-        })
-    }
-
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         check(arguments!!.containsKey(SHOW_DELETE_KEY))
@@ -191,7 +179,19 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 ?: arguments!!).run { getParcelable(SCHEDULE_DIALOG_DATA_KEY)!! }
 
         customView.scheduleType.run {
-            text.makeSpinner(resources.getStringArray(R.array.schedule_types).toList())
+            setItems(resources.getStringArray(R.array.schedule_types).toList())
+
+            addListener {
+                scheduleDialogData.scheduleType = when (it) {
+                    0 -> ScheduleType.SINGLE
+                    1 -> ScheduleType.WEEKLY
+                    2 -> if (scheduleDialogData.monthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
+                    else -> throw UnsupportedOperationException()
+                }
+
+                if (activity != null && customTimeDatas != null)
+                    initialize()
+            }
 
             setSelection(when (scheduleDialogData.scheduleType) {
                 ScheduleType.SINGLE -> 0
@@ -199,22 +199,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 ScheduleType.WEEKLY -> 1
                 ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> 2
             })
-
-            text.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, i: Int, l: Long) {
-                    scheduleDialogData.scheduleType = when (i) {
-                        0 -> ScheduleType.SINGLE
-                        1 -> ScheduleType.WEEKLY
-                        2 -> if (scheduleDialogData.monthlyDay) ScheduleType.MONTHLY_DAY else ScheduleType.MONTHLY_WEEK
-                        else -> throw UnsupportedOperationException()
-                    }
-
-                    if (activity != null && customTimeDatas != null)
-                        initialize()
-                }
-
-                override fun onNothingSelected(adapterView: AdapterView<*>) = Unit
-            }
         }
 
         customView.scheduleDialogTime.setOnClickListener {

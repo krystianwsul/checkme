@@ -39,4 +39,14 @@ class RemoteMyUserRecord(
             createObject.defaultReminder = value
             addValue("$key/defaultReminder", value)
         }
+
+    override var defaultTab: Int
+        get() = createObject.defaultTab
+        set(value) {
+            if (value == createObject.defaultTab)
+                return
+
+            createObject.defaultTab = value
+            addValue("$key/defaultTab", value)
+        }
 }

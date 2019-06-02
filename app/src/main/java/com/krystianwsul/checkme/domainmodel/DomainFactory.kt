@@ -773,7 +773,7 @@ class DomainFactory(
                 .sortedDescending()
                 .toMutableList()
 
-        return MainViewModel.Data(TaskListFragment.TaskData(childTaskDatas, null))
+        return MainViewModel.Data(TaskListFragment.TaskData(childTaskDatas, null), remoteUserFactory.remoteUser.defaultTab)
     }
 
     @Synchronized
@@ -1724,6 +1724,16 @@ class DomainFactory(
         remoteUserFactory.remoteUser.defaultReminder = defaultReminder
 
         save(dataId, source)
+    }
+
+    @Synchronized
+    fun updateDefaultTab(source: SaveService.Source, defaultTab: Int) {
+        MyCrashlytics.log("DomainFactory.updateDefaultTab")
+        if (remoteUserFactory.isSaved) throw SavedFactoryException()
+
+        remoteUserFactory.remoteUser.defaultTab = defaultTab
+
+        save(0, source)
     }
 
     @Synchronized

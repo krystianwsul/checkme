@@ -118,9 +118,10 @@ class SettingsActivity : AbstractActivity() {
                         getString(R.string.instances) -> MainActivity.Tab.INSTANCES
                         getString(R.string.tasks) -> MainActivity.Tab.TASKS
                         else -> throw IllegalArgumentException()
-                    }
+                    }.ordinal
 
-                    Preferences.tab = newTab.ordinal
+                    Preferences.tab = newTab
+                    DomainFactory.instance.updateDefaultTab(SaveService.Source.GUI, newTab)
 
                     true
                 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.firebase.records.RemoteMyUserRecord
 
 
@@ -10,4 +11,8 @@ class RemoteMyUser(private val remoteMyUserRecord: RemoteMyUserRecord) : RemoteR
         set(value) {
             remoteMyUserRecord.photoUrl = value
         }
+
+    init {
+        Preferences.tab = defaultTab
+    }
 }

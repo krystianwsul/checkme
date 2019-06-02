@@ -22,10 +22,7 @@ import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.startTicks
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
@@ -163,6 +160,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             scheduleDialogCancel.setOnClickListener {
                 dialog!!.cancel()
             }
+
+            scheduleDialogDate.fixClicks()
+            scheduleDialogTime.fixClicks()
         }
 
         return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {

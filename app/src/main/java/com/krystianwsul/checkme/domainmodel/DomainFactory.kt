@@ -716,7 +716,7 @@ class DomainFactory(
 
         val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) }
 
-        return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas)
+        return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas, remoteUserFactory.remoteUser.defaultReminder)
     }
 
     @Synchronized
@@ -839,6 +839,13 @@ class DomainFactory(
         }
 
         return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
+    }
+
+    @Synchronized
+    fun getSettingsData(): SettingsViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getSettingsData")
+
+        return SettingsViewModel.Data(remoteUserFactory.remoteUser.defaultReminder)
     }
 
     // sets

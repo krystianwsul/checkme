@@ -16,10 +16,12 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.settings_activity.*
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -29,6 +31,8 @@ class SettingsActivity : AbstractActivity() {
 
         fun newIntent() = Intent(MyApplication.instance, SettingsActivity::class.java)
     }
+
+    private val settingsViewModel by lazy { getViewModel<SettingsViewModel>() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +45,14 @@ class SettingsActivity : AbstractActivity() {
         supportFragmentManager.apply {
             if (findFragmentById(R.id.settingsFrame) == null)
                 beginTransaction().replace(R.id.settingsFrame, SettingsFragment()).commit()
+        }
+
+        settingsViewModel.apply {
+            start()
+
+            createDisposable += data.subscribe {
+                animateVisibility(settingsFrame, settingsProgress, immediate = it.immediate)
+            }
         }
     }
 
@@ -71,14 +83,13 @@ class SettingsActivity : AbstractActivity() {
 
         private val settingsActivity get() = (activity as SettingsActivity)
 
-        private val settingsViewModel by lazy { getViewModel<SettingsViewModel>() }
-
         private val createDisposable = CompositeDisposable()
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-            settingsViewModel.relay
+            settingsActivity.settingsViewModel
+                    .relay
                     .subscribe {
                         if (it.value != null)
                             settingsActivity.updateFromAccount(it.value)
@@ -88,7 +99,7 @@ class SettingsActivity : AbstractActivity() {
                     .addTo(createDisposable)
 
             findPreference<Preference>(getString(R.string.accountDetails))!!.setOnPreferenceClickListener {
-                settingsViewModel.silentSignIn()
+                settingsActivity.settingsViewModel.silentSignIn()
 
                 true
             }
@@ -115,15 +126,22 @@ class SettingsActivity : AbstractActivity() {
                 }
             }
 
-            findPreference<SwitchPreferenceCompat>(getString(R.string.defaultReminder))!!.apply {
-                isChecked = Preferences.defaultReminder
+            val defaultReminderPreference = findPreference<SwitchPreferenceCompat>(getString(R.string.defaultReminder))!!
 
-                setOnPreferenceChangeListener { _, newValue ->
-                    Preferences.defaultReminder = newValue as Boolean
+            settingsActivity.settingsViewModel
+                    .data
+                    .subscribe {
+                        defaultReminderPreference.apply {
+                            isChecked = it.defaultReminder
 
-                    true
-                }
-            }
+                            setOnPreferenceChangeListener { _, newValue ->
+                                DomainFactory.instance.updateDefaultReminder(it.dataId, SaveService.Source.GUI, newValue as Boolean)
+
+                                true
+                            }
+                        }
+                    }
+                    .addTo(createDisposable)
         }
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

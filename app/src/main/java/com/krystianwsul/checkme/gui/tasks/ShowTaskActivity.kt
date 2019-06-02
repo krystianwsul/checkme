@@ -62,10 +62,11 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
             intent.getParcelableExtra(TASK_KEY_KEY)!!
         }
 
-        taskListFragment = (supportFragmentManager.findFragmentById(R.id.show_task_fragment) as? TaskListFragment) ?: TaskListFragment.newInstance().also {
+        taskListFragment = (supportFragmentManager.findFragmentById(R.id.showTaskFragment) as? TaskListFragment)
+                ?: TaskListFragment.newInstance().also {
             supportFragmentManager
                     .beginTransaction()
-                    .add(R.id.show_task_fragment, it)
+                    .add(R.id.showTaskFragment, it)
                     .commit()
         }.also { it.setFab(bottomFab) }
 

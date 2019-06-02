@@ -58,6 +58,15 @@ fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.a
     }
 })
 
+fun View.addOneShotScrollChangedListener(action: () -> Unit) = viewTreeObserver.addOnScrollChangedListener(object : ViewTreeObserver.OnScrollChangedListener {
+
+    override fun onScrollChanged() {
+        viewTreeObserver.removeOnScrollChangedListener(this)
+
+        action()
+    }
+})
+
 fun View.addOneShotPreDrawListener(action: () -> Unit) = viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
 
     override fun onPreDraw(): Boolean {

@@ -32,7 +32,7 @@ import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
 import java.util.*
 
-class TaskListFragment : AbstractFragment(), FabUser {
+class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     companion object {
 
@@ -201,7 +201,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
-    private var scrollToTaskKey: TaskKey? = null
+    override var scrollToTaskKey: TaskKey? = null
+    override val listItemAddedListener get() = taskListListener
+    override val recyclerView: RecyclerView get() = taskListRecycler
 
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
@@ -366,31 +368,12 @@ class TaskListFragment : AbstractFragment(), FabUser {
         tryScroll()
     }
 
-    private fun tryScroll() {
-        if (scrollToTaskKey == null)
-            return
-
-        val target = treeViewAdapter.getTreeNodeCollection()
-                .nodes
-                .mapIndexed { index: Int, treeNode: TreeNode -> Pair(index, treeNode.modelNode) }
-                .firstOrNull {
-                    (it.second as? TaskAdapter.TaskWrapper)?.childTaskData?.taskKey == scrollToTaskKey
-                } ?: return
-
-        val linearLayoutManager = taskListRecycler.layoutManager as LinearLayoutManager
-
-        if (target.first <= linearLayoutManager.findFirstCompletelyVisibleItemPosition()) {
-            taskListListener.setToolbarExpanded(true)
-            taskListRecycler.smoothScrollToPosition(target.first)
-        } else {
-            taskListListener.setToolbarExpanded(false)
-            taskListRecycler.smoothScrollToPosition(target.first + 1)
-        }
-
-        scrollToTaskKey = null
-
-        return
-    }
+    override fun findItem() = treeViewAdapter.getTreeNodeCollection()
+            .nodes
+            .mapIndexed { index: Int, treeNode: TreeNode -> Pair(index, treeNode.modelNode) }
+            .firstOrNull {
+                (it.second as? TaskAdapter.TaskWrapper)?.childTaskData?.taskKey == scrollToTaskKey
+            }?.first
 
     private fun updateSelectAll() {
         val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter
@@ -728,7 +711,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    interface TaskListListener : ActionModeListener, SnackbarListener {
+    interface TaskListListener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 
@@ -737,8 +720,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
         fun getBottomBar(): MyBottomBar
 
         fun initBottomBar()
-
-        fun setToolbarExpanded(expanded: Boolean)
     }
 
     data class RootTaskData(val taskKey: TaskKey, val imageState: ImageState?)

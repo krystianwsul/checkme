@@ -15,47 +15,36 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/editInstanceDateLayout"
-        style="@style/OldTextInput"
+        style="@style/MySpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:errorEnabled="true"
         app:hintEnabled="false">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <AutoCompleteTextView
             android:id="@+id/editInstanceDate"
-            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:cursorVisible="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:inputType="textNoSuggestions"
-            android:textSize="@dimen/textPrimary"
-            tools:ignore="LabelFor,TextFields" />
+            style="@style/MySpinnerText"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/editInstanceTimeLayout"
-        style="@style/OldTextInput"
+        style="@style/MySpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="18dp"
         app:errorEnabled="true"
         app:hintEnabled="false">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <AutoCompleteTextView
             android:id="@+id/editInstanceTime"
-            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:cursorVisible="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:inputType="textNoSuggestions"
-            android:singleLine="true"
-            android:textSize="@dimen/textPrimary"
-            tools:ignore="Deprecated,LabelFor,TextFields" />
+            style="@style/MySpinnerText"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

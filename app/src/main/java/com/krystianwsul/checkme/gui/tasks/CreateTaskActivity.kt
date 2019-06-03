@@ -24,10 +24,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMinute
@@ -929,6 +926,8 @@ class CreateTaskActivity : AbstractActivity() {
                                 it.initialize(data!!.parentTreeDatas, parentFragmentListener)
                             }
                         }
+
+                        fixClicks()
                     }
                 }
                 in (elementsBeforeSchedules until (elementsBeforeSchedules + stateData.state.schedules.size)) -> (holder as ScheduleHolder).run {
@@ -944,7 +943,10 @@ class CreateTaskActivity : AbstractActivity() {
 
                     scheduleText.run {
                         setText(scheduleEntry.scheduleData.getText(data!!.customTimeDatas, this@CreateTaskActivity))
+
                         setOnClickListener { onTextClick() }
+
+                        fixClicks()
                     }
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size -> (holder as ScheduleHolder).run {
@@ -958,6 +960,7 @@ class CreateTaskActivity : AbstractActivity() {
 
                     scheduleText.run {
                         text = null
+
                         setOnClickListener {
                             check(hourMinutePickerPosition == null)
 
@@ -966,6 +969,8 @@ class CreateTaskActivity : AbstractActivity() {
                                 it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
                             }
                         }
+
+                        fixClicks()
                     }
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size + 1 -> {
@@ -987,6 +992,8 @@ class CreateTaskActivity : AbstractActivity() {
                                 CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
                             }
                         }
+
+                        imageLayoutText.fixClicks()
                     }
                 }
                 else -> throw IllegalArgumentException()

@@ -74,8 +74,6 @@ class CreateTaskActivity : AbstractActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
-        const val REQUEST_CREATE_TASK = 983
-
         fun getCreateIntent(hint: Hint? = null) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             hint?.let { putExtra(KEY_HINT, hint) }
         }
@@ -92,6 +90,8 @@ class CreateTaskActivity : AbstractActivity() {
         }
 
         fun getEditIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
+
+        var createdTaskKey: TaskKey? = null
     }
 
     private var savedInstanceState: Bundle? = null
@@ -306,7 +306,7 @@ class CreateTaskActivity : AbstractActivity() {
                                             note,
                                             projectId,
                                             writeImagePath?.value,
-                                            removeInstanceKeys)
+                                            removeInstanceKeys).also { createdTaskKey = it }
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
@@ -319,7 +319,7 @@ class CreateTaskActivity : AbstractActivity() {
                                             scheduleDatas,
                                             note,
                                             projectId,
-                                            writeImagePath?.value)
+                                            writeImagePath?.value).also { createdTaskKey = it }
                                 }
                             }
                         }
@@ -356,7 +356,7 @@ class CreateTaskActivity : AbstractActivity() {
                                             taskKeys!!,
                                             note,
                                             writeImagePath?.value,
-                                            removeInstanceKeys)
+                                            removeInstanceKeys).also { createdTaskKey = it }
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
@@ -368,7 +368,7 @@ class CreateTaskActivity : AbstractActivity() {
                                             parentTaskKey,
                                             name,
                                             note,
-                                            writeImagePath?.value)
+                                            writeImagePath?.value).also { createdTaskKey = it }
                                 }
                             }
                         }
@@ -401,7 +401,7 @@ class CreateTaskActivity : AbstractActivity() {
                                             note,
                                             projectId,
                                             writeImagePath?.value,
-                                            removeInstanceKeys)
+                                            removeInstanceKeys).also { createdTaskKey = it }
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
@@ -413,7 +413,7 @@ class CreateTaskActivity : AbstractActivity() {
                                             name,
                                             note,
                                             projectId,
-                                            writeImagePath?.value)
+                                            writeImagePath?.value).also { createdTaskKey = it }
                                 }
                             }
                         }

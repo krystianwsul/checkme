@@ -1,8 +1,6 @@
 package com.krystianwsul.checkme.gui.tasks
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -264,6 +262,15 @@ class TaskListFragment : AbstractFragment(), FabUser {
         initialize()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        scrollToTaskKey = CreateTaskActivity.createdTaskKey
+        CreateTaskActivity.createdTaskKey = null
+
+        tryScroll()
+    }
+
     fun setAllTasks(data: Data) {
         check(rootTaskData == null)
 
@@ -356,20 +363,19 @@ class TaskListFragment : AbstractFragment(), FabUser {
 
         updateSelectAll()
 
-        scrollToTaskKey?.let {
-            check(tryScroll(it))
-
-            scrollToTaskKey = null
-        }
+        tryScroll()
     }
 
-    private fun tryScroll(taskKey: TaskKey): Boolean {
+    private fun tryScroll() {
+        if (scrollToTaskKey == null)
+            return
+
         val target = treeViewAdapter.getTreeNodeCollection()
                 .nodes
                 .mapIndexed { index: Int, treeNode: TreeNode -> Pair(index, treeNode.modelNode) }
                 .firstOrNull {
-                    (it.second as? TaskAdapter.TaskWrapper)?.childTaskData?.taskKey == taskKey
-                } ?: return false
+                    (it.second as? TaskAdapter.TaskWrapper)?.childTaskData?.taskKey == scrollToTaskKey
+                } ?: return
 
         val linearLayoutManager = taskListRecycler.layoutManager as LinearLayoutManager
 
@@ -381,7 +387,9 @@ class TaskListFragment : AbstractFragment(), FabUser {
             taskListRecycler.smoothScrollToPosition(target.first + 1)
         }
 
-        return true
+        scrollToTaskKey = null
+
+        return
     }
 
     private fun updateSelectAll() {
@@ -424,7 +432,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         taskListFragmentFab = floatingActionButton
 
         taskListFragmentFab!!.setOnClickListener {
-            startActivityForResult(CreateTaskActivity.getCreateIntent(hint()), CreateTaskActivity.REQUEST_CREATE_TASK)
+            startActivity(CreateTaskActivity.getCreateIntent(hint()))
         }
 
         updateFabVisibility()
@@ -456,21 +464,6 @@ class TaskListFragment : AbstractFragment(), FabUser {
         super.onDestroyView()
 
         initializeDisposable.clear()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == CreateTaskActivity.REQUEST_CREATE_TASK) {
-            if (resultCode == Activity.RESULT_OK) {
-                check(scrollToTaskKey == null)
-
-                val taskKey = data!!.getParcelableExtra<TaskKey>(ShowTaskActivity.TASK_KEY_KEY)
-
-                if (!tryScroll(taskKey))
-                    scrollToTaskKey = taskKey
-            }
-        }
     }
 
     private class TaskAdapter(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {

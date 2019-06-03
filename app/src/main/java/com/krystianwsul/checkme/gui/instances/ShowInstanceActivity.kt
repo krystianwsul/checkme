@@ -185,6 +185,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         super.onStart()
 
         startTicks(broadcastReceiver)
+
+        groupListFragment.checkCreatedTaskKey()
     }
 
     override fun onStop() {

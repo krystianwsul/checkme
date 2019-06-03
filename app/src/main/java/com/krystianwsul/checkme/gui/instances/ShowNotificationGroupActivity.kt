@@ -58,6 +58,12 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
         initBottomBar()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        groupListFragment.checkCreatedTaskKey()
+    }
+
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
 
     override fun onDestroyGroupActionMode() = Unit

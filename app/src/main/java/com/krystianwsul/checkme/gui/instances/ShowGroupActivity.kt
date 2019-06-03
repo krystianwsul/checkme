@@ -58,6 +58,12 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
         initBottomBar()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        groupListFragment.checkCreatedTaskKey()
+    }
+
     private fun onLoadFinished(data: ShowGroupViewModel.Data) {
         toolbar.title = data.displayText
 

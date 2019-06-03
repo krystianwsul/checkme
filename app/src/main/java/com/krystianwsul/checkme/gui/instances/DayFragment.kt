@@ -124,13 +124,13 @@ class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSe
 
                         activity.selectAllRelay
                                 .subscribe {
-                                    groupListFragment
-                                            .treeViewAdapter
-                                            .updateDisplayedNodes {
-                                                selectAll(TreeViewAdapter.Placeholder)
-                                            }
+                                    groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                                        selectAll(TreeViewAdapter.Placeholder)
+                                    }
                                 }
                                 .addTo(compositeDisposable)
+
+                        groupListFragment.checkCreatedTaskKey()
                     } else {
                         clearFab()
                         saveState()

@@ -438,6 +438,13 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        if (visibleTab.value == Tab.TASKS)
+            taskListFragment.checkCreatedTaskKey()
+    }
+
     override fun initBottomBar() {
         bottomAppBar.apply {
             setNavigationIcon(R.drawable.ic_menu_white_24dp)

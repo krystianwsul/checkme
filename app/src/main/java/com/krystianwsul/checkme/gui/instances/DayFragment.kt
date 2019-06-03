@@ -117,30 +117,39 @@ class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSe
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        key.switchMap { key -> (context as Host).hostEvents.map { Pair(key, it) } }
-                .subscribe { (key, event) ->
-                    if (event is Event.PageVisible && event.position == key.second) {
-                        setFab(event.floatingActionButton)
+        val hostEvents = key.switchMap { key -> (context as Host).hostEvents.map { Pair(key, it) } }
 
-                        activity.selectAllRelay
-                                .subscribe {
-                                    groupListFragment.treeViewAdapter.updateDisplayedNodes {
-                                        selectAll(TreeViewAdapter.Placeholder)
-                                    }
-                                }
-                                .addTo(compositeDisposable)
+        hostEvents.subscribe { (key, event) ->
+            if (event is Event.PageVisible && event.position == key.second) {
+                setFab(event.floatingActionButton)
 
-                        groupListFragment.checkCreatedTaskKey()
-                    } else {
-                        clearFab()
-                        saveState()
-                    }
-                }
-                .addTo(compositeDisposable)
+                activity.selectAllRelay
+                        .subscribe {
+                            groupListFragment.treeViewAdapter.updateDisplayedNodes {
+                                selectAll(TreeViewAdapter.Placeholder)
+                            }
+                        }
+                        .addTo(compositeDisposable)
+            } else {
+                clearFab()
+                saveState()
+            }
+        }.addTo(compositeDisposable)
 
         key.switchMap { key -> entry!!.data.map { Pair(key, it) } }
                 .subscribe { (key, data) -> groupListFragment.setAll(key.first, key.second, data.dataId, data.immediate, data.dataWrapper) }
                 .addTo(compositeDisposable)
+
+        hostEvents.switchMap { (key, event) ->
+            if (event is Event.PageVisible && event.position == key.second)
+                activity.started
+            else
+                Observable.never<Boolean>()
+        }
+                .filter { it }
+                .subscribe { groupListFragment.checkCreatedTaskKey() }
+                .addTo(compositeDisposable)
+
     }
 
     override fun onDetachedFromWindow() {

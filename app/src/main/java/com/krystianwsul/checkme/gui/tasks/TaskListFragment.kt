@@ -264,15 +264,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         initialize()
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        scrollToTaskKey = CreateTaskActivity.createdTaskKey
-        CreateTaskActivity.createdTaskKey = null
-
-        tryScroll()
-    }
-
     fun setAllTasks(data: Data) {
         check(rootTaskData == null)
 

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
 
 interface ListItemAddedScroller {
@@ -33,5 +34,12 @@ interface ListItemAddedScroller {
         scrollToTaskKey = null
 
         return
+    }
+
+    fun checkCreatedTaskKey() {
+        scrollToTaskKey = CreateTaskActivity.createdTaskKey
+        CreateTaskActivity.createdTaskKey = null
+
+        tryScroll()
     }
 }

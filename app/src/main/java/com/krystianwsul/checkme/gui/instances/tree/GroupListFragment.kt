@@ -732,13 +732,6 @@ class GroupListFragment @JvmOverloads constructor(
                         ?.contains(scrollToTaskKey) == true
             }?.first
 
-    fun checkCreatedTaskKey() {
-        scrollToTaskKey = CreateTaskActivity.createdTaskKey
-        CreateTaskActivity.createdTaskKey = null
-
-        tryScroll()
-    }
-
     class GroupAdapter(val groupListFragment: GroupListFragment) : TreeModelAdapter, NodeCollectionParent {
 
         companion object {

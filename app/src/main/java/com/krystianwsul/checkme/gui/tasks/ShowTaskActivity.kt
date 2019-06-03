@@ -77,6 +77,12 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        taskListFragment.checkCreatedTaskKey()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

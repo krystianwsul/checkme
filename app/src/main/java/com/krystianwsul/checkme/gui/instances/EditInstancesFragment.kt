@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.fixClicks
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
@@ -142,11 +143,17 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         myView = requireActivity().layoutInflater
                 .inflate(R.layout.fragment_edit_instances, null)
                 .apply {
-                    editInstanceDate.setOnClickListener {
-                        val datePickerDialogFragment = DatePickerDialogFragment.newInstance(date!!)
-                        datePickerDialogFragment.listener = datePickerDialogFragmentListener
-                        datePickerDialogFragment.show(childFragmentManager, DATE_FRAGMENT_TAG)
+                    editInstanceDate.apply {
+                        setOnClickListener {
+                            val datePickerDialogFragment = DatePickerDialogFragment.newInstance(date!!)
+                            datePickerDialogFragment.listener = datePickerDialogFragmentListener
+                            datePickerDialogFragment.show(childFragmentManager, DATE_FRAGMENT_TAG)
+                        }
+
+                        fixClicks()
                     }
+
+                    editInstanceTime.fixClicks()
 
                     editInstanceSave.setOnClickListener {
                         checkNotNull(date)

@@ -14,15 +14,15 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingBottom="@dimen/activity_vertical_margin">
 
-        <Spinner
+        <com.krystianwsul.checkme.gui.MySpinner
             android:id="@+id/scheduleType"
-            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/scheduleDialogDateLayout"
-            style="@style/OldTextInput"
+            style="@style/MySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="17dp"
@@ -30,18 +30,12 @@
             app:errorEnabled="true"
             app:hintEnabled="false">
 
-            <EditText
+            <AutoCompleteTextView
                 android:id="@+id/scheduleDialogDate"
-                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:cursorVisible="false"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:importantForAutofill="no"
-                android:inputType="textNoSuggestions"
-                android:textSize="@dimen/textPrimary"
-                tools:ignore="LabelFor,TextFields,UnusedAttribute" />
+                style="@style/MySpinnerText"
+                tools:ignore="LabelFor" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -177,7 +171,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/scheduleDialogTimeLayout"
-            style="@style/OldTextInput"
+            style="@style/MySpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="18dp"
@@ -185,19 +179,12 @@
             app:hintEnabled="false"
             android:visibility="gone">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <AutoCompleteTextView
                 android:id="@+id/scheduleDialogTime"
-                style="@style/Widget.AppCompat.Spinner.Underlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:cursorVisible="false"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:importantForAutofill="no"
-                android:inputType="textNoSuggestions"
-                android:singleLine="true"
-                android:textSize="@dimen/textPrimary"
-                tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute" />
+                style="@style/MySpinnerText"
+                tools:ignore="LabelFor" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

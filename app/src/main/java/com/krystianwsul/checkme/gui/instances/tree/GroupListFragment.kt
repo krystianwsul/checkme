@@ -14,6 +14,7 @@ import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.DataDiff
@@ -47,7 +48,7 @@ class GroupListFragment @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
-        defStyleRes: Int = 0) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes), FabUser {
+        defStyleRes: Int = 0) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes), FabUser, ListItemAddedScroller {
 
     companion object {
 
@@ -417,6 +418,10 @@ class GroupListFragment @JvmOverloads constructor(
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
+    override var scrollToTaskKey: TaskKey? = null
+    override val listItemAddedListener get() = listener
+    override val recyclerView: RecyclerView get() = groupListRecycler
+
     private fun getShareData(selectedDatas: Collection<SelectedData>): String {
         check(selectedDatas.isNotEmpty())
 
@@ -716,6 +721,15 @@ class GroupListFragment @JvmOverloads constructor(
         floatingActionButton = null
     }
 
+    override fun findItem() = treeViewAdapter.getTreeNodeCollection()
+            .nodes
+            .mapIndexed { index, treeNode -> Pair(index, treeNode.modelNode) }
+            .firstOrNull {
+                (it.second as? NotDoneGroupNode)?.instanceDatas
+                        ?.map { it.instanceKey.taskKey }
+                        ?.contains(scrollToTaskKey) == true
+            }?.first
+
     class GroupAdapter(val groupListFragment: GroupListFragment) : TreeModelAdapter, NodeCollectionParent {
 
         companion object {
@@ -828,7 +842,7 @@ class GroupListFragment @JvmOverloads constructor(
             val selectedGroups: List<Long> = listOf(),
             val selectedTaskKeys: List<TaskKey> = listOf()) : Parcelable
 
-    interface GroupListListener : SnackbarListener {
+    interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
         fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter)
 

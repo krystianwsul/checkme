@@ -370,7 +370,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     override fun findItem() = treeViewAdapter.getTreeNodeCollection()
             .nodes
-            .mapIndexed { index: Int, treeNode: TreeNode -> Pair(index, treeNode.modelNode) }
+            .mapIndexed { index, treeNode -> Pair(index, treeNode.modelNode) }
             .firstOrNull {
                 (it.second as? TaskAdapter.TaskWrapper)?.childTaskData?.taskKey == scrollToTaskKey
             }?.first

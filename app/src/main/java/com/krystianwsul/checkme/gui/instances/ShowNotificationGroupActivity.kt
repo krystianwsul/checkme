@@ -14,6 +14,7 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_notification_group.*
 import kotlinx.android.synthetic.main.bottom.*
+import kotlinx.android.synthetic.main.toolbar.*
 import java.util.*
 
 class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
@@ -95,4 +96,6 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
 
         updateBottomBar()
     }
+
+    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
 }

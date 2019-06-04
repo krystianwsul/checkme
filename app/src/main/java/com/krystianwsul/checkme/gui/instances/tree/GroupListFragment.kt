@@ -723,14 +723,41 @@ class GroupListFragment @JvmOverloads constructor(
         floatingActionButton = null
     }
 
-    override fun findItem() = treeViewAdapter.getTreeNodeCollection()
-            .nodes
-            .mapIndexed { index, treeNode -> Pair(index, treeNode.modelNode) }
+    private fun getAllInstanceDatas(instanceData: InstanceData): List<InstanceData> {
+        return listOf(listOf(listOf(instanceData)), instanceData.children.values.map { getAllInstanceDatas(it) }).flatten().flatten()
+    }
+
+    private val InstanceData.allTaskKeys get() = getAllInstanceDatas(this).map { it.taskKey }
+
+    override fun findItem() = treeViewAdapter.displayedNodes
             .firstOrNull {
-                (it.second as? NotDoneGroupNode)?.instanceDatas
-                        ?.map { it.instanceKey.taskKey }
-                        ?.contains(scrollToTaskKey) == true
-            }?.first
+                when (val modelNode = it.modelNode) {
+                    is NotDoneGroupNode -> {
+                        if (it.isExpanded) {
+                            if (modelNode.singleInstance()) {
+                                modelNode.singleInstanceData.taskKey == scrollToTaskKey
+                            } else {
+                                false
+                            }
+                        } else {
+                            modelNode.instanceDatas
+                                    .map { it.allTaskKeys }
+                                    .flatten()
+                                    .contains(scrollToTaskKey)
+                        }
+                    }
+                    is NotDoneGroupNode.NotDoneInstanceNode -> {
+                        if (it.isExpanded) {
+                            modelNode.instanceData.taskKey == scrollToTaskKey
+                        } else {
+                            modelNode.instanceData
+                                    .allTaskKeys
+                                    .contains(scrollToTaskKey)
+                        }
+                    }
+                    else -> false
+                }
+            }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
 
     class GroupAdapter(val groupListFragment: GroupListFragment) : TreeModelAdapter, NodeCollectionParent {
 

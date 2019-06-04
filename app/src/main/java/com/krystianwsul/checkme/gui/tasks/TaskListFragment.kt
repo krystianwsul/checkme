@@ -359,12 +359,28 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         tryScroll()
     }
 
-    override fun findItem() = treeViewAdapter.getTreeNodeCollection()
-            .nodes
-            .mapIndexed { index, treeNode -> Pair(index, treeNode.modelNode) }
+    private fun getAllChildTaskDatas(childTaskData: ChildTaskData): List<ChildTaskData> {
+        return listOf(listOf(listOf(childTaskData)), childTaskData.children.map { getAllChildTaskDatas(it) }).flatten().flatten()
+    }
+
+    private val ChildTaskData.allTaskKeys get() = getAllChildTaskDatas(this).map { it.taskKey }
+
+    override fun findItem() = treeViewAdapter.displayedNodes
             .firstOrNull {
-                (it.second as? TaskAdapter.TaskWrapper)?.childTaskData?.taskKey == scrollToTaskKey
-            }?.first
+                val modelNode = it.modelNode
+
+                if (modelNode is TaskAdapter.TaskWrapper) {
+                    if (it.isExpanded) {
+                        modelNode.childTaskData.taskKey == scrollToTaskKey
+                    } else {
+                        modelNode.childTaskData
+                                .allTaskKeys
+                                .contains(scrollToTaskKey)
+                    }
+                } else {
+                    false
+                }
+            }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
 
     private fun updateSelectAll() {
         val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter

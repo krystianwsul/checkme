@@ -1,12 +1,10 @@
 package com.krystianwsul.checkme
 
-import com.google.gson.*
-import com.google.gson.reflect.TypeToken
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.deserialize
+import com.krystianwsul.checkme.utils.serialize
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import org.joda.time.LocalDateTime
-import org.joda.time.format.DateTimeFormat
-import java.lang.reflect.Type
 import kotlin.properties.Delegates.observable
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -20,10 +18,6 @@ object Preferences {
     private const val KEY_SHORTCUTS = "shortcuts2"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
-
-    private val gson by lazy {
-        GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeTypeConverter()).create()!!
-    }
 
     var lastTick
         get() = sharedPreferences.getLong(LAST_TICK_KEY, -1)
@@ -45,13 +39,9 @@ object Preferences {
                 .apply()
     }
 
-    private val shortcutTypeToken by lazy {
-        object : TypeToken<Map<TaskKey, LocalDateTime>>() {}.type
-    }
-
-    var shortcuts: Map<TaskKey, LocalDateTime> by observable(gson.fromJson(shortcutString, shortcutTypeToken)
+    var shortcuts: Map<TaskKey, LocalDateTime> by observable(deserialize(shortcutString)
             ?: mapOf()) { _, _, newValue ->
-        shortcutString = gson.toJson(newValue)
+        shortcutString = serialize(newValue)
     }
 
     fun logLineDate(line: String) {
@@ -82,17 +72,5 @@ object Preferences {
         override fun setValue(thisRef: Any, property: KProperty<*>, value: String) = sharedPreferences.edit()
                 .putString(key, value)
                 .apply()
-    }
-
-    private class LocalDateTimeTypeConverter : JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
-
-        companion object {
-
-            private const val PATTERN = "yyyy-MM-dd HH:mm:ss"
-        }
-
-        override fun serialize(src: LocalDateTime, srcType: Type, context: JsonSerializationContext) = JsonPrimitive(src.toString(PATTERN)!!)
-
-        override fun deserialize(json: JsonElement, type: Type, context: JsonDeserializationContext) = DateTimeFormat.forPattern(PATTERN).parseLocalDateTime(json.asString)!!
     }
 }

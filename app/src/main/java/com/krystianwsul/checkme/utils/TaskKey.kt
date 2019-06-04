@@ -18,8 +18,6 @@ data class TaskKey(val remoteProjectId: String, val remoteTaskId: String) : Parc
 
     val type get() = Type.REMOTE
 
-    override fun toString() = super.toString() + ": " + remoteProjectId + "/" + remoteTaskId
-
     fun toShortcut() = "$remoteProjectId:$remoteTaskId"
 
     enum class Type {

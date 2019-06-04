@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Base64
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +27,9 @@ import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import io.reactivex.Observable
+import java.io.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 fun Set<DayOfWeek>.prettyPrint(): String {
     check(isNotEmpty())
@@ -213,3 +216,35 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
 fun newUuid() = UUID.randomUUID().toString()
 
 fun AutoCompleteTextView.fixClicks() = setOnTouchListener { _, _ -> false }
+
+fun <T> serialize(obj: T): String {
+    return ByteArrayOutputStream().let {
+        ObjectOutputStream(it).run {
+            writeObject(obj)
+            close()
+        }
+
+        Base64.encodeToString(it.toByteArray(), Base64.DEFAULT).also { check(!it.isNullOrEmpty()) }
+    }
+}
+
+fun <T> deserialize(serialized: String?): T? {
+    if (serialized.isNullOrEmpty())
+        return null
+
+    return try {
+        ObjectInputStream(ByteArrayInputStream(Base64.decode(serialized, Base64.DEFAULT))).run {
+            @Suppress("UNCHECKED_CAST")
+            val obj = readObject() as T
+            close()
+
+            obj
+        }
+    } catch (invalidClassException: InvalidClassException) {
+        null
+    } catch (e: Exception) {
+        MyCrashlytics.logException(e)
+
+        null
+    }
+}

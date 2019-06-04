@@ -208,7 +208,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             val customTimeDatas = if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
                 val dayOfWeek = scheduleDialogData.date.dayOfWeek
-                list.sortedBy { dayOfWeek }.map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[dayOfWeek] + ")") }
+                list.sortedBy { it.hourMinutes[dayOfWeek] }.map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[dayOfWeek] + ")") }
             } else {
                 list.sortedBy { it.hourMinutes.values.map { it.hour * 60 + it.minute }.sum() }.map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name) }
             }

@@ -32,7 +32,7 @@ import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
 import java.util.*
 
-class TaskListFragment : AbstractFragment(), FabUser {
+class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     companion object {
 
@@ -201,6 +201,10 @@ class TaskListFragment : AbstractFragment(), FabUser {
     private var showImage = false
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
+    override var scrollToTaskKey: TaskKey? = null
+    override val listItemAddedListener get() = taskListListener
+    override val recyclerView: RecyclerView get() = taskListRecycler
+
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
 
@@ -351,7 +355,32 @@ class TaskListFragment : AbstractFragment(), FabUser {
         animateVisibility(listOf(show), hide, immediate = data!!.immediate)
 
         updateSelectAll()
+
+        tryScroll()
     }
+
+    private fun getAllChildTaskDatas(childTaskData: ChildTaskData): List<ChildTaskData> {
+        return listOf(listOf(listOf(childTaskData)), childTaskData.children.map { getAllChildTaskDatas(it) }).flatten().flatten()
+    }
+
+    private val ChildTaskData.allTaskKeys get() = getAllChildTaskDatas(this).map { it.taskKey }
+
+    override fun findItem() = treeViewAdapter.displayedNodes
+            .firstOrNull {
+                val modelNode = it.modelNode
+
+                if (modelNode is TaskAdapter.TaskWrapper) {
+                    if (it.isExpanded) {
+                        modelNode.childTaskData.taskKey == scrollToTaskKey
+                    } else {
+                        modelNode.childTaskData
+                                .allTaskKeys
+                                .contains(scrollToTaskKey)
+                    }
+                } else {
+                    false
+                }
+            }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
 
     private fun updateSelectAll() {
         val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter
@@ -689,7 +718,7 @@ class TaskListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    interface TaskListListener : ActionModeListener, SnackbarListener {
+    interface TaskListListener : ActionModeListener, SnackbarListener, ListItemAddedListener {
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 

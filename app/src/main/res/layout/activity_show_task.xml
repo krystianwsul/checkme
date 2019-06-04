@@ -15,11 +15,10 @@
 
         <include layout="@layout/toolbar"/>
 
-        <androidx.core.widget.NestedScrollView
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/show_task_fragment"
-            android:fillViewport="true"
+            android:id="@+id/showTaskFragment"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
         <include layout="@layout/bottom" />

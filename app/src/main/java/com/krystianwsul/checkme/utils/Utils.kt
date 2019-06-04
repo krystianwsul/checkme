@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.text.TextUtils
 import com.google.android.gms.tasks.Task
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
@@ -95,11 +94,6 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
 
 fun <T> Task<T>.toSingle() = Single.create<NullableWrapper<T>> { subscriber ->
     addOnCompleteListener {
-        subscriber.onSuccess(NullableWrapper(if (it.isSuccessful) {
-            it.result
-        } else {
-            MyCrashlytics.logException(it.exception!!)
-            null
-        }))
+        subscriber.onSuccess(NullableWrapper(it.result))
     }
 }!!

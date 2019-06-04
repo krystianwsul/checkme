@@ -11,14 +11,17 @@ import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.material.snackbar.Snackbar
 import com.krystianwsul.checkme.MyApplication
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.SettingsViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.settings_activity.*
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -28,6 +31,8 @@ class SettingsActivity : AbstractActivity() {
 
         fun newIntent() = Intent(MyApplication.instance, SettingsActivity::class.java)
     }
+
+    private val settingsViewModel by lazy { getViewModel<SettingsViewModel>() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +45,14 @@ class SettingsActivity : AbstractActivity() {
         supportFragmentManager.apply {
             if (findFragmentById(R.id.settingsFrame) == null)
                 beginTransaction().replace(R.id.settingsFrame, SettingsFragment()).commit()
+        }
+
+        settingsViewModel.apply {
+            start()
+
+            createDisposable += data.subscribe {
+                animateVisibility(settingsFrame, settingsProgress, immediate = it.immediate)
+            }
         }
     }
 
@@ -70,14 +83,13 @@ class SettingsActivity : AbstractActivity() {
 
         private val settingsActivity get() = (activity as SettingsActivity)
 
-        private val settingsViewModel by lazy { getViewModel<SettingsViewModel>() }
-
         private val createDisposable = CompositeDisposable()
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
-            settingsViewModel.relay
+            settingsActivity.settingsViewModel
+                    .relay
                     .subscribe {
                         if (it.value != null)
                             settingsActivity.updateFromAccount(it.value)
@@ -87,7 +99,7 @@ class SettingsActivity : AbstractActivity() {
                     .addTo(createDisposable)
 
             findPreference<Preference>(getString(R.string.accountDetails))!!.setOnPreferenceClickListener {
-                settingsViewModel.silentSignIn()
+                settingsActivity.settingsViewModel.silentSignIn()
 
                 true
             }
@@ -106,23 +118,31 @@ class SettingsActivity : AbstractActivity() {
                         getString(R.string.instances) -> MainActivity.Tab.INSTANCES
                         getString(R.string.tasks) -> MainActivity.Tab.TASKS
                         else -> throw IllegalArgumentException()
+                    }.ordinal
+
+                    Preferences.tab = newTab
+                    DomainFactory.instance.updateDefaultTab(SaveService.Source.GUI, newTab)
+
+                    true
+                }
+            }
+
+            val defaultReminderPreference = findPreference<SwitchPreferenceCompat>(getString(R.string.defaultReminder))!!
+
+            settingsActivity.settingsViewModel
+                    .data
+                    .subscribe {
+                        defaultReminderPreference.apply {
+                            isChecked = it.defaultReminder
+
+                            setOnPreferenceChangeListener { _, newValue ->
+                                DomainFactory.instance.updateDefaultReminder(it.dataId, SaveService.Source.GUI, newValue as Boolean)
+
+                                true
+                            }
+                        }
                     }
-
-                    Preferences.tab = newTab.ordinal
-
-                    true
-                }
-            }
-
-            findPreference<SwitchPreferenceCompat>(getString(R.string.defaultReminder))!!.apply {
-                isChecked = Preferences.defaultReminder
-
-                setOnPreferenceChangeListener { _, newValue ->
-                    Preferences.defaultReminder = newValue as Boolean
-
-                    true
-                }
-            }
+                    .addTo(createDisposable)
         }
 
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -130,10 +150,13 @@ class SettingsActivity : AbstractActivity() {
 
             check(requestCode == RC_SIGN_IN)
 
-            Auth.GoogleSignInApi
-                    .getSignInResultFromIntent(data)!!
-                    .signInAccount
-                    ?.let { settingsActivity.updateFromAccount(it) }
+            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)!!
+            val account = result.signInAccount
+
+            if (account != null)
+                settingsActivity.updateFromAccount(account)
+            else
+                MyCrashlytics.logException(SettingsSignInException(result.status.toString()))
         }
 
         override fun onDestroy() {
@@ -142,4 +165,6 @@ class SettingsActivity : AbstractActivity() {
             super.onDestroy()
         }
     }
+
+    private class SettingsSignInException(message: String) : Exception(message)
 }

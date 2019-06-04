@@ -45,21 +45,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields"
+                    <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_sunday_time"
-                        android:singleLine="true"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"/>
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -87,21 +80,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields"
+                    <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_monday_time"
-                        android:singleLine="true"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"/>
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -129,22 +115,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
+                    <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_tuesday_time"
-                        android:singleLine="true"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"
-                        android:importantForAutofill="no" />
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -172,22 +150,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
+                    <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_wednesday_time"
-                        android:singleLine="true"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"
-                        android:importantForAutofill="no" />
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -215,22 +185,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
+                    <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_thursday_time"
-                        android:singleLine="true"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"
-                        android:importantForAutofill="no" />
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -258,22 +220,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
+                    <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_friday_time"
-                        android:singleLine="true"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"
-                        android:importantForAutofill="no" />
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -301,22 +255,14 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/OldTextInput">
+                    style="@style/MySpinner">
 
-                    <EditText
-                        style="@style/Widget.AppCompat.Spinner.Underlined"
-                        android:cursorVisible="false"
-                        android:focusable="false"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textNoSuggestions"
-                        tools:ignore="Deprecated,LabelFor,TextFields,UnusedAttribute"
+                    <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/time_saturday_time"
-                        android:singleLine="true"
-                        android:textSize="@dimen/textPrimary"
-                        android:textColor="@color/textPrimary"
-                        android:importantForAutofill="no" />
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 

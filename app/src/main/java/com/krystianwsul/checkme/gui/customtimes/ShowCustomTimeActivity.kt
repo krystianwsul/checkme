@@ -10,6 +10,7 @@ import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -18,6 +19,7 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.checkme.utils.fixClicks
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
@@ -205,9 +207,7 @@ class ShowCustomTimeActivity : AbstractActivity() {
 
         timeName.text = dayOfWeek.toString()
 
-        val timeView = findViewById<TextView>(timeId)!!
-
-        timeViews[dayOfWeek] = timeView
+        timeViews[dayOfWeek] = findViewById<AutoCompleteTextView>(timeId)!!.apply { fixClicks() }
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {

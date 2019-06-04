@@ -18,7 +18,6 @@ object Preferences {
     private const val TICK_LOG = "tickLog"
     private const val TAB_KEY = "tab"
     private const val KEY_SHORTCUTS = "shortcuts2"
-    private const val KEY_DEFAULT_REMINDER = "defaultReminder"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -53,12 +52,6 @@ object Preferences {
     var shortcuts: Map<TaskKey, LocalDateTime> by observable(gson.fromJson(shortcutString, shortcutTypeToken)
             ?: mapOf()) { _, _, newValue ->
         shortcutString = gson.toJson(newValue)
-    }
-
-    var defaultReminder by observable(sharedPreferences.getBoolean(KEY_DEFAULT_REMINDER, true)) { _, _, newValue ->
-        sharedPreferences.edit()
-                .putBoolean(KEY_DEFAULT_REMINDER, newValue)
-                .apply()
     }
 
     fun logLineDate(line: String) {

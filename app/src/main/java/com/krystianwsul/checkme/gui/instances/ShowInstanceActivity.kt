@@ -185,6 +185,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         super.onStart()
 
         startTicks(broadcastReceiver)
+
+        groupListFragment.checkCreatedTaskKey()
     }
 
     override fun onStop() {
@@ -344,4 +346,6 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
             showInstanceViewModel.start(instanceKey)
         }
     }
+
+    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
 }

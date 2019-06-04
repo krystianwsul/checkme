@@ -20,7 +20,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
         fun newInstance() = DrawerFragment()
     }
 
-    override val alwaysExpand = true
+    override val alwaysExpand = false
 
     private val mainActivity get() = activity as MainActivity
 

@@ -57,6 +57,12 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
         initBottomBar()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        groupListFragment.checkCreatedTaskKey()
+    }
+
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
@@ -90,4 +96,6 @@ class ShowTaskInstancesActivity : ToolbarActivity(), GroupListFragment.GroupList
                 .findItem(R.id.action_select_all)
                 ?.isVisible = selectAllVisible
     }
+
+    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
 }

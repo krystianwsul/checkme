@@ -53,7 +53,22 @@
 
     <style name="OldTextInput" parent="@style/Widget.Design.TextInputLayout" />
 
+    <style name="NewTextInput" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" />
+
     <style name="BottomNavigationDrawer" parent="Widget.Design.NavigationView">
         <item name="android:listDivider">@color/navigationDivider</item>
     </style>
+
+    <style name="MySpinner" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu" />
+
+    <style name="MySpinnerText">
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="android:focusableInTouchMode">false</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">@dimen/textPrimary</item>
+        <item name="android:textColor">@color/textPrimary</item>
+        <item name="android:cursorVisible">false</item>
+    </style>
+
 </resources>

@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.AutoCompleteTextView
 import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
@@ -53,6 +54,15 @@ fun View.addOneShotGlobalLayoutListener(action: () -> Unit) = viewTreeObserver.a
 
     override fun onGlobalLayout() {
         viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+        action()
+    }
+})
+
+fun View.addOneShotScrollChangedListener(action: () -> Unit) = viewTreeObserver.addOnScrollChangedListener(object : ViewTreeObserver.OnScrollChangedListener {
+
+    override fun onScrollChanged() {
+        viewTreeObserver.removeOnScrollChangedListener(this)
 
         action()
     }
@@ -201,3 +211,5 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .into(this)
 
 fun newUuid() = UUID.randomUUID().toString()
+
+fun AutoCompleteTextView.fixClicks() = setOnTouchListener { _, _ -> false }

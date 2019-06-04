@@ -765,7 +765,7 @@ class DomainFactory(
 
         val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) }
 
-        return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas)
+        return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas, remoteUserFactory.remoteUser.defaultReminder)
     }
 
     @Synchronized
@@ -822,7 +822,7 @@ class DomainFactory(
                 .sortedDescending()
                 .toMutableList()
 
-        return MainViewModel.Data(TaskListFragment.TaskData(childTaskDatas, null))
+        return MainViewModel.Data(TaskListFragment.TaskData(childTaskDatas, null), remoteUserFactory.remoteUser.defaultTab)
     }
 
     @Synchronized
@@ -888,6 +888,13 @@ class DomainFactory(
         }
 
         return ShowProjectViewModel.Data(name, userListDatas, friendDatas)
+    }
+
+    @Synchronized
+    fun getSettingsData(): SettingsViewModel.Data {
+        MyCrashlytics.log("DomainFactory.getSettingsData")
+
+        return SettingsViewModel.Data(remoteUserFactory.remoteUser.defaultReminder)
     }
 
     // sets
@@ -1754,6 +1761,26 @@ class DomainFactory(
 
         remoteUserFactory.remoteUser.photoUrl = photoUrl
         remoteProjectFactory.updatePhotoUrl(userInfo, photoUrl)
+
+        save(0, source)
+    }
+
+    @Synchronized
+    fun updateDefaultReminder(dataId: Int, source: SaveService.Source, defaultReminder: Boolean) {
+        MyCrashlytics.log("DomainFactory.updateDefaultReminder")
+        if (remoteUserFactory.isSaved) throw SavedFactoryException()
+
+        remoteUserFactory.remoteUser.defaultReminder = defaultReminder
+
+        save(dataId, source)
+    }
+
+    @Synchronized
+    fun updateDefaultTab(source: SaveService.Source, defaultTab: Int) {
+        MyCrashlytics.log("DomainFactory.updateDefaultTab")
+        if (remoteUserFactory.isSaved) throw SavedFactoryException()
+
+        remoteUserFactory.remoteUser.defaultTab = defaultTab
 
         save(0, source)
     }

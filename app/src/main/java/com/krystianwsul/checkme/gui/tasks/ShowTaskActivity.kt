@@ -62,10 +62,11 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
             intent.getParcelableExtra(TASK_KEY_KEY)!!
         }
 
-        taskListFragment = (supportFragmentManager.findFragmentById(R.id.show_task_fragment) as? TaskListFragment) ?: TaskListFragment.newInstance().also {
+        taskListFragment = (supportFragmentManager.findFragmentById(R.id.showTaskFragment) as? TaskListFragment)
+                ?: TaskListFragment.newInstance().also {
             supportFragmentManager
                     .beginTransaction()
-                    .add(R.id.show_task_fragment, it)
+                    .add(R.id.showTaskFragment, it)
                     .commit()
         }.also { it.setFab(bottomFab) }
 
@@ -76,22 +77,28 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        taskListFragment.checkCreatedTaskKey()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        check(requestCode == REQUEST_EDIT_TASK)
+        if (requestCode == REQUEST_EDIT_TASK) {
+            if (resultCode == Activity.RESULT_OK) {
+                check(data!!.hasExtra(TASK_KEY_KEY))
 
-        if (resultCode == Activity.RESULT_OK) {
-            check(data!!.hasExtra(TASK_KEY_KEY))
+                taskKey = data.getParcelableExtra(TASK_KEY_KEY)!!
 
-            taskKey = data.getParcelableExtra(TASK_KEY_KEY)!!
+                setResult(Activity.RESULT_OK, Intent().apply {
+                    putExtra(TASK_KEY_KEY, taskKey as Parcelable)
+                })
+            }
 
-            setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra(TASK_KEY_KEY, taskKey as Parcelable)
-            })
+            showTaskViewModel.start(taskKey)
         }
-
-        showTaskViewModel.start(taskKey)
     }
 
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
@@ -182,4 +189,6 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
             }
         }
     }
+
+    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
 }

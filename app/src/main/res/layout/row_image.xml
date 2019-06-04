@@ -26,28 +26,19 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/imageLayout"
-        style="@style/OldTextInput"
+        style="@style/MySpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/add_an_image"
-        android:textColorHint="@color/textDisabled"
         app:errorEnabled="true"
         app:hintAnimationEnabled="false">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/imageLayoutText"
-            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:cursorVisible="false"
-            android:clickable="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:importantForAutofill="no"
-            android:singleLine="true"
-            android:textSize="@dimen/textPrimary"
-            tools:ignore="Deprecated,LabelFor,TextFields"
-            tools:targetApi="o" />
+            style="@style/MySpinnerText"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

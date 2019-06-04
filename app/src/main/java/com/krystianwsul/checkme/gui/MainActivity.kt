@@ -383,6 +383,14 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             start()
 
             createDisposable += data.subscribe { taskListFragment.setAllTasks(TaskListFragment.Data(it.dataId, it.immediate, it.taskData)) }
+
+            if (savedInstanceState == null) {
+                data.firstOrError()
+                        .subscribe { mainData ->
+                            visibleTab.accept(Tab.values()[mainData.defaultTab])
+                        }
+                        .addTo(createDisposable)
+            }
         }
 
         dayViewModel = getViewModel()
@@ -428,6 +436,13 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 layoutParams = layoutParams.apply { width = mainActivityToolbar.width - dpToPx(64).toInt() }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (visibleTab.value == Tab.TASKS)
+            taskListFragment.checkCreatedTaskKey()
     }
 
     override fun initBottomBar() {
@@ -669,6 +684,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         updateBottomMenu()
     }
+
+    override fun setToolbarExpanded(expanded: Boolean) = mainActivityAppBarLayout.setExpanded(expanded)
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) {
         onCreateActionMode(actionMode)

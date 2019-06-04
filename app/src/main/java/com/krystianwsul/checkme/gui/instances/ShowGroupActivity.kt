@@ -58,6 +58,12 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
         initBottomBar()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        groupListFragment.checkCreatedTaskKey()
+    }
+
     private fun onLoadFinished(data: ShowGroupViewModel.Data) {
         toolbar.title = data.displayText
 
@@ -101,4 +107,6 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
     private fun updateBottomMenu() {
         bottomAppBar.menu.findItem(R.id.action_select_all)?.isVisible = selectAllVisible
     }
+
+    override fun setToolbarExpanded(expanded: Boolean) = appBarLayout.setExpanded(expanded)
 }

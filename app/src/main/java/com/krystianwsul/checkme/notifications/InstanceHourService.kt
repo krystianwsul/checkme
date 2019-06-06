@@ -4,6 +4,7 @@ import android.app.IntentService
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -24,6 +25,8 @@ class InstanceHourService : IntentService("InstanceHourService") {
     }
 
     override fun onHandleIntent(intent: Intent) {
+        Preferences.logLineDate("InstanceHourService.onHandleIntent")
+
         check(intent.hasExtra(INSTANCE_KEY))
         check(intent.hasExtra(NOTIFICATION_ID_KEY))
 

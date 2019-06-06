@@ -913,6 +913,7 @@ class DomainFactory(
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
+        Preferences.logLineHour("DomainFactory: adding hour to ${instance.name}")
 
         val now = ExactTimeStamp.now
         val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
@@ -987,6 +988,7 @@ class DomainFactory(
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
+        Preferences.logLineHour("DomainFactory: setting ${instance.name} done")
 
         val now = ExactTimeStamp.now
 

@@ -57,8 +57,6 @@ class DomainFactory(
 
             val savedFalse = domainFactory?.remoteProjectFactory?.eitherSaved == false
 
-            Preferences.logLineHour("DomainFactory.setFirebaseTickListener savedFalse: $savedFalse")
-
             val tickData = TickHolder.getTickData()
 
             if (savedFalse) {

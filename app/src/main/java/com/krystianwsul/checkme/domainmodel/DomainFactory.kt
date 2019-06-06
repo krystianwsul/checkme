@@ -680,7 +680,41 @@ class DomainFactory(
                 if (schedules.isNotEmpty()) {
                     val pair = getScheduleDatas(schedules, now)
                     customTimes.putAll(pair.first)
-                    scheduleDatas = pair.second.keys.toList()
+
+                    fun TimePair.getTime() = customTimeKey?.let { getCustomTime(it) }
+                            ?: NormalTime(hourMinute!!)
+
+                    fun CreateTaskViewModel.ScheduleData.Single.getHourMinute() = timePair.getTime().getHourMinute(date.dayOfWeek)
+
+                    fun TimePair.getTimeInt(daysOfWeek: Collection<DayOfWeek>): Int {
+                        val time = getTime()
+
+                        return daysOfWeek.map { day ->
+                            time.getHourMinute(day).let { it.hour * 60 + it.minute }
+                        }.sum()
+                    }
+
+                    val singleSchedules = pair.second
+                            .keys
+                            .filterIsInstance<CreateTaskViewModel.ScheduleData.Single>()
+                            .sortedWith(compareBy({ it.date }, { it.getHourMinute() }))
+
+                    val weeklySchedules = pair.second
+                            .keys
+                            .filterIsInstance<CreateTaskViewModel.ScheduleData.Weekly>()
+                            .sortedBy { it.timePair.getTimeInt(it.daysOfWeek) }
+
+                    val monthlyDaySchedules = pair.second
+                            .keys
+                            .filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyDay>()
+                            .sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.timePair.getTimeInt(DayOfWeek.values().toList()) }))
+
+                    val monthlyWeekSchedules = pair.second
+                            .keys
+                            .filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyWeek>()
+                            .sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.dayOfWeek }, { it.timePair.getTimeInt(DayOfWeek.values().toList()) }))
+
+                    scheduleDatas = singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules
                 }
             } else {
                 val parentTask = task.getParentTask(now)!!

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
@@ -23,12 +24,30 @@ interface ListItemAddedScroller {
 
         val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
 
+        if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == -1)
+            return
+
         if (target <= linearLayoutManager.findFirstCompletelyVisibleItemPosition()) {
             listItemAddedListener.setToolbarExpanded(true)
             recyclerView.smoothScrollToPosition(target)
         } else {
-            listItemAddedListener.setToolbarExpanded(false)
-            recyclerView.smoothScrollToPosition(target + 1)
+            fun scrollToBottom() {
+                listItemAddedListener.setToolbarExpanded(false)
+                recyclerView.smoothScrollToPosition(target + 1)
+            }
+
+            if (target > linearLayoutManager.findLastCompletelyVisibleItemPosition()) {
+                scrollToBottom()
+            } else {
+                val anchorTop = listItemAddedListener.anchor.getAbsoluteTop()
+
+                val targetView = linearLayoutManager.findViewByPosition(target)!!
+
+                val targetBottom = targetView.getAbsoluteTop() + targetView.height
+
+                if (targetBottom > anchorTop)
+                    scrollToBottom()
+            }
         }
 
         scrollToTaskKey = null
@@ -41,5 +60,18 @@ interface ListItemAddedScroller {
         CreateTaskActivity.createdTaskKey = null
 
         tryScroll()
+    }
+
+    private fun View.getAbsoluteTop(): Int {
+        /*
+        val rect = Rect()
+        getGlobalVisibleRect(rect)
+
+        return rect.top
+        */
+
+        val arr = IntArray(2)
+        getLocationOnScreen(arr)
+        return arr[1]
     }
 }

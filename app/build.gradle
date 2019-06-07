@@ -20,11 +20,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 'android-Q'
+    compileSdkVersion 29
     defaultConfig {
         applicationId 'com.krystianwsul.checkme'
         minSdkVersion 22
-        targetSdkVersion 'Q'
+        targetSdkVersion 29
 
         versionCode 179
         versionName "0.18.4"

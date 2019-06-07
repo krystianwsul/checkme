@@ -684,12 +684,12 @@ class DomainFactory(
 
                     fun CreateTaskViewModel.ScheduleData.Single.getHourMinute() = timePair.getTime().getHourMinute(date.dayOfWeek)
 
-                    fun TimePair.getTimeInt(daysOfWeek: Collection<DayOfWeek>): Int {
+                    fun TimePair.getTimeFloat(daysOfWeek: Collection<DayOfWeek>): Float {
                         val time = getTime()
 
                         return daysOfWeek.map { day ->
                             time.getHourMinute(day).let { it.hour * 60 + it.minute }
-                        }.sum()
+                        }.sum().toFloat() / daysOfWeek.count()
                     }
 
                     val singleSchedules = pair.second
@@ -700,17 +700,17 @@ class DomainFactory(
                     val weeklySchedules = pair.second
                             .keys
                             .filterIsInstance<CreateTaskViewModel.ScheduleData.Weekly>()
-                            .sortedBy { it.timePair.getTimeInt(it.daysOfWeek) }
+                            .sortedBy { it.timePair.getTimeFloat(it.daysOfWeek) }
 
                     val monthlyDaySchedules = pair.second
                             .keys
                             .filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyDay>()
-                            .sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.timePair.getTimeInt(DayOfWeek.values().toList()) }))
+                            .sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.timePair.getTimeFloat(DayOfWeek.values().toList()) }))
 
                     val monthlyWeekSchedules = pair.second
                             .keys
                             .filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyWeek>()
-                            .sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.dayOfWeek }, { it.timePair.getTimeInt(DayOfWeek.values().toList()) }))
+                            .sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.dayOfWeek }, { it.timePair.getTimeFloat(DayOfWeek.values().toList()) }))
 
                     scheduleDatas = singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules
                 }

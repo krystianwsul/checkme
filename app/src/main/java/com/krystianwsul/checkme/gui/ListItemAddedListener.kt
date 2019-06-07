@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.gui
 
-interface ListItemAddedListener {
+interface ListItemAddedListener : SnackbarListener {
 
     fun setToolbarExpanded(expanded: Boolean)
 }

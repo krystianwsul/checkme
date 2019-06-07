@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 object TickHolder {
@@ -21,14 +20,9 @@ object TickHolder {
     }
 
     private fun tryClearTickData() {
-        Preferences.logLineHour("TickHolder.tryClearTickData: tickData $tickData")
         tickData?.let {
-            if (it.expires < ExactTimeStamp.now || !it.wakelock.isHeld) {
-                Preferences.logLineHour("TickHolder.tryClearTickData: tickData expired, clearing")
+            if (it.expires < ExactTimeStamp.now || !it.wakelock.isHeld)
                 tickData = null
-            } else {
-                Preferences.logLineHour("TickHolder.tryClearTickData: tickData not expired")
-            }
         }
     }
 

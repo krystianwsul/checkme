@@ -365,22 +365,27 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private val ChildTaskData.allTaskKeys get() = getAllChildTaskDatas(this).map { it.taskKey }
 
-    override fun findItem() = treeViewAdapter.displayedNodes
-            .firstOrNull {
-                val modelNode = it.modelNode
+    override fun findItem(): Int? {
+        if (!this::treeViewAdapter.isInitialized)
+            return null
 
-                if (modelNode is TaskAdapter.TaskWrapper) {
-                    if (it.isExpanded) {
-                        modelNode.childTaskData.taskKey == scrollToTaskKey
+        return treeViewAdapter.displayedNodes
+                .firstOrNull {
+                    val modelNode = it.modelNode
+
+                    if (modelNode is TaskAdapter.TaskWrapper) {
+                        if (it.isExpanded) {
+                            modelNode.childTaskData.taskKey == scrollToTaskKey
+                        } else {
+                            modelNode.childTaskData
+                                    .allTaskKeys
+                                    .contains(scrollToTaskKey)
+                        }
                     } else {
-                        modelNode.childTaskData
-                                .allTaskKeys
-                                .contains(scrollToTaskKey)
+                        false
                     }
-                } else {
-                    false
-                }
-            }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+                }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+    }
 
     private fun updateSelectAll() {
         val taskAdapter = treeViewAdapter.treeModelAdapter as TaskAdapter

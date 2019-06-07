@@ -62,8 +62,6 @@ class DomainFactory(
 
             val savedFalse = domainFactory?.remoteProjectFactory?.eitherSaved == false
 
-            Preferences.logLineHour("DomainFactory.setFirebaseTickListener savedFalse: $savedFalse")
-
             val tickData = TickHolder.getTickData()
 
             if (savedFalse) {
@@ -729,7 +727,41 @@ class DomainFactory(
                 if (schedules.isNotEmpty()) {
                     val pair = getScheduleDatas(schedules, now)
                     customTimes.putAll(pair.first)
-                    scheduleDatas = pair.second.keys.toList()
+
+                    fun TimePair.getTime() = customTimeKey?.let { getCustomTime(it) }
+                            ?: NormalTime(hourMinute!!)
+
+                    fun CreateTaskViewModel.ScheduleData.Single.getHourMinute() = timePair.getTime().getHourMinute(date.dayOfWeek)
+
+                    fun TimePair.getTimeFloat(daysOfWeek: Collection<DayOfWeek>): Float {
+                        val time = getTime()
+
+                        return daysOfWeek.map { day ->
+                            time.getHourMinute(day).let { it.hour * 60 + it.minute }
+                        }.sum().toFloat() / daysOfWeek.count()
+                    }
+
+                    val singleSchedules = pair.second
+                            .keys
+                            .filterIsInstance<CreateTaskViewModel.ScheduleData.Single>()
+                            .sortedWith(compareBy({ it.date }, { it.getHourMinute() }))
+
+                    val weeklySchedules = pair.second
+                            .keys
+                            .filterIsInstance<CreateTaskViewModel.ScheduleData.Weekly>()
+                            .sortedBy { it.timePair.getTimeFloat(it.daysOfWeek) }
+
+                    val monthlyDaySchedules = pair.second
+                            .keys
+                            .filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyDay>()
+                            .sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.timePair.getTimeFloat(DayOfWeek.values().toList()) }))
+
+                    val monthlyWeekSchedules = pair.second
+                            .keys
+                            .filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyWeek>()
+                            .sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.dayOfWeek }, { it.timePair.getTimeFloat(DayOfWeek.values().toList()) }))
+
+                    scheduleDatas = singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules
                 }
             } else {
                 val parentTask = task.getParentTask(now)!!
@@ -930,6 +962,7 @@ class DomainFactory(
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
+        Preferences.logLineHour("DomainFactory: adding hour to ${instance.name}")
 
         val now = ExactTimeStamp.now
         val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
@@ -1004,6 +1037,7 @@ class DomainFactory(
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
+        Preferences.logLineHour("DomainFactory: setting ${instance.name} done")
 
         val now = ExactTimeStamp.now
 

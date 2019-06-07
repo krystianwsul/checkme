@@ -729,35 +729,40 @@ class GroupListFragment @JvmOverloads constructor(
 
     private val InstanceData.allTaskKeys get() = getAllInstanceDatas(this).map { it.taskKey }
 
-    override fun findItem() = treeViewAdapter.displayedNodes
-            .firstOrNull {
-                when (val modelNode = it.modelNode) {
-                    is NotDoneGroupNode -> {
-                        if (it.isExpanded) {
-                            if (modelNode.singleInstance()) {
-                                modelNode.singleInstanceData.taskKey == scrollToTaskKey
+    override fun findItem(): Int? {
+        if (!this::treeViewAdapter.isInitialized)
+            return null
+
+        return treeViewAdapter.displayedNodes
+                .firstOrNull {
+                    when (val modelNode = it.modelNode) {
+                        is NotDoneGroupNode -> {
+                            if (it.isExpanded) {
+                                if (modelNode.singleInstance()) {
+                                    modelNode.singleInstanceData.taskKey == scrollToTaskKey
+                                } else {
+                                    false
+                                }
                             } else {
-                                false
+                                modelNode.instanceDatas
+                                        .map { it.allTaskKeys }
+                                        .flatten()
+                                        .contains(scrollToTaskKey)
                             }
-                        } else {
-                            modelNode.instanceDatas
-                                    .map { it.allTaskKeys }
-                                    .flatten()
-                                    .contains(scrollToTaskKey)
                         }
-                    }
-                    is NotDoneGroupNode.NotDoneInstanceNode -> {
-                        if (it.isExpanded) {
-                            modelNode.instanceData.taskKey == scrollToTaskKey
-                        } else {
-                            modelNode.instanceData
-                                    .allTaskKeys
-                                    .contains(scrollToTaskKey)
+                        is NotDoneGroupNode.NotDoneInstanceNode -> {
+                            if (it.isExpanded) {
+                                modelNode.instanceData.taskKey == scrollToTaskKey
+                            } else {
+                                modelNode.instanceData
+                                        .allTaskKeys
+                                        .contains(scrollToTaskKey)
+                            }
                         }
+                        else -> false
                     }
-                    else -> false
-                }
-            }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+                }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+    }
 
     class GroupAdapter(val groupListFragment: GroupListFragment) : TreeModelAdapter, NodeCollectionParent {
 

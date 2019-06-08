@@ -79,8 +79,9 @@ class CreateTaskActivity : AbstractActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
-        fun getCreateIntent(hint: Hint? = null) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+        fun getCreateIntent(hint: Hint? = null, parentScheduleState: ParentScheduleState? = null) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             hint?.let { putExtra(KEY_HINT, hint) }
+            parentScheduleState?.let { putExtra(KEY_INITIAL_STATE, parentScheduleState) }
         }
 
         fun getJoinIntent(
@@ -145,8 +146,7 @@ class CreateTaskActivity : AbstractActivity() {
             scheduleHolder.scheduleText.text = null
         }
 
-        // todo pass own hint or own parent (project or task)
-        override fun onNewParent() = startActivityForResult(getCreateIntent(), REQUEST_CREATE_PARENT)
+        override fun onNewParent() = startActivityForResult(getCreateIntent(hint, ParentScheduleState(stateData.state.parentKey, stateData.state.schedules.map { ScheduleEntry(it.scheduleData) }.toMutableList())), REQUEST_CREATE_PARENT)
     }
 
     private fun setupParent(view: View) {
@@ -509,14 +509,21 @@ class CreateTaskActivity : AbstractActivity() {
             removeInstanceKeys = getParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS) ?: listOf()
         }
 
-        savedInstanceState?.run {
-            @Suppress("UNCHECKED_CAST")
-            if (containsKey(KEY_INITIAL_STATE)) {
-                initialState = getParcelable(KEY_INITIAL_STATE)!!
-                tmpState = getParcelable(KEY_STATE)!!
+        if (savedInstanceState != null) {
+            savedInstanceState.run {
+                @Suppress("UNCHECKED_CAST")
+                if (containsKey(KEY_INITIAL_STATE)) {
+                    initialState = getParcelable(KEY_INITIAL_STATE)!!
+                    tmpState = getParcelable(KEY_STATE)!!
 
-                if (containsKey(HOUR_MINUTE_PICKER_POSITION_KEY))
-                    hourMinutePickerPosition = getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -1).also { check(it > 0) }
+                    if (containsKey(HOUR_MINUTE_PICKER_POSITION_KEY))
+                        hourMinutePickerPosition = getInt(HOUR_MINUTE_PICKER_POSITION_KEY, -1).also { check(it > 0) }
+                }
+            }
+        } else {
+            if (intent.hasExtra(KEY_INITIAL_STATE)) {
+                tmpState = intent.getParcelableExtra(KEY_INITIAL_STATE)!!
+                initialState = ParentScheduleState(tmpState!!.parentKey, ArrayList(tmpState!!.schedules))
             }
         }
 
@@ -1119,7 +1126,7 @@ class CreateTaskActivity : AbstractActivity() {
     }
 
     @Parcelize
-    private class ParentScheduleState(
+    class ParentScheduleState(
             var parentKey: CreateTaskViewModel.ParentKey?,
             val schedules: MutableList<ScheduleEntry> = mutableListOf()) : Parcelable {
 

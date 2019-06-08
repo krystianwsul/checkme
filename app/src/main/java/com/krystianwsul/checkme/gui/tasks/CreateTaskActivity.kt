@@ -488,18 +488,21 @@ class CreateTaskActivity : AbstractActivity() {
                 if (hasExtra(TASK_KEYS_KEY))
                     taskKeys = getParcelableArrayListExtra<TaskKey>(TASK_KEYS_KEY)!!.apply { check(size > 1) }
 
-                if (hasExtra(KEY_HINT)) {
-                    check(!hasExtra(KEY_SHORTCUT_ID))
+                hint = when {
+                    hasExtra(KEY_HINT) -> {
+                        check(!hasExtra(KEY_SHORTCUT_ID))
 
-                    hint = getSerializableExtra(KEY_HINT) as Hint
-                } else if (hasExtra(KEY_SHORTCUT_ID)) {
-                    hint = Hint.Task(TaskKey.fromShortcut(getStringExtra(KEY_SHORTCUT_ID)!!))
-                } else if (hasExtra(KEY_PARENT_PROJECT)) {
-                    Log.e("asdf", "shortcut e")
-                    check(hasExtra(KEY_PARENT_TASK))
-                    check(!hasExtra(KEY_SHORTCUT_ID))
+                        getSerializableExtra(KEY_HINT) as Hint
+                    }
+                    hasExtra(KEY_SHORTCUT_ID) -> Hint.Task(TaskKey.fromShortcut(getStringExtra(KEY_SHORTCUT_ID)!!))
+                    hasExtra(KEY_PARENT_PROJECT) -> {
+                        Log.e("asdf", "shortcut e")
+                        check(hasExtra(KEY_PARENT_TASK))
+                        check(!hasExtra(KEY_SHORTCUT_ID))
 
-                    hint = Hint.Task(TaskKey(getStringExtra(KEY_PARENT_PROJECT)!!, getStringExtra(KEY_PARENT_TASK)!!))
+                        Hint.Task(TaskKey(getStringExtra(KEY_PARENT_PROJECT)!!, getStringExtra(KEY_PARENT_TASK)!!))
+                    }
+                    else -> null
                 }
             }
 

@@ -94,6 +94,6 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
 
 fun <T> Task<T>.toSingle() = Single.create<NullableWrapper<T>> { subscriber ->
     addOnCompleteListener {
-        subscriber.onSuccess(NullableWrapper(it.result))
+        subscriber.onSuccess(NullableWrapper(it.takeIf { it.isSuccessful }?.result))
     }
 }!!

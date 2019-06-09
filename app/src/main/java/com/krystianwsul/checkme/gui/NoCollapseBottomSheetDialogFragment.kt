@@ -8,6 +8,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.setTransparentNavigation
 import io.reactivex.disposables.CompositeDisposable
 
 abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment() {
@@ -63,17 +64,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             findViewById<View>(com.google.android.material.R.id.container)!!.fitsSystemWindows = false
             findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!.setPadding(0, 0, 0, 0)
 
-            window!!.apply {
-                var flags = decorView.systemUiVisibility or
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    flags = flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-
-                decorView.systemUiVisibility = flags
-            }
+            window!!.setTransparentNavigation()
         }
-
     }
 }

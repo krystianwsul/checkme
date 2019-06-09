@@ -23,8 +23,8 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
-import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
+import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.Date
@@ -50,7 +50,7 @@ import java.io.Serializable
 import kotlin.properties.Delegates.observable
 
 
-class CreateTaskActivity : AbstractActivity() {
+class CreateTaskActivity : NavBarActivity() {
 
     companion object {
 

@@ -4,11 +4,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.util.Base64
-import android.view.Menu
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.view.*
 import android.widget.AutoCompleteTextView
 import android.widget.ImageView
 import androidx.annotation.IdRes
@@ -247,4 +245,15 @@ fun <T> deserialize(serialized: String?): T? {
 
         null
     }
+}
+
+fun Window.setTransparentNavigation() {
+    var flags = decorView.systemUiVisibility or
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        flags = flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+
+    decorView.systemUiVisibility = flags
 }

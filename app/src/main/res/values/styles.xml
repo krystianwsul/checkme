@@ -30,6 +30,7 @@
 
     <style name="AppTheme.NoSplash">
         <item name="android:windowBackground">@color/materialBackground</item>
+        <item name="android:navigationBarColor">@color/primaryColor12</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

@@ -25,7 +25,7 @@ import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.settings_activity.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class SettingsActivity : AbstractActivity() {
+class SettingsActivity : NavBarActivity() {
 
     companion object {
 

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.gui
 
 import android.os.Bundle
+import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -32,7 +33,22 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
         drawerViewModel.start()
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?) = BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
+    override fun onCreateDialog(savedInstanceState: Bundle?) = object : BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme_Navbar) {
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+
+            findViewById<View>(com.google.android.material.R.id.coordinator)!!.fitsSystemWindows = false
+            findViewById<View>(com.google.android.material.R.id.container)!!.fitsSystemWindows = false
+
+            window!!.apply {
+                decorView.systemUiVisibility =
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            }
+        }
+
+    }.apply {
         setCancelable(true)
         setContentView(R.layout.main_navigation)
     }

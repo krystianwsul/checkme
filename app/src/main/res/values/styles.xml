@@ -51,6 +51,10 @@
         <item name="android:navigationBarColor">#E0E0E0</item>
     </style>
 
+    <style name="BottomSheetDialogTheme.Navbar" parent="BaseBottomSheetDialog">
+        <item name="android:navigationBarColor">@color/primaryColor12</item>
+    </style>
+
     <style name="OldTextInput" parent="@style/Widget.Design.TextInputLayout" />
 
     <style name="NewTextInput" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" />

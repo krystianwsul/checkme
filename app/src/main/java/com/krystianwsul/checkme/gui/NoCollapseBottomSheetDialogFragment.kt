@@ -61,6 +61,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             super.onCreate(savedInstanceState)
 
             findViewById<View>(com.google.android.material.R.id.container)!!.fitsSystemWindows = false
+            findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!.setPadding(0, 0, 0, 0)
 
             window!!.apply {
                 var flags = decorView.systemUiVisibility or

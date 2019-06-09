@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -38,13 +39,17 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
 
-            findViewById<View>(com.google.android.material.R.id.coordinator)!!.fitsSystemWindows = false
             findViewById<View>(com.google.android.material.R.id.container)!!.fitsSystemWindows = false
 
             window!!.apply {
-                decorView.systemUiVisibility =
+                var flags = decorView.systemUiVisibility or
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    flags = flags or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+
+                decorView.systemUiVisibility = flags
             }
         }
 

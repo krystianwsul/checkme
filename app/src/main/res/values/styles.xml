@@ -52,6 +52,7 @@
     </style>
 
     <style name="BottomSheetDialogTheme.Navbar" parent="BaseBottomSheetDialog">
+        <item name="android:statusBarColor">#152026</item>
         <item name="android:navigationBarColor">@color/primaryColor12</item>
     </style>
 

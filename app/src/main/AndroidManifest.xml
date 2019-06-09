@@ -55,10 +55,12 @@
         <activity
             android:name=".gui.instances.ShowTaskInstancesActivity"
             android:theme="@style/AppTheme.Toolbar" />
-        <activity android:name=".gui.customtimes.ShowCustomTimeActivity" />
+        <activity
+            android:name=".gui.customtimes.ShowCustomTimeActivity"
+            android:theme="@style/AppTheme.NavBar" />
         <activity
             android:name=".gui.tasks.CreateTaskActivity"
-            android:theme="@style/AppTheme.NoSplash"
+            android:theme="@style/AppTheme.NavBar.NoSplash"
             android:windowSoftInputMode="stateHidden"> <!-- keyboard hack -->
 
             <intent-filter>

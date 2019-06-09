@@ -14,8 +14,8 @@ import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.gui.AbstractActivity
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
+import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
@@ -29,7 +29,7 @@ import kotlinx.android.synthetic.main.activity_show_custom_time.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
 import java.util.*
 
-class ShowCustomTimeActivity : AbstractActivity() {
+class ShowCustomTimeActivity : NavBarActivity() {
 
     companion object {
 

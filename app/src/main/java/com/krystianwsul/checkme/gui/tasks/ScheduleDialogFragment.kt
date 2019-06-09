@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.DatePickerDialogFragment
 import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
@@ -165,7 +164,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             scheduleDialogTime.fixClicks()
         }
 
-        return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
+        return TransparentNavigationDialog().apply {
             setCancelable(true)
             setContentView(customView)
         }

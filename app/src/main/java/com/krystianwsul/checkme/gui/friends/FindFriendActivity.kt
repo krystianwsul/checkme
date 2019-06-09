@@ -20,14 +20,14 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.UserData
-import com.krystianwsul.checkme.gui.AbstractActivity
+import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.loadPhoto
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_find_friend.*
 
-class FindFriendActivity : AbstractActivity() {
+class FindFriendActivity : NavBarActivity() {
 
     companion object {
 

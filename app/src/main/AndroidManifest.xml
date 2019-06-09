@@ -80,7 +80,8 @@
             android:windowSoftInputMode="adjustNothing" />
         <activity
             android:name=".gui.friends.FindFriendActivity"
-            android:windowSoftInputMode="stateVisible" />
+            android:windowSoftInputMode="stateVisible"
+            android:theme="@style/AppTheme.NavBar" />
 
         <receiver
             android:name=".notifications.BootReceiver"

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -16,7 +17,7 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_tutorial.*
 
-class TutorialActivity : AbstractActivity() {
+class TutorialActivity : NavBarActivity() {
 
     companion object {
 
@@ -46,6 +47,8 @@ class TutorialActivity : AbstractActivity() {
         }
 
         setContentView(R.layout.activity_tutorial)
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.primaryColor12Solid)
 
         tutorialPager.adapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
 

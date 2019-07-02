@@ -163,6 +163,7 @@ class DomainFactory(
     fun save(dataId: Int, source: SaveService.Source) = save(listOf(dataId), source)
 
     fun save(dataIds: List<Int>, source: SaveService.Source) {
+        Preferences.logLineHour("DomainFactory.save: skipping? $skipSave")
         if (skipSave)
             return
 
@@ -2469,11 +2470,6 @@ class DomainFactory(
 
         Preferences.logLineHour("notification instances: " + notificationInstances.values.joinToString(", ") { it.name })
 
-        val shownInstances = getExistingInstances().filter { it.notificationShown }
-        Preferences.logLineHour("shown instances: " + shownInstances.joinToString(", ") { it.name })
-
-        val shownInstanceKeys = shownInstances.map { it.instanceKey }.toMutableSet()
-
         val instanceShownPairs = localFactory.instanceShownRecords
                 .filter { it.notificationShown }
                 .map { Pair(it, remoteProjectFactory.getRemoteProjectIfPresent(it.projectId)?.getRemoteTaskIfPresent(it.taskId)) }
@@ -2504,7 +2500,7 @@ class DomainFactory(
             instanceShownRecord.notificationShown = false
         }
 
-        instanceShownPairs.filter { it.second != null }.forEach { (instanceShownRecord, task) ->
+        val shownInstanceKeys = instanceShownPairs.filter { it.second != null }.map { (instanceShownRecord, task) ->
             val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
             val remoteCustomTimeId = instanceShownRecord.scheduleCustomTimeId
 
@@ -2527,12 +2523,12 @@ class DomainFactory(
             }
 
             val taskKey = TaskKey(instanceShownRecord.projectId, instanceShownRecord.taskId)
-            val instanceKey = InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
-
-            shownInstanceKeys.add(instanceKey)
+            InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
         }
 
         val showInstanceKeys = notificationInstances.keys.filter { !shownInstanceKeys.contains(it) }
+
+        Preferences.logLineHour("shown instances: " + shownInstanceKeys.joinToString(", ") { getInstance(it).name })
 
         val hideInstanceKeys = shownInstanceKeys.filter { !notificationInstances.containsKey(it) }.toSet()
 

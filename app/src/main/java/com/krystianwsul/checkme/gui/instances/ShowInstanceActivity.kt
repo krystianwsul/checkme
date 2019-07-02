@@ -169,7 +169,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        val instanceKey = intent.getParcelableExtra<InstanceKey>(INSTANCE_KEY)
+        val instanceKey = intent.getParcelableExtra<InstanceKey>(INSTANCE_KEY)!!
         if (instanceKey == this.instanceKey) {
             setIntent(intent)
             cancelNotification()

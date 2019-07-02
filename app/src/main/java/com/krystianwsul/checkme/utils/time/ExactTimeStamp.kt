@@ -10,10 +10,7 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
         val now get() = ExactTimeStamp(Calendar.getInstance())
     }
 
-    val calendar
-        get() = Calendar.getInstance().apply {
-            timeInMillis = long
-        }!!
+    val calendar: Calendar get() = Calendar.getInstance().apply { timeInMillis = long }
 
     val date get() = Date(calendar)
 

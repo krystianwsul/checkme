@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.firebase.json.InstanceJson
@@ -49,23 +48,23 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             val hourMinuteMatcher = hourMinuteKeyPattern.matcher(key)
 
             if (hourMinuteMatcher.matches()) {
-                val year = Integer.valueOf(hourMinuteMatcher.group(1))
-                val month = Integer.valueOf(hourMinuteMatcher.group(2))
-                val day = Integer.valueOf(hourMinuteMatcher.group(3))
-                val hour = Integer.valueOf(hourMinuteMatcher.group(4))
-                val minute = Integer.valueOf(hourMinuteMatcher.group(5))
+                val year = hourMinuteMatcher.group(1)!!.toInt()
+                val month = hourMinuteMatcher.group(2)!!.toInt()
+                val day = hourMinuteMatcher.group(3)!!.toInt()
+                val hour = hourMinuteMatcher.group(4)!!.toInt()
+                val minute = hourMinuteMatcher.group(5)!!.toInt()
 
                 return Pair(ScheduleKey(Date(year, month, day), TimePair(HourMinute(hour, minute))), null)
             } else {
                 val customTimeMatcher = customTimeKeyPattern.matcher(key)
                 check(customTimeMatcher.matches())
 
-                val year = Integer.valueOf(customTimeMatcher.group(1))
-                val month = Integer.valueOf(customTimeMatcher.group(2))
-                val day = Integer.valueOf(customTimeMatcher.group(3))
+                val year = customTimeMatcher.group(1)!!.toInt()
+                val month = customTimeMatcher.group(2)!!.toInt()
+                val day = customTimeMatcher.group(3)!!.toInt()
 
-                val customTimeId = customTimeMatcher.group(4)
-                check(!TextUtils.isEmpty(customTimeId))
+                val customTimeId = customTimeMatcher.group(4)!!
+                check(customTimeId.isNotEmpty())
 
                 val customTimeRecord = remoteProjectRecord.getCustomTimeRecord(customTimeId)
 
@@ -157,13 +156,13 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         initialInstanceJsonTime = createObject.instanceTime?.let {
             val matcher = hourMinutePattern.matcher(it)
             if (matcher.matches())
-                JsonTime.Normal<T>(HourMinute.fromJson(it))
+                JsonTime.Normal(HourMinute.fromJson(it))
             else
                 JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it))
         }
                 ?: createObject.instanceCustomTimeId?.let { JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it)) }
                         ?: createObject.instanceHour?.let { hour ->
-                    createObject.instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) }
+                    createObject.instanceMinute?.let { JsonTime.Normal(HourMinute(hour, it)) }
                 }
     }
 

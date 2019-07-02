@@ -2,7 +2,7 @@
 // https://github.com/GoogleCloudPlatform/gradle-appengine-plugin
 
 buildscript {
-    ext.kotlin_version = '1.3.31'
+    ext.kotlin_version = '1.3.40'
     repositories {
         jcenter()
     }

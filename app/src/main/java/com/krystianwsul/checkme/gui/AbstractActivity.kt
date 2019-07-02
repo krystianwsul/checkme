@@ -75,7 +75,7 @@ abstract class AbstractActivity : AppCompatActivity() {
         super.onResume()
 
         snackbarData?.let {
-            (this as SnackbarListener).apply {
+            (this as? SnackbarListener)?.apply {
                 anchor.addOneShotGlobalLayoutListener {
                     it.show(this)
                 }

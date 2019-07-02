@@ -98,6 +98,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                 .hourMinute
                 ?.hour
     }
+
     override val scheduleMinute by lazy {
         scheduleKey.scheduleTimePair
                 .hourMinute
@@ -156,13 +157,13 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         initialInstanceJsonTime = createObject.instanceTime?.let {
             val matcher = hourMinutePattern.matcher(it)
             if (matcher.matches())
-                JsonTime.Normal(HourMinute.fromJson(it))
+                JsonTime.Normal<T>(HourMinute.fromJson(it))
             else
                 JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it))
         }
                 ?: createObject.instanceCustomTimeId?.let { JsonTime.Custom(remoteTaskRecord.getRemoteCustomTimeId(it)) }
                         ?: createObject.instanceHour?.let { hour ->
-                    createObject.instanceMinute?.let { JsonTime.Normal(HourMinute(hour, it)) }
+                    createObject.instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) }
                 }
     }
 

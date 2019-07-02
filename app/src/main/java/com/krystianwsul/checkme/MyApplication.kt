@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
 import com.google.firebase.auth.FirebaseAuth

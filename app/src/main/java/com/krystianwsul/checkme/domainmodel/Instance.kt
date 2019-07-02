@@ -179,18 +179,29 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     }
 
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        return !instanceData.hidden && (getParentInstance(now)?.isVisible(now, hack24)
-                ?: (done?.let {
-            val cutoff = if (hack24) {
-                now.calendar
-                        .apply { add(Calendar.DAY_OF_YEAR, -1) }
-                        .toExactTimeStamp()
-            } else {
-                ExactTimeStamp.now
-            }
+        if (instanceData.hidden)
+            return false
 
-            (it > cutoff)
-                } ?: true))
+        val parentInstance = getParentInstance(now)
+        if (parentInstance != null) {
+            return parentInstance.isVisible(now, hack24)
+        } else {
+            val done = done
+
+            return if (done != null) {
+                val cutoff = if (hack24) {
+                    now.calendar
+                            .apply { add(Calendar.DAY_OF_YEAR, -1) }
+                            .toExactTimeStamp()
+                } else {
+                    ExactTimeStamp.now
+                }
+
+                (done > cutoff)
+            } else {
+                true
+            }
+        }
     }
 
     fun getParentInstance(now: ExactTimeStamp): Instance? {

@@ -246,4 +246,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
         (instanceData as InstanceData.Real).instanceRecord.hidden = true
     }
+
+    val hidden get() = instanceData.hidden
 }

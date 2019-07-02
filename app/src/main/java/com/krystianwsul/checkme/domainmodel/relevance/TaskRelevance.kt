@@ -45,7 +45,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
 
         task.existingInstances
                 .values
-                .filter { it.scheduleDate >= oldestVisible }
+                .filter { it.scheduleDate >= oldestVisible || it.hidden }
                 .map { instanceRelevances[it.instanceKey]!! }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }

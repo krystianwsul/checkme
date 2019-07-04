@@ -11,5 +11,6 @@ class InsetLayout @JvmOverloads constructor(context: Context, attrs: AttributeSe
         fitsSystemWindows = true
     }
 
+    @Suppress("DEPRECATION")
     override fun onApplyWindowInsets(insets: WindowInsets) = super.onApplyWindowInsets(insets.replaceSystemWindowInsets(0, insets.systemWindowInsetTop, 0, insets.systemWindowInsetBottom))!!
 }

@@ -48,7 +48,7 @@ class NodeCollection(
             if (!note.isNullOrEmpty()) {
                 check(indentation == 0)
 
-                add(NoteNode(note).initialize(nodeContainer))
+                add(NoteNode(note, true).initialize(nodeContainer))
             }
 
             imageData?.let {

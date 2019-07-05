@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui
 
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -8,6 +7,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.isLandscape
 import com.krystianwsul.checkme.utils.setTransparentNavigation
 import io.reactivex.disposables.CompositeDisposable
 
@@ -18,6 +18,8 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
     protected val startDisposable = CompositeDisposable()
 
     protected open val alwaysExpand = false
+
+    protected val landscape by lazy { resources.isLandscape }
 
     override fun onStart() {
         super.onStart()
@@ -38,7 +40,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             if (first) {
                 first = false
 
-                if (state == BottomSheetBehavior.STATE_COLLAPSED && (alwaysExpand || resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE))
+                if (state == BottomSheetBehavior.STATE_COLLAPSED && (alwaysExpand || landscape))
                     state = BottomSheetBehavior.STATE_EXPANDED
             }
         }
@@ -64,7 +66,7 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             findViewById<View>(com.google.android.material.R.id.container)!!.fitsSystemWindows = false
             findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!.setPadding(0, 0, 0, 0)
 
-            window!!.setTransparentNavigation()
+            window!!.setTransparentNavigation(landscape)
         }
     }
 }

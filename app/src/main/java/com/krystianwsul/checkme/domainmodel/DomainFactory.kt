@@ -180,7 +180,7 @@ class DomainFactory(
 
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
-                .filter { it.second?.current(now) == true }
+                .filter { it.second?.isVisible(now, false) == true }
                 .map { Pair(it.first, it.second!!) }
 
         ShortcutManager.keepShortcuts(shortcutTasks.map { it.second.taskKey })

@@ -65,7 +65,7 @@ class TaskNode(
         }
     }
 
-    override val name get() = Triple(taskData.name, colorPrimary, true)
+    override val name get() = NameData(taskData.name)
 
     override val children
         get() = if ((taskData.children.isEmpty() || expanded()) && taskData.note.isNullOrEmpty()) {

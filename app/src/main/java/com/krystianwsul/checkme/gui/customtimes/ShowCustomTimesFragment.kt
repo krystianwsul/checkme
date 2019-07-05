@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
@@ -248,7 +249,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             return treeNode
         }
 
-        override val name get() = Triple(customTimeData.name, colorPrimary, true)
+        override val name get() = NameData(customTimeData.name)
 
         override val isSelectable = true
 

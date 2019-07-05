@@ -18,7 +18,7 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
 
     data class Id(val id: Any)
 
-    override val name: Triple<String, Int, Boolean>? = null
+    override val name: NameData? = null
 
     override val isSeparatorVisibleWhenNotExpanded = true
 

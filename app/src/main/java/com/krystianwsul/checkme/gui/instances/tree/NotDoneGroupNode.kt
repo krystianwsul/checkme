@@ -127,14 +127,14 @@ class NotDoneGroupNode(
     }
 
     override val name
-        get(): Triple<String, Int, Boolean>? {
+        get(): NameData? {
             return if (singleInstance()) {
-                Triple(singleInstanceData.name, if (!singleInstanceData.taskCurrent) colorDisabled else colorPrimary, true)
+                NameData(singleInstanceData.name, if (!singleInstanceData.taskCurrent) colorDisabled else colorPrimary)
             } else {
                 if (treeNode.isExpanded) {
                     null
                 } else {
-                    Triple(instanceDatas.sorted().joinToString(", ") { it.name }, colorPrimary, true)
+                    NameData(instanceDatas.sorted().joinToString(", ") { it.name })
                 }
             }
         }
@@ -445,7 +445,7 @@ class NotDoneGroupNode(
 
         override val groupAdapter by lazy { parentNotDoneGroupNode.groupAdapter }
 
-        override val name get() = Triple(instanceData.name, if (!instanceData.taskCurrent) colorDisabled else colorPrimary, true)
+        override val name get() = NameData(instanceData.name, if (!instanceData.taskCurrent) colorDisabled else colorPrimary)
 
         override val children get() = getChildrenNew(treeNode, instanceData)
 

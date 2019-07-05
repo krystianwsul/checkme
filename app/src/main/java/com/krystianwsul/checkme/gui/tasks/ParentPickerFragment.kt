@@ -16,6 +16,7 @@ import com.jakewharton.rxbinding3.widget.textChanges
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.treeadapter.*
@@ -298,7 +299,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return treeNode
             }
 
-            override val name get() = Triple(parentTreeData.name, colorPrimary, true)
+            override val name get() = NameData(parentTreeData.name)
 
             override val details: Pair<String, Int>?
                 get() = if (parentTreeData.scheduleText.isNullOrEmpty()) {

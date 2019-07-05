@@ -54,7 +54,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
         1
     }
 
-    override val name get() = Triple(groupListFragment.activity.getString(R.string.noReminder), colorPrimary, true)
+    override val name get() = NameData(groupListFragment.activity.getString(R.string.noReminder))
 
     override val isVisibleWhenEmpty = false
 

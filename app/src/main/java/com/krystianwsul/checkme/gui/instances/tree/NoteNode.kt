@@ -30,7 +30,7 @@ class NoteNode(private val note: String) : GroupHolderNode(0) {
 
     override val textSelectable = true
 
-    override val name get() = Triple(note, colorPrimary, false)
+    override val name get() = NameData(note)
 
     override val isVisibleDuringActionMode = false
 

@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
@@ -264,7 +265,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 return treeNode
             }
 
-            override val name get() = Triple(projectData.name, colorPrimary, true)
+            override val name get() = NameData(projectData.name)
 
             override val details get() = Pair(projectData.users, colorSecondary)
 

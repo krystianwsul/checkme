@@ -73,7 +73,7 @@ class DoneInstanceNode(
 
     override val groupAdapter by lazy { parentNodeCollection.groupAdapter }
 
-    override val name get() = Triple(instanceData.name, if (!instanceData.taskCurrent) colorDisabled else colorPrimary, true)
+    override val name get() = NameData(instanceData.name, if (!instanceData.taskCurrent) colorDisabled else colorPrimary)
 
     override val details
         get() = instanceData.displayText

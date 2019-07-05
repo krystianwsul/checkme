@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
+import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.checkError
@@ -244,7 +245,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val ripple = true
 
-        override val name = Triple(userListData.name, colorPrimary, true)
+        override val name = NameData(userListData.name)
 
         override val details = Pair(userListData.email, colorSecondary)
 

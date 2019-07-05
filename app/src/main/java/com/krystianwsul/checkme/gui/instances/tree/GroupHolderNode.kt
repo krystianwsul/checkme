@@ -20,6 +20,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
 import com.stfalcon.imageviewer.loader.ImageLoader
+import kotlin.math.ceil
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
@@ -40,7 +41,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected abstract val treeNode: TreeNode
 
-    protected abstract val name: Triple<String, Int, Boolean>?
+    protected abstract val name: NameData?
 
     protected open val details: Pair<String, Int>? = null
 
@@ -83,7 +84,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     data class State(
             val id: Any,
-            val name: Triple<String, Int, Boolean>?,
+            val name: NameData?,
             val details: Pair<String, Int>?,
             val children: Pair<String, Int>?,
             val indentation: Int,
@@ -159,7 +160,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                             it.getTextBounds(text.toString(), 0, text.length, this)
                         }
 
-                        Math.ceil(width().toDouble() / (textWidth ?: 0)).toInt()
+                        ceil(width().toDouble() / (textWidth ?: 0)).toInt()
                     }
 
                     val lines = listOf(wantLines, remainingLines + 1).min()!!
@@ -169,7 +170,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     if (lines == 1) {
                         setSingleLine()
                     } else {
-                        setSingleLine(false)
+                        isSingleLine = false
                         maxLines = lines
                     }
                 }
@@ -178,8 +179,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                     name.let {
                         if (it != null) {
                             visibility = View.VISIBLE
-                            text = it.first
-                            setTextColor(it.second)
+                            text = it.text
+                            setTextColor(it.color)
 
                             allocateLines()
                         } else {

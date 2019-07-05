@@ -55,7 +55,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
             doneInstanceNode.addExpandedInstances(expandedInstances)
     }
 
-    override val name get() = Triple(groupListFragment.activity.getString(R.string.done), colorPrimary, true)
+    override val name get() = NameData(groupListFragment.activity.getString(R.string.done))
 
     override val checkBoxVisibility = View.INVISIBLE
 

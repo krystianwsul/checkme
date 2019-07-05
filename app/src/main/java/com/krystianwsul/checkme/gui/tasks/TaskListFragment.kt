@@ -13,10 +13,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.gui.*
-import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
-import com.krystianwsul.checkme.gui.instances.tree.ImageNode
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
-import com.krystianwsul.checkme.gui.instances.tree.NoteNode
+import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
@@ -618,7 +615,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     Pair(childTaskData.scheduleText, colorSecondary)
                 }
 
-            override val name get() = Triple(childTaskData.name, colorPrimary, true)
+            override val name get() = NameData(childTaskData.name)
 
             override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
                 val treeNodeCollection = taskAdapter.treeNodeCollection

@@ -182,7 +182,12 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                             text = it.text
                             setTextColor(it.color)
 
-                            allocateLines()
+                            if (it.unlimitedLines) {
+                                maxLines = Int.MAX_VALUE
+                                isSingleLine = false
+                            } else {
+                                allocateLines()
+                            }
                         } else {
                             visibility = View.INVISIBLE
 
@@ -196,6 +201,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 rowDetails.run {
                     details.let {
                         if (it != null) {
+                            check(name?.unlimitedLines != true)
+
                             visibility = View.VISIBLE
                             text = it.first
                             setTextColor(it.second)
@@ -210,6 +217,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 rowChildren.run {
                     children.let {
                         if (it != null) {
+                            check(name?.unlimitedLines != true)
+
                             visibility = View.VISIBLE
                             text = it.first
                             setTextColor(it.second)

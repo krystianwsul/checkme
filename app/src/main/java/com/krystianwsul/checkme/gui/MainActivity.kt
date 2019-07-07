@@ -816,6 +816,13 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 .millis
     }
 
+    override fun onBackPressed() {
+        if (mainActivitySearch.visibility == View.VISIBLE)
+            closeSearch(false)
+        else
+            super.onBackPressed()
+    }
+
     private inner class MyFragmentStatePagerAdapter : RecyclerView.Adapter<Holder>() {
 
         override fun getItemCount() = Integer.MAX_VALUE

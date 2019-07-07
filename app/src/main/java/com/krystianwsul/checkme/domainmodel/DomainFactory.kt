@@ -185,8 +185,6 @@ class DomainFactory(
 
         ShortcutManager.keepShortcuts(shortcutTasks.map { it.second.taskKey })
 
-        ShortcutManagerCompat.removeAllDynamicShortcuts(MyApplication.instance)
-
         val maxShortcuts = ShortcutManagerCompat.getMaxShortcutCountPerActivity(MyApplication.instance) - 4
         if (maxShortcuts <= 0)
             return
@@ -205,12 +203,21 @@ class DomainFactory(
                             .build()
                 }
 
-        /* todo 29 remove shortcuts selectively
-        val allShortcuts = ShortcutManagerCompat.getDynamicShortcuts(MyApplication.instance).map { it.id }
-        val removeShortcuts = allShortcuts - shortcuts.map { it.id }
-        */
+        val existingShortcuts = ShortcutManagerCompat.getDynamicShortcuts(MyApplication.instance).map { it.id }
 
-        ShortcutManagerCompat.addDynamicShortcuts(MyApplication.instance, shortcuts)
+        val constructor = ShortcutManagerCompat::class.java.getDeclaredConstructor()
+        constructor.isAccessible = true
+        val shortcutManagerCompat = constructor.newInstance()
+
+        val addShortcuts = shortcuts.filter { it.id !in existingShortcuts }
+        val updateShortcuts = shortcuts.filter { it.id in existingShortcuts }
+
+        val shortcutIds = shortcuts.map { it.id }
+        val removeShortcuts = existingShortcuts.filter { it !in shortcutIds }
+
+        ShortcutManagerCompat.addDynamicShortcuts(MyApplication.instance, addShortcuts)
+        ShortcutManagerCompat.updateShortcuts(MyApplication.instance, updateShortcuts)
+        shortcutManagerCompat.removeDynamicShortcuts(MyApplication.instance, removeShortcuts)
     }
 
     // firebase

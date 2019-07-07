@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -277,7 +278,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                             updateCalendarHeight()
                         }
-                        R.id.actionMainClose -> closeSearch(false)
+                        R.id.actionMainClose -> mainActivitySearch.setText(null)
                         R.id.actionMainSearch -> {
                             check(restoreInstances == null)
 
@@ -297,6 +298,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                                 requestFocus()
 
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+
                             }
 
                             updateTopMenu(true)
@@ -307,6 +309,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                 true
             }
+
+            setNavigationOnClickListener { closeSearch(false) }
         }
 
         initBottomBar()
@@ -433,7 +437,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         mainActivitySearch.apply {
             addOneShotGlobalLayoutListener {
-                layoutParams = layoutParams.apply { width = mainActivityToolbar.width - dpToPx(64).toInt() }
+                layoutParams = layoutParams.apply { width = mainActivityToolbar.width - dpToPx(64 + 56).toInt() }
             }
         }
     }
@@ -522,9 +526,34 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             )
         }
 
-        mainActivityToolbar.animateItems(itemVisibilities, changingSearch) {
-            mainActivityToolbar.menu.setGroupVisible(R.id.actionMainFilter, visibleTab.value!! == Tab.INSTANCES)
+        mainActivityToolbar.apply {
+            animateItems(itemVisibilities, changingSearch) {
+                menu.setGroupVisible(R.id.actionMainFilter, visibleTab.value!! == Tab.INSTANCES)
+            }
+
+            if (searching) {
+                setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
+
+                if (changingSearch) {
+                    val button = children.filterIsInstance<AppCompatImageButton>().single()
+                    button.visibility = View.INVISIBLE
+
+                    animateVisibility2(listOf(Pair(button, HideType.INVISIBLE)), listOf(), duration = MyBottomBar.duration)
+                }
+            } else {
+                if (changingSearch) {
+                    val button = children.filterIsInstance<AppCompatImageButton>().singleOrNull()
+                    if (button != null) {
+                        animateVisibility2(listOf(), listOf(Pair(button, HideType.INVISIBLE)), duration = MyBottomBar.duration) {
+                            navigationIcon = null
+                        }
+                    }
+                } else {
+                    navigationIcon = null
+                }
+            }
         }
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

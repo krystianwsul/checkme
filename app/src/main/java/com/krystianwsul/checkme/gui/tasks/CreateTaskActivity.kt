@@ -139,9 +139,9 @@ class CreateTaskActivity : NavBarActivity() {
 
             stateData.parent = null
 
-            val view = scheduleRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)!!
+            val view = createTaskRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)!!
 
-            val scheduleHolder = scheduleRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
+            val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
 
             scheduleHolder.scheduleText.text = null
         }
@@ -226,6 +226,7 @@ class CreateTaskActivity : NavBarActivity() {
     private var noteHasFocus = false // keyboard hack
 
     private val onChildAttachStateChangeListener = object : RecyclerView.OnChildAttachStateChangeListener { // keyboard hack
+
         override fun onChildViewAttachedToWindow(view: View) {
             view.noteText?.let {
                 removeListenerHelper()
@@ -453,6 +454,8 @@ class CreateTaskActivity : NavBarActivity() {
 
         setSupportActionBar(toolbar)
 
+        createTaskFocus.requestFocus()
+
         supportActionBar!!.run {
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(R.drawable.ic_close_white_24dp)
@@ -464,7 +467,7 @@ class CreateTaskActivity : NavBarActivity() {
             imageUrl.accept(getSerializable(IMAGE_URL_KEY) as ImageState)
         }
 
-        scheduleRecycler.layoutManager = LinearLayoutManager(this)
+        createTaskRecycler.layoutManager = LinearLayoutManager(this)
 
         intent.run {
             if (hasExtra(TASK_KEY_KEY)) {
@@ -604,7 +607,7 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
-            toolbarEditText.addTextChangedListener(object : TextWatcher {
+            addTextChangedListener(object : TextWatcher {
 
                 private var mSkip = savedInstanceState != null
 
@@ -690,16 +693,16 @@ class CreateTaskActivity : NavBarActivity() {
         (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(this.data!!.customTimeDatas, scheduleDialogListener)
 
         createTaskAdapter = CreateTaskAdapter()
-        scheduleRecycler.adapter = createTaskAdapter
+        createTaskRecycler.adapter = createTaskAdapter
 
         if (noteHasFocus) { // keyboard hack
             val notePosition = stateData.state
                     .schedules
                     .size + 1 + createTaskAdapter.elementsBeforeSchedules()
 
-            scheduleRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
+            createTaskRecycler.addOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
 
-            (scheduleRecycler.layoutManager as LinearLayoutManager).scrollToPosition(notePosition)
+            (createTaskRecycler.layoutManager as LinearLayoutManager).scrollToPosition(notePosition)
         }
 
         check(!hasValueParentTask() || !hasValueSchedule())
@@ -787,8 +790,8 @@ class CreateTaskActivity : NavBarActivity() {
                 .indexOf(scheduleEntry)
         check(index >= 0)
 
-        scheduleRecycler.getChildAt(index + createTaskAdapter.elementsBeforeSchedules())?.let {
-            (scheduleRecycler.getChildViewHolder(it) as CreateTaskAdapter.ScheduleHolder).scheduleLayout.error = scheduleEntry.error
+        createTaskRecycler.getChildAt(index + createTaskAdapter.elementsBeforeSchedules())?.let {
+            (createTaskRecycler.getChildViewHolder(it) as CreateTaskAdapter.ScheduleHolder).scheduleLayout.error = scheduleEntry.error
         }
     }
 
@@ -847,10 +850,10 @@ class CreateTaskActivity : NavBarActivity() {
     }
 
     private fun updateParentView() {
-        val view = scheduleRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)
+        val view = createTaskRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)
                 ?: return
 
-        val scheduleHolder = scheduleRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
+        val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
 
         scheduleHolder.scheduleText.setText(if (stateData.parent != null) stateData.parent!!.name else null)
     }
@@ -866,9 +869,9 @@ class CreateTaskActivity : NavBarActivity() {
     private fun firstScheduleEntry() = hintToSchedule(hint as? Hint.Schedule)
 
     private fun removeListenerHelper() { // keyboard hack
-        checkNotNull(scheduleRecycler)
+        checkNotNull(createTaskRecycler)
 
-        scheduleRecycler.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
+        createTaskRecycler.removeOnChildAttachStateChangeListener(onChildAttachStateChangeListener)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -1011,7 +1014,12 @@ class CreateTaskActivity : NavBarActivity() {
                             setText(note)
                             removeTextChangedListener(mNameListener)
                             addTextChangedListener(mNameListener)
-                            setOnFocusChangeListener { _, hasFocus -> noteHasFocus = hasFocus }
+                            setOnFocusChangeListener { _, hasFocus ->
+                                noteHasFocus = hasFocus
+
+                                if (hasFocus)
+                                    editToolbarAppBar.setExpanded(false)
+                            }
                         }
                     }
                 }

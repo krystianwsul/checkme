@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.krystianwsul.checkme.gui.tasks.InsetLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/createTaskRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".gui.tasks.CreateTaskActivity"
-    android:id="@+id/createTaskRoot">
+    android:fitsSystemWindows="true"
+    tools:context=".gui.tasks.CreateTaskActivity">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <View
+        android:id="@+id/createTaskFocus"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0px"
+        android:layout_height="0px" />
+
+    <include layout="@layout/toolbar_edit_text" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/createTaskRecycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-        <include layout="@layout/toolbar_edit_text" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/scheduleRecycler"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-</com.krystianwsul.checkme.gui.tasks.InsetLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

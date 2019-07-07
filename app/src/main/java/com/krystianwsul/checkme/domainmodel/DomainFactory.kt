@@ -189,7 +189,7 @@ class DomainFactory(
         if (maxShortcuts <= 0)
             return
 
-        val shortcuts = shortcutTasks.filter { it.second.isVisible(now, true) }
+        val shortcuts = shortcutTasks.filter { it.second.isVisible(now, false) }
                 .sortedBy { it.first }
                 .takeLast(maxShortcuts)
                 .map {

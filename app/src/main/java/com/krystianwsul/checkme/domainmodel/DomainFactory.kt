@@ -215,9 +215,9 @@ class DomainFactory(
         val shortcutIds = shortcuts.map { it.id }
         val removeShortcuts = existingShortcuts.filter { it !in shortcutIds }
 
+        shortcutManagerCompat.removeDynamicShortcuts(MyApplication.instance, removeShortcuts)
         ShortcutManagerCompat.addDynamicShortcuts(MyApplication.instance, addShortcuts)
         ShortcutManagerCompat.updateShortcuts(MyApplication.instance, updateShortcuts)
-        shortcutManagerCompat.removeDynamicShortcuts(MyApplication.instance, removeShortcuts)
     }
 
     // firebase

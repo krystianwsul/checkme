@@ -278,7 +278,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                             updateCalendarHeight()
                         }
-                        R.id.actionMainClose -> mainActivitySearch.setText(null)
+                        R.id.actionMainClose -> mainActivitySearch.text = null
                         R.id.actionMainSearch -> {
                             check(restoreInstances == null)
 

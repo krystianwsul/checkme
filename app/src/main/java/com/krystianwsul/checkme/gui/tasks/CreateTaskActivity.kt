@@ -454,8 +454,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         setSupportActionBar(toolbar)
 
-        createTaskFocus.requestFocus()
-
         supportActionBar!!.run {
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(R.drawable.ic_close_white_24dp)

@@ -9,13 +9,6 @@
     android:fitsSystemWindows="true"
     tools:context=".gui.tasks.CreateTaskActivity">
 
-    <View
-        android:id="@+id/createTaskFocus"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:layout_width="0px"
-        android:layout_height="0px" />
-
     <include layout="@layout/toolbar_edit_text" />
 
     <androidx.recyclerview.widget.RecyclerView

@@ -54,9 +54,7 @@ abstract class RepeatingSchedule(domainFactory: DomainFactory) : Schedule(domain
 
     protected abstract fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance?
 
-    override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {
-        check(current(now))
-
-        return true
+    override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean, ignoreCurrent: Boolean): Boolean {
+        return current(now) // todo search?
     }
 }

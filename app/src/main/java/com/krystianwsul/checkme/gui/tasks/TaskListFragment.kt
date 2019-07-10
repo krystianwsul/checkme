@@ -594,6 +594,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 return treeNode
             }
 
+            private val disabledOverride get() = colorDisabled.takeUnless { childTaskData.current }
+
             override val children
                 get() = if ((childTaskData.children.isEmpty() || treeNode.isExpanded) && childTaskData.note.isNullOrEmpty()) {
                     null
@@ -606,17 +608,17 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         childTaskData.note
                     }
 
-                    Pair(text, colorSecondary)
+                    Pair(text, disabledOverride ?: colorSecondary)
                 }
 
             override val details
                 get() = if (childTaskData.scheduleText.isNullOrEmpty()) {
                     null
                 } else {
-                    Pair(childTaskData.scheduleText, colorSecondary)
+                    Pair(childTaskData.scheduleText, disabledOverride ?: colorSecondary)
                 }
 
-            override val name get() = NameData(childTaskData.name)
+            override val name get() = NameData(childTaskData.name, disabledOverride ?: colorPrimary)
 
             override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
                 val treeNodeCollection = taskAdapter.treeNodeCollection
@@ -632,7 +634,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val isSelectable = true
 
             override fun onClick() {
-                taskListFragment.activity!!.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
+                if (childTaskData.current) // todo search long press
+                    taskListFragment.activity!!.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
             }
 
             override val isVisibleWhenEmpty = true
@@ -697,7 +700,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             private val startExactTimeStamp: ExactTimeStamp,
             val taskKey: TaskKey,
             val hierarchyData: HierarchyData?,
-            val imageState: ImageState?) : Comparable<ChildTaskData> {
+            val imageState: ImageState?,
+            val current: Boolean) : Comparable<ChildTaskData> {
 
         override fun compareTo(other: ChildTaskData) = if (hierarchyData != null) {
             hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
@@ -707,9 +711,12 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             startExactTimeStamp.compareTo(other.startExactTimeStamp)
         }
 
-        fun matchesSearch(query: String?): Boolean { // todo search
-            if (query.isNullOrEmpty())
-                return true
+        fun matchesSearch(query: String?): Boolean {
+            if (query == null)
+                return current
+
+            if (query.isEmpty())
+                return false
 
             if (name.toLowerCase().contains(query))
                 return true

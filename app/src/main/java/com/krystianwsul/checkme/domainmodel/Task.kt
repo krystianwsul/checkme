@@ -71,18 +71,21 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         return endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp
     }
 
-    fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
-        if (!current(now))
+    fun isVisible(now: ExactTimeStamp, hack24: Boolean, ignoreCurrent: Boolean = false): Boolean {
+        val current = current(now)
+
+        if (!ignoreCurrent && !current(now))
             return false
 
-        val rootTask = getRootTask(now)
+        val exactTimeStamp = if (current) now else getEndExactTimeStamp()!!.minusOne()
 
-        val schedules = rootTask.getCurrentSchedules(now)
+        val rootTask = getRootTask(exactTimeStamp)
+        val schedules = rootTask.getCurrentSchedules(exactTimeStamp)
 
         if (schedules.isEmpty())
             return true
 
-        if (schedules.any { it.isVisible(this, now, hack24) })
+        if (schedules.any { it.isVisible(this, now, hack24, ignoreCurrent) })
             return true
 
         return false

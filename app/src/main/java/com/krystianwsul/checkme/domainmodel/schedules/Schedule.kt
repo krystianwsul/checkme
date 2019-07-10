@@ -57,7 +57,7 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
 
     abstract fun getInstances(task: Task, givenStartExactTimeStamp: ExactTimeStamp?, givenExactEndTimeStamp: ExactTimeStamp): List<Instance>
 
-    abstract fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean
+    abstract fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean, ignoreCurrent: Boolean = false): Boolean
 
     abstract fun getScheduleText(): String
 

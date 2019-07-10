@@ -341,7 +341,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return comparison
             }
 
-            override fun matchesSearch(query: String) = parentTreeData.matchesSearch(query)
+            override fun matchesSearch(query: String?) = parentTreeData.matchesSearch(query)
         }
     }
 

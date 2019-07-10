@@ -189,7 +189,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private var selectedTaskKeys: List<TaskKey>? = null
     private var expandedTaskIds: List<TaskKey>? = null
 
-    private var query: String = ""
+    private var query: String? = null
 
     private val initializeDisposable = CompositeDisposable()
 
@@ -245,7 +245,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 check(expandedTaskIds!!.isNotEmpty())
             }
 
-            query = getString(QUERY_KEY)!!
+            query = getString(QUERY_KEY)
 
             showImage = getBoolean(KEY_SHOW_IMAGE)
         }
@@ -306,7 +306,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
-                query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
+                search(query, TreeViewAdapter.Placeholder)
             }
         } else {
             val taskAdapter = TaskAdapter(this)
@@ -318,7 +318,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
-                query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }
+                search(query, TreeViewAdapter.Placeholder)
             }
         }
 
@@ -446,7 +446,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = null
     }
 
-    private fun search(query: String, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+    private fun search(query: String?, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         this.query = query
 
         treeViewAdapter.query = query
@@ -674,7 +674,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 DomainFactory.instance.setTaskHierarchyOrdinal(taskListFragment.data!!.dataId, childTaskData.hierarchyData)
             }
 
-            override fun matchesSearch(query: String) = childTaskData.matchesSearch(query)
+            override fun matchesSearch(query: String?) = childTaskData.matchesSearch(query)
         }
     }
 
@@ -706,8 +706,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             startExactTimeStamp.compareTo(other.startExactTimeStamp)
         }
 
-        fun matchesSearch(query: String): Boolean {
-            if (query.isEmpty())
+        fun matchesSearch(query: String?): Boolean { // todo search
+            if (query.isNullOrEmpty())
                 return true
 
             if (name.toLowerCase().contains(query))

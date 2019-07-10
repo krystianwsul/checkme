@@ -181,8 +181,8 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             val note: String?,
             val sortKey: SortKey) {
 
-        fun matchesSearch(query: String): Boolean {
-            if (query.isEmpty())
+        fun matchesSearch(query: String?): Boolean { // todo search
+            if (query.isNullOrEmpty())
                 return true
 
             if (name.toLowerCase().contains(query))

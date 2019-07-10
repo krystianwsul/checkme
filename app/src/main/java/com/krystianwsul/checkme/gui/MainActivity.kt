@@ -32,6 +32,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
@@ -108,8 +109,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     val selectAllRelay = PublishRelay.create<Unit>()
 
     override val search by lazy {
+        // todo search
         mainActivitySearch.textChanges()
-                .map { it.toString() }
+                .map { NullableWrapper(it.toString()) }
                 .share()!!
     }
 
@@ -362,8 +364,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
         search.filter { visibleTab.value == Tab.TASKS }
                 .subscribe {
-                    val query = it.toString().toLowerCase()
-                    if (query.isEmpty())
+                    if (it.value != null)
                         bottomFab.show()
                     else
                         bottomFab.hide()

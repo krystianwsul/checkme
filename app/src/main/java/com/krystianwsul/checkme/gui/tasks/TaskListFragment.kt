@@ -20,6 +20,7 @@ import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.removeFromGetter
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
@@ -325,7 +326,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         (context as TaskListListener).search
                 .subscribe {
                     treeViewAdapter.updateDisplayedNodes {
-                        search(it, TreeViewAdapter.Placeholder)
+                        search(it.value, TreeViewAdapter.Placeholder)
                     }
                 }
                 .addTo(initializeDisposable)
@@ -724,7 +725,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 
-        val search: Observable<String>
+        val search: Observable<NullableWrapper<String>>
 
         fun getBottomBar(): MyBottomBar
 

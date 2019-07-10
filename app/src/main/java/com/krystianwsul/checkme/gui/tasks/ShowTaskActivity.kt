@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowTaskViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -44,7 +45,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
     private lateinit var showTaskViewModel: ShowTaskViewModel
 
-    override val search = Observable.never<String>()!!
+    override val search = Observable.never<NullableWrapper<String>>()!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

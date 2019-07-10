@@ -108,16 +108,18 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
     val selectAllRelay = PublishRelay.create<Unit>()
 
-    override val search by lazy {
-        // todo search
-        mainActivitySearch.textChanges()
-                .map { NullableWrapper(it.toString()) }
-                .share()!!
-    }
-
     private var actionMode: ActionMode? = null
 
-    private var restoreInstances: Boolean? = null
+    private val restoreInstances = BehaviorRelay.createDefault(NullableWrapper<Boolean>())
+
+    override val search by lazy {
+        restoreInstances.switchMap {
+            if (it.value != null)
+                mainActivitySearch.textChanges().map { NullableWrapper(it.toString()) }
+            else
+                Observable.just(NullableWrapper())
+        }.share()!!
+    }
 
     override fun getBottomBar() = bottomAppBar!!
 
@@ -142,22 +144,24 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     }
 
     private fun closeSearch(switchingTab: Boolean) {
-        restoreInstances?.let {
-            if (!switchingTab)
-                check(visibleTab.value!! == Tab.TASKS)
+        restoreInstances.value!!
+                .value
+                ?.let {
+                    if (!switchingTab)
+                        check(visibleTab.value!! == Tab.TASKS)
 
-            restoreInstances = null
+                    restoreInstances.accept(NullableWrapper())
 
-            mainActivitySearch.apply {
-                check(visibility == View.VISIBLE)
+                    mainActivitySearch.apply {
+                        check(visibility == View.VISIBLE)
 
-                animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
-                text = null
-            }
+                        animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
+                        text = null
+                    }
 
-            if (it && !switchingTab)
-                showTab(Tab.INSTANCES, changingSearch = true)
-        }
+                    if (it && !switchingTab)
+                        showTab(Tab.INSTANCES, changingSearch = true)
+                }
 
         updateTopMenu(true)
         hideKeyboard()
@@ -199,7 +203,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                         setText(getString(SEARCH_KEY))
                     }
 
-                    restoreInstances = getBoolean(RESTORE_INSTANCES_KEY)
+                    restoreInstances.accept(NullableWrapper(getBoolean(RESTORE_INSTANCES_KEY)))
                 } else {
                     check(!containsKey(RESTORE_INSTANCES_KEY))
                 }
@@ -220,9 +224,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 ACTION_INSTANCES -> visibleTab.accept(Tab.INSTANCES)
                 ACTION_TASKS -> visibleTab.accept(Tab.TASKS)
                 ACTION_SEARCH -> {
-                    check(restoreInstances == null)
+                    check(restoreInstances.value!!.value == null)
 
-                    restoreInstances = false
+                    restoreInstances.accept(NullableWrapper(false))
                     visibleTab.accept(Tab.TASKS)
 
                     mainActivitySearch.apply {
@@ -282,9 +286,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                         }
                         R.id.actionMainClose -> mainActivitySearch.text = null
                         R.id.actionMainSearch -> {
-                            check(restoreInstances == null)
+                            check(restoreInstances.value!!.value == null)
 
-                            restoreInstances = when (visibleTab.value!!) {
+                            restoreInstances.accept(NullableWrapper(when (visibleTab.value!!) {
                                 Tab.INSTANCES -> {
                                     showTab(Tab.TASKS, changingSearch = true)
                                     true
@@ -293,7 +297,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                                     false
                                 }
                                 else -> throw IllegalArgumentException()
-                            }
+                            }))
 
                             mainActivitySearch.apply {
                                 animateVisibility(listOf(this), listOf(), duration = MyBottomBar.duration)
@@ -501,7 +505,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     }
 
     private fun updateTopMenu(changingSearch: Boolean) {
-        val searching = restoreInstances != null
+        val searching = restoreInstances.value!!.value != null
         if (searching)
             check(mainActivitySearch.visibility == View.VISIBLE)
 
@@ -565,8 +569,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             putSerializable(TIME_RANGE_KEY, timeRange)
             putBoolean(DEBUG_KEY, debug)
 
-            if (restoreInstances != null) {
-                putBoolean(RESTORE_INSTANCES_KEY, restoreInstances!!)
+            if (restoreInstances.value!!.value != null) {
+                putBoolean(RESTORE_INSTANCES_KEY, restoreInstances.value!!.value!!)
                 putString(SEARCH_KEY, mainActivitySearch.text.toString())
             }
 

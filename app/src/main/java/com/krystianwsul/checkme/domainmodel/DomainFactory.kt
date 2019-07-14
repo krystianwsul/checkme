@@ -815,29 +815,30 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val task = getTaskForce(taskKey)
-        check(task.current(now))
+        val hierarchyTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-        val childTaskDatas = task.getChildTaskHierarchies(now)
+        val childTaskDatas = task.getChildTaskHierarchies(hierarchyTimeStamp)
                 .map {
                     val childTask = it.childTask
 
                     TaskListFragment.ChildTaskData(
                             childTask.name,
-                            childTask.getScheduleText(now),
-                            getTaskListChildTaskDatas(childTask, now),
+                            childTask.getScheduleText(hierarchyTimeStamp),
+                            getTaskListChildTaskDatas(childTask, now, true, hierarchyTimeStamp),
                             childTask.note,
                             childTask.startExactTimeStamp,
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
                             childTask.image,
-                            true,
-                            childTask.hasInstances(now))
+                            childTask.current(now),
+                            childTask.hasInstances(now),
+                            true)
                 }
                 .sorted()
 
         return ShowTaskViewModel.Data(
                 task.name,
-                task.getScheduleText(now, true),
+                task.getScheduleText(hierarchyTimeStamp, true),
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
                 task.hasInstances(now),
                 task.image)
@@ -858,14 +859,15 @@ class DomainFactory(
                     TaskListFragment.ChildTaskData(
                             task.name,
                             task.getScheduleText(hierarchyExactTimeStamp),
-                            getTaskListChildTaskDatas(task, now, true),
+                            getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp),
                             task.note,
                             task.startExactTimeStamp,
                             task.taskKey,
                             null,
                             task.image,
                             task.current(now),
-                            task.hasInstances(now))
+                            task.hasInstances(now),
+                            false)
                 }
                 .sortedDescending()
                 .toMutableList()
@@ -2300,28 +2302,25 @@ class DomainFactory(
                 .toList()
     }
 
-    private fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp, includeHidden: Boolean = false): List<TaskListFragment.ChildTaskData> {
-        val exactTimeStamp = if (includeHidden) parentTask.getHierarchyExactTimeStamp(now) else now
-
-        return parentTask.getChildTaskHierarchies(exactTimeStamp)
+    private fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp, alwaysShow: Boolean = true, hierarchyExactTimeStamp: ExactTimeStamp = now): List<TaskListFragment.ChildTaskData> {
+        return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp)
                 .asSequence()
                 .sortedBy { it.ordinal }
                 .map {
                     val childTask = it.childTask
 
-                    val childExactTimeStamp = if (includeHidden) childTask.getHierarchyExactTimeStamp(now) else now
-
                     TaskListFragment.ChildTaskData(
                             childTask.name,
-                            childTask.getScheduleText(childExactTimeStamp),
-                            getTaskListChildTaskDatas(childTask, now, includeHidden),
+                            childTask.getScheduleText(hierarchyExactTimeStamp),
+                            getTaskListChildTaskDatas(childTask, now, alwaysShow, hierarchyExactTimeStamp),
                             childTask.note,
                             childTask.startExactTimeStamp,
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
                             childTask.image,
                             childTask.current(now),
-                            childTask.hasInstances(now))
+                            childTask.hasInstances(now),
+                            alwaysShow)
                 }
                 .toList()
     }

@@ -699,7 +699,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val hierarchyData: HierarchyData?,
             val imageState: ImageState?,
             val current: Boolean,
-            val hasInstances: Boolean) : Comparable<ChildTaskData> {
+            val hasInstances: Boolean,
+            val alwaysShow: Boolean) : Comparable<ChildTaskData> {
 
         override fun compareTo(other: ChildTaskData) = if (hierarchyData != null) {
             hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)
@@ -711,7 +712,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         fun matchesSearch(query: String?): Boolean {
             if (query == null)
-                return current
+                return alwaysShow || current
 
             if (query.isEmpty())
                 return false

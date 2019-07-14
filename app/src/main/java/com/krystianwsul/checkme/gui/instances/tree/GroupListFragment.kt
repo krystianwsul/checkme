@@ -261,6 +261,8 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     listener.showSnackbarDone(instanceKeys.size) {
+                        instanceKeys.singleOrNull()?.let { scrollToInstance(it) }
+
                         DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, false)
                     }
                 }
@@ -290,6 +292,8 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     listener.showSnackbarDone(instanceKeys.size) {
+                        instanceKeys.singleOrNull()?.let { scrollToInstance(it) }
+
                         DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, true)
                     }
                 }
@@ -641,6 +645,12 @@ class GroupListFragment @JvmOverloads constructor(
                 }
             }
         }
+    }
+
+    fun scrollToInstance(instanceKey: InstanceKey) {
+        check(scrollToInstanceKey == null)
+
+        scrollToInstanceKey = instanceKey
     }
 
     private fun setGroupMenuItemVisibility() {

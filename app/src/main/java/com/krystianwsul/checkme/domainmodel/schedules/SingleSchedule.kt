@@ -40,8 +40,7 @@ class SingleSchedule(
             return instances
 
         val endExactTimeStamp = getEndExactTimeStamp()
-        if (endExactTimeStamp != null && singleScheduleExactTimeStamp >= endExactTimeStamp)
-        // timezone hack
+        if (endExactTimeStamp != null && singleScheduleExactTimeStamp >= endExactTimeStamp)// timezone hack
             return instances
 
         instances.add(getInstance(task))
@@ -49,9 +48,8 @@ class SingleSchedule(
         return instances
     }
 
-    override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean, ignoreCurrent: Boolean): Boolean {
-        if (!ignoreCurrent)
-            check(current(now))
+    override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {
+        check(current(now))
 
         return getInstance(task).isVisible(now, hack24)
     }

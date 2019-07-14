@@ -848,18 +848,16 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val childTaskDatas = getTasks().filter { it.isVisible(now, hack24 = false, ignoreCurrent = true) }
-                .map {
-                    val current = it.current(now)
-                    val exactTimeStamp = if (current) now else it.getEndExactTimeStamp()!!.minusOne()
-                    Triple(it, current, exactTimeStamp)
-                }
-                .filter { (task, _, exactTimeStamp) -> task.isRootTask(exactTimeStamp) }
-                .map { (task, current, exactTimeStamp) ->
+        val childTaskDatas = getTasks().map {
+            val exactTimeStamp = it.getNowOrEnd(now)
+            Pair(it, exactTimeStamp)
+        }
+                .filter { (task, exactTimeStamp) -> task.isRootTask(exactTimeStamp) }
+                .map { (task, exactTimeStamp) ->
                     TaskListFragment.ChildTaskData(
                             task.name,
                             task.getScheduleText(exactTimeStamp),
-                            getTaskListChildTaskDatas(task, exactTimeStamp, current),
+                            getTaskListChildTaskDatas(task, now, true),
                             task.note,
                             task.startExactTimeStamp,
                             task.taskKey,
@@ -2300,23 +2298,27 @@ class DomainFactory(
                 .toList()
     }
 
-    private fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp, current: Boolean = true): List<TaskListFragment.ChildTaskData> {
-        return parentTask.getChildTaskHierarchies(now)
+    private fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp, includeHidden: Boolean = false): List<TaskListFragment.ChildTaskData> {
+        val exactTimeStamp = if (includeHidden) parentTask.getNowOrEnd(now) else now
+
+        return parentTask.getChildTaskHierarchies(exactTimeStamp)
                 .asSequence()
                 .sortedBy { it.ordinal }
                 .map {
                     val childTask = it.childTask
 
+                    val childExactTimeStamp = if (includeHidden) childTask.getNowOrEnd(now) else now
+
                     TaskListFragment.ChildTaskData(
                             childTask.name,
-                            childTask.getScheduleText(now),
-                            getTaskListChildTaskDatas(childTask, now),
+                            childTask.getScheduleText(childExactTimeStamp),
+                            getTaskListChildTaskDatas(childTask, now, includeHidden),
                             childTask.note,
                             childTask.startExactTimeStamp,
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
                             childTask.image,
-                            current)
+                            childTask.current(now))
                 }
                 .toList()
     }

@@ -122,19 +122,13 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
     }
 
-    override fun createInstanceRecord(now: ExactTimeStamp) {
-        val task = task
-
-        val scheduleDateTime = scheduleDateTime
-
-        instanceData = RemoteReal(this, task.createRemoteInstanceRecord(this, scheduleDateTime))
+    override fun createInstanceRecord(now: ExactTimeStamp): InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> = RemoteReal(this, task.createRemoteInstanceRecord(this, scheduleDateTime)).also {
+        instanceData = it
     }
 
     override fun setDone(done: Boolean, now: ExactTimeStamp) {
         if (done) {
-            createInstanceHierarchy(now)
-
-            (instanceData as RemoteReal).instanceRecord.done = now.long
+            createInstanceHierarchy(now).instanceRecord.done = now.long
 
             instanceShownRecord?.notified = false
         } else {

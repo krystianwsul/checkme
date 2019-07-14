@@ -144,16 +144,17 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp)
 
-    fun createInstanceHierarchy(now: ExactTimeStamp) {
-        if (instanceData is InstanceData.Real)
-            return
+    fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *, *> {
+        (instanceData as? InstanceData.Real)?.let {
+            return it
+        }
 
         getParentInstance(now)?.createInstanceHierarchy(now)
 
-        createInstanceRecord(now)
+        return createInstanceRecord(now)
     }
 
-    protected abstract fun createInstanceRecord(now: ExactTimeStamp)
+    protected abstract fun createInstanceRecord(now: ExactTimeStamp): InstanceData.Real<*, *, *>
 
     abstract fun setDone(done: Boolean, now: ExactTimeStamp)
 
@@ -242,9 +243,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     fun hide(now: ExactTimeStamp) {
         check(!instanceData.hidden)
 
-        createInstanceHierarchy(now)
-
-        (instanceData as InstanceData.Real).instanceRecord.hidden = true
+        createInstanceHierarchy(now).instanceRecord.hidden = true
     }
 
     val hidden get() = instanceData.hidden

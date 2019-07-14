@@ -17,7 +17,7 @@ interface InstanceRecord<out T> {
 
     val instanceJsonTime: JsonTime<T>?
 
-    val done: Long?
+    var done: Long?
 
     var ordinal: Double?
 

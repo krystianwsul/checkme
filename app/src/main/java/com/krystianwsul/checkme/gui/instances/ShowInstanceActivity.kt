@@ -158,7 +158,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                 return
 
             findItem(R.id.instance_menu_share).isVisible = data != null
-            findItem(R.id.instance_menu_show_task).isVisible = data?.taskCurrent == true
+            findItem(R.id.instance_menu_show_task).isVisible = data != null
             findItem(R.id.instance_menu_edit_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
@@ -266,8 +266,6 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                                 Utils.share(this@ShowInstanceActivity, it.name + "\n" + shareData)
                         }
                         R.id.instance_menu_show_task -> {
-                            check(it.taskCurrent)
-
                             showInstanceViewModel.stop()
 
                             startActivityForResult(ShowTaskActivity.newIntent(instanceKey.taskKey), ShowTaskActivity.REQUEST_EDIT_TASK)

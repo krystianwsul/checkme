@@ -278,18 +278,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         hide.add(taskListRecycler)
                         show.add(emptyTextLayout)
 
-                        val (emptyTextId, showEmptyImage) = when {
-                            searchWrapper.value != null -> Pair(R.string.noResults, false) // todo no results image
-                            rootTaskData != null -> Pair(R.string.empty_child, true)
-                            else -> Pair(R.string.tasks_empty_root, true)
+                        val (emptyTextId, emptyDrawableId) = when {
+                            searchWrapper.value != null -> Pair(R.string.noResults, R.drawable.search)
+                            rootTaskData != null -> Pair(R.string.empty_child, R.drawable.empty)
+                            else -> Pair(R.string.tasks_empty_root, R.drawable.empty)
                         }
 
-                        if (showEmptyImage)
-                            show.add(emptyImage)
-                        else
-                            hide.add(emptyImage)
-
                         emptyText.setText(emptyTextId)
+                        emptyImage.setImageResource(emptyDrawableId)
                     } else {
                         show.add(taskListRecycler)
                         hide.add(emptyTextLayout)

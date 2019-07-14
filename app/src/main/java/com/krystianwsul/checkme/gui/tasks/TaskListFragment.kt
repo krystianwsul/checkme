@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ImageState
@@ -205,6 +206,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     override val listItemAddedListener get() = taskListListener
     override val recyclerView: RecyclerView get() = taskListRecycler
 
+    private val dataRelay = BehaviorRelay.create<Unit>()
+
     private fun getShareData(childTaskDatas: List<ChildTaskData>) = mutableListOf<String>().also {
         check(childTaskDatas.isNotEmpty())
 
@@ -260,6 +263,27 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         super.onViewCreated(view, savedInstanceState)
 
         taskListRecycler.layoutManager = LinearLayoutManager(context)
+
+        dataRelay.subscribe {
+            val hide = mutableListOf<View>(taskListProgress)
+            val show: View
+
+            if (treeViewAdapter.displayedNodes.isEmpty()) {
+                hide.add(taskListRecycler)
+                show = emptyTextLayout
+
+                emptyText.setText(if (rootTaskData != null) {
+                    R.string.empty_child
+                } else {
+                    R.string.tasks_empty_root
+                })
+            } else {
+                show = taskListRecycler
+                hide.add(emptyTextLayout)
+            }
+
+            animateVisibility(listOf(show), hide, immediate = data!!.immediate)
+        }.addTo(viewCreatedDisposable)
 
         initialize()
     }
@@ -335,24 +359,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         updateFabVisibility()
 
-        val hide = mutableListOf<View>(taskListProgress)
-        val show: View
-
-        if (treeViewAdapter.displayedNodes.isEmpty()) {
-            hide.add(taskListRecycler)
-            show = emptyTextLayout
-
-            emptyText.setText(if (rootTaskData != null) {
-                R.string.empty_child
-            } else {
-                R.string.tasks_empty_root
-            })
-        } else {
-            show = taskListRecycler
-            hide.add(emptyTextLayout)
-        }
-
-        animateVisibility(listOf(show), hide, immediate = data!!.immediate)
+        dataRelay.accept(Unit)
 
         updateSelectAll()
 

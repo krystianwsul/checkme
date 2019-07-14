@@ -849,7 +849,7 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val childTaskDatas = getTasks().map {
-            val exactTimeStamp = it.getNowOrEnd(now)
+            val exactTimeStamp = it.getHierarchyExactTimeStamp(now)
             Pair(it, exactTimeStamp)
         }
                 .filter { (task, exactTimeStamp) -> task.isRootTask(exactTimeStamp) }
@@ -2299,7 +2299,7 @@ class DomainFactory(
     }
 
     private fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp, includeHidden: Boolean = false): List<TaskListFragment.ChildTaskData> {
-        val exactTimeStamp = if (includeHidden) parentTask.getNowOrEnd(now) else now
+        val exactTimeStamp = if (includeHidden) parentTask.getHierarchyExactTimeStamp(now) else now
 
         return parentTask.getChildTaskHierarchies(exactTimeStamp)
                 .asSequence()
@@ -2307,7 +2307,7 @@ class DomainFactory(
                 .map {
                     val childTask = it.childTask
 
-                    val childExactTimeStamp = if (includeHidden) childTask.getNowOrEnd(now) else now
+                    val childExactTimeStamp = if (includeHidden) childTask.getHierarchyExactTimeStamp(now) else now
 
                     TaskListFragment.ChildTaskData(
                             childTask.name,

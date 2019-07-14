@@ -283,5 +283,5 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     abstract fun updateProject(now: ExactTimeStamp, projectId: String): Task
 
-    fun getNowOrEnd(now: ExactTimeStamp) = if (notDeleted(now)) now else getEndExactTimeStamp()!!.minusOne()
+    fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
 }

@@ -23,7 +23,10 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
         val taskKey = task.taskKey
 
         (task.getTaskHierarchiesByChildTaskKey(taskKey) + task.getTaskHierarchiesByParentTaskKey(taskKey))
-                .filter { it.notDeleted(now) }
+                .filter {
+                    val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
+                    it.notDeleted(hierarchyExactTimeStamp)
+                }
                 .forEach { taskHierarchyRelevances.getValue(it.taskHierarchyKey).setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         val oldestVisible = task.getOldestVisible()!!

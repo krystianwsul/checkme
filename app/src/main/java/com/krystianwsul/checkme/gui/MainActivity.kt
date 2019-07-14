@@ -113,16 +113,20 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
     private val restoreInstances = BehaviorRelay.createDefault(NullableWrapper<Boolean>())
 
+    private val showDeleted = BehaviorRelay.create<Boolean>()
+
     override val search by lazy {
         restoreInstances.switchMap {
-            if (it.value != null)
-                mainActivitySearch.textChanges().map { NullableWrapper(it.toString()) }
-            else
+            if (it.value != null) {
+                Observables.combineLatest(
+                        mainActivitySearch.textChanges(),
+                        showDeleted
+                ).map { NullableWrapper(TaskListFragment.SearchData(it.first.toString(), it.second)) }
+            } else {
                 Observable.just(NullableWrapper())
+            }
         }.share()!!
     }
-
-    private val showDeleted = BehaviorRelay.create<Boolean>()
 
     override fun getBottomBar() = bottomAppBar!!
 

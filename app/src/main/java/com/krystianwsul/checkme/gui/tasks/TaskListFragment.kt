@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.tasks
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,7 @@ import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
 import java.util.*
@@ -37,7 +39,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         private const val SELECTED_TASK_KEYS_KEY = "selectedTaskKeys"
         private const val EXPANDED_TASK_KEYS_KEY = "expandedTaskKeys"
-        private const val QUERY_KEY = "query"
+        private const val KEY_SEARCH_DATA = "searchData"
         private const val KEY_SHOW_IMAGE = "showImage"
 
         fun newInstance() = TaskListFragment()
@@ -190,7 +192,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private var selectedTaskKeys: List<TaskKey>? = null
     private var expandedTaskIds: List<TaskKey>? = null
 
-    private var query: String? = null
+    private var searchData: SearchData? = null
 
     private val initializeDisposable = CompositeDisposable()
 
@@ -246,7 +248,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 check(expandedTaskIds!!.isNotEmpty())
             }
 
-            query = getString(QUERY_KEY)
+            searchData = getParcelable<SearchData>(KEY_SEARCH_DATA)
 
             showImage = getBoolean(KEY_SHOW_IMAGE)
         }
@@ -307,7 +309,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
-                search(query, TreeViewAdapter.Placeholder)
+                search(searchData, TreeViewAdapter.Placeholder)
             }
         } else {
             val taskAdapter = TaskAdapter(this)
@@ -319,7 +321,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
 
-                search(query, TreeViewAdapter.Placeholder)
+                search(searchData, TreeViewAdapter.Placeholder)
             }
         }
 
@@ -413,7 +415,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     putParcelableArrayList(EXPANDED_TASK_KEYS_KEY, ArrayList(expandedTaskKeys))
             }
 
-            putString(QUERY_KEY, query)
+            putParcelable(KEY_SEARCH_DATA, searchData)
 
             putBoolean(KEY_SHOW_IMAGE, imageViewerData != null)
         }
@@ -447,8 +449,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         taskListFragmentFab = null
     }
 
-    private fun search(query: String?, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
-        this.query = query
+    private fun search(searchData: SearchData?, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
+        this.searchData = searchData
     }
 
     override fun onDestroyView() {
@@ -673,7 +675,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 DomainFactory.instance.setTaskHierarchyOrdinal(taskListFragment.data!!.dataId, childTaskData.hierarchyData)
             }
 
-            override fun filter() = childTaskData.matchesSearch(query)
+            override fun filter() = childTaskData.matchesSearch(searchData)
         }
     }
 
@@ -708,9 +710,14 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             startExactTimeStamp.compareTo(other.startExactTimeStamp)
         }
 
-        fun matchesSearch(query: String?): Boolean {
-            if (query == null)
+        fun matchesSearch(searchData: SearchData?): Boolean {
+            if (searchData == null)
                 return alwaysShow || current
+
+            if (!searchData.showDeleted && !current)
+                return false
+
+            val query = searchData.query
 
             if (query.isEmpty())
                 return false
@@ -721,7 +728,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             if (note?.toLowerCase()?.contains(query) == true)
                 return true
 
-            return children.any { it.matchesSearch(query) }
+            return children.any { it.matchesSearch(searchData) }
         }
     }
 
@@ -729,7 +736,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         fun setTaskSelectAllVisibility(selectAllVisible: Boolean)
 
-        val search: Observable<NullableWrapper<String>>
+        val search: Observable<NullableWrapper<SearchData>>
 
         fun getBottomBar(): MyBottomBar
 
@@ -737,4 +744,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     data class RootTaskData(val taskKey: TaskKey, val imageState: ImageState?)
+
+    @Parcelize
+    data class SearchData(val query: String, val showDeleted: Boolean) : Parcelable
 }

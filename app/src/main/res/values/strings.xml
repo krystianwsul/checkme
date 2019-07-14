@@ -103,6 +103,7 @@
     <string name="defaultReminder">Default reminder</string>
     <string name="defaultReminderSummaryOn">Automatically add a reminder to new tasks</string>
     <string name="defaultReminderSummaryOff">Don\'t add a reminder to new tasks</string>
+    <string name="showRemoved">Show removed</string>
 
     <!-- Preference Titles
     <string name="messages_header">Messages</string>

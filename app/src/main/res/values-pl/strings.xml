@@ -103,4 +103,5 @@
     <string name="defaultReminder">Domyślne przypomnienie</string>
     <string name="defaultReminderSummaryOn">Automatycznie dodawaj przypomnienie do nowych zadań</string>
     <string name="defaultReminderSummaryOff">Nie dodawaj przypomnienia do nowych zadań</string>
+    <string name="showRemoved">Pokaż usunięte</string>
 </resources>

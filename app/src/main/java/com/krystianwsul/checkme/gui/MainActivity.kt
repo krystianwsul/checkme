@@ -58,6 +58,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         private const val CALENDAR_KEY = "calendar"
         private const val DAY_STATES_KEY = "dayStates"
         private const val RESTORE_INSTANCES_KEY = "restoreInstances"
+        private const val KEY_SHOW_DELETED = "showDeleted"
 
         private const val NORMAL_ELEVATION = 6f
         private const val INSTANCES_ELEVATION = 0f
@@ -120,6 +121,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 Observable.just(NullableWrapper())
         }.share()!!
     }
+
+    private val showDeleted = BehaviorRelay.create<Boolean>()
 
     override fun getBottomBar() = bottomAppBar!!
 
@@ -216,6 +219,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 states = getParcelableArrayList<ParcelableState>(DAY_STATES_KEY)!!.associate {
                     Pair(it.timeRange, it.position) to it.state
                 }.toMutableMap()
+
+                check(containsKey(KEY_SHOW_DELETED))
+                showDeleted.accept(getBoolean(KEY_SHOW_DELETED))
             }
         } else {
             states = mutableMapOf()
@@ -237,6 +243,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                     }
                 }
             }
+
+            showDeleted.accept(false)
         }
 
         mainActivityToolbar.apply {
@@ -245,13 +253,14 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             val triples = listOf(
                     R.id.actionMainFilterDay to TimeRange.DAY,
                     R.id.actionMainFilterWeek to TimeRange.WEEK,
-                    R.id.actionMainFilterMonth to TimeRange.MONTH).map { Triple(it.first, it.second, menu.findItem(it.first)) }
+                    R.id.actionMainFilterMonth to TimeRange.MONTH
+            ).map { Triple(it.first, it.second, menu.findItem(it.first)) }
 
-            fun update() {
+            fun updateTimeRangeFilter() {
                 triples.single { it.second == timeRange }.third.isChecked = true
             }
 
-            update()
+            updateTimeRangeFilter()
 
             setOnMenuItemClickListener { item ->
                 val triple = triples.singleOrNull { it.first == item.itemId }
@@ -275,7 +284,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                         updateCalendarDate()
                         updateCalendarHeight()
-                        update()
+                        updateTimeRangeFilter()
                     }
                 } else {
                     when (item.itemId) {
@@ -304,11 +313,11 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                                 requestFocus()
 
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-
                             }
 
                             updateTopMenu(true)
                         }
+                        R.id.actionMainShowDeleted -> showDeleted.accept(!showDeleted.value!!)
                         else -> throw IllegalArgumentException()
                     }
                 }
@@ -317,6 +326,10 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             }
 
             setNavigationOnClickListener { closeSearch(false) }
+
+            createDisposable += showDeleted.subscribe {
+                menu.findItem(R.id.actionMainShowDeleted).isChecked = it
+            }
         }
 
         initBottomBar()
@@ -516,17 +529,20 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 listOf(
                         R.id.actionMainCalendar to (timeRange == TimeRange.DAY),
                         R.id.actionMainClose to false,
+                        R.id.actionMainShowDeleted to false,
                         R.id.actionMainSearch to true
                 )
             }
             Tab.TASKS -> listOf(
                     R.id.actionMainCalendar to false,
                     R.id.actionMainClose to searching,
+                    R.id.actionMainShowDeleted to searching,
                     R.id.actionMainSearch to !searching
             )
             else -> listOf(
                     R.id.actionMainCalendar to false,
                     R.id.actionMainClose to false,
+                    R.id.actionMainShowDeleted to false,
                     R.id.actionMainSearch to false
             )
         }
@@ -578,6 +594,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             mainDaysPager.children.forEach { (it as DayFragment).saveState() }
 
             putParcelableArrayList(DAY_STATES_KEY, ArrayList(states.map { ParcelableState(it.key.first, it.key.second, it.value) }))
+
+            putBoolean(KEY_SHOW_DELETED, showDeleted.value!!)
         }
     }
 

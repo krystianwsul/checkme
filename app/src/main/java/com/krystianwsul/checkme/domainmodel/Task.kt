@@ -243,6 +243,8 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         return instances
     }
 
+    fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).isNotEmpty()
+
     abstract fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy>
 
     abstract fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy>

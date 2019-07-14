@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
@@ -130,11 +131,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                         initialize()
                     }
                 }
-                R.id.action_task_add -> {
-                    val childTaskData = childTaskDatas.single()
-
-                    startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(childTaskData.taskKey)))
-                }
+                R.id.action_task_add -> startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(taskKeys.single())))
+                R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -155,8 +153,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             val single = selectedNodes.size < 2
 
-            val projectIdCount = selectedNodes.asSequence()
-                    .map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData.taskKey.remoteProjectId }
+            val childTaskDatas = selectedNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
+
+            val projectIdCount = childTaskDatas.map { it.taskKey.remoteProjectId }
                     .distinct()
                     .count()
 
@@ -165,7 +164,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             return listOf(
                     R.id.action_task_join to (!single && projectIdCount == 1),
                     R.id.action_task_edit to single,
-                    R.id.action_task_add to single
+                    R.id.action_task_add to single,
+                    R.id.action_task_show_instances to (childTaskDatas.singleOrNull()?.hasInstances == true)
             )
         }
 
@@ -698,7 +698,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             val taskKey: TaskKey,
             val hierarchyData: HierarchyData?,
             val imageState: ImageState?,
-            val current: Boolean) : Comparable<ChildTaskData> {
+            val current: Boolean,
+            val hasInstances: Boolean) : Comparable<ChildTaskData> {
 
         override fun compareTo(other: ChildTaskData) = if (hierarchyData != null) {
             hierarchyData.ordinal.compareTo(other.hierarchyData!!.ordinal)

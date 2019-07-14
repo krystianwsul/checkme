@@ -830,7 +830,8 @@ class DomainFactory(
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
                             childTask.image,
-                            true)
+                            true,
+                            childTask.hasInstances(now))
                 }
                 .sorted()
 
@@ -838,7 +839,7 @@ class DomainFactory(
                 task.name,
                 task.getScheduleText(now, true),
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
-                task.existingInstances.values.isNotEmpty() || task.getInstances(null, now, now).isNotEmpty(),
+                task.hasInstances(now),
                 task.image)
     }
 
@@ -852,18 +853,19 @@ class DomainFactory(
             val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
             Pair(it, hierarchyExactTimeStamp)
         }
-                .filter { (task, hierarhyExactTimeStamp) -> task.isRootTask(hierarhyExactTimeStamp) }
-                .map { (task, exactTimeStamp) ->
+                .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
+                .map { (task, hierarchyExactTimeStamp) ->
                     TaskListFragment.ChildTaskData(
                             task.name,
-                            task.getScheduleText(exactTimeStamp),
+                            task.getScheduleText(hierarchyExactTimeStamp),
                             getTaskListChildTaskDatas(task, now, true),
                             task.note,
                             task.startExactTimeStamp,
                             task.taskKey,
                             null,
                             task.image,
-                            task.current(now))
+                            task.current(now),
+                            task.hasInstances(now))
                 }
                 .sortedDescending()
                 .toMutableList()
@@ -2318,7 +2320,8 @@ class DomainFactory(
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
                             childTask.image,
-                            childTask.current(now))
+                            childTask.current(now),
+                            childTask.hasInstances(now))
                 }
                 .toList()
     }

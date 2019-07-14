@@ -449,8 +449,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private fun search(query: String?, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         this.query = query
-
-        treeViewAdapter.query = query
     }
 
     override fun onDestroyView() {
@@ -459,7 +457,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         initializeDisposable.clear()
     }
 
-    private class TaskAdapter(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {
+    private inner class TaskAdapter(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {
 
         lateinit var taskWrappers: MutableList<TaskWrapper>
             private set
@@ -536,7 +534,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = taskListFragment.selectionCallback.decrementSelected(x)
 
-        class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : GroupHolderNode(indentation), TaskParent, Sortable {
+        inner class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val childTaskData: ChildTaskData) : GroupHolderNode(indentation), TaskParent, Sortable {
 
             override val id = childTaskData.taskKey
 
@@ -675,7 +673,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 DomainFactory.instance.setTaskHierarchyOrdinal(taskListFragment.data!!.dataId, childTaskData.hierarchyData)
             }
 
-            override fun matchesSearch(query: String?) = childTaskData.matchesSearch(query)
+            override fun filter() = childTaskData.matchesSearch(query)
         }
     }
 

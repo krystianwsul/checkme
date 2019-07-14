@@ -18,7 +18,7 @@ interface ModelNode : Comparable<ModelNode> {
 
     fun onClick() = Unit
 
-    fun matchesSearch(query: String?) = true
+    fun filter() = true
 
     val state: ModelState
 

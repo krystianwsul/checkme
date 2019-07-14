@@ -39,6 +39,10 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 putBoolean(SHOW_DELETE_KEY, showDelete)
             }
         }
+
+        private val taskBackground by lazy {
+            GroupHolderNode.getColor(android.R.color.white)
+        }
     }
 
     private lateinit var recyclerView: RecyclerView
@@ -183,11 +187,9 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
     private fun search(query: String, @Suppress("UNUSED_PARAMETER") x: TreeViewAdapter.Placeholder) {
         this.query = query
-
-        treeViewAdapter!!.query = query
     }
 
-    private class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) : TreeModelAdapter, TaskParent {
+    private inner class TaskAdapter(private val parentPickerFragment: ParentPickerFragment) : TreeModelAdapter, TaskParent {
 
         private lateinit var taskWrappers: MutableList<TaskWrapper>
 
@@ -225,12 +227,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = throw UnsupportedOperationException()
 
-        private class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : GroupHolderNode(indentation), TaskParent {
-
-            companion object {
-
-                private val background = getColor(android.R.color.white)
-            }
+        private inner class TaskWrapper(indentation: Int, private val taskParent: TaskParent, val parentTreeData: CreateTaskViewModel.ParentTreeData) : GroupHolderNode(indentation), TaskParent {
 
             override lateinit var treeNode: TreeNode
                 private set
@@ -256,7 +253,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             override val isSeparatorVisibleWhenNotExpanded = false
 
             override val colorBackground: Int
-                get() = background
+                get() = taskBackground
 
             val expandedParentKeys: List<CreateTaskViewModel.ParentKey>
                 get() {
@@ -341,7 +338,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                 return comparison
             }
 
-            override fun matchesSearch(query: String?) = parentTreeData.matchesSearch(query)
+            override fun filter() = parentTreeData.matchesSearch(query)
         }
     }
 

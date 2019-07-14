@@ -26,8 +26,6 @@ class TreeViewAdapter(
     val selectedNodes
         get() = treeNodeCollection?.selectedNodes ?: throw SetTreeNodeCollectionNotCalledException()
 
-    var query: String? = null
-
     private var updating = false
 
     val updates = PublishRelay.create<Unit>()

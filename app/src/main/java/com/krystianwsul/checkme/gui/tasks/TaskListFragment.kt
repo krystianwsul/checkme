@@ -28,6 +28,7 @@ import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Observables
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.*
@@ -264,26 +265,38 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         taskListRecycler.layoutManager = LinearLayoutManager(context)
 
-        dataRelay.subscribe {
-            val hide = mutableListOf<View>(taskListProgress)
-            val show: View
+        Observables.combineLatest(dataRelay, taskListListener.search)
+                .subscribe { (_, searchWrapper) ->
+                    treeViewAdapter.updateDisplayedNodes {
+                        search(searchWrapper.value, TreeViewAdapter.Placeholder)
+                    }
 
-            if (treeViewAdapter.displayedNodes.isEmpty()) {
-                hide.add(taskListRecycler)
-                show = emptyTextLayout
+                    val hide = mutableListOf<View>(taskListProgress)
+                    val show = mutableListOf<View>()
 
-                emptyText.setText(if (rootTaskData != null) {
-                    R.string.empty_child
-                } else {
-                    R.string.tasks_empty_root
-                })
-            } else {
-                show = taskListRecycler
-                hide.add(emptyTextLayout)
-            }
+                    if (treeViewAdapter.displayedNodes.isEmpty()) {
+                        hide.add(taskListRecycler)
+                        show.add(emptyTextLayout)
 
-            animateVisibility(listOf(show), hide, immediate = data!!.immediate)
-        }.addTo(viewCreatedDisposable)
+                        val (emptyTextId, showEmptyImage) = when {
+                            searchWrapper.value != null -> Pair(R.string.noResults, false) // todo no results image
+                            rootTaskData != null -> Pair(R.string.empty_child, true)
+                            else -> Pair(R.string.tasks_empty_root, true)
+                        }
+
+                        if (showEmptyImage)
+                            show.add(emptyImage)
+                        else
+                            hide.add(emptyImage)
+
+                        emptyText.setText(emptyTextId)
+                    } else {
+                        show.add(taskListRecycler)
+                        hide.add(emptyTextLayout)
+                    }
+
+                    animateVisibility(show, hide, immediate = data!!.immediate)
+                }.addTo(viewCreatedDisposable)
 
         initialize()
     }
@@ -348,14 +361,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 search(searchData, TreeViewAdapter.Placeholder)
             }
         }
-
-        (context as TaskListListener).search
-                .subscribe {
-                    treeViewAdapter.updateDisplayedNodes {
-                        search(it.value, TreeViewAdapter.Placeholder)
-                    }
-                }
-                .addTo(initializeDisposable)
 
         updateFabVisibility()
 
@@ -651,8 +656,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override val thumbnail = childTaskData.imageState
 
             override fun compareTo(other: ModelNode) = if (other is TaskWrapper) {
-                val taskListFragment = taskListFragment
-
                 var comparison = childTaskData.compareTo(other.childTaskData)
                 if (taskListFragment.rootTaskData == null && indentation == 0)
                     comparison = -comparison

@@ -633,10 +633,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val isSelectable = true
 
-            override fun onClick() {
-                if (childTaskData.current) // todo search long press
-                    taskListFragment.activity!!.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
-            }
+            override fun onClick() = taskListFragment.activity!!.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
 
             override val isVisibleWhenEmpty = true
 

@@ -171,7 +171,6 @@ class GroupListFragment @JvmOverloads constructor(
                 R.id.action_group_share -> Utils.share(activity, getShareData(selectedDatas))
                 R.id.action_group_show_task -> {
                     val instanceData = selectedDatas.single()
-                    check(instanceData.taskCurrent)
 
                     activity.startActivity(ShowTaskActivity.newIntent(instanceData.taskKey))
                 }
@@ -341,7 +340,7 @@ class GroupListFragment @JvmOverloads constructor(
                 val instanceData = selectedDatas.single()
 
                 itemVisibilities.addAll(listOf(
-                        R.id.action_group_show_task to instanceData.taskCurrent,
+                        R.id.action_group_show_task to true,
                         R.id.action_group_edit_task to instanceData.taskCurrent,
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to instanceData.taskCurrent,

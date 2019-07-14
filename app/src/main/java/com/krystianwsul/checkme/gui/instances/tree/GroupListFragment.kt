@@ -418,6 +418,8 @@ class GroupListFragment @JvmOverloads constructor(
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
     override var scrollToTaskKey: TaskKey? = null
+    var scrollToInstanceKey: InstanceKey? = null
+
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = groupListRecycler
 
@@ -626,7 +628,19 @@ class GroupListFragment @JvmOverloads constructor(
         setGroupMenuItemVisibility()
         updateFabVisibility()
 
-        tryScroll()
+        delay {
+            if (scrollToTaskKey != null) {
+                check(scrollToInstanceKey == null)
+
+                tryScroll()
+            } else if (scrollToInstanceKey != null) {
+                findInstance()?.let {
+                    scrollToPosition(it)
+
+                    scrollToInstanceKey = null
+                }
+            }
+        }
     }
 
     private fun setGroupMenuItemVisibility() {
@@ -756,6 +770,43 @@ class GroupListFragment @JvmOverloads constructor(
                                 modelNode.instanceData
                                         .allTaskKeys
                                         .contains(scrollToTaskKey)
+                            }
+                        }
+                        else -> false
+                    }
+                }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
+    }
+
+    private fun findInstance(): Int? {
+        if (!this::treeViewAdapter.isInitialized)
+            return null
+
+        fun InstanceData.getAllInstanceKeys() = getAllInstanceDatas(this).map { it.instanceKey }
+
+        return treeViewAdapter.displayedNodes
+                .firstOrNull {
+                    when (val modelNode = it.modelNode) {
+                        is NotDoneGroupNode -> {
+                            if (it.isExpanded) {
+                                if (modelNode.singleInstance()) {
+                                    modelNode.singleInstanceData.instanceKey == scrollToInstanceKey
+                                } else {
+                                    false
+                                }
+                            } else {
+                                modelNode.instanceDatas
+                                        .map { it.getAllInstanceKeys() }
+                                        .flatten()
+                                        .contains(scrollToInstanceKey)
+                            }
+                        }
+                        is NotDoneGroupNode.NotDoneInstanceNode -> {
+                            if (it.isExpanded) {
+                                modelNode.instanceData.instanceKey == scrollToInstanceKey
+                            } else {
+                                modelNode.instanceData
+                                        .getAllInstanceKeys()
+                                        .contains(scrollToInstanceKey)
                             }
                         }
                         else -> false

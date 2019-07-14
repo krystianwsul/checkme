@@ -196,10 +196,12 @@ class NotDoneGroupNode(
 
         check(!groupAdapter.groupListFragment.selectionCallback.hasActionMode)
 
+        val instanceKey = singleInstanceData.instanceKey
+
         groupAdapter.treeNodeCollection
                 .treeViewAdapter
                 .updateDisplayedNodes {
-                    singleInstanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, singleInstanceData.instanceKey, true)!!
+                    singleInstanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceKey, true)!!
 
                     GroupListFragment.recursiveExists(singleInstanceData)
 
@@ -209,7 +211,11 @@ class NotDoneGroupNode(
                 }
 
         groupListFragment.listener.showSnackbarDone(1) {
-            DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, singleInstanceData.instanceKey, false)
+            check(groupListFragment.scrollToInstanceKey == null)
+
+            groupListFragment.scrollToInstanceKey = instanceKey
+
+            DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
         }
     }
 

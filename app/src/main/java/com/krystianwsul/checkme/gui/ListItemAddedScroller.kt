@@ -19,12 +19,7 @@ interface ListItemAddedScroller {
 
     val listItemAddedListener: ListItemAddedListener
 
-    fun tryScroll() {
-        if (scrollToTaskKey == null)
-            return
-
-        val target = findItem() ?: return
-
+    fun scrollToPosition(target: Int) {
         val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
 
         if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == -1)
@@ -65,17 +60,26 @@ interface ListItemAddedScroller {
                     scrollToBottom()
             }
         }
+    }
+
+    fun tryScroll() {
+        if (scrollToTaskKey == null)
+            return
+
+        val target = findItem() ?: return
+
+        scrollToPosition(target)
 
         scrollToTaskKey = null
-
-        return
     }
+
+    fun delay(action: () -> Unit) = Handler().postDelayed(action, 500)
 
     fun checkCreatedTaskKey() {
         scrollToTaskKey = CreateTaskActivity.createdTaskKey
         CreateTaskActivity.createdTaskKey = null
 
-        Handler().postDelayed({ tryScroll() }, 500)
+        delay { tryScroll() }
     }
 
     private fun View.getAbsoluteTop(): Int {

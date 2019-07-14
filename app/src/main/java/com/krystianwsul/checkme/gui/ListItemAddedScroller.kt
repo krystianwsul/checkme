@@ -1,7 +1,10 @@
 package com.krystianwsul.checkme.gui
 
+import android.os.Handler
+import android.util.DisplayMetrics
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
@@ -27,13 +30,26 @@ interface ListItemAddedScroller {
         if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == -1)
             return
 
+        fun smoothScroll(position: Int) {
+            val scroller = object : LinearSmoothScroller(recyclerView.context) {
+
+                override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics): Float {
+                    return 100f / displayMetrics.densityDpi
+                }
+            }
+
+            scroller.targetPosition = position
+
+            recyclerView.layoutManager!!.startSmoothScroll(scroller)
+        }
+
         if (target <= linearLayoutManager.findFirstCompletelyVisibleItemPosition()) {
             listItemAddedListener.setToolbarExpanded(true)
-            recyclerView.smoothScrollToPosition(target)
+            smoothScroll(target)
         } else {
             fun scrollToBottom() {
                 listItemAddedListener.setToolbarExpanded(false)
-                recyclerView.smoothScrollToPosition(target + 1)
+                smoothScroll(target + 1)
             }
 
             if (target > linearLayoutManager.findLastCompletelyVisibleItemPosition()) {
@@ -59,17 +75,10 @@ interface ListItemAddedScroller {
         scrollToTaskKey = CreateTaskActivity.createdTaskKey
         CreateTaskActivity.createdTaskKey = null
 
-        tryScroll()
+        Handler().postDelayed({ tryScroll() }, 500)
     }
 
     private fun View.getAbsoluteTop(): Int {
-        /*
-        val rect = Rect()
-        getGlobalVisibleRect(rect)
-
-        return rect.top
-        */
-
         val arr = IntArray(2)
         getLocationOnScreen(arr)
         return arr[1]

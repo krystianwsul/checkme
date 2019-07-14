@@ -531,13 +531,15 @@ class DomainFactory(
 
         val instances = task.existingInstances.values + task.getInstances(null, now, now)
 
+        val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
+
         val instanceDatas = instances.associate {
             val children = getChildInstanceDatas(it, now)
 
-            val hierarchyData = if (task.isRootTask(now)) {
+            val hierarchyData = if (task.isRootTask(hierarchyExactTimeStamp)) {
                 null
             } else {
-                val taskHierarchy = getParentTaskHierarchy(task, now)!!
+                val taskHierarchy = getParentTaskHierarchy(task, hierarchyExactTimeStamp)!!
 
                 HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal)
             }
@@ -841,7 +843,8 @@ class DomainFactory(
                 task.getScheduleText(hierarchyTimeStamp, true),
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
                 task.hasInstances(now),
-                task.image)
+                task.image,
+                task.current(now))
     }
 
     @Synchronized

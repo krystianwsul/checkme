@@ -647,7 +647,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    fun scrollToInstance(instanceKey: InstanceKey) {
+    fun scrollToInstance(instanceKey: InstanceKey) { // todo only do this if the instance was at position 0
         check(scrollToInstanceKey == null)
 
         scrollToInstanceKey = instanceKey

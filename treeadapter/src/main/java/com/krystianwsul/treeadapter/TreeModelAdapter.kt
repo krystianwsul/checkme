@@ -12,4 +12,6 @@ interface TreeModelAdapter {
     fun incrementSelected(x: TreeViewAdapter.Placeholder)
 
     fun decrementSelected(x: TreeViewAdapter.Placeholder)
+
+    fun scrollToTop() = Unit
 }

@@ -261,8 +261,6 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     listener.showSnackbarDone(instanceKeys.size) {
-                        instanceKeys.singleOrNull()?.let { scrollToInstance(it) }
-
                         DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, false)
                     }
                 }
@@ -292,8 +290,6 @@ class GroupListFragment @JvmOverloads constructor(
                     }
 
                     listener.showSnackbarDone(instanceKeys.size) {
-                        instanceKeys.singleOrNull()?.let { scrollToInstance(it) }
-
                         DomainFactory.instance.setInstancesDone(0, SaveService.Source.GUI, instanceKeys, true)
                     }
                 }
@@ -422,7 +418,6 @@ class GroupListFragment @JvmOverloads constructor(
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
     override var scrollToTaskKey: TaskKey? = null
-    private var scrollToInstanceKey: InstanceKey? = null
 
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = groupListRecycler
@@ -632,26 +627,7 @@ class GroupListFragment @JvmOverloads constructor(
         setGroupMenuItemVisibility()
         updateFabVisibility()
 
-        delay {
-            if (scrollToTaskKey != null) {
-                check(scrollToInstanceKey == null)
-
-                tryScroll()
-            } else if (scrollToInstanceKey != null) {
-                findInstance()?.let {
-                    if (it == 0)
-                        scrollToPosition(it)
-
-                    scrollToInstanceKey = null
-                }
-            }
-        }
-    }
-
-    fun scrollToInstance(instanceKey: InstanceKey) {
-        check(scrollToInstanceKey == null)
-
-        scrollToInstanceKey = instanceKey
+        tryScroll()
     }
 
     private fun setGroupMenuItemVisibility() {
@@ -788,43 +764,6 @@ class GroupListFragment @JvmOverloads constructor(
                 }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
     }
 
-    private fun findInstance(): Int? {
-        if (!this::treeViewAdapter.isInitialized)
-            return null
-
-        fun InstanceData.getAllInstanceKeys() = getAllInstanceDatas(this).map { it.instanceKey }
-
-        return treeViewAdapter.displayedNodes
-                .firstOrNull {
-                    when (val modelNode = it.modelNode) {
-                        is NotDoneGroupNode -> {
-                            if (it.isExpanded) {
-                                if (modelNode.singleInstance()) {
-                                    modelNode.singleInstanceData.instanceKey == scrollToInstanceKey
-                                } else {
-                                    false
-                                }
-                            } else {
-                                modelNode.instanceDatas
-                                        .map { it.getAllInstanceKeys() }
-                                        .flatten()
-                                        .contains(scrollToInstanceKey)
-                            }
-                        }
-                        is NotDoneGroupNode.NotDoneInstanceNode -> {
-                            if (it.isExpanded) {
-                                modelNode.instanceData.instanceKey == scrollToInstanceKey
-                            } else {
-                                modelNode.instanceData
-                                        .getAllInstanceKeys()
-                                        .contains(scrollToInstanceKey)
-                            }
-                        }
-                        else -> false
-                    }
-                }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
-    }
-
     class GroupAdapter(val groupListFragment: GroupListFragment) : TreeModelAdapter, NodeCollectionParent {
 
         companion object {
@@ -924,6 +863,8 @@ class GroupListFragment @JvmOverloads constructor(
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = groupListFragment.selectionCallback.decrementSelected(x)
 
         override val groupAdapter = this
+
+        override fun scrollToTop() = groupListFragment.scrollToTop()
     }
 
     @Parcelize

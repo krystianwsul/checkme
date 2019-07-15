@@ -211,8 +211,6 @@ class NotDoneGroupNode(
                 }
 
         groupListFragment.listener.showSnackbarDone(1) {
-            groupListFragment.scrollToInstance(instanceKey)
-
             DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
         }
     }
@@ -479,8 +477,6 @@ class NotDoneGroupNode(
                     }
 
             groupListFragment.listener.showSnackbarDone(1) {
-                groupListFragment.scrollToInstance(instanceKey)
-
                 DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
             }
         }

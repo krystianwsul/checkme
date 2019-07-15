@@ -63,14 +63,16 @@ interface ListItemAddedScroller {
     }
 
     fun tryScroll() {
-        if (scrollToTaskKey == null)
-            return
+        delay {
+            if (scrollToTaskKey == null)
+                return@delay
 
-        val target = findItem() ?: return
+            val target = findItem() ?: return@delay
 
-        scrollToPosition(target)
+            scrollToPosition(target)
 
-        scrollToTaskKey = null
+            scrollToTaskKey = null
+        }
     }
 
     fun delay(action: () -> Unit) = Handler().postDelayed(action, 500)
@@ -79,12 +81,16 @@ interface ListItemAddedScroller {
         scrollToTaskKey = CreateTaskActivity.createdTaskKey
         CreateTaskActivity.createdTaskKey = null
 
-        delay { tryScroll() }
+        tryScroll()
     }
 
     private fun View.getAbsoluteTop(): Int {
         val arr = IntArray(2)
         getLocationOnScreen(arr)
         return arr[1]
+    }
+
+    fun scrollToTop() {
+        delay { scrollToPosition(0) }
     }
 }

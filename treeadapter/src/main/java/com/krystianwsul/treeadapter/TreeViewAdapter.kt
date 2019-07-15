@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay2.PublishRelay
 
@@ -99,7 +100,21 @@ class TreeViewAdapter(
 
                 return oldStates[oldItemPosition] == newStates[newItemPosition]
             }
-        }).dispatchUpdatesTo(this)
+        }).dispatchUpdatesTo(object : ListUpdateCallback {
+
+            override fun onInserted(position: Int, count: Int) {
+                notifyItemRangeInserted(position, count)
+
+                if (position == 0)
+                    treeModelAdapter.scrollToTop()
+            }
+
+            override fun onRemoved(position: Int, count: Int) = notifyItemRangeRemoved(position, count)
+
+            override fun onMoved(fromPosition: Int, toPosition: Int) = notifyItemMoved(fromPosition, toPosition)
+
+            override fun onChanged(position: Int, count: Int, payload: Any?) = notifyItemRangeChanged(position, count, payload)
+        })
 
         updates.accept(Unit)
     }

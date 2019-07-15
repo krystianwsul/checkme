@@ -123,9 +123,11 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                         showDeleted
                 ).map { NullableWrapper(TaskListFragment.SearchData(it.first.toString(), it.second)) }
             } else {
-                Observable.just(NullableWrapper())
+                Observable.just(NullableWrapper<TaskListFragment.SearchData>())
             }
-        }.share()!!
+        }
+                .replay(1)
+                .apply { createDisposable += connect() }
     }
 
     override fun getBottomBar() = bottomAppBar!!

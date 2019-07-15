@@ -45,7 +45,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
     private lateinit var showTaskViewModel: ShowTaskViewModel
 
-    override val search = Observable.never<NullableWrapper<TaskListFragment.SearchData>>()!!
+    override val search = Observable.just(NullableWrapper<TaskListFragment.SearchData>())!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

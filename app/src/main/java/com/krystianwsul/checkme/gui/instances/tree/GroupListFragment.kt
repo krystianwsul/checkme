@@ -422,7 +422,7 @@ class GroupListFragment @JvmOverloads constructor(
     private var imageViewerData: Pair<ImageState, StfalconImageViewer<ImageState>>? = null
 
     override var scrollToTaskKey: TaskKey? = null
-    var scrollToInstanceKey: InstanceKey? = null
+    private var scrollToInstanceKey: InstanceKey? = null
 
     override val listItemAddedListener get() = listener
     override val recyclerView: RecyclerView get() = groupListRecycler
@@ -639,7 +639,8 @@ class GroupListFragment @JvmOverloads constructor(
                 tryScroll()
             } else if (scrollToInstanceKey != null) {
                 findInstance()?.let {
-                    scrollToPosition(it)
+                    if (it == 0)
+                        scrollToPosition(it)
 
                     scrollToInstanceKey = null
                 }
@@ -647,7 +648,7 @@ class GroupListFragment @JvmOverloads constructor(
         }
     }
 
-    fun scrollToInstance(instanceKey: InstanceKey) { // todo only do this if the instance was at position 0
+    fun scrollToInstance(instanceKey: InstanceKey) {
         check(scrollToInstanceKey == null)
 
         scrollToInstanceKey = instanceKey

@@ -185,10 +185,10 @@ class GroupListFragment @JvmOverloads constructor(
                     check(taskKeys.isNotEmpty())
                     check(selectedDatas.all { it.taskCurrent })
 
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(0, SaveService.Source.GUI, taskKeys.toSet())
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys.toSet())
 
                     listener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
-                        DomainFactory.instance.clearTaskEndTimeStamps(0, SaveService.Source.GUI, taskUndoData)
+                        DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
                     }
                 }
                 R.id.action_group_add_task -> {

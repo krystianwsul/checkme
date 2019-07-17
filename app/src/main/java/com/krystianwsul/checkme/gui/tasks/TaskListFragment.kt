@@ -109,30 +109,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                             removeNodes.remove(it)
                     }
 
-                    val removeTaskDatas = removeNodes.map { (it.modelNode as TaskAdapter.TaskWrapper).childTaskData }
-
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(data!!.dataId, SaveService.Source.GUI, taskKeys.toSet())
-                    data!!.taskData
-                            .childTaskDatas
-                            .removeAll(removeTaskDatas)
-
-                    updateSelectAll()
+                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys.toSet())
 
                     taskListListener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
-                        DomainFactory.instance.clearTaskEndTimeStamps(data!!.dataId, SaveService.Source.GUI, taskUndoData)
-
-                        data!!.taskData
-                                .childTaskDatas
-                                .apply {
-                                    addAll(removeTaskDatas)
-
-                                    if (rootTaskData != null)
-                                        sort()
-                                    else
-                                        sortDescending()
-                                }
-
-                        initialize()
+                        DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
                     }
                 }
                 R.id.action_task_add -> startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(taskKeys.single())))

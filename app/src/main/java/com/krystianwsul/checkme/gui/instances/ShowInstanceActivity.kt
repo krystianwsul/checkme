@@ -283,19 +283,11 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                             if (!it.exists)
                                 showInstanceViewModel.stop()
 
-                            val undoTaskData = DomainFactory.instance.setTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, setOf(instanceKey.taskKey))
+                            val undoTaskData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, setOf(instanceKey.taskKey))
 
                             if (it.exists) {
-                                it.taskCurrent = false
-
-                                updateBottomMenu()
-
                                 showSnackbarRemoved(1) {
-                                    it.taskCurrent = true
-
-                                    updateBottomMenu()
-
-                                    DomainFactory.instance.clearTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, undoTaskData)
+                                    DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, undoTaskData)
                                 }
                             } else {
                                 setSnackbar(undoTaskData)

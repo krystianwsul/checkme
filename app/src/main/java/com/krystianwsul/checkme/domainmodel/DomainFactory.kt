@@ -1597,7 +1597,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskKeys: Set<TaskKey>): TaskUndoData {
+    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>): TaskUndoData {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1625,7 +1625,7 @@ class DomainFactory(
 
         updateNotifications(now)
 
-        save(dataId, source)
+        save(0, source)
 
         notifyCloud(remoteProjects)
 
@@ -1633,7 +1633,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun clearTaskEndTimeStamps(dataId: Int, source: SaveService.Source, taskUndoData: TaskUndoData) {
+    fun clearTaskEndTimeStamps(source: SaveService.Source, taskUndoData: TaskUndoData) {
         MyCrashlytics.log("DomainFactory.clearTaskEndTimeStamps")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1643,7 +1643,7 @@ class DomainFactory(
 
         updateNotifications(now)
 
-        save(dataId, source)
+        save(0, source)
 
         val remoteProjects = taskUndoData.taskKeys
                 .map { getTaskForce(it).project }

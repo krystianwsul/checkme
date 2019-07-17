@@ -169,7 +169,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                     R.id.task_menu_delete -> {
                         showTaskViewModel.stop()
 
-                        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(data!!.dataId, SaveService.Source.GUI, setOf(taskKey))
+                        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, setOf(taskKey))
 
                         setResult(RESULT_DELETE)
 

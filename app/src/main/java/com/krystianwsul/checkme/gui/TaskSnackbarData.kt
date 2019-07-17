@@ -7,7 +7,7 @@ class TaskSnackbarData(private val taskUndoData: DomainFactory.TaskUndoData) : S
 
     override fun show(snackbarListener: SnackbarListener) {
         snackbarListener.showSnackbarRemoved(1) {
-            DomainFactory.instance.clearTaskEndTimeStamps(0, SaveService.Source.GUI, taskUndoData)
+            DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
         }
     }
 }

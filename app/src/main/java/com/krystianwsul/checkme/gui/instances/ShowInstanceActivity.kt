@@ -283,7 +283,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                             if (!it.exists)
                                 showInstanceViewModel.stop()
 
-                            val undoTaskData = DomainFactory.instance.setTaskEndTimeStamp(it.dataId, SaveService.Source.GUI, instanceKey.taskKey)
+                            val undoTaskData = DomainFactory.instance.setTaskEndTimeStamps(it.dataId, SaveService.Source.GUI, setOf(instanceKey.taskKey))
 
                             if (it.exists) {
                                 it.taskCurrent = false

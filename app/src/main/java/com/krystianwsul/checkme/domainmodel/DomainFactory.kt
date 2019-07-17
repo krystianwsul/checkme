@@ -1553,29 +1553,6 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setTaskEndTimeStamp(dataId: Int, source: SaveService.Source, taskKey: TaskKey): TaskUndoData {
-        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamp")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
-        val now = ExactTimeStamp.now
-
-        val task = getTaskForce(taskKey)
-        check(task.current(now))
-
-        val taskUndoData = TaskUndoData()
-
-        task.setEndExactTimeStamp(now, taskUndoData)
-
-        updateNotifications(now)
-
-        save(dataId, source)
-
-        notifyCloud(task.project)
-
-        return taskUndoData
-    }
-
-    @Synchronized
     fun setInstanceOrdinal(dataId: Int, instanceKey: InstanceKey, ordinal: Double) {
         MyCrashlytics.log("DomainFactory.setInstanceOrdinal")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()

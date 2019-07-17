@@ -9,7 +9,7 @@ abstract class AbstractDialogFragment : AppCompatDialogFragment() {
     protected val startDisposable = CompositeDisposable()
 
     override fun onResume() {
-        MyCrashlytics.log(javaClass.simpleName + ".onResume")
+        MyCrashlytics.logMethod(this)
 
         super.onResume()
     }

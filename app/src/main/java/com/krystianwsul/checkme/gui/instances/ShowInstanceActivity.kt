@@ -97,10 +97,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                             check(it.isRootInstance)
 
                             if (!it.notificationShown) { // to ignore double taps
-                                DomainFactory.instance.setInstancesNotNotified(it.dataId, SaveService.Source.GUI, listOf(instanceKey))
-                                it.notificationShown = true
-
-                                updateTopMenu()
+                                DomainFactory.instance.setInstancesNotNotified(0, SaveService.Source.GUI, listOf(instanceKey))
                             }
                         }
                         R.id.instanceMenuHour -> {
@@ -254,18 +251,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         groupListFragment.setInstanceKey(instanceKey, data.dataId, data.immediate, data.dataWrapper)
     }
 
-    private fun setDone(done: Boolean) {
-        DomainFactory.instance.setInstanceDone(data!!.dataId, SaveService.Source.GUI, instanceKey, done)
-
-        data!!.let {
-            it.done = done
-
-            if (done)
-                it.exists = true
-        }
-
-        updateTopMenu()
-    }
+    private fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, done)
 
     override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
 

@@ -11,4 +11,5 @@ class InstanceJson @JvmOverloads constructor(
         var instanceHour: Int? = null,
         var instanceMinute: Int? = null,
         var ordinal: Double? = null,
-        var hidden: Boolean = false)
+        var hidden: Boolean = false,
+        var endTime: Long? = null)

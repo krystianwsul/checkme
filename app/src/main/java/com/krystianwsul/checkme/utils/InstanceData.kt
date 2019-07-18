@@ -17,6 +17,8 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
     abstract val hidden: Boolean
 
+    abstract val endTime: Long?
+
     abstract class Real<T, U, V : InstanceRecord<U>>(val instanceRecord: V) : InstanceData<T, U, V>() {
 
         protected abstract fun getCustomTime(customTimeId: U): CustomTime
@@ -54,6 +56,8 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
         override val done get() = instanceRecord.done
 
         override val hidden get() = instanceRecord.hidden
+
+        override val endTime get() = instanceRecord.done
     }
 
     class Virtual<T, U, V : InstanceRecord<U>>(val taskId: T, val scheduleDateTime: DateTime) : InstanceData<T, U, V>() {
@@ -69,6 +73,8 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
         override val done: Long? = null
 
         override val hidden = false
+
+        override val endTime: Long? = null
     }
 
     class InconsistentInstanceException(message: String) : Exception(message)

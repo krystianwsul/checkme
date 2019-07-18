@@ -12,7 +12,7 @@ import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.JsonTime
 import com.krystianwsul.checkme.utils.time.TimePair
 import java.util.regex.Pattern
-import kotlin.properties.Delegates
+import kotlin.properties.Delegates.observable
 
 class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         create: Boolean,
@@ -123,7 +123,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             null
     }
 
-    override var instanceDate by Delegates.observable(getInitialInstanceDate()) { _, _, value ->
+    override var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
         val instanceYear = value!!.year
         val instanceMonth = value.month
         val instanceDay = value.day
@@ -167,7 +167,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                 }
     }
 
-    override var instanceJsonTime by Delegates.observable(initialInstanceJsonTime) { _, _, value ->
+    override var instanceJsonTime by observable(initialInstanceJsonTime) { _, _, value ->
         var customTimeId: T? = null
         var hourMinute: HourMinute? = null
         when (value) {
@@ -219,4 +219,14 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         }
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
+
+    override var endTime
+        get() = createObject.endTime
+        set(value) {
+            if (value == createObject.endTime)
+                return
+
+            createObject.endTime = value
+            addValue("$key/endTime", value)
+        }
 }

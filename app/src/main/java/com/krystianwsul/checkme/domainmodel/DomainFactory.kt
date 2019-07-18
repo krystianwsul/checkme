@@ -1597,7 +1597,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean): TaskUndoData { // todo delete instances
+    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean): TaskUndoData {
         MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1618,6 +1618,8 @@ class DomainFactory(
         }
 
         val taskUndoData = TaskUndoData()
+
+        // todo delete instances: if (deleteIsntances ==true) set instance end timestamps if exist and not done, add to taskUndoData
 
         tasks.forEach { it.setEndExactTimeStamp(now, taskUndoData) }
 

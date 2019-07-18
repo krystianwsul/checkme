@@ -106,6 +106,8 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract val instanceShownRecord: InstanceShownRecord?
 
+    val endExactTimeStamp get() = instanceData.endTime?.let { ExactTimeStamp(it) }
+
     fun exists() = (instanceData is InstanceData.Real)
 
     fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
@@ -182,6 +184,11 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     private fun isVisibleHelper(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (instanceData.hidden)
             return false
+
+        endExactTimeStamp?.let {
+            if (it <= now)
+                return false
+        }
 
         val parentInstance = getParentInstance(now)
         if (parentInstance != null) {

@@ -23,12 +23,14 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimesFragment
 import com.krystianwsul.checkme.gui.friends.FriendListFragment
 import com.krystianwsul.checkme.gui.instances.DayFragment
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.projects.ProjectListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.checkme.viewmodels.MainViewModel
@@ -68,6 +70,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         private const val ACTION_INSTANCES = "com.krystianwsul.checkme.INSTANCES"
         private const val ACTION_TASKS = "com.krystianwsul.checkme.TASKS"
         private const val ACTION_SEARCH = "com.krystianwsul.checkme.SEARCH"
+
+        private const val TAG_DELETE_INSTANCES = "deleteInstances"
 
         fun newIntent() = Intent(MyApplication.instance, MainActivity::class.java)
     }
@@ -123,11 +127,19 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                         showDeleted
                 ).map { NullableWrapper(TaskListFragment.SearchData(it.first.toString(), it.second)) }
             } else {
-                Observable.just(NullableWrapper<TaskListFragment.SearchData>())
+                Observable.just(NullableWrapper())
             }
         }
                 .replay(1)
-                .apply { createDisposable += connect() }
+                .apply { createDisposable += connect() }!!
+    }
+
+    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, removeInstances: Boolean ->
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances)
+
+        showSnackbarRemoved(taskUndoData.taskKeys.size) {
+            DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
+        }
     }
 
     override fun getBottomBar() = bottomAppBar!!
@@ -464,6 +476,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 layoutParams = layoutParams.apply { width = mainActivityToolbar.width - dpToPx(64 + 56).toInt() }
             }
         }
+
+        (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
     override fun onStart() {
@@ -770,6 +784,12 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
 
         updateBottomMenu()
+    }
+
+    override fun deleteTasks(taskKeys: Set<TaskKey>) {
+        RemoveInstancesDialogFragment.newInstance(taskKeys)
+                .also { it.listener = deleteInstancesListener }
+                .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) {

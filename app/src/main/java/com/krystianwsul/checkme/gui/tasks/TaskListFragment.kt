@@ -21,7 +21,6 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.checkme.utils.removeFromGetter
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.treeadapter.*
@@ -44,6 +43,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         private const val KEY_SEARCH_DATA = "searchData"
         private const val KEY_SHOW_IMAGE = "showImage"
 
+        private const val TAG_REMOVE_INSTANCES = "removeInstances"
+
         fun newInstance() = TaskListFragment()
     }
 
@@ -60,6 +61,16 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             override fun getTreeViewAdapter() = treeViewAdapter
 
             override fun onSetNewItemPosition() = selectionCallback.actionMode!!.finish()
+        }
+    }
+
+    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, deleteInstances: Boolean ->
+        checkNotNull(data)
+
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, deleteInstances)
+
+        taskListListener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
+            DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
         }
     }
 
@@ -88,32 +99,9 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 R.id.action_task_delete -> {
                     checkNotNull(data)
 
-                    removeFromGetter({ treeViewAdapter.selectedNodes.sortedByDescending { it.indentation } }) {
-                        val taskWrapper = it.modelNode as TaskAdapter.TaskWrapper
-
-                        taskWrapper.removeFromParent(x)
-
-                        decrementSelected(x)
-                    }
-
-                    val removeNodes = selected.toMutableList()
-
-                    fun parentPresent(treeNode: TreeNode): Boolean {
-                        return (treeNode.parent as? TreeNode)?.let {
-                            removeNodes.contains(it) || parentPresent(it)
-                        } ?: false
-                    }
-
-                    removeNodes.toMutableList().forEach {
-                        if (parentPresent(it))
-                            removeNodes.remove(it)
-                    }
-
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys.toSet())
-
-                    taskListListener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
-                        DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
-                    }
+                    RemoveInstancesDialogFragment.newInstance(taskKeys.toSet())
+                            .also { it.listener = deleteInstancesListener }
+                            .show(childFragmentManager, TAG_REMOVE_INSTANCES)
                 }
                 R.id.action_task_add -> startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(taskKeys.single())))
                 R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
@@ -236,6 +224,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             showImage = getBoolean(KEY_SHOW_IMAGE)
         }
+
+        (childFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_task_list, container, false)!!
@@ -642,8 +632,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             } else {
                 1
             }
-
-            fun removeFromParent(x: TreeViewAdapter.Placeholder) = taskParent.remove(this, x)
 
             override fun remove(taskWrapper: TaskWrapper, x: TreeViewAdapter.Placeholder) {
                 check(taskWrappers.contains(taskWrapper))

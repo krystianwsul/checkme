@@ -8,6 +8,7 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -32,6 +33,8 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
         const val REQUEST_EDIT_TASK = 1
         const val RESULT_DELETE = 65
 
+        private const val TAG_REMOVE_INSTANCES = "removeInstances"
+
         fun newIntent(taskKey: TaskKey) = Intent(MyApplication.instance, ShowTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
     }
 
@@ -46,6 +49,18 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     private lateinit var showTaskViewModel: ShowTaskViewModel
 
     override val search = Observable.just(NullableWrapper<TaskListFragment.SearchData>())!!
+
+    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, deleteInstances: Boolean ->
+        showTaskViewModel.stop()
+
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, deleteInstances)
+
+        setResult(RESULT_DELETE)
+
+        finish()
+
+        setSnackbar(taskUndoData)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +91,8 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
+
+        (supportFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
     override fun onStart() {
@@ -167,15 +184,9 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
                         Utils.share(this@ShowTaskActivity, data!!.name + taskListFragment.shareData.let { "\n" + it })
                     }
                     R.id.task_menu_delete -> {
-                        showTaskViewModel.stop()
-
-                        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, setOf(taskKey))
-
-                        setResult(RESULT_DELETE)
-
-                        finish()
-
-                        setSnackbar(taskUndoData)
+                        RemoveInstancesDialogFragment.newInstance(setOf(taskKey))
+                                .also { it.listener = deleteInstancesListener }
+                                .show(supportFragmentManager, TAG_REMOVE_INSTANCES)
                     }
                     R.id.task_menu_select_all -> {
                         taskListFragment.treeViewAdapter.updateDisplayedNodes {

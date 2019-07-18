@@ -106,8 +106,6 @@
     <string name="showRemoved">Show removed</string>
     <string name="noResults">No results</string>
     <string name="removeInstancesMessage">Remove reminders as well?</string>
-    <string name="removeInstancesNoSingular">Only task</string>
-    <string name="removeInstancesYesSingular">Task and instances</string>
-    <string name="removeInstancesNoPlural">Only tasks</string>
-    <string name="removeInstancesYesPlural">Tasks and instances</string>
+    <string name="removeInstancesNo">Only tasks</string>
+    <string name="removeInstancesYes">Tasks and instances</string>
 </resources>

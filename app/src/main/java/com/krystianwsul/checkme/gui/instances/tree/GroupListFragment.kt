@@ -185,11 +185,7 @@ class GroupListFragment @JvmOverloads constructor(
                     check(taskKeys.isNotEmpty())
                     check(selectedDatas.all { it.taskCurrent })
 
-                    val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys.toSet())
-
-                    listener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
-                        DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
-                    }
+                    listener.deleteTasks(taskKeys.toSet())
                 }
                 R.id.action_group_add_task -> {
                     val instanceData = selectedDatas.single()
@@ -889,6 +885,8 @@ class GroupListFragment @JvmOverloads constructor(
         fun getBottomBar(): MyBottomBar
 
         fun initBottomBar()
+
+        fun deleteTasks(taskKeys: Set<TaskKey>)
     }
 
     data class DataWrapper(

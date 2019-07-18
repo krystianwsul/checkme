@@ -5,8 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
@@ -23,6 +27,8 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
 
         private const val TIME_KEY = "time"
 
+        private const val TAG_DELETE_INSTANCES = "deleteInstances"
+
         fun getIntent(exactTimeStamp: ExactTimeStamp, context: Context) = Intent(context, ShowGroupActivity::class.java).apply {
             putExtra(TIME_KEY, exactTimeStamp.long)
         }
@@ -35,6 +41,14 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
     private lateinit var showGroupViewModel: ShowGroupViewModel
 
     override val snackbarParent get() = showGroupCoordinator!!
+
+    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, removeInstances: Boolean ->
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances)
+
+        showSnackbarRemoved(taskUndoData.taskKeys.size) {
+            DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +70,8 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
         }
 
         initBottomBar()
+
+        (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
     override fun onStart() {
@@ -100,6 +116,12 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
                 true
             }
         }
+    }
+
+    override fun deleteTasks(taskKeys: Set<TaskKey>) {
+        RemoveInstancesDialogFragment.newInstance(taskKeys)
+                .also { it.listener = deleteInstancesListener }
+                .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
     override fun getBottomBar() = bottomAppBar!!

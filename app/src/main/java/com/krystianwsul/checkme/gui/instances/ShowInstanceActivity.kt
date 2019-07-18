@@ -11,6 +11,7 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
+import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
@@ -39,6 +40,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
         private const val EDIT_INSTANCES_TAG = "editInstances"
 
+        private const val TAG_DELETE_INSTANCES = "deleteInstances"
+
         fun getIntent(context: Context, instanceKey: InstanceKey) = Intent(context, ShowInstanceActivity::class.java).apply { putExtra(INSTANCE_KEY, instanceKey as Parcelable) }
 
         fun getNotificationIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, ShowInstanceActivity::class.java).apply {
@@ -66,6 +69,16 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     private val broadcastReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context?, intent: Intent?) = updateBottomMenu()
+    }
+
+    private var deletedTasks: Pair<Int, DomainFactory.TaskUndoData>? = null
+
+    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, removeInstances: Boolean ->
+        check(deletedTasks == null)
+
+        val undoTaskData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances)
+
+        deletedTasks = Pair(taskKeys.size, undoTaskData)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,6 +151,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
             createDisposable += data.subscribe { onLoadFinished(it) }
         }
+
+        (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
     private fun showHour() = data?.run { !done && isRootInstance && instanceDateTime.timeStamp <= TimeStamp.now } == true
@@ -213,6 +228,19 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
+        deletedTasks?.let {
+            // todo
+            if (false) {
+                setSnackbar(it.second)
+
+                finish()
+            } else {
+                showSnackbarRemoved(it.first) {
+                    DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, it.second)
+                }
+            }
+        }
+
         this.data = data
 
         toolbar.run {
@@ -280,20 +308,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                         R.id.instance_menu_delete_task -> {
                             check(it.taskCurrent)
 
-                            if (!it.exists)
-                                showInstanceViewModel.stop()
-
-                            val undoTaskData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, setOf(instanceKey.taskKey))
-
-                            if (it.exists) {
-                                showSnackbarRemoved(1) {
-                                    DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, undoTaskData)
-                                }
-                            } else {
-                                setSnackbar(undoTaskData)
-
-                                finish()
-                            }
+                            deleteTasks(setOf(instanceKey.taskKey))
                         }
                         R.id.instance_menu_select_all -> {
                             groupListFragment.treeViewAdapter.updateDisplayedNodes {
@@ -314,6 +329,12 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         }
 
         updateBottomMenu()
+    }
+
+    override fun deleteTasks(taskKeys: Set<TaskKey>) {
+        RemoveInstancesDialogFragment.newInstance(taskKeys)
+                .also { it.listener = deleteInstancesListener }
+                .show(supportFragmentManager, TAG_DELETE_INSTANCES)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

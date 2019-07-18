@@ -71,14 +71,23 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         override fun onReceive(context: Context?, intent: Intent?) = updateBottomMenu()
     }
 
-    private var deletedTasks: Pair<Int, DomainFactory.TaskUndoData>? = null
-
     private val deleteInstancesListener = { taskKeys: Set<TaskKey>, removeInstances: Boolean ->
-        check(deletedTasks == null)
+        val close = taskKeys.contains(instanceKey.taskKey) && !data!!.exists // todo delete instances
+
+        if (close)
+            showInstanceViewModel.stop()
 
         val undoTaskData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances)
 
-        deletedTasks = Pair(taskKeys.size, undoTaskData)
+        if (close) {
+            setSnackbar(undoTaskData)
+
+            finish()
+        } else {
+            showSnackbarRemoved(taskKeys.size) {
+                DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, undoTaskData)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -225,19 +234,6 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     }
 
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
-        deletedTasks?.let {
-            // todo
-            if (false) {
-                setSnackbar(it.second)
-
-                finish()
-            } else {
-                showSnackbarRemoved(it.first) {
-                    DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, it.second)
-                }
-            }
-        }
-
         this.data = data
 
         toolbar.run {

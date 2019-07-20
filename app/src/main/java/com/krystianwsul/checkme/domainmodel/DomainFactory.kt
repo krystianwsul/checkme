@@ -1621,7 +1621,7 @@ class DomainFactory(
 
         // todo delete instances: if (deleteIsntances ==true) set instance end timestamps if exist and not done, add to taskUndoData
 
-        tasks.forEach { it.setEndExactTimeStamp(now, taskUndoData) }
+        tasks.forEach { it.setEndExactTimeStamp(now, Pair(taskUndoData, deleteInstances)) }
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
@@ -2755,6 +2755,7 @@ class DomainFactory(
         val taskKeys = mutableSetOf<TaskKey>()
         val scheduleIds = mutableSetOf<ScheduleId>()
         val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
+        val instanceKeys = mutableSetOf<InstanceKey>()
     }
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)

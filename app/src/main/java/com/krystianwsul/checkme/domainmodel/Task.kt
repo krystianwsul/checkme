@@ -104,17 +104,21 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     protected abstract fun setMyEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp?)
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp, taskUndoData: DomainFactory.TaskUndoData? = null, recursive: Boolean = false) {
+    fun setEndExactTimeStamp(now: ExactTimeStamp, taskUndoData: Pair<DomainFactory.TaskUndoData, Boolean>? = null, recursive: Boolean = false) {
         check(current(now))
 
-        taskUndoData?.taskKeys?.add(taskKey)
+        taskUndoData?.first
+                ?.taskKeys
+                ?.add(taskKey)
 
         val schedules = getCurrentSchedules(now)
         if (isRootTask(now)) {
             check(schedules.all { it.current(now) })
 
             schedules.forEach {
-                taskUndoData?.scheduleIds?.add(it.scheduleId)
+                taskUndoData?.first
+                        ?.scheduleIds
+                        ?.add(it.scheduleId)
 
                 it.setEndExactTimeStamp(now)
             }
@@ -125,7 +129,9 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         getChildTaskHierarchies(now).forEach {
             it.childTask.setEndExactTimeStamp(now, taskUndoData, true)
 
-            taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
+            taskUndoData?.first
+                    ?.taskHierarchyKeys
+                    ?.add(it.taskHierarchyKey)
 
             it.setEndExactTimeStamp(now)
         }
@@ -134,11 +140,20 @@ abstract class Task(protected val domainFactory: DomainFactory) {
             domainFactory.getParentTaskHierarchy(this, now)?.let {
                 check(it.current(now))
 
-                taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
+                taskUndoData?.first
+                        ?.taskHierarchyKeys
+                        ?.add(it.taskHierarchyKey)
 
                 it.setEndExactTimeStamp(now)
             }
         }
+
+        if (taskUndoData?.second == true)
+            taskUndoData.first
+                    .instanceKeys
+                    .addAll(existingInstances.values
+                            .filter { it.exists() && it.done == null && it.instanceDateTime.timeStamp.toExactTimeStamp() > now }
+                            .map { it.instanceKey })
 
         setMyEndExactTimeStamp(now)
     }

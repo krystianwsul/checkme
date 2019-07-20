@@ -1142,6 +1142,9 @@ class DomainFactory(
         MyCrashlytics.log("DomainFactory.setInstanceNotified")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
+        val instance = getInstance(instanceKey)
+
+        Preferences.logLineHour("DomainFactory: setting notified: ${instance.name}")
         setInstanceNotified(instanceKey)
 
         save(dataId, source)

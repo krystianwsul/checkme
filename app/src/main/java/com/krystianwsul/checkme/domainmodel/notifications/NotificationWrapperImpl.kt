@@ -251,4 +251,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     protected open fun setExact(time: Long, pendingIntent: PendingIntent) {
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent)
     }
+
+    override fun logNotificationIds(source: String) = Unit
 }

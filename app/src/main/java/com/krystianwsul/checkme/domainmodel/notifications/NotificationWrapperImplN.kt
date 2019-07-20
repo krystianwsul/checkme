@@ -7,6 +7,7 @@ import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 
@@ -75,6 +76,8 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
                 setGroupSummary(true)
         }
     }
+
+    override fun logNotificationIds(source: String) = Preferences.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })
 
     private class NotificationException(lastNotificationId: Int, statusBarNotifications: Array<StatusBarNotification>) : RuntimeException("last id: $lastNotificationId, shown ids: " + statusBarNotifications.joinToString(", ") { it.id.toString() })
 }

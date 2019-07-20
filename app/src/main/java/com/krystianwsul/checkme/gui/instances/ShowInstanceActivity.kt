@@ -198,7 +198,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     private fun cancelNotification() = NotificationWrapper.instance.run {
         intent.getIntExtra(NOTIFICATION_ID_KEY, -1)
                 .takeIf { it != -1 }
-                ?.let(this::cancelNotification)
+                ?.let(::cancelNotification)
 
         cleanGroup(null)
     }

@@ -14,6 +14,7 @@ import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
@@ -36,7 +37,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
     override fun cancelNotification(id: Int) {
-        MyCrashlytics.log("NotificationManager.cancel $id")
+        Preferences.logLineHour("NotificationManager.cancel $id")
         notificationManager.cancel(id)
     }
 
@@ -94,7 +95,25 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             style = null
         }
 
-        notify(instance.name, text, notificationId, pendingDeleteIntent, pendingContentIntent, silent, actions, instance.instanceDateTime.timeStamp.long, style, true, false, instance.instanceDateTime.timeStamp.long.toString() + instance.task.startExactTimeStamp.toString())
+        val timeStampLong = instance.instanceDateTime
+                .timeStamp
+                .long
+
+        notify(
+                instance.name,
+                text,
+                notificationId,
+                pendingDeleteIntent,
+                pendingContentIntent,
+                silent,
+                actions,
+                timeStampLong,
+                style,
+                autoCancel = true,
+                summary = false,
+                sortKey = timeStampLong.toString() + instance.task
+                        .startExactTimeStamp
+                        .toString())
     }
 
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {
@@ -201,7 +220,19 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .sortedWith(compareBy({ it.instanceDateTime.timeStamp }, { it.task.startExactTimeStamp }))
                 .map { it.name + getInstanceText(it, now) }, true)
 
-        notify(instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders), names.joinToString(", "), 0, pendingDeleteIntent, pendingContentIntent, silent, listOf(), null, inboxStyle, false, true, "0")
+        notify(
+                instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders),
+                names.joinToString(", "),
+                0,
+                pendingDeleteIntent,
+                pendingContentIntent,
+                silent,
+                listOf(),
+                null,
+                inboxStyle,
+                autoCancel = false,
+                summary = true,
+                sortKey = "0")
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {

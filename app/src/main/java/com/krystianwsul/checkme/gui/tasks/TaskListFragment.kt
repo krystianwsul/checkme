@@ -496,18 +496,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = NodeHolder(taskListFragment.activity!!.layoutInflater.inflate(R.layout.row_list, parent, false))
 
-        override fun remove(taskWrapper: TaskWrapper, x: TreeViewAdapter.Placeholder) {
-            check(taskWrappers.contains(taskWrapper))
-
-            taskWrappers.remove(taskWrapper)
-
-            val treeNodeCollection = this.treeNodeCollection
-
-            val treeNode = taskWrapper.treeNode
-
-            treeNodeCollection.remove(treeNode, x)
-        }
-
         override val hasActionMode get() = taskListFragment.selectionCallback.hasActionMode
 
         override fun incrementSelected(x: TreeViewAdapter.Placeholder) = taskListFragment.selectionCallback.incrementSelected(x)
@@ -633,16 +621,6 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 1
             }
 
-            override fun remove(taskWrapper: TaskWrapper, x: TreeViewAdapter.Placeholder) {
-                check(taskWrappers.contains(taskWrapper))
-
-                taskWrappers.remove(taskWrapper)
-
-                val childTreeNode = taskWrapper.treeNode
-
-                treeNode.remove(childTreeNode, x)
-            }
-
             override fun getOrdinal() = childTaskData.hierarchyData!!.ordinal
 
             override fun setOrdinal(ordinal: Double) {
@@ -656,9 +634,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     }
 
     private interface TaskParent {
-        val taskAdapter: TaskAdapter
 
-        fun remove(taskWrapper: TaskAdapter.TaskWrapper, x: TreeViewAdapter.Placeholder)
+        val taskAdapter: TaskAdapter
     }
 
     data class Data(val dataId: Int, val immediate: Boolean, val taskData: TaskData)

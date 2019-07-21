@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
 import androidx.appcompat.view.ActionMode
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
@@ -219,12 +220,17 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     private fun cancelNotification() = NotificationWrapper.instance.run {
         intent.getIntExtra(NOTIFICATION_ID_KEY, -1)
                 .takeIf { it != -1 }
-                ?.let(this::cancelNotification)
+                ?.let {
+                    logNotificationIds("ShowInstanceActivity.cancelNotification")
+
+                    cancelNotification(it)
+                }
 
         cleanGroup(null)
     }
 
     private fun setInstanceNotified() {
+        Preferences.logLineHour("ShowInstanceActivity: setting notified")
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
             DomainFactory.addFirebaseListener {
                 it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)

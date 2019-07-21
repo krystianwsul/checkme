@@ -17,7 +17,7 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
     abstract val hidden: Boolean
 
-    abstract val endTime: Long?
+    abstract var endTime: Long?
 
     abstract class Real<T, U, V : InstanceRecord<U>>(val instanceRecord: V) : InstanceData<T, U, V>() {
 
@@ -57,7 +57,11 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
         override val hidden get() = instanceRecord.hidden
 
-        override val endTime get() = instanceRecord.done
+        override var endTime
+            get() = instanceRecord.done
+            set(value) {
+                instanceRecord.done = value
+            }
     }
 
     class Virtual<T, U, V : InstanceRecord<U>>(val taskId: T, val scheduleDateTime: DateTime) : InstanceData<T, U, V>() {
@@ -74,7 +78,10 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
         override val hidden = false
 
-        override val endTime: Long? = null
+        @Suppress("UNUSED_PARAMETER")
+        override var endTime: Long?
+            get() = null
+            set(value) = throw UnsupportedOperationException()
     }
 
     class InconsistentInstanceException(message: String) : Exception(message)

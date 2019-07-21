@@ -153,7 +153,13 @@ abstract class Task(protected val domainFactory: DomainFactory) {
                     .instanceKeys
                     .addAll(existingInstances.values
                             .filter { it.exists() && it.done == null && it.instanceDateTime.timeStamp.toExactTimeStamp() > now }
-                            .map { it.instanceKey })
+                            .map {
+                                check(it.current(now))
+
+                                it.setEndExactTimeStamp(now)
+
+                                it.instanceKey
+                            })
 
         setMyEndExactTimeStamp(now)
     }

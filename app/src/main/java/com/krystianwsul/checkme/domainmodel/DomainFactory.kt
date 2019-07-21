@@ -1666,20 +1666,29 @@ class DomainFactory(
                     it.clearEndExactTimeStamp(now)
                 }
 
-        val remoteTaskHierarchyKeys = taskUndoData.taskHierarchyKeys.filterIsInstance<TaskHierarchyKey.RemoteTaskHierarchyKey>()
-        val remoteScheduleIds = taskUndoData.scheduleIds.filterIsInstance<ScheduleId.Remote>()
+        taskUndoData.taskHierarchyKeys
+                .map { remoteProjectFactory.getTaskHierarchy(it as TaskHierarchyKey.RemoteTaskHierarchyKey) }
+                .forEach {
+                    check(!it.current(now))
 
-        remoteTaskHierarchyKeys.map { remoteProjectFactory.getTaskHierarchy(it) }.forEach {
-            check(!it.current(now))
+                    it.clearEndExactTimeStamp(now)
+                }
 
-            it.clearEndExactTimeStamp(now)
-        }
+        taskUndoData.scheduleIds
+                .map { remoteProjectFactory.getSchedule(it as ScheduleId.Remote) }
+                .forEach {
+                    check(!it.current(now))
 
-        remoteScheduleIds.map { remoteProjectFactory.getSchedule(it) }.forEach {
-            check(!it.current(now))
+                    it.clearEndExactTimeStamp(now)
+                }
 
-            it.clearEndExactTimeStamp(now)
-        }
+        taskUndoData.instanceKeys
+                .map { getExistingInstanceForce(it) }
+                .forEach {
+                    check(!it.current(now))
+
+                    it.clearEndExactTimeStamp(now) // todo visible
+                }
     }
 
     @Synchronized
@@ -1942,6 +1951,8 @@ class DomainFactory(
     }
 
     private fun getExistingInstanceIfPresent(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)
+
+    private fun getExistingInstanceForce(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)!!
 
     fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
             .values

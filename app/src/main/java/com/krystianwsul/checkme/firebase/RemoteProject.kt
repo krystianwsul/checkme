@@ -176,7 +176,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
         remoteTasks.values
                 .filter { it.current(now) }
-                .forEach { it.setEndExactTimeStamp(now, projectUndoData?.taskUndoData) }
+                .forEach { it.setEndExactTimeStamp(now, projectUndoData?.taskUndoData?.let { Pair(it, false) }) } // todo delete project instances
 
         projectUndoData?.projectIds?.add(id)
 

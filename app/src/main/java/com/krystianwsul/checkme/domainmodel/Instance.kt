@@ -254,4 +254,19 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     }
 
     val hidden get() = instanceData.hidden
+
+    fun current(exactTimeStamp: ExactTimeStamp) = endExactTimeStamp?.let { it > exactTimeStamp }
+            ?: true
+
+    fun setEndExactTimeStamp(now: ExactTimeStamp) {
+        check(current(now))
+
+        instanceData.endTime = now.long
+    }
+
+    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+        check(!current(now))
+
+        instanceData.endTime = null
+    }
 }

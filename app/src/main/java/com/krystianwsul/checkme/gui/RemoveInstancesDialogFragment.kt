@@ -12,6 +12,7 @@ class RemoveInstancesDialogFragment : AbstractDialogFragment() {
         private const val KEY_TASKS = "tasks"
 
         fun newInstance(taskKeys: Set<TaskKey>) = RemoveInstancesDialogFragment().apply {
+            // todo check if eligible instances exist
             arguments = Bundle().apply {
                 putParcelableArrayList(KEY_TASKS, ArrayList(taskKeys))
             }

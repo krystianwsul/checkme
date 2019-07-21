@@ -269,4 +269,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
         instanceData.endTime = null
     }
+
+    fun shouldDelete(now: ExactTimeStamp) = exists() && done == null && instanceDateTime.timeStamp.toExactTimeStamp() > now
 }

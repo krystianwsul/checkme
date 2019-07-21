@@ -58,9 +58,9 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
         override val hidden get() = instanceRecord.hidden
 
         override var endTime
-            get() = instanceRecord.done
+            get() = instanceRecord.endTime
             set(value) {
-                instanceRecord.done = value
+                instanceRecord.endTime = value
             }
     }
 

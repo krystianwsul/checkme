@@ -12,7 +12,7 @@ interface SnackbarListener {
 
     companion object {
 
-        private val hashes = mutableSetOf<Int>()
+        val hashes = mutableSetOf<Int>()
 
         val deleting get() = hashes.size > 0
     }

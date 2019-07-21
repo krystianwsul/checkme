@@ -26,6 +26,7 @@ abstract class AbstractActivity : AppCompatActivity() {
         fun setSnackbar(snackbarData: SnackbarData) {
             check(this.snackbarData == null)
 
+            SnackbarListener.hashes.add(snackbarData.hashCode())
             this.snackbarData = snackbarData
         }
 
@@ -76,10 +77,16 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         snackbarData?.let {
             (this as? SnackbarListener)?.apply {
+                val hash = hashCode()
+
+                SnackbarListener.hashes.add(hash)
                 anchor.addOneShotGlobalLayoutListener {
                     it.show(this)
+                    SnackbarListener.hashes.remove(hash)
                 }
             }
+
+            SnackbarListener.hashes.remove(it.hashCode())
         }
         snackbarData = null
 

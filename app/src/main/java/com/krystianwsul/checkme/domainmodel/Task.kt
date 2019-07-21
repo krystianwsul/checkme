@@ -152,7 +152,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
             taskUndoData.first
                     .instanceKeys
                     .addAll(existingInstances.values
-                            .filter { it.exists() && it.done == null && it.instanceDateTime.timeStamp.toExactTimeStamp() > now }
+                            .filter { it.shouldDelete(now) }
                             .map {
                                 check(it.current(now))
 

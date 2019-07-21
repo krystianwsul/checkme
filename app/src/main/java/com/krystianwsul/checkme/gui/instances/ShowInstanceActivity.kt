@@ -73,21 +73,20 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     }
 
     private val deleteInstancesListener = { taskKeys: Set<TaskKey>, removeInstances: Boolean ->
-        val close = taskKeys.contains(instanceKey.taskKey) && !data!!.exists // todo delete instances
+        showInstanceViewModel.stop()
 
-        if (close)
-            showInstanceViewModel.stop()
+        val (undoTaskData, visible) = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances, instanceKey)
 
-        val undoTaskData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances)
+        if (visible) {
+            showInstanceViewModel.start(instanceKey)
 
-        if (close) {
-            setSnackbar(undoTaskData)
-
-            finish()
-        } else {
             showSnackbarRemoved(taskKeys.size) {
                 DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, undoTaskData)
             }
+        } else {
+            setSnackbar(undoTaskData)
+
+            finish()
         }
     }
 

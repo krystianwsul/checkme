@@ -1599,14 +1599,8 @@ class DomainFactory(
         notifyCloud(remoteProject)
     }
 
-    @Synchronized
-    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean): TaskUndoData {
-        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
-        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
-
+    private fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean, now: ExactTimeStamp): TaskUndoData {
         check(taskKeys.isNotEmpty())
-
-        val now = ExactTimeStamp.now
 
         val tasks = taskKeys.map { getTaskForce(it) }.toMutableSet()
         check(tasks.all { it.current(now) })
@@ -1622,8 +1616,6 @@ class DomainFactory(
 
         val taskUndoData = TaskUndoData()
 
-        // todo delete instances: if (deleteIsntances ==true) set instance end timestamps if exist and not done, add to taskUndoData
-
         tasks.forEach { it.setEndExactTimeStamp(now, Pair(taskUndoData, deleteInstances)) }
 
         val remoteProjects = tasks.map { it.project }.toSet()
@@ -1635,6 +1627,37 @@ class DomainFactory(
         notifyCloud(remoteProjects)
 
         return taskUndoData
+    }
+
+    @Synchronized
+    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean): TaskUndoData {
+        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        return setTaskEndTimeStamps(source, taskKeys, deleteInstances, ExactTimeStamp.now)
+    }
+
+    @Synchronized
+    fun setTaskEndTimeStamps(source: SaveService.Source, taskKeys: Set<TaskKey>, deleteInstances: Boolean, instanceKey: InstanceKey): Pair<TaskUndoData, Boolean> {
+        MyCrashlytics.log("DomainFactory.setTaskEndTimeStamps")
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+
+        val now = ExactTimeStamp.now
+
+        val taskUndoData = setTaskEndTimeStamps(source, taskKeys, deleteInstances, now)
+
+        val instance = getInstance(instanceKey)
+        val task = instance.task
+
+        val instanceExactTimeStamp by lazy {
+            instance.instanceDateTime
+                    .timeStamp
+                    .toExactTimeStamp()
+        }
+
+        val visible = task.notDeleted(now) || (instance.done != null || instanceExactTimeStamp <= now) || (!deleteInstances && instance.exists())
+
+        return Pair(taskUndoData, visible)
     }
 
     @Synchronized
@@ -1687,7 +1710,7 @@ class DomainFactory(
                 .forEach {
                     check(!it.current(now))
 
-                    it.clearEndExactTimeStamp(now) // todo visible
+                    it.clearEndExactTimeStamp(now)
                 }
     }
 
@@ -2337,115 +2360,116 @@ class DomainFactory(
             }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
-        if (!SnackbarListener.deleting) {
-            val tasks = getTasks()
+        if (SnackbarListener.deleting)
+            return
 
-            for (task in tasks)
-                task.updateOldestVisible(now)
+        val tasks = getTasks()
 
-            // relevant hack
-            val taskRelevances = tasks.map { it.taskKey to TaskRelevance(this, it) }.toMap()
+        for (task in tasks)
+            task.updateOldestVisible(now)
 
-            val taskHierarchies = remoteProjectFactory.remoteProjects
-                    .map { it.value.taskHierarchies }
-                    .flatten()
-            val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
+        // relevant hack
+        val taskRelevances = tasks.map { it.taskKey to TaskRelevance(this, it) }.toMap()
 
-            val existingInstances = getExistingInstances()
-            val rootInstances = getRootInstances(null, now.plusOne(), now)
+        val taskHierarchies = remoteProjectFactory.remoteProjects
+                .map { it.value.taskHierarchies }
+                .flatten()
+        val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }
 
-            val instanceRelevances = (existingInstances + rootInstances)
-                    .asSequence()
-                    .distinct()
-                    .map { it.instanceKey to InstanceRelevance(it) }
-                    .toList()
-                    .toMap()
-                    .toMutableMap()
+        val existingInstances = getExistingInstances()
+        val rootInstances = getRootInstances(null, now.plusOne(), now)
 
-            tasks.asSequence()
-                    .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now, true) }
-                    .map { taskRelevances.getValue(it.taskKey) }.toList()
-                    .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+        val instanceRelevances = (existingInstances + rootInstances)
+                .asSequence()
+                .distinct()
+                .map { it.instanceKey to InstanceRelevance(it) }
+                .toList()
+                .toMap()
+                .toMutableMap()
 
-            rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+        tasks.asSequence()
+                .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now, true) }
+                .map { taskRelevances.getValue(it.taskKey) }.toList()
+                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-            existingInstances.asSequence()
-                    .filter { it.isRootInstance(now) && it.isVisible(now, true) }
-                    .map { instanceRelevances[it.instanceKey]!! }.toList()
-                    .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
+        rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-            val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
-            val relevantTasks = relevantTaskRelevances.map { it.task }
+        existingInstances.asSequence()
+                .filter { it.isRootInstance(now) && it.isVisible(now, true) }
+                .map { instanceRelevances[it.instanceKey]!! }.toList()
+                .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-            val irrelevantTasks = tasks.toMutableList()
-            irrelevantTasks.removeAll(relevantTasks)
+        val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
+        val relevantTasks = relevantTaskRelevances.map { it.task }
 
-            check(irrelevantTasks.none { it.isVisible(now, true) })
+        val irrelevantTasks = tasks.toMutableList()
+        irrelevantTasks.removeAll(relevantTasks)
 
-            val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
-            val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
+        check(irrelevantTasks.none { it.isVisible(now, true) })
 
-            val irrelevantTaskHierarchies = taskHierarchies.toMutableList().apply { removeAll(relevantTaskHierarchies) }
+        val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
+        val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
 
-            val relevantInstances = instanceRelevances.values
-                    .filter { it.relevant }
-                    .map { it.instance }
+        val irrelevantTaskHierarchies = taskHierarchies.toMutableList().apply { removeAll(relevantTaskHierarchies) }
 
-            val relevantExistingInstances = relevantInstances.filter { it.exists() }
+        val relevantInstances = instanceRelevances.values
+                .filter { it.relevant }
+                .map { it.instance }
 
-            val irrelevantExistingInstances = ArrayList<Instance>(existingInstances)
-            irrelevantExistingInstances.removeAll(relevantExistingInstances)
+        val relevantExistingInstances = relevantInstances.filter { it.exists() }
 
-            check(irrelevantExistingInstances.none { it.isVisible(now, true) })
+        val irrelevantExistingInstances = ArrayList<Instance>(existingInstances)
+        irrelevantExistingInstances.removeAll(relevantExistingInstances)
 
-            irrelevantExistingInstances.forEach { it.delete() }
-            irrelevantTasks.forEach { it.delete() }
-            irrelevantTaskHierarchies.forEach { it.delete() }
+        check(irrelevantExistingInstances.none { it.isVisible(now, true) })
 
-            val remoteCustomTimes = remoteProjectFactory.remoteCustomTimes
-            val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
+        irrelevantExistingInstances.forEach { it.delete() }
+        irrelevantTasks.forEach { it.delete() }
+        irrelevantTaskHierarchies.forEach { it.delete() }
 
-            remoteProjectFactory.remotePrivateProject
-                    .customTimes
-                    .filter { it.current }
-                    .forEach { remoteCustomTimeRelevances.getValue(Pair(it.projectId, it.id)).setRelevant() }
+        val remoteCustomTimes = remoteProjectFactory.remoteCustomTimes
+        val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
 
-            val remoteProjects = remoteProjectFactory.remoteProjects.values
-            val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()
+        remoteProjectFactory.remotePrivateProject
+                .customTimes
+                .filter { it.current }
+                .forEach { remoteCustomTimeRelevances.getValue(Pair(it.projectId, it.id)).setRelevant() }
 
-            remoteProjects.filter { it.current(now) }
-                    .map { remoteProjectRelevances.getValue(it.id) }
-                    .forEach { it.setRelevant() }
+        val remoteProjects = remoteProjectFactory.remoteProjects.values
+        val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()
 
-            taskRelevances.values
-                    .filter { it.relevant }
-                    .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
+        remoteProjects.filter { it.current(now) }
+                .map { remoteProjectRelevances.getValue(it.id) }
+                .forEach { it.setRelevant() }
 
-            instanceRelevances.values
-                    .filter { it.relevant }
-                    .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
+        taskRelevances.values
+                .filter { it.relevant }
+                .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
 
-            val relevantRemoteCustomTimes = remoteCustomTimeRelevances.values
-                    .filter { it.relevant }
-                    .map { it.remoteCustomTime }
+        instanceRelevances.values
+                .filter { it.relevant }
+                .forEach { it.setRemoteRelevant(remoteCustomTimeRelevances, remoteProjectRelevances) }
 
-            val irrelevantRemoteCustomTimes = ArrayList(remoteCustomTimes)
-            irrelevantRemoteCustomTimes.removeAll(relevantRemoteCustomTimes)
-            irrelevantRemoteCustomTimes.forEach { it.delete() }
+        val relevantRemoteCustomTimes = remoteCustomTimeRelevances.values
+                .filter { it.relevant }
+                .map { it.remoteCustomTime }
 
-            val relevantRemoteProjects = remoteProjectRelevances.values
-                    .filter { it.relevant }
-                    .map { it.remoteProject }
+        val irrelevantRemoteCustomTimes = ArrayList(remoteCustomTimes)
+        irrelevantRemoteCustomTimes.removeAll(relevantRemoteCustomTimes)
+        irrelevantRemoteCustomTimes.forEach { it.delete() }
 
-            val irrelevantRemoteProjects = ArrayList(remoteProjects)
-            irrelevantRemoteProjects.removeAll(relevantRemoteProjects)
-            irrelevantRemoteProjects.forEach { it.delete() }
+        val relevantRemoteProjects = remoteProjectRelevances.values
+                .filter { it.relevant }
+                .map { it.remoteProject }
 
-            val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
-                    .toMutableList()
-                    .apply { removeAll(relevantInstances.map { it.instanceShownRecord }) }
-            irrelevantInstanceShownRecords.forEach { it.delete() }
-        }
+        val irrelevantRemoteProjects = ArrayList(remoteProjects)
+        irrelevantRemoteProjects.removeAll(relevantRemoteProjects)
+        irrelevantRemoteProjects.forEach { it.delete() }
+
+        val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
+                .toMutableList()
+                .apply { removeAll(relevantInstances.map { it.instanceShownRecord }) }
+        irrelevantInstanceShownRecords.forEach { it.delete() }
     }
 
     private fun notifyCloud(remoteProject: RemoteProject<*>) = notifyCloud(setOf(remoteProject))

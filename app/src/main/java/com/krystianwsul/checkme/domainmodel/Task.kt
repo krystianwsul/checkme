@@ -25,7 +25,9 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     abstract val schedules: Collection<Schedule>
 
-    abstract fun getEndExactTimeStamp(): ExactTimeStamp?
+    abstract fun getEndData(): EndData?
+
+    fun getEndExactTimeStamp() = getEndData()?.exactTimeStamp
 
     abstract fun getOldestVisible(): Date?
 
@@ -102,23 +104,24 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         return getParentTask(exactTimeStamp) == null
     }
 
-    protected abstract fun setMyEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp?)
+    protected abstract fun setMyEndExactTimeStamp(endData: EndData?)
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp, taskUndoData: Pair<DomainFactory.TaskUndoData, Boolean>? = null, recursive: Boolean = false) {
+    fun setEndData(
+            endData: EndData,
+            taskUndoData: DomainFactory.TaskUndoData,
+            recursive: Boolean = false) {
+        val now = endData.exactTimeStamp
+
         check(current(now))
 
-        taskUndoData?.first
-                ?.taskKeys
-                ?.add(taskKey)
+        taskUndoData.taskKeys.add(taskKey)
 
         val schedules = getCurrentSchedules(now)
         if (isRootTask(now)) {
             check(schedules.all { it.current(now) })
 
             schedules.forEach {
-                taskUndoData?.first
-                        ?.scheduleIds
-                        ?.add(it.scheduleId)
+                taskUndoData.scheduleIds.add(it.scheduleId)
 
                 it.setEndExactTimeStamp(now)
             }
@@ -127,11 +130,9 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         }
 
         getChildTaskHierarchies(now).forEach {
-            it.childTask.setEndExactTimeStamp(now, taskUndoData, true)
+            it.childTask.setEndData(endData, taskUndoData, true)
 
-            taskUndoData?.first
-                    ?.taskHierarchyKeys
-                    ?.add(it.taskHierarchyKey)
+            taskUndoData.taskHierarchyKeys.add(it.taskHierarchyKey)
 
             it.setEndExactTimeStamp(now)
         }
@@ -140,28 +141,13 @@ abstract class Task(protected val domainFactory: DomainFactory) {
             domainFactory.getParentTaskHierarchy(this, now)?.let {
                 check(it.current(now))
 
-                taskUndoData?.first
-                        ?.taskHierarchyKeys
-                        ?.add(it.taskHierarchyKey)
+                taskUndoData.taskHierarchyKeys.add(it.taskHierarchyKey)
 
                 it.setEndExactTimeStamp(now)
             }
         }
 
-        if (taskUndoData?.second == true)
-            taskUndoData.first
-                    .instanceKeys
-                    .addAll(existingInstances.values
-                            .filter { it.shouldDelete(now) }
-                            .map {
-                                check(it.current(now))
-
-                                it.setEndExactTimeStamp(now)
-
-                                it.instanceKey
-                            })
-
-        setMyEndExactTimeStamp(now)
+        setMyEndExactTimeStamp(endData)
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
@@ -307,4 +293,8 @@ abstract class Task(protected val domainFactory: DomainFactory) {
     abstract fun updateProject(now: ExactTimeStamp, projectId: String): Task
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
+
+    data class EndData(
+            val exactTimeStamp: ExactTimeStamp,
+            val deleteInstances: Boolean)
 }

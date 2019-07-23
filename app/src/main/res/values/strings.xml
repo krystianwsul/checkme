@@ -105,7 +105,7 @@
     <string name="defaultReminderSummaryOff">Don\'t add a reminder to new tasks</string>
     <string name="showRemoved">Show removed</string>
     <string name="noResults">No results</string>
-    <string name="removeInstancesMessage">Remove future reminders as well?</string>
+    <string name="removeInstancesMessage">Remove incomplete reminders?</string>
     <string name="removeInstancesNo">Only tasks</string>
     <string name="removeInstancesYes">Tasks and reminders</string>
 </resources>

@@ -106,8 +106,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract val instanceShownRecord: InstanceShownRecord?
 
-    val endExactTimeStamp get() = instanceData.endTime?.let { ExactTimeStamp(it) }
-
     fun exists() = (instanceData is InstanceData.Real)
 
     fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
@@ -185,10 +183,8 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         if (instanceData.hidden)
             return false
 
-        endExactTimeStamp?.let {
-            if (it <= now)
-                return false
-        }
+        if (task.run { !notDeleted(now) && getEndData()!!.deleteInstances && done == null })
+            return false
 
         val parentInstance = getParentInstance(now)
         if (parentInstance != null) {
@@ -254,21 +250,4 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     }
 
     val hidden get() = instanceData.hidden
-
-    fun current(exactTimeStamp: ExactTimeStamp) = endExactTimeStamp?.let { it > exactTimeStamp }
-            ?: true
-
-    fun setEndExactTimeStamp(now: ExactTimeStamp) {
-        check(current(now))
-
-        instanceData.endTime = now.long
-    }
-
-    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
-        check(!current(now))
-
-        instanceData.endTime = null
-    }
-
-    fun shouldDelete(now: ExactTimeStamp) = exists() && done == null && instanceDateTime.timeStamp.toExactTimeStamp() > now
 }

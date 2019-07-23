@@ -219,14 +219,4 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         }
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
-
-    override var endTime
-        get() = createObject.endTime
-        set(value) {
-            if (value == createObject.endTime)
-                return
-
-            createObject.endTime = value
-            addValue("$key/endTime", value)
-        }
 }

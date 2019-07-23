@@ -94,10 +94,10 @@ class RemoteTask<T : RemoteCustomTimeId>(
                 .map { MonthlyWeekSchedule(domainFactory, RemoteMonthlyWeekScheduleBridge(domainFactory, it)) })
     }
 
-    override fun getEndExactTimeStamp() = remoteTaskRecord.endTime?.let { ExactTimeStamp(it) }
+    override fun getEndData() = remoteTaskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 
-    override fun setMyEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp?) {
-        remoteTaskRecord.endTime = endExactTimeStamp?.long
+    override fun setMyEndExactTimeStamp(endData: EndData?) {
+        remoteTaskRecord.endData = endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
     }
 
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?, imageUuid: String?): Task {
@@ -134,6 +134,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is RemoteTask<*>)
 
+        @Suppress("UNCHECKED_CAST")
         remoteProject.createTaskHierarchy(this, childTask as RemoteTask<T>, now)
     }
 

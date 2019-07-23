@@ -85,14 +85,17 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     val startTime get() = taskJson.startTime
 
-    var endTime
-        get() = taskJson.endTime
+    var endData
+        get() = taskJson.endData ?: taskJson.endTime?.let { TaskJson.EndData(it, false) }
         set(value) {
-            if (value == taskJson.endTime)
+            if (value == taskJson.endData)
                 return
 
-            taskJson.endTime = value
-            addValue("$key/endTime", value)
+            taskJson.endData = value
+            addValue("$key/endData", value)
+
+            taskJson.endTime = value?.time
+            addValue("$key/endData", value?.time)
         }
 
     var note

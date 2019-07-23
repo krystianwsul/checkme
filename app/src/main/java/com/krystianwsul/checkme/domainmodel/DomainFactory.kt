@@ -1616,7 +1616,7 @@ class DomainFactory(
 
         val taskUndoData = TaskUndoData()
 
-        tasks.forEach { it.setEndExactTimeStamp(now, Pair(taskUndoData, deleteInstances)) }
+        tasks.forEach { it.setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
@@ -1699,14 +1699,6 @@ class DomainFactory(
 
         taskUndoData.scheduleIds
                 .map { remoteProjectFactory.getSchedule(it as ScheduleId.Remote) }
-                .forEach {
-                    check(!it.current(now))
-
-                    it.clearEndExactTimeStamp(now)
-                }
-
-        taskUndoData.instanceKeys
-                .map { getExistingInstanceForce(it) }
                 .forEach {
                     check(!it.current(now))
 
@@ -2793,7 +2785,6 @@ class DomainFactory(
         val taskKeys = mutableSetOf<TaskKey>()
         val scheduleIds = mutableSetOf<ScheduleId>()
         val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
-        val instanceKeys = mutableSetOf<InstanceKey>()
     }
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)

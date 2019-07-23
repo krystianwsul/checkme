@@ -171,14 +171,14 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp, projectUndoData: DomainFactory.ProjectUndoData? = null) {
+    fun setEndExactTimeStamp(now: ExactTimeStamp, projectUndoData: DomainFactory.ProjectUndoData) {
         check(current(now))
 
         remoteTasks.values
                 .filter { it.current(now) }
-                .forEach { it.setEndExactTimeStamp(now, projectUndoData?.taskUndoData?.let { Pair(it, false) }) } // todo delete project instances
+                .forEach { it.setEndData(Task.EndData(now, false), projectUndoData.taskUndoData) } // todo delete project instances
 
-        projectUndoData?.projectIds?.add(id)
+        projectUndoData.projectIds.add(id)
 
         remoteProjectRecord.endTime = now.long
     }

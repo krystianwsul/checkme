@@ -22,6 +22,4 @@ interface InstanceRecord<out T> {
     var ordinal: Double?
 
     var hidden: Boolean
-
-    var endTime: Long?
 }

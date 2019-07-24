@@ -105,8 +105,8 @@
     <string name="defaultReminderSummaryOff">Nie dodawaj przypomnienia do nowych zadań</string>
     <string name="showRemoved">Pokaż usunięte</string>
     <string name="noResults">Brak wyników</string>
-    <string name="removeInstancesMessage">Usunąć nieukończone przypomnienia?</string>
-    <string name="removeInstancesNo">Tylko zadania</string>
-    <string name="removeInstancesYes">Zadania i przypomnienia</string>
+    <string name="removeInstancesMessage">Usunąć nieukończone przypomnienia dla tych zadań?</string>
+    <string name="removeInstancesNo">Nie</string>
+    <string name="removeInstancesYes">Tak</string>
 
 </resources>

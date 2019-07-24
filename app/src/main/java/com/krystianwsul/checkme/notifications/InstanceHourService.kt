@@ -38,6 +38,6 @@ class InstanceHourService : IntentService("InstanceHourService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId)
 
-        DomainFactory.addFirebaseListener { it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey) }
+        DomainFactory.addFirebaseListener("InstanceHourService $notificationId") { it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey) }
     }
 }

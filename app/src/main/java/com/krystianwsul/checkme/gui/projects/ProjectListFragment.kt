@@ -22,6 +22,7 @@ import com.krystianwsul.treeadapter.*
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_project_list.*
+import java.io.Serializable
 import java.util.*
 
 class ProjectListFragment : AbstractFragment(), FabUser {
@@ -29,6 +30,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
     companion object {
 
         private const val SELECTED_PROJECT_IDS = "selectedProjectIds"
+
+        private const val TAG_REMOVE_INSTANCES = "removeInstances"
 
         fun newInstance() = ProjectListFragment()
     }
@@ -57,7 +60,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             val projectIds = treeViewAdapter.selectedNodes
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
-                    .toSet()
+                    .toHashSet()
 
             check(projectIds.isNotEmpty())
 
@@ -65,11 +68,9 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                 R.id.action_project_delete -> {
                     checkNotNull(data)
 
-                    val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(0, SaveService.Source.GUI, projectIds)
-
-                    mainActivity.showSnackbarRemoved(projectIds.size) {
-                        DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, projectUndoData)
-                    }
+                    RemoveInstancesDialogFragment.newInstance(projectIds)
+                            .also { it.listener = deleteInstancesListener }
+                            .show(childFragmentManager, TAG_REMOVE_INSTANCES)
                 }
                 else -> throw UnsupportedOperationException()
             }
@@ -96,6 +97,16 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private lateinit var projectListViewModel: ProjectListViewModel
 
+    private val deleteInstancesListener = { projectIds: Serializable, removeInstances: Boolean ->
+        checkNotNull(data)
+
+        @Suppress("UNCHECKED_CAST") val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(0, SaveService.Source.GUI, projectIds as Set<String>, removeInstances)
+
+        mainActivity.showSnackbarRemoved(projectIds.size) {
+            DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, projectUndoData)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -104,6 +115,8 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             this.selectedProjectIds = HashSet(selectedProjectIds)
         }
+
+        (childFragmentManager.findFragmentByTag(TAG_REMOVE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_project_list, container, false)!!
@@ -270,8 +283,6 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
                 return projectData.id.compareTo(other.projectData.id)
             }
-
-            fun remove(x: TreeViewAdapter.Placeholder) = projectListAdapter.remove(this, x)
         }
     }
 

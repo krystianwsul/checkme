@@ -1904,7 +1904,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectIds: Set<String>): ProjectUndoData {
+    fun setProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectIds: Set<String>, removeInstances: Boolean): ProjectUndoData {
         MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
         check(projectIds.isNotEmpty())
@@ -1916,7 +1916,7 @@ class DomainFactory(
 
         val projectUndoData = ProjectUndoData()
 
-        remoteProjects.forEach { it.setEndExactTimeStamp(now, projectUndoData) }
+        remoteProjects.forEach { it.setEndExactTimeStamp(now, projectUndoData, removeInstances) }
 
         updateNotifications(now)
 

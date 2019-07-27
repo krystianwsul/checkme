@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import com.stfalcon.imageviewer.StfalconImageViewer
 import java.util.*
 
@@ -35,6 +36,8 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
     }
 
     override fun compareTo(other: ModelNode) = if (other is NoteNode) 1 else -1
+
+    override fun onClick(holder: TreeViewAdapter.Holder) = showImage((holder as NodeHolder).rowBigImage!!, imageData)
 
     class ImageData(
             val imageState: ImageState,

@@ -322,7 +322,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
                     Pair(text, colorSecondary)
                 }
 
-            override fun onClick() {
+            override fun onClick(holder: TreeViewAdapter.Holder) {
                 val parentPickerFragment = parentFragment
 
                 parentPickerFragment.dismiss()

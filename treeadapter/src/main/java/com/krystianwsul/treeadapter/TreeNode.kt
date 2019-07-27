@@ -21,13 +21,13 @@ class TreeNode(
         }
     }
 
-    fun onClick() {
+    fun onClick(holder: TreeViewAdapter.Holder) {
         if (hasActionMode()) {
             treeViewAdapter.updateDisplayedNodes {
                 toggleSelected(TreeViewAdapter.Placeholder)
             }
         } else {
-            modelNode.onClick()
+            modelNode.onClick(holder)
         }
     }
 

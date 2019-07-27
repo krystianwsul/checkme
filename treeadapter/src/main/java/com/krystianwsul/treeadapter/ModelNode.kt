@@ -18,7 +18,7 @@ interface ModelNode : Comparable<ModelNode> {
 
     fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder)
 
-    fun onClick() = Unit
+    fun onClick(holder: TreeViewAdapter.Holder) = Unit
 
     fun filter() = true
 

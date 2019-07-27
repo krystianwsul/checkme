@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeViewAdapter
 
 class TaskNode(
         indentation: Int,
@@ -86,7 +87,7 @@ class TaskNode(
             Pair(text, color)
         }
 
-    override fun onClick() {
+    override fun onClick(holder: TreeViewAdapter.Holder) {
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))
     }
 

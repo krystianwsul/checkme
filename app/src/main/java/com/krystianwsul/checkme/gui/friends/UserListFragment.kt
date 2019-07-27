@@ -342,8 +342,6 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val avatarImage = NullableWrapper(userListData.photoUrl)
 
-        override fun onClick() = Unit
-
         override fun compareTo(other: ModelNode) = userListData.id.compareTo((other as UserNode).userListData.id)
 
         fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {

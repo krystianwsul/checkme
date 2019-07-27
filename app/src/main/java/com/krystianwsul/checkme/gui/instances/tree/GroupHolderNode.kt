@@ -109,7 +109,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         }
     }
 
-    private fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {
+    protected fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {
         val viewer = StfalconImageViewer.Builder(rowBigImage.context, listOf(taskImage.imageState), MyImageLoader)
                 .withTransitionFrom(rowBigImage)
                 .withDismissListener { taskImage.onDismiss() }
@@ -292,19 +292,17 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                         val treeNode = getTreeNode()
                         val groupHolderNode = treeNode.getGroupNode()
 
+                        groupHolderNode.checkStale()
+
                         val imageData = groupHolderNode.imageData
 
-                        if (imageData != null) {
-                            showImage(rowBigImage!!, imageData)
-                        } else {
-                            groupHolderNode.checkStale()
-
-                            treeNode.onClick()
-                        }
+                        if (imageData != null)
+                        else
+                            treeNode.onClick(groupHolder)
                     }
                     .addTo(compositeDisposable)
 
-            itemView.longClicks { getTreeNode().getGroupNode().imageData != null }
+            itemView.longClicks { true }
                     .subscribe {
                         getTreeNode().getGroupNode().apply {
                             checkStale()
@@ -319,24 +317,20 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                         val treeNode = getTreeNode()
                         val groupHolderNode = treeNode.getGroupNode()
 
-                        if (groupHolderNode.imageData == null) {
-                            groupHolderNode.checkStale()
+                        groupHolderNode.checkStale()
 
-                            treeNode.onExpandClick()
-                        }
+                        treeNode.onExpandClick()
                     }
                     .addTo(compositeDisposable)
 
             rowCheckBox.clicks()
                     .subscribe {
-                        val treeNode = getTreeNode()
-                        val groupHolderNode = treeNode.getGroupNode()
+                        // todo rowCheckBox.setOnClickListener(null)
 
-                        if (groupHolderNode.imageData == null) {
-                            groupHolderNode.checkStale()
+                        getTreeNode().getGroupNode().apply {
+                            checkStale()
 
-                            // todo setOnClickListener(null)
-                            groupHolderNode.checkBoxOnClickListener()
+                            checkBoxOnClickListener()
                         }
                     }
                     .addTo(compositeDisposable)

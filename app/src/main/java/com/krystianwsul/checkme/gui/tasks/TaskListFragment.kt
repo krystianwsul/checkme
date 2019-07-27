@@ -643,7 +643,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val isSelectable = true
 
-            override fun onClick() = taskListFragment.activity!!.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
+            override fun onClick(holder: TreeViewAdapter.Holder) = taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
 
             override val isVisibleWhenEmpty = true
 

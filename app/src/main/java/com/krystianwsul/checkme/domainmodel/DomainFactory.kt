@@ -90,6 +90,18 @@ class DomainFactory(
             else
                 firebaseListeners.add(firebaseListener)
         }
+
+        @Synchronized
+        fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) {
+            val domainFactory = nullableInstance
+            if (domainFactory?.remoteProjectFactory?.eitherSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
+                Preferences.logLineHour("running firebaseListener $source")
+                firebaseListener(domainFactory)
+            } else {
+                Preferences.logLineHour("queuing firebaseListener $source")
+                firebaseListeners.add(firebaseListener)
+            }
+        }
     }
 
     val localReadTimes: ReadTimes
@@ -117,6 +129,8 @@ class DomainFactory(
     private var firstTaskEvent = true
 
     init {
+        Preferences.logLineHour("DomainFactory.init")
+
         val start = ExactTimeStamp.now
 
         localFactory = LocalFactory(persistenceManager)
@@ -273,12 +287,13 @@ class DomainFactory(
 
         skipSave = true
 
-        firebaseListeners.forEach { it.invoke(this) }
+        Preferences.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
+        firebaseListeners.forEach { it(this) }
         firebaseListeners.clear()
 
         val tickData = TickHolder.getTickData()
         if (tickData == null) {
-            updateNotifications(firstTaskEvent, ExactTimeStamp.now, listOf(), source)
+            updateNotifications(ExactTimeStamp.now, silent = firstTaskEvent, removedTaskKeys = listOf(), sourceName = source)
         } else {
             updateNotificationsTick(SaveService.Source.GUI, tickData.silent, tickData.source)
 
@@ -994,7 +1009,7 @@ class DomainFactory(
         instance.setInstanceDateTime(date, TimePair(hourMinute), now)
         instance.notificationShown = false
 
-        updateNotifications(now)
+        updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
 
         save(0, source)
 
@@ -1065,7 +1080,7 @@ class DomainFactory(
         instance.setDone(true, now)
         instance.notificationShown = false
 
-        updateNotifications(now)
+        updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
 
         save(0, source)
 
@@ -1783,7 +1798,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        updateNotifications(silent, now, listOf(), sourceName)
+        updateNotifications(now, silent = silent, removedTaskKeys = listOf(), sourceName = sourceName)
 
         setIrrelevant(now)
 
@@ -2208,9 +2223,9 @@ class DomainFactory(
         val startProject = startingRemoteTask.remoteProject
         startProject.convertRemoteToRemoteHelper(remoteToRemoteConversion, startingRemoteTask)
 
-        updateNotifications(true, now, remoteToRemoteConversion.startTasks
+        updateNotifications(now, silent = true, removedTaskKeys = remoteToRemoteConversion.startTasks
                 .values
-                .map { it.first.taskKey }, "other")
+                .map { it.first.taskKey }, sourceName = "other")
 
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
 
@@ -2485,10 +2500,15 @@ class DomainFactory(
         BackendNotifier.notify(remoteProjects, userInfo, userKeys)
     }
 
-    private fun updateNotifications(now: ExactTimeStamp, clear: Boolean = false) = updateNotifications(true, now, mutableListOf(), "other", clear)
-
-    private fun updateNotifications(silent: Boolean, now: ExactTimeStamp, removedTaskKeys: List<TaskKey>, sourceName: String, clear: Boolean = false) {
+    private fun updateNotifications(
+            now: ExactTimeStamp,
+            clear: Boolean = false,
+            silent: Boolean = true,
+            removedTaskKeys: List<TaskKey> = listOf(),
+            sourceName: String = "other") {
         Preferences.logLineDate("updateNotifications start $sourceName")
+
+        // todo if saving, set tick listener instead
 
         val notificationInstances = if (clear)
             mapOf()

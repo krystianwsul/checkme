@@ -37,6 +37,6 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId)
 
-        DomainFactory.addFirebaseListener { it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey) }
+        DomainFactory.addFirebaseListener("InstanceDoneService $notificationId") { it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey) }
     }
 }

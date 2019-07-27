@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.view.longClicks
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -20,6 +22,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
 import com.stfalcon.imageviewer.loader.ImageLoader
+import io.reactivex.rxkotlin.addTo
 import kotlin.math.ceil
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
@@ -97,17 +100,26 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         override fun same(other: ModelState) = (other as State).id == id
     }
 
+    private fun checkStale() {
+        if (treeNode.treeNodeCollection.stale) {
+            if (MyCrashlytics.enabled)
+                MyCrashlytics.logException(StaleTreeNodeException())
+            else
+                throw StaleTreeNodeException()
+        }
+    }
+
+    private fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {
+        val viewer = StfalconImageViewer.Builder(rowBigImage.context, listOf(taskImage.imageState), MyImageLoader)
+                .withTransitionFrom(rowBigImage)
+                .withDismissListener { taskImage.onDismiss() }
+                .show()
+
+        taskImage.onImageShown(viewer)
+    }
+
     final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         val groupHolder = viewHolder as NodeHolder
-
-        fun checkStale() {
-            if (treeNode.treeNodeCollection.stale) {
-                if (MyCrashlytics.enabled)
-                    MyCrashlytics.logException(StaleTreeNodeException())
-                else
-                    throw StaleTreeNodeException()
-            }
-        }
 
         checkStale()
 
@@ -120,23 +132,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
                 taskImage.imageState.load(rowBigImage!!)
 
-                fun showImage() {
-                    val viewer = StfalconImageViewer.Builder(rowBigImage.context, listOf(taskImage.imageState), MyImageLoader)
-                            .withTransitionFrom(rowBigImage)
-                            .withDismissListener { taskImage.onDismiss() }
-                            .show()
-
-                    taskImage.onImageShown(viewer)
-                }
-
                 if (taskImage.showImage)
-                    showImage()
-
-                itemView.apply {
-                    setOnLongClickListener(null)
-
-                    setOnClickListener { showImage() }
-                }
+                    showImage(rowBigImage, taskImage)
             } else {
                 rowContainer.visibility = View.VISIBLE
                 rowBigImageLayout?.visibility = View.GONE
@@ -251,24 +248,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 rowExpand.run {
                     visibility = if (treeNode.expandVisible) View.VISIBLE else View.INVISIBLE
                     setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
-
-                    setOnClickListener {
-                        checkStale()
-
-                        treeNode.onExpandClick()
-                    }
                 }
 
                 rowCheckBox.run {
                     visibility = checkBoxVisibility
                     isChecked = checkBoxChecked
-
-                    setOnClickListener {
-                        checkStale()
-
-                        setOnClickListener(null)
-                        checkBoxOnClickListener()
-                    }
                 }
 
                 if (avatarImage != null) {
@@ -285,24 +269,77 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
 
-                    setOnLongClickListener {
-                        checkStale()
-
-                        onLongClick(viewHolder)
-                        true
-                    }
-                    setOnClickListener {
-                        checkStale()
-
-                        treeNode.onClick()
-                    }
-
                     @SuppressWarnings("TargetApi")
                     foreground = if (ripple && !isPressed) ContextCompat.getDrawable(context, R.drawable.item_background_material) else null
                 }
             }
 
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
+        }
+    }
+
+    final override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
+        val groupHolder = holder as NodeHolder
+
+        checkStale()
+
+        groupHolder.apply {
+            fun getTreeNode() = treeNode.treeNodeCollection.getNode(groupHolder.adapterPosition)
+            fun TreeNode.getGroupNode() = modelNode as GroupHolderNode
+
+            itemView.clicks()
+                    .subscribe {
+                        val treeNode = getTreeNode()
+                        val groupHolderNode = treeNode.getGroupNode()
+
+                        val imageData = groupHolderNode.imageData
+
+                        if (imageData != null) {
+                            showImage(rowBigImage!!, imageData)
+                        } else {
+                            groupHolderNode.checkStale()
+
+                            treeNode.onClick()
+                        }
+                    }
+                    .addTo(compositeDisposable)
+
+            itemView.longClicks { getTreeNode().getGroupNode().imageData != null }
+                    .subscribe {
+                        getTreeNode().getGroupNode().apply {
+                            checkStale()
+
+                            onLongClick(holder)
+                        }
+                    }
+                    .addTo(compositeDisposable)
+
+            rowExpand.clicks()
+                    .subscribe {
+                        val treeNode = getTreeNode()
+                        val groupHolderNode = treeNode.getGroupNode()
+
+                        if (groupHolderNode.imageData == null) {
+                            groupHolderNode.checkStale()
+
+                            treeNode.onExpandClick()
+                        }
+                    }
+                    .addTo(compositeDisposable)
+
+            rowCheckBox.clicks()
+                    .subscribe {
+                        val treeNode = getTreeNode()
+                        val groupHolderNode = treeNode.getGroupNode()
+
+                        if (groupHolderNode.imageData == null) {
+                            groupHolderNode.checkStale()
+
+                            // todo setOnClickListener(null)
+                            groupHolderNode.checkBoxOnClickListener()
+                        }
+                    }
+                    .addTo(compositeDisposable)
         }
     }
 

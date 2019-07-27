@@ -16,6 +16,8 @@ interface ModelNode : Comparable<ModelNode> {
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean = false)
 
+    fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder)
+
     fun onClick() = Unit
 
     fun filter() = true

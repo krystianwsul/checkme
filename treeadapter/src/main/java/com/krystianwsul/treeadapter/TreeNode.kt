@@ -146,6 +146,8 @@ class TreeNode(
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) = modelNode.onBindViewHolder(viewHolder)
 
+    fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) = modelNode.onViewAttachedToWindow(holder)
+
     override fun compareTo(other: TreeNode) = modelNode.compareTo(other.modelNode)
 
     private fun toggleSelected(x: TreeViewAdapter.Placeholder, recursive: Boolean = true) {

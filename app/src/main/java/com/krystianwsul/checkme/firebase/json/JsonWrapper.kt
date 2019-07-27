@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.json
 
 
 class JsonWrapper @JvmOverloads constructor(
-        private val recordOf: MutableMap<String, Boolean> = mutableMapOf(),
+        val recordOf: MutableMap<String, Boolean> = mutableMapOf(),
         var projectJson: SharedProjectJson = SharedProjectJson()) {
 
     constructor(recordOf: Set<String>, projectJson: SharedProjectJson) : this(recordOf.associateBy({ it }, { true }).toMutableMap(), projectJson)

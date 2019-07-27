@@ -270,7 +270,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val isSelectable = true
 
-            override fun onClick() = activity!!.startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
+            override fun onClick(holder: TreeViewAdapter.Holder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 
             override val isVisibleWhenEmpty = true
 

@@ -259,7 +259,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val isVisibleWhenEmpty = true
 
-        override fun onClick() = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
+        override fun onClick(holder: TreeViewAdapter.Holder) = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
         override fun compareTo(other: ModelNode) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
     }

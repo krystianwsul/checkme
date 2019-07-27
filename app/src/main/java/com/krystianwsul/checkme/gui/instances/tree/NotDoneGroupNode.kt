@@ -227,7 +227,7 @@ class NotDoneGroupNode(
         }
     }
 
-    override fun onClick() {
+    override fun onClick(holder: TreeViewAdapter.Holder) {
         groupListFragment.activity.startActivity(if (singleInstance()) {
             ShowInstanceActivity.getIntent(groupListFragment.activity, singleInstanceData.instanceKey)
         } else {
@@ -481,7 +481,7 @@ class NotDoneGroupNode(
             }
         }
 
-        override fun onClick() = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
+        override fun onClick(holder: TreeViewAdapter.Holder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
 
         override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 

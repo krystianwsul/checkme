@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import androidx.recyclerview.widget.RecyclerView
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import kotlinx.android.synthetic.main.row_list.view.*
 
-class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
+class NodeHolder(view: View) : TreeViewAdapter.Holder(view) {
 
     val rowContainer = itemView.rowContainer!!
     val rowTextLayout = itemView.rowTextLayout!!

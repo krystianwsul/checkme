@@ -21,13 +21,13 @@ class TreeNode(
         }
     }
 
-    fun onClick() {
+    fun onClick(holder: TreeViewAdapter.Holder) {
         if (hasActionMode()) {
             treeViewAdapter.updateDisplayedNodes {
                 toggleSelected(TreeViewAdapter.Placeholder)
             }
         } else {
-            modelNode.onClick()
+            modelNode.onClick(holder)
         }
     }
 
@@ -145,6 +145,8 @@ class TreeNode(
     }
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder) = modelNode.onBindViewHolder(viewHolder)
+
+    fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) = modelNode.onViewAttachedToWindow(holder)
 
     override fun compareTo(other: TreeNode) = modelNode.compareTo(other.modelNode)
 

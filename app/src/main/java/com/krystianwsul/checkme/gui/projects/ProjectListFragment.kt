@@ -55,39 +55,21 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_projects, listener::initBottomBar) }
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
-            val selected = treeViewAdapter.selectedNodes
-            check(selected.isNotEmpty())
+            val projectIds = treeViewAdapter.selectedNodes
+                    .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
+                    .toSet()
 
-            val projectNodes = selected.map { it.modelNode as ProjectListAdapter.ProjectNode }
-            val projectDatas = projectNodes.map { it.projectData }
-
-            val projectIds = projectDatas.map { it.id }.toSet()
+            check(projectIds.isNotEmpty())
 
             when (itemId) {
                 R.id.action_project_delete -> {
-                    check(data != null)
+                    checkNotNull(data)
 
-                    projectIds.forEach { data!!.projectDatas.remove(it) }
+                    val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(0, SaveService.Source.GUI, projectIds)
 
-                    for (treeNode in selected) {
-                        val projectNode = treeNode.modelNode as ProjectListAdapter.ProjectNode
-
-                        projectNode.remove(x)
-
-                        decrementSelected(x)
+                    mainActivity.showSnackbarRemoved(projectIds.size) {
+                        DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, projectUndoData)
                     }
-
-                    val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectIds)
-
-                    mainActivity.showSnackbarRemoved(selected.size) {
-                        onLoadFinished(data!!.also {
-                            it.projectDatas.putAll(projectDatas.map { it.id to it })
-                        })
-
-                        DomainFactory.instance.clearProjectEndTimeStamps(data!!.dataId, SaveService.Source.GUI, projectUndoData)
-                    }
-
-                    updateSelectAll()
                 }
                 else -> throw UnsupportedOperationException()
             }

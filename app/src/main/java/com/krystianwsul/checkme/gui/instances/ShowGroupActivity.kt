@@ -20,6 +20,7 @@ import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_group.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
+import java.io.Serializable
 
 class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
 
@@ -42,8 +43,9 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
 
     override val snackbarParent get() = showGroupCoordinator!!
 
-    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, removeInstances: Boolean ->
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances)
+    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+        @Suppress("UNCHECKED_CAST")
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
 
         showSnackbarRemoved(taskUndoData.taskKeys.size) {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)

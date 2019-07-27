@@ -32,6 +32,7 @@ import io.reactivex.rxkotlin.addTo
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_task_list.*
+import java.io.Serializable
 import java.util.*
 
 class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
@@ -64,10 +65,11 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
     }
 
-    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, deleteInstances: Boolean ->
+    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         checkNotNull(data)
 
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, deleteInstances)
+        @Suppress("UNCHECKED_CAST")
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
 
         taskListListener.showSnackbarRemoved(taskUndoData.taskKeys.size) {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)

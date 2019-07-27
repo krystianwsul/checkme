@@ -23,6 +23,7 @@ import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
+import java.io.Serializable
 
 class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
@@ -50,10 +51,11 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
     override val search = Observable.just(NullableWrapper<TaskListFragment.SearchData>())!!
 
-    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, deleteInstances: Boolean ->
+    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         showTaskViewModel.stop()
 
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, deleteInstances)
+        @Suppress("UNCHECKED_CAST")
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
 
         setResult(RESULT_DELETE)
 

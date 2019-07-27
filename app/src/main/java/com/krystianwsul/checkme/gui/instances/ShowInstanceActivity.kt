@@ -31,6 +31,7 @@ import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_instance.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.*
+import java.io.Serializable
 
 class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
 
@@ -72,10 +73,11 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
         override fun onReceive(context: Context?, intent: Intent?) = updateBottomMenu()
     }
 
-    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, removeInstances: Boolean ->
+    @Suppress("UNCHECKED_CAST")
+    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         showInstanceViewModel.stop()
 
-        val (undoTaskData, visible) = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances, instanceKey)
+        val (undoTaskData, visible) = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances, instanceKey)
 
         if (visible) {
             showInstanceViewModel.start(instanceKey)

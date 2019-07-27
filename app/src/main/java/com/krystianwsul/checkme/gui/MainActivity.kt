@@ -48,6 +48,7 @@ import kotlinx.android.synthetic.main.bottom.*
 import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.LocalDate
+import java.io.Serializable
 
 class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, TaskListFragment.TaskListListener, DayFragment.Host, FriendListFragment.FriendListListener, ProjectListFragment.ProjectListListener {
 
@@ -134,8 +135,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 .apply { createDisposable += connect() }!!
     }
 
-    private val deleteInstancesListener = { taskKeys: Set<TaskKey>, removeInstances: Boolean ->
-        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys, removeInstances)
+    private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
+        @Suppress("UNCHECKED_CAST")
+        val taskUndoData = DomainFactory.instance.setTaskEndTimeStamps(SaveService.Source.GUI, taskKeys as Set<TaskKey>, removeInstances)
 
         showSnackbarRemoved(taskUndoData.taskKeys.size) {
             DomainFactory.instance.clearTaskEndTimeStamps(SaveService.Source.GUI, taskUndoData)

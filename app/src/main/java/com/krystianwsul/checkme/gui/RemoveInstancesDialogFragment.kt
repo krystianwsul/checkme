@@ -4,32 +4,35 @@ import android.os.Bundle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.TaskKey
+import java.io.Serializable
 
 class RemoveInstancesDialogFragment : AbstractDialogFragment() {
 
     companion object {
 
-        private const val KEY_TASKS = "tasks"
+        private const val KEY_PAYLOAD = "payload"
 
-        fun newInstance(taskKeys: Set<TaskKey>) = RemoveInstancesDialogFragment().apply {
+        fun newInstance(taskKeys: Set<TaskKey>) = newInstance(taskKeys.toHashSet() as Serializable)
+
+        fun newInstance(payload: Serializable) = RemoveInstancesDialogFragment().apply {
             arguments = Bundle().apply {
-                putParcelableArrayList(KEY_TASKS, ArrayList(taskKeys))
+                putSerializable(KEY_PAYLOAD, payload)
             }
         }
     }
 
-    lateinit var taskKeys: Set<TaskKey>
+    lateinit var payload: Serializable
 
-    lateinit var listener: (Set<TaskKey>, Boolean) -> Unit
+    lateinit var listener: (Serializable, Boolean) -> Unit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        taskKeys = arguments!!.getParcelableArrayList<TaskKey>(KEY_TASKS)!!.toSet()
+        payload = arguments!!.getSerializable(KEY_PAYLOAD)!!
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.removeInstancesMessage)
-            .setNegativeButton(R.string.removeInstancesNo) { _, _ -> listener(taskKeys, false) }
-            .setPositiveButton(R.string.removeInstancesYes) { _, _ -> listener(taskKeys, true) }
+            .setNegativeButton(R.string.removeInstancesNo) { _, _ -> listener(payload, false) }
+            .setPositiveButton(R.string.removeInstancesYes) { _, _ -> listener(payload, true) }
             .create()
 }

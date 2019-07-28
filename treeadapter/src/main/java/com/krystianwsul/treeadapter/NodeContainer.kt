@@ -1,22 +1,24 @@
 package com.krystianwsul.treeadapter
 
-interface NodeContainer {
+import androidx.recyclerview.widget.RecyclerView
+
+interface NodeContainer<T : RecyclerView.ViewHolder> {
 
     val isExpanded: Boolean
 
-    val selectedChildren: List<TreeNode>
+    val selectedChildren: List<TreeNode<T>>
 
-    val treeNodeCollection: TreeNodeCollection
+    val treeNodeCollection: TreeNodeCollection<T>
 
     val indentation: Int
 
     val displayedSize: Int
 
-    fun getPosition(treeNode: TreeNode): Int
+    fun getPosition(treeNode: TreeNode<T>): Int
 
-    fun remove(treeNode: TreeNode, x: TreeViewAdapter.Placeholder)
+    fun remove(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder)
 
-    fun add(treeNode: TreeNode, x: TreeViewAdapter.Placeholder)
+    fun add(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder)
 
     val id: Any
 }

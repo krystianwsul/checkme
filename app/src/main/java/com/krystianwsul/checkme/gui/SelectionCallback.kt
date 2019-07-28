@@ -11,6 +11,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomappbar.BottomAppBar
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.utils.animateItems
 import com.krystianwsul.treeadapter.TreeViewAdapter
 
@@ -25,7 +26,7 @@ abstract class SelectionCallback : ActionMode.Callback {
     private var menuClick = false
     private var removingLast = false
 
-    protected abstract fun getTreeViewAdapter(): TreeViewAdapter
+    protected abstract fun getTreeViewAdapter(): TreeViewAdapter<NodeHolder>
 
     protected abstract val bottomBarData: Triple<MyBottomBar, Int, () -> Unit>
 

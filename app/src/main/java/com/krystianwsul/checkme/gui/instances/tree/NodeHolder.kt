@@ -3,10 +3,11 @@ package com.krystianwsul.checkme.gui.instances.tree
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
-import com.krystianwsul.treeadapter.TreeViewAdapter
+import androidx.recyclerview.widget.RecyclerView
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.row_list.view.*
 
-class NodeHolder(view: View) : TreeViewAdapter.Holder(view) {
+class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     val rowContainer = itemView.rowContainer!!
     val rowTextLayout = itemView.rowTextLayout!!
@@ -23,4 +24,6 @@ class NodeHolder(view: View) : TreeViewAdapter.Holder(view) {
     val rowSeparator = itemView.rowSeparator!!
 
     var textWidth: Int? = null
+
+    val compositeDisposable = CompositeDisposable()
 }

@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
@@ -22,7 +23,10 @@ import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeNodeCollection
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.empty_text.*
 import java.util.*
@@ -39,7 +43,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
     private lateinit var friendListProgress: ProgressBar
     private lateinit var friendListRecycler: RecyclerView
 
-    lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
 
     private var data: FriendListViewModel.Data? = null
@@ -189,12 +193,14 @@ class FriendListFragment : AbstractFragment(), FabUser {
         friendListFab = null
     }
 
-    private inner class FriendListAdapter : TreeModelAdapter {
+    private inner class FriendListAdapter : GroupHolderAdapter() {
 
         lateinit var userDataWrappers: MutableList<FriendNode>
 
         val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
-        private lateinit var treeNodeCollection: TreeNodeCollection
+
+        override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+            private set
 
         fun initialize() {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
@@ -249,7 +255,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val details = Pair(userListData.email, colorSecondary)
 
-        public override lateinit var treeNode: TreeNode
+        public override lateinit var treeNode: TreeNode<NodeHolder>
             private set
 
         override val isSelectable = true
@@ -264,9 +270,9 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
         override val avatarImage = NullableWrapper(userListData.photoUrl)
 
-        override fun compareTo(other: ModelNode) = userListData.id.compareTo((other as FriendNode).userListData.id)
+        override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as FriendNode).userListData.id)
 
-        fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
+        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>): TreeNode<NodeHolder> {
             treeNode = TreeNode(this, treeNodeCollection, false, selectedIds.contains(userListData.id))
             treeNode.setChildTreeNodes(listOf())
             return treeNode

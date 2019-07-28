@@ -2,7 +2,7 @@ package com.krystianwsul.treeadapter
 
 import androidx.recyclerview.widget.RecyclerView
 
-interface ModelNode : Comparable<ModelNode> {
+interface ModelNode<T : RecyclerView.ViewHolder> : Comparable<ModelNode<T>> {
 
     val itemViewType: Int
 
@@ -16,9 +16,7 @@ interface ModelNode : Comparable<ModelNode> {
 
     fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean = false)
 
-    fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder)
-
-    fun onClick(holder: TreeViewAdapter.Holder) = Unit
+    fun onClick(holder: T) = Unit
 
     fun filter() = true
 

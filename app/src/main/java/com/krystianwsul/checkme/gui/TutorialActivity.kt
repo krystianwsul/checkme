@@ -50,7 +50,7 @@ class TutorialActivity : NavBarActivity() {
 
         window.navigationBarColor = ContextCompat.getColor(this, R.color.primaryColor12Solid)
 
-        tutorialPager.adapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
+        tutorialPager.adapter = object : FragmentStatePagerAdapter(supportFragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
             override fun getCount() = 4
 

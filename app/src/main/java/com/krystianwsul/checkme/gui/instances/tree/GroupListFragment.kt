@@ -30,7 +30,6 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -80,7 +79,7 @@ class GroupListFragment @JvmOverloads constructor(
             return Date(calendar)
         }
 
-        private fun nodesToSelectedDatas(treeNodes: List<TreeNode>, includeGroups: Boolean): Set<SelectedData> {
+        private fun nodesToSelectedDatas(treeNodes: List<TreeNode<NodeHolder>>, includeGroups: Boolean): Set<SelectedData> {
             val instanceDatas = ArrayList<SelectedData>()
             treeNodes.map { it.modelNode }.forEach {
                 when (it) {
@@ -112,7 +111,7 @@ class GroupListFragment @JvmOverloads constructor(
     val activity get() = context as AbstractActivity
     val listener get() = context as GroupListListener
 
-    lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
 
     private val parametersRelay = BehaviorRelay.create<Parameters>()
@@ -764,7 +763,7 @@ class GroupListFragment @JvmOverloads constructor(
                 }?.let { treeViewAdapter.getTreeNodeCollection().getPosition(it) }
     }
 
-    class GroupAdapter(val groupListFragment: GroupListFragment) : TreeModelAdapter, NodeCollectionParent {
+    class GroupAdapter(val groupListFragment: GroupListFragment) : GroupHolderAdapter(), NodeCollectionParent {
 
         companion object {
 
@@ -774,7 +773,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
 
-        lateinit var treeNodeCollection: TreeNodeCollection
+        override public lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
 
         private lateinit var nodeCollection: NodeCollection
@@ -880,7 +879,7 @@ class GroupListFragment @JvmOverloads constructor(
 
     interface GroupListListener : SnackbarListener, ListItemAddedListener {
 
-        fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter)
+        fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>)
 
         fun onDestroyGroupActionMode()
 

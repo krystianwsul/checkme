@@ -8,18 +8,17 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.disposables.CompositeDisposable
 
-class TreeViewAdapter(
-        val treeModelAdapter: TreeModelAdapter,
-        @param:LayoutRes @field:LayoutRes private val paddingLayout: Int?) : RecyclerView.Adapter<TreeViewAdapter.Holder>() {
+class TreeViewAdapter<T : RecyclerView.ViewHolder>(
+        val treeModelAdapter: TreeModelAdapter<T>,
+        @param:LayoutRes @field:LayoutRes private val paddingLayout: Int?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
 
         private const val TYPE_PADDING = 1000
     }
 
-    private var treeNodeCollection: TreeNodeCollection? = null
+    private var treeNodeCollection: TreeNodeCollection<T>? = null
 
     val displayedNodes
         get() = treeNodeCollection?.displayedNodes
@@ -32,7 +31,7 @@ class TreeViewAdapter(
 
     val updates = PublishRelay.create<Unit>()
 
-    fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection) {
+    fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {
         this.treeNodeCollection?.stale = true
 
         this.treeNodeCollection = treeNodeCollection
@@ -139,7 +138,7 @@ class TreeViewAdapter(
         treeNodeCollection!!.selectAll(x)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == TYPE_PADDING) {
             checkNotNull(paddingLayout)
 
@@ -149,7 +148,7 @@ class TreeViewAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: Holder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         check(position >= 0)
         check(position < itemCount)
 
@@ -168,28 +167,17 @@ class TreeViewAdapter(
         }
     }
 
-    override fun onViewAttachedToWindow(holder: Holder) {
-        val position = holder.adapterPosition
-
-        check(position >= 0)
-        check(position < itemCount)
-
-        if (treeNodeCollection == null)
-            throw SetTreeNodeCollectionNotCalledException()
-
-        val displayedSize = treeNodeCollection!!.displayedSize
-
-        if (position < displayedSize) {
-            val treeNode = treeNodeCollection!!.getNode(position)
-            treeNode.onViewAttachedToWindow(holder)
-        } else {
-            check(position == displayedSize)
-            check(paddingLayout != null)
-            check(position == itemCount - 1)
-        }
+    override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
+        if (holder !is PaddingHolder) // can't do conditional cast because of erasure
+            @Suppress("UNCHECKED_CAST")
+            treeModelAdapter.onViewAttachedToWindow(holder as T)
     }
 
-    override fun onViewDetachedFromWindow(holder: Holder) = holder.compositeDisposable.clear()
+    override fun onViewDetachedFromWindow(holder: RecyclerView.ViewHolder) {
+        if (holder !is PaddingHolder) // can't do conditional cast because of erasure
+            @Suppress("UNCHECKED_CAST")
+            treeModelAdapter.onViewDetachedFromWindow(holder as T)
+    }
 
     override fun getItemViewType(position: Int): Int {
         if (treeNodeCollection == null)
@@ -220,12 +208,7 @@ class TreeViewAdapter(
 
     class SetTreeNodeCollectionNotCalledException : InitializationException("TreeViewAdapter.setTreeNodeCollection() has not been called.")
 
-    abstract class Holder(view: View) : RecyclerView.ViewHolder(view) {
-
-        val compositeDisposable = CompositeDisposable()
-    }
-
-    private class PaddingHolder(view: View) : Holder(view)
+    private class PaddingHolder(view: View) : RecyclerView.ViewHolder(view)
 
     object Placeholder
 }

@@ -134,6 +134,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is RemoteTask<*>)
 
+        @Suppress("UNCHECKED_CAST")
         remoteProject.createTaskHierarchy(this, childTask as RemoteTask<T>, now)
     }
 

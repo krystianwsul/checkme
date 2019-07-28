@@ -5,14 +5,13 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeViewAdapter
 
 class TaskNode(
         indentation: Int,
         val taskData: GroupListFragment.TaskData,
         private val taskParent: TaskParent) : GroupHolderNode(indentation), TaskParent {
 
-    override lateinit var treeNode: TreeNode
+    override lateinit var treeNode: TreeNode<NodeHolder>
         private set
 
     override val id = taskData.taskKey
@@ -37,7 +36,10 @@ class TaskNode(
             }
         }
 
-    fun initialize(parentTreeNode: TreeNode, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>): TreeNode {
+    fun initialize(
+            parentTreeNode: TreeNode<NodeHolder>,
+            expandedTaskKeys: List<TaskKey>,
+            selectedTaskKeys: List<TaskKey>): TreeNode<NodeHolder> {
         val selected = selectedTaskKeys.contains(taskData.taskKey)
         val expanded = expandedTaskKeys.contains(taskData.taskKey) && taskData.children.isNotEmpty()
 
@@ -58,7 +60,7 @@ class TaskNode(
 
     private fun expanded() = treeNode.isExpanded
 
-    override fun compareTo(other: ModelNode) = (other as TaskNode).taskData.startExactTimeStamp.let {
+    override fun compareTo(other: ModelNode<NodeHolder>) = (other as TaskNode).taskData.startExactTimeStamp.let {
         if (indentation == 0) {
             -taskData.startExactTimeStamp.compareTo(it)
         } else {
@@ -87,7 +89,7 @@ class TaskNode(
             Pair(text, color)
         }
 
-    override fun onClick(holder: TreeViewAdapter.Holder) {
+    override fun onClick(holder: NodeHolder) {
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))
     }
 

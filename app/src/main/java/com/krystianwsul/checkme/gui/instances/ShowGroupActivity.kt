@@ -7,6 +7,7 @@ import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
@@ -76,7 +77,7 @@ class ShowGroupActivity : ToolbarActivity(), GroupListFragment.GroupListListener
         groupListFragment.setTimeStamp(timeStamp, data.dataId, data.immediate, data.dataWrapper)
     }
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
+    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
 

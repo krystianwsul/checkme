@@ -7,10 +7,10 @@ import com.krystianwsul.treeadapter.TreeNode
 
 class NoteNode(private val note: String, instance: Boolean) : GroupHolderNode(0) {
 
-    override lateinit var treeNode: TreeNode
+    override lateinit var treeNode: TreeNode<NodeHolder>
         private set
 
-    private lateinit var nodeContainer: NodeContainer
+    private lateinit var nodeContainer: NodeContainer<NodeHolder>
 
     override val id get() = Id(nodeContainer.id)
 
@@ -20,7 +20,7 @@ class NoteNode(private val note: String, instance: Boolean) : GroupHolderNode(0)
         check(note.isNotEmpty())
     }
 
-    fun initialize(nodeContainer: NodeContainer): TreeNode {
+    fun initialize(nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {
         this.nodeContainer = nodeContainer
 
         treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
@@ -37,7 +37,7 @@ class NoteNode(private val note: String, instance: Boolean) : GroupHolderNode(0)
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override fun compareTo(other: ModelNode) = -1
+    override fun compareTo(other: ModelNode<NodeHolder>) = -1
 
     override val checkBoxVisibility = if (instance) View.INVISIBLE else View.GONE
 }

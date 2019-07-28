@@ -1,14 +1,15 @@
 package com.krystianwsul.treeadapter
 
+import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
+class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeViewAdapter<T>) : NodeContainer<T> {
 
-    private lateinit var treeNodes: MutableList<TreeNode>
+    private lateinit var treeNodes: MutableList<TreeNode<T>>
 
     var stale = false
 
-    val selectedNodes: List<TreeNode>
+    val selectedNodes: List<TreeNode<T>>
         get() {
             if (!this::treeNodes.isInitialized)
                 throw SetTreeNodesNotCalledException()
@@ -16,7 +17,7 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
             return treeNodes.flatMap { it.selectedNodes }
         }
 
-    var nodes: List<TreeNode>
+    var nodes: List<TreeNode<T>>
         get() {
             if (!this::treeNodes.isInitialized)
                 throw SetTreeNodesNotCalledException()
@@ -40,7 +41,7 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
             return
     }
 
-    fun getNode(position: Int): TreeNode {
+    fun getNode(position: Int): TreeNode<T> {
         if (!this::treeNodes.isInitialized)
             throw SetTreeNodesNotCalledException()
 
@@ -58,7 +59,7 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
         throw IndexOutOfBoundsException()
     }
 
-    override fun getPosition(treeNode: TreeNode): Int {
+    override fun getPosition(treeNode: TreeNode<T>): Int {
         if (!this::treeNodes.isInitialized)
             throw SetTreeNodesNotCalledException()
 
@@ -90,7 +91,7 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
             return displayedSize
         }
 
-    val displayedNodes: List<TreeNode>
+    val displayedNodes: List<TreeNode<T>>
         get() {
             if (!this::treeNodes.isInitialized)
                 throw SetTreeNodesNotCalledException()
@@ -105,7 +106,7 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
         treeNodes.forEach { it.unselect(x) }
     }
 
-    override fun add(treeNode: TreeNode, x: TreeViewAdapter.Placeholder) {
+    override fun add(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder) {
         if (!this::treeNodes.isInitialized)
             throw SetTreeNodesNotCalledException()
 
@@ -113,7 +114,7 @@ class TreeNodeCollection(val treeViewAdapter: TreeViewAdapter) : NodeContainer {
         treeNodes.sort()
     }
 
-    override fun remove(treeNode: TreeNode, x: TreeViewAdapter.Placeholder) {
+    override fun remove(treeNode: TreeNode<T>, x: TreeViewAdapter.Placeholder) {
         if (!this::treeNodes.isInitialized)
             throw SetTreeNodesNotCalledException()
 

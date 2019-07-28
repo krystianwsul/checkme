@@ -107,6 +107,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 }
                 R.id.action_task_add -> startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(taskKeys.single())))
                 R.id.action_task_show_instances -> startActivity(ShowTaskInstancesActivity.getIntent(taskKeys.single()))
+                R.id.actionTaskCopy -> startActivity(CreateTaskActivity.getCopyIntent(taskKeys.single()))
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -139,7 +140,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     R.id.action_task_join to (!single && projectIdCount == 1),
                     R.id.action_task_edit to single,
                     R.id.action_task_add to single,
-                    R.id.action_task_show_instances to (childTaskDatas.singleOrNull()?.hasInstances == true)
+                    R.id.action_task_show_instances to (childTaskDatas.singleOrNull()?.hasInstances == true),
+                    R.id.actionTaskCopy to single
             )
         }
 

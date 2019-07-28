@@ -278,7 +278,7 @@ class CreateTaskActivity : NavBarActivity() {
                 checkNotNull(data)
                 checkNotNull(toolbarEditText)
 
-                if (!updateError()) {
+                if (!updateError()) { // todo copy
                     val name = toolbarEditText.text.toString().trim { it <= ' ' }
                     check(!TextUtils.isEmpty(name))
 

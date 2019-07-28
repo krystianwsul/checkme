@@ -299,6 +299,11 @@ class GroupListFragment @JvmOverloads constructor(
 
                     instanceDatas.forEach { it.notificationShown = true }
                 }
+                R.id.actionGroupCopyTask -> {
+                    val instanceData = selectedDatas.single()
+
+                    activity.startActivity(CreateTaskActivity.getCopyIntent(instanceData.taskKey))
+                }
                 else -> throw UnsupportedOperationException()
             }
         }
@@ -339,7 +344,8 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_edit_task to instanceData.taskCurrent,
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to instanceData.taskCurrent,
-                        R.id.action_group_add_task to instanceData.taskCurrent
+                        R.id.action_group_add_task to instanceData.taskCurrent,
+                        R.id.actionGroupCopyTask to true
                 ))
             } else {
                 check(selectedDatas.size > 1)
@@ -347,7 +353,8 @@ class GroupListFragment @JvmOverloads constructor(
                 itemVisibilities.addAll(listOf(
                         R.id.action_group_show_task to false,
                         R.id.action_group_edit_task to false,
-                        R.id.action_group_add_task to false
+                        R.id.action_group_add_task to false,
+                        R.id.actionGroupCopyTask to false
                 ))
 
                 if (selectedDatas.all { it.taskCurrent }) {

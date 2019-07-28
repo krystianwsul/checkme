@@ -278,7 +278,7 @@ class CreateTaskActivity : NavBarActivity() {
                 checkNotNull(data)
                 checkNotNull(toolbarEditText)
 
-                if (!updateError()) { // todo copy
+                if (!updateError()) {
                     val name = toolbarEditText.text.toString().trim { it <= ' ' }
                     check(!TextUtils.isEmpty(name))
 
@@ -793,7 +793,7 @@ class CreateTaskActivity : NavBarActivity() {
             if (scheduleEntry.scheduleData !is CreateTaskViewModel.ScheduleData.Single)
                 continue
 
-            if (data!!.taskData != null && data!!.taskData!!.scheduleDatas != null && data!!.taskData!!.scheduleDatas!!.contains(scheduleEntry.scheduleData))
+            if (!copy && data?.taskData?.scheduleDatas?.contains(scheduleEntry.scheduleData) == true)
                 continue
 
             if (scheduleEntry.scheduleData.date > Date.today())

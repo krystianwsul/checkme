@@ -50,6 +50,8 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     private val uuid get() = remoteProject.uuid
 
+    override val imageJson get() = remoteTaskRecord.image
+
     override var image: ImageState?
         get() {
             val image = remoteTaskRecord.image ?: return null
@@ -100,8 +102,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         remoteTaskRecord.endData = endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
     }
 
-    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?, imageUuid: String?): Task {
-        val image = imageUuid?.let { TaskJson.Image(imageUuid, uuid) }
+    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task {
         val taskJson = TaskJson(name, now.long, null, null, null, null, note, image = image)
 
         val childTask = remoteProject.newRemoteTask(taskJson, now)

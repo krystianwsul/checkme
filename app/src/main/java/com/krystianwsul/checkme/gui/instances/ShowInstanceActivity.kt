@@ -310,6 +310,9 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
                                 startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(it.date, it.time.timePair)))
                             }
                         }
+                        R.id.instanceMenuCopyTask -> {
+                            startActivity(CreateTaskActivity.getCopyIntent(data!!.taskKey))
+                        }
                         else -> throw UnsupportedOperationException()
                     }
                 }

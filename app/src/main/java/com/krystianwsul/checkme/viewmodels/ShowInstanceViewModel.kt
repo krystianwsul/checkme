@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.DateTime
 
 class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
@@ -29,7 +30,8 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             var exists: Boolean,
             val dataWrapper: GroupListFragment.DataWrapper,
             var notificationShown: Boolean,
-            val displayText: String) : DomainData() {
+            val displayText: String,
+            val taskKey: TaskKey) : DomainData() {
 
         init {
             check(name.isNotEmpty())

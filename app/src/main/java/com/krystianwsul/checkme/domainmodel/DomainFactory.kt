@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.domainmodel.schedules.*
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
@@ -653,6 +654,7 @@ class DomainFactory(
         val instanceDateTime = instance.instanceDateTime
         val parentInstance = instance.getParentInstance(now)
         val displayText = parentInstance?.name ?: instanceDateTime.getDisplayText()
+
         return ShowInstanceViewModel.Data(
                 instance.name,
                 instanceDateTime,
@@ -662,7 +664,8 @@ class DomainFactory(
                 instance.exists(),
                 getGroupListData(instance, task, now, true),
                 instance.notificationShown,
-                displayText)
+                displayText,
+                task.taskKey)
     }
 
     fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {
@@ -1186,7 +1189,8 @@ class DomainFactory(
             scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
+            imagePath: Pair<String, Uri>?,
+            copyTaskKey: TaskKey? = null): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1200,6 +1204,8 @@ class DomainFactory(
         val imageUuid = imagePath?.let { newUuid() }
 
         val task = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId, imageUuid)
+
+        copyTaskKey?.let { copyTask(now, task, it) }
 
         updateNotifications(now)
 
@@ -1320,20 +1326,22 @@ class DomainFactory(
             name: String,
             note: String?,
             projectId: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
+            imagePath: Pair<String, Uri>?,
+            copyTaskKey: TaskKey? = null): TaskKey {
         MyCrashlytics.log("DomainFactory.createRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
-        val now = ExactTimeStamp.now
-
-
         check(name.isNotEmpty())
+
+        val now = ExactTimeStamp.now
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
 
         val imageUuid = imagePath?.let { newUuid() }
 
         val task = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId, imageUuid)
+
+        copyTaskKey?.let { copyTask(now, task, it) }
 
         updateNotifications(now)
 
@@ -1447,7 +1455,8 @@ class DomainFactory(
             parentTaskKey: TaskKey,
             name: String,
             note: String?,
-            imagePath: Pair<String, Uri>?): TaskKey {
+            imagePath: Pair<String, Uri>?,
+            copyTaskKey: TaskKey? = null): TaskKey {
         MyCrashlytics.log("DomainFactory.createChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1460,7 +1469,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val childTask = parentTask.createChildTask(now, name, note, imageUuid)
+        val childTask = createChildTask(now, parentTask, name, note, imageUuid?.let { TaskJson.Image(it, uuid) }, copyTaskKey)
 
         updateNotifications(now)
 
@@ -1473,6 +1482,23 @@ class DomainFactory(
         }
 
         return childTask.taskKey
+    }
+
+    private fun createChildTask(
+            now: ExactTimeStamp,
+            parentTask: Task,
+            name: String,
+            note: String?,
+            imageJson: TaskJson.Image?,
+            copyTaskKey: TaskKey? = null): Task {
+        check(name.isNotEmpty())
+        check(parentTask.current(now))
+
+        val childTask = parentTask.createChildTask(now, name, note, imageJson)
+
+        copyTaskKey?.let { copyTask(now, childTask, it) }
+
+        return childTask
     }
 
     @Synchronized
@@ -1500,9 +1526,9 @@ class DomainFactory(
 
         val joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
-        val uuid = imagePath?.let { newUuid() }
+        val imageUuid = imagePath?.let { newUuid() }
 
-        val childTask = parentTask.createChildTask(now, name, note, uuid)
+        val childTask = parentTask.createChildTask(now, name, note, imageUuid?.let { TaskJson.Image(it, uuid) })
 
         joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
@@ -1512,7 +1538,7 @@ class DomainFactory(
 
         notifyCloud(childTask.project)
 
-        uuid?.let {
+        imageUuid?.let {
             Uploader.addUpload(childTask.taskKey, it, imagePath)
         }
 
@@ -1981,8 +2007,6 @@ class DomainFactory(
     }
 
     private fun getExistingInstanceIfPresent(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)
-
-    private fun getExistingInstanceForce(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)!!
 
     fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
             .values
@@ -2792,6 +2816,17 @@ class DomainFactory(
 
     fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey<*> {
         return remoteProjectFactory.getRemoteCustomTime(remoteProjectId, remoteCustomTimeId).customTimeKey
+    }
+
+    private fun copyTask(now: ExactTimeStamp, task: Task, copyTaskKey: TaskKey) {
+        val copiedTask = getTaskForce(copyTaskKey)
+
+        copiedTask.getChildTaskHierarchies(now).forEach {
+            val copiedChildTask = it.childTask
+            copiedChildTask.image?.let { check(it is ImageState.Remote) }
+
+            createChildTask(now, task, copiedChildTask.name, copiedChildTask.note, copiedChildTask.imageJson, copiedChildTask.taskKey)
+        }
     }
 
     class ProjectUndoData {

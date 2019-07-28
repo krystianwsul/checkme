@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.schedules.Schedule
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
@@ -34,6 +35,8 @@ abstract class Task(protected val domainFactory: DomainFactory) {
     abstract val existingInstances: Map<ScheduleKey, Instance>
 
     abstract val project: RemoteProject<*>
+
+    abstract val imageJson: TaskJson.Image?
 
     abstract var image: ImageState?
 
@@ -156,7 +159,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         setMyEndExactTimeStamp(null)
     }
 
-    abstract fun createChildTask(now: ExactTimeStamp, name: String, note: String?, imageUuid: String?): Task
+    abstract fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task
 
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         check(notDeleted(exactTimeStamp))

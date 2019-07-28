@@ -58,6 +58,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         private const val TASK_KEY_KEY = "taskKey"
         private const val TASK_KEYS_KEY = "taskKeys"
+        private const val KEY_COPY = "copy"
 
         private const val KEY_HINT = "hint"
         private const val KEY_REMOVE_INSTANCE_KEYS = "removeInstanceKeys"
@@ -97,6 +98,11 @@ class CreateTaskActivity : NavBarActivity() {
 
         fun getEditIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
 
+        fun getCopyIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+            putExtra(TASK_KEY_KEY, taskKey as Parcelable)
+            putExtra(KEY_COPY, true)
+        }
+
         fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             action = Intent.ACTION_DEFAULT
             putExtra(KEY_PARENT_PROJECT, parentTaskKeyHint.remoteProjectId)
@@ -112,6 +118,7 @@ class CreateTaskActivity : NavBarActivity() {
 
     private var taskKey: TaskKey? = null
     private var taskKeys: List<TaskKey>? = null
+    private var copy = false
 
     private var hint: Hint? = null
     private var nameHint: String? = null
@@ -234,9 +241,6 @@ class CreateTaskActivity : NavBarActivity() {
                 it.requestFocus()
 
                 window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-
-                //InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                //imm.showSoftInput(noteText, InputMethodManager.SHOW_FORCED);
             }
         }
 
@@ -289,6 +293,21 @@ class CreateTaskActivity : NavBarActivity() {
                             val projectId = if (hasValueParentInGeneral()) (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
 
                             when {
+                                copy -> {
+                                    checkNotNull(data!!.taskData)
+                                    check(taskKeys == null)
+                                    check(removeInstanceKeys.isEmpty())
+
+                                    DomainFactory.instance.createScheduleRootTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            name,
+                                            scheduleDatas,
+                                            note,
+                                            projectId,
+                                            writeImagePath?.value,
+                                            taskKey!!).also { createdTaskKey = it }
+                                }
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
@@ -344,6 +363,20 @@ class CreateTaskActivity : NavBarActivity() {
                                 ShortcutManager.addShortcut(parentTaskKey)
 
                             when {
+                                copy -> {
+                                    checkNotNull(data!!.taskData)
+                                    check(taskKeys == null)
+                                    check(removeInstanceKeys.isEmpty())
+
+                                    DomainFactory.instance.createChildTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            parentTaskKey,
+                                            name,
+                                            note,
+                                            writeImagePath?.value,
+                                            taskKey!!).also { createdTaskKey = it }
+                                }
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
@@ -391,6 +424,20 @@ class CreateTaskActivity : NavBarActivity() {
                             val projectId = if (hasValueParentInGeneral()) (stateData.parent!!.parentKey as CreateTaskViewModel.ParentKey.Project).projectId else null
 
                             when {
+                                copy -> {
+                                    checkNotNull(data!!.taskData)
+                                    check(taskKeys == null)
+                                    check(removeInstanceKeys.isEmpty())
+
+                                    DomainFactory.instance.createRootTask(
+                                            data!!.dataId,
+                                            SaveService.Source.GUI,
+                                            name,
+                                            note,
+                                            projectId,
+                                            writeImagePath?.value,
+                                            taskKey!!).also { createdTaskKey = it }
+                                }
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
                                     check(taskKeys == null)
@@ -474,7 +521,10 @@ class CreateTaskActivity : NavBarActivity() {
                 check(!hasExtra(KEY_HINT))
 
                 taskKey = getParcelableExtra(TASK_KEY_KEY)!!
+                copy = getBooleanExtra(KEY_COPY, false)
             } else {
+                check(!hasExtra(KEY_COPY))
+
                 Log.e("asdf", "shortcut b")
                 if (action == Intent.ACTION_SEND) {
                     Log.e("asdf", "shortcut c")

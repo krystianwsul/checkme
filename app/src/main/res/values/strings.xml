@@ -20,6 +20,7 @@
     <string name="list">List</string>
     <string name="edit_instance">Change reminder time</string>
     <string name="show_task">Show task</string>
+    <string name="copyTask">Copy task</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="mark_done">Mark done</string>

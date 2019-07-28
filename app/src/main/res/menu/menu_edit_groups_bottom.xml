@@ -50,4 +50,12 @@
         android:icon="@drawable/ic_assignment_white_24dp"
         android:visible="false"/>
 
+    <item
+        android:id="@+id/actionGroupCopyTask"
+        android:title="@string/copyTask"
+        android:orderInCategory="600"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_content_copy_white_24dp"
+        android:visible="false" /><!-- todo copy -->
+
 </menu>

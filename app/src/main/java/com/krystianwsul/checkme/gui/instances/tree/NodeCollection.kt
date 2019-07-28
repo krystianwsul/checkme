@@ -10,7 +10,7 @@ class NodeCollection(
         private val indentation: Int,
         val groupAdapter: GroupListFragment.GroupAdapter,
         val useGroups: Boolean,
-        val nodeContainer: NodeContainer,
+        val nodeContainer: NodeContainer<NodeHolder>,
         private val note: String?) {
 
     lateinit var notDoneGroupCollection: NotDoneGroupCollection
@@ -40,11 +40,11 @@ class NodeCollection(
             unscheduledExpanded: Boolean,
             expandedTaskKeys: List<TaskKey>,
             selectedTaskKeys: List<TaskKey>,
-            imageData: ImageNode.ImageData?): List<TreeNode> {
+            imageData: ImageNode.ImageData?): List<TreeNode<NodeHolder>> {
         val notDoneInstanceDatas = instanceDatas.filter { it.done == null }
         val doneInstanceDatas = instanceDatas.filter { it.done != null }
 
-        return mutableListOf<TreeNode>().apply {
+        return mutableListOf<TreeNode<NodeHolder>>().apply {
             if (!note.isNullOrEmpty()) {
                 check(indentation == 0)
 

@@ -4,16 +4,15 @@ import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
-import com.krystianwsul.treeadapter.TreeViewAdapter
 import com.stfalcon.imageviewer.StfalconImageViewer
 import java.util.*
 
 class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
 
-    override lateinit var treeNode: TreeNode
+    override lateinit var treeNode: TreeNode<NodeHolder>
         private set
 
-    private lateinit var nodeContainer: NodeContainer
+    private lateinit var nodeContainer: NodeContainer<NodeHolder>
 
     override val id get() = Id(nodeContainer.id)
 
@@ -27,7 +26,7 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
 
     override val itemViewType = GroupListFragment.GroupAdapter.TYPE_IMAGE
 
-    fun initialize(nodeContainer: NodeContainer): TreeNode {
+    fun initialize(nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {
         this.nodeContainer = nodeContainer
         treeNode = TreeNode(this, nodeContainer, expanded = false, selected = false)
 
@@ -35,9 +34,9 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
         return treeNode
     }
 
-    override fun compareTo(other: ModelNode) = if (other is NoteNode) 1 else -1
+    override fun compareTo(other: ModelNode<NodeHolder>) = if (other is NoteNode) 1 else -1
 
-    override fun onClick(holder: TreeViewAdapter.Holder) = showImage((holder as NodeHolder).rowBigImage!!, imageData)
+    override fun onClick(holder: NodeHolder) = showImage(holder.rowBigImage!!, imageData)
 
     class ImageData(
             val imageState: ImageState,

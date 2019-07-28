@@ -19,7 +19,7 @@ class NotDoneGroupNode(
         private val notDoneGroupCollection: NotDoneGroupCollection,
         val instanceDatas: MutableList<GroupListFragment.InstanceData>) : GroupHolderNode(indentation), NodeCollectionParent, Sortable {
 
-    public override lateinit var treeNode: TreeNode
+    public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
 
     override val ripple = true
@@ -49,7 +49,12 @@ class NotDoneGroupNode(
         check(instanceDatas.all { it.instanceTimeStamp.toExactTimeStamp() == exactTimeStamp })
     }
 
-    fun initialize(expandedGroups: List<TimeStamp>, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, nodeContainer: NodeContainer): TreeNode {
+    fun initialize(
+            expandedGroups: List<TimeStamp>,
+            expandedInstances: Map<InstanceKey, Boolean>,
+            selectedInstances: List<InstanceKey>,
+            selectedGroups: List<Long>,
+            nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {
         val expanded: Boolean
         val doneExpanded: Boolean
         if (instanceDatas.size == 1) {
@@ -227,7 +232,7 @@ class NotDoneGroupNode(
         }
     }
 
-    override fun onClick(holder: TreeViewAdapter.Holder) {
+    override fun onClick(holder: NodeHolder) {
         groupListFragment.activity.startActivity(if (singleInstance()) {
             ShowInstanceActivity.getIntent(groupListFragment.activity, singleInstanceData.instanceKey)
         } else {
@@ -288,7 +293,7 @@ class NotDoneGroupNode(
         }
     }
 
-    override fun compareTo(other: ModelNode) = when (other) {
+    override fun compareTo(other: ModelNode<NodeHolder>) = when (other) {
         is NoteNode, is ImageNode -> 1
         is NotDoneGroupNode -> {
 
@@ -329,7 +334,12 @@ class NotDoneGroupNode(
         treeNode.add(newChildTreeNode(instanceData, mapOf(), false, listOf(), listOf()), x)
     }
 
-    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>, selected: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>): TreeNode {
+    private fun newChildTreeNode(
+            instanceData: GroupListFragment.InstanceData,
+            expandedInstances: Map<InstanceKey, Boolean>,
+            selected: Boolean,
+            selectedInstances: List<InstanceKey>,
+            selectedGroups: List<Long>): TreeNode<NodeHolder> {
         val notDoneInstanceNode = NotDoneInstanceNode(indentation, instanceData, this)
 
         val childTreeNode = notDoneInstanceNode.initialize(expandedInstances, selected, selectedInstances, selectedGroups, treeNode)
@@ -372,7 +382,7 @@ class NotDoneGroupNode(
 
         companion object {
 
-            fun getChildrenNew(treeNode: TreeNode, instanceData: GroupListFragment.InstanceData) = instanceData.children
+            fun getChildrenNew(treeNode: TreeNode<NodeHolder>, instanceData: GroupListFragment.InstanceData) = instanceData.children
                     .values
                     .filter { it.done == null }
                     .let {
@@ -394,7 +404,7 @@ class NotDoneGroupNode(
 
         override val isSelectable = true
 
-        public override lateinit var treeNode: TreeNode
+        public override lateinit var treeNode: TreeNode<NodeHolder>
             private set
 
         private lateinit var nodeCollection: NodeCollection
@@ -405,7 +415,12 @@ class NotDoneGroupNode(
 
         private val groupListFragment get() = groupAdapter.groupListFragment
 
-        fun initialize(expandedInstances: Map<InstanceKey, Boolean>, selected: Boolean, selectedInstances: List<InstanceKey>, selectedGroups: List<Long>, notDoneGroupTreeNode: TreeNode): TreeNode {
+        fun initialize(
+                expandedInstances: Map<InstanceKey, Boolean>,
+                selected: Boolean,
+                selectedInstances: List<InstanceKey>,
+                selectedGroups: List<Long>,
+                notDoneGroupTreeNode: TreeNode<NodeHolder>): TreeNode<NodeHolder> {
             val expanded: Boolean
             val doneExpanded: Boolean
             if (expandedInstances.containsKey(instanceData.instanceKey) && instanceData.children.isNotEmpty()) {
@@ -481,9 +496,9 @@ class NotDoneGroupNode(
             }
         }
 
-        override fun onClick(holder: TreeViewAdapter.Holder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
+        override fun onClick(holder: NodeHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
 
-        override fun compareTo(other: ModelNode) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
+        override fun compareTo(other: ModelNode<NodeHolder>) = instanceData.compareTo((other as NotDoneInstanceNode).instanceData)
 
         fun removeFromParent(x: TreeViewAdapter.Placeholder) = parentNotDoneGroupNode.remove(this, x)
 

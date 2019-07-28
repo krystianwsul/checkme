@@ -8,8 +8,6 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.jakewharton.rxbinding3.view.clicks
-import com.jakewharton.rxbinding3.view.longClicks
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -22,10 +20,9 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
 import com.stfalcon.imageviewer.loader.ImageLoader
-import io.reactivex.rxkotlin.addTo
 import kotlin.math.ceil
 
-abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
+abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeHolder> {
 
     companion object {
 
@@ -42,7 +39,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         val textWidths = mutableMapOf<Triple<Int, Boolean, Int>, Int>()
     }
 
-    protected abstract val treeNode: TreeNode
+    protected abstract val treeNode: TreeNode<NodeHolder>
 
     protected abstract val name: NameData?
 
@@ -56,9 +53,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     protected open val avatarImage: NullableWrapper<String>? = null
 
-    protected open fun checkBoxOnClickListener() = Unit
+    open fun checkBoxOnClickListener() = Unit
 
-    protected open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
+    open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 
     override val itemViewType: Int = GroupListFragment.GroupAdapter.TYPE_GROUP
 
@@ -66,7 +63,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
 
     open val ripple = false
 
-    protected open val imageData: ImageNode.ImageData? = null
+    open val imageData: ImageNode.ImageData? = null
 
     protected open val thumbnail: ImageState? = null
 
@@ -100,7 +97,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         override fun same(other: ModelState) = (other as State).id == id
     }
 
-    private fun checkStale() {
+    private fun checkStale() { // todo use GroupHolderAdapter
         if (treeNode.treeNodeCollection.stale) {
             if (MyCrashlytics.enabled)
                 MyCrashlytics.logException(StaleTreeNodeException())
@@ -278,66 +275,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode {
         }
     }
 
-    final override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
-        val groupHolder = holder as NodeHolder
-
-        checkStale()
-
-        groupHolder.apply {
-            fun getTreeNode() = treeNode.treeNodeCollection.getNode(groupHolder.adapterPosition)
-            fun TreeNode.getGroupNode() = modelNode as GroupHolderNode
-
-            itemView.clicks()
-                    .subscribe {
-                        val treeNode = getTreeNode()
-                        val groupHolderNode = treeNode.getGroupNode()
-
-                        groupHolderNode.checkStale()
-
-                        val imageData = groupHolderNode.imageData
-
-                        if (imageData != null)
-                        else
-                            treeNode.onClick(groupHolder)
-                    }
-                    .addTo(compositeDisposable)
-
-            itemView.longClicks { true }
-                    .subscribe {
-                        getTreeNode().getGroupNode().apply {
-                            checkStale()
-
-                            onLongClick(holder)
-                        }
-                    }
-                    .addTo(compositeDisposable)
-
-            rowExpand.clicks()
-                    .subscribe {
-                        val treeNode = getTreeNode()
-                        val groupHolderNode = treeNode.getGroupNode()
-
-                        groupHolderNode.checkStale()
-
-                        treeNode.onExpandClick()
-                    }
-                    .addTo(compositeDisposable)
-
-            rowCheckBox.clicks()
-                    .subscribe {
-                        // todo rowCheckBox.setOnClickListener(null)
-
-                        getTreeNode().getGroupNode().apply {
-                            checkStale()
-
-                            checkBoxOnClickListener()
-                        }
-                    }
-                    .addTo(compositeDisposable)
-        }
-    }
-
-    private class StaleTreeNodeException : Exception()
+    class StaleTreeNodeException : Exception()
 
     object MyImageLoader : ImageLoader<ImageState> {
 

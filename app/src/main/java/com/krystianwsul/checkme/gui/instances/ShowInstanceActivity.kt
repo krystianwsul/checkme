@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -256,7 +257,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
     private fun setDone(done: Boolean) = DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, done)
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
+    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
 

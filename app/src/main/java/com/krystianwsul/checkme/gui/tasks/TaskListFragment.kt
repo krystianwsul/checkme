@@ -53,7 +53,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
     private var data: Data? = null
 
-    lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
 
     private val dragHelper by lazy {
@@ -439,13 +439,15 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         initializeDisposable.clear()
     }
 
-    private inner class TaskAdapter(val taskListFragment: TaskListFragment) : TreeModelAdapter, TaskParent {
+    private inner class TaskAdapter(val taskListFragment: TaskListFragment) : GroupHolderAdapter(), TaskParent {
 
         lateinit var taskWrappers: MutableList<TaskWrapper>
             private set
 
         val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
-        private lateinit var treeNodeCollection: TreeNodeCollection
+
+        override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+            private set
 
         override val taskAdapter = this
 
@@ -456,7 +458,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             treeViewAdapter.setTreeNodeCollection(treeNodeCollection)
 
-            val treeNodes = mutableListOf<TreeNode>()
+            val treeNodes = mutableListOf<TreeNode<NodeHolder>>()
 
             if (!taskData.note.isNullOrEmpty()) {
                 val noteNode = NoteNode(taskData.note, false)
@@ -510,7 +512,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val id = childTaskData.taskKey
 
-            public override lateinit var treeNode: TreeNode
+            public override lateinit var treeNode: TreeNode<NodeHolder>
                 private set
 
             override val ripple = true
@@ -532,7 +534,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     }
                 }
 
-            fun initialize(selectedTaskKeys: List<TaskKey>?, nodeContainer: NodeContainer, expandedTaskKeys: List<TaskKey>?): TreeNode {
+            fun initialize(
+                    selectedTaskKeys: List<TaskKey>?,
+                    nodeContainer: NodeContainer<NodeHolder>,
+                    expandedTaskKeys: List<TaskKey>?): TreeNode<NodeHolder> {
                 val selected = if (selectedTaskKeys != null) {
                     check(selectedTaskKeys.isNotEmpty())
                     selectedTaskKeys.contains(childTaskData.taskKey)
@@ -549,7 +554,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
                 treeNode = TreeNode(this, nodeContainer, expanded, selected)
 
-                val treeNodes = mutableListOf<TreeNode>()
+                val treeNodes = mutableListOf<TreeNode<NodeHolder>>()
 
                 for (childTaskData in childTaskData.children) {
                     val taskWrapper = TaskWrapper(indentation + 1, this, childTaskData)
@@ -603,7 +608,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val isSelectable = true
 
-            override fun onClick(holder: TreeViewAdapter.Holder) = taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
+            override fun onClick(holder: NodeHolder) = taskListFragment.startActivity(ShowTaskActivity.newIntent(childTaskData.taskKey))
 
             override val isVisibleWhenEmpty = true
 
@@ -613,7 +618,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
 
             override val thumbnail = childTaskData.imageState
 
-            override fun compareTo(other: ModelNode) = if (other is TaskWrapper) {
+            override fun compareTo(other: ModelNode<NodeHolder>) = if (other is TaskWrapper) {
                 var comparison = childTaskData.compareTo(other.childTaskData)
                 if (taskListFragment.rootTaskData == null && indentation == 0)
                     comparison = -comparison

@@ -14,7 +14,7 @@ class DoneInstanceNode(
         val instanceData: GroupListFragment.InstanceData,
         val dividerNode: DividerNode) : GroupHolderNode(indentation), NodeCollectionParent {
 
-    public override lateinit var treeNode: TreeNode
+    public override lateinit var treeNode: TreeNode<NodeHolder>
         private set
 
     override val ripple = true
@@ -27,7 +27,10 @@ class DoneInstanceNode(
 
     override val thumbnail = instanceData.imageState
 
-    fun initialize(dividerTreeNode: TreeNode, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
+    fun initialize(
+            dividerTreeNode: TreeNode<NodeHolder>,
+            expandedInstances: Map<InstanceKey, Boolean>,
+            selectedInstances: List<InstanceKey>): TreeNode<NodeHolder> {
         val selected = selectedInstances.contains(instanceData.instanceKey)
 
         val expanded: Boolean
@@ -111,7 +114,7 @@ class DoneInstanceNode(
         }
     }
 
-    override fun compareTo(other: ModelNode): Int {
+    override fun compareTo(other: ModelNode<NodeHolder>): Int {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = other as DoneInstanceNode
@@ -122,7 +125,7 @@ class DoneInstanceNode(
 
     override val isSelectable = true
 
-    override fun onClick(holder: TreeViewAdapter.Holder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
+    override fun onClick(holder: NodeHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
 
     fun removeFromParent(x: TreeViewAdapter.Placeholder) {
         dividerNode.remove(this, x)

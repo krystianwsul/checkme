@@ -11,6 +11,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
@@ -18,7 +19,10 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeNodeCollection
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_project_list.*
@@ -38,7 +42,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
     private var projectListFab: FloatingActionButton? = null
 
-    lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
 
     private var data: ProjectListViewModel.Data? = null
@@ -211,12 +215,14 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         projectListFab = null
     }
 
-    private inner class ProjectListAdapter : TreeModelAdapter {
+    private inner class ProjectListAdapter : GroupHolderAdapter() {
 
         val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
 
         private lateinit var projectNodes: MutableList<ProjectNode>
-        private lateinit var treeNodeCollection: TreeNodeCollection
+
+        override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+            private set
 
         fun initialize(projectDatas: SortedMap<String, ProjectListViewModel.ProjectData>) {
             projectNodes = projectDatas.values
@@ -251,10 +257,10 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val id = projectData.id
 
-            public override lateinit var treeNode: TreeNode
+            public override lateinit var treeNode: TreeNode<NodeHolder>
                 private set
 
-            fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
+            fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>): TreeNode<NodeHolder> {
                 treeNode = TreeNode(this, treeNodeCollection, false, selectedProjectIds.contains(projectData.id))
                 treeNode.setChildTreeNodes(ArrayList())
                 return treeNode
@@ -270,7 +276,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val isSelectable = true
 
-            override fun onClick(holder: TreeViewAdapter.Holder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
+            override fun onClick(holder: NodeHolder) = startActivity(ShowProjectActivity.newIntent(activity!!, projectData.id))
 
             override val isVisibleWhenEmpty = true
 
@@ -278,7 +284,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
             override val isSeparatorVisibleWhenNotExpanded = false
 
-            override fun compareTo(other: ModelNode): Int {
+            override fun compareTo(other: ModelNode<NodeHolder>): Int {
                 check(other is ProjectNode)
 
                 return projectData.id.compareTo(other.projectData.id)

@@ -15,7 +15,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     private lateinit var taskDatas: List<GroupListFragment.TaskData>
 
-    override lateinit var treeNode: TreeNode
+    override lateinit var treeNode: TreeNode<NodeHolder>
         private set
 
     private val taskNodes = mutableListOf<TaskNode>()
@@ -24,7 +24,12 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     private val groupListFragment by lazy { groupAdapter.groupListFragment }
 
-    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, taskDatas: List<GroupListFragment.TaskData>, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>): TreeNode {
+    fun initialize(
+            expanded: Boolean,
+            nodeContainer: NodeContainer<NodeHolder>,
+            taskDatas: List<GroupListFragment.TaskData>,
+            expandedTaskKeys: List<TaskKey>,
+            selectedTaskKeys: List<TaskKey>): TreeNode<NodeHolder> {
         check(!expanded || taskDatas.isNotEmpty())
 
         this.taskDatas = taskDatas
@@ -36,7 +41,10 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
         return treeNode
     }
 
-    private fun newChildTreeNode(taskData: GroupListFragment.TaskData, expandedTaskKeys: List<TaskKey>, selectedTaskKeys: List<TaskKey>) = TaskNode(0, taskData, this).let {
+    private fun newChildTreeNode(
+            taskData: GroupListFragment.TaskData,
+            expandedTaskKeys: List<TaskKey>,
+            selectedTaskKeys: List<TaskKey>) = TaskNode(0, taskData, this).let {
         taskNodes.add(it)
 
         it.initialize(treeNode, expandedTaskKeys, selectedTaskKeys)
@@ -46,7 +54,7 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val groupAdapter by lazy { nodeCollection.groupAdapter }
 
-    override fun compareTo(other: ModelNode) = if (other is DividerNode) {
+    override fun compareTo(other: ModelNode<NodeHolder>) = if (other is DividerNode) {
         -1
     } else {
         check(other is NotDoneGroupNode)

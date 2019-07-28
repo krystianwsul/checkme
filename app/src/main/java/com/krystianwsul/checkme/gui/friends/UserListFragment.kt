@@ -12,6 +12,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
@@ -19,7 +20,10 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeNodeCollection
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_friend_list.*
@@ -37,7 +41,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private var projectId: String? = null
 
-    lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
 
     private var data: ShowProjectViewModel.Data? = null
@@ -251,13 +255,14 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     private fun updateSelectAll() = listener.setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
 
-    inner class FriendListAdapter : TreeModelAdapter {
+    inner class FriendListAdapter : GroupHolderAdapter() {
 
         lateinit var userNodes: MutableList<UserNode>
             private set
 
         val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
-        lateinit var treeNodeCollection: TreeNodeCollection
+
+        public override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
 
         fun initialize(userListDatas: Collection<ShowProjectViewModel.UserListData>, saveState: SaveState) {
@@ -327,7 +332,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val details = Pair(userListData.email, colorSecondary)
 
-        public override lateinit var treeNode: TreeNode
+        public override lateinit var treeNode: TreeNode<NodeHolder>
             private set
 
         override val id = userListData.id
@@ -342,9 +347,9 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override val avatarImage = NullableWrapper(userListData.photoUrl)
 
-        override fun compareTo(other: ModelNode) = userListData.id.compareTo((other as UserNode).userListData.id)
+        override fun compareTo(other: ModelNode<NodeHolder>) = userListData.id.compareTo((other as UserNode).userListData.id)
 
-        fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
+        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>): TreeNode<NodeHolder> {
             treeNode = TreeNode(this, treeNodeCollection, false, selectedIds.contains(userListData.id))
             treeNode.setChildTreeNodes(listOf())
             return treeNode

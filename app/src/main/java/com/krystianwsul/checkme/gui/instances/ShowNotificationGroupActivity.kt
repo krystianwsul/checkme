@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.viewmodels.ShowNotificationGroupViewModel
@@ -82,7 +83,7 @@ class ShowNotificationGroupActivity : ToolbarActivity(), GroupListFragment.Group
         groupListFragment.checkCreatedTaskKey()
     }
 
-    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter) = Unit
+    override fun onCreateGroupActionMode(actionMode: ActionMode, treeViewAdapter: TreeViewAdapter<NodeHolder>) = Unit
 
     override fun onDestroyGroupActionMode() = Unit
 

@@ -12,6 +12,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
@@ -20,7 +21,10 @@ import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.treeadapter.*
+import com.krystianwsul.treeadapter.ModelNode
+import com.krystianwsul.treeadapter.TreeNode
+import com.krystianwsul.treeadapter.TreeNodeCollection
+import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.empty_text.*
 import kotlinx.android.synthetic.main.fragment_show_custom_times.*
@@ -35,7 +39,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         fun newInstance() = ShowCustomTimesFragment()
     }
 
-    lateinit var treeViewAdapter: TreeViewAdapter
+    lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
 
     private var selectedCustomTimeIds: List<RemoteCustomTimeId.Private>? = null
@@ -204,13 +208,15 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         showTimesFab = null
     }
 
-    private inner class CustomTimesAdapter : TreeModelAdapter {
+    private inner class CustomTimesAdapter : GroupHolderAdapter() {
 
         lateinit var customTimeWrappers: MutableList<CustomTimeNode>
             private set
 
         val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
-        private lateinit var treeNodeCollection: TreeNodeCollection
+
+        override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+            private set
 
         fun initialize() {
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
@@ -235,14 +241,14 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
     private inner class CustomTimeNode(val customTimeData: ShowCustomTimesViewModel.CustomTimeData) : GroupHolderNode(0) {
 
-        public override lateinit var treeNode: TreeNode
+        public override lateinit var treeNode: TreeNode<NodeHolder>
             private set
 
         override val id = customTimeData.id
 
         override val ripple = true
 
-        fun initialize(treeNodeCollection: TreeNodeCollection): TreeNode {
+        fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>): TreeNode<NodeHolder> {
             treeNode = TreeNode(this, treeNodeCollection, false, selectedCustomTimeIds?.contains(customTimeData.id)
                     ?: false)
             treeNode.setChildTreeNodes(listOf())
@@ -259,9 +265,9 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override val isVisibleWhenEmpty = true
 
-        override fun onClick(holder: TreeViewAdapter.Holder) = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
+        override fun onClick(holder: NodeHolder) = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
-        override fun compareTo(other: ModelNode) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
+        override fun compareTo(other: ModelNode<NodeHolder>) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
     }
 
     interface CustomTimesListListener : ActionModeListener, SnackbarListener {

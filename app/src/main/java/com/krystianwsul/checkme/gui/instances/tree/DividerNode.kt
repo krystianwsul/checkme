@@ -15,7 +15,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     data class Id(val id: Any)
 
-    override lateinit var treeNode: TreeNode
+    override lateinit var treeNode: TreeNode<NodeHolder>
         private set
 
     private val doneInstanceNodes = ArrayList<DoneInstanceNode>()
@@ -24,7 +24,12 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     private val groupListFragment get() = groupAdapter.groupListFragment
 
-    fun initialize(expanded: Boolean, nodeContainer: NodeContainer, doneInstanceDatas: List<GroupListFragment.InstanceData>, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
+    fun initialize(
+            expanded: Boolean,
+            nodeContainer: NodeContainer<NodeHolder>,
+            doneInstanceDatas: List<GroupListFragment.InstanceData>,
+            expandedInstances: Map<InstanceKey, Boolean>,
+            selectedInstances: List<InstanceKey>): TreeNode<NodeHolder> {
         check(!expanded || doneInstanceDatas.isNotEmpty())
 
         treeNode = TreeNode(this, nodeContainer, expanded, false)
@@ -36,7 +41,10 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
         return treeNode
     }
 
-    private fun newChildTreeNode(instanceData: GroupListFragment.InstanceData, expandedInstances: Map<InstanceKey, Boolean>, selectedInstances: List<InstanceKey>): TreeNode {
+    private fun newChildTreeNode(
+            instanceData: GroupListFragment.InstanceData,
+            expandedInstances: Map<InstanceKey, Boolean>,
+            selectedInstances: List<InstanceKey>): TreeNode<NodeHolder> {
         checkNotNull(instanceData.done)
 
         val doneInstanceNode = DoneInstanceNode(indentation, instanceData, this)
@@ -68,7 +76,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     fun add(instanceData: GroupListFragment.InstanceData, x: TreeViewAdapter.Placeholder) = treeNode.add(newChildTreeNode(instanceData, mapOf(), listOf()), x)
 
-    override fun compareTo(other: ModelNode): Int {
+    override fun compareTo(other: ModelNode<NodeHolder>): Int {
         check(other is NoteNode || other is NotDoneGroupNode || other is UnscheduledNode || other is ImageNode)
         return 1
     }

@@ -53,7 +53,7 @@ class DomainFactory(
 
         val instance get() = instanceRelay.value!!.value!!
 
-        private val firebaseListeners = mutableListOf<(DomainFactory) -> Unit>()
+        private val firebaseListeners = mutableListOf<Pair<(DomainFactory) -> Unit, String>>()
 
         @Synchronized // still running?
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData): Boolean {
@@ -89,7 +89,7 @@ class DomainFactory(
             if (domainFactory?.remoteProjectFactory?.eitherSaved == false && !domainFactory.remoteFriendFactory.isSaved)
                 firebaseListener(domainFactory)
             else
-                firebaseListeners.add(firebaseListener)
+                firebaseListeners.add(Pair(firebaseListener, "other"))
         }
 
         @Synchronized
@@ -100,7 +100,9 @@ class DomainFactory(
                 firebaseListener(domainFactory)
             } else {
                 Preferences.logLineHour("queuing firebaseListener $source")
-                firebaseListeners.add(firebaseListener)
+                Preferences.logLineHour("listeners before: " + firebaseListeners.joinToString("; ") { it.second })
+                firebaseListeners.add(Pair(firebaseListener, source))
+                Preferences.logLineHour("listeners after: " + firebaseListeners.joinToString("; ") { it.second })
             }
         }
     }
@@ -289,7 +291,7 @@ class DomainFactory(
         skipSave = true
 
         Preferences.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
-        firebaseListeners.forEach { it(this) }
+        firebaseListeners.forEach { it.first(this) }
         firebaseListeners.clear()
 
         val tickData = TickHolder.getTickData()

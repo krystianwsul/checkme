@@ -16,10 +16,12 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
 
         private const val INSTANCE_KEY = "instanceKey"
         private const val NOTIFICATION_ID_KEY = "notificationId"
+        private const val KEY_NAME = "name"
 
-        fun getIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, InstanceDoneService::class.java).apply {
+        fun getIntent(context: Context, instanceKey: InstanceKey, notificationId: Int, name: String) = Intent(context, InstanceDoneService::class.java).apply {
             putExtra(INSTANCE_KEY, instanceKey as Parcelable)
             putExtra(NOTIFICATION_ID_KEY, notificationId)
+            putExtra(KEY_NAME, name)
         }
     }
 
@@ -34,9 +36,11 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
         val notificationId = intent.getIntExtra(NOTIFICATION_ID_KEY, -1)
         check(notificationId != -1)
 
+        val name = intent.getStringExtra(KEY_NAME)!!
+
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId)
 
-        DomainFactory.addFirebaseListener("InstanceDoneService $notificationId") { it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey) }
+        DomainFactory.addFirebaseListener("InstanceDoneService $name") { it.setInstanceNotificationDone(SaveService.Source.SERVICE, instanceKey) }
     }
 }

@@ -17,10 +17,12 @@ class InstanceHourService : IntentService("InstanceHourService") {
 
         private const val INSTANCE_KEY = "instanceKey"
         private const val NOTIFICATION_ID_KEY = "notificationId"
+        private const val KEY_NAME = "name"
 
-        fun getIntent(context: Context, instanceKey: InstanceKey, notificationId: Int) = Intent(context, InstanceHourService::class.java).apply {
+        fun getIntent(context: Context, instanceKey: InstanceKey, notificationId: Int, name: String) = Intent(context, InstanceHourService::class.java).apply {
             putExtra(INSTANCE_KEY, instanceKey as Parcelable)
             putExtra(NOTIFICATION_ID_KEY, notificationId)
+            putExtra(KEY_NAME, name)
         }
     }
 
@@ -35,9 +37,11 @@ class InstanceHourService : IntentService("InstanceHourService") {
         val notificationId = intent.getIntExtra(NOTIFICATION_ID_KEY, -1)
         check(notificationId != -1)
 
+        val name = intent.getStringExtra(KEY_NAME)!!
+
         val notificationWrapper = NotificationWrapper.instance
         notificationWrapper.cleanGroup(notificationId)
 
-        DomainFactory.addFirebaseListener("InstanceHourService $notificationId") { it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey) }
+        DomainFactory.addFirebaseListener("InstanceHourService $name") { it.setInstanceAddHourService(SaveService.Source.SERVICE, instanceKey) }
     }
 }

@@ -14,6 +14,7 @@ import com.google.firebase.iid.FirebaseInstanceId
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -149,6 +150,8 @@ class MyApplication : Application() {
         Queue.ready.subscribe { clearPaparazzo() }
 
         Uploader.resume()
+
+        ImageManager.init()
     }
 
     private fun clearPaparazzo() {

@@ -2,15 +2,22 @@ package com.krystianwsul.checkme.firebase
 
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.krystianwsul.checkme.GlideApp
+import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.upload.Uploader
+import java.io.File
 import java.io.Serializable
 
 sealed class ImageState : Serializable {
 
     abstract fun load(imageView: ImageView)
 
-    data class Local(val uuid: String) : ImageState() {
+    abstract val requestBuilder: RequestBuilder<File>?
+
+    abstract val uuid: String?
+
+    data class Local(override val uuid: String) : ImageState() {
 
         override fun load(imageView: ImageView) {
             Uploader.getPath(this)?.let {
@@ -19,6 +26,13 @@ sealed class ImageState : Serializable {
                         .into(imageView)
             } ?: Remote.load(imageView, uuid)
         }
+
+        override val requestBuilder
+            get() = Uploader.getPath(this)?.let {
+                Glide.with(MyApplication.instance)
+                        .asFile()
+                        .load(it)
+            }
 
         override fun hashCode() = uuid.hashCode()
 
@@ -38,7 +52,7 @@ sealed class ImageState : Serializable {
         }
     }
 
-    data class Remote(val uuid: String) : ImageState() {
+    data class Remote(override val uuid: String) : ImageState() {
 
         companion object {
 
@@ -50,6 +64,11 @@ sealed class ImageState : Serializable {
         }
 
         override fun load(imageView: ImageView) = load(imageView, uuid)
+
+        override val requestBuilder
+            get() = GlideApp.with(MyApplication.instance)
+                    .asFile()
+                    .load(Uploader.getReference(uuid))
 
         override fun hashCode() = uuid.hashCode()
 
@@ -72,5 +91,9 @@ sealed class ImageState : Serializable {
     object Uploading : ImageState() {
 
         override fun load(imageView: ImageView) = Unit
+
+        override val requestBuilder: RequestBuilder<File>? get() = null
+
+        override val uuid: String? = null
     }
 }

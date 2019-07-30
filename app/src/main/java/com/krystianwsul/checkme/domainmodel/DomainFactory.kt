@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
+import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.domainmodel.schedules.*
@@ -195,6 +196,8 @@ class DomainFactory(
     private fun updateShortcuts() {
         val now = ExactTimeStamp.now
 
+        ImageManager.prefetch(getTasks().toList())
+
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
                 .filter { it.second?.isVisible(now, false) == true }
@@ -214,7 +217,7 @@ class DomainFactory(
 
                     ShortcutInfoCompat.Builder(MyApplication.instance, taskKey.toShortcut())
                             .setShortLabel(MyApplication.instance.getString(R.string.addTo) + " " + it.second.name)
-                            .setIcon(IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add))
+                            .setIcon(IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add)) // todo show image
                             .setCategories(setOf("ADD_TO_LIST"))
                             .setIntent(CreateTaskActivity.getShortcutIntent(taskKey))
                             .build()

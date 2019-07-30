@@ -92,8 +92,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             text = task.note
             style = NotificationCompat.BigTextStyle().also { it.bigText(text) }
         } else {
-            text = null
-            style = null
+            val bigPicture = ImageManager.getBigPicture(task)
+            if (bigPicture != null) {
+                text = null
+                style = NotificationCompat.BigPictureStyle().also { it.bigPicture(bigPicture) }
+            } else {
+                text = null
+                style = null
+            }
         }
 
         val timeStampLong = instance.instanceDateTime
@@ -115,7 +121,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 sortKey = timeStampLong.toString() + instance.task
                         .startExactTimeStamp
                         .toString(),
-                largeIcon = ImageManager.getImage(instance.task))
+                largeIcon = ImageManager.getLargeIcon(instance.task))
     }
 
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {

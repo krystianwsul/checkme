@@ -3,6 +3,7 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.util.Log
@@ -11,6 +12,7 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.Task
+import com.krystianwsul.checkme.utils.dpToPx
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -20,96 +22,125 @@ object ImageManager {
 
     private const val LARGE_ICON_SIZE = 256
 
-    private val largeIconDir = File(MyApplication.instance.cacheDir.absolutePath, "largeIcons")
+    private val largeIconDownloader = Downloader(
+            LARGE_ICON_SIZE,
+            LARGE_ICON_SIZE,
+            "largeIcons")
 
-    private lateinit var largeIcons: MutableMap<String, State>
+    private val bigPictureDownloader = Downloader(
+            Resources.getSystem()
+                    .displayMetrics
+                    .widthPixels.also {
+                Log.e("asdf", "screen width: $it")
+            },
+            MyApplication.instance
+                    .dpToPx(256)
+                    .toInt(),
+            "bigPictures")
 
-    private fun getFile(uuid: String) = File(largeIconDir.absolutePath, uuid)
-
-    fun init() {
-        Single.fromCallable {
-            largeIcons = (largeIconDir.listFiles()?.toList() ?: listOf()).map { it.name }
-                    .associateWith { State.Downloaded }
-                    .toMutableMap()
-        }
-                .subscribeOn(Schedulers.io())
-                .subscribe()
-    }
+    private val downloaders = listOf(largeIconDownloader, bigPictureDownloader)
 
     @Synchronized
-    fun prefetch(tasks: List<Task>) {
-        val tasksWithImages = tasks.filter { it.image?.uuid != null }.associateBy { it.image!!.uuid!! }
+    fun init() = downloaders.forEach { it.init() }
 
-        val taskUuids = tasksWithImages.keys
-        val presentUuids = largeIcons.keys
+    @Synchronized
+    fun prefetch(tasks: List<Task>) = downloaders.forEach { it.prefetch(tasks) }
 
-        val imagesToDownload = taskUuids - presentUuids
-        val imagesToRemove = presentUuids - taskUuids
+    @Synchronized
+    fun getLargeIcon(task: Task) = largeIconDownloader.getImage(task)
 
-        val statesToRemove = imagesToRemove.map { it to largeIcons.getValue(it) }
+    @Synchronized
+    fun getBigPicture(task: Task) = bigPictureDownloader.getImage(task)
 
-        imagesToRemove.forEach { largeIcons.remove(it) }
+    private class Downloader(private val width: Int, private val height: Int, dirSuffix: String) {
 
-        statesToRemove.filter { it.second is State.Downloading }.forEach { (uuid, state) ->
-            (state as State.Downloading).target
-                    .request!!
-                    .clear()
+        private val dir = File(MyApplication.instance.cacheDir.absolutePath, dirSuffix)
 
-            largeIcons.remove(uuid)
-        }
+        private lateinit var imageStates: MutableMap<String, State>
 
-        Single.fromCallable {
-            statesToRemove.filter { it.second is State.Downloaded }.forEach {
-                Log.e("asdf", "ImageManager deleting ${it.first}")
-                getFile(it.first).delete()
+        private fun getFile(uuid: String) = File(dir.absolutePath, uuid)
+
+        fun init() {
+            Single.fromCallable {
+                imageStates = (dir.listFiles()?.toList() ?: listOf()).map { it.name }
+                        .associateWith { State.Downloaded }
+                        .toMutableMap()
             }
+                    .subscribeOn(Schedulers.io())
+                    .subscribe()
         }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe()
 
-        val tasksToDownload = imagesToDownload.map { it to tasksWithImages.getValue(it) }
+        fun prefetch(tasks: List<Task>) {
+            val tasksWithImages = tasks.filter { it.image?.uuid != null }.associateBy { it.image!!.uuid!! }
 
-        largeIcons.putAll(tasksToDownload.map { (uuid, task) ->
-            val target = task.image!!
-                    .requestBuilder!!
-                    .into(object : SimpleTarget<File>(LARGE_ICON_SIZE, LARGE_ICON_SIZE) {
+            val taskUuids = tasksWithImages.keys
+            val presentUuids = imageStates.keys
 
-                        @SuppressLint("CheckResult")
-                        override fun onResourceReady(resource: File, transition: Transition<in File>?) {
-                            check(largeIcons.getValue(uuid) is State.Downloading)
+            val imagesToDownload = taskUuids - presentUuids
+            val imagesToRemove = presentUuids - taskUuids
 
-                            Single.fromCallable {
-                                check(largeIcons.getValue(uuid) is State.Downloading)
+            val statesToRemove = imagesToRemove.map { it to imageStates.getValue(it) }
 
-                                resource.copyTo(getFile(uuid), false)
-                                Log.e("asdf", "ImageManager copied to $uuid")
+            imagesToRemove.forEach { imageStates.remove(it) }
+
+            statesToRemove.filter { it.second is State.Downloading }.forEach { (uuid, state) ->
+                (state as State.Downloading).target
+                        .request!!
+                        .clear()
+
+                imageStates.remove(uuid)
+            }
+
+            Single.fromCallable {
+                statesToRemove.filter { it.second is State.Downloaded }.forEach {
+                    getFile(it.first).delete()
+                }
+            }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe()
+
+            val tasksToDownload = imagesToDownload.map { it to tasksWithImages.getValue(it) }
+
+            imageStates.putAll(tasksToDownload.map { (uuid, task) ->
+                val target = task.image!!
+                        .requestBuilder!!
+                        .into(object : SimpleTarget<File>(width, height) {
+
+                            @SuppressLint("CheckResult")
+                            override fun onResourceReady(resource: File, transition: Transition<in File>?) {
+                                check(imageStates.getValue(uuid) is State.Downloading)
+
+                                Single.fromCallable {
+                                    check(imageStates.getValue(uuid) is State.Downloading)
+
+                                    resource.copyTo(getFile(uuid), false)
+                                }
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe { _ ->
+                                            check(imageStates.getValue(uuid) is State.Downloading)
+
+                                            imageStates[uuid] = State.Downloaded
+                                        }
                             }
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe { _ ->
-                                        check(largeIcons.getValue(uuid) is State.Downloading)
 
-                                        largeIcons[uuid] = State.Downloaded
-                                    }
-                        }
+                            override fun onLoadFailed(errorDrawable: Drawable?) {
+                                check(imageStates.getValue(uuid) is State.Downloading)
 
-                        override fun onLoadFailed(errorDrawable: Drawable?) {
-                            check(largeIcons.getValue(uuid) is State.Downloading)
+                                imageStates.remove(uuid)
+                            }
+                        })
 
-                            largeIcons.remove(uuid)
-                        }
-                    })
+                uuid to State.Downloading(target)
+            })
+        }
 
-            uuid to State.Downloading(target)
-        })
+        fun getImage(task: Task) = task.image // todo async
+                ?.uuid
+                ?.takeIf { (imageStates[it] is State.Downloaded) }
+                ?.let { BitmapFactory.decodeFile(getFile(it).absolutePath) }
     }
-
-    @Synchronized
-    fun getImage(task: Task) = task.image // todo async
-            ?.uuid
-            ?.takeIf { (largeIcons[it] is State.Downloaded) }
-            ?.let { BitmapFactory.decodeFile(getFile(it).absolutePath) }
 
     private sealed class State {
 

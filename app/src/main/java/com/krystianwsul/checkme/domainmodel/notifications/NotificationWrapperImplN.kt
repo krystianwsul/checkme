@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.graphics.Bitmap
 import android.os.Build
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
@@ -68,13 +69,35 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
         return inboxStyle
     }
 
-    override fun getNotificationBuilder(title: String, text: String?, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String): NotificationCompat.Builder {
-        return super.getNotificationBuilder(title, text, deleteIntent, contentIntent, silent, actions, time, style, autoCancel, summary, sortKey).apply {
-            setGroup(TickJobIntentService.GROUP_KEY)
+    override fun getNotificationBuilder(
+            title: String,
+            text: String?,
+            deleteIntent: PendingIntent,
+            contentIntent: PendingIntent,
+            silent: Boolean,
+            actions: List<NotificationCompat.Action>,
+            time: Long?,
+            style: NotificationCompat.Style?,
+            autoCancel: Boolean,
+            summary: Boolean,
+            sortKey: String,
+            largeIcon: Bitmap?) = super.getNotificationBuilder(
+            title,
+            text,
+            deleteIntent,
+            contentIntent,
+            silent,
+            actions,
+            time,
+            style,
+            autoCancel,
+            summary,
+            sortKey,
+            largeIcon).apply {
+        setGroup(TickJobIntentService.GROUP_KEY)
 
-            if (summary)
-                setGroupSummary(true)
-        }
+        if (summary)
+            setGroupSummary(true)
     }
 
     override fun logNotificationIds(source: String) = Preferences.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })

@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
@@ -113,7 +114,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 summary = false,
                 sortKey = timeStampLong.toString() + instance.task
                         .startExactTimeStamp
-                        .toString())
+                        .toString(),
+                largeIcon = ImageManager.getImage(instance.task))
     }
 
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {
@@ -155,7 +157,19 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     @Suppress("DEPRECATION")
     protected open fun newBuilder(silent: Boolean) = NotificationCompat.Builder(MyApplication.instance)
 
-    protected open fun getNotificationBuilder(title: String, text: String?, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String): NotificationCompat.Builder {
+    protected open fun getNotificationBuilder(
+            title: String,
+            text: String?,
+            deleteIntent: PendingIntent,
+            contentIntent: PendingIntent,
+            silent: Boolean,
+            actions: List<NotificationCompat.Action>,
+            time: Long?,
+            style: NotificationCompat.Style?,
+            autoCancel: Boolean,
+            summary: Boolean,
+            sortKey: String,
+            largeIcon: Bitmap?): NotificationCompat.Builder {
         check(title.isNotEmpty())
 
         val builder = newBuilder(silent)
@@ -188,11 +202,38 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (autoCancel)
             builder.setAutoCancel(true)
 
+        largeIcon?.let { builder.setLargeIcon(it) }
+
         return builder
     }
 
-    protected open fun notify(title: String, text: String?, notificationId: Int, deleteIntent: PendingIntent, contentIntent: PendingIntent, silent: Boolean, actions: List<NotificationCompat.Action>, time: Long?, style: NotificationCompat.Style?, autoCancel: Boolean, summary: Boolean, sortKey: String) {
-        val notification = getNotificationBuilder(title, text, deleteIntent, contentIntent, silent, actions, time, style, autoCancel, summary, sortKey).build()
+    protected open fun notify(
+            title: String,
+            text: String?,
+            notificationId: Int,
+            deleteIntent: PendingIntent,
+            contentIntent: PendingIntent,
+            silent: Boolean,
+            actions: List<NotificationCompat.Action>,
+            time: Long?,
+            style: NotificationCompat.Style?,
+            autoCancel: Boolean,
+            summary: Boolean,
+            sortKey: String,
+            largeIcon: Bitmap?) {
+        val notification = getNotificationBuilder(
+                title,
+                text,
+                deleteIntent,
+                contentIntent,
+                silent,
+                actions,
+                time,
+                style,
+                autoCancel,
+                summary,
+                sortKey,
+                largeIcon).build()
 
         @Suppress("Deprecation")
         if (!silent)
@@ -232,7 +273,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 inboxStyle,
                 autoCancel = false,
                 summary = true,
-                sortKey = "0")
+                sortKey = "0",
+                largeIcon = null)
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {

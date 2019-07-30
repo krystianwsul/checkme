@@ -3,7 +3,9 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.util.Log
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
@@ -22,7 +24,7 @@ object ImageManager {
 
     private lateinit var largeIcons: MutableMap<String, State>
 
-    private fun getFile(uuid: String) = File(uuid, largeIconDir.absolutePath)
+    private fun getFile(uuid: String) = File(largeIconDir.absolutePath, uuid)
 
     fun init() {
         Single.fromCallable {
@@ -58,6 +60,7 @@ object ImageManager {
 
         Single.fromCallable {
             statesToRemove.filter { it.second is State.Downloaded }.forEach {
+                Log.e("asdf", "ImageManager deleting ${it.first}")
                 getFile(it.first).delete()
             }
         }
@@ -80,6 +83,7 @@ object ImageManager {
                                 check(largeIcons.getValue(uuid) is State.Downloading)
 
                                 resource.copyTo(getFile(uuid), false)
+                                Log.e("asdf", "ImageManager copied to $uuid")
                             }
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
@@ -100,6 +104,12 @@ object ImageManager {
             uuid to State.Downloading(target)
         })
     }
+
+    @Synchronized
+    fun getImage(task: Task) = task.image // todo async
+            ?.uuid
+            ?.takeIf { (largeIcons[it] is State.Downloaded) }
+            ?.let { BitmapFactory.decodeFile(getFile(it).absolutePath) }
 
     private sealed class State {
 

@@ -252,16 +252,15 @@ class DomainFactory(
 
         if (remoteProjectFactory.isPrivateSaved) {
             remoteProjectFactory.isPrivateSaved = false
-            return
+        } else {
+            remoteProjectFactory.onNewPrivate(dataSnapshot, ExactTimeStamp.now)
+
+            val stop = ExactTimeStamp.now
+
+            remoteUpdateTime = stop.long - start.long
+
+            TickHolder.getTickData()?.privateRefreshed = true
         }
-
-        remoteProjectFactory.onNewPrivate(dataSnapshot, ExactTimeStamp.now)
-
-        val stop = ExactTimeStamp.now
-
-        remoteUpdateTime = stop.long - start.long
-
-        TickHolder.getTickData()?.privateRefreshed = true
 
         tryNotifyListeners("DomainFactory.updatePrivateProjectRecord")
     }
@@ -274,12 +273,11 @@ class DomainFactory(
 
         if (remoteProjectFactory.isSharedSaved) {
             remoteProjectFactory.isSharedSaved = false
-            return
+        } else {
+            remoteProjectFactory.onChildEvent(childEvent, ExactTimeStamp.now)
+
+            TickHolder.getTickData()?.sharedRefreshed = true
         }
-
-        remoteProjectFactory.onChildEvent(childEvent, ExactTimeStamp.now)
-
-        TickHolder.getTickData()?.sharedRefreshed = true
 
         tryNotifyListeners("DomainFactory.updateSharedProjectRecords")
     }

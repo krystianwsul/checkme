@@ -95,7 +95,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             addValue("$key/endData", value)
 
             taskJson.endTime = value?.time
-            addValue("$key/endData", value?.time)
+            addValue("$key/endData", value)
         }
 
     var note

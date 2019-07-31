@@ -95,7 +95,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val bigPicture = ImageManager.getBigPicture(task)
             if (bigPicture != null) {
                 text = null
-                style = NotificationCompat.BigPictureStyle().also { it.bigPicture(bigPicture) }
+                style = NotificationCompat.BigPictureStyle().also {
+                    it.bigPicture(bigPicture)
+                    it.bigLargeIcon(null)
+                }
             } else {
                 text = null
                 style = null

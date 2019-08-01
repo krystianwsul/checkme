@@ -40,13 +40,6 @@
             android:layout_height="wrap_content"
             android:id="@+id/debugData"/>
 
-        <Button
-            android:id="@+id/debugDiffButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:ignore="HardcodedText"
-            android:text="show data diff"/>
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

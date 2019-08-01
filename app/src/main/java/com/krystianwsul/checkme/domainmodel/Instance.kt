@@ -252,7 +252,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     val hidden get() = instanceData.hidden
 
-    val createTaskTimePair: TimePair
+    val createTaskTimePair: TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
         get() {
             val instanceTimePair = instanceTime.timePair
 

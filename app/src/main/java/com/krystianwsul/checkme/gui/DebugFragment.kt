@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
@@ -93,7 +92,5 @@ class DebugFragment : AbstractFragment() {
                 append(tickLog)
             }
         }
-
-        debugDiffButton.setOnClickListener { debugDiffText.text = DataDiff.diff }
     }
 }

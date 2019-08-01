@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.DataDiff
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -499,13 +498,6 @@ class GroupListFragment @JvmOverloads constructor(
 
         compositeDisposable += observable.subscribe { initialize() }
 
-        observable.reduce { one, two ->
-            DataDiff.diffData(one.dataWrapper, two.dataWrapper)
-            two
-        }
-                .subscribe()
-                .addTo(compositeDisposable)
-
         activity.startTicks(receiver)
     }
 
@@ -776,7 +768,7 @@ class GroupListFragment @JvmOverloads constructor(
 
         val treeViewAdapter = TreeViewAdapter(this, R.layout.row_group_list_fab_padding)
 
-        override public lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
+        public override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
 
         private lateinit var nodeCollection: NodeCollection

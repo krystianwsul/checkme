@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.checkme.firebase.RemoteSharedCustomTime
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
@@ -250,4 +251,26 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     }
 
     val hidden get() = instanceData.hidden
+
+    val createTaskTimePair: TimePair
+        get() {
+            val instanceTimePair = instanceTime.timePair
+
+            return if (instanceTimePair.customTimeKey is CustomTimeKey.Shared) {
+                val sharedCustomTime = domainFactory.getCustomTime(instanceTimePair.customTimeKey) as RemoteSharedCustomTime
+
+                val privateProjectKey = domainFactory.remoteProjectFactory.remotePrivateProject.id
+                if (sharedCustomTime.ownerKey == privateProjectKey) {
+                    val privateCustomTimeKey = CustomTimeKey.Private(privateProjectKey, sharedCustomTime.privateKey!!)
+
+                    TimePair(privateCustomTimeKey)
+                } else {
+                    val hourMinute = sharedCustomTime.getHourMinute(instanceDate.dayOfWeek)
+
+                    TimePair(hourMinute)
+                }
+            } else {
+                instanceTimePair
+            }
+        }
 }

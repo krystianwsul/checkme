@@ -497,9 +497,7 @@ class DomainFactory(
                     instance.isRootInstance(now),
                     isRootTask,
                     instance.exists(),
-                    instance.instanceDateTime
-                            .time
-                            .timePair,
+                    instance.createTaskTimePair,
                     task.note,
                     children,
                     null,
@@ -573,9 +571,7 @@ class DomainFactory(
                     it.isRootInstance(now),
                     isRootTask,
                     it.exists(),
-                    it.instanceDateTime
-                            .time
-                            .timePair,
+                    it.createTaskTimePair,
                     task.note,
                     children,
                     hierarchyData,
@@ -624,9 +620,7 @@ class DomainFactory(
                     instance.isRootInstance(now),
                     isRootTask,
                     instance.exists(),
-                    instance.instanceDateTime
-                            .time
-                            .timePair,
+                    instance.createTaskTimePair,
                     task.note,
                     children,
                     null,
@@ -2143,9 +2137,7 @@ class DomainFactory(
                             childInstance.isRootInstance(now),
                             isRootTask,
                             childInstance.exists(),
-                            childInstance.instanceDateTime
-                                    .time
-                                    .timePair,
+                            childInstance.createTaskTimePair,
                             childTask.note,
                             children,
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
@@ -2740,9 +2732,7 @@ class DomainFactory(
                     instance.isRootInstance(now),
                     isRootTask,
                     instance.exists(),
-                    instance.instanceDateTime
-                            .time
-                            .timePair,
+                    instance.createTaskTimePair,
                     task.note,
                     children,
                     null,
@@ -2786,9 +2776,7 @@ class DomainFactory(
                             childInstance.isRootInstance(now),
                             isRootTask,
                             childInstance.exists(),
-                            childInstance.instanceDateTime
-                                    .time
-                                    .timePair,
+                            childInstance.createTaskTimePair,
                             childTask.note,
                             children,
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),

@@ -203,7 +203,7 @@ class GroupListFragment @JvmOverloads constructor(
 
                         val scheduleHint = instanceDatas.minBy { it.instanceTimeStamp }?.let {
                             val date = it.instanceTimeStamp.date
-                            val timePair = it.instanceTimePair
+                            val timePair = it.createTaskTimePair
 
                             CreateTaskActivity.Hint.Schedule(date, timePair)
                         }
@@ -667,9 +667,9 @@ class GroupListFragment @JvmOverloads constructor(
 
                     if (actionMode != null) {
                         nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).map { it as InstanceData }.let {
-                            (it.firstOrNull { it.instanceTimePair.customTimeKey != null }
+                            (it.firstOrNull { it.createTaskTimePair.customTimeKey != null }
                                     ?: it.first()).let {
-                                activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(it.instanceTimeStamp.date, it.instanceTimePair)))
+                                activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)))
                             }
                         }
 
@@ -922,7 +922,7 @@ class GroupListFragment @JvmOverloads constructor(
             val isRootInstance: Boolean,
             var isRootTask: Boolean?,
             var exists: Boolean,
-            val instanceTimePair: TimePair,
+            val createTaskTimePair: TimePair,
             override val note: String?,
             val children: MutableMap<InstanceKey, InstanceData>,
             val hierarchyData: HierarchyData?,

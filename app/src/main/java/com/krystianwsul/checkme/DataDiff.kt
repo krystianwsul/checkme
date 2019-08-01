@@ -49,7 +49,7 @@ object DataDiff {
         }
     }
 
-    private fun diffInstance(indent: String, oldInstanceData: GroupListFragment.InstanceData, newInstanceData: GroupListFragment.InstanceData) {
+    private fun diffInstance(indent: String, oldInstanceData: GroupListFragment.InstanceData, newInstanceData: GroupListFragment.InstanceData) { // todo remove
         check(indent.isNotEmpty())
         check(oldInstanceData.instanceKey == newInstanceData.instanceKey)
 
@@ -77,8 +77,8 @@ object DataDiff {
         if (oldInstanceData.exists != newInstanceData.exists)
             sDiff.add(indent + "oldInstanceData.exists == " + oldInstanceData.exists + ", newInstanceData.exists == " + newInstanceData.exists)
 
-        if (oldInstanceData.instanceTimePair != newInstanceData.instanceTimePair)
-            sDiff.add(indent + "oldInstanceData.instanceTimePair == " + oldInstanceData.instanceTimePair + ", newInstanceData.instanceTimePair == " + newInstanceData.instanceTimePair)
+        if (oldInstanceData.createTaskTimePair != newInstanceData.createTaskTimePair)
+            sDiff.add(indent + "oldInstanceData.instanceTimePair == " + oldInstanceData.createTaskTimePair + ", newInstanceData.instanceTimePair == " + newInstanceData.createTaskTimePair)
 
         if (oldInstanceData.note != newInstanceData.note)
             sDiff.add(indent + "oldInstanceData.note == " + oldInstanceData.note + ", newInstanceData.note == " + newInstanceData.note)

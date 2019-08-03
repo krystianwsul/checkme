@@ -56,6 +56,8 @@ class DomainFactory(
 
         private val firebaseListeners = mutableListOf<Pair<(DomainFactory) -> Unit, String>>()
 
+        var firstRun = false
+
         @Synchronized // still running?
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData): Boolean {
             check(MyApplication.instance.hasUserInfo)
@@ -131,8 +133,6 @@ class DomainFactory(
     private var skipSave = false
 
     val domainChanged = BehaviorRelay.createDefault(listOf<Int>())
-
-    private var firstTaskEvent = true
 
     init {
         Preferences.logLineHour("DomainFactory.init")
@@ -303,7 +303,8 @@ class DomainFactory(
 
         val tickData = TickHolder.getTickData()
         if (tickData == null) {
-            updateNotifications(now, silent = firstTaskEvent, sourceName = source)
+            if (!firstRun)
+                updateNotifications(now, silent = false, sourceName = source)
         } else {
             updateNotificationsTick(now, tickData.silent, tickData.source)
 
@@ -311,7 +312,7 @@ class DomainFactory(
                 tickData.release()
         }
 
-        firstTaskEvent = false
+        firstRun = false
 
         save(0, SaveService.Source.GUI)
     }

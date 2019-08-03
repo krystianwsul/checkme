@@ -89,6 +89,10 @@ class MyApplication : Application() {
 
         userInfoRelay.switchMap {
             MyCrashlytics.log("userInfoRelay: $it")
+
+            if (it.value != null)
+                DomainFactory.firstRun = true
+
             it.value?.let { DatabaseWrapper.getPrivateProjectObservable(it.key) }
                     ?: Observable.never()
         }

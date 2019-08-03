@@ -85,12 +85,14 @@ class DomainFactory(
         }
 
         @Synchronized
-        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) {
+        fun addFirebaseListener(firebaseListener: (DomainFactory) -> Unit) { // todo route all external calls through here
             val domainFactory = nullableInstance
-            if (domainFactory?.remoteProjectFactory?.eitherSaved == false && !domainFactory.remoteFriendFactory.isSaved)
+            if (domainFactory?.remoteProjectFactory?.eitherSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
+                domainFactory.checkSave()
                 firebaseListener(domainFactory)
-            else
+            } else {
                 firebaseListeners.add(Pair(firebaseListener, "other"))
+            }
         }
 
         @Synchronized
@@ -158,7 +160,7 @@ class DomainFactory(
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
-        tryNotifyListeners("DomainFactory.init")
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.init")
 
         updateShortcuts()
     }
@@ -265,7 +267,7 @@ class DomainFactory(
             TickHolder.getTickData()?.privateRefreshed = true
         }
 
-        tryNotifyListeners("DomainFactory.updatePrivateProjectRecord")
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updatePrivateProjectRecord")
     }
 
     @Synchronized
@@ -274,18 +276,20 @@ class DomainFactory(
 
         updateShortcuts()
 
+        val now = ExactTimeStamp.now
+
         if (remoteProjectFactory.isSharedSaved) {
             remoteProjectFactory.isSharedSaved = false
         } else {
-            remoteProjectFactory.onChildEvent(childEvent, ExactTimeStamp.now)
+            remoteProjectFactory.onChildEvent(childEvent, now)
 
             TickHolder.getTickData()?.sharedRefreshed = true
         }
 
-        tryNotifyListeners("DomainFactory.updateSharedProjectRecords")
+        tryNotifyListeners(now, "DomainFactory.updateSharedProjectRecords")
     }
 
-    private fun tryNotifyListeners(source: String) {
+    private fun tryNotifyListeners(now: ExactTimeStamp, source: String) {
         if (remoteProjectFactory.eitherSaved || remoteFriendFactory.isSaved)
             return
 
@@ -295,11 +299,13 @@ class DomainFactory(
         firebaseListeners.forEach { it.first(this) }
         firebaseListeners.clear()
 
+        skipSave = false
+
         val tickData = TickHolder.getTickData()
         if (tickData == null) {
-            updateNotifications(ExactTimeStamp.now, silent = firstTaskEvent, removedTaskKeys = listOf(), sourceName = source)
+            updateNotifications(now, silent = firstTaskEvent, sourceName = source)
         } else {
-            updateNotificationsTick(SaveService.Source.GUI, tickData.silent, tickData.source)
+            updateNotificationsTick(now, tickData.silent, tickData.source)
 
             if (tickData.privateRefreshed && tickData.sharedRefreshed)
                 tickData.release()
@@ -307,7 +313,6 @@ class DomainFactory(
 
         firstTaskEvent = false
 
-        skipSave = false
         save(0, SaveService.Source.GUI)
     }
 
@@ -322,7 +327,7 @@ class DomainFactory(
 
         remoteUserFactory.onNewSnapshot(dataSnapshot)
 
-        tryNotifyListeners("DomainFactory.updateUserRecord")
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord")
     }
 
     @Synchronized
@@ -334,7 +339,7 @@ class DomainFactory(
 
         remoteFriendFactory = RemoteFriendFactory(this, dataSnapshot.children)
 
-        tryNotifyListeners("DomainFactory.setFriendRecords")
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.setFriendRecords")
     }
 
     // gets
@@ -1153,6 +1158,11 @@ class DomainFactory(
     }
 
     @Synchronized
+    fun checkSave() {
+        if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
+    }
+
+    @Synchronized
     fun setInstanceNotified(dataId: Int, source: SaveService.Source, instanceKey: InstanceKey) {
         MyCrashlytics.log("DomainFactory.setInstanceNotified")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
@@ -1821,13 +1831,17 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        updateNotifications(now, silent = silent, removedTaskKeys = listOf(), sourceName = sourceName)
+        updateNotificationsTick(now, silent, sourceName)
+
+        save(0, source)
+    }
+
+    private fun updateNotificationsTick(now: ExactTimeStamp, silent: Boolean, sourceName: String) {
+        updateNotifications(now, silent = silent, sourceName = sourceName)
 
         setIrrelevant(now)
 
         remoteProjectFactory.let { localFactory.deleteInstanceShownRecords(it.taskKeys) }
-
-        save(0, source)
     }
 
     @Synchronized
@@ -2525,9 +2539,12 @@ class DomainFactory(
             silent: Boolean = true,
             removedTaskKeys: List<TaskKey> = listOf(),
             sourceName: String = "other") {
-        Preferences.logLineDate("updateNotifications start $sourceName")
+        Preferences.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
-        // todo if saving, set tick listener instead
+        if (skipSave) {
+            TickHolder.addTickData(TickData(silent, sourceName, listOf()))
+            return
+        }
 
         val notificationInstances = if (clear)
             mapOf()

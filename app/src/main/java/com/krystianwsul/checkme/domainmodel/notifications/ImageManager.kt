@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
-import android.util.Log
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
@@ -30,9 +29,7 @@ object ImageManager {
     private val bigPictureDownloader = Downloader(
             Resources.getSystem()
                     .displayMetrics
-                    .widthPixels.also {
-                Log.e("asdf", "screen width: $it")
-            },
+                    .widthPixels,
             MyApplication.instance
                     .dpToPx(256)
                     .toInt(),

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ImageState
@@ -115,7 +116,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         override fun onFirstAdded(x: TreeViewAdapter.Placeholder) {
             (activity as AppCompatActivity).startSupportActionMode(this)
 
-            updateFabVisibility()
+            updateFabVisibility("onFirstAdded")
 
             (activity as TaskListListener).onCreateActionMode(actionMode!!)
 
@@ -146,7 +147,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         }
 
         override fun onLastRemoved(x: TreeViewAdapter.Placeholder) {
-            updateFabVisibility()
+            updateFabVisibility("onLastRemoved")
 
             (activity as TaskListListener).onDestroyActionMode()
         }
@@ -332,7 +333,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             }
         }
 
-        updateFabVisibility()
+        updateFabVisibility("initialize")
 
         dataRelay.accept(Unit)
 
@@ -412,12 +413,13 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             startActivity(CreateTaskActivity.getCreateIntent(hint()))
         }
 
-        updateFabVisibility()
+        updateFabVisibility("setFab")
     }
 
     private fun hint() = rootTaskData?.let { CreateTaskActivity.Hint.Task(it.taskKey) }
 
-    private fun updateFabVisibility() {
+    private fun updateFabVisibility(source: String) {
+        Preferences.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
         taskListFragmentFab?.run {
             if (data != null && !selectionCallback.hasActionMode) {
                 show()

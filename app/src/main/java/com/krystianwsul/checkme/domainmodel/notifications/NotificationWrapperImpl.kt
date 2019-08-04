@@ -36,6 +36,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         @JvmStatic
         protected val KEY_HASH_CODE = "com.krystianwsul.checkme.notification_hash_code"
+
+        @JvmStatic
+        protected val MAX_INBOX_LINES = 5
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -173,18 +176,18 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             .map { it.first.name }
             .toList()
 
-    protected open fun getInboxStyle(lines: List<String>, group: Boolean): Pair<NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
-        check(lines.isNotEmpty())
+    protected open fun getExtraCount(lines: List<String>, group: Boolean) = lines.size - MAX_INBOX_LINES
 
-        val max = 5
+    private fun getInboxStyle(lines: List<String>, group: Boolean): Pair<NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
+        check(lines.isNotEmpty())
 
         val inboxStyle = NotificationCompat.InboxStyle()
 
-        val finalLines = lines.take(max)
+        val finalLines = lines.take(MAX_INBOX_LINES)
 
         finalLines.forEach { inboxStyle.addLine(it) }
 
-        val extraCount = lines.size - max
+        val extraCount = getExtraCount(lines, group)
 
         if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
@@ -264,7 +267,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             sortKey: String,
             largeIcon: Bitmap?, // todo fetch bitmaps only if not unchanged
             notificationHash: NotificationHash) {
-        if (false && unchanged(notificationHash)) {
+        if (unchanged(notificationHash)) {
             Preferences.logLineHour("skipping notification update for $title")
             return
         }

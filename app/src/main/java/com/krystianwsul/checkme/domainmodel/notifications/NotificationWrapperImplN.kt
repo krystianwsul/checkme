@@ -6,10 +6,8 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
-import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 
 
@@ -52,24 +50,7 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
         }
     }
 
-    override fun getInboxStyle(lines: List<String>, group: Boolean): Pair<NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
-        check(lines.isNotEmpty())
-
-        val max = 5
-
-        val inboxStyle = NotificationCompat.InboxStyle()
-
-        val finalLines = lines.take(max)
-
-        finalLines.forEach { inboxStyle.addLine(it) }
-
-        val extraCount = if (group) 0 else lines.size - max
-
-        if (extraCount > 0)
-            inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
-
-        return Pair(inboxStyle, NotificationHash.Style.Inbox(finalLines, extraCount))
-    }
+    override fun getExtraCount(lines: List<String>, group: Boolean) = if (group) 0 else lines.size - MAX_INBOX_LINES
 
     override fun getNotificationBuilder(
             title: String,

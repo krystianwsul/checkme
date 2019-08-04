@@ -20,20 +20,23 @@ class TickData(
         private const val DURATION = 30 * 1000
     }
 
-    val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
+    private val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
         acquire(DURATION.toLong())
     }
 
-    val expires = ExactTimeStamp(DateTime.now().plusMillis(DURATION))
+    private val expires = ExactTimeStamp(DateTime.now().plusMillis(DURATION))
 
-    fun releaseWakelock() {
-        if (wakelock.isHeld) wakelock.release()
-    }
+    val shouldClear get() = expires < ExactTimeStamp.now || !wakelock.isHeld
 
     fun release() {
+        if (wakelock.isHeld)
+            wakelock.release()
+    }
+
+    fun notifyAndRelease() {
         for (listener in listeners)
             listener()
 
-        releaseWakelock()
+        release()
     }
 }

@@ -77,8 +77,8 @@ class DomainFactory(
             if (!savedFalse || tickData?.privateRefreshed == false || tickData?.sharedRefreshed == false) {
                 TickHolder.addTickData(newTickData)
             } else {
-                tickData?.release()
-                newTickData.release()
+                tickData?.notifyAndRelease()
+                newTickData.notifyAndRelease()
             }
         }
 
@@ -323,7 +323,7 @@ class DomainFactory(
             updateNotificationsTick(now, tickData.silent && !forceNotify, tickData.source)
 
             if (tickData.privateRefreshed && tickData.sharedRefreshed) // todo not all need wakelock
-                tickData.release()
+                tickData.notifyAndRelease()
         }
 
         fun notify() {

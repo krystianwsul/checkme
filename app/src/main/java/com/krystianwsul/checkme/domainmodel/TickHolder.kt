@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-
 object TickHolder {
 
     private var tickData: TickData? = null
@@ -11,8 +9,8 @@ object TickHolder {
 
         val source = "merged (${oldTickData.source}, ${newTickData.source})"
 
-        oldTickData.releaseWakelock()
-        newTickData.releaseWakelock()
+        oldTickData.release()
+        newTickData.release()
 
         val listeners = oldTickData.listeners + newTickData.listeners
 
@@ -20,10 +18,8 @@ object TickHolder {
     }
 
     private fun tryClearTickData() {
-        tickData?.let {
-            if (it.expires < ExactTimeStamp.now || !it.wakelock.isHeld)
-                tickData = null
-        }
+        if (tickData?.shouldClear == true)
+            tickData = null
     }
 
     fun getTickData(): TickData? {

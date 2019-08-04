@@ -55,7 +55,7 @@ class TickJobIntentService : JobIntentService() {
 
             val listeners = listOfNotNull(listener)
 
-            DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
+            DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName, listeners))
         }
     }
 

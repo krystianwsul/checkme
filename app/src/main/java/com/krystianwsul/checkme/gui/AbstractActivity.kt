@@ -66,7 +66,7 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     private fun tick(source: String) = Single.just(Unit)
             .observeOn(Schedulers.single())
-            .subscribe { _ -> DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(true, source, listOf())) }!!
+            .subscribe { _ -> DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Normal(true, source)) }!!
 
     protected open val tickOnResume = true
 

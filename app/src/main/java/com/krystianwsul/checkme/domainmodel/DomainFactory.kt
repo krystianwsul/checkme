@@ -2596,7 +2596,7 @@ class DomainFactory(
         Preferences.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
-            TickHolder.addTickData(TickData(silent, sourceName, listOf()))
+            TickHolder.addTickData(TickData.Normal(silent, sourceName))
             return
         }
 

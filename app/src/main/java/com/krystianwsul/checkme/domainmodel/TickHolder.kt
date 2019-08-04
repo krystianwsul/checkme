@@ -5,16 +5,24 @@ object TickHolder {
     private var tickData: TickData? = null
 
     private fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
-        val silent = oldTickData.silent && newTickData.silent
-
-        val source = "merged (${oldTickData.source}, ${newTickData.source})"
-
         oldTickData.release()
         newTickData.release()
 
-        val listeners = oldTickData.listeners + newTickData.listeners
+        val silent = oldTickData.silent && newTickData.silent
+        val source = "merged (${oldTickData.source}, ${newTickData.source})"
 
-        return TickData(silent, source, listeners, oldTickData.waitingForPrivate, oldTickData.waitingForShared)
+        val locks = listOf(oldTickData, newTickData).filterIsInstance<TickData.Lock>()
+        val listeners = locks.flatMap { it.listeners }
+        val waitingForPrivate = locks.all { it.waitingForPrivate }
+        val waitingForShared = locks.all { it.waitingForShared }
+
+        return if (waitingForPrivate || waitingForShared) {
+            TickData.Lock(silent, source, listeners, waitingForPrivate, waitingForShared)
+        } else {
+            check(locks.isEmpty())
+
+            TickData.Normal(silent, source)
+        }
     }
 
     private fun tryClearTickData() {
@@ -28,10 +36,6 @@ object TickHolder {
     }
 
     fun addTickData(newTickData: TickData) {
-        tickData = if (tickData != null) {
-            mergeTickDatas(tickData!!, newTickData)
-        } else {
-            newTickData
-        }
+        tickData = tickData?.let { mergeTickDatas(it, newTickData) } ?: newTickData
     }
 }

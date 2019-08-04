@@ -325,11 +325,11 @@ class DomainFactory(
 
         val tickData = TickHolder.getTickData()
 
-        fun TickData.run(forceNotify: Boolean) {
-            updateNotificationsTick(now, silent && !forceNotify, source)
+        fun tick(tickData: TickData, forceNotify: Boolean) {
+            updateNotificationsTick(now, tickData.silent && !forceNotify, tickData.source)
 
-            if (privateRefreshed && sharedRefreshed)
-                release()
+            if (tickData.privateRefreshed && tickData.sharedRefreshed) // todo not all need wakelock
+                tickData.release()
         }
 
         fun notify() {
@@ -339,8 +339,8 @@ class DomainFactory(
         }
 
         when (runType) {
-            RunType.APP_START, RunType.LOCAL -> tickData?.run(false)
-            RunType.SIGN_IN -> tickData?.run(true) ?: notify()
+            RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(tickData, false) }
+            RunType.SIGN_IN -> tickData?.let { tick(tickData, false) } ?: notify()
             RunType.REMOTE -> notify()
         }
 

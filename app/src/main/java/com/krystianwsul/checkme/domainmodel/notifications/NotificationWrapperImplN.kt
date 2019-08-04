@@ -52,21 +52,23 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
         }
     }
 
-    override fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
+    override fun getInboxStyle(lines: List<String>, group: Boolean): Pair<NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
         check(lines.isNotEmpty())
 
         val max = 5
 
         val inboxStyle = NotificationCompat.InboxStyle()
 
-        lines.take(max).forEach { inboxStyle.addLine(it) }
+        val finalLines = lines.take(max)
 
-        val extraCount = lines.size - max
+        finalLines.forEach { inboxStyle.addLine(it) }
 
-        if (extraCount > 0 && !group)
+        val extraCount = if (group) 0 else lines.size - max
+
+        if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
 
-        return inboxStyle
+        return Pair(inboxStyle, NotificationHash.Style.Inbox(finalLines, extraCount))
     }
 
     override fun getNotificationBuilder(
@@ -81,7 +83,8 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
             autoCancel: Boolean,
             summary: Boolean,
             sortKey: String,
-            largeIcon: Bitmap?) = super.getNotificationBuilder(
+            largeIcon: Bitmap?,
+            notificationHash: NotificationHash) = super.getNotificationBuilder(
             title,
             text,
             deleteIntent,
@@ -93,7 +96,8 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
             autoCancel,
             summary,
             sortKey,
-            largeIcon).apply {
+            largeIcon,
+            notificationHash).apply {
         setGroup(TickJobIntentService.GROUP_KEY)
 
         if (summary)

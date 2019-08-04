@@ -8,8 +8,10 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
+import android.os.Bundle
 import android.os.SystemClock
 import android.provider.Settings
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
@@ -31,6 +33,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     companion object {
 
         val alarmManager by lazy { MyApplication.instance.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
+
+        @JvmStatic
+        protected val KEY_HASH_CODE = "com.krystianwsul.checkme.notification_hash_code"
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -85,12 +90,17 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val text: String?
         val style: NotificationCompat.Style?
+        val styleHash: NotificationHash.Style?
         if (childNames.isNotEmpty()) {
             text = childNames.joinToString(", ")
-            style = getInboxStyle(childNames, false)
+
+            val pair = getInboxStyle(childNames, false)
+            style = pair.first
+            styleHash = pair.second
         } else if (!task.note.isNullOrEmpty()) {
             text = task.note
             style = NotificationCompat.BigTextStyle().also { it.bigText(text) }
+            styleHash = NotificationHash.Style.Text(text)
         } else {
             val bigPicture = ImageManager.getBigPicture(task)
             if (bigPicture != null) {
@@ -99,15 +109,33 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                     it.bigPicture(bigPicture)
                     it.bigLargeIcon(null)
                 }
+                styleHash = NotificationHash.Style.Picture(task.image!!.uuid!!)
             } else {
                 text = null
                 style = null
+                styleHash = null
             }
         }
 
         val timeStampLong = instance.instanceDateTime
                 .timeStamp
                 .long
+
+        val sortKey = timeStampLong.toString() + instance.task
+                .startExactTimeStamp
+                .toString()
+
+        val largeIcon = ImageManager.getLargeIcon(instance.task)
+
+        val notificationHash = NotificationHash(
+                instance.name,
+                text,
+                notificationId,
+                timeStampLong,
+                styleHash,
+                sortKey,
+                largeIcon?.let { task.image!!.uuid!! }
+        )
 
         notify(
                 instance.name,
@@ -121,10 +149,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 style,
                 autoCancel = true,
                 summary = false,
-                sortKey = timeStampLong.toString() + instance.task
-                        .startExactTimeStamp
-                        .toString(),
-                largeIcon = ImageManager.getLargeIcon(instance.task))
+                sortKey = sortKey,
+                largeIcon = largeIcon,
+                notificationHash = notificationHash)
     }
 
     private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {
@@ -146,21 +173,23 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             .map { it.first.name }
             .toList()
 
-    protected open fun getInboxStyle(lines: List<String>, group: Boolean): NotificationCompat.InboxStyle {
+    protected open fun getInboxStyle(lines: List<String>, group: Boolean): Pair<NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
         check(lines.isNotEmpty())
 
         val max = 5
 
         val inboxStyle = NotificationCompat.InboxStyle()
 
-        lines.take(max).forEach { inboxStyle.addLine(it) }
+        val finalLines = lines.take(max)
+
+        finalLines.forEach { inboxStyle.addLine(it) }
 
         val extraCount = lines.size - max
 
         if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
 
-        return inboxStyle
+        return Pair(inboxStyle, NotificationHash.Style.Inbox(finalLines, extraCount))
     }
 
     @Suppress("DEPRECATION")
@@ -178,7 +207,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             autoCancel: Boolean,
             summary: Boolean,
             sortKey: String,
-            largeIcon: Bitmap?): NotificationCompat.Builder {
+            largeIcon: Bitmap?,
+            notificationHash: NotificationHash): NotificationCompat.Builder {
         check(title.isNotEmpty())
 
         val builder = newBuilder(silent)
@@ -191,6 +221,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .setSortKey(sortKey)
                 .setOnlyAlertOnce(true)
                 .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+                .addExtras(Bundle().apply { putInt(KEY_HASH_CODE, notificationHash.hashCode()) })
 
         if (!text.isNullOrEmpty())
             builder.setContentText(text)
@@ -216,6 +247,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         return builder
     }
 
+    protected open fun unchanged(notificationHash: NotificationHash) = false
+
     protected open fun notify(
             title: String,
             text: String?,
@@ -229,7 +262,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             autoCancel: Boolean,
             summary: Boolean,
             sortKey: String,
-            largeIcon: Bitmap?) {
+            largeIcon: Bitmap?, // todo fetch bitmaps only if not unchanged
+            notificationHash: NotificationHash) {
+        if (false && unchanged(notificationHash)) {
+            Preferences.logLineHour("skipping notification update for $title")
+            return
+        }
+
         val notification = getNotificationBuilder(
                 title,
                 text,
@@ -242,7 +281,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 autoCancel,
                 summary,
                 sortKey,
-                largeIcon).build()
+                largeIcon,
+                notificationHash).build()
 
         @Suppress("Deprecation")
         if (!silent)
@@ -266,13 +306,25 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val contentIntent = ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys)
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
-        val inboxStyle = getInboxStyle(instances
+        val (inboxStyle, styleHash) = getInboxStyle(instances
                 .sortedWith(compareBy({ it.instanceDateTime.timeStamp }, { it.task.startExactTimeStamp }))
                 .map { it.name + getInstanceText(it, now) }, true)
 
+        val title = instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders)
+        val text = names.joinToString(", ")
+
+        val notificationHash = NotificationHash(
+                title,
+                text,
+                0,
+                null,
+                styleHash,
+                "0",
+                null)
+
         notify(
-                instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders),
-                names.joinToString(", "),
+                title,
+                text,
                 0,
                 pendingDeleteIntent,
                 pendingContentIntent,
@@ -283,7 +335,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 autoCancel = false,
                 summary = true,
                 sortKey = "0",
-                largeIcon = null)
+                largeIcon = null,
+                notificationHash = notificationHash)
     }
 
     override fun cleanGroup(lastNotificationId: Int?) {
@@ -304,4 +357,25 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun logNotificationIds(source: String) = Unit
+
+    protected data class NotificationHash(
+            val title: String,
+            val text: String?,
+            val id: Int,
+            val timeStamp: Long?,
+            val style: Style?,
+            val sortKey: String,
+            val uuid: String?) {
+
+        init {
+            Log.e("asdf", "notificationHash $this")
+        }
+
+        interface Style {
+
+            data class Inbox(val lines: List<String>, val extraCount: Int) : Style
+            data class Text(val text: String?) : Style
+            data class Picture(val uuid: String) : Style
+        }
+    }
 }

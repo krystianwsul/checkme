@@ -59,7 +59,7 @@ class DomainFactory(
         var firstRun = false
 
         @Synchronized // still running?
-        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData): Boolean {
+        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
             check(MyApplication.instance.hasUserInfo)
 
             val domainFactory = nullableInstance
@@ -74,15 +74,11 @@ class DomainFactory(
                 domainFactory!!.updateNotificationsTick(source, silent, newTickData.source)
             }
 
-            return if (!savedFalse || tickData?.privateRefreshed == false || tickData?.sharedRefreshed == false) {
+            if (!savedFalse || tickData?.waiting == true) {
                 TickHolder.addTickData(newTickData)
-
-                true
             } else {
-                tickData?.release()
-                newTickData.release()
-
-                false
+                tickData?.notifyAndRelease()
+                newTickData.notifyAndRelease()
             }
         }
 
@@ -170,8 +166,6 @@ class DomainFactory(
     private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
 
     // misc
-
-    val isHoldingWakeLock get() = TickHolder.isHeld
 
     val taskCount get() = remoteProjectFactory.taskCount
     val instanceCount get() = remoteProjectFactory.instanceCount
@@ -274,7 +268,7 @@ class DomainFactory(
 
             remoteUpdateTime = stop.long - start.long
 
-            TickHolder.getTickData()?.privateRefreshed = true
+            TickHolder.getTickData()?.privateTriggered()
 
             runType = RunType.REMOTE
         }
@@ -298,7 +292,7 @@ class DomainFactory(
         } else {
             remoteProjectFactory.onChildEvent(childEvent, now)
 
-            TickHolder.getTickData()?.sharedRefreshed = true
+            TickHolder.getTickData()?.sharedTriggered()
 
             runType = RunType.REMOTE
         }
@@ -328,8 +322,8 @@ class DomainFactory(
         fun tick(tickData: TickData, forceNotify: Boolean) {
             updateNotificationsTick(now, tickData.silent && !forceNotify, tickData.source)
 
-            if (tickData.privateRefreshed && tickData.sharedRefreshed) // todo not all need wakelock
-                tickData.release()
+            if (!tickData.waiting)
+                tickData.notifyAndRelease()
         }
 
         fun notify() {
@@ -2602,7 +2596,7 @@ class DomainFactory(
         Preferences.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
-            TickHolder.addTickData(TickData(silent, sourceName, listOf()))
+            TickHolder.addTickData(TickData.Normal(silent, sourceName))
             return
         }
 

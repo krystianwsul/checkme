@@ -6,34 +6,82 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import org.joda.time.DateTime
 
-class TickData(
-        val silent: Boolean,
-        val source: String,
-        val listeners: List<() -> Unit>,
-        var privateRefreshed: Boolean = false,
-        var sharedRefreshed: Boolean = false) {
+sealed class TickData {
 
-    companion object {
+    abstract val silent: Boolean
+    abstract val source: String
 
-        private const val WAKELOCK_TAG = "Check.me:myWakelockTag"
+    abstract val shouldClear: Boolean
 
-        private const val DURATION = 30 * 1000
+    abstract val waiting: Boolean
+
+    abstract fun privateTriggered()
+    abstract fun sharedTriggered()
+
+    abstract fun release()
+    abstract fun notifyAndRelease()
+
+    class Normal(
+            override val silent: Boolean,
+            override val source: String) : TickData() {
+
+        override var shouldClear = false
+            private set
+
+        override val waiting = false
+
+        override fun privateTriggered() = Unit
+        override fun sharedTriggered() = Unit
+
+        override fun release() {
+            shouldClear = true
+        }
+
+        override fun notifyAndRelease() = release()
     }
 
-    val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
-        acquire(DURATION.toLong())
-    }
+    class Lock(
+            override val silent: Boolean,
+            override val source: String,
+            val listeners: List<() -> Unit> = listOf(),
+            var waitingForPrivate: Boolean = true,
+            var waitingForShared: Boolean = true) : TickData() {
 
-    val expires = ExactTimeStamp(DateTime.now().plusMillis(DURATION))
+        companion object {
 
-    fun releaseWakelock() {
-        if (wakelock.isHeld) wakelock.release()
-    }
+            private const val WAKELOCK_TAG = "Check.me:myWakelockTag"
 
-    fun release() {
-        for (listener in listeners)
-            listener()
+            private const val DURATION = 30 * 1000
 
-        releaseWakelock()
+            private val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
+                acquire(DURATION.toLong())
+            }
+
+            private val expires = ExactTimeStamp(DateTime.now().plusMillis(DURATION))
+        }
+
+        override val shouldClear get() = expires < ExactTimeStamp.now || !wakelock.isHeld
+
+        override val waiting get() = waitingForPrivate || waitingForShared
+
+        override fun privateTriggered() {
+            waitingForPrivate = false
+        }
+
+        override fun sharedTriggered() {
+            waitingForShared = false
+        }
+
+        override fun release() {
+            if (wakelock.isHeld)
+                wakelock.release()
+        }
+
+        override fun notifyAndRelease() {
+            for (listener in listeners)
+                listener()
+
+            release()
+        }
     }
 }

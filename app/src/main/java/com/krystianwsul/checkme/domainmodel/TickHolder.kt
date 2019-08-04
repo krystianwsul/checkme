@@ -1,29 +1,33 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-
 object TickHolder {
 
     private var tickData: TickData? = null
 
     private fun mergeTickDatas(oldTickData: TickData, newTickData: TickData): TickData {
-        val silent = oldTickData.silent && newTickData.silent
+        oldTickData.release()
+        newTickData.release()
 
+        val silent = oldTickData.silent && newTickData.silent
         val source = "merged (${oldTickData.source}, ${newTickData.source})"
 
-        oldTickData.releaseWakelock()
-        newTickData.releaseWakelock()
+        val locks = listOf(oldTickData, newTickData).filterIsInstance<TickData.Lock>()
+        val listeners = locks.flatMap { it.listeners }
+        val waitingForPrivate = locks.all { it.waitingForPrivate }
+        val waitingForShared = locks.all { it.waitingForShared }
 
-        val listeners = oldTickData.listeners + newTickData.listeners
+        return if (waitingForPrivate || waitingForShared) {
+            TickData.Lock(silent, source, listeners, waitingForPrivate, waitingForShared)
+        } else {
+            check(locks.isEmpty())
 
-        return TickData(silent, source, listeners, oldTickData.privateRefreshed || newTickData.privateRefreshed, oldTickData.sharedRefreshed || newTickData.sharedRefreshed)
+            TickData.Normal(silent, source)
+        }
     }
 
     private fun tryClearTickData() {
-        tickData?.let {
-            if (it.expires < ExactTimeStamp.now || !it.wakelock.isHeld)
-                tickData = null
-        }
+        if (tickData?.shouldClear == true)
+            tickData = null
     }
 
     fun getTickData(): TickData? {
@@ -32,12 +36,6 @@ object TickHolder {
     }
 
     fun addTickData(newTickData: TickData) {
-        tickData = if (tickData != null) {
-            mergeTickDatas(tickData!!, newTickData)
-        } else {
-            newTickData
-        }
+        tickData = tickData?.let { mergeTickDatas(it, newTickData) } ?: newTickData
     }
-
-    val isHeld get() = tickData?.wakelock?.isHeld == true
 }

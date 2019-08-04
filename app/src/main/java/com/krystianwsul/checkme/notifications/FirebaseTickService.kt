@@ -2,22 +2,16 @@ package com.krystianwsul.checkme.notifications
 
 import com.firebase.jobdispatcher.JobParameters
 import com.firebase.jobdispatcher.JobService
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 
 class FirebaseTickService : JobService() {
 
-    private var running = false
+    private var running = true
 
     override fun onStartJob(job: JobParameters): Boolean {
-        running = TickJobIntentService.tick(false, "FirebaseTickService") { running = false }
+        TickJobIntentService.tick(false, "FirebaseTickService") { running = false }
 
         return running
     }
 
-    override fun onStopJob(job: JobParameters): Boolean {
-        if (!DomainFactory.instance.isHoldingWakeLock)
-            return false
-
-        return running
-    }
+    override fun onStopJob(job: JobParameters) = running
 }

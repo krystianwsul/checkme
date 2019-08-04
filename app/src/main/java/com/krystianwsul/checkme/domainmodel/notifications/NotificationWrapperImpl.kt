@@ -71,9 +71,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val instanceKey = instance.instanceKey
 
-        fun pendingService(intent: Intent) = PendingIntent.getService(MyApplication.instance, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+        fun pendingService(intent: Intent) = PendingIntent.getService(MyApplication.instance, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, notificationId, ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId), PendingIntent.FLAG_CANCEL_CURRENT)
+        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, notificationId, ShowInstanceActivity.getNotificationIntent(MyApplication.instance, instanceKey, notificationId), PendingIntent.FLAG_UPDATE_CURRENT)
 
         val pendingDeleteIntent = pendingService(InstanceNotificationDeleteService.getIntent(MyApplication.instance, instanceKey))
 
@@ -304,10 +304,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
 
         val deleteIntent = GroupNotificationDeleteService.getIntent(MyApplication.instance, instanceKeys)
-        val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, 0, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val pendingDeleteIntent = PendingIntent.getService(MyApplication.instance, 0, deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val contentIntent = ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys)
-        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val (inboxStyle, styleHash) = getInboxStyle(instances
                 .sortedWith(compareBy({ it.instanceDateTime.timeStamp }, { it.task.startExactTimeStamp }))

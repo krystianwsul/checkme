@@ -60,11 +60,11 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
             silent: Boolean,
             actions: List<NotificationCompat.Action>,
             time: Long?,
-            style: NotificationCompat.Style?,
+            style: (() -> NotificationCompat.Style)?,
             autoCancel: Boolean,
             summary: Boolean,
             sortKey: String,
-            largeIcon: Bitmap?,
+            largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash) = super.getNotificationBuilder(
             title,
             text,

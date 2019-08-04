@@ -136,7 +136,7 @@ object ImageManager {
         fun getImage(task: Task) = task.image // todo async
                 ?.uuid
                 ?.takeIf { (imageStates[it] is State.Downloaded) }
-                ?.let { BitmapFactory.decodeFile(getFile(it).absolutePath) }
+                ?.let { { BitmapFactory.decodeFile(getFile(it).absolutePath) } }
     }
 
     private sealed class State {

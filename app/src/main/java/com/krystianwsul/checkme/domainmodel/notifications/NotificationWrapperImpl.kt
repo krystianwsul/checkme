@@ -92,7 +92,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val childNames = getChildNames(instance, now)
 
         val text: String?
-        val style: NotificationCompat.Style?
+        val style: (() -> NotificationCompat.Style)?
         val styleHash: NotificationHash.Style?
         if (childNames.isNotEmpty()) {
             text = childNames.joinToString(", ")
@@ -102,15 +102,19 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             styleHash = pair.second
         } else if (!task.note.isNullOrEmpty()) {
             text = task.note
-            style = NotificationCompat.BigTextStyle().also { it.bigText(text) }
+            style = {
+                NotificationCompat.BigTextStyle().also { it.bigText(text) }
+            }
             styleHash = NotificationHash.Style.Text(text)
         } else {
             val bigPicture = ImageManager.getBigPicture(task)
             if (bigPicture != null) {
                 text = null
-                style = NotificationCompat.BigPictureStyle().also {
-                    it.bigPicture(bigPicture)
-                    it.bigLargeIcon(null)
+                style = {
+                    NotificationCompat.BigPictureStyle().also {
+                        it.bigPicture(bigPicture())
+                        it.bigLargeIcon(null)
+                    }
                 }
                 styleHash = NotificationHash.Style.Picture(task.image!!.uuid!!)
             } else {
@@ -178,7 +182,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     protected open fun getExtraCount(lines: List<String>, group: Boolean) = lines.size - MAX_INBOX_LINES
 
-    private fun getInboxStyle(lines: List<String>, group: Boolean): Pair<NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
+    private fun getInboxStyle(lines: List<String>, group: Boolean): Pair<() -> NotificationCompat.InboxStyle, NotificationHash.Style.Inbox> {
         check(lines.isNotEmpty())
 
         val inboxStyle = NotificationCompat.InboxStyle()
@@ -192,7 +196,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (extraCount > 0)
             inboxStyle.setSummaryText("+" + extraCount + " " + MyApplication.instance.getString(R.string.more))
 
-        return Pair(inboxStyle, NotificationHash.Style.Inbox(finalLines, extraCount))
+        return Pair({ inboxStyle }, NotificationHash.Style.Inbox(finalLines, extraCount))
     }
 
     @Suppress("DEPRECATION")
@@ -206,11 +210,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             silent: Boolean,
             actions: List<NotificationCompat.Action>,
             time: Long?,
-            style: NotificationCompat.Style?,
+            style: (() -> NotificationCompat.Style)?,
             autoCancel: Boolean,
             summary: Boolean,
             sortKey: String,
-            largeIcon: Bitmap?,
+            largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash): NotificationCompat.Builder {
         check(title.isNotEmpty())
 
@@ -240,12 +244,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             builder.setWhen(time).setShowWhen(true)
 
         if (style != null)
-            builder.setStyle(style)
+            builder.setStyle(style())
 
         if (autoCancel)
             builder.setAutoCancel(true)
 
-        largeIcon?.let { builder.setLargeIcon(it) }
+        largeIcon?.let { builder.setLargeIcon(it()) }
 
         return builder
     }
@@ -261,11 +265,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             silent: Boolean,
             actions: List<NotificationCompat.Action>,
             time: Long?,
-            style: NotificationCompat.Style?,
+            style: (() -> NotificationCompat.Style)?,
             autoCancel: Boolean,
             summary: Boolean,
             sortKey: String,
-            largeIcon: Bitmap?, // todo fetch bitmaps only if not unchanged
+            largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash) {
         if (unchanged(notificationHash)) {
             Preferences.logLineHour("skipping notification update for $title")

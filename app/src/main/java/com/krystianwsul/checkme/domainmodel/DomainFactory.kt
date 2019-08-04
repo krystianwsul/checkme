@@ -130,9 +130,9 @@ class DomainFactory(
     var remoteFriendFactory: RemoteFriendFactory
         private set
 
-    private var skipSave = false
+    private var aggregateData: AggregateData? = null
 
-    val domainChanged = BehaviorRelay.createDefault(listOf<Int>())
+    val domainChanged = BehaviorRelay.createDefault(setOf<Int>())
 
     init {
         Preferences.logLineHour("DomainFactory.init")
@@ -182,12 +182,17 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
-    fun save(dataId: Int, source: SaveService.Source) = save(listOf(dataId), source)
+    fun save(dataId: Int, source: SaveService.Source) = save(setOf(dataId), source)
 
-    fun save(dataIds: List<Int>, source: SaveService.Source) {
-        Preferences.logLineHour("DomainFactory.save: skipping? $skipSave")
-        if (skipSave)
+    fun save(dataIds: Set<Int>, source: SaveService.Source) {
+        val skipping = aggregateData != null
+        Preferences.logLineHour("DomainFactory.save: skipping? $skipping")
+
+        if (skipping) {
+            check(dataIds.single() == 0)
+
             return
+        }
 
         val localChanges = localFactory.save(source)
         val remoteChanges = remoteProjectFactory.save()
@@ -307,13 +312,16 @@ class DomainFactory(
         if (remoteProjectFactory.eitherSaved || remoteFriendFactory.isSaved || remoteUserFactory.isSaved)
             return
 
-        skipSave = true
+        check(aggregateData == null)
+
+        aggregateData = AggregateData()
 
         Preferences.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
         firebaseListeners.forEach { it.first(this) }
         firebaseListeners.clear()
 
-        skipSave = false
+        val copyAggregateData = aggregateData!!
+        aggregateData = null
 
         val tickData = TickHolder.getTickData()
 
@@ -337,6 +345,11 @@ class DomainFactory(
         }
 
         save(0, SaveService.Source.GUI)
+
+        copyAggregateData.run {
+            if (listOf(notificationProjects, notificationUserKeys).any { it.isNotEmpty() })
+                notifyCloudPrivateFixed(notificationProjects, notificationUserKeys)
+        }
     }
 
     private enum class RunType {
@@ -2554,12 +2567,19 @@ class DomainFactory(
 
     private fun notifyCloud(remoteProjects: Set<RemoteProject<*>>) {
         if (remoteProjects.isNotEmpty())
-            notifyCloudPrivateFixed(remoteProjects.toMutableSet(), userInfo, mutableListOf())
+            notifyCloudPrivateFixed(remoteProjects.toMutableSet(), mutableListOf())
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject<*>, userKeys: Collection<String>) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userInfo, userKeys.toMutableList())
+    private fun notifyCloud(remoteProject: RemoteProject<*>, userKeys: Collection<String>) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userKeys.toMutableList())
 
-    private fun notifyCloudPrivateFixed(remoteProjects: MutableSet<RemoteProject<*>>, userInfo: UserInfo, userKeys: MutableCollection<String>) {
+    private fun notifyCloudPrivateFixed(remoteProjects: MutableSet<RemoteProject<*>>, userKeys: MutableCollection<String>) {
+        aggregateData?.run {
+            notificationProjects.addAll(remoteProjects)
+            notificationUserKeys.addAll(userKeys)
+
+            return
+        }
+
         val remotePrivateProject = remoteProjects.singleOrNull { it is RemotePrivateProject }
 
         remotePrivateProject?.let {
@@ -2577,6 +2597,8 @@ class DomainFactory(
             silent: Boolean = true,
             removedTaskKeys: List<TaskKey> = listOf(),
             sourceName: String = "other") {
+        val skipSave = aggregateData != null
+
         Preferences.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
@@ -2897,4 +2919,10 @@ class DomainFactory(
     }
 
     private inner class SavedFactoryException : Exception("private.isSaved == " + remoteProjectFactory.isPrivateSaved + ", shared.isSaved == " + remoteProjectFactory.isSharedSaved + ", user.isSaved == " + remoteUserFactory.isSaved)
+
+    private class AggregateData {
+
+        val notificationProjects = mutableSetOf<RemoteProject<*>>()
+        val notificationUserKeys = mutableSetOf<String>()
+    }
 }

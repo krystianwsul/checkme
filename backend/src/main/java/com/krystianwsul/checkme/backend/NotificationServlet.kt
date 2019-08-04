@@ -72,7 +72,7 @@ class NotificationServlet : HttpServlet() {
 
         val userTokens = HashSet<String>()
         if (req.getParameterValues("projects") != null) {
-            val projects = HashSet(Arrays.asList(*req.getParameterValues("projects")))
+            val projects = HashSet(listOf(*req.getParameterValues("projects")))
             check(projects.isNotEmpty())
 
             resp.writer.println("projects: $projects")
@@ -108,7 +108,7 @@ class NotificationServlet : HttpServlet() {
         val userTokenData = mutableMapOf<String, Pair<String, String>>()
 
         if (req.getParameterValues("userKeys") != null) {
-            val userKeys = HashSet(Arrays.asList(*req.getParameterValues("userKeys")))
+            val userKeys = HashSet(listOf(*req.getParameterValues("userKeys")))
             check(userKeys.isNotEmpty())
 
             resp.writer.print("root user keys: " + Joiner.on(", ").join(userKeys))
@@ -131,7 +131,7 @@ class NotificationServlet : HttpServlet() {
                     continue
                 }
 
-                val tokens = ArrayList<String>(userTokenMap.values)
+                val tokens = ArrayList(userTokenMap.values)
 
                 userTokenData.putAll(userTokenMap.entries.associate { (uuid, token) -> token to Pair(userKey, uuid) })
 
@@ -169,7 +169,7 @@ class NotificationServlet : HttpServlet() {
             val response = IOUtils.toString(reader)
             IOUtils.closeQuietly(reader)
 
-            val parsedResponse = gson.fromJson<Response>(response, Response::class.java)
+            val parsedResponse = gson.fromJson(response, Response::class.java)
             resp.writer.println("parsed response: $parsedResponse")
             resp.writer.println()
 

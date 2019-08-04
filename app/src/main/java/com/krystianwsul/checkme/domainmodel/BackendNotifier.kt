@@ -31,7 +31,6 @@ object BackendNotifier {
     }
 
     fun notify(remoteProjects: Set<RemoteProject<*>>, userInfo: UserInfo, userKeys: Collection<String>) {
-
         val production = when (DatabaseWrapper.root) {
             "development" -> false
             "production" -> true

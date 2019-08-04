@@ -45,17 +45,17 @@ class TickJobIntentService : JobIntentService() {
         }
 
         // still running?
-        fun tick(silent: Boolean, sourceName: String, listener: (() -> Unit)? = null): Boolean {
+        fun tick(silent: Boolean, sourceName: String, listener: (() -> Unit)? = null) {
             Preferences.logLineHour("TickJobIntentService.tick from $sourceName")
 
             if (!MyApplication.instance.hasUserInfo) {
                 Preferences.logLineHour("TickJobIntentService.tick skipping, no userInfo")
-                return false
+                listener?.invoke()
             }
 
             val listeners = listOfNotNull(listener)
 
-            return DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
+            DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData(silent, sourceName, listeners))
         }
     }
 
@@ -65,7 +65,7 @@ class TickJobIntentService : JobIntentService() {
 
         val silent = intent.getBooleanExtra(SILENT_KEY, false)
 
-        val sourceName = intent.getStringExtra(SOURCE_KEY)
+        val sourceName = intent.getStringExtra(SOURCE_KEY)!!
         check(!TextUtils.isEmpty(sourceName))
 
         tick(silent, sourceName)

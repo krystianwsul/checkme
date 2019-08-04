@@ -38,6 +38,4 @@ object TickHolder {
             newTickData
         }
     }
-
-    val isHeld get() = tickData?.wakelock?.isHeld == true
 }

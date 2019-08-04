@@ -59,7 +59,7 @@ class DomainFactory(
         var firstRun = false
 
         @Synchronized // still running?
-        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData): Boolean {
+        fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
             check(MyApplication.instance.hasUserInfo)
 
             val domainFactory = nullableInstance
@@ -74,15 +74,11 @@ class DomainFactory(
                 domainFactory!!.updateNotificationsTick(source, silent, newTickData.source)
             }
 
-            return if (!savedFalse || tickData?.privateRefreshed == false || tickData?.sharedRefreshed == false) {
+            if (!savedFalse || tickData?.privateRefreshed == false || tickData?.sharedRefreshed == false) {
                 TickHolder.addTickData(newTickData)
-
-                true
             } else {
                 tickData?.release()
                 newTickData.release()
-
-                false
             }
         }
 
@@ -170,8 +166,6 @@ class DomainFactory(
     private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
 
     // misc
-
-    val isHoldingWakeLock get() = TickHolder.isHeld
 
     val taskCount get() = remoteProjectFactory.taskCount
     val instanceCount get() = remoteProjectFactory.instanceCount

@@ -87,11 +87,12 @@ class MyApplication : Application() {
                 .distinctUntilChanged()
                 .subscribe(userInfoRelay)
 
+        userInfoRelay.firstOrError()
+                .filter { it.value != null }
+                .subscribe { _ -> DomainFactory.firstRun = true }
+
         userInfoRelay.switchMap {
             MyCrashlytics.log("userInfoRelay: $it")
-
-            if (it.value != null)
-                DomainFactory.firstRun = true
 
             it.value?.let { DatabaseWrapper.getPrivateProjectObservable(it.key) }
                     ?: Observable.never()

@@ -160,7 +160,9 @@ class DomainFactory(
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.init")
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.init", if (firstRun) RunType.APP_START else RunType.SIGN_IN)
+
+        firstRun = false
 
         updateShortcuts()
     }
@@ -255,8 +257,11 @@ class DomainFactory(
 
         val start = ExactTimeStamp.now
 
+        val runType: RunType
         if (remoteProjectFactory.isPrivateSaved) {
             remoteProjectFactory.isPrivateSaved = false
+
+            runType = RunType.LOCAL
         } else {
             remoteProjectFactory.onNewPrivate(dataSnapshot, ExactTimeStamp.now)
 
@@ -265,9 +270,11 @@ class DomainFactory(
             remoteUpdateTime = stop.long - start.long
 
             TickHolder.getTickData()?.privateRefreshed = true
+
+            runType = RunType.REMOTE
         }
 
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updatePrivateProjectRecord")
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updatePrivateProjectRecord", runType)
     }
 
     @Synchronized
@@ -278,19 +285,26 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
+        val runType: RunType
         if (remoteProjectFactory.isSharedSaved) {
             remoteProjectFactory.isSharedSaved = false
+
+            runType = RunType.LOCAL
         } else {
             remoteProjectFactory.onChildEvent(childEvent, now)
 
             TickHolder.getTickData()?.sharedRefreshed = true
+
+            runType = RunType.REMOTE
         }
 
-        tryNotifyListeners(now, "DomainFactory.updateSharedProjectRecords")
+        tryNotifyListeners(now, "DomainFactory.updateSharedProjectRecords", runType)
     }
 
-    private fun tryNotifyListeners(now: ExactTimeStamp, source: String) {
-        if (remoteProjectFactory.eitherSaved || remoteFriendFactory.isSaved)
+    private fun tryNotifyListeners(now: ExactTimeStamp, source: String, runType: RunType) {
+        MyCrashlytics.log("tryNotifyListeners $source $runType")
+
+        if (remoteProjectFactory.eitherSaved || remoteFriendFactory.isSaved || remoteUserFactory.isSaved)
             return
 
         skipSave = true
@@ -302,45 +316,68 @@ class DomainFactory(
         skipSave = false
 
         val tickData = TickHolder.getTickData()
-        if (tickData == null) {
-            if (!firstRun)
-                updateNotifications(now, silent = false, sourceName = source)
-        } else {
-            updateNotificationsTick(now, tickData.silent, tickData.source)
 
-            if (tickData.privateRefreshed && tickData.sharedRefreshed)
-                tickData.release()
+        fun TickData.run(forceNotify: Boolean) {
+            updateNotificationsTick(now, silent && !forceNotify, source)
+
+            if (privateRefreshed && sharedRefreshed)
+                release()
         }
 
-        firstRun = false
+        fun notify() {
+            check(tickData == null)
+
+            updateNotifications(now, silent = false, sourceName = source)
+        }
+
+        when (runType) {
+            RunType.APP_START, RunType.LOCAL -> tickData?.run(false)
+            RunType.SIGN_IN -> tickData?.run(true) ?: notify()
+            RunType.REMOTE -> notify()
+        }
 
         save(0, SaveService.Source.GUI)
+    }
+
+    private enum class RunType {
+
+        APP_START, SIGN_IN, LOCAL, REMOTE
     }
 
     @Synchronized
     fun updateUserRecord(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("updateUserRecord")
 
+        val runType: RunType
         if (remoteUserFactory.isSaved) {
             remoteUserFactory.isSaved = false
-            return
+
+            runType = RunType.LOCAL
+        } else {
+            remoteUserFactory.onNewSnapshot(dataSnapshot)
+
+            runType = RunType.REMOTE
         }
 
-        remoteUserFactory.onNewSnapshot(dataSnapshot)
-
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord")
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord", runType)
     }
 
     @Synchronized
     fun setFriendRecords(dataSnapshot: DataSnapshot) {
+        MyCrashlytics.log("setFriendRecords")
+
+        val runType: RunType
         if (remoteFriendFactory.isSaved) {
             remoteFriendFactory.isSaved = false
-            return
+
+            runType = RunType.LOCAL
+        } else {
+            remoteFriendFactory = RemoteFriendFactory(this, dataSnapshot.children)
+
+            runType = RunType.REMOTE
         }
 
-        remoteFriendFactory = RemoteFriendFactory(this, dataSnapshot.children)
-
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.setFriendRecords")
+        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.setFriendRecords", runType)
     }
 
     // gets

@@ -10,8 +10,8 @@ class TickData(
         val silent: Boolean,
         val source: String,
         val listeners: List<() -> Unit>,
-        var privateRefreshed: Boolean = false,
-        var sharedRefreshed: Boolean = false) {
+        var waitingForPrivate: Boolean = true,
+        var waitingForShared: Boolean = true) {
 
     companion object {
 
@@ -27,6 +27,16 @@ class TickData(
     private val expires = ExactTimeStamp(DateTime.now().plusMillis(DURATION))
 
     val shouldClear get() = expires < ExactTimeStamp.now || !wakelock.isHeld
+
+    val waiting get() = waitingForPrivate || waitingForShared
+
+    fun privateTriggered() {
+        waitingForPrivate = false
+    }
+
+    fun sharedTriggered() {
+        waitingForShared = false
+    }
 
     fun release() {
         if (wakelock.isHeld)

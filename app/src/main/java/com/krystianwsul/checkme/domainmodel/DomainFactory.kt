@@ -74,7 +74,7 @@ class DomainFactory(
                 domainFactory!!.updateNotificationsTick(source, silent, newTickData.source)
             }
 
-            if (!savedFalse || tickData?.privateRefreshed == false || tickData?.sharedRefreshed == false) {
+            if (!savedFalse || tickData?.waiting == true) {
                 TickHolder.addTickData(newTickData)
             } else {
                 tickData?.notifyAndRelease()
@@ -268,7 +268,7 @@ class DomainFactory(
 
             remoteUpdateTime = stop.long - start.long
 
-            TickHolder.getTickData()?.privateRefreshed = true
+            TickHolder.getTickData()?.privateTriggered()
 
             runType = RunType.REMOTE
         }
@@ -292,7 +292,7 @@ class DomainFactory(
         } else {
             remoteProjectFactory.onChildEvent(childEvent, now)
 
-            TickHolder.getTickData()?.sharedRefreshed = true
+            TickHolder.getTickData()?.sharedTriggered()
 
             runType = RunType.REMOTE
         }
@@ -322,7 +322,7 @@ class DomainFactory(
         fun tick(tickData: TickData, forceNotify: Boolean) {
             updateNotificationsTick(now, tickData.silent && !forceNotify, tickData.source)
 
-            if (tickData.privateRefreshed && tickData.sharedRefreshed) // todo not all need wakelock
+            if (!tickData.waiting)
                 tickData.notifyAndRelease()
         }
 

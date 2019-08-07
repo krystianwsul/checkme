@@ -49,7 +49,7 @@ object ImageManager {
     @Synchronized
     fun getBigPicture(uuid: String?) = bigPictureDownloader.getImage(uuid)
 
-    private class Downloader(private val width: Int, private val height: Int, dirSuffix: String) {
+    private class Downloader(private val width: Int, private val height: Int, dirSuffix: String) { // todo add circle parameter
 
         private val dir = File(MyApplication.instance.cacheDir.absolutePath, dirSuffix)
 

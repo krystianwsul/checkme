@@ -21,6 +21,8 @@ sealed class TickData {
     abstract fun release()
     abstract fun notifyAndRelease()
 
+    override fun toString() = super.toString() + " silent: $silent, source: $source"
+
     class Normal(
             override val silent: Boolean,
             override val source: String) : TickData() {
@@ -52,13 +54,13 @@ sealed class TickData {
             private const val WAKELOCK_TAG = "Check.me:myWakelockTag"
 
             private const val DURATION = 30 * 1000
-
-            private val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
-                acquire(DURATION.toLong())
-            }
-
-            private val expires = ExactTimeStamp(DateTime.now().plusMillis(DURATION))
         }
+
+        private val wakelock = (MyApplication.instance.getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG)!!.apply {
+            acquire(DURATION.toLong())
+        }
+
+        private val expires = ExactTimeStamp(DateTime.now().plusMillis(DURATION))
 
         override val shouldClear get() = expires < ExactTimeStamp.now || !wakelock.isHeld
 
@@ -83,5 +85,7 @@ sealed class TickData {
 
             release()
         }
+
+        override fun toString() = super.toString() + ", waitingForPrivate: $waitingForPrivate, waitingForShared: $waitingForShared, expires: $expires"
     }
 }

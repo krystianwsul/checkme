@@ -60,21 +60,21 @@ class DomainFactory(
 
             val domainFactory = nullableInstance
 
-            val savedFalse = domainFactory?.remoteProjectFactory?.eitherSaved == false
-
-            val tickData = TickHolder.getTickData()
-
-            if (savedFalse) {
-                val silent = (tickData?.silent ?: true) && newTickData.silent
-
-                domainFactory!!.updateNotificationsTick(source, silent, newTickData.source)
-            }
-
-            if (!savedFalse || tickData?.waiting == true) {
+            if (domainFactory?.remoteProjectFactory?.eitherSaved != false) {
                 TickHolder.addTickData(newTickData)
             } else {
-                tickData?.notifyAndRelease()
-                newTickData.notifyAndRelease()
+                val tickData = TickHolder.getTickData()
+
+                val silent = (tickData?.silent ?: true) && newTickData.silent
+
+                domainFactory.updateNotificationsTick(source, silent, newTickData.source)
+
+                if (tickData?.waiting == true) {
+                    TickHolder.addTickData(newTickData)
+                } else {
+                    tickData?.notifyAndRelease()
+                    newTickData.notifyAndRelease()
+                }
             }
         }
 

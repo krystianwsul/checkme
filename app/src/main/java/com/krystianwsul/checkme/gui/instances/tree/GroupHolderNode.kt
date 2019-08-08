@@ -236,7 +236,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     if (thumbnail != null) {
                         visibility = View.VISIBLE
 
-                        thumbnail!!.load(this)
+                        thumbnail!!.load(this, true)
                     } else {
                         visibility = View.GONE
                     }

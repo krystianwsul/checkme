@@ -7,11 +7,12 @@ import com.bumptech.glide.RequestBuilder
 import com.krystianwsul.checkme.GlideApp
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.upload.Uploader
+import com.krystianwsul.checkme.utils.circle
 import java.io.Serializable
 
 sealed class ImageState : Serializable {
 
-    abstract fun load(imageView: ImageView)
+    abstract fun load(imageView: ImageView, circle: Boolean = false)
 
     abstract val requestBuilder: RequestBuilder<Bitmap>?
 
@@ -19,10 +20,11 @@ sealed class ImageState : Serializable {
 
     data class Local(override val uuid: String) : ImageState() {
 
-        override fun load(imageView: ImageView) {
+        override fun load(imageView: ImageView, circle: Boolean) {
             Uploader.getPath(this)?.let {
                 Glide.with(imageView)
                         .load(it)
+                        .circle(circle)
                         .into(imageView)
             } ?: Remote.load(imageView, uuid)
         }
@@ -56,14 +58,15 @@ sealed class ImageState : Serializable {
 
         companion object {
 
-            fun load(imageView: ImageView, uuid: String) {
+            fun load(imageView: ImageView, uuid: String, circle: Boolean = false) {
                 GlideApp.with(imageView)
                         .load(Uploader.getReference(uuid))
+                        .circle(circle)
                         .into(imageView)
             }
         }
 
-        override fun load(imageView: ImageView) = load(imageView, uuid)
+        override fun load(imageView: ImageView, circle: Boolean) = load(imageView, uuid, circle)
 
         override val requestBuilder
             get() = GlideApp.with(MyApplication.instance)
@@ -90,7 +93,7 @@ sealed class ImageState : Serializable {
 
     object Uploading : ImageState() {
 
-        override fun load(imageView: ImageView) = Unit
+        override fun load(imageView: ImageView, circle: Boolean) = Unit
 
         override val requestBuilder: RequestBuilder<Bitmap>? get() = null
 

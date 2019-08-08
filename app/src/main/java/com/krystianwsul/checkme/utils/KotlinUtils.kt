@@ -15,6 +15,7 @@ import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayout
@@ -265,3 +266,5 @@ fun Window.setTransparentNavigation(landscape: Boolean) {
 }
 
 val Resources.isLandscape get() = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+fun <T> RequestBuilder<T>.circle(circle: Boolean) = if (circle) apply(RequestOptions.circleCropTransform()) else this

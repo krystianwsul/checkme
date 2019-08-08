@@ -25,7 +25,7 @@ object ShortcutQueue {
                         val icon = it.uuid
                                 ?.let { ImageManager.getLargeIcon(it) }
                                 ?.invoke()
-                                ?.let { IconCompat.createWithBitmap(it) }
+                                ?.let { IconCompat.createWithAdaptiveBitmap(it) }
                                 ?: IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add)
 
                         ShortcutInfoCompat.Builder(MyApplication.instance, it.taskKey.toShortcut())

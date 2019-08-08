@@ -7,7 +7,7 @@
         android:enabled="true"
         tools:ignore="UnusedAttribute"
         android:icon="@mipmap/launcher_instances"
-        android:shortcutShortLabel="@string/instances"> <!-- todo gray background circle -->
+        android:shortcutShortLabel="@string/instances">
 
         <intent
             android:action="com.krystianwsul.checkme.INSTANCES"

@@ -4,8 +4,10 @@ package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.annotation.SuppressLint
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
@@ -24,7 +26,8 @@ object ImageManager {
     private val largeIconDownloader = Downloader(
             LARGE_ICON_SIZE,
             LARGE_ICON_SIZE,
-            "largeIcons")
+            "largeIcons",
+            true)
 
     private val bigPictureDownloader = Downloader(
             Resources.getSystem()
@@ -33,7 +36,8 @@ object ImageManager {
             MyApplication.instance
                     .dpToPx(256)
                     .toInt(),
-            "bigPictures")
+            "bigPictures",
+            false)
 
     private val downloaders = listOf(largeIconDownloader, bigPictureDownloader)
 
@@ -49,7 +53,11 @@ object ImageManager {
     @Synchronized
     fun getBigPicture(uuid: String?) = bigPictureDownloader.getImage(uuid)
 
-    private class Downloader(private val width: Int, private val height: Int, dirSuffix: String) { // todo add circle parameter
+    private class Downloader(
+            private val width: Int,
+            private val height: Int,
+            dirSuffix: String,
+            private val circle: Boolean) {
 
         private val dir = File(MyApplication.instance.cacheDir.absolutePath, dirSuffix)
 
@@ -58,6 +66,8 @@ object ImageManager {
         private fun getFile(uuid: String) = File(dir.absolutePath, uuid)
 
         fun init() {
+            dir.mkdirs()
+
             Single.fromCallable {
                 imageStates = (dir.listFiles()?.toList() ?: listOf()).map { it.name }
                         .associateWith { State.Downloaded }
@@ -102,16 +112,30 @@ object ImageManager {
             imageStates.putAll(tasksToDownload.map { (uuid, task) ->
                 val target = task.image!!
                         .requestBuilder!!
-                        .into(object : SimpleTarget<File>(width, height) {
+                        .let {
+                            if (circle)
+                                it.apply(RequestOptions.circleCropTransform())
+                            else
+                                it
+                        }
+                        .into(object : SimpleTarget<Bitmap>(width, height) {
 
                             @SuppressLint("CheckResult")
-                            override fun onResourceReady(resource: File, transition: Transition<in File>?) {
+                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                                 check(imageStates.getValue(uuid) is State.Downloading)
 
                                 Single.fromCallable {
                                     check(imageStates.getValue(uuid) is State.Downloading)
 
-                                    resource.copyTo(getFile(uuid), false)
+                                    getFile(uuid).apply {
+                                        createNewFile()
+
+                                        outputStream().let {
+                                            resource.compress(Bitmap.CompressFormat.PNG, 0, it)
+                                            it.flush()
+                                            it.close()
+                                        }
+                                    }
                                 }
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
@@ -141,6 +165,6 @@ object ImageManager {
     private sealed class State {
 
         object Downloaded : State()
-        class Downloading(val target: Target<File>) : State()
+        class Downloading(val target: Target<Bitmap>) : State()
     }
 }

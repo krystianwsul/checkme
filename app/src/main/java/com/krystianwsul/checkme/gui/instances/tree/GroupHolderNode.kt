@@ -97,7 +97,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
         override fun same(other: ModelState) = (other as State).id == id
     }
 
-    private fun checkStale() { // todo use GroupHolderAdapter
+    private fun checkStale() {
         if (treeNode.treeNodeCollection.stale) {
             if (MyCrashlytics.enabled)
                 MyCrashlytics.logException(StaleTreeNodeException())
@@ -236,7 +236,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     if (thumbnail != null) {
                         visibility = View.VISIBLE
 
-                        thumbnail!!.load(this)
+                        thumbnail!!.load(this, true)
                     } else {
                         visibility = View.GONE
                     }

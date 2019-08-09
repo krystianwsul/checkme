@@ -80,13 +80,13 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
             intent.getParcelableExtra(TASK_KEY_KEY)!!
         }
 
-        taskListFragment = (supportFragmentManager.findFragmentById(R.id.showTaskFragment) as? TaskListFragment)
+        taskListFragment = ((supportFragmentManager.findFragmentById(R.id.showTaskFragment) as? TaskListFragment)
                 ?: TaskListFragment.newInstance().also {
             supportFragmentManager
                     .beginTransaction()
                     .add(R.id.showTaskFragment, it)
                     .commit()
-        }.also { it.setFab(bottomFab) }
+                }).also { it.setFab(bottomFab) }
 
         showTaskViewModel = getViewModel<ShowTaskViewModel>().apply {
             start(taskKey)

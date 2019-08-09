@@ -11,10 +11,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
@@ -26,6 +26,9 @@ import com.krystianwsul.checkme.notifications.*
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.TimeStamp
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 open class NotificationWrapperImpl : NotificationWrapper() {
@@ -45,12 +48,26 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     private val lastNotificationBeeps = mutableMapOf<InstanceKey, Long>()
 
+    private val notificationRelay = PublishRelay.create<() -> Unit>()
+
+    init {
+        notificationRelay.toFlowable(BackpressureStrategy.BUFFER)
+                .observeOn(Schedulers.io())
+                .flatMapSingle({ Single.fromCallable(it) }, false, 1)
+                .subscribe()
+    }
+
     override fun cancelNotification(id: Int) {
         Preferences.logLineHour("NotificationManager.cancel $id")
         notificationManager.cancel(id)
     }
 
-    override fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) {
+    final override fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) { // consider queueing all notifications and group in a batch
+        val instanceData = getInstanceData(instance, silent, now)
+        notificationRelay.accept { notifyInstanceHelper(instanceData) }
+    }
+
+    protected open fun getInstanceData(instance: Instance, silent: Boolean, now: ExactTimeStamp): InstanceData {
         val reallySilent = if (silent) {
             true
         } else {
@@ -59,17 +76,16 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                     ?.let { true } ?: false
         }
 
-        notifyInstanceHelper(instance, reallySilent, now)
-
         if (!reallySilent)
             lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
+
+        return InstanceData(instance, now, reallySilent)
     }
 
-    protected fun notifyInstanceHelper(instance: Instance, silent: Boolean, now: ExactTimeStamp) {
-        val task = instance.task
-        val notificationId = instance.notificationId
+    private fun notifyInstanceHelper(instanceData: InstanceData) {
+        val notificationId = instanceData.notificationId
 
-        val instanceKey = instance.instanceKey
+        val instanceKey = instanceData.instanceKey
 
         fun pendingService(intent: Intent) = PendingIntent.getService(MyApplication.instance, notificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
 
@@ -77,8 +93,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         val pendingDeleteIntent = pendingService(InstanceNotificationDeleteService.getIntent(MyApplication.instance, instanceKey))
 
-        val pendingDoneIntent = pendingService(InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId, instance.name))
-        val pendingHourIntent = pendingService(InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId, instance.name))
+        val pendingDoneIntent = pendingService(InstanceDoneService.getIntent(MyApplication.instance, instanceKey, notificationId, instanceData.name))
+        val pendingHourIntent = pendingService(InstanceHourService.getIntent(MyApplication.instance, instanceKey, notificationId, instanceData.name))
 
         fun action(@DrawableRes icon: Int, @StringRes text: Int, pendingIntent: PendingIntent) = NotificationCompat.Action
                 .Builder(icon, MyApplication.instance.getString(text), pendingIntent)
@@ -89,7 +105,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 action(R.drawable.ic_alarm_white_24dp, R.string.hour, pendingHourIntent)
         )
 
-        val childNames = getChildNames(instance, now)
+        val childNames = instanceData.childNames
 
         val text: String?
         val style: (() -> NotificationCompat.Style)?
@@ -100,14 +116,14 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val pair = getInboxStyle(childNames, false)
             style = pair.first
             styleHash = pair.second
-        } else if (!task.note.isNullOrEmpty()) {
-            text = task.note
+        } else if (!instanceData.note.isNullOrEmpty()) {
+            text = instanceData.note
             style = {
                 NotificationCompat.BigTextStyle().also { it.bigText(text) }
             }
             styleHash = NotificationHash.Style.Text(text)
         } else {
-            val bigPicture = ImageManager.getBigPicture(task)
+            val bigPicture = ImageManager.getBigPicture(instanceData.uuid)
             if (bigPicture != null) {
                 text = null
                 style = {
@@ -116,7 +132,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                         it.bigLargeIcon(null)
                     }
                 }
-                styleHash = NotificationHash.Style.Picture(task.image!!.uuid!!)
+                styleHash = NotificationHash.Style.Picture(instanceData.uuid!!)
             } else {
                 text = null
                 style = null
@@ -124,33 +140,29 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             }
         }
 
-        val timeStampLong = instance.instanceDateTime
-                .timeStamp
-                .long
+        val timeStampLong = instanceData.timeStampLong
 
-        val sortKey = timeStampLong.toString() + instance.task
-                .startExactTimeStamp
-                .toString()
+        val sortKey = timeStampLong.toString() + instanceData.startExactTimeStamp
 
-        val largeIcon = ImageManager.getLargeIcon(instance.task)
+        val largeIcon = ImageManager.getLargeIcon(instanceData.uuid)
 
         val notificationHash = NotificationHash(
-                instance.name,
+                instanceData.name,
                 text,
                 notificationId,
                 timeStampLong,
                 styleHash,
                 sortKey,
-                largeIcon?.let { task.image!!.uuid!! }
+                largeIcon?.let { instanceData.uuid!! }
         )
 
         notify(
-                instance.name,
+                instanceData.name,
                 text,
                 notificationId,
                 pendingDeleteIntent,
                 pendingContentIntent,
-                silent,
+                instanceData.silent,
                 actions,
                 timeStampLong,
                 style,
@@ -300,9 +312,31 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun notifyGroup(instances: Collection<Instance>, silent: Boolean /* not needed >= 24 */, now: ExactTimeStamp) {
+        val groupData = GroupData(instances, now, silent)
+        notificationRelay.accept { notifyGroupHelper(groupData) }
+    }
+
+    private inner class GroupData(
+            instances: Collection<com.krystianwsul.checkme.domainmodel.Instance>,
+            private val now: ExactTimeStamp,
+            val silent: Boolean) {
+
+        val instances = instances.map(::Instance)
+
+        inner class Instance(instance: com.krystianwsul.checkme.domainmodel.Instance) {
+
+            val name = instance.name
+            val instanceKey = instance.instanceKey
+            val timeStamp = instance.instanceDateTime.timeStamp
+            val startExactTimeStamp = instance.task.startExactTimeStamp
+            val text = getInstanceText(instance, now)
+        }
+    }
+
+    private fun notifyGroupHelper(groupData: GroupData) {
         val names = ArrayList<String>()
         val instanceKeys = ArrayList<InstanceKey>()
-        instances.forEach {
+        groupData.instances.forEach {
             names.add(it.name)
             instanceKeys.add(it.instanceKey)
         }
@@ -313,11 +347,11 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val contentIntent = ShowNotificationGroupActivity.getIntent(MyApplication.instance, instanceKeys)
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val (inboxStyle, styleHash) = getInboxStyle(instances
-                .sortedWith(compareBy({ it.instanceDateTime.timeStamp }, { it.task.startExactTimeStamp }))
-                .map { it.name + getInstanceText(it, now) }, true)
+        val (inboxStyle, styleHash) = getInboxStyle(groupData.instances
+                .sortedWith(compareBy({ it.timeStamp }, { it.startExactTimeStamp }))
+                .map { it.name + it.text }, true)
 
-        val title = instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders)
+        val title = groupData.instances.size.toString() + " " + MyApplication.instance.getString(R.string.multiple_reminders)
         val text = names.joinToString(", ")
 
         val notificationHash = NotificationHash(
@@ -335,7 +369,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 0,
                 pendingDeleteIntent,
                 pendingContentIntent,
-                silent,
+                groupData.silent,
                 listOf(),
                 null,
                 inboxStyle,
@@ -374,15 +408,23 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             val sortKey: String,
             val uuid: String?) {
 
-        init {
-            Log.e("asdf", "notificationHash $this")
-        }
-
         interface Style {
 
             data class Inbox(val lines: List<String>, val extraCount: Int) : Style
             data class Text(val text: String?) : Style
             data class Picture(val uuid: String) : Style
         }
+    }
+
+    protected inner class InstanceData(instance: Instance, now: ExactTimeStamp, val silent: Boolean) {
+
+        val notificationId = instance.notificationId
+        val instanceKey = instance.instanceKey
+        val note = instance.task.note
+        val uuid = instance.task.image?.uuid
+        val timeStampLong = instance.instanceDateTime.timeStamp.long
+        val startExactTimeStamp = instance.task.startExactTimeStamp.toString()
+        val name = instance.name
+        val childNames = getChildNames(instance, now)
     }
 }

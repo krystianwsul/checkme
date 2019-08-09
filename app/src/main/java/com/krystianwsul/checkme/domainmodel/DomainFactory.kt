@@ -2,16 +2,13 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.net.Uri
 import android.os.Build
-import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.drawable.IconCompat
 import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.google.firebase.database.DataSnapshot
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
@@ -24,7 +21,6 @@ import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -64,21 +60,21 @@ class DomainFactory(
 
             val domainFactory = nullableInstance
 
-            val savedFalse = domainFactory?.remoteProjectFactory?.eitherSaved == false
-
-            val tickData = TickHolder.getTickData()
-
-            if (savedFalse) {
-                val silent = (tickData?.silent ?: true) && newTickData.silent
-
-                domainFactory!!.updateNotificationsTick(source, silent, newTickData.source)
-            }
-
-            if (!savedFalse || tickData?.waiting == true) {
+            if (domainFactory?.remoteProjectFactory?.eitherSaved != false) {
                 TickHolder.addTickData(newTickData)
             } else {
-                tickData?.notifyAndRelease()
-                newTickData.notifyAndRelease()
+                val tickData = TickHolder.getTickData()
+
+                val silent = (tickData?.silent ?: true) && newTickData.silent
+
+                domainFactory.updateNotificationsTick(source, silent, newTickData.source)
+
+                if (tickData?.waiting == true) {
+                    TickHolder.addTickData(newTickData)
+                } else {
+                    tickData?.notifyAndRelease()
+                    newTickData.notifyAndRelease()
+                }
             }
         }
 
@@ -212,35 +208,12 @@ class DomainFactory(
         if (maxShortcuts <= 0)
             return
 
-        val shortcuts = shortcutTasks.filter { it.second.isVisible(now, false) }
+        val shortcutDatas = shortcutTasks.filter { it.second.isVisible(now, false) }
                 .sortedBy { it.first }
                 .takeLast(maxShortcuts)
-                .map {
-                    val taskKey = it.second.taskKey
+                .map { ShortcutQueue.ShortcutData(it.second) }
 
-                    ShortcutInfoCompat.Builder(MyApplication.instance, taskKey.toShortcut())
-                            .setShortLabel(MyApplication.instance.getString(R.string.addTo) + " " + it.second.name)
-                            .setIcon(IconCompat.createWithResource(MyApplication.instance, R.mipmap.launcher_add)) // todo show image
-                            .setCategories(setOf("ADD_TO_LIST"))
-                            .setIntent(CreateTaskActivity.getShortcutIntent(taskKey))
-                            .build()
-                }
-
-        val existingShortcuts = ShortcutManagerCompat.getDynamicShortcuts(MyApplication.instance).map { it.id }
-
-        val constructor = ShortcutManagerCompat::class.java.getDeclaredConstructor()
-        constructor.isAccessible = true
-        val shortcutManagerCompat = constructor.newInstance()
-
-        val addShortcuts = shortcuts.filter { it.id !in existingShortcuts }
-        val updateShortcuts = shortcuts.filter { it.id in existingShortcuts }
-
-        val shortcutIds = shortcuts.map { it.id }
-        val removeShortcuts = existingShortcuts.filter { it !in shortcutIds }
-
-        shortcutManagerCompat.removeDynamicShortcuts(MyApplication.instance, removeShortcuts)
-        ShortcutManagerCompat.addDynamicShortcuts(MyApplication.instance, addShortcuts)
-        ShortcutManagerCompat.updateShortcuts(MyApplication.instance, updateShortcuts)
+        ShortcutQueue.updateShortcuts(shortcutDatas)
     }
 
     // firebase
@@ -333,9 +306,9 @@ class DomainFactory(
         }
 
         when (runType) {
-            RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(tickData, false) }
-            RunType.SIGN_IN -> tickData?.let { tick(tickData, false) } ?: notify()
-            RunType.REMOTE -> notify()
+            RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(it, false) }
+            RunType.SIGN_IN -> tickData?.let { tick(it, false) } ?: notify()
+            RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
         save(0, SaveService.Source.GUI)

@@ -4,6 +4,7 @@ package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.annotation.SuppressLint
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import com.bumptech.glide.request.target.SimpleTarget
@@ -11,6 +12,7 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.Task
+import com.krystianwsul.checkme.utils.circle
 import com.krystianwsul.checkme.utils.dpToPx
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -24,7 +26,8 @@ object ImageManager {
     private val largeIconDownloader = Downloader(
             LARGE_ICON_SIZE,
             LARGE_ICON_SIZE,
-            "largeIcons")
+            "largeIcons",
+            true)
 
     private val bigPictureDownloader = Downloader(
             Resources.getSystem()
@@ -33,7 +36,8 @@ object ImageManager {
             MyApplication.instance
                     .dpToPx(256)
                     .toInt(),
-            "bigPictures")
+            "bigPictures",
+            false)
 
     private val downloaders = listOf(largeIconDownloader, bigPictureDownloader)
 
@@ -44,12 +48,16 @@ object ImageManager {
     fun prefetch(tasks: List<Task>) = downloaders.forEach { it.prefetch(tasks) }
 
     @Synchronized
-    fun getLargeIcon(task: Task) = largeIconDownloader.getImage(task)
+    fun getLargeIcon(uuid: String?) = largeIconDownloader.getImage(uuid)
 
     @Synchronized
-    fun getBigPicture(task: Task) = bigPictureDownloader.getImage(task)
+    fun getBigPicture(uuid: String?) = bigPictureDownloader.getImage(uuid)
 
-    private class Downloader(private val width: Int, private val height: Int, dirSuffix: String) {
+    private class Downloader(
+            private val width: Int,
+            private val height: Int,
+            dirSuffix: String,
+            private val circle: Boolean) {
 
         private val dir = File(MyApplication.instance.cacheDir.absolutePath, dirSuffix)
 
@@ -58,6 +66,8 @@ object ImageManager {
         private fun getFile(uuid: String) = File(dir.absolutePath, uuid)
 
         fun init() {
+            dir.mkdirs()
+
             Single.fromCallable {
                 imageStates = (dir.listFiles()?.toList() ?: listOf()).map { it.name }
                         .associateWith { State.Downloaded }
@@ -102,16 +112,25 @@ object ImageManager {
             imageStates.putAll(tasksToDownload.map { (uuid, task) ->
                 val target = task.image!!
                         .requestBuilder!!
-                        .into(object : SimpleTarget<File>(width, height) {
+                        .circle(circle)
+                        .into(object : SimpleTarget<Bitmap>(width, height) {
 
                             @SuppressLint("CheckResult")
-                            override fun onResourceReady(resource: File, transition: Transition<in File>?) {
+                            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                                 check(imageStates.getValue(uuid) is State.Downloading)
 
                                 Single.fromCallable {
                                     check(imageStates.getValue(uuid) is State.Downloading)
 
-                                    resource.copyTo(getFile(uuid), false)
+                                    getFile(uuid).apply {
+                                        createNewFile()
+
+                                        outputStream().let {
+                                            resource.compress(Bitmap.CompressFormat.PNG, 0, it)
+                                            it.flush()
+                                            it.close()
+                                        }
+                                    }
                                 }
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
@@ -133,15 +152,14 @@ object ImageManager {
             })
         }
 
-        fun getImage(task: Task) = task.image // todo async
-                ?.uuid
-                ?.takeIf { (imageStates[it] is State.Downloaded) }
-                ?.let { { BitmapFactory.decodeFile(getFile(it).absolutePath) } }
+        fun getImage(uuid: String?) = uuid?.takeIf { (imageStates[it] is State.Downloaded) }?.let {
+            { BitmapFactory.decodeFile(getFile(it).absolutePath) }
+        }
     }
 
     private sealed class State {
 
         object Downloaded : State()
-        class Downloading(val target: Target<File>) : State()
+        class Downloading(val target: Target<Bitmap>) : State()
     }
 }

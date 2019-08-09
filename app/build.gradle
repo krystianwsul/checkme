@@ -26,8 +26,8 @@ android {
         minSdkVersion 22
         targetSdkVersion 29
 
-        versionCode 188
-        versionName "0.20.2"
+        versionCode 189
+        versionName "0.21.0"
     }
     buildTypes {
         release {
@@ -78,7 +78,7 @@ dependencies {
     testImplementation "org.powermock:powermock-classloading-xstream:$powermockVersion"
 
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
-    implementation 'com.google.android.material:material:1.1.0-alpha08'
+    implementation 'com.google.android.material:material:1.1.0-alpha08' // todo
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.preference:preference:1.1.0-rc01'
     implementation 'androidx.sharetarget:sharetarget:1.0.0-alpha02'

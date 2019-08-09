@@ -306,16 +306,9 @@ class DomainFactory(
         }
 
         when (runType) {
-            RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(tickData, false) }
-            RunType.SIGN_IN -> tickData?.let { tick(tickData, false) } ?: notify()
-            RunType.REMOTE -> {
-                if (tickData != null) {
-                    MyCrashlytics.logException(InvalidTickStateException(tickData.toString()))
-                    tick(tickData, true)
-                } else {
-                    notify()
-                }
-            }
+            RunType.APP_START, RunType.LOCAL -> tickData?.let { tick(it, false) }
+            RunType.SIGN_IN -> tickData?.let { tick(it, false) } ?: notify()
+            RunType.REMOTE -> tickData?.let { tick(it, true) } ?: notify()
         }
 
         save(0, SaveService.Source.GUI)
@@ -325,8 +318,6 @@ class DomainFactory(
                 notifyCloudPrivateFixed(notificationProjects, notificationUserKeys)
         }
     }
-
-    private class InvalidTickStateException(message: String) : Exception(message)
 
     private enum class RunType {
 

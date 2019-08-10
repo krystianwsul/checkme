@@ -8,7 +8,7 @@ import io.reactivex.rxkotlin.Singles
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 
-class FactoryListener<T, U, V, W>(
+class FactoryListener<T : Any, U : Any, V : Any, W : Any>(
         userInfoObservable: Observable<NullableWrapper<T>>,
         getPrivateProjectSingle: (T) -> Single<U>,
         getSharedProjectSingle: (T) -> Single<U>,

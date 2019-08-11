@@ -22,8 +22,6 @@ class SingleSchedule(
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    override fun getScheduleText() = dateTime.getDisplayText()
-
     fun getInstance(task: Task) = domainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }

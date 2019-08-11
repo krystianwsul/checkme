@@ -688,6 +688,10 @@ class DomainFactory(
                 task.taskKey)
     }
 
+    fun getTime(timePair: TimePair) = timePair.customTimeKey
+            ?.let { getCustomTime(it) }
+            ?: NormalTime(timePair.hourMinute!!)
+
     @Synchronized
     fun getCreateTaskData(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?, parentTaskKeyHint: TaskKey?): CreateTaskViewModel.Data {
         MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
@@ -731,13 +735,10 @@ class DomainFactory(
 
                     customTimes.putAll(scheduleGroups.mapNotNull { it.customTimeKey }.associateWith { getCustomTime(it) })
 
-                    fun TimePair.getTime() = customTimeKey?.let { getCustomTime(it) }
-                            ?: NormalTime(hourMinute!!)
-
-                    fun CreateTaskViewModel.ScheduleData.Single.getHourMinute() = timePair.getTime().getHourMinute(date.dayOfWeek)
+                    fun CreateTaskViewModel.ScheduleData.Single.getHourMinute() = getTime(timePair).getHourMinute(date.dayOfWeek)
 
                     fun TimePair.getTimeFloat(daysOfWeek: Collection<DayOfWeek>): Float {
-                        val time = getTime()
+                        val time = getTime(this)
 
                         return daysOfWeek.map { day ->
                             time.getHourMinute(day).let { it.hour * 60 + it.minute }
@@ -2054,18 +2055,6 @@ class DomainFactory(
         }
 
         return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
-    }
-
-    private fun getTime(timePair: TimePair): Time {
-        return if (timePair.hourMinute != null) {
-            check(timePair.customTimeKey == null)
-
-            NormalTime(timePair.hourMinute)
-        } else {
-            checkNotNull(timePair.customTimeKey)
-
-            getCustomTime(timePair.customTimeKey)
-        }
     }
 
     private fun getDateTime(date: Date, timePair: TimePair) = DateTime(date, getTime(timePair))

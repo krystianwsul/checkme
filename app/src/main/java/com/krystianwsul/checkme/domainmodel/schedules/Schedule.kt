@@ -4,7 +4,9 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.time.*
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.checkme.utils.time.NormalTime
+import com.krystianwsul.checkme.utils.time.TimeStamp
 
 
 abstract class Schedule(protected val domainFactory: DomainFactory) {
@@ -25,15 +27,11 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
 
     abstract val scheduleType: ScheduleType
 
-    val timePair
-        get() = scheduleBridge.run {
-            customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
-        }
+    val timePair get() = scheduleBridge.timePair
 
-    protected val time
-        get() = scheduleBridge.run {
-            customTimeKey?.let { domainFactory.getCustomTime(it) }
-                    ?: NormalTime(hour!!, minute!!)
+    val time
+        get() = timePair.run {
+            customTimeKey?.let { domainFactory.getCustomTime(it) } ?: NormalTime(hourMinute!!)
         }
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
@@ -58,8 +56,6 @@ abstract class Schedule(protected val domainFactory: DomainFactory) {
     abstract fun getInstances(task: Task, givenStartExactTimeStamp: ExactTimeStamp?, givenExactEndTimeStamp: ExactTimeStamp): List<Instance>
 
     abstract fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean
-
-    abstract fun getScheduleText(): String
 
     abstract fun getNextAlarm(now: ExactTimeStamp): TimeStamp?
 

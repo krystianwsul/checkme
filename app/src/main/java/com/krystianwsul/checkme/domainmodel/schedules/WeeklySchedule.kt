@@ -20,9 +20,6 @@ class WeeklySchedule(
 
     override val scheduleBridge get() = mWeeklyScheduleBridge
 
-    // todo single tostring
-    override fun getScheduleText() = daysOfWeek.joinToString(", ") + ": " + time
-
     override fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance? {
         val day = date.dayOfWeek
 

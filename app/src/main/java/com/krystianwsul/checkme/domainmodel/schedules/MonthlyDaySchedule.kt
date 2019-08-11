@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.schedules
 
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
@@ -22,13 +20,6 @@ class MonthlyDaySchedule(
     val beginningOfMonth get() = monthlyDayScheduleBridge.beginningOfMonth
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
-
-    override fun getScheduleText(): String {
-        val context = MyApplication.instance
-        val day = monthlyDayScheduleBridge.dayOfMonth.toString() + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (monthlyDayScheduleBridge.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
-
-        return "$day: $time"
-    }
 
     override fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance? {
         val dateThisMonth = getDate(date.year, date.month)

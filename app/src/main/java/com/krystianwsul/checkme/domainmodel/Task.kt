@@ -57,7 +57,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         return if (parentTask == null) {
             check(currentSchedules.all { it.current(exactTimeStamp) })
 
-            currentSchedules.joinToString(", ") { it.getScheduleText() }
+            ScheduleGroup.getGroups(currentSchedules).joinToString(", ") { it.getScheduleText(domainFactory) }
         } else {
             check(currentSchedules.isEmpty())
 

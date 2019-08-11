@@ -4,6 +4,8 @@ import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.time.HourMinute
+import com.krystianwsul.checkme.utils.time.TimePair
 
 interface ScheduleBridge {
     
@@ -24,4 +26,7 @@ interface ScheduleBridge {
     val minute: Int?
 
     val scheduleId: ScheduleId
+
+    val timePair
+        get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
 }

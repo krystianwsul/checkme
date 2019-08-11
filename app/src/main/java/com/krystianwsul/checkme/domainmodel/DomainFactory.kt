@@ -13,7 +13,8 @@ import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.relevance.*
-import com.krystianwsul.checkme.domainmodel.schedules.*
+import com.krystianwsul.checkme.domainmodel.schedules.Schedule
+import com.krystianwsul.checkme.domainmodel.schedules.ScheduleGroup
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.json.TaskJson
@@ -688,48 +689,42 @@ class DomainFactory(
                 task.taskKey)
     }
 
-    fun getScheduleDatas(schedules: List<Schedule>, now: ExactTimeStamp): Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {
-        val customTimes = HashMap<CustomTimeKey<*>, CustomTime>()
+    fun getScheduleDatas(schedules: List<Schedule>): Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>> {
+        val scheduleGroups = ScheduleGroup.getGroups(schedules)
 
-        val scheduleDatas = HashMap<CreateTaskViewModel.ScheduleData, List<Schedule>>()
+        val customTimes = scheduleGroups.mapNotNull { it.customTimeKey }
+                .toSet()
+                .associateWith { getCustomTime(it) }
 
-        val weeklySchedules = HashMap<TimePair, MutableList<WeeklySchedule>>()
-
-        for (schedule in schedules) {
-            check(schedule.current(now))
-
-            when (schedule) {
-                is SingleSchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.Single(schedule.date, schedule.timePair)] = listOf<Schedule>(schedule)
-
-                    schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
+        val scheduleDatas = scheduleGroups.map {
+            when (it) {
+                is ScheduleGroup.Single -> it.singleSchedule.let {
+                    CreateTaskViewModel.ScheduleData.Single(
+                            it.date,
+                            it.timePair) to listOf<Schedule>(it)
                 }
-                is WeeklySchedule -> {
-                    val timePair = schedule.timePair
-                    if (!weeklySchedules.containsKey(timePair))
-                        weeklySchedules[timePair] = ArrayList()
-                    weeklySchedules[timePair]!!.add(schedule)
-
-                    schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
+                is ScheduleGroup.Weekly -> {
+                    CreateTaskViewModel.ScheduleData.Weekly(
+                            it.weeklySchedules
+                                    .flatMap { it.daysOfWeek }
+                                    .toSet(),
+                            it.timePair) to it.weeklySchedules
                 }
-                is MonthlyDaySchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyDay(schedule.dayOfMonth, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
-
-                    schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
+                is ScheduleGroup.MonthlyDay -> it.monthlyDaySchedule.let {
+                    CreateTaskViewModel.ScheduleData.MonthlyDay(
+                            it.dayOfMonth,
+                            it.beginningOfMonth,
+                            it.timePair) to listOf<Schedule>(it)
                 }
-                is MonthlyWeekSchedule -> {
-                    scheduleDatas[CreateTaskViewModel.ScheduleData.MonthlyWeek(schedule.dayOfMonth, schedule.dayOfWeek, schedule.beginningOfMonth, schedule.timePair)] = listOf<Schedule>(schedule)
-
-                    schedule.customTimeKey?.let { customTimes[it] = getCustomTime(it) }
+                is ScheduleGroup.MonthlyWeek -> it.monthlyWeekSchedule.let {
+                    CreateTaskViewModel.ScheduleData.MonthlyWeek(
+                            it.dayOfMonth,
+                            it.dayOfWeek,
+                            it.beginningOfMonth,
+                            it.timePair) to listOf<Schedule>(it)
                 }
-                else -> throw UnsupportedOperationException()
             }
-        }
-
-        for ((key, value) in weeklySchedules) {
-            val daysOfWeek = value.flatMap { it.daysOfWeek }.toHashSet()
-            scheduleDatas[CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, key)] = ArrayList<Schedule>(value)
-        }
+        }.toMap()
 
         return Pair<Map<CustomTimeKey<*>, CustomTime>, Map<CreateTaskViewModel.ScheduleData, List<Schedule>>>(customTimes, scheduleDatas)
     }
@@ -773,7 +768,7 @@ class DomainFactory(
                 parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
                 if (schedules.isNotEmpty()) {
-                    val pair = getScheduleDatas(schedules, now)
+                    val pair = getScheduleDatas(schedules)
                     customTimes.putAll(pair.first)
 
                     fun TimePair.getTime() = customTimeKey?.let { getCustomTime(it) }

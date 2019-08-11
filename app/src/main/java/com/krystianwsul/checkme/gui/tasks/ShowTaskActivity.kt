@@ -49,7 +49,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
     private lateinit var showTaskViewModel: ShowTaskViewModel
 
-    override val search = Observable.just(NullableWrapper<TaskListFragment.SearchData>())!!
+    override val search = Observable.just(NullableWrapper<TaskListFragment.SearchData>())
 
     private val deleteInstancesListener = { taskKeys: Serializable, removeInstances: Boolean ->
         showTaskViewModel.stop()
@@ -70,15 +70,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         initBottomBar()
 
-        taskKey = if (savedInstanceState != null) {
-            check(savedInstanceState.containsKey(TASK_KEY_KEY))
-
-            savedInstanceState.getParcelable(TASK_KEY_KEY)!!
-        } else {
-            check(intent.hasExtra(TASK_KEY_KEY))
-
-            intent.getParcelableExtra(TASK_KEY_KEY)!!
-        }
+        taskKey = (savedInstanceState ?: intent.extras!!).getParcelable(TASK_KEY_KEY)!!
 
         taskListFragment = ((supportFragmentManager.findFragmentById(R.id.showTaskFragment) as? TaskListFragment)
                 ?: TaskListFragment.newInstance().also {

@@ -69,7 +69,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             }
         }
 
-        data class Weekly(val daysOfWeek: HashSet<DayOfWeek>, override val timePair: TimePair) : ScheduleData() {
+        data class Weekly(val daysOfWeek: Set<DayOfWeek>, override val timePair: TimePair) : ScheduleData() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
                 return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {

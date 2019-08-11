@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.schedules.Schedule
+import com.krystianwsul.checkme.domainmodel.schedules.ScheduleGroup
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.firebase.json.TaskJson
@@ -268,7 +269,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         val addScheduleDatas = ArrayList(newScheduleDatas)
 
         val oldSchedules = getCurrentSchedules(now)
-        val scheduleDatas = domainFactory.getScheduleDatas(oldSchedules).second
+        val scheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleData to it.schedules }
         for ((key, value) in scheduleDatas) {
             if (addScheduleDatas.contains(key)) {
                 addScheduleDatas.remove(key)

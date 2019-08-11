@@ -737,20 +737,20 @@ class DomainFactory(
 
                     fun CreateTaskViewModel.ScheduleData.Single.getHourMinute() = getTime(timePair).getHourMinute(date.dayOfWeek)
 
-                    fun TimePair.getTimeFloat(daysOfWeek: Collection<DayOfWeek>): Float {
-                        val time = getTime(this)
-
-                        return daysOfWeek.map { day ->
-                            time.getHourMinute(day).let { it.hour * 60 + it.minute }
-                        }.sum().toFloat() / daysOfWeek.count()
+                    fun TimePair.getTimeFloat(daysOfWeek: Collection<DayOfWeek>) = daysOfWeek.map { day ->
+                        getTime(this).getHourMinute(day).let { it.hour * 60 + it.minute }
                     }
+                            .sum()
+                            .toFloat() / daysOfWeek.count()
 
                     val unsortedScheduleDatas = scheduleGroups.map { it.scheduleData }
 
+                    val allWeekDays by lazy { DayOfWeek.values().toList() }
+
                     val singleSchedules = unsortedScheduleDatas.filterIsInstance<CreateTaskViewModel.ScheduleData.Single>().sortedWith(compareBy({ it.date }, { it.getHourMinute() }))
                     val weeklySchedules = unsortedScheduleDatas.filterIsInstance<CreateTaskViewModel.ScheduleData.Weekly>().sortedBy { it.timePair.getTimeFloat(it.daysOfWeek) }
-                    val monthlyDaySchedules = unsortedScheduleDatas.filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyDay>().sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.timePair.getTimeFloat(DayOfWeek.values().toList()) }))
-                    val monthlyWeekSchedules = unsortedScheduleDatas.filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyWeek>().sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.dayOfWeek }, { it.timePair.getTimeFloat(DayOfWeek.values().toList()) }))
+                    val monthlyDaySchedules = unsortedScheduleDatas.filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyDay>().sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.timePair.getTimeFloat(allWeekDays) }))
+                    val monthlyWeekSchedules = unsortedScheduleDatas.filterIsInstance<CreateTaskViewModel.ScheduleData.MonthlyWeek>().sortedWith(compareBy({ !it.beginningOfMonth }, { it.dayOfMonth }, { it.dayOfWeek }, { it.timePair.getTimeFloat(allWeekDays) }))
 
                     scheduleDatas = singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules
                 }

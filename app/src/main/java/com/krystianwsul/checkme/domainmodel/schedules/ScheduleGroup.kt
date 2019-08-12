@@ -4,6 +4,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel.ScheduleData
 
@@ -66,7 +67,12 @@ sealed class ScheduleGroup {
 
         override val schedules get() = weeklySchedules
 
-        override fun getScheduleText(domainFactory: DomainFactory) = daysOfWeek.joinToString(", ") + ": " + domainFactory.getTime(timePair)
+        override fun getScheduleText(domainFactory: DomainFactory) = daysOfWeek.let {
+            if (it == DayOfWeek.values().toSet())
+                MyApplication.instance.getString(R.string.daily)
+            else
+                daysOfWeek.sorted().joinToString(", ")
+        } + ": " + domainFactory.getTime(timePair)
     }
 
     class MonthlyDay(private val monthlyDaySchedule: MonthlyDaySchedule) : ScheduleGroup() {

@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.time.DayOfWeek
+import com.krystianwsul.checkme.utils.time.Time
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel.ScheduleData
 
@@ -12,26 +13,46 @@ sealed class ScheduleGroup {
 
     companion object {
 
+        private val allDaysOfWeek by lazy { DayOfWeek.values().toSet() }
+
         fun getGroups(schedules: List<Schedule>): List<ScheduleGroup> {
-            val scheduleGroups = mutableListOf<ScheduleGroup>()
-
-            val weeklySchedules = mutableMapOf<TimePair, MutableList<WeeklySchedule>>()
-
-            schedules.forEach {
-                when (it) {
-                    is SingleSchedule -> scheduleGroups.add(Single(it))
-                    is WeeklySchedule -> {
-                        if (!weeklySchedules.containsKey(it.timePair))
-                            weeklySchedules[it.timePair] = mutableListOf()
-                        weeklySchedules.getValue(it.timePair).add(it)
-                    }
-                    is MonthlyDaySchedule -> scheduleGroups.add(MonthlyDay(it))
-                    is MonthlyWeekSchedule -> scheduleGroups.add(MonthlyWeek(it))
-                }
+            fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek>) = daysOfWeek.map { day ->
+                getHourMinute(day).let { it.hour * 60 + it.minute }
             }
+                    .sum()
+                    .toFloat() / daysOfWeek.count()
 
-            scheduleGroups.addAll(weeklySchedules.map { Weekly(it.key, it.value) })
-            return scheduleGroups
+            val singleSchedules = schedules.filterIsInstance<SingleSchedule>()
+                    .sortedWith(compareBy(
+                            { it.date },
+                            { it.time.getHourMinute(it.date.dayOfWeek) }
+                    ))
+                    .map { Single(it) }
+
+            val weeklySchedules = schedules.asSequence()
+                    .filterIsInstance<WeeklySchedule>()
+                    .groupBy { it.timePair }
+                    .map { it.value.first().time to Weekly(it.key, it.value) }
+                    .sortedBy { it.first.getTimeFloat(it.second.daysOfWeek) }
+                    .map { it.second }
+                    .toList()
+
+            val monthlyDaySchedules = schedules.filterIsInstance<MonthlyDaySchedule>()
+                    .sortedWith(compareBy(
+                            { !it.beginningOfMonth },
+                            { it.dayOfMonth },
+                            { it.time.getTimeFloat(allDaysOfWeek) }))
+                    .map(::MonthlyDay)
+
+            val monthlyWeekSchedules = schedules.filterIsInstance<MonthlyWeekSchedule>()
+                    .sortedWith(compareBy(
+                            { !it.beginningOfMonth },
+                            { it.dayOfMonth },
+                            { it.dayOfWeek },
+                            { it.time.getTimeFloat(allDaysOfWeek) }))
+                    .map(::MonthlyWeek)
+
+            return singleSchedules + weeklySchedules + monthlyDaySchedules + monthlyWeekSchedules
         }
     }
 
@@ -61,14 +82,14 @@ sealed class ScheduleGroup {
 
         override val customTimeKey get() = timePair.customTimeKey
 
-        private val daysOfWeek get() = weeklySchedules.flatMap { it.daysOfWeek }.toSet()
+        val daysOfWeek get() = weeklySchedules.flatMap { it.daysOfWeek }.toSet()
 
         override val scheduleData get() = ScheduleData.Weekly(daysOfWeek, timePair)
 
         override val schedules get() = weeklySchedules
 
         override fun getScheduleText(domainFactory: DomainFactory) = daysOfWeek.let {
-            if (it == DayOfWeek.values().toSet())
+            if (it == allDaysOfWeek)
                 MyApplication.instance.getString(R.string.daily)
             else
                 daysOfWeek.sorted().joinToString(", ")

@@ -799,7 +799,8 @@ class DomainFactory(
 
         return ShowTaskViewModel.Data(
                 task.name,
-                task.getScheduleText(hierarchyTimeStamp, true),
+                task.getParentName(hierarchyTimeStamp),
+                task.getScheduleTextMultiline(hierarchyTimeStamp),
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
                 task.hasInstances(now),
                 task.image,

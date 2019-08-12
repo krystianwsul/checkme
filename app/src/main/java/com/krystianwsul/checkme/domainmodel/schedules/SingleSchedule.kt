@@ -18,7 +18,7 @@ class SingleSchedule(
 
     val date get() = Date(singleScheduleBridge.year, singleScheduleBridge.month, singleScheduleBridge.day)
 
-    private val dateTime get() = DateTime(date, time)
+    val dateTime get() = DateTime(date, time)
 
     override val scheduleType get() = ScheduleType.SINGLE
 

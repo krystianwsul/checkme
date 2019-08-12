@@ -75,7 +75,7 @@ sealed class ScheduleGroup {
 
         override val schedules get() = listOf(singleSchedule)
 
-        override fun getScheduleText(domainFactory: DomainFactory) = singleSchedule.date.getDisplayText()
+        override fun getScheduleText(domainFactory: DomainFactory) = singleSchedule.dateTime.getDisplayText()
     }
 
     class Weekly(val timePair: TimePair, private val weeklySchedules: List<WeeklySchedule>) : ScheduleGroup() {

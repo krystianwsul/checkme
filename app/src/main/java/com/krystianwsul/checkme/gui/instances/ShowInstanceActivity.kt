@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
+import android.view.View
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
@@ -31,7 +32,9 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_instance.*
 import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar.*
+import kotlinx.android.synthetic.main.toolbar.appBarLayout
+import kotlinx.android.synthetic.main.toolbar.toolbar
+import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
 class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListener {
@@ -246,7 +249,12 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
 
         toolbar.run {
             title = data.name
-            subtitle = data.displayText
+            subtitle = data.subtitle
+        }
+
+        toolbarCollapseText.apply {
+            visibility = if (data.displayText.isNullOrEmpty()) View.GONE else View.VISIBLE
+            text = data.displayText
         }
 
         updateTopMenu()

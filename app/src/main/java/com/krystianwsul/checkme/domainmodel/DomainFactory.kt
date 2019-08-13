@@ -673,10 +673,11 @@ class DomainFactory(
         val instance = getInstance(instanceKey)
         val instanceDateTime = instance.instanceDateTime
         val parentInstance = instance.getParentInstance(now)
-        val displayText = parentInstance?.name ?: instanceDateTime.getDisplayText()
+        val displayText = if (instance.isRootInstance(now)) instanceDateTime.getDisplayText() else null
 
         return ShowInstanceViewModel.Data(
                 instance.name,
+                instance.task.getParentName(now),
                 instanceDateTime,
                 instance.done != null,
                 task.current(now),

@@ -729,6 +729,8 @@ class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
+                customTimes.putAll(schedules.mapNotNull { it.customTimeKey }.map { it to getCustomTime(it) })
+
                 parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
                 if (schedules.isNotEmpty())

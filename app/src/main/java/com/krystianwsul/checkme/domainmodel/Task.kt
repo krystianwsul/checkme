@@ -124,20 +124,20 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     fun setEndData(
             endData: EndData,
-            taskUndoData: DomainFactory.TaskUndoData,
+            taskUndoData: DomainFactory.TaskUndoData? = null,
             recursive: Boolean = false) {
         val now = endData.exactTimeStamp
 
         check(current(now))
 
-        taskUndoData.taskKeys.add(taskKey)
+        taskUndoData?.taskKeys?.add(taskKey)
 
         val schedules = getCurrentSchedules(now)
         if (isRootTask(now)) {
             check(schedules.all { it.current(now) })
 
             schedules.forEach {
-                taskUndoData.scheduleIds.add(it.scheduleId)
+                taskUndoData?.scheduleIds?.add(it.scheduleId)
 
                 it.setEndExactTimeStamp(now)
             }
@@ -148,7 +148,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         getChildTaskHierarchies(now).forEach {
             it.childTask.setEndData(endData, taskUndoData, true)
 
-            taskUndoData.taskHierarchyKeys.add(it.taskHierarchyKey)
+            taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
 
             it.setEndExactTimeStamp(now)
         }
@@ -157,7 +157,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
             domainFactory.getParentTaskHierarchy(this, now)?.let {
                 check(it.current(now))
 
-                taskUndoData.taskHierarchyKeys.add(it.taskHierarchyKey)
+                taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
 
                 it.setEndExactTimeStamp(now)
             }

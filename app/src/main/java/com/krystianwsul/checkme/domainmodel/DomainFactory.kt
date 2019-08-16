@@ -2183,11 +2183,7 @@ class DomainFactory(
 
         val remoteToRemoteConversion = RemoteToRemoteConversion<T>()
         val startProject = startingRemoteTask.remoteProject
-        startProject.convertRemoteToRemoteHelper(remoteToRemoteConversion, startingRemoteTask)
-
-        updateNotifications(now, silent = true, removedTaskKeys = remoteToRemoteConversion.startTasks
-                .values
-                .map { it.first.taskKey }, sourceName = "other")
+        startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingRemoteTask)
 
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
 
@@ -2200,15 +2196,21 @@ class DomainFactory(
             val parentRemoteTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.parentTaskId]!!
             val childRemoteTask = remoteToRemoteConversion.endTasks[startTaskHierarchy.childTaskId]!!
 
-            val remoteTaskHierarchy = remoteProject.copyRemoteTaskHierarchy(startTaskHierarchy, parentRemoteTask.id, childRemoteTask.id)
+            val remoteTaskHierarchy = remoteProject.copyRemoteTaskHierarchy(
+                    now,
+                    startTaskHierarchy,
+                    parentRemoteTask.id,
+                    childRemoteTask.id)
 
             remoteToRemoteConversion.endTaskHierarchies.add(remoteTaskHierarchy)
         }
 
-        for (pair in remoteToRemoteConversion.startTasks.values) {
-            pair.second.forEach { it.delete() }
+        val endData = Task.EndData(now, true)
 
-            pair.first.delete()
+        for (pair in remoteToRemoteConversion.startTasks.values) {
+            pair.second.forEach { it.hide(now) }
+
+            pair.first.setEndData(endData)
         }
 
         return remoteToRemoteConversion.endTasks[startingRemoteTask.id]!!

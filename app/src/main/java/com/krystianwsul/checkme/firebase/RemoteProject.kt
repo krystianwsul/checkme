@@ -91,7 +91,16 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         val oldestVisibleMap = oldestVisible?.let { mapOf(uuid to OldestVisibleJson(Date(it.year, it.month, it.day))) }
                 ?: mapOf()
 
-        val taskJson = TaskJson(task.name, task.startExactTimeStamp.long, endTime, oldestVisibleYear, oldestVisibleMonth, oldestVisibleDay, task.note, instanceJsons, oldestVisible = oldestVisibleMap.toMutableMap())
+        val taskJson = TaskJson(
+                task.name,
+                now.long,
+                endTime,
+                oldestVisibleYear,
+                oldestVisibleMonth,
+                oldestVisibleDay,
+                task.note,
+                instanceJsons,
+                oldestVisible = oldestVisibleMap.toMutableMap())
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
 
         val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
@@ -99,7 +108,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
         remoteTasks[remoteTask.id] = remoteTask
 
-        remoteTask.copySchedules(task.schedules)
+        remoteTask.copySchedules(now, task.getCurrentSchedules(now))
 
         return remoteTask
     }
@@ -118,13 +127,13 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         return InstanceJson(done, instanceDate.toJson(), instanceDate.year, instanceDate.month, instanceDate.day, instanceTime, instanceRemoteCustomTimeId?.value, instanceHour, instanceMinute, instance.ordinal)
     }
 
-    fun <U : RemoteCustomTimeId> copyRemoteTaskHierarchy(startTaskHierarchy: RemoteTaskHierarchy<U>, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy<T> {
+    fun <U : RemoteCustomTimeId> copyRemoteTaskHierarchy(now: ExactTimeStamp, startTaskHierarchy: RemoteTaskHierarchy<U>, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy<T> {
         check(!TextUtils.isEmpty(remoteParentTaskId))
         check(!TextUtils.isEmpty(remoteChildTaskId))
 
         val endTime = if (startTaskHierarchy.getEndExactTimeStamp() != null) startTaskHierarchy.getEndExactTimeStamp()!!.long else null
 
-        val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, startTaskHierarchy.startExactTimeStamp.long, endTime, startTaskHierarchy.ordinal)
+        val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, now.long, endTime, startTaskHierarchy.ordinal)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
         val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
@@ -199,23 +208,32 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
 
-    fun convertRemoteToRemoteHelper(remoteToRemoteConversion: RemoteToRemoteConversion<T>, startTask: RemoteTask<T>) {
+    fun convertRemoteToRemoteHelper(
+            now: ExactTimeStamp,
+            remoteToRemoteConversion: RemoteToRemoteConversion<T>,
+            startTask: RemoteTask<T>) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
             return
 
         val taskKey = startTask.taskKey
 
-        remoteToRemoteConversion.startTasks[startTask.id] = Pair(startTask, startTask.existingInstances.values.toList())
+        remoteToRemoteConversion.startTasks[startTask.id] = Pair(
+                startTask,
+                startTask.existingInstances
+                        .values
+                        .toList()
+                        .filter { it.instanceDateTime.timeStamp.toExactTimeStamp() >= now }
+        )
 
-        val parentLocalTaskHierarchies = remoteTaskHierarchyContainer.getByChildTaskKey(taskKey)
+        val childTaskHierarchies = remoteTaskHierarchyContainer.getByParentTaskKey(taskKey).filter { it.current(now) }
 
-        remoteToRemoteConversion.startTaskHierarchies.addAll(parentLocalTaskHierarchies)
+        remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 
-        remoteTaskHierarchyContainer.getByParentTaskKey(taskKey)
-                .map { it.childTask }
-                .forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it) }
+        childTaskHierarchies.map { it.childTask }.forEach {
+            check(it.current(now))
 
-        parentLocalTaskHierarchies.map { it.parentTask }.forEach { convertRemoteToRemoteHelper(remoteToRemoteConversion, it) }
+            convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)
+        }
     }
 
     private class MissingTaskException(projectId: String, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")

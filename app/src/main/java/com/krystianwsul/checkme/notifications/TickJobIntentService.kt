@@ -51,11 +51,11 @@ class TickJobIntentService : JobIntentService() {
             if (!MyApplication.instance.hasUserInfo) {
                 Preferences.logLineHour("TickJobIntentService.tick skipping, no userInfo")
                 listener?.invoke()
+            } else {
+                val listeners = listOfNotNull(listener)
+
+                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName, listeners))
             }
-
-            val listeners = listOfNotNull(listener)
-
-            DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName, listeners))
         }
     }
 

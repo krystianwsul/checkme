@@ -2,6 +2,8 @@ package com.krystianwsul.treeadapter
 
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
+import kotlin.math.ceil
+import kotlin.math.min
 
 class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeViewAdapter<T>) : NodeContainer<T> {
 
@@ -156,7 +158,7 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
 
         val visibleNodes = treeNodes.filter { it.canBeShown() }
 
-        val adjustedPosition = Math.min(visibleNodes.size - 1, position) // padding
+        val adjustedPosition = min(visibleNodes.size - 1, position) // padding
 
         val previousNode = adjustedPosition.takeIf { it > 0 }?.let { visibleNodes[adjustedPosition - 1] }
         val node = visibleNodes[adjustedPosition]
@@ -167,10 +169,10 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
         if (previousNode != null) {
             previousOrdinal = (previousNode.modelNode as Sortable).getOrdinal()
 
-            val lastOrdinal = if (previousOrdinal.toInt() == Math.ceil(previousOrdinal).toInt())
+            val lastOrdinal = if (previousOrdinal.toInt() == ceil(previousOrdinal).toInt())
                 previousOrdinal + 1
             else
-                Math.ceil(previousOrdinal)
+                ceil(previousOrdinal)
 
             nextOrdinal = (nextNode?.modelNode as? Sortable)?.getOrdinal() ?: lastOrdinal
         } else {

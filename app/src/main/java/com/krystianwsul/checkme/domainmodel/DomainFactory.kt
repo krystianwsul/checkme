@@ -677,7 +677,7 @@ class DomainFactory(
 
         return ShowInstanceViewModel.Data(
                 instance.name,
-                instance.task.getParentName(now),
+                instance.getParentName(now),
                 instanceDateTime,
                 instance.done != null,
                 task.current(now),
@@ -2238,9 +2238,15 @@ class DomainFactory(
         val endData = Task.EndData(now, true)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
-            pair.second.forEach { it.hide(now) }
+            pair.second.forEach {
+                if (!it.hidden)
+                    it.hide(now)
+            }
 
-            pair.first.setEndData(endData)
+            if (pair.first.getEndData() != null)
+                check(pair.first.getEndData() == endData)
+            else
+                pair.first.setEndData(endData)
         }
 
         return remoteToRemoteConversion.endTasks[startingRemoteTask.id]!!

@@ -273,4 +273,6 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
                 instanceTimePair
             }
         }
+
+    fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
 }

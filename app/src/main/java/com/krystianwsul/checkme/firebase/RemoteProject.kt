@@ -211,18 +211,33 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp,
             remoteToRemoteConversion: RemoteToRemoteConversion<T>,
-            startTask: RemoteTask<T>) {
+            startTask: RemoteTask<T>,
+            recursive: Boolean = false) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
             return
 
         val taskKey = startTask.taskKey
+        /* todo
+        want to move only current state.  so all future existing instances are moved
+        but, current state may be a single instance in the past
+        so, if the initial task is a child task, copy only future
+        if it's a root task, copy... not done root instances?  but those may contain tasks that aren't currently child tasks...
+
+
+        explore example of list in past
+
+        for child tasks, copy instances based on parent being copied?
+         */
 
         remoteToRemoteConversion.startTasks[startTask.id] = Pair(
                 startTask,
                 startTask.existingInstances
                         .values
                         .toList()
-                        .filter { it.instanceDateTime.timeStamp.toExactTimeStamp() >= now }
+                        .filter {
+
+                            it.instanceDateTime.timeStamp.toExactTimeStamp() >= now
+                        }
         )
 
         val childTaskHierarchies = remoteTaskHierarchyContainer.getByParentTaskKey(taskKey).filter { it.current(now) }
@@ -232,7 +247,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         childTaskHierarchies.map { it.childTask }.forEach {
             check(it.current(now))
 
-            convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)
+            convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it, true)
         }
     }
 

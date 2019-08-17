@@ -179,7 +179,8 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             val parentKey: ParentKey,
             val scheduleText: String?,
             val note: String?,
-            val sortKey: SortKey) {
+            val sortKey: SortKey,
+            val projectId: String?) {
 
         fun matchesSearch(query: String?): Boolean {
             if (query.isNullOrEmpty())

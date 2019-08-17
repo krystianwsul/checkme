@@ -776,6 +776,11 @@ class CreateTaskActivity : NavBarActivity() {
         }
     }
 
+    private fun CreateTaskViewModel.ParentKey.getProjectId() = when (this) {
+        is CreateTaskViewModel.ParentKey.Project -> projectId
+        is CreateTaskViewModel.ParentKey.Task -> findTaskData(this).projectId
+    }
+
     private fun updateError(): Boolean {
         checkNotNull(data)
 
@@ -793,8 +798,26 @@ class CreateTaskActivity : NavBarActivity() {
             if (scheduleEntry.scheduleData !is CreateTaskViewModel.ScheduleData.Single)
                 continue
 
-            if (!copy && data?.taskData?.scheduleDatas?.contains(scheduleEntry.scheduleData) == true)
-                continue
+            if (!copy && data?.taskData?.scheduleDatas?.contains(scheduleEntry.scheduleData) == true) {
+                if (data!!.taskData == null) {
+                    continue
+                } else {
+                    if (data!!.taskData!!.parentKey == stateData.state.parentKey) {
+                        continue
+                    } else {
+                        val initialProject = data!!.taskData!!
+                                .parentKey
+                                ?.getProjectId()
+
+                        val finalProject = stateData.parent
+                                ?.parentKey
+                                ?.getProjectId()
+
+                        if (initialProject == finalProject)
+                            continue
+                    }
+                }
+            }
 
             if (scheduleEntry.scheduleData.date > Date.today())
                 continue

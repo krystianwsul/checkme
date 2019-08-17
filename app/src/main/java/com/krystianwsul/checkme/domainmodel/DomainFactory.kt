@@ -2104,7 +2104,14 @@ class DomainFactory(
                     .map {
                         val childTask = it.childTask
                         val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.childTaskKey)
-                        val parentTreeData = CreateTaskViewModel.ParentTreeData(childTask.name, getTaskListChildTaskDatas(now, childTask, excludedTaskKeys), CreateTaskViewModel.ParentKey.Task(childTask.taskKey), childTask.getScheduleText(now), childTask.note, CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp))
+                        val parentTreeData = CreateTaskViewModel.ParentTreeData(
+                                childTask.name,
+                                getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
+                                CreateTaskViewModel.ParentKey.Task(childTask.taskKey),
+                                childTask.getScheduleText(now),
+                                childTask.note,
+                                CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
+                                (childTask.project as? RemoteSharedProject)?.id)
 
                         taskParentKey to parentTreeData
                     }
@@ -2146,7 +2153,14 @@ class DomainFactory(
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.taskKey)
-                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
+                    val parentTreeData = CreateTaskViewModel.ParentTreeData(
+                            it.name,
+                            getTaskListChildTaskDatas(now, it, excludedTaskKeys),
+                            taskParentKey,
+                            it.getScheduleText(now),
+                            it.note,
+                            CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
+                            null)
 
                     taskParentKey to parentTreeData
                 }
@@ -2159,7 +2173,14 @@ class DomainFactory(
                     val projectParentKey = CreateTaskViewModel.ParentKey.Project(it.id)
 
                     val users = it.users.joinToString(", ") { it.name }
-                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getProjectTaskTreeDatas(now, it, excludedTaskKeys, includedTaskKeys), projectParentKey, users, null, CreateTaskViewModel.SortKey.ProjectSortKey(it.id))
+                    val parentTreeData = CreateTaskViewModel.ParentTreeData(
+                            it.name,
+                            getProjectTaskTreeDatas(now, it, excludedTaskKeys, includedTaskKeys),
+                            projectParentKey,
+                            users,
+                            null,
+                            CreateTaskViewModel.SortKey.ProjectSortKey(it.id),
+                            it.id)
 
                     projectParentKey to parentTreeData
                 }
@@ -2173,7 +2194,14 @@ class DomainFactory(
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.taskKey)
-                    val parentTreeData = CreateTaskViewModel.ParentTreeData(it.name, getTaskListChildTaskDatas(now, it, excludedTaskKeys), taskParentKey, it.getScheduleText(now), it.note, CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp))
+                    val parentTreeData = CreateTaskViewModel.ParentTreeData(
+                            it.name,
+                            getTaskListChildTaskDatas(now, it, excludedTaskKeys),
+                            taskParentKey,
+                            it.getScheduleText(now),
+                            it.note,
+                            CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
+                            (it.project as? RemoteSharedProject)?.id)
 
                     taskParentKey to parentTreeData
                 }

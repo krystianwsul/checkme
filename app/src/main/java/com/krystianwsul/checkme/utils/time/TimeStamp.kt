@@ -24,10 +24,10 @@ data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
         }
     }
 
-    val calendar
+    val calendar: Calendar
         get() = Calendar.getInstance().apply {
             timeInMillis = long
-        }!!
+        }
 
     val date: Date get() = Date(calendar)
 

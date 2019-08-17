@@ -72,7 +72,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             return true
         }
 
-    val state get() = State(isExpanded, isSelected, expandVisible, separatorVisible, modelNode.state, modelNode.ignoreStale || treeNodeCollection.stale)
+    val state get() = State(isExpanded, isSelected, expandVisible, separatorVisible, modelNode.state)
 
     // hiding
     // showing
@@ -436,8 +436,7 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             val isSelected: Boolean,
             val expandVisible: Boolean,
             val separatorVisibility: Boolean,
-            val modelState: ModelState,
-            val stale: Boolean)
+            val modelState: ModelState)
 
     override val id get() = modelNode.id
 }

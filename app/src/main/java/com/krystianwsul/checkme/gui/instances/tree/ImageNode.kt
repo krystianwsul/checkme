@@ -22,8 +22,6 @@ class ImageNode(override val imageData: ImageData) : GroupHolderNode(0) {
 
     override val isSeparatorVisibleWhenNotExpanded = true
 
-    override val ignoreStale = true
-
     override val itemViewType = GroupListFragment.GroupAdapter.TYPE_IMAGE
 
     fun initialize(nodeContainer: NodeContainer<NodeHolder>): TreeNode<NodeHolder> {

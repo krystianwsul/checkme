@@ -195,7 +195,7 @@ class DomainFactory(
     private fun updateShortcuts() {
         val now = ExactTimeStamp.now
 
-        ImageManager.prefetch(getTasks().toList())
+        ImageManager.prefetch(getTasks().toList()) { updateNotifications(ExactTimeStamp.now) }
 
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }

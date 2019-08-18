@@ -45,7 +45,7 @@ object ImageManager {
     fun init() = downloaders.forEach { it.init() }
 
     @Synchronized
-    fun prefetch(tasks: List<Task>) = downloaders.forEach { it.prefetch(tasks) }
+    fun prefetch(tasks: List<Task>, callback: () -> Unit) = downloaders.forEach { it.prefetch(tasks, callback) }
 
     @Synchronized
     fun getLargeIcon(uuid: String?) = largeIconDownloader.getImage(uuid)
@@ -77,7 +77,7 @@ object ImageManager {
                     .subscribe()
         }
 
-        fun prefetch(tasks: List<Task>) {
+        fun prefetch(tasks: List<Task>, callback: () -> Unit) {
             val tasksWithImages = tasks.filter { it.image?.uuid != null }.associateBy { it.image!!.uuid!! }
 
             val taskUuids = tasksWithImages.keys
@@ -138,6 +138,8 @@ object ImageManager {
                                             check(imageStates.getValue(uuid) is State.Downloading)
 
                                             imageStates[uuid] = State.Downloaded
+
+                                            callback()
                                         }
                             }
 

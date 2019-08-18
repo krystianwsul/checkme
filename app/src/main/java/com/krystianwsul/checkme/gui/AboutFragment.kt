@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.krystianwsul.checkme.BuildConfig
 import com.krystianwsul.checkme.R
 import io.reactivex.Observable
@@ -37,8 +36,7 @@ class AboutFragment : AbstractFragment() {
         val element = Element().setTitle(getString(R.string.designBy)).setIconDrawable(R.drawable.ic_brush_black_24dp)
 
         val config = FirebaseRemoteConfig.getInstance().apply {
-            setConfigSettings(FirebaseRemoteConfigSettings.Builder().setDeveloperModeEnabled(BuildConfig.DEBUG).build())
-            setDefaults(mapOf(BENIA_URL_KEY to "https://www.linkedin.com/in/bernardakaluza/"))
+            setDefaultsAsync(mapOf(BENIA_URL_KEY to "https://www.linkedin.com/in/bernardakaluza/"))
         }
 
         fun update() = element.setIntent(Intent(Intent.ACTION_VIEW, Uri.parse(config.getString(BENIA_URL_KEY))))
@@ -47,8 +45,7 @@ class AboutFragment : AbstractFragment() {
         Observable.interval(0, 12, TimeUnit.HOURS)
                 .subscribe {
                     config.apply {
-                        fetch().addOnSuccessListener {
-                            activateFetched()
+                        fetchAndActivate().addOnSuccessListener {
                             update()
                         }
                     }
@@ -60,6 +57,7 @@ class AboutFragment : AbstractFragment() {
                 .addItem(element)
                 .addEmail("krystianwsul@gmail.com")
                 .addPlayStore("com.krystianwsul.checkme")
+                .addItem(Element().setTitle(getString(R.string.version) + " " + BuildConfig.VERSION_NAME))
                 .create().apply {
                     findViewById<ImageView>(mehdi.sakout.aboutpage.R.id.image).apply {
                         layoutParams = layoutParams.apply {

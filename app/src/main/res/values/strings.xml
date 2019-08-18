@@ -109,4 +109,5 @@
     <string name="removeInstancesMessage">Remove incomplete reminders?</string>
     <string name="removeInstancesNo">No</string>
     <string name="removeInstancesYes">Yes</string>
+    <string name="version">Version</string>
 </resources>

@@ -61,7 +61,7 @@ kapt {
 
 ext {
     powermockVersion = '2.0.2'
-    lifecycleVersion = '2.2.0-alpha02'
+    lifecycleVersion = '2.2.0-alpha03'
     glideVersion = '4.9.0'
 }
 
@@ -88,12 +88,12 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
 
-    implementation 'com.google.firebase:firebase-core:17.0.1'
-    implementation 'com.google.firebase:firebase-auth:18.1.0'
-    implementation 'com.google.firebase:firebase-database:18.0.1'
-    implementation 'com.google.firebase:firebase-messaging:19.0.1'
-    implementation 'com.google.firebase:firebase-config:18.0.0'
-    implementation 'com.google.firebase:firebase-storage:18.1.1'
+    implementation 'com.google.firebase:firebase-core:17.1.0'
+    implementation 'com.google.firebase:firebase-auth:19.0.0'
+    implementation 'com.google.firebase:firebase-database:19.0.0'
+    implementation 'com.google.firebase:firebase-messaging:20.0.0'
+    implementation 'com.google.firebase:firebase-config:19.0.0'
+    implementation 'com.google.firebase:firebase-storage:19.0.0'
 
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 

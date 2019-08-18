@@ -30,7 +30,7 @@ class TutorialViewModel : ViewModel() {
                     .signInWithCredential(credential)
                     .addOnCompleteListener {
                         if (it.isSuccessful) {
-                            state.accept(State.Success(it.result!!.user.displayName!!))
+                            state.accept(State.Success(it.result!!.user!!.displayName!!))
                         } else {
                             val exception = it.exception!!
 

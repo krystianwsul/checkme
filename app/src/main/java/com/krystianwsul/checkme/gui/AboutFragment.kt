@@ -44,11 +44,7 @@ class AboutFragment : AbstractFragment() {
 
         Observable.interval(0, 12, TimeUnit.HOURS)
                 .subscribe {
-                    config.apply {
-                        fetchAndActivate().addOnSuccessListener {
-                            update()
-                        }
-                    }
+                    config.fetchAndActivate().addOnSuccessListener { update() }
                 }
                 .addTo(viewCreatedDisposable)
 

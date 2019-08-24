@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Paint
 import android.graphics.Rect
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -146,16 +147,20 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 var remainingLines = TOTAL_LINES - minLines
 
                 fun TextView.allocateLines() {
-                    val wantLines = Rect().run {
+                    fun getWantLines(text: String) = Rect().run {
                         val currentSize = textSize
 
                         Paint().let {
                             it.textSize = currentSize
-                            it.getTextBounds(text.toString(), 0, text.length, this)
+                            it.getTextBounds(text, 0, text.length, this)
                         }
 
                         ceil(width().toDouble() / (textWidth ?: 0)).toInt()
                     }
+
+                    val wantLines = text.toString()
+                            .split('\n')
+                            .map { getWantLines(it) }.sum()
 
                     val lines = listOf(wantLines, remainingLines + 1).min()!!
 
@@ -214,7 +219,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                             check(name?.unlimitedLines != true)
 
                             visibility = View.VISIBLE
+                            Log.e("asdf", "magic before: ${it.first}")
                             text = it.first
+                            Log.e("asdf", "magic after: ${text}")
                             setTextColor(it.second)
 
                             allocateLines()

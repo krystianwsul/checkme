@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.graphics.Paint
 import android.graphics.Rect
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -141,26 +140,32 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
                 rowContainer.setIndent(indentation)
 
-                textWidth = textWidths[widthKey]
+                val textWidth = textWidths[widthKey]
 
                 val minLines = 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0)
                 var remainingLines = TOTAL_LINES - minLines
 
                 fun TextView.allocateLines() {
                     fun getWantLines(text: String) = Rect().run {
-                        val currentSize = textSize
+                        if (textWidth != null) {
+                            val currentSize = textSize
 
-                        Paint().let {
-                            it.textSize = currentSize
-                            it.getTextBounds(text, 0, text.length, this)
+                            Paint().let {
+                                it.textSize = currentSize
+                                it.getTextBounds(text, 0, text.length, this)
+                            }
+
+                            ceil(width().toDouble() / textWidth).toInt()
+                        } else {
+                            1
                         }
-
-                        ceil(width().toDouble() / (textWidth ?: 0)).toInt()
                     }
 
                     val wantLines = text.toString()
                             .split('\n')
-                            .map { getWantLines(it) }.sum()
+                            .map {
+                                getWantLines(it)
+                            }.sum()
 
                     val lines = listOf(wantLines, remainingLines + 1).min()!!
 
@@ -169,8 +174,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     if (lines == 1) {
                         setSingleLine()
                     } else {
+                        check(lines > 1)
+
                         isSingleLine = false
-                        maxLines = lines
+                        setLines(lines)
                     }
                 }
 
@@ -219,9 +226,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                             check(name?.unlimitedLines != true)
 
                             visibility = View.VISIBLE
-                            Log.e("asdf", "magic before: ${it.first}")
                             text = it.first
-                            Log.e("asdf", "magic after: ${text}")
                             setTextColor(it.second)
 
                             allocateLines()
@@ -233,9 +238,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
                 rowTextLayout.apply {
                     viewTreeObserver.addOnGlobalLayoutListener {
-                        val width = measuredWidth
-                        textWidth = width
-                        textWidths[widthKey] = width
+                        textWidths[widthKey] = measuredWidth
                     }
                 }
 

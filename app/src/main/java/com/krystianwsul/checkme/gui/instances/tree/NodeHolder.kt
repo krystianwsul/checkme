@@ -23,7 +23,5 @@ class NodeHolder(view: View) : RecyclerView.ViewHolder(view) {
     val rowBigImageLayout: RelativeLayout? = itemView.rowBigImageLayout
     val rowSeparator = itemView.rowSeparator!!
 
-    var textWidth: Int? = null
-
     val compositeDisposable = CompositeDisposable()
 }

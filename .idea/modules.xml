@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Check.me.iml" filepath="$PROJECT_DIR$/.idea/Check.me.iml" />
-      <module fileurl="file://$PROJECT_DIR$/StudioProjects-Check.me.iml" filepath="$PROJECT_DIR$/StudioProjects-Check.me.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Check.me.iml" filepath="$PROJECT_DIR$/Check.me.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/backend/backend.iml" filepath="$PROJECT_DIR$/backend/backend.iml" />
       <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />

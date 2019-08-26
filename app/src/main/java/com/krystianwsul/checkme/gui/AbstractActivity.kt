@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -12,9 +14,12 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 
 abstract class AbstractActivity : AppCompatActivity() {
@@ -66,7 +71,7 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     private fun tick(source: String) = Single.just(Unit)
             .observeOn(Schedulers.single())
-            .subscribe { _ -> DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Normal(true, source)) }!!
+            .subscribeBy { DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Normal(true, source)) }
 
     protected open val tickOnResume = true
 
@@ -123,4 +128,15 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         super.onDestroy()
     }
+
+    protected fun <T : Any> Observable<out AbstractResultDialogFragment<out T>>.show(tag: String) = show(supportFragmentManager, tag)
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> FragmentManager.getFragmentObservable(tag: String): Observable<T> where T : Fragment = (findFragmentByTag(tag) as? T)?.let { Observable.just(it) }
+            ?: Observable.never()
+
+    private fun <T : Any> Observable<out AbstractResultDialogFragment<out T>>.show(fragmentManager: FragmentManager, tag: String): Observable<T> = listOf(
+            map { it.apply { show(fragmentManager, tag) } },
+            fragmentManager.getFragmentObservable(tag)
+    ).merge().switchMap { it.result }
 }

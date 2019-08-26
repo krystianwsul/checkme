@@ -495,7 +495,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
 
-        result.accept(Result.Cancel(position))
+        result.accept(Result.Cancel)
     }
 
     @Parcelize
@@ -530,12 +530,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     sealed class Result {
 
-        abstract val position: Int?
+        class Change(val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
 
-        class Change(override val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
+        class Delete(val position: Int?) : Result()
 
-        class Delete(override val position: Int?) : Result()
-
-        class Cancel(override val position: Int?) : Result()
+        object Cancel : Result()
     }
 }

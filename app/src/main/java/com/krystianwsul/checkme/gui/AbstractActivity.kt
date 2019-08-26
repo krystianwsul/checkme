@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.DialogFragment
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -13,10 +12,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
@@ -127,13 +124,4 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         super.onDestroy()
     }
-
-    @Suppress("UNCHECKED_CAST")
-    protected fun <T : Any, U> Observable<out U>.show(tag: String): Observable<T>
-            where U : AbstractResultDialogFragment<out T>,
-                  U : DialogFragment = listOf(
-            map { it.apply { show(supportFragmentManager, tag) } },
-            (supportFragmentManager.findFragmentByTag(tag) as? U)?.let { Observable.just(it) }
-                    ?: Observable.never()
-    ).merge().switchMapSingle { it.result.firstOrError() }
 }

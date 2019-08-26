@@ -37,10 +37,12 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.merge
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_create_task.*
@@ -543,12 +545,21 @@ class CreateTaskActivity : NavBarActivity() {
 
         setupParent(createTaskRoot)
 
-        parametersRelay.map {
-            ScheduleDialogFragment.newInstance(it).apply {
-                initialize(data!!.customTimeDatas)
-            }
-        }
-                .show(SCHEDULE_DIALOG_TAG)
+        listOf(
+                parametersRelay.toFlowable(BackpressureStrategy.DROP).flatMapSingle({
+                    check(hourMinutePickerPosition == null)
+
+                    hourMinutePickerPosition = it.position
+
+                    ScheduleDialogFragment.newInstance(it).run {
+                        initialize(data!!.customTimeDatas)
+                        show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
+                        result.firstOrError()
+                    }
+                }, false, 1).toObservable(),
+                ((supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.let { Observable.just(it) }
+                        ?: Observable.never()).flatMapSingle { it.result.firstOrError() }
+        ).merge()
                 .subscribe { result ->
                     when (result) {
                         is ScheduleDialogFragment.Result.Change -> {
@@ -1076,8 +1087,6 @@ class CreateTaskActivity : NavBarActivity() {
                         text = null
 
                         setOnClickListener {
-                            check(hourMinutePickerPosition == null)
-
                             val parameters = ScheduleDialogFragment.Parameters(
                                     null,
                                     firstScheduleEntry().scheduleData.getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)),
@@ -1187,11 +1196,8 @@ class CreateTaskActivity : NavBarActivity() {
 
             fun onTextClick() {
                 checkNotNull(data)
-                check(hourMinutePickerPosition == null)
 
-                hourMinutePickerPosition = adapterPosition
-
-                val scheduleEntry = stateData.state.schedules[hourMinutePickerPosition!! - createTaskAdapter.elementsBeforeSchedules()]
+                val scheduleEntry = stateData.state.schedules[adapterPosition - createTaskAdapter.elementsBeforeSchedules()]
 
                 val parameters = ScheduleDialogFragment.Parameters(
                         adapterPosition,

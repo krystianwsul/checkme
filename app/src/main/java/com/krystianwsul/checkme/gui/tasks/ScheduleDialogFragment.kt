@@ -17,7 +17,10 @@ import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.*
+import com.krystianwsul.checkme.gui.DatePickerDialogFragment
+import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
+import com.krystianwsul.checkme.gui.TimeDialogFragment
+import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
@@ -27,7 +30,7 @@ import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.util.*
 
-class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment(), AbstractResultDialogFragment<ScheduleDialogFragment.Result> {
+class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     companion object {
 
@@ -118,7 +121,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment(), AbstractRe
 
     private var position: Int? = null
 
-    override val result = PublishRelay.create<Result>()
+    val result = PublishRelay.create<Result>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

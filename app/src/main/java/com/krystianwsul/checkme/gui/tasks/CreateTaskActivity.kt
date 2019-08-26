@@ -180,52 +180,54 @@ class CreateTaskActivity : NavBarActivity() {
 
     private val scheduleDialogListener = object : ScheduleDialogFragment.ScheduleDialogListener {
 
-        override fun onScheduleDialogResult(scheduleDialogData: ScheduleDialogFragment.ScheduleDialogData) {
-            checkNotNull(data)
+        override fun onScheduleDialogResult(result: ScheduleDialogFragment.Result) {
+            when (result) {
+                is ScheduleDialogFragment.Result.Change -> {
+                    checkNotNull(data)
 
-            if (scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
-                check(scheduleDialogData.monthlyDay)
-            } else if (scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
-                check(!scheduleDialogData.monthlyDay)
-            }
+                    if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
+                        check(result.scheduleDialogData.monthlyDay)
+                    } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
+                        check(!result.scheduleDialogData.monthlyDay)
+                    }
 
-            if (hourMinutePickerPosition == null) {
-                clearParentTask()
+                    if (hourMinutePickerPosition == null) {
+                        clearParentTask()
 
-                createTaskAdapter.addScheduleEntry(scheduleDialogData.toScheduleEntry())
-            } else {
-                hourMinutePickerPosition!!.let {
-                    check(it >= createTaskAdapter.elementsBeforeSchedules())
+                        createTaskAdapter.addScheduleEntry(result.scheduleDialogData.toScheduleEntry())
+                    } else {
+                        hourMinutePickerPosition!!.let {
+                            check(it >= createTaskAdapter.elementsBeforeSchedules())
 
-                    stateData.state.schedules[it - createTaskAdapter.elementsBeforeSchedules()] = scheduleDialogData.toScheduleEntry()
+                            stateData.state.schedules[it - createTaskAdapter.elementsBeforeSchedules()] = result.scheduleDialogData.toScheduleEntry()
 
-                    createTaskAdapter.notifyItemChanged(it)
+                            createTaskAdapter.notifyItemChanged(it)
 
-                    hourMinutePickerPosition = null
+                            hourMinutePickerPosition = null
+                        }
+                    }
                 }
-            }
-        }
+                is ScheduleDialogFragment.Result.Delete -> {
+                    hourMinutePickerPosition!!.let {
+                        check(it >= createTaskAdapter.elementsBeforeSchedules())
+                        checkNotNull(data)
 
-        override fun onScheduleDialogDelete() {
-            hourMinutePickerPosition!!.let {
-                check(it >= createTaskAdapter.elementsBeforeSchedules())
-                checkNotNull(data)
+                        stateData.state
+                                .schedules
+                                .removeAt(it - createTaskAdapter.elementsBeforeSchedules())
 
-                stateData.state
-                        .schedules
-                        .removeAt(it - createTaskAdapter.elementsBeforeSchedules())
+                        createTaskAdapter.notifyItemRemoved(it)
 
-                createTaskAdapter.notifyItemRemoved(it)
+                        hourMinutePickerPosition = null
+                    }
+                }
+                is ScheduleDialogFragment.Result.Cancel -> {
+                    hourMinutePickerPosition?.let {
+                        check(it >= createTaskAdapter.elementsBeforeSchedules())
 
-                hourMinutePickerPosition = null
-            }
-        }
-
-        override fun onScheduleDialogCancel() {
-            hourMinutePickerPosition?.let {
-                check(it >= createTaskAdapter.elementsBeforeSchedules())
-
-                hourMinutePickerPosition = null
+                        hourMinutePickerPosition = null
+                    }
+                }
             }
         }
     }

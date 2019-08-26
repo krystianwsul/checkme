@@ -149,7 +149,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 check(scheduleDialogListener != null)
                 check(isValid)
 
-                scheduleDialogListener!!.onScheduleDialogResult(scheduleDialogData)
+                scheduleDialogListener!!.onScheduleDialogResult(Result.Change(position, scheduleDialogData))
 
                 dismiss()
             }
@@ -159,7 +159,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     visibility = View.VISIBLE
 
                     setOnClickListener {
-                        scheduleDialogListener!!.onScheduleDialogDelete()
+                        scheduleDialogListener!!.onScheduleDialogResult(Result.Delete(position))
 
                         dismiss()
                     }
@@ -498,7 +498,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         check(scheduleDialogListener != null)
 
-        scheduleDialogListener!!.onScheduleDialogCancel()
+        scheduleDialogListener!!.onScheduleDialogResult(Result.Cancel(position))
     }
 
     @Parcelize
@@ -531,9 +531,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     interface ScheduleDialogListener {
 
-        fun onScheduleDialogResult(scheduleDialogData: ScheduleDialogData)
-        fun onScheduleDialogDelete()
-        fun onScheduleDialogCancel()
+        fun onScheduleDialogResult(result: Result)
     }
 
     class Parameters(val position: Int?, val scheduleDialogData: ScheduleDialogData, val showDelete: Boolean)
@@ -542,10 +540,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         abstract val position: Int?
 
-        class Data(override val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
+        class Change(override val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
 
-        class Delete(override val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
+        class Delete(override val position: Int?) : Result()
 
-        class Cancel(override val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
+        class Cancel(override val position: Int?) : Result()
     }
 }

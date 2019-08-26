@@ -33,6 +33,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     companion object {
 
+        private const val KEY_POSITION = "position"
         private const val SCHEDULE_DIALOG_DATA_KEY = "scheduleDialogData"
         private const val SHOW_DELETE_KEY = "showDelete"
 
@@ -40,10 +41,11 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         private const val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
         private const val TIME_PICKER_TAG = "timePicker"
 
-        fun newInstance(scheduleDialogData: ScheduleDialogData, showDelete: Boolean) = ScheduleDialogFragment().apply {
+        fun newInstance(parameters: Parameters) = ScheduleDialogFragment().apply {
             arguments = Bundle().apply {
-                putParcelable(SCHEDULE_DIALOG_DATA_KEY, scheduleDialogData)
-                putBoolean(SHOW_DELETE_KEY, showDelete)
+                parameters.position?.let { putInt(KEY_POSITION, it) }
+                putParcelable(SCHEDULE_DIALOG_DATA_KEY, parameters.scheduleDialogData)
+                putBoolean(SHOW_DELETE_KEY, parameters.showDelete)
             }
         }
     }
@@ -116,6 +118,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             return TimeStamp(scheduleDialogData.date, hourMinute) > TimeStamp.now
         }
+
+    private var position: Int? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        position = arguments!!.getInt(KEY_POSITION, -1).takeUnless { it == -1 }
+    }
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -524,5 +534,18 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         fun onScheduleDialogResult(scheduleDialogData: ScheduleDialogData)
         fun onScheduleDialogDelete()
         fun onScheduleDialogCancel()
+    }
+
+    class Parameters(val position: Int?, val scheduleDialogData: ScheduleDialogData, val showDelete: Boolean)
+
+    sealed class Result {
+
+        abstract val position: Int?
+
+        class Data(override val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
+
+        class Delete(override val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
+
+        class Cancel(override val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
     }
 }

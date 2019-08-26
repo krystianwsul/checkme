@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -39,6 +40,7 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.Response
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_create_task.*
@@ -258,6 +260,8 @@ class CreateTaskActivity : NavBarActivity() {
     val imageUrl = BehaviorRelay.createDefault<ImageState>(ImageState.None)
 
     private lateinit var removeInstanceKeys: List<InstanceKey>
+
+    private val parametersRelay = PublishRelay.create<ScheduleDialogFragment.Parameters>()
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_save, menu)
@@ -590,6 +594,14 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         setupParent(createTaskRoot)
+
+        parametersRelay.subscribe {
+            ScheduleDialogFragment.newInstance(it).let {
+                it.initialize(data!!.customTimeDatas, scheduleDialogListener)
+                it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
+            }
+        }
+                .addTo(createDisposable)
     }
 
     @SuppressLint("CheckResult")
@@ -1068,10 +1080,12 @@ class CreateTaskActivity : NavBarActivity() {
                         setOnClickListener {
                             check(hourMinutePickerPosition == null)
 
-                            ScheduleDialogFragment.newInstance(firstScheduleEntry().scheduleData.getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)), false).let {
-                                it.initialize(data!!.customTimeDatas, scheduleDialogListener)
-                                it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
-                            }
+                            val parameters = ScheduleDialogFragment.Parameters(
+                                    null,
+                                    firstScheduleEntry().scheduleData.getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)),
+                                    false)
+
+                            parametersRelay.accept(parameters)
                         }
 
                         fixClicks()
@@ -1181,10 +1195,12 @@ class CreateTaskActivity : NavBarActivity() {
 
                 val scheduleEntry = stateData.state.schedules[hourMinutePickerPosition!! - createTaskAdapter.elementsBeforeSchedules()]
 
-                ScheduleDialogFragment.newInstance(scheduleEntry.scheduleData.getScheduleDialogData(Date.today(), hint as? Hint.Schedule), true).let {
-                    it.initialize(data!!.customTimeDatas, scheduleDialogListener)
-                    it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
-                }
+                val parameters = ScheduleDialogFragment.Parameters(
+                        adapterPosition,
+                        scheduleEntry.scheduleData.getScheduleDialogData(Date.today(), hint as? Hint.Schedule),
+                        true)
+
+                parametersRelay.accept(parameters)
             }
         }
 

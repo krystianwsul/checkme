@@ -15,11 +15,9 @@ import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
+import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.gui.DatePickerDialogFragment
-import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
-import com.krystianwsul.checkme.gui.TimeDialogFragment
-import com.krystianwsul.checkme.gui.TimePickerDialogFragment
+import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
@@ -29,7 +27,7 @@ import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.util.*
 
-class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
+class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment(), AbstractResultDialogFragment<ScheduleDialogFragment.Result> {
 
     companion object {
 
@@ -54,7 +52,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private lateinit var scheduleDialogDays: Map<DayOfWeek, CheckBox>
 
     private var customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>? = null
-    private var scheduleDialogListener: ScheduleDialogListener? = null
 
     private lateinit var scheduleDialogData: ScheduleDialogData
 
@@ -121,6 +118,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private var position: Int? = null
 
+    override val result = PublishRelay.create<Result>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -146,10 +145,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             scheduleDialogSave.setOnClickListener {
                 check(customTimeDatas != null)
-                check(scheduleDialogListener != null)
                 check(isValid)
 
-                scheduleDialogListener!!.onScheduleDialogResult(Result.Change(position, scheduleDialogData))
+                result.accept(Result.Change(position, scheduleDialogData))
 
                 dismiss()
             }
@@ -159,7 +157,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     visibility = View.VISIBLE
 
                     setOnClickListener {
-                        scheduleDialogListener!!.onScheduleDialogResult(Result.Delete(position))
+                        result.accept(Result.Delete(position))
 
                         dismiss()
                     }
@@ -386,9 +384,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             updateFields()
     }
 
-    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>, scheduleDialogListener: ScheduleDialogListener) {
+    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>) {
         this.customTimeDatas = customTimeDatas
-        this.scheduleDialogListener = scheduleDialogListener
 
         if (this::scheduleDialogData.isInitialized)
             initialize()
@@ -396,7 +393,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private fun initialize() {
         check(customTimeDatas != null)
-        check(scheduleDialogListener != null)
         check(activity != null)
 
         when (scheduleDialogData.scheduleType) {
@@ -496,9 +492,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
 
-        check(scheduleDialogListener != null)
-
-        scheduleDialogListener!!.onScheduleDialogResult(Result.Cancel(position))
+        result.accept(Result.Cancel(position))
     }
 
     @Parcelize
@@ -527,11 +521,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleData.MonthlyWeek(monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist.timePair)
             else -> throw UnsupportedOperationException()
         })
-    }
-
-    interface ScheduleDialogListener {
-
-        fun onScheduleDialogResult(result: Result)
     }
 
     class Parameters(val position: Int?, val scheduleDialogData: ScheduleDialogData, val showDelete: Boolean)

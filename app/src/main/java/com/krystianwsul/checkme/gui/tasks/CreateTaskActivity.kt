@@ -178,60 +178,6 @@ class CreateTaskActivity : NavBarActivity() {
         inputMethodManager.hideSoftInputFromWindow(createTaskRoot.windowToken, 0)
     }
 
-    private val scheduleDialogListener = object : ScheduleDialogFragment.ScheduleDialogListener {
-
-        override fun onScheduleDialogResult(result: ScheduleDialogFragment.Result) {
-            when (result) {
-                is ScheduleDialogFragment.Result.Change -> {
-                    checkNotNull(data)
-
-                    if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
-                        check(result.scheduleDialogData.monthlyDay)
-                    } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
-                        check(!result.scheduleDialogData.monthlyDay)
-                    }
-
-                    if (hourMinutePickerPosition == null) {
-                        clearParentTask()
-
-                        createTaskAdapter.addScheduleEntry(result.scheduleDialogData.toScheduleEntry())
-                    } else {
-                        hourMinutePickerPosition!!.let {
-                            check(it >= createTaskAdapter.elementsBeforeSchedules())
-
-                            stateData.state.schedules[it - createTaskAdapter.elementsBeforeSchedules()] = result.scheduleDialogData.toScheduleEntry()
-
-                            createTaskAdapter.notifyItemChanged(it)
-
-                            hourMinutePickerPosition = null
-                        }
-                    }
-                }
-                is ScheduleDialogFragment.Result.Delete -> {
-                    hourMinutePickerPosition!!.let {
-                        check(it >= createTaskAdapter.elementsBeforeSchedules())
-                        checkNotNull(data)
-
-                        stateData.state
-                                .schedules
-                                .removeAt(it - createTaskAdapter.elementsBeforeSchedules())
-
-                        createTaskAdapter.notifyItemRemoved(it)
-
-                        hourMinutePickerPosition = null
-                    }
-                }
-                is ScheduleDialogFragment.Result.Cancel -> {
-                    hourMinutePickerPosition?.let {
-                        check(it >= createTaskAdapter.elementsBeforeSchedules())
-
-                        hourMinutePickerPosition = null
-                    }
-                }
-            }
-        }
-    }
-
     private var note: String? = null
 
     private var noteHasFocus = false // keyboard hack
@@ -597,12 +543,62 @@ class CreateTaskActivity : NavBarActivity() {
 
         setupParent(createTaskRoot)
 
-        parametersRelay.subscribe {
-            ScheduleDialogFragment.newInstance(it).let {
-                it.initialize(data!!.customTimeDatas, scheduleDialogListener)
-                it.show(supportFragmentManager, SCHEDULE_DIALOG_TAG)
+        parametersRelay.map {
+            ScheduleDialogFragment.newInstance(it).apply {
+                initialize(data!!.customTimeDatas)
             }
         }
+                .show(SCHEDULE_DIALOG_TAG)
+                .subscribe { result ->
+                    when (result) {
+                        is ScheduleDialogFragment.Result.Change -> {
+                            checkNotNull(data)
+
+                            if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_DAY) {
+                                check(result.scheduleDialogData.monthlyDay)
+                            } else if (result.scheduleDialogData.scheduleType == ScheduleType.MONTHLY_WEEK) {
+                                check(!result.scheduleDialogData.monthlyDay)
+                            }
+
+                            if (hourMinutePickerPosition == null) {
+                                clearParentTask()
+
+                                createTaskAdapter.addScheduleEntry(result.scheduleDialogData.toScheduleEntry())
+                            } else {
+                                hourMinutePickerPosition!!.let {
+                                    check(it >= createTaskAdapter.elementsBeforeSchedules())
+
+                                    stateData.state.schedules[it - createTaskAdapter.elementsBeforeSchedules()] = result.scheduleDialogData.toScheduleEntry()
+
+                                    createTaskAdapter.notifyItemChanged(it)
+
+                                    hourMinutePickerPosition = null
+                                }
+                            }
+                        }
+                        is ScheduleDialogFragment.Result.Delete -> {
+                            hourMinutePickerPosition!!.let {
+                                check(it >= createTaskAdapter.elementsBeforeSchedules())
+                                checkNotNull(data)
+
+                                stateData.state
+                                        .schedules
+                                        .removeAt(it - createTaskAdapter.elementsBeforeSchedules())
+
+                                createTaskAdapter.notifyItemRemoved(it)
+
+                                hourMinutePickerPosition = null
+                            }
+                        }
+                        is ScheduleDialogFragment.Result.Cancel -> {
+                            hourMinutePickerPosition?.let {
+                                check(it >= createTaskAdapter.elementsBeforeSchedules())
+
+                                hourMinutePickerPosition = null
+                            }
+                        }
+                    }
+                }
                 .addTo(createDisposable)
     }
 
@@ -721,7 +717,7 @@ class CreateTaskActivity : NavBarActivity() {
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(this.data!!.parentTreeDatas, parentFragmentListener)
+        (supportFragmentManager.findFragmentByTag(PARENT_PICKER_FRAGMENT_TAG) as? ParentPickerFragment)?.initialize(data.parentTreeDatas, parentFragmentListener)
 
         invalidateOptionsMenu()
 
@@ -752,7 +748,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         stateData = ParentScheduleData(tmpState!!)
 
-        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(this.data!!.customTimeDatas, scheduleDialogListener)
+        (supportFragmentManager.findFragmentByTag(SCHEDULE_DIALOG_TAG) as? ScheduleDialogFragment)?.initialize(data.customTimeDatas)
 
         createTaskAdapter = CreateTaskAdapter()
         createTaskRecycler.adapter = createTaskAdapter

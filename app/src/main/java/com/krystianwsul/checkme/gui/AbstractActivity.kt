@@ -5,8 +5,7 @@ import android.os.Bundle
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.DialogFragment
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -129,14 +128,12 @@ abstract class AbstractActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    protected fun <T : Any> Observable<out AbstractResultDialogFragment<out T>>.show(tag: String) = show(supportFragmentManager, tag)
-
     @Suppress("UNCHECKED_CAST")
-    private fun <T> FragmentManager.getFragmentObservable(tag: String): Observable<T> where T : Fragment = (findFragmentByTag(tag) as? T)?.let { Observable.just(it) }
-            ?: Observable.never()
-
-    private fun <T : Any> Observable<out AbstractResultDialogFragment<out T>>.show(fragmentManager: FragmentManager, tag: String): Observable<T> = listOf(
-            map { it.apply { show(fragmentManager, tag) } },
-            fragmentManager.getFragmentObservable(tag)
-    ).merge().switchMap { it.result }
+    protected fun <T : Any, U> Observable<out U>.show(tag: String): Observable<T>
+            where U : AbstractResultDialogFragment<out T>,
+                  U : DialogFragment = listOf(
+            map { it.apply { show(supportFragmentManager, tag) } },
+            (supportFragmentManager.findFragmentByTag(tag) as? U)?.let { Observable.just(it) }
+                    ?: Observable.never()
+    ).merge().switchMapSingle { it.result.firstOrError() }
 }

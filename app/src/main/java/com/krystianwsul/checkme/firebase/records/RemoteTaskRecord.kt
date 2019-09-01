@@ -5,13 +5,14 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.firebase.RemoteTask
-import com.krystianwsul.checkme.firebase.json.InstanceJson
-import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
-import com.krystianwsul.checkme.firebase.json.ScheduleWrapper
-import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.toDate
+import com.krystianwsul.common.firebase.InstanceJson
+import com.krystianwsul.common.firebase.OldestVisibleJson
+import com.krystianwsul.common.firebase.ScheduleWrapper
+import com.krystianwsul.common.firebase.TaskJson
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,

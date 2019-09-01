@@ -15,7 +15,7 @@ object BackendNotifier {
 
     private const val PREFIX = "https://check-me-add47.appspot.com/notify?"
 
-    fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String?): String {
+    fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String): String {
         check(projects.isNotEmpty() || !userKeys.isEmpty())
 
         val parameters = projects.map { "projects=$it" }.toMutableSet()
@@ -25,7 +25,7 @@ object BackendNotifier {
         if (production)
             parameters.add("production=1")
 
-        parameters.add("senderToken=" + senderToken!!)
+        parameters.add("senderToken=$senderToken")
 
         return PREFIX + parameters.joinToString("&")
     }
@@ -39,7 +39,7 @@ object BackendNotifier {
 
         val projectIds = remoteProjects.map { it.id }.toSet()
 
-        val url = getUrl(projectIds, production, userKeys, userInfo.token)
+        val url = getUrl(projectIds, production, userKeys, userInfo.token!!)
         check(url.isNotEmpty())
 
         run(url)
@@ -49,7 +49,7 @@ object BackendNotifier {
         check(url.isNotEmpty())
 
         val queue = Volley.newRequestQueue(MyApplication.instance)
-
+        Log.e("asdf", "BackendNotifier url: $url")
         val stringRequest = StringRequest(
                 Request.Method.GET, url,
                 { Log.e("asdf", "BackendNotifier response: $it") }

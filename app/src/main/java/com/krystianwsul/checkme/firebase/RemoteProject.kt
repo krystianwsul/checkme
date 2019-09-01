@@ -5,18 +5,15 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.RemoteToRemoteConversion
 import com.krystianwsul.checkme.domainmodel.Task
-import com.krystianwsul.checkme.firebase.json.InstanceJson
-import com.krystianwsul.checkme.firebase.json.OldestVisibleJson
-import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
-import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
-import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
-import com.krystianwsul.checkme.utils.TaskHierarchyContainer
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.firebase.InstanceJson
+import com.krystianwsul.common.firebase.OldestVisibleJson
+import com.krystianwsul.common.firebase.TaskHierarchyJson
+import com.krystianwsul.common.firebase.TaskJson
 
 abstract class RemoteProject<T : RemoteCustomTimeId>(
         protected val domainFactory: DomainFactory,
@@ -88,7 +85,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
             RemoteInstanceRecord.scheduleKeyToString(scheduleKey) to instanceJson
         }.toMutableMap()
 
-        val oldestVisibleMap = oldestVisible?.let { mapOf(uuid to OldestVisibleJson(Date(it.year, it.month, it.day))) }
+        val oldestVisibleMap = oldestVisible?.let { mapOf(uuid to OldestVisibleJson.fromDate(Date(it.year, it.month, it.day))) }
                 ?: mapOf()
 
         val taskJson = TaskJson(

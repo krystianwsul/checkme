@@ -16,7 +16,6 @@ import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.domainmodel.schedules.ScheduleGroup
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
-import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.SnackbarListener
@@ -30,6 +29,7 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.*
+import com.krystianwsul.common.firebase.TaskJson
 import java.util.*
 
 @Suppress("LeakingThis")

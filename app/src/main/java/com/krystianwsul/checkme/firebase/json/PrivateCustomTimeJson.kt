@@ -1,5 +1,7 @@
 package com.krystianwsul.checkme.firebase.json
 
+import com.krystianwsul.common.firebase.CustomTimeJson
+
 class PrivateCustomTimeJson @JvmOverloads constructor(
         override var name: String = "",
         override var sundayHour: Int = 0,

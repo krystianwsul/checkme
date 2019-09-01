@@ -9,13 +9,13 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.json.JsonWrapper
-import com.krystianwsul.checkme.firebase.json.SharedProjectJson
-import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectManager
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectManager
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.common.firebase.SharedProjectJson
+import com.krystianwsul.common.firebase.TaskJson
 import java.util.*
 
 class RemoteProjectFactory(

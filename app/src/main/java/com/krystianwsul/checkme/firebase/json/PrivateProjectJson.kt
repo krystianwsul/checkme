@@ -1,5 +1,9 @@
 package com.krystianwsul.checkme.firebase.json
 
+import com.krystianwsul.common.firebase.ProjectJson
+import com.krystianwsul.common.firebase.TaskHierarchyJson
+import com.krystianwsul.common.firebase.TaskJson
+
 class PrivateProjectJson @JvmOverloads constructor(
         override var name: String = "",
         override val startTime: Long = 0,

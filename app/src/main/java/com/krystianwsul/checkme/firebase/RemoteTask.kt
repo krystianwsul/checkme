@@ -5,17 +5,18 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.domainmodel.schedules.*
-import com.krystianwsul.checkme.firebase.json.*
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.fromDate
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DateTime
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.common.firebase.*
 import java.util.*
 
 class RemoteTask<T : RemoteCustomTimeId>(
@@ -114,7 +115,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun getOldestVisible() = remoteTaskRecord.oldestVisible
 
-    override fun setOldestVisible(date: Date) = remoteTaskRecord.setOldestVisible(OldestVisibleJson(date))
+    override fun setOldestVisible(date: Date) = remoteTaskRecord.setOldestVisible(OldestVisibleJson.fromDate(date))
 
     override fun delete() {
         schedules.toMutableList().forEach { it.delete() }

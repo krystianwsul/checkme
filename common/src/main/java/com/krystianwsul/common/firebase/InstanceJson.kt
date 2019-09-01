@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase.json
+package com.krystianwsul.common.firebase
 
 class InstanceJson @JvmOverloads constructor(
         var done: Long? = null,

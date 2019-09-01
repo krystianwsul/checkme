@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase.json
+package com.krystianwsul.common.firebase
 
 interface CustomTimeJson {
     var name: String

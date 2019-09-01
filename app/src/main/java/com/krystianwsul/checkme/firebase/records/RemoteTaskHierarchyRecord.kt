@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.TaskHierarchyJson
 
 
 class RemoteTaskHierarchyRecord : RemoteRecord {

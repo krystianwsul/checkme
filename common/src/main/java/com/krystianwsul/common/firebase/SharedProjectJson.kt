@@ -1,6 +1,4 @@
-package com.krystianwsul.checkme.firebase.json
-
-import com.krystianwsul.common.firebase.UserJson
+package com.krystianwsul.common.firebase
 
 class SharedProjectJson @JvmOverloads constructor(
         override var name: String = "",

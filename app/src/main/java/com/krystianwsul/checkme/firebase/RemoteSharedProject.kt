@@ -2,13 +2,13 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.firebase.SharedCustomTimeJson
 import java.util.*
 
 class RemoteSharedProject(

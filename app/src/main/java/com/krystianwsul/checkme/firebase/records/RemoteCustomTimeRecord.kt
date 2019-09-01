@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.json.CustomTimeJson
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.common.firebase.CustomTimeJson
 
 
 abstract class RemoteCustomTimeRecord<T : RemoteCustomTimeId>(create: Boolean) : RemoteRecord(create), CustomTimeRecord {

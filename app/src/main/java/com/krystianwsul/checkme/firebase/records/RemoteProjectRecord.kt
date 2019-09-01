@@ -2,11 +2,11 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.json.ProjectJson
-import com.krystianwsul.checkme.firebase.json.TaskHierarchyJson
-import com.krystianwsul.checkme.firebase.json.TaskJson
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.common.firebase.ProjectJson
+import com.krystianwsul.common.firebase.TaskHierarchyJson
+import com.krystianwsul.common.firebase.TaskJson
 
 @Suppress("LeakingThis")
 abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(

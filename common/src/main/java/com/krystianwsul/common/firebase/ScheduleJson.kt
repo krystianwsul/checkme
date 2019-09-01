@@ -1,5 +1,4 @@
-package com.krystianwsul.checkme.firebase.json
-
+package com.krystianwsul.common.firebase
 
 
 abstract class ScheduleJson(val startTime: Long = 0, var endTime: Long? = null) {

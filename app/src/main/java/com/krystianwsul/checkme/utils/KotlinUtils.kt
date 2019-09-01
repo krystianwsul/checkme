@@ -25,9 +25,11 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
 import com.krystianwsul.checkme.gui.MyBottomBar
+import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.firebase.OldestVisibleJson
 import io.reactivex.Observable
 import java.io.*
 import java.util.*
@@ -268,3 +270,7 @@ fun Window.setTransparentNavigation(landscape: Boolean) {
 val Resources.isLandscape get() = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
 fun <T> RequestBuilder<T>.circle(circle: Boolean) = if (circle) apply(RequestOptions.circleCropTransform()) else this
+
+fun OldestVisibleJson.Companion.fromDate(date: Date) = OldestVisibleJson(date.toJson(), date.year, date.month, date.day)
+
+fun OldestVisibleJson.toDate() = date?.let { Date.fromJson(it) } ?: Date(year, month, day)

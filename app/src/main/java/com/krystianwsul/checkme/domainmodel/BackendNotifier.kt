@@ -51,15 +51,19 @@ object BackendNotifier {
         val queue = Volley.newRequestQueue(MyApplication.instance)
         Log.e("asdf", "BackendNotifier url: $url")
         val stringRequest = StringRequest(
-                Request.Method.GET, url,
-                { Log.e("asdf", "BackendNotifier response: $it") }
-                , {
-            if (it is TimeoutError || it is NoConnectionError) {
-                Log.e("asdf", "BackendNotifier error", it)
-            } else {
-                MyCrashlytics.logException(it)
-            }
-        })
+                Request.Method.GET,
+                url,
+                {
+                    Log.e("asdf", "BackendNotifier response:")
+                    it.lines().forEach { Log.e("asdf", it) }
+                },
+                {
+                    if (it is TimeoutError || it is NoConnectionError) {
+                        Log.e("asdf", "BackendNotifier error", it)
+                    } else {
+                        MyCrashlytics.logException(it)
+                    }
+                })
 
         queue.add(stringRequest)
     }

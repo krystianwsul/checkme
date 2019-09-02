@@ -1,5 +1,8 @@
 package com.krystianwsul.common.firebase
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class OldestVisibleJson @JvmOverloads constructor(
         var date: String? = null,
         var year: Int = 0,

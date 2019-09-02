@@ -1,5 +1,8 @@
 package com.krystianwsul.common.firebase
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class TaskHierarchyJson @JvmOverloads constructor(
         val parentTaskId: String = "",
         val childTaskId: String = "",

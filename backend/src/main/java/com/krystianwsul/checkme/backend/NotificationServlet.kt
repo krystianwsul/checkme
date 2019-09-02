@@ -10,6 +10,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.common.base.Joiner
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.krystianwsul.common.Notification
+import com.krystianwsul.common.Response
 import com.krystianwsul.common.firebase.UserJson
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
@@ -28,7 +30,7 @@ import kotlin.collections.HashMap
 
 class NotificationServlet : HttpServlet() {
 
-    public override fun doGet(req: HttpServletRequest, resp: HttpServletResponse) {
+    override fun doGet(req: HttpServletRequest, resp: HttpServletResponse) {
         val productionParam = req.getParameter("production")
         val production = !StringUtils.isEmpty(productionParam)
 

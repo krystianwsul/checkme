@@ -1,1 +1,1 @@
-include ':app', ':backend', ':treeadapter', ':common'
+include ':app', ':treeadapter', ':common'

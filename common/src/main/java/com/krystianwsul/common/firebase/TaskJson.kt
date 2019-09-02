@@ -1,5 +1,8 @@
 package com.krystianwsul.common.firebase
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class TaskJson @JvmOverloads constructor(
         var name: String = "",
         val startTime: Long = 0,
@@ -14,10 +17,12 @@ class TaskJson @JvmOverloads constructor(
         var image: Image? = null,
         var endData: EndData? = null) {
 
+    @Serializable
     data class Image(
             val imageUuid: String = "",
             val uploaderUuid: String? = null)
 
+    @Serializable
     data class EndData(
             val time: Long = 0,
             val deleteInstances: Boolean = false)

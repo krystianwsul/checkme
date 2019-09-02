@@ -1,5 +1,8 @@
 package com.krystianwsul.common.firebase
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class SharedProjectJson @JvmOverloads constructor(
         override var name: String = "",
         override val startTime: Long = 0,

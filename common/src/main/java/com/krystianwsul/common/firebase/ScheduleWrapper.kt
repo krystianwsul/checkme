@@ -1,5 +1,8 @@
 package com.krystianwsul.common.firebase
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class ScheduleWrapper @JvmOverloads constructor(
         val singleScheduleJson: SingleScheduleJson? = null,
         val dailyScheduleJson: DailyScheduleJson? = null,

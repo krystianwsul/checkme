@@ -1,8 +1,8 @@
 package com.krystianwsul.common.firebase
 
-//import kotlinx.serialization.*
+import kotlinx.serialization.Serializable
 
-//@Serializable
+@Serializable
 data class UserJson @JvmOverloads constructor(
         val email: String = "",
         var name: String = "",

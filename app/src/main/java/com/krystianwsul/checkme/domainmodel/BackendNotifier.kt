@@ -13,7 +13,7 @@ import com.krystianwsul.checkme.firebase.RemoteProject
 
 object BackendNotifier {
 
-    private const val PREFIX = "https://check-me-add47.appspot.com/notify?"
+    private const val PREFIX = "https://us-central1-check-me-add47.cloudfunctions.net/notify?"
 
     fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String): String {
         check(projects.isNotEmpty() || !userKeys.isEmpty())

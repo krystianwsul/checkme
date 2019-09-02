@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase
 
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
 @Serializable
 class InstanceJson @JvmOverloads constructor(

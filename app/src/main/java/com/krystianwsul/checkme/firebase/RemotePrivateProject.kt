@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
@@ -43,7 +43,7 @@ class RemotePrivateProject(
 
     override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) = throw UnsupportedOperationException()
 
-    fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTime {
+    fun newRemoteCustomTime(customTimeJson: com.krystianwsul.common.firebase.PrivateCustomTimeJson): RemotePrivateCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
         val remoteCustomTime = RemotePrivateCustomTime(domainFactory, this, remoteCustomTimeRecord)

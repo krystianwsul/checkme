@@ -1,7 +1,9 @@
-package com.krystianwsul.checkme.firebase.json
+package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.firebase.CustomTimeJson
+import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
+@Serializable
 class PrivateCustomTimeJson @JvmOverloads constructor(
         override var name: String = "",
         override var sundayHour: Int = 0,

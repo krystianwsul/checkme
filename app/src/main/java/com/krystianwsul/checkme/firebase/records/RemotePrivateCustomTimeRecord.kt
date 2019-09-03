@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.PrivateCustomTimeJson
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 
 
@@ -9,15 +9,15 @@ class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.
 
     override val id: RemoteCustomTimeId.Private
     override val remoteProjectRecord: RemotePrivateProjectRecord
-    override val customTimeJson: PrivateCustomTimeJson
+    override val customTimeJson: com.krystianwsul.common.firebase.PrivateCustomTimeJson
 
-    constructor(id: RemoteCustomTimeId.Private, remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(false) {
+    constructor(id: RemoteCustomTimeId.Private, remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: com.krystianwsul.common.firebase.PrivateCustomTimeJson) : super(false) {
         this.id = id
         this.remoteProjectRecord = remoteProjectRecord
         this.customTimeJson = customTimeJson
     }
 
-    constructor(remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(true) {
+    constructor(remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: com.krystianwsul.common.firebase.PrivateCustomTimeJson) : super(true) {
         id = remoteProjectRecord.getCustomTimeRecordId()
         this.remoteProjectRecord = remoteProjectRecord
         this.customTimeJson = customTimeJson

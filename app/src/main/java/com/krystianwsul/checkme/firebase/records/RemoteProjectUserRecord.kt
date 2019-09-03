@@ -43,7 +43,7 @@ class RemoteProjectUserRecord(
             addValue("$key/photoUrl", value)
         }
 
-    fun setToken(token: String?, uuid: String) { // todo remove
+    fun setToken(token: String?, uuid: String) {
         check(!TextUtils.isEmpty(uuid))
 
         if (token == createObject.tokens[uuid])

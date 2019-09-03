@@ -1,9 +1,9 @@
-package com.krystianwsul.checkme.firebase.json
+package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.firebase.ProjectJson
-import com.krystianwsul.common.firebase.TaskHierarchyJson
-import com.krystianwsul.common.firebase.TaskJson
+import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmOverloads
 
+@Serializable
 class PrivateProjectJson @JvmOverloads constructor(
         override var name: String = "",
         override val startTime: Long = 0,

@@ -2,6 +2,7 @@
   <dictionary name="kryst">
     <words>
       <w>datas</w>
+      <w>relevances</w>
     </words>
   </dictionary>
 </component>

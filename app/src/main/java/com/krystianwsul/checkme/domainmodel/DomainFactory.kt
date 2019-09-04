@@ -28,8 +28,8 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.*
-import com.krystianwsul.common.firebase.TaskJson
 import com.krystianwsul.common.firebase.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.TaskJson
 import java.util.*
 
 @Suppress("LeakingThis")
@@ -683,7 +683,7 @@ class DomainFactory(
                 task.current(now),
                 parentInstance == null,
                 instance.exists(),
-                getGroupListData(instance, task, now, true),
+                getGroupListData(instance, task, now),
                 instance.notificationShown,
                 displayText,
                 task.taskKey)
@@ -2747,8 +2747,7 @@ class DomainFactory(
     private fun getGroupListData(
             instance: Instance,
             task: Task,
-            now: ExactTimeStamp,
-            showImage: Boolean): GroupListFragment.DataWrapper {
+            now: ExactTimeStamp): GroupListFragment.DataWrapper {
         val customTimeDatas = getCurrentRemoteCustomTimes().map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
 
         val instanceDatas = instance.getChildInstances(now)
@@ -2783,15 +2782,13 @@ class DomainFactory(
                 .toMap()
                 .toMutableMap()
 
-        val imageState = if (showImage) task.image else null
-
         val dataWrapper = GroupListFragment.DataWrapper(
                 customTimeDatas,
                 task.current(now),
                 listOf(),
                 task.note,
                 instanceDatas,
-                imageState)
+                task.image)
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 

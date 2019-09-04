@@ -5,6 +5,7 @@ import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.checkme.firebase.records.RemotePrivateCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 
 class RemotePrivateCustomTime(
         private val domainFactory: DomainFactory,
@@ -22,10 +23,22 @@ class RemotePrivateCustomTime(
                 .toMutableList<RemoteCustomTimeRecord<*>>()
                 .apply { add(remoteCustomTimeRecord) }
 
-    var current
-        get() = remoteCustomTimeRecord.current
+    fun current(exactTimeStamp: ExactTimeStamp): Boolean {
+        val current = remoteCustomTimeRecord.current
+        val endExactTimeStamp = endExactTimeStamp
+
+        check(endExactTimeStamp == null || !current)
+
+        return endExactTimeStamp?.let { it > exactTimeStamp } ?: current
+    }
+
+    var endExactTimeStamp
+        get() = remoteCustomTimeRecord.endTime?.let { ExactTimeStamp(it) }
         set(value) {
-            remoteCustomTimeRecord.current = value
+            check((value == null) != (remoteCustomTimeRecord.endTime == null))
+
+            remoteCustomTimeRecord.current = value == null
+            remoteCustomTimeRecord.endTime = value?.long
         }
 
     override fun delete() {

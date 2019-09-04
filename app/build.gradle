@@ -143,7 +143,7 @@ dependencies {
     implementation 'com.github.stfalcon:stfalcon-imageviewer:0.1.0'
 
     implementation project(path: ':treeadapter')
-    implementation project(path: ':common', configuration:'default')
+    implementation project(path: ':common', configuration: 'default')
 }
 
 apply plugin: 'com.google.gms.google-services'

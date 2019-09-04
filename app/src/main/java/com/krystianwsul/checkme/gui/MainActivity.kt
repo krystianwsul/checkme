@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.view.ActionMode
-import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -125,7 +124,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         restoreInstances.switchMap {
             if (it.value != null) {
                 Observables.combineLatest(
-                        mainActivitySearch.textChanges(),
+                        mainSearchText.textChanges(),
                         showDeleted
                 ).map { NullableWrapper(TaskListFragment.SearchData(it.first.toString(), it.second)) }
             } else {
@@ -176,12 +175,13 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                     restoreInstances.accept(NullableWrapper())
 
-                    mainActivitySearch.apply {
+                    mainSearchToolbar.apply {
                         check(visibility == View.VISIBLE)
 
                         animateVisibility(listOf(), listOf(this), duration = MyBottomBar.duration)
-                        text = null
                     }
+
+                    mainSearchText.text = null
 
                     if (it && !switchingTab)
                         showTab(Tab.INSTANCES, changingSearch = true)
@@ -222,10 +222,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                 debug = getBoolean(DEBUG_KEY)
 
                 if (containsKey(SEARCH_KEY)) {
-                    mainActivitySearch.run {
-                        visibility = View.VISIBLE
-                        setText(getString(SEARCH_KEY))
-                    }
+                    mainSearchToolbar.visibility = View.VISIBLE
+                    mainSearchText.setText(getString(SEARCH_KEY))
 
                     restoreInstances.accept(NullableWrapper(getBoolean(RESTORE_INSTANCES_KEY)))
                 } else {
@@ -256,8 +254,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                     restoreInstances.accept(NullableWrapper(false))
                     visibleTab.accept(Tab.TASKS)
 
-                    mainActivitySearch.apply {
-                        visibility = View.VISIBLE
+                    mainSearchToolbar.visibility = View.VISIBLE
+                    mainSearchText.apply {
                         requestFocus()
 
                         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
@@ -314,7 +312,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                             updateCalendarHeight()
                         }
-                        R.id.actionMainClose -> mainActivitySearch.text = null
                         R.id.actionMainSearch -> {
                             check(restoreInstances.value!!.value == null)
 
@@ -329,8 +326,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                                 else -> throw IllegalArgumentException()
                             }))
 
-                            mainActivitySearch.apply {
-                                animateVisibility(listOf(this), listOf(), duration = MyBottomBar.duration)
+                            animateVisibility(listOf(mainSearchToolbar), listOf(), duration = MyBottomBar.duration)
+
+                            mainSearchText.apply {
                                 requestFocus()
 
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
@@ -338,18 +336,33 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                             updateTopMenu(true)
                         }
-                        R.id.actionMainShowDeleted -> showDeleted.accept(!showDeleted.value!!)
                         else -> throw IllegalArgumentException()
                     }
                 }
 
                 true
             }
+        }
+
+        mainSearchToolbar.apply {
+            menuInflater.inflate(R.menu.main_activity_search, menu)
+
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.actionSearchClose -> mainSearchText.text = null
+                    R.id.actionSearchShowDeleted -> showDeleted.accept(!showDeleted.value!!)
+                    else -> throw IllegalArgumentException()
+                }
+
+                true
+            }
+
+            setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
 
             setNavigationOnClickListener { closeSearch(false) }
 
             createDisposable += showDeleted.subscribe {
-                menu.findItem(R.id.actionMainShowDeleted).isChecked = it
+                menu.findItem(R.id.actionSearchShowDeleted).isChecked = it
             }
         }
 
@@ -474,12 +487,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             })
         }
 
-        mainActivitySearch.apply {
-            addOneShotGlobalLayoutListener {
-                layoutParams = layoutParams.apply { width = mainActivityToolbar.width - dpToPx(64 + 56).toInt() }
-            }
-        }
-
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
     }
 
@@ -540,10 +547,10 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    private fun updateTopMenu(changingSearch: Boolean) {
+    private fun updateTopMenu(changingSearch: Boolean) { // todo remove search
         val searching = restoreInstances.value!!.value != null
         if (searching)
-            check(mainActivitySearch.visibility == View.VISIBLE)
+            check(mainSearchToolbar.visibility == View.VISIBLE)
 
         val itemVisibilities = when (visibleTab.value!!) {
             Tab.INSTANCES -> {
@@ -551,21 +558,15 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                 listOf(
                         R.id.actionMainCalendar to (timeRange == TimeRange.DAY),
-                        R.id.actionMainClose to false,
-                        R.id.actionMainShowDeleted to false,
                         R.id.actionMainSearch to true
                 )
             }
             Tab.TASKS -> listOf(
                     R.id.actionMainCalendar to false,
-                    R.id.actionMainClose to searching,
-                    R.id.actionMainShowDeleted to searching,
                     R.id.actionMainSearch to !searching
             )
             else -> listOf(
                     R.id.actionMainCalendar to false,
-                    R.id.actionMainClose to false,
-                    R.id.actionMainShowDeleted to false,
                     R.id.actionMainSearch to false
             )
         }
@@ -573,28 +574,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         mainActivityToolbar.apply {
             animateItems(itemVisibilities, changingSearch) {
                 menu.setGroupVisible(R.id.actionMainFilter, visibleTab.value!! == Tab.INSTANCES)
-            }
-
-            if (searching) {
-                setNavigationIcon(R.drawable.ic_arrow_back_white_24dp)
-
-                if (changingSearch) {
-                    val button = children.filterIsInstance<AppCompatImageButton>().single()
-                    button.visibility = View.INVISIBLE
-
-                    animateVisibility2(listOf(Pair(button, HideType.INVISIBLE)), listOf(), duration = MyBottomBar.duration)
-                }
-            } else {
-                if (changingSearch) {
-                    val button = children.filterIsInstance<AppCompatImageButton>().singleOrNull()
-                    if (button != null) {
-                        animateVisibility2(listOf(), listOf(Pair(button, HideType.INVISIBLE)), duration = MyBottomBar.duration) {
-                            navigationIcon = null
-                        }
-                    }
-                } else {
-                    navigationIcon = null
-                }
             }
         }
 
@@ -610,7 +589,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
             if (restoreInstances.value!!.value != null) {
                 putBoolean(RESTORE_INSTANCES_KEY, restoreInstances.value!!.value!!)
-                putString(SEARCH_KEY, mainActivitySearch.text.toString())
+                putString(SEARCH_KEY, mainSearchText.text.toString())
             }
 
             putBoolean(CALENDAR_KEY, calendarOpen)
@@ -869,7 +848,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
     }
 
     override fun onBackPressed() {
-        if (mainActivitySearch.visibility == View.VISIBLE)
+        if (mainSearchToolbar.visibility == View.VISIBLE)
             closeSearch(false)
         else
             super.onBackPressed()

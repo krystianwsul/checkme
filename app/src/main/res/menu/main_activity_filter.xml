@@ -12,21 +12,6 @@
         tools:ignore="AlwaysShowAction" />
 
     <item
-        android:id="@+id/actionMainClose"
-        android:orderInCategory="200"
-        android:icon="@drawable/ic_close_white_24dp"
-        app:showAsAction="always"
-        android:visible="false" />
-
-    <item
-        android:id="@+id/actionMainShowDeleted"
-        android:orderInCategory="250"
-        app:showAsAction="never"
-        android:checkable="true"
-        android:title="@string/showRemoved"
-        android:visible="false" />
-
-    <item
         android:id="@+id/actionMainCalendar"
         android:orderInCategory="300"
         android:icon="@drawable/ic_date_range_white_24dp"

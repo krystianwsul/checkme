@@ -20,30 +20,44 @@
             android:theme="@style/AppTheme.AppBarOverlay"
             tools:targetApi="lollipop">
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/mainActivityToolbar"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimary"
-                android:theme="@style/AppTheme.AppBarOverlay"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
+                app:layout_scrollFlags="scroll|enterAlways">
 
-                <EditText
-                    android:id="@+id/mainActivitySearch"
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/mainActivityToolbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/search"
-                    android:imeOptions="actionSearch"
-                    android:importantForAutofill="no"
-                    android:inputType="text"
-                    android:singleLine="true"
-                    android:textColor="@color/textPrimaryWhite"
-                    android:textColorHint="@color/textDisabledWhite"
-                    android:visibility="gone"
-                    tools:targetApi="o" />
+                    android:background="@color/colorPrimary"
+                    android:theme="@style/AppTheme.AppBarOverlay"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-            </androidx.appcompat.widget.Toolbar>
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/mainSearchToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorPrimary"
+                    android:theme="@style/AppTheme.AppBarOverlay"
+                    app:popupTheme="@style/AppTheme.PopupOverlay"
+                    android:visibility="gone">
+
+                    <EditText
+                        android:id="@+id/mainSearchText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/search"
+                        android:imeOptions="actionSearch"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textColor="@color/textPrimaryWhite"
+                        android:textColorHint="@color/textDisabledWhite"
+                        tools:targetApi="o" />
+
+                </androidx.appcompat.widget.Toolbar>
+
+            </FrameLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
 

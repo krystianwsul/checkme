@@ -37,7 +37,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     private val startExactTimeStamp by lazy { ExactTimeStamp(remoteProjectRecord.startTime) }
 
-    private val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
+    val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
 
     private val remoteFactory get() = domainFactory.remoteProjectFactory
 

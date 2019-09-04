@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase
 
 import kotlinx.serialization.Serializable
-import kotlin.jvm.JvmOverloads
 
 @Serializable
 class PrivateCustomTimeJson @JvmOverloads constructor(
@@ -20,4 +19,4 @@ class PrivateCustomTimeJson @JvmOverloads constructor(
         override var fridayMinute: Int = 0,
         override var saturdayHour: Int = 0,
         override var saturdayMinute: Int = 0,
-        var current: Boolean = true) : CustomTimeJson
+        var current: Boolean = true) : CustomTimeJson // todo endExactTimeStamp

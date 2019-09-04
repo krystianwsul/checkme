@@ -2392,12 +2392,13 @@ class DomainFactory(
 
         val yesterday = ExactTimeStamp(org.joda.time.DateTime(now.long).minusDays(1))
 
+        fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp?) = endExactTimeStamp?.takeIf { it > yesterday } // delay deleting removed tasks by a day
+                ?.minusOne()
+                ?: now
+
         tasks.asSequence()
                 .filter {
-                    val exactTimeStamp = it.getEndExactTimeStamp()
-                            ?.takeIf { it > yesterday } // delay deleting removed tasks by a day
-                            ?.minusOne()
-                            ?: now
+                    val exactTimeStamp = getIrrelevantNow(it.getEndExactTimeStamp())
 
                     it.current(exactTimeStamp) && it.isRootTask(exactTimeStamp) && it.isVisible(exactTimeStamp, true)
                 }
@@ -2450,7 +2451,7 @@ class DomainFactory(
         val remoteProjects = remoteProjectFactory.remoteProjects.values
         val remoteProjectRelevances = remoteProjects.map { it.id to RemoteProjectRelevance(it) }.toMap()
 
-        remoteProjects.filter { it.current(now) }
+        remoteProjects.filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
                 .map { remoteProjectRelevances.getValue(it.id) }
                 .forEach { it.setRelevant() }
 

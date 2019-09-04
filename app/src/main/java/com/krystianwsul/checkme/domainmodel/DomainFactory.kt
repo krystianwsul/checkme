@@ -17,7 +17,6 @@ import com.krystianwsul.checkme.domainmodel.schedules.ScheduleGroup
 import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.gui.SnackbarListener
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
@@ -2367,9 +2366,6 @@ class DomainFactory(
             }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
-        if (SnackbarListener.deleting)
-            return
-
         val tasks = getTasks()
 
         for (task in tasks)
@@ -2394,16 +2390,25 @@ class DomainFactory(
                 .toMap()
                 .toMutableMap()
 
+        val yesterday = ExactTimeStamp(org.joda.time.DateTime(now.long).minusDays(1))
+
         tasks.asSequence()
-                .filter { it.current(now) && it.isRootTask(now) && it.isVisible(now, true) }
-                .map { taskRelevances.getValue(it.taskKey) }.toList()
+                .filter {
+                    val exactTimeStamp = it.getEndExactTimeStamp()
+                            ?.takeIf { it > yesterday } // delay deleting removed tasks by a day
+                            ?.minusOne()
+                            ?: now
+
+                    it.current(exactTimeStamp) && it.isRootTask(exactTimeStamp) && it.isVisible(exactTimeStamp, true)
+                }
+                .map { taskRelevances.getValue(it.taskKey) }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         rootInstances.map { instanceRelevances[it.instanceKey]!! }.forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         existingInstances.asSequence()
                 .filter { it.isRootInstance(now) && it.isVisible(now, true) }
-                .map { instanceRelevances[it.instanceKey]!! }.toList()
+                .map { instanceRelevances[it.instanceKey]!! }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
         val relevantTaskRelevances = taskRelevances.values.filter { it.relevant }
@@ -2672,8 +2677,7 @@ class DomainFactory(
                 .takeUnless { clear }
 
         val minSchedulesTimeStamp = getTasks().filter { it.current(now) && it.isRootTask(now) }
-                .toList()
-                .flatMap { it.getCurrentSchedules(now) }
+                .flatMap { it.getCurrentSchedules(now).asSequence() }
                 .mapNotNull { it.getNextAlarm(now) }
                 .min()
 

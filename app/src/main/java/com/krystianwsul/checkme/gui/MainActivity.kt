@@ -187,7 +187,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
                         showTab(Tab.INSTANCES, changingSearch = true)
                 }
 
-        updateTopMenu(true)
         hideKeyboard()
     }
 
@@ -333,8 +332,6 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
                                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
                             }
-
-                            updateTopMenu(true)
                         }
                         else -> throw IllegalArgumentException()
                     }
@@ -547,15 +544,9 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
     }
 
-    private fun updateTopMenu(changingSearch: Boolean) { // todo remove search
-        val searching = restoreInstances.value!!.value != null
-        if (searching)
-            check(mainSearchToolbar.visibility == View.VISIBLE)
-
+    private fun updateTopMenu() {
         val itemVisibilities = when (visibleTab.value!!) {
             Tab.INSTANCES -> {
-                check(!searching)
-
                 listOf(
                         R.id.actionMainCalendar to (timeRange == TimeRange.DAY),
                         R.id.actionMainSearch to true
@@ -563,7 +554,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             }
             Tab.TASKS -> listOf(
                     R.id.actionMainCalendar to false,
-                    R.id.actionMainSearch to !searching
+                    R.id.actionMainSearch to true
             )
             else -> listOf(
                     R.id.actionMainCalendar to false,
@@ -572,7 +563,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
 
         mainActivityToolbar.apply {
-            animateItems(itemVisibilities, changingSearch) {
+            animateItems(itemVisibilities) {
                 menu.setGroupVisible(R.id.actionMainFilter, visibleTab.value!! == Tab.INSTANCES)
             }
         }
@@ -721,8 +712,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         if (!changingSearch) {
             if (closeSearch)
                 closeSearch(true)
-            else
-                updateTopMenu(false)
+
+            updateTopMenu()
         }
     }
 

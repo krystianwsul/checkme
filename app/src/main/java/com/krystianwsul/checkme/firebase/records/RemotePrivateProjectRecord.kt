@@ -4,16 +4,15 @@ import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.PrivateCustomTimeJson
-import com.krystianwsul.common.firebase.PrivateProjectJson
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.common.firebase.PrivateProjectJson
 
 class RemotePrivateProjectRecord(
         create: Boolean,
         domainFactory: DomainFactory,
         id: String,
-        override val projectJson: com.krystianwsul.common.firebase.PrivateProjectJson) : RemoteProjectRecord<RemoteCustomTimeId.Private>(create, domainFactory, id) {
+        override val projectJson: PrivateProjectJson) : RemoteProjectRecord<RemoteCustomTimeId.Private>(create, domainFactory, id) {
 
     override val remoteCustomTimeRecords = projectJson.customTimes
             .map { (id, customTimeJson) ->
@@ -26,13 +25,13 @@ class RemotePrivateProjectRecord(
             .toMap()
             .toMutableMap()
 
-    constructor(domainFactory: DomainFactory, id: String, projectJson: com.krystianwsul.common.firebase.PrivateProjectJson) : this(
+    constructor(domainFactory: DomainFactory, id: String, projectJson: PrivateProjectJson) : this(
             false,
             domainFactory,
             id,
             projectJson)
 
-    constructor(domainFactory: DomainFactory, userInfo: UserInfo, projectJson: com.krystianwsul.common.firebase.PrivateProjectJson) : this(
+    constructor(domainFactory: DomainFactory, userInfo: UserInfo, projectJson: PrivateProjectJson) : this(
             true,
             domainFactory,
             userInfo.key,

@@ -4,7 +4,7 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.checkme.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.JsonWrapper
 import com.krystianwsul.checkme.utils.checkError
 import java.util.*
 import kotlin.properties.Delegates

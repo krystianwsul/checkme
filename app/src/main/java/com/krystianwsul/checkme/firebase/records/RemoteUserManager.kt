@@ -5,9 +5,9 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.checkme.firebase.json.UserWrapper
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.UserJson
+import com.krystianwsul.common.firebase.UserWrapper
 import java.util.*
 import kotlin.properties.Delegates
 

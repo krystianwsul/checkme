@@ -8,7 +8,7 @@ import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.JsonWrapper
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectManager
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectManager
 import com.krystianwsul.checkme.utils.*

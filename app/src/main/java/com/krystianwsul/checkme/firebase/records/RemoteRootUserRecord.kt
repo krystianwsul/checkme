@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.UserData
-import com.krystianwsul.checkme.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.UserWrapper
 
 
 open class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create) {

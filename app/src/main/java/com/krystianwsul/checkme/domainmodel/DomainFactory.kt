@@ -2371,7 +2371,7 @@ class DomainFactory(
                         childTask.image)
             }
 
-    private fun setIrrelevant(now: ExactTimeStamp) {
+    private fun setIrrelevant(now: ExactTimeStamp) { // todo move to class, iterate over projects, don't use factories
         val tasks = getTasks()
 
         for (task in tasks)

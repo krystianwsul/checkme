@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.common.firebase.UserWrapper
 
@@ -34,7 +33,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
     open val photoUrl get() = userJson.photoUrl
 
     fun removeFriendOf(friendId: String) {
-        check(!TextUtils.isEmpty(friendId))
+        check(friendId.isNotEmpty())
 
         val friendOf = createObject.friendOf
         check(friendOf.containsKey(friendId))

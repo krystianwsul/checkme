@@ -256,6 +256,4 @@ class RemoteTask<T : RemoteCustomTimeId>(
     }
 
     fun generateInstance(scheduleDateTime: DateTime, instanceShownRecord: InstanceShownRecord?) = RemoteInstance(domainFactory, remoteProject, this, scheduleDateTime, instanceShownRecord)
-
-    class MissingDayException(message: String) : Exception(message)
 }

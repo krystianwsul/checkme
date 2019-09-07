@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.firebase.RemoteTask
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
@@ -117,7 +116,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                         add(Date(taskJson.oldestVisibleYear!!, taskJson.oldestVisibleMonth!!, taskJson.oldestVisibleDay!!))
                     } else {
                         if (taskJson.oldestVisibleYear != null || taskJson.oldestVisibleMonth != null || taskJson.oldestVisibleDay != null)
-                            MyCrashlytics.logException(RemoteTask.MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
+                            MyCrashlytics.logException(MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
                     }
                 }
                 .min()
@@ -312,4 +311,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
 
     private class MissingNameException(message: String) : Exception(message)
+
+    private class MissingDayException(message: String) : Exception(message)
 }

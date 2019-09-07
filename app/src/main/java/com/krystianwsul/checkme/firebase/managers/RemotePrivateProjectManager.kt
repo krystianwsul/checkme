@@ -21,13 +21,13 @@ class RemotePrivateProjectManager(
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemotePrivateProjectManager.isSaved = $value") }
 
     var remoteProjectRecord = if (dataSnapshot.value == null) {
-        RemotePrivateProjectRecord(domainFactory, deviceInfo, PrivateProjectJson(startTime = now.long))
+        RemotePrivateProjectRecord(deviceInfo, domainFactory.uuid, PrivateProjectJson(startTime = now.long))
     } else {
         dataSnapshot.toRecord()
     }
         private set
 
-    private fun DataSnapshot.toRecord() = RemotePrivateProjectRecord(domainFactory, key!!, getValue(PrivateProjectJson::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemotePrivateProjectRecord(key!!, domainFactory.uuid, getValue(PrivateProjectJson::class.java)!!)
 
     fun newSnapshot(dataSnapshot: DataSnapshot): RemotePrivateProjectRecord {
         remoteProjectRecord = dataSnapshot.toRecord()

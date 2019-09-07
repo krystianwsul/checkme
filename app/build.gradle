@@ -27,8 +27,8 @@ android {
         minSdkVersion 22
         targetSdkVersion 29
 
-        versionCode 193
-        versionName "0.22.0"
+        versionCode 194
+        versionName "0.22.1"
     }
     buildTypes {
         release {

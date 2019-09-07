@@ -3,9 +3,10 @@ package com.krystianwsul.checkme.firebase
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.schedules.WeeklyScheduleBridge
 import com.krystianwsul.checkme.firebase.records.RemoteWeeklyScheduleRecord
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteWeeklyScheduleBridge<T : RemoteCustomTimeId>(
         domainFactory: DomainFactory,

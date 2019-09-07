@@ -3,8 +3,9 @@ package com.krystianwsul.checkme.firebase.records
 import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.common.firebase.PrivateProjectJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemotePrivateProjectRecord(
         create: Boolean,

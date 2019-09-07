@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.persistencemodel
 
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
 class PersistenceManager(

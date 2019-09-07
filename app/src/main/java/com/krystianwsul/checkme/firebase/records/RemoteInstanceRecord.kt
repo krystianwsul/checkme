@@ -4,13 +4,14 @@ package com.krystianwsul.checkme.firebase.records
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.utils.InstanceData
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.JsonTime
 import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.common.firebase.InstanceJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 import kotlin.properties.Delegates.observable
 
 class RemoteInstanceRecord<T : RemoteCustomTimeId>(

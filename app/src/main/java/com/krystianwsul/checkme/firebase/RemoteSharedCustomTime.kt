@@ -2,7 +2,8 @@ package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.firebase.records.RemoteSharedCustomTimeRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.RemoteCustomTimeId
+
 
 class RemoteSharedCustomTime(
         override val remoteProject: RemoteSharedProject,

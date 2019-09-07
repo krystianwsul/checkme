@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.toDate
@@ -9,6 +9,7 @@ import com.krystianwsul.common.firebase.InstanceJson
 import com.krystianwsul.common.firebase.OldestVisibleJson
 import com.krystianwsul.common.firebase.ScheduleWrapper
 import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,

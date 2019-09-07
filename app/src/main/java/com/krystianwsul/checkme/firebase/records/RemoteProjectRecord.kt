@@ -1,10 +1,11 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.common.firebase.ProjectJson
 import com.krystianwsul.common.firebase.TaskHierarchyJson
 import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
 abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(

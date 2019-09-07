@@ -1,8 +1,9 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.common.firebase.PrivateCustomTimeJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
 class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.Private> {

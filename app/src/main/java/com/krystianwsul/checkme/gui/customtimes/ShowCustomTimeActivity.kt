@@ -18,12 +18,13 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.checkme.utils.fixClicks
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_custom_time.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*

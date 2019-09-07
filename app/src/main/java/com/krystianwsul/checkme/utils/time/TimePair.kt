@@ -3,7 +3,8 @@ package com.krystianwsul.checkme.utils.time
 import android.os.Parcelable
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.RemoteCustomTimeId
+
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 

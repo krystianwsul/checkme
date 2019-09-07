@@ -3,10 +3,11 @@ package com.krystianwsul.checkme.firebase.records
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.common.firebase.JsonWrapper
 import com.krystianwsul.common.firebase.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.UserJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteSharedProjectRecord(
         private val remoteSharedProjectManager: RemoteSharedProjectManager,

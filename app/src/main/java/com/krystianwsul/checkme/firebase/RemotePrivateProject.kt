@@ -1,12 +1,12 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.common.firebase.PrivateCustomTimeJson
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 
 class RemotePrivateProject(

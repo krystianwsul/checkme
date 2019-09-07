@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.domainmodel.DeviceInfo
+import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.common.firebase.PrivateCustomTimeJson
 
@@ -27,7 +27,7 @@ class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.
 
     override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
 
-    override fun mine(deviceInfo: DeviceInfo) = true
+    override fun mine(userInfo: UserInfo) = true
 
     var current: Boolean
         get() = customTimeJson.current

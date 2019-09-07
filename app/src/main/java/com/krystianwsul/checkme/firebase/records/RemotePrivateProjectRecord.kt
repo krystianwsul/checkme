@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
@@ -16,7 +15,7 @@ class RemotePrivateProjectRecord(
 
     override val remoteCustomTimeRecords = projectJson.customTimes
             .map { (id, customTimeJson) ->
-                check(!TextUtils.isEmpty(id))
+                check(id.isNotEmpty())
 
                 val remoteCustomTimeId = RemoteCustomTimeId.Private(id)
 

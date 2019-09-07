@@ -1,8 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.firebase.RemoteTask
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
@@ -16,7 +14,7 @@ import com.krystianwsul.common.firebase.TaskJson
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
-        val domainFactory: DomainFactory,
+        private val uuid: String,
         val id: String,
         private val remoteProjectRecord: RemoteProjectRecord<T>,
         private val taskJson: TaskJson) : RemoteRecord(create) {
@@ -75,7 +73,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     var name
         get() = taskJson.name
         set(name) {
-            check(!TextUtils.isEmpty(name))
+            check(name.isNotEmpty())
 
             if (name == taskJson.name)
                 return
@@ -134,26 +132,37 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             addValue("$key/image", value)
         }
 
-    constructor(domainFactory: DomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord<T>, taskJson: TaskJson) : this(
+    constructor(
+            id: String,
+            uuid: String,
+            remoteProjectRecord: RemoteProjectRecord<T>,
+            taskJson: TaskJson
+    ) : this(
             false,
-            domainFactory,
+            uuid,
             id,
             remoteProjectRecord,
-            taskJson)
+            taskJson
+    )
 
-    constructor(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord<T>, taskJson: TaskJson) : this(
+    constructor(
+            uuid: String,
+            remoteProjectRecord: RemoteProjectRecord<T>,
+            taskJson: TaskJson
+    ) : this(
             true,
-            domainFactory,
+            uuid,
             remoteProjectRecord.getTaskRecordId(),
             remoteProjectRecord,
-            taskJson)
+            taskJson
+    )
 
     init {
         if (taskJson.name.isEmpty())
             MyCrashlytics.logException(MissingNameException("taskKey: $key"))
 
         for ((key, instanceJson) in taskJson.instances) {
-            check(!TextUtils.isEmpty(key))
+            check(key.isNotEmpty())
 
             val (scheduleKey, remoteCustomTimeId) = RemoteInstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
 
@@ -169,7 +178,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         }
 
         for ((id, scheduleWrapper) in taskJson.schedules) {
-            check(!TextUtils.isEmpty(id))
+            check(id.isNotEmpty())
 
             when {
                 scheduleWrapper.singleScheduleJson != null -> {
@@ -206,8 +215,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             }
         }
     }
-
-    private val uuid by lazy { domainFactory.uuid }
 
     private val oldestVisibleJson get() = taskJson.oldestVisible[uuid]
 

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.common.firebase.ProjectJson
@@ -10,8 +9,8 @@ import com.krystianwsul.common.firebase.TaskJson
 @Suppress("LeakingThis")
 abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
         create: Boolean,
-        domainFactory: DomainFactory,
-        val id: String) : RemoteRecord(create) {
+        val id: String,
+        private val uuid: String) : RemoteRecord(create) {
 
     companion object {
 
@@ -27,7 +26,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
                 .mapValues { (id, taskJson) ->
                     check(id.isNotEmpty())
 
-                    RemoteTaskRecord(id, domainFactory.uuid, this, taskJson)
+                    RemoteTaskRecord(id, uuid, this, taskJson)
                 }
                 .toMutableMap()
     }
@@ -75,8 +74,8 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
                 remoteTaskHierarchyRecords.values +
                 remoteCustomTimeRecords.values
 
-    fun newRemoteTaskRecord(domainFactory: DomainFactory, taskJson: TaskJson): RemoteTaskRecord<T> {
-        val remoteTaskRecord = RemoteTaskRecord(domainFactory.uuid, this, taskJson)
+    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T> {
+        val remoteTaskRecord = RemoteTaskRecord(uuid, this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
         remoteTaskRecords[remoteTaskRecord.id] = remoteTaskRecord

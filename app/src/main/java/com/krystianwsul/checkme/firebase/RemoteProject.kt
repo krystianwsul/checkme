@@ -52,7 +52,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     val taskHierarchies get() = remoteTaskHierarchyContainer.all
 
     fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask<T> {
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
+        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
         val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))
@@ -98,7 +98,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
                 task.note,
                 instanceJsons,
                 oldestVisible = oldestVisibleMap.toMutableMap())
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
+        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
         val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))

@@ -1,11 +1,12 @@
-package com.krystianwsul.checkme.firebase.records
+package com.krystianwsul.checkme.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.JsonWrapper
+import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.common.firebase.JsonWrapper
 import java.util.*
 import kotlin.properties.Delegates
 

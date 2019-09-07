@@ -3,9 +3,10 @@ package com.krystianwsul.checkme.firebase.records
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.JsonWrapper
+import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.common.firebase.JsonWrapper
 import com.krystianwsul.common.firebase.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.UserJson
 

@@ -1,10 +1,11 @@
-package com.krystianwsul.checkme.firebase.records
+package com.krystianwsul.checkme.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.common.firebase.PrivateProjectJson

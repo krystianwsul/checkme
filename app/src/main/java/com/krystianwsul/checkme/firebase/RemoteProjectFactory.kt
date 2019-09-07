@@ -8,8 +8,8 @@ import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectManager
-import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectManager
+import com.krystianwsul.checkme.firebase.managers.RemotePrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel

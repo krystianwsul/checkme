@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.records.RemoteUserManager
+import com.krystianwsul.checkme.firebase.managers.RemoteUserManager
 
 class RemoteUserFactory(
         domainFactory: DomainFactory,

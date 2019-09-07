@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
@@ -258,11 +257,11 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         }
     }
 
-    fun newRemoteInstanceRecord(remoteProject: RemoteProject<T>, instanceJson: InstanceJson, scheduleKey: ScheduleKey): RemoteInstanceRecord<T> {
-        val remoteCustomTimeId = scheduleKey.scheduleTimePair
-                .customTimeKey
-                ?.let { remoteProject.getRemoteCustomTime(it.remoteCustomTimeId).id }
-
+    fun newRemoteInstanceRecord(
+            instanceJson: InstanceJson,
+            scheduleKey: ScheduleKey,
+            remoteCustomTimeId: T?
+    ): RemoteInstanceRecord<T> {
         val firebaseKey = RemoteInstanceRecord.scheduleKeyToString(scheduleKey)
 
         val remoteInstanceRecord = RemoteInstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)

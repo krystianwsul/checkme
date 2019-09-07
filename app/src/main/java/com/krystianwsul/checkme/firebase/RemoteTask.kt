@@ -151,7 +151,12 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
-        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(remoteProject, instanceJson, scheduleKey)
+        val remoteCustomTimeId = scheduleDateTime.time
+                .timePair
+                .customTimeKey
+                ?.let { remoteProject.getRemoteCustomTime(it.remoteCustomTimeId).id }
+
+        val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey, remoteCustomTimeId)
 
         existingRemoteInstances[remoteInstance.scheduleKey] = remoteInstance
 

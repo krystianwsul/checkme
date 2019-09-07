@@ -55,7 +55,16 @@ object BackendNotifier {
                 url,
                 {
                     Log.e("asdf", "BackendNotifier response:")
-                    it.lines().forEach { Log.e("asdf", it) }
+
+                    val lines = it.lines()
+
+                    lines.forEach { Log.e("asdf", it) }
+
+                    lines.firstOrNull { it.startsWith("error") }?.let {
+                        val error = (lines.indexOf(it) until lines.size).joinToString("\n") { lines[it] }
+
+                        MyCrashlytics.logException(BackendException(error))
+                    }
                 },
                 {
                     if (it is TimeoutError || it is NoConnectionError) {
@@ -67,4 +76,6 @@ object BackendNotifier {
 
         queue.add(stringRequest)
     }
+
+    private class BackendException(message: String) : Exception(message)
 }

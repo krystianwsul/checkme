@@ -30,7 +30,7 @@ object DatabaseWrapper {
                 .child(root)
     }
 
-    fun getRootRecordId() = rootReference.child(RECORDS_KEY).push().key!!
+    fun newSharedProjectRecordId() = rootReference.child(RECORDS_KEY).push().key!!
 
     fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 
@@ -57,7 +57,7 @@ object DatabaseWrapper {
         return id
     }
 
-    fun getSharedScheduleRecordId(projectId: String, taskId: String): String {
+    fun newSharedScheduleRecordId(projectId: String, taskId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
                 .push()
                 .key!!
@@ -75,7 +75,7 @@ object DatabaseWrapper {
         return id
     }
 
-    fun getSharedTaskRecordId(projectId: String): String {
+    fun newSharedTaskRecordId(projectId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
                 .push()
                 .key!!
@@ -93,7 +93,7 @@ object DatabaseWrapper {
         return id
     }
 
-    fun getSharedTaskHierarchyRecordId(projectId: String): String {
+    fun newSharedTaskHierarchyRecordId(projectId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
                 .push()
                 .key!!
@@ -111,7 +111,7 @@ object DatabaseWrapper {
         return id
     }
 
-    fun getSharedCustomTimeRecordId(projectId: String): String {
+    fun newSharedCustomTimeRecordId(projectId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
                 .push()
                 .key!!

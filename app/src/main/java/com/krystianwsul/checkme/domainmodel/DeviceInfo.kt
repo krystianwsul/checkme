@@ -4,7 +4,7 @@ import android.text.TextUtils
 import com.google.firebase.auth.FirebaseUser
 import com.krystianwsul.checkme.firebase.UserData
 
-data class UserInfo(
+data class DeviceInfo(
         val email: String,
         val name: String,
         var token: String?) {

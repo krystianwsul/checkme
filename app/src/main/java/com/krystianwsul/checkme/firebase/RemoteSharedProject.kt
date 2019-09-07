@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
+import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
@@ -14,7 +14,7 @@ import java.util.*
 class RemoteSharedProject(
         domainFactory: DomainFactory,
         override val remoteProjectRecord: RemoteSharedProjectRecord,
-        userInfo: UserInfo,
+        deviceInfo: DeviceInfo,
         uuid: String,
         now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(domainFactory, uuid) {
 
@@ -51,7 +51,7 @@ class RemoteSharedProject(
                 .map { RemoteTaskHierarchy(domainFactory, this, it) }
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
 
-        updateUserInfo(userInfo.key, uuid, userInfo.token)
+        updateUserInfo(deviceInfo.key, uuid, deviceInfo.token)
     }
 
     private fun addUser(remoteRootUser: RemoteRootUser) {
@@ -80,8 +80,8 @@ class RemoteSharedProject(
         remoteProjectUser.setToken(token, uuid)
     }
 
-    fun updatePhotoUrl(userInfo: UserInfo, photoUrl: String) {
-        val key = userInfo.key
+    fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) {
+        val key = deviceInfo.key
         check(remoteUsers.containsKey(key))
 
         val remoteProjectUser = remoteUsers.getValue(key)

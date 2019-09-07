@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.records
 
 import android.text.TextUtils
+import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
@@ -31,10 +31,10 @@ class RemotePrivateProjectRecord(
             id,
             projectJson)
 
-    constructor(domainFactory: DomainFactory, userInfo: UserInfo, projectJson: PrivateProjectJson) : this(
+    constructor(domainFactory: DomainFactory, deviceInfo: DeviceInfo, projectJson: PrivateProjectJson) : this(
             true,
             domainFactory,
-            userInfo.key,
+            deviceInfo.key,
             projectJson)
 
     fun newRemoteCustomTimeRecord(customTimeJson: com.krystianwsul.common.firebase.PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {

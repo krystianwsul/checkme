@@ -12,8 +12,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.UserInfo
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
@@ -56,7 +56,7 @@ class MyApplication : Application() {
 
     val googleSigninClient by lazy { getClient() }
 
-    private val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<UserInfo>())
+    private val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<DeviceInfo>())
 
     val userInfo get() = userInfoRelay.value!!.value!!
 
@@ -83,7 +83,7 @@ class MyApplication : Application() {
                 .authStateChanges()
                 .map { NullableWrapper(it.currentUser) }
                 .startWith(NullableWrapper(FirebaseAuth.getInstance().currentUser))
-                .map { NullableWrapper(it.value?.let { UserInfo(it, token) }) }
+                .map { NullableWrapper(it.value?.let { DeviceInfo(it, token) }) }
                 .distinctUntilChanged()
                 .subscribe(userInfoRelay)
 

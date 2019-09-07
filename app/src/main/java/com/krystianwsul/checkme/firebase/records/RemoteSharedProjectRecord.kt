@@ -1,9 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.text.TextUtils
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
+import com.krystianwsul.checkme.firebase.DatabaseWrapper // todo
+import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager // todo
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.RemoteCustomTimeId
 import com.krystianwsul.common.firebase.JsonWrapper
@@ -13,20 +11,20 @@ import com.krystianwsul.common.firebase.UserJson
 class RemoteSharedProjectRecord(
         private val remoteSharedProjectManager: RemoteSharedProjectManager,
         create: Boolean,
-        domainFactory: DomainFactory,
         id: String,
+        uuid: String,
         private val jsonWrapper: JsonWrapper
 ) : RemoteProjectRecord<RemoteCustomTimeId.Shared>(
         create,
         id,
-        domainFactory.uuid
+        uuid
 ) {
 
     override val projectJson = jsonWrapper.projectJson
 
     override val remoteCustomTimeRecords = projectJson.customTimes
             .map { (id, customTimeJson) ->
-                check(!TextUtils.isEmpty(id))
+                check(id.isNotEmpty())
 
                 val remoteCustomTimeId = RemoteCustomTimeId.Shared(id)
 
@@ -38,7 +36,7 @@ class RemoteSharedProjectRecord(
     val remoteUserRecords by lazy {
         projectJson.users
                 .mapValues { (id, userJson) ->
-                    check(!TextUtils.isEmpty(id))
+                    check(id.isNotEmpty())
 
                     RemoteProjectUserRecord(create, this, userJson)
                 }
@@ -47,19 +45,30 @@ class RemoteSharedProjectRecord(
 
     override val children get() = super.children + remoteUserRecords.values
 
-    constructor(remoteSharedProjectManager: RemoteSharedProjectManager, domainFactory: DomainFactory, id: String, jsonWrapper: JsonWrapper) : this(
+    constructor(
+            remoteSharedProjectManager: RemoteSharedProjectManager,
+            uuid: String,
+            id: String,
+            jsonWrapper: JsonWrapper
+    ) : this(
             remoteSharedProjectManager,
             false,
-            domainFactory,
             id,
-            jsonWrapper)
+            uuid,
+            jsonWrapper
+    )
 
-    constructor(remoteSharedProjectManager: RemoteSharedProjectManager, domainFactory: DomainFactory, jsonWrapper: JsonWrapper) : this(
+    constructor(
+            remoteSharedProjectManager: RemoteSharedProjectManager,
+            uuid: String,
+            jsonWrapper: JsonWrapper
+    ) : this(
             remoteSharedProjectManager,
             true,
-            domainFactory,
             DatabaseWrapper.getRootRecordId(),
-            jsonWrapper)
+            uuid,
+            jsonWrapper
+    )
 
     fun updateRecordOf(addedFriends: Set<String>, removedFriends: Set<String>) {
         check(addedFriends.none { removedFriends.contains(it) })

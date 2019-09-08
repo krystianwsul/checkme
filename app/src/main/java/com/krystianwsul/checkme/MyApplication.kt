@@ -23,12 +23,12 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DateTimeSoy
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
+import com.soywiz.klock.DateTimeTz
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
@@ -163,7 +163,7 @@ class MyApplication : Application() {
 
         val today = Date.today()
 
-        Log.e("asdf", "klok " + DateTimeSoy.createAdjusted(today.year, today.month, today.day).toString())
+        Log.e("asdf", "klock timestamp " + DateTimeTz.nowLocal().format("HH:mm"))
     }
 
     private fun clearPaparazzo() {

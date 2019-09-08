@@ -168,7 +168,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                         dismiss()
                     }
 
-                    editInstanceCancel.setOnClickListener { dialog!!.cancel() }
+                    editInstanceCancel.setOnClickListener { dialog.cancel() }
                 }
 
         return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
@@ -227,7 +227,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                 override fun show(snackbarListener: SnackbarListener) = snackbarListener.showInstanceMarkedDone()
             })
 
-            dialog!!.cancel()
+            dialog.cancel()
             return
         }
 
@@ -244,9 +244,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
             val dateTime = data.instanceDatas
                     .values
-                    .map { it.instanceDateTime }
-                    .sorted()
-                    .first()
+                    .map { it.instanceDateTime }.min()!!
 
             date = dateTime.date
             timePairPersist = TimePairPersist(dateTime.time.timePair)

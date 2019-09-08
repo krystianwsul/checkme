@@ -15,7 +15,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        val data = remoteMessage.data!!
+        val data = remoteMessage.data
 
         if (data.containsKey(REFRESH_KEY)) {
             val refresh = data[REFRESH_KEY]!!

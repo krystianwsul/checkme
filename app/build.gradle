@@ -78,8 +78,8 @@ dependencies {
     testImplementation "org.powermock:powermock-api-mockito2:$powermockVersion"
     testImplementation "org.powermock:powermock-classloading-xstream:$powermockVersion"
 
-    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
-    implementation 'com.google.android.material:material:1.1.0-alpha09'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0-alpha10'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
     implementation 'androidx.preference:preference:1.1.0-rc01'
     implementation 'androidx.sharetarget:sharetarget:1.0.0-alpha02'

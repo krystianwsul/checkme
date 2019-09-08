@@ -167,9 +167,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 }
             }
 
-            scheduleDialogCancel.setOnClickListener {
-                dialog!!.cancel()
-            }
+            scheduleDialogCancel.setOnClickListener { dialog.cancel() }
 
             scheduleDialogDate.fixClicks()
             scheduleDialogTime.fixClicks()

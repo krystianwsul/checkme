@@ -24,18 +24,18 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
     override fun onStart() {
         super.onStart()
 
-        BottomSheetBehavior.from(dialog!!.window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
+        BottomSheetBehavior.from(dialog.window!!.findViewById<View>(R.id.design_bottom_sheet)).apply {
             skipCollapsed = true
 
-            setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
 
                 override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
 
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     if (newState == BottomSheetBehavior.STATE_HIDDEN)
-                        dialog!!.cancel()
+                        dialog.cancel()
                 }
-            })
+            }
 
             if (first) {
                 first = false
@@ -45,11 +45,12 @@ abstract class NoCollapseBottomSheetDialogFragment : BottomSheetDialogFragment()
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            dialog!!.window!!.decorView.apply {
-                systemUiVisibility = systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-            }
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            dialog.window!!
+                    .decorView
+                    .apply {
+                        systemUiVisibility = systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                    }
     }
 
     override fun onStop() {

@@ -39,7 +39,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onStart() {
         super.onStart()
 
-        dialog!!.findViewById<NavigationView>(R.id.mainActivityNavigation).apply {
+        dialog.findViewById<NavigationView>(R.id.mainActivityNavigation)!!.apply {
             mainActivity.apply {
                 setCheckedItem(when (visibleTab.value!!) {
                     MainActivity.Tab.INSTANCES -> R.id.main_drawer_instances

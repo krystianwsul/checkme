@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.utils.time
 
 import android.os.Parcelable
+import com.soywiz.klock.DateTimeTz
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
@@ -42,4 +43,6 @@ data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
     override fun toString() = "$date $hourMinute"
 
     fun toExactTimeStamp() = ExactTimeStamp(long)
+
+    fun toDateTimeTz() = DateTimeTz.fromUnixLocal(long)
 }

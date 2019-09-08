@@ -28,3 +28,5 @@ fun Date.getDisplayText(): String {
 }
 
 fun Calendar.toDateTimeTz() = DateTimeTz.fromUnixLocal(timeInMillis)
+
+val Date.calendar get() = GregorianCalendar(year, month - 1, day)

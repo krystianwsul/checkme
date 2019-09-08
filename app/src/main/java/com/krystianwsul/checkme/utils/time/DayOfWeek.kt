@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.utils.time
 
-import com.soywiz.klock.DateTimeTz
-
 enum class DayOfWeek {
     SUNDAY,
     MONDAY,
@@ -13,11 +11,7 @@ enum class DayOfWeek {
 
     companion object {
 
-        fun fromDate(date: Date): DayOfWeek {
-            val day = DateTimeTz.fromUnixLocal(TimeStamp(date, HourMinute.now).long).dayOfWeekInt
-
-            return values()[day]
-        }
+        fun fromDate(date: Date) = values()[date.toDateTimeTz().dayOfWeekInt]
     }
 
     override fun toString() = com.soywiz.klock.DayOfWeek[ordinal].localName

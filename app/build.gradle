@@ -144,6 +144,8 @@ dependencies {
 
     implementation project(path: ':treeadapter')
     implementation project(path: ':common', configuration: 'default')
+
+    implementation "com.soywiz.korlibs.klock:klock:1.6.0"
 }
 
 apply plugin: 'com.google.gms.google-services'

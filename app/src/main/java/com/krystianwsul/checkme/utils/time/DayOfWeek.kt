@@ -1,9 +1,6 @@
 package com.krystianwsul.checkme.utils.time
 
-import android.text.TextUtils
-
-import java.text.DateFormatSymbols
-import java.util.*
+import com.soywiz.klock.DateTimeTz
 
 enum class DayOfWeek {
     SUNDAY,
@@ -16,17 +13,12 @@ enum class DayOfWeek {
 
     companion object {
 
-        fun getDayFromCalendar(calendar: Calendar): DayOfWeek {
-            val day = calendar.get(Calendar.DAY_OF_WEEK)
+        fun fromDate(date: Date): DayOfWeek {
+            val day = DateTimeTz.fromUnixLocal(TimeStamp(date, HourMinute.now).long).dayOfWeekInt
 
-            return values()[day - 1]
+            return values()[day]
         }
     }
 
-    override fun toString(): String {
-        val weekDay = DateFormatSymbols.getInstance().weekdays[ordinal + 1]
-        check(!TextUtils.isEmpty(weekDay))
-
-        return weekDay
-    }
+    override fun toString() = com.soywiz.klock.DayOfWeek[ordinal].localName
 }

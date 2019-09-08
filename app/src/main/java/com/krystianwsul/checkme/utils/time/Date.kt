@@ -23,7 +23,7 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
         fun fromJson(json: String) = format.parseLocalDate(json).let { Date(it.year, it.monthOfYear, it.dayOfMonth) }
     }
 
-    val dayOfWeek get() = DayOfWeek.getDayFromCalendar(GregorianCalendar(year, month - 1, day))
+    val dayOfWeek get() = DayOfWeek.fromDate(this)
 
     val calendar get() = GregorianCalendar(year, month - 1, day)
 

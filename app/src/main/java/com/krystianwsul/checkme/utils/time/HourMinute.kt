@@ -31,7 +31,7 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
             calendar.add(Calendar.HOUR_OF_DAY, 1)
             calendar.set(Calendar.MINUTE, 0)
 
-            return Pair(Date(calendar), HourMinute(calendar))
+            return Pair(Date(calendar.toDateTimeTz()), HourMinute(calendar)) // todo
         }
 
         fun fromJson(json: String) = format.parseLocalTime(json).let { HourMinute(it.hourOfDay, it.minuteOfHour) }

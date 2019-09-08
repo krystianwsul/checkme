@@ -75,7 +75,7 @@ class GroupListFragment @JvmOverloads constructor(
                 }
             }
 
-            return Date(calendar)
+            return Date(calendar.toDateTimeTz())
         }
 
         private fun nodesToSelectedDatas(treeNodes: List<TreeNode<NodeHolder>>, includeGroups: Boolean): Set<SelectedData> {

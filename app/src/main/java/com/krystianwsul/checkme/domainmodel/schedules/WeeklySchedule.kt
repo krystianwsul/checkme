@@ -60,7 +60,7 @@ class WeeklySchedule(
             thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference)
         else
             thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference + 7)
-        val thisDate = Date(thisCalendar)
+        val thisDate = Date(thisCalendar.toDateTimeTz())
 
         return DateTime(thisDate, time).timeStamp
     }

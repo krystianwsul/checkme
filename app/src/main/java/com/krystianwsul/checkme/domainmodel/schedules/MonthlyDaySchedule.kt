@@ -59,7 +59,7 @@ class MonthlyDaySchedule(
             val calendar = now.calendar
             calendar.add(Calendar.MONTH, 1)
 
-            val dateNextMonth = Date(calendar)
+            val dateNextMonth = Date(calendar.toDateTimeTz())
 
             val nextMonth = DateTime(dateNextMonth, time).timeStamp
 

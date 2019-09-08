@@ -465,7 +465,7 @@ class DomainFactory(
                 }
             }
 
-            startExactTimeStamp = ExactTimeStamp(Date(startCalendar), HourMilli(0, 0, 0, 0))
+            startExactTimeStamp = ExactTimeStamp(Date(startCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
         }
 
         val endCalendar = now.calendar
@@ -482,7 +482,7 @@ class DomainFactory(
             }
         }
 
-        endExactTimeStamp = ExactTimeStamp(Date(endCalendar), HourMilli(0, 0, 0, 0))
+        endExactTimeStamp = ExactTimeStamp(Date(endCalendar.toDateTimeTz()), HourMilli(0, 0, 0, 0))
 
         val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
 
@@ -953,7 +953,7 @@ class DomainFactory(
         val now = ExactTimeStamp.now
         val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
-        val date = Date(calendar)
+        val date = Date(calendar.toDateTimeTz())
         val hourMinute = HourMinute(calendar)
 
         instance.setInstanceDateTime(date, TimePair(hourMinute), now)
@@ -974,7 +974,7 @@ class DomainFactory(
         val now = ExactTimeStamp.now
         val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
-        val date = Date(calendar)
+        val date = Date(calendar.toDateTimeTz())
         val hourMinute = HourMinute(calendar)
         val timePair = TimePair(hourMinute)
 

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.utils.time
 
 import android.os.Parcelable
+import com.soywiz.klock.DateTimeTz
 import kotlinx.android.parcel.Parcelize
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
@@ -16,7 +17,7 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
         private val format = DateTimeFormat.forPattern(PATTERN)
 
-        fun today() = Date(Calendar.getInstance())
+        fun today() = Date(DateTimeTz.nowLocal())
 
         fun fromJson(json: String) = format.parseLocalDate(json).let { Date(it.year, it.monthOfYear, it.dayOfMonth) }
     }
@@ -25,7 +26,7 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     val calendar get() = GregorianCalendar(year, month - 1, day)
 
-    constructor(calendar: Calendar) : this(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH))
+    constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.yearInt, dateTimeTz.month1, dateTimeTz.dayOfMonth)
 
     override fun compareTo(other: Date) = compareValuesBy(this, other, { it.year }, { it.month }, { it.day })
 

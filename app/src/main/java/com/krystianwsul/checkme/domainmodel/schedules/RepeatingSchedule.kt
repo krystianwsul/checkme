@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.HourMilli
+import com.krystianwsul.checkme.utils.time.toDateTimeTz
 
 import java.util.*
 
@@ -42,7 +43,7 @@ abstract class RepeatingSchedule(domainFactory: DomainFactory) : Schedule(domain
             val loopEndCalendar = endExactTimeStamp.date.calendar
 
             while (loopStartCalendar.before(loopEndCalendar)) {
-                instances.add(getInstanceInDate(task, Date(loopStartCalendar), null, null))
+                instances.add(getInstanceInDate(task, Date(loopStartCalendar.toDateTimeTz()), null, null))
                 loopStartCalendar.add(Calendar.DATE, 1)
             }
 

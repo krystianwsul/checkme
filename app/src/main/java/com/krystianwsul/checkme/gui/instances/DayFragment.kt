@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
@@ -36,27 +37,35 @@ class DayFragment @JvmOverloads constructor(context: Context, attrs: AttributeSe
                     0 -> getString(R.string.today)
                     1 -> getString(R.string.tomorrow)
                     else -> {
-                        Date(Calendar.getInstance().apply {
-                            add(Calendar.DATE, position)
-                        }).let {
-                            it.dayOfWeek.toString() + ", " + it.toString()
-                        }
+                        Date(
+                                Calendar.getInstance()
+                                        .apply { add(Calendar.DATE, position) }
+                                        .toDateTimeTz()
+                        ).let { it.dayOfWeek.toString() + ", " + it.toString() }
                     }
                 }
             } else {
                 if (timeRange == MainActivity.TimeRange.WEEK) {
-                    val startDate = Date(Calendar.getInstance().apply {
-                        if (position > 0) {
-                            add(Calendar.WEEK_OF_YEAR, position)
-                            set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
-                        }
-                    })
+                    val startDate = Date(
+                            Calendar.getInstance()
+                                    .apply {
+                                        if (position > 0) {
+                                            add(Calendar.WEEK_OF_YEAR, position)
+                                            set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
+                                        }
+                                    }
+                                    .toDateTimeTz()
+                    )
 
-                    val endDate = Date(Calendar.getInstance().apply {
-                        add(Calendar.WEEK_OF_YEAR, position + 1)
-                        set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
-                        add(Calendar.DATE, -1)
-                    })
+                    val endDate = Date(
+                            Calendar.getInstance()
+                                    .apply {
+                                        add(Calendar.WEEK_OF_YEAR, position + 1)
+                                        set(Calendar.DAY_OF_WEEK, firstDayOfWeek)
+                                        add(Calendar.DATE, -1)
+                                    }
+                                    .toDateTimeTz()
+                    )
 
                     "$startDate - $endDate"
                 } else {

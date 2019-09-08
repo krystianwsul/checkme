@@ -7,27 +7,26 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
 
     companion object {
 
-        val now get() = ExactTimeStamp(Calendar.getInstance())
+        val now get() = ExactTimeStamp(DateTimeSoy.nowUnixLong())
     }
+
+    fun toDateTimeSoy() = DateTimeSoy.fromUnix(long)
 
     val calendar: Calendar get() = Calendar.getInstance().apply { timeInMillis = long }
 
-    val date get() = Date(calendar.toDateTimeTz()) // todo
+    val date get() = Date(toDateTimeSoy().local)
 
     val hourMilli get() = HourMilli(calendar)
 
-    constructor(date: Date, hourMilli: HourMilli) : this(Calendar.getInstance().run {
-        set(Calendar.YEAR, date.year)
-        set(Calendar.MONTH, date.month - 1)
-        set(Calendar.DAY_OF_MONTH, date.day)
-        set(Calendar.HOUR_OF_DAY, hourMilli.hour)
-        set(Calendar.MINUTE, hourMilli.minute)
-        set(Calendar.SECOND, hourMilli.second)
-        set(Calendar.MILLISECOND, hourMilli.milli)
-        timeInMillis
-    })
-
-    constructor(calendar: Calendar) : this(calendar.timeInMillis)
+    constructor(date: Date, hourMilli: HourMilli) : this(DateTimeSoy.createAdjusted(
+            date.year,
+            date.month,
+            date.day,
+            hourMilli.hour,
+            hourMilli.minute,
+            hourMilli.second,
+            hourMilli.milli
+    ).unixMillisLong)
 
     constructor(dateTime: DateTime) : this(dateTime.millis)
 

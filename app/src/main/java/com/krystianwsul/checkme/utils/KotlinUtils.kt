@@ -209,7 +209,7 @@ fun Toolbar.animateItems(itemVisibilities: List<Pair<Int, Boolean>>, replaceMenu
 
 fun Context.normalizedId(@IdRes id: Int) = if (id == View.NO_ID) "NO_ID" else resources.getResourceName(id)!!
 
-fun Calendar.toExactTimeStamp() = ExactTimeStamp(this)
+fun Calendar.toExactTimeStamp() = ExactTimeStamp(timeInMillis)
 
 fun ImageView.loadPhoto(url: String?) = Glide.with(this)
         .load(url)

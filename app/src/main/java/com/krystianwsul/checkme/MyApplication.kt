@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
@@ -21,6 +22,8 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
+import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.DateTimeSoy
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -157,6 +160,10 @@ class MyApplication : Application() {
         Uploader.resume()
 
         ImageManager.init()
+
+        val today = Date.today()
+
+        Log.e("asdf", "klok " + DateTimeSoy.createAdjusted(today.year, today.month, today.day).toString())
     }
 
     private fun clearPaparazzo() {

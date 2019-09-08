@@ -1,17 +1,18 @@
-package com.krystianwsul.checkme.firebase.records
+package com.krystianwsul.checkme.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.checkme.firebase.json.JsonWrapper
+import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.common.firebase.JsonWrapper
 import java.util.*
 import kotlin.properties.Delegates
 
 class RemoteSharedProjectManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
-    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(this@RemoteSharedProjectManager, domainFactory, key!!, getValue(JsonWrapper::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(this@RemoteSharedProjectManager, domainFactory.uuid, key!!, getValue(JsonWrapper::class.java)!!)
 
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemoteSharedProjectManager.isSaved = $value") }
 
@@ -56,7 +57,7 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
         return isSaved
     }
 
-    fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(this, domainFactory, jsonWrapper).also {
+    fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(this, domainFactory.uuid, jsonWrapper).also {
         check(!remoteProjectRecords.containsKey(it.id))
 
         remoteProjectRecords[it.id] = it

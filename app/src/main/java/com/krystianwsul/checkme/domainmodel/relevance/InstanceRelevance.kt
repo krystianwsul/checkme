@@ -2,10 +2,10 @@ package com.krystianwsul.checkme.domainmodel.relevance
 
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
 class InstanceRelevance(val instance: Instance) {

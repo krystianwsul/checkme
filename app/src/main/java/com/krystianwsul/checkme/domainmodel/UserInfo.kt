@@ -1,23 +1,21 @@
 package com.krystianwsul.checkme.domainmodel
 
-import android.text.TextUtils
 import com.google.firebase.auth.FirebaseUser
 import com.krystianwsul.checkme.firebase.UserData
 
 data class UserInfo(
         val email: String,
-        val name: String,
-        var token: String?) {
+        val name: String
+) {
 
-    constructor(firebaseUser: FirebaseUser, token: String?) : this(
+    constructor(firebaseUser: FirebaseUser) : this(
             firebaseUser.email!!,
-            firebaseUser.displayName!!,
-            token)
+            firebaseUser.displayName!!)
 
     val key by lazy { UserData.getKey(email) }
 
     init {
-        check(!TextUtils.isEmpty(email))
-        check(!TextUtils.isEmpty(name))
+        check(email.isNotEmpty())
+        check(name.isNotEmpty())
     }
 }

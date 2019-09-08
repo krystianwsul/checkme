@@ -5,9 +5,10 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.DateTime
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @SuppressLint("UseSparseArrays")
 class LocalFactory(private val persistenceManager: PersistenceManager = PersistenceManager.instance) {

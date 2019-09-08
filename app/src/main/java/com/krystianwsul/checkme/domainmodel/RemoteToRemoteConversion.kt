@@ -3,7 +3,8 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.firebase.RemoteInstance
 import com.krystianwsul.checkme.firebase.RemoteTask
 import com.krystianwsul.checkme.firebase.RemoteTaskHierarchy
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteToRemoteConversion<S : RemoteCustomTimeId> {
 

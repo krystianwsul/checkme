@@ -1,7 +1,6 @@
-package com.krystianwsul.checkme.firebase.json
+package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.firebase.SharedProjectJson
-
+import kotlin.jvm.JvmOverloads
 
 class JsonWrapper @JvmOverloads constructor(
         val recordOf: MutableMap<String, Boolean> = mutableMapOf(),

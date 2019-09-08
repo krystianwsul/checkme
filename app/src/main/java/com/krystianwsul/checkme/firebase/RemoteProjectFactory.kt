@@ -6,28 +6,32 @@ import com.androidhuman.rxfirebase2.database.ChildChangeEvent
 import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.UserInfo
-import com.krystianwsul.checkme.firebase.json.JsonWrapper
-import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectManager
-import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectManager
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.firebase.managers.RemotePrivateProjectManager
+import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
+import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.checkme.utils.ScheduleId
+import com.krystianwsul.checkme.utils.TaskHierarchyKey
+import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.common.firebase.JsonWrapper
 import com.krystianwsul.common.firebase.SharedProjectJson
 import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 
 class RemoteProjectFactory(
         private val domainFactory: DomainFactory,
         sharedChildren: Iterable<DataSnapshot>,
         privateSnapshot: DataSnapshot,
-        private val userInfo: UserInfo,
+        private val deviceInfo: DeviceInfo,
         now: ExactTimeStamp) {
 
     val uuid = domainFactory.uuid
 
-    private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, userInfo, privateSnapshot, now)
+    private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, deviceInfo, privateSnapshot, now)
     private val remoteSharedProjectManager = RemoteSharedProjectManager(domainFactory, sharedChildren)
 
     var remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid, now)
@@ -35,7 +39,7 @@ class RemoteProjectFactory(
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .map { RemoteSharedProject(domainFactory, it, userInfo, uuid, now) }
+            .map { RemoteSharedProject(domainFactory, it, deviceInfo, uuid, now) }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -94,13 +98,13 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteSharedProjectManager.addChild(childEvent.dataSnapshot())
 
                 check(!remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
             }
             is ChildChangeEvent -> {
                 val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
             }
             is ChildRemoveEvent -> {
                 val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
@@ -132,16 +136,16 @@ class RemoteProjectFactory(
         check(!TextUtils.isEmpty(name))
 
         val friendIds = HashSet(recordOf)
-        friendIds.remove(userInfo.key)
+        friendIds.remove(deviceInfo.key)
 
         val userJsons = domainFactory.remoteFriendFactory.getUserJsons(friendIds)
-        userJsons[userInfo.key] = remoteRootUser.userJson
+        userJsons[deviceInfo.key] = remoteRootUser.userJson
 
         val projectJson = SharedProjectJson(name, now.long, users = userJsons)
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteSharedProject(domainFactory, remoteProjectRecord, userInfo, uuid, now)
+        val remoteProject = RemoteSharedProject(domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
 
         check(!remoteProjects.containsKey(remoteProject.id))
 
@@ -197,9 +201,9 @@ class RemoteProjectFactory(
         return getRemoteProjectIfPresent(taskKey)?.getRemoteTaskIfPresent(taskKey.remoteTaskId)
     }
 
-    fun updateToken(token: String?) = remoteSharedProjects.values.forEach { it.updateUserInfo(userInfo.key, uuid, token) }
+    fun updateToken(token: String?) = remoteSharedProjects.values.forEach { it.updateUserInfo(deviceInfo.key, uuid, token) }
 
-    fun updatePhotoUrl(userInfo: UserInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(userInfo, photoUrl) }
+    fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }
 
     fun getRemoteProjectForce(projectId: String): RemoteProject<*> {
         check(!TextUtils.isEmpty(projectId))

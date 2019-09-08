@@ -1,11 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.firebase.RemoteTask
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.toDate
@@ -13,10 +9,11 @@ import com.krystianwsul.common.firebase.InstanceJson
 import com.krystianwsul.common.firebase.OldestVisibleJson
 import com.krystianwsul.common.firebase.ScheduleWrapper
 import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
-        val domainFactory: DomainFactory,
+        private val uuid: String,
         val id: String,
         private val remoteProjectRecord: RemoteProjectRecord<T>,
         private val taskJson: TaskJson) : RemoteRecord(create) {
@@ -75,7 +72,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     var name
         get() = taskJson.name
         set(name) {
-            check(!TextUtils.isEmpty(name))
+            check(name.isNotEmpty())
 
             if (name == taskJson.name)
                 return
@@ -119,7 +116,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                         add(Date(taskJson.oldestVisibleYear!!, taskJson.oldestVisibleMonth!!, taskJson.oldestVisibleDay!!))
                     } else {
                         if (taskJson.oldestVisibleYear != null || taskJson.oldestVisibleMonth != null || taskJson.oldestVisibleDay != null)
-                            MyCrashlytics.logException(RemoteTask.MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
+                            MyCrashlytics.logException(MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
                     }
                 }
                 .min()
@@ -134,26 +131,37 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             addValue("$key/image", value)
         }
 
-    constructor(domainFactory: DomainFactory, id: String, remoteProjectRecord: RemoteProjectRecord<T>, taskJson: TaskJson) : this(
+    constructor(
+            id: String,
+            uuid: String,
+            remoteProjectRecord: RemoteProjectRecord<T>,
+            taskJson: TaskJson
+    ) : this(
             false,
-            domainFactory,
+            uuid,
             id,
             remoteProjectRecord,
-            taskJson)
+            taskJson
+    )
 
-    constructor(domainFactory: DomainFactory, remoteProjectRecord: RemoteProjectRecord<T>, taskJson: TaskJson) : this(
+    constructor(
+            uuid: String,
+            remoteProjectRecord: RemoteProjectRecord<T>,
+            taskJson: TaskJson
+    ) : this(
             true,
-            domainFactory,
+            uuid,
             remoteProjectRecord.getTaskRecordId(),
             remoteProjectRecord,
-            taskJson)
+            taskJson
+    )
 
     init {
         if (taskJson.name.isEmpty())
             MyCrashlytics.logException(MissingNameException("taskKey: $key"))
 
         for ((key, instanceJson) in taskJson.instances) {
-            check(!TextUtils.isEmpty(key))
+            check(key.isNotEmpty())
 
             val (scheduleKey, remoteCustomTimeId) = RemoteInstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
 
@@ -169,7 +177,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         }
 
         for ((id, scheduleWrapper) in taskJson.schedules) {
-            check(!TextUtils.isEmpty(id))
+            check(id.isNotEmpty())
 
             when {
                 scheduleWrapper.singleScheduleJson != null -> {
@@ -206,8 +214,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             }
         }
     }
-
-    private val uuid by lazy { domainFactory.uuid }
 
     private val oldestVisibleJson get() = taskJson.oldestVisible[uuid]
 
@@ -252,11 +258,11 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         }
     }
 
-    fun newRemoteInstanceRecord(remoteProject: RemoteProject<T>, instanceJson: InstanceJson, scheduleKey: ScheduleKey): RemoteInstanceRecord<T> {
-        val remoteCustomTimeId = scheduleKey.scheduleTimePair
-                .customTimeKey
-                ?.let { remoteProject.getRemoteCustomTime(it.remoteCustomTimeId).id }
-
+    fun newRemoteInstanceRecord(
+            instanceJson: InstanceJson,
+            scheduleKey: ScheduleKey,
+            remoteCustomTimeId: T?
+    ): RemoteInstanceRecord<T> {
         val firebaseKey = RemoteInstanceRecord.scheduleKeyToString(scheduleKey)
 
         val remoteInstanceRecord = RemoteInstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)
@@ -305,4 +311,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
 
     private class MissingNameException(message: String) : Exception(message)
+
+    private class MissingDayException(message: String) : Exception(message)
 }

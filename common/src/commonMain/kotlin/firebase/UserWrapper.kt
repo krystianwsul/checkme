@@ -1,6 +1,6 @@
-package com.krystianwsul.checkme.firebase.json
+package com.krystianwsul.common.firebase
 
-import com.krystianwsul.common.firebase.UserJson
+import kotlin.jvm.JvmOverloads
 
 class UserWrapper @JvmOverloads constructor(
         val friendOf: MutableMap<String, Boolean> = mutableMapOf(),

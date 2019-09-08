@@ -1,18 +1,17 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.text.TextUtils
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.CustomTimeKey
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.common.firebase.ProjectJson
 import com.krystianwsul.common.firebase.TaskHierarchyJson
 import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
 abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
         create: Boolean,
-        domainFactory: DomainFactory,
-        val id: String) : RemoteRecord(create) {
+        val id: String,
+        private val uuid: String) : RemoteRecord(create) {
 
     companion object {
 
@@ -26,9 +25,9 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
     val remoteTaskRecords by lazy {
         projectJson.tasks
                 .mapValues { (id, taskJson) ->
-                    check(!TextUtils.isEmpty(id))
+                    check(id.isNotEmpty())
 
-                    RemoteTaskRecord(domainFactory, id, this, taskJson)
+                    RemoteTaskRecord(id, uuid, this, taskJson)
                 }
                 .toMutableMap()
     }
@@ -36,7 +35,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
     val remoteTaskHierarchyRecords by lazy {
         projectJson.taskHierarchies
                 .mapValues { (id, taskHierarchyJson) ->
-                    check(!TextUtils.isEmpty(id))
+                    check(id.isNotEmpty())
 
                     RemoteTaskHierarchyRecord(id, this, taskHierarchyJson)
                 }
@@ -50,7 +49,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
     var name: String
         get() = projectJson.name
         set(name) {
-            check(!TextUtils.isEmpty(name))
+            check(name.isNotEmpty())
 
             if (name == projectJson.name)
                 return
@@ -76,8 +75,8 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
                 remoteTaskHierarchyRecords.values +
                 remoteCustomTimeRecords.values
 
-    fun newRemoteTaskRecord(domainFactory: DomainFactory, taskJson: TaskJson): RemoteTaskRecord<T> {
-        val remoteTaskRecord = RemoteTaskRecord(domainFactory, this, taskJson)
+    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T> {
+        val remoteTaskRecord = RemoteTaskRecord(uuid, this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
         remoteTaskRecords[remoteTaskRecord.id] = remoteTaskRecord

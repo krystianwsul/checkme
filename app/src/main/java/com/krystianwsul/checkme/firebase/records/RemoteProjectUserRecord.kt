@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.firebase.UserData
 import com.krystianwsul.common.firebase.UserJson
 
@@ -44,7 +43,7 @@ class RemoteProjectUserRecord(
         }
 
     fun setToken(token: String?, uuid: String) {
-        check(!TextUtils.isEmpty(uuid))
+        check(uuid.isNotEmpty())
 
         if (token == createObject.tokens[uuid])
             return

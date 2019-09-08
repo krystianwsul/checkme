@@ -1,7 +1,8 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.utils.RemoteCustomTimeId
+
 import com.krystianwsul.common.firebase.ScheduleWrapper
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
 class RemoteSingleScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRecord<T> {

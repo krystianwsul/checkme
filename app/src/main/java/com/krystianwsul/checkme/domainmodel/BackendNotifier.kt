@@ -30,7 +30,7 @@ object BackendNotifier {
         return PREFIX + parameters.joinToString("&")
     }
 
-    fun notify(remoteProjects: Set<RemoteProject<*>>, userInfo: UserInfo, userKeys: Collection<String>) {
+    fun notify(remoteProjects: Set<RemoteProject<*>>, deviceInfo: DeviceInfo, userKeys: Collection<String>) {
         val production = when (DatabaseWrapper.root) {
             "development" -> false
             "production" -> true
@@ -39,7 +39,7 @@ object BackendNotifier {
 
         val projectIds = remoteProjects.map { it.id }.toSet()
 
-        val url = getUrl(projectIds, production, userKeys, userInfo.token!!)
+        val url = getUrl(projectIds, production, userKeys, deviceInfo.token!!)
         check(url.isNotEmpty())
 
         run(url)

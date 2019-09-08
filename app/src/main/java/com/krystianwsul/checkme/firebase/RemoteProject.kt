@@ -7,13 +7,17 @@ import com.krystianwsul.checkme.domainmodel.RemoteToRemoteConversion
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.checkme.utils.TaskHierarchyContainer
+import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.fromDate
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.common.firebase.InstanceJson
 import com.krystianwsul.common.firebase.OldestVisibleJson
 import com.krystianwsul.common.firebase.TaskHierarchyJson
 import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 abstract class RemoteProject<T : RemoteCustomTimeId>(
         protected val domainFactory: DomainFactory,
@@ -52,7 +56,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     val taskHierarchies get() = remoteTaskHierarchyContainer.all
 
     fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask<T> {
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
+        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
         val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))
@@ -98,7 +102,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
                 task.note,
                 instanceJsons,
                 oldestVisible = oldestVisibleMap.toMutableMap())
-        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(domainFactory, taskJson)
+        val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
         val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))

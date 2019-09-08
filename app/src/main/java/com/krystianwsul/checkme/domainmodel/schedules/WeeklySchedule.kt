@@ -44,7 +44,7 @@ class WeeklySchedule(
         val today = Date.today()
 
         val nowDayOfWeek = today.dayOfWeek
-        val nowHourMinute = HourMinute(now.calendar)
+        val nowHourMinute = HourMinute(now.calendar.toDateTimeTz())
 
         val nextDayOfWeek = daysOfWeek.sorted().run {
             if (time.getHourMinute(nowDayOfWeek) > nowHourMinute) {

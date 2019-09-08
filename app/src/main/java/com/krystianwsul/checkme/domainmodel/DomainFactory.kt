@@ -954,7 +954,7 @@ class DomainFactory(
         val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
         val date = Date(calendar.toDateTimeTz())
-        val hourMinute = HourMinute(calendar)
+        val hourMinute = HourMinute(calendar.toDateTimeTz())
 
         instance.setInstanceDateTime(date, TimePair(hourMinute), now)
         instance.notificationShown = false
@@ -975,7 +975,7 @@ class DomainFactory(
         val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
 
         val date = Date(calendar.toDateTimeTz())
-        val hourMinute = HourMinute(calendar)
+        val hourMinute = HourMinute(calendar.toDateTimeTz())
         val timePair = TimePair(hourMinute)
 
         val instances = instanceKeys.map(this::getInstance)

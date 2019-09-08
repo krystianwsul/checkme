@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.utils.time
 
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.soywiz.klock.DateTimeTz
 import org.joda.time.DateTime
 import java.util.*
 
@@ -28,7 +27,7 @@ fun Date.getDisplayText(): String {
     }
 }
 
-fun Calendar.toDateTimeTz() = DateTimeTz.fromUnixLocal(timeInMillis)
+fun Calendar.toDateTimeTz() = DateTimeSoy.fromUnix(timeInMillis).local
 
 val Date.calendar get() = GregorianCalendar(year, month - 1, day)
 

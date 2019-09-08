@@ -22,7 +22,6 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
-import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -160,8 +159,6 @@ class MyApplication : Application() {
         Uploader.resume()
 
         ImageManager.init()
-
-        val today = Date.today()
 
         Log.e("asdf", "klock timestamp " + DateTimeTz.nowLocal().format("HH:mm"))
     }

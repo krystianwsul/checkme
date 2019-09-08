@@ -18,7 +18,7 @@ data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
 
         private fun calendarToMillis(calendar: Calendar): Long {
             val (year, month, day) = Date(calendar.toDateTimeTz()) // todo
-            val (hour, minute) = HourMinute(calendar)
+            val (hour, minute) = HourMinute(calendar.toDateTimeTz()) // todo
 
             return GregorianCalendar(year, month - 1, day, hour, minute).timeInMillis
         }
@@ -31,7 +31,7 @@ data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
 
     val date: Date get() = Date(calendar.toDateTimeTz()) // todo
 
-    val hourMinute: HourMinute get() = HourMinute(calendar)
+    val hourMinute: HourMinute get() = HourMinute(calendar.toDateTimeTz()) // todo
 
     constructor(calendar: Calendar) : this(calendarToMillis(calendar))
 

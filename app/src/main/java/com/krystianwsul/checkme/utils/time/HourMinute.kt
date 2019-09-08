@@ -7,7 +7,6 @@ import com.soywiz.klock.hours
 import com.soywiz.klock.parse
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
-import java.util.*
 
 @Parcelize
 data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, Parcelable, Serializable {
@@ -32,8 +31,6 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
 
         fun fromJson(json: String) = format.parse(json).let { HourMinute(it.hours, it.minutes) }
     }
-
-    constructor(calendar: Calendar) : this(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
 
     constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.hours, dateTimeTz.minutes)
 

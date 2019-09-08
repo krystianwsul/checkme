@@ -27,10 +27,14 @@ fun Date.getDisplayText(): String {
     }
 }
 
-fun Calendar.toDateTimeTz() = DateTimeSoy.fromUnix(timeInMillis).local
+fun Calendar.toDateTimeSoy() = DateTimeSoy.fromUnix(timeInMillis)
+
+fun Calendar.toDateTimeTz() = toDateTimeSoy().local
 
 val Date.calendar get() = GregorianCalendar(year, month - 1, day)
 
 val ExactTimeStamp.calendar: Calendar get() = Calendar.getInstance().apply { timeInMillis = long }
 
 fun DateTime.toExactTimeStamp() = ExactTimeStamp(millis)
+
+val TimeStamp.calendar: Calendar get() = Calendar.getInstance().apply { timeInMillis = long }

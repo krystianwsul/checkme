@@ -1,41 +1,31 @@
 package com.krystianwsul.checkme.utils.time
 
 import android.os.Parcelable
+import com.soywiz.klock.milliseconds
+import com.soywiz.klock.seconds
 import kotlinx.android.parcel.Parcelize
-import java.util.*
 
 @Parcelize
 data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
 
     companion object {
 
-        val now get() = TimeStamp(Calendar.getInstance())
+        val now get() = TimeStamp(DateTimeSoy.now())
 
-        fun fromMillis(millis: Long) = TimeStamp(Calendar.getInstance().apply {
-            timeInMillis = millis
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis)
-
-        private fun calendarToMillis(calendar: Calendar): Long {
-            val (year, month, day) = Date(calendar.toDateTimeTz()) // todo
-            val (hour, minute) = HourMinute(calendar.toDateTimeTz()) // todo
-
-            return GregorianCalendar(year, month - 1, day, hour, minute).timeInMillis
-        }
+        fun fromMillis(millis: Long) = TimeStamp(DateTimeSoy.fromUnix(millis))
     }
 
-    val calendar: Calendar
-        get() = Calendar.getInstance().apply {
-            timeInMillis = long
-        }
+    val date: Date get() = Date(toDateTimeTz())
 
-    val date: Date get() = Date(calendar.toDateTimeTz()) // todo
+    val hourMinute: HourMinute get() = HourMinute(toDateTimeTz())
 
-    val hourMinute: HourMinute get() = HourMinute(calendar.toDateTimeTz()) // todo
+    constructor(dateTimeSoy: DateTimeSoy) : this(
+            dateTimeSoy.run {
+                minus(seconds.seconds).minus(milliseconds.milliseconds)
+            }.unixMillisLong
+    )
 
-    constructor(calendar: Calendar) : this(calendarToMillis(calendar))
-
-    constructor(date: Date, hourMinute: HourMinute) : this(GregorianCalendar(date.year, date.month - 1, date.day, hourMinute.hour, hourMinute.minute).timeInMillis)
+    constructor(date: Date, hourMinute: HourMinute) : this(DateTimeSoy(date.year, date.month, date.day, hourMinute.hour, hourMinute.minute))
 
     override fun compareTo(other: TimeStamp) = long.compareTo(other.long)
 

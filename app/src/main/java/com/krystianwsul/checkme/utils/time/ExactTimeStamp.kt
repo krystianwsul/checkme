@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.utils.time
 
-import org.joda.time.DateTime
-
 data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
 
     companion object {
@@ -24,8 +22,6 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
             hourMilli.second,
             hourMilli.milli
     ).unixMillisLong)
-
-    constructor(dateTime: DateTime) : this(dateTime.millis)
 
     override fun compareTo(other: ExactTimeStamp) = long.compareTo(other.long)
 

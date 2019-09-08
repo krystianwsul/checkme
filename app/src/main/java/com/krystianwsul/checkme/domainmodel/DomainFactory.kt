@@ -2397,7 +2397,7 @@ class DomainFactory(
                 .toMap()
                 .toMutableMap()
 
-        val yesterday = ExactTimeStamp(org.joda.time.DateTime(now.long).minusDays(1))
+        val yesterday = org.joda.time.DateTime(now.long).minusDays(1).toExactTimeStamp()
 
         fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp?) = endExactTimeStamp?.takeIf { it > yesterday } // delay deleting removed tasks by a day
                 ?.minusOne()

@@ -32,7 +32,7 @@ data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
                     date.day,
                     hourMinute.hour,
                     hourMinute.minute
-            ).let { it + it.localOffset.time }
+            ).let { it - it.localOffset.time }
     )
 
     override fun compareTo(other: TimeStamp) = long.compareTo(other.long)

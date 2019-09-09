@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.preference.PreferenceManager
 import com.androidhuman.rxfirebase2.auth.authStateChanges
 import com.github.anrwatchdog.ANRWatchDog
@@ -27,7 +26,6 @@ import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
-import com.soywiz.klock.DateTimeTz
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
@@ -159,8 +157,6 @@ class MyApplication : Application() {
         Uploader.resume()
 
         ImageManager.init()
-
-        Log.e("asdf", "klock timestamp " + DateTimeTz.nowLocal().format("HH:mm"))
     }
 
     private fun clearPaparazzo() {

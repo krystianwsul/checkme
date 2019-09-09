@@ -25,7 +25,15 @@ data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {
             }.unixMillisLong
     )
 
-    constructor(date: Date, hourMinute: HourMinute) : this(DateTimeSoy(date.year, date.month, date.day, hourMinute.hour, hourMinute.minute))
+    constructor(date: Date, hourMinute: HourMinute) : this(
+            DateTimeSoy(
+                    date.year,
+                    date.month,
+                    date.day,
+                    hourMinute.hour,
+                    hourMinute.minute
+            ).let { it + it.localOffset.time }
+    )
 
     override fun compareTo(other: TimeStamp) = long.compareTo(other.long)
 

@@ -24,10 +24,10 @@ import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.startTicks
-import com.krystianwsul.checkme.utils.time.TimePair
-import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.checkme.viewmodels.ShowInstanceViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_instance.*

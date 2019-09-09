@@ -4,13 +4,12 @@ package com.krystianwsul.checkme.firebase.records
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.utils.InstanceData
-
 import com.krystianwsul.checkme.utils.ScheduleKey
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.HourMinute
-import com.krystianwsul.checkme.utils.time.JsonTime
-import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.common.firebase.InstanceJson
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.JsonTime
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import kotlin.properties.Delegates.observable
 
@@ -35,9 +34,9 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                 if (it.customTimeKey != null) {
                     check(it.hourMinute == null)
 
-                    it.customTimeKey.remoteCustomTimeId
+                    it.customTimeKey!!.remoteCustomTimeId
                 } else {
-                    it.hourMinute!!.hour.toString() + "-" + it.hourMinute.minute
+                    it.hourMinute!!.hour.toString() + "-" + it.hourMinute!!.minute
                 }
             }
 

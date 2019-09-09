@@ -5,9 +5,9 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DateTime
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.time.ExactTimeStamp
 import java.util.*
 
 class SingleSchedule(

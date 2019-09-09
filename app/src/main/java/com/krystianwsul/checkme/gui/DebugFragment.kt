@@ -11,7 +11,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.notifications.TickJobIntentService
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.time.ExactTimeStamp
 import kotlinx.android.synthetic.main.fragment_debug.*
 
 class DebugFragment : AbstractFragment() {

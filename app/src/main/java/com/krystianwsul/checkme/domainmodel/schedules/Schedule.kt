@@ -4,9 +4,9 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.NormalTime
-import com.krystianwsul.checkme.utils.time.TimeStamp
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.NormalTime
+import com.krystianwsul.common.time.TimeStamp
 
 
 abstract class Schedule(protected val domainFactory: DomainFactory) {

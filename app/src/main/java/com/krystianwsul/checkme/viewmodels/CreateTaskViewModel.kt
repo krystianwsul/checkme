@@ -12,8 +12,9 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.prettyPrint
-import com.krystianwsul.checkme.utils.time.*
-import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
@@ -52,7 +53,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 return date.getDisplayText() + ", " + if (timePair.customTimeKey != null) {
                     check(timePair.hourMinute == null)
 
-                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey)
+                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
 
                     customTimeData.name + " (" + customTimeData.hourMinutes[date.dayOfWeek] + ")"
                 } else {
@@ -79,7 +80,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
                     check(timePair.hourMinute == null)
 
-                    customTimeDatas.getValue(timePair.customTimeKey).name
+                    customTimeDatas.getValue(timePair.customTimeKey!!).name
                 } else {
                     timePair.hourMinute!!.toString()
                 }
@@ -111,7 +112,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 return "$day, " + if (timePair.customTimeKey != null) {
                     check(timePair.hourMinute == null)
 
-                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey)
+                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
 
                     customTimeData.name
                 } else {
@@ -140,7 +141,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 return "$day, " + if (timePair.customTimeKey != null) {
                     check(timePair.hourMinute == null)
 
-                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey)
+                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
 
                     customTimeData.name
                 } else {
@@ -190,10 +191,10 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             if (query.isNullOrEmpty())
                 return true
 
-            if (name.toLowerCase().contains(query))
+            if (name.toLowerCase(Locale.getDefault()).contains(query))
                 return true
 
-            if (note?.toLowerCase()?.contains(query) == true)
+            if (note?.toLowerCase(Locale.getDefault())?.contains(query) == true)
                 return true
 
             return parentTreeDatas.values.any { it.matchesSearch(query) }

@@ -6,8 +6,9 @@ import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.InstanceData.Virtual
+import com.krystianwsul.checkme.utils.time.destructureRemote
+import com.krystianwsul.common.time.*
 
-import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteInstance<T : RemoteCustomTimeId> : Instance {

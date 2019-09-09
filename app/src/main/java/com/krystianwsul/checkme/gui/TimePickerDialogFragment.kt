@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.text.format.DateFormat
-import com.krystianwsul.checkme.utils.time.HourMinute
+import com.krystianwsul.common.time.HourMinute
 
 
 class TimePickerDialogFragment : AbstractDialogFragment() {

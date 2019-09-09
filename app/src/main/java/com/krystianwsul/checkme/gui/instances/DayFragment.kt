@@ -12,9 +12,9 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.MainActivity
-import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.checkme.viewmodels.DayViewModel
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable

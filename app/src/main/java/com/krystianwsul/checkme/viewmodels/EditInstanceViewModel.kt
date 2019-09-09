@@ -2,10 +2,10 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DayOfWeek
-import com.krystianwsul.checkme.utils.time.HourMinute
-import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
 import java.util.*
 

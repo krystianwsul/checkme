@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.gui
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.os.Bundle
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.ExactTimeStamp
 
 
 class DatePickerDialogFragment : AbstractDialogFragment() {

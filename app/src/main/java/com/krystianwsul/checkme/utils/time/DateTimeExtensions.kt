@@ -2,8 +2,12 @@ package com.krystianwsul.checkme.utils.time
 
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import org.joda.time.DateTime
+import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
+import org.joda.time.DateTime as DateTimeJoda
 
 fun Date.getDisplayText(): String {
     val todayCalendar = Calendar.getInstance()
@@ -35,6 +39,28 @@ val Date.calendar get() = GregorianCalendar(year, month - 1, day)
 
 val ExactTimeStamp.calendar: Calendar get() = Calendar.getInstance().apply { timeInMillis = long }
 
-fun DateTime.toExactTimeStamp() = ExactTimeStamp(millis)
+fun DateTimeJoda.toExactTimeStamp() = ExactTimeStamp(millis)
 
 val TimeStamp.calendar: Calendar get() = Calendar.getInstance().apply { timeInMillis = long }
+
+fun DateTime.getDisplayText() = date.getDisplayText() + ", " + time.toString()
+
+fun <T : RemoteCustomTimeId> TimePair.destructureRemote(remoteProject: RemoteProject<T>): Triple<T?, Int?, Int?> {
+    val remoteCustomTimeId: T?
+    val hour: Int?
+    val minute: Int?
+    if (customTimeKey != null) {
+        check(hourMinute == null)
+
+        remoteCustomTimeId = remoteProject.getRemoteCustomTimeKey(customTimeKey!!).remoteCustomTimeId
+
+        hour = null
+        minute = null
+    } else {
+        remoteCustomTimeId = null
+        hour = hourMinute!!.hour
+        minute = hourMinute!!.minute
+    }
+
+    return Triple(remoteCustomTimeId, hour, minute)
+}

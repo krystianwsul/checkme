@@ -9,13 +9,13 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.RemoveInstancesDialogFragment
 import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
+import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.TimeStamp
 import com.krystianwsul.checkme.viewmodels.ShowGroupViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_group.*

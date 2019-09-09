@@ -8,11 +8,11 @@ import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.HourMilli
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.HourMilli
 import java.util.*
 
 abstract class Task(protected val domainFactory: DomainFactory) {

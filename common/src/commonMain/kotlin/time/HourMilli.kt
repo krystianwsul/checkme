@@ -1,7 +1,7 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import com.krystianwsul.common.utils.Parcelable
+import com.krystianwsul.common.utils.Parcelize
 
 @Parcelize
 data class HourMilli(
@@ -19,5 +19,7 @@ data class HourMilli(
 
     override fun compareTo(other: HourMilli) = compareValuesBy(this, other, { it.hour }, { it.minute }, { it.second }, { it.milli })
 
-    override fun toString() = String.format("%02d", hour) + ":" + String.format("%02d", minute) + ":" + String.format("%02d", second) + ":" + String.format("%03d", milli)
+    private fun Int.pad() = toString().let { if (it.length == 1) "0$it" else it }
+
+    override fun toString() = hour.pad() + ":" + minute.pad() + ":" + second.pad() + ":" + milli.pad()
 }

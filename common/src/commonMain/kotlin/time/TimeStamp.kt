@@ -1,9 +1,9 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
-import android.os.Parcelable
+import com.krystianwsul.common.utils.Parcelable
+import com.krystianwsul.common.utils.Parcelize
 import com.soywiz.klock.milliseconds
 import com.soywiz.klock.seconds
-import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class TimeStamp(val long: Long) : Comparable<TimeStamp>, Parcelable {

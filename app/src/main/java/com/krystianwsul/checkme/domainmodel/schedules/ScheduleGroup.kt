@@ -3,10 +3,11 @@ package com.krystianwsul.checkme.domainmodel.schedules
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.utils.time.DayOfWeek
-import com.krystianwsul.checkme.utils.time.Time
-import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel.ScheduleData
+import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
 
 sealed class ScheduleGroup {

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
 data class NormalTime(val hourMinute: HourMinute) : Time {
 

@@ -28,13 +28,13 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.HourMinute
-import com.krystianwsul.checkme.utils.time.TimePair
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.TimePair
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
 import io.reactivex.BackpressureStrategy
@@ -826,7 +826,7 @@ class CreateTaskActivity : NavBarActivity() {
                 check(timePair.hourMinute == null)
 
                 data!!.customTimeDatas
-                        .getValue(timePair.customTimeKey)
+                        .getValue(timePair.customTimeKey!!)
                         .hourMinutes[scheduleEntry.scheduleData.date.dayOfWeek]
             } else {
                 checkNotNull(timePair.hourMinute)

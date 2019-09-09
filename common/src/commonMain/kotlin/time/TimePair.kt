@@ -1,12 +1,6 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
-import android.os.Parcelable
-import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
-
-import kotlinx.android.parcel.Parcelize
-import java.io.Serializable
+import com.krystianwsul.common.utils.*
 
 @Parcelize
 data class TimePair(
@@ -29,26 +23,6 @@ data class TimePair(
         } else {
             super.toString() + ": " + hourMinute!!
         }
-    }
-
-    fun <T : RemoteCustomTimeId> destructureRemote(remoteProject: RemoteProject<T>): Triple<T?, Int?, Int?> {
-        val remoteCustomTimeId: T?
-        val hour: Int?
-        val minute: Int?
-        if (customTimeKey != null) {
-            check(hourMinute == null)
-
-            remoteCustomTimeId = remoteProject.getRemoteCustomTimeKey(customTimeKey).remoteCustomTimeId
-
-            hour = null
-            minute = null
-        } else {
-            remoteCustomTimeId = null
-            hour = hourMinute!!.hour
-            minute = hourMinute.minute
-        }
-
-        return Triple(remoteCustomTimeId, hour, minute)
     }
 
     fun destructureRemote(): Triple<RemoteCustomTimeId?, Int?, Int?> {

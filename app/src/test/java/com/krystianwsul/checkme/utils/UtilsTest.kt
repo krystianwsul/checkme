@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.utils
 
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DayOfWeek
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DayOfWeek
 
 import junit.framework.Assert
 

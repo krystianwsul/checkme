@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.utils.time.DayOfWeek
-import com.krystianwsul.checkme.utils.time.HourMinute
+import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.HourMinute
 
 interface CustomTimeRecord {
 

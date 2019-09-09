@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.utils
 
-import com.krystianwsul.checkme.utils.time.DayOfWeek
+import com.krystianwsul.common.time.DayOfWeek
 import org.junit.Assert
 import org.junit.Test
 import java.util.*

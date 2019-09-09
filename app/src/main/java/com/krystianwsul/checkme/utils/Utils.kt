@@ -5,9 +5,9 @@ import android.content.Intent
 import android.text.TextUtils
 import com.google.android.gms.tasks.Task
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DayOfWeek
 import io.reactivex.Single
 import java.util.*
 

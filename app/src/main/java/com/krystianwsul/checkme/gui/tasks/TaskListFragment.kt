@@ -22,8 +22,8 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.treeadapter.*
 import com.stfalcon.imageviewer.StfalconImageViewer
 import io.reactivex.Observable

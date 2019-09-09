@@ -7,7 +7,7 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.time.DateTime
+import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @SuppressLint("UseSparseArrays")

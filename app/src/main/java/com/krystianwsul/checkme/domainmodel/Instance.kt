@@ -5,8 +5,10 @@ import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.firebase.RemoteSharedCustomTime
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.*
-import com.krystianwsul.checkme.utils.time.*
-import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.calendar
+import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
@@ -257,9 +259,10 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
     val createTaskTimePair: TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
         get() {
             val instanceTimePair = instanceTime.timePair
+            val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
 
-            return if (instanceTimePair.customTimeKey is CustomTimeKey.Shared) {
-                val sharedCustomTime = domainFactory.getCustomTime(instanceTimePair.customTimeKey) as RemoteSharedCustomTime
+            return if (shared != null) {
+                val sharedCustomTime = domainFactory.getCustomTime(shared) as RemoteSharedCustomTime
 
                 val privateProjectKey = domainFactory.remoteProjectFactory.remotePrivateProject.id
                 if (sharedCustomTime.ownerKey == privateProjectKey) {

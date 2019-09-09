@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.os.Build
 import com.krystianwsul.checkme.domainmodel.Instance
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
-import com.krystianwsul.checkme.utils.time.TimeStamp
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.TimeStamp
 
 abstract class NotificationWrapper {
 

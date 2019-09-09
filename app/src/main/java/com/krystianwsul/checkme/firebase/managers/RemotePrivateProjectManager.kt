@@ -7,8 +7,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.common.firebase.PrivateProjectJson
+import com.krystianwsul.common.time.ExactTimeStamp
 import java.util.*
 import kotlin.properties.Delegates
 

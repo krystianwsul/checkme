@@ -3,9 +3,9 @@ package com.krystianwsul.checkme.firebase
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 
-import com.krystianwsul.checkme.utils.time.DayOfWeek
-import com.krystianwsul.checkme.utils.time.HourMinute
-import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 

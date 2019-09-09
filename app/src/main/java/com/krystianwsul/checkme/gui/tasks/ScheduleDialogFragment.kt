@@ -26,9 +26,10 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.fixClicks
 import com.krystianwsul.checkme.utils.startTicks
-import com.krystianwsul.checkme.utils.time.*
-import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
+import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
@@ -91,7 +92,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
         check(customTimeDatas != null)
 
-        scheduleDialogData.timePairPersist.hourMinute = hourMinute
+        scheduleDialogData.timePairPersist.setHourMinute(hourMinute)
         updateFields()
     }
 

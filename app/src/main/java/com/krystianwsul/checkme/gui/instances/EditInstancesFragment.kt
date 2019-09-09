@@ -17,10 +17,11 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.fixClicks
-import com.krystianwsul.checkme.utils.time.*
-import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxkotlin.addTo
 import kotlinx.android.synthetic.main.fragment_edit_instances.view.*
@@ -94,7 +95,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
     private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
         checkNotNull(data)
 
-        timePairPersist!!.hourMinute = hourMinute
+        timePairPersist!!.setHourMinute(hourMinute)
         updateTimeText()
         updateError()
     }

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.time.ExactTimeStamp
 
 abstract class TaskHierarchy(protected val domainFactory: DomainFactory) {
 

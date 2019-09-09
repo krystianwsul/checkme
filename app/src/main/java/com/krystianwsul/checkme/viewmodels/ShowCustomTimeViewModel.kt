@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 
-import com.krystianwsul.checkme.utils.time.DayOfWeek
-import com.krystianwsul.checkme.utils.time.HourMinute
+import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() {

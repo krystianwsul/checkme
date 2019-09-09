@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.utils.time.TimeStamp
+import com.krystianwsul.common.time.TimeStamp
 
 class ShowGroupViewModel : DomainViewModel<ShowGroupViewModel.Data>() {
 

@@ -1,3 +1,3 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
 typealias DateTimeSoy = com.soywiz.klock.DateTime

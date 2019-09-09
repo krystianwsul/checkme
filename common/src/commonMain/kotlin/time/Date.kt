@@ -1,12 +1,12 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
-import android.os.Parcelable
+import com.krystianwsul.common.utils.Parcelable
+import com.krystianwsul.common.utils.Parcelize
+import com.krystianwsul.common.utils.Serializable
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.ISO8601
 import com.soywiz.klock.parse
-import kotlinx.android.parcel.Parcelize
-import java.io.Serializable
 
 @Parcelize
 data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>, Parcelable, Serializable {

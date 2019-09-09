@@ -3,8 +3,8 @@ package com.krystianwsul.checkme.domainmodel
 import android.content.Context
 import android.os.PowerManager
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.time.toExactTimeStamp
+import com.krystianwsul.common.time.ExactTimeStamp
 import org.joda.time.DateTime
 
 sealed class TickData {

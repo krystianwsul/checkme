@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
 data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
 
@@ -9,8 +9,6 @@ data class DateTime(val date: Date, val time: Time) : Comparable<DateTime> {
     override fun compareTo(other: DateTime) = compareValuesBy(this, other, { it.date }, { time.getHourMinute(date.dayOfWeek) })
 
     override fun toString() = "$date $time"
-
-    fun getDisplayText() = date.getDisplayText() + ", " + time.toString()
 
     fun toExactTimeStamp() = timeStamp.toExactTimeStamp()
 }

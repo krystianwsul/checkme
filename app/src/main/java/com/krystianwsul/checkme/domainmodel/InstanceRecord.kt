@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.utils.time.Date
-import com.krystianwsul.checkme.utils.time.JsonTime
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.JsonTime
 
 interface InstanceRecord<out T> {
 

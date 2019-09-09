@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
 import com.krystianwsul.checkme.domainmodel.Instance
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
+import com.krystianwsul.common.time.ExactTimeStamp
 
 class NotificationWrapperImplOMr1 : NotificationWrapperImplO() {
 

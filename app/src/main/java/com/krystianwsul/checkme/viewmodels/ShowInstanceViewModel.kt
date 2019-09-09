@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.time.DateTime
+import com.krystianwsul.common.time.DateTime
 
 class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
 

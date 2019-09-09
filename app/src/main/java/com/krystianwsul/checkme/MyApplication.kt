@@ -22,9 +22,9 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
-import com.krystianwsul.checkme.utils.time.ExactTimeStamp
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import com.soywiz.klock.DateTimeTz

@@ -3,8 +3,11 @@ package com.krystianwsul.checkme.domainmodel.schedules
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
-import com.krystianwsul.checkme.utils.time.*
-import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.calendar
+import com.krystianwsul.checkme.utils.time.toDateTimeTz
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.HourMilli
 
 import java.util.*
 

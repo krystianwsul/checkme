@@ -1,12 +1,12 @@
-package com.krystianwsul.checkme.utils.time
+package com.krystianwsul.common.time
 
-import android.os.Parcelable
+import com.krystianwsul.common.utils.Parcelable
+import com.krystianwsul.common.utils.Parcelize
+import com.krystianwsul.common.utils.Serializable
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.hours
 import com.soywiz.klock.parse
-import kotlinx.android.parcel.Parcelize
-import java.io.Serializable
 
 @Parcelize
 data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, Parcelable, Serializable {

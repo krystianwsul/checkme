@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.time.TimeStamp
+import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
 

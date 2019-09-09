@@ -27,8 +27,9 @@ import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
-import com.krystianwsul.checkme.utils.time.*
-import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.checkme.utils.time.toDateTimeTz
+import com.krystianwsul.common.time.*
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import com.krystianwsul.treeadapter.TreeViewAdapter
@@ -994,7 +995,7 @@ class GroupListFragment @JvmOverloads constructor(
                 override val dataId: Int,
                 override val immediate: Boolean,
                 override val dataWrapper: DataWrapper,
-                val timeStamp: com.krystianwsul.checkme.utils.time.TimeStamp) : Parameters()
+                val timeStamp: com.krystianwsul.common.time.TimeStamp) : Parameters()
 
         class InstanceKey(
                 override val dataId: Int,

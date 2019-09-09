@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.domainmodel.RemoteToRemoteConversion
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteProjectRecord
-import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.fromDate
@@ -17,6 +16,7 @@ import com.krystianwsul.common.firebase.InstanceJson
 import com.krystianwsul.common.firebase.OldestVisibleJson
 import com.krystianwsul.common.firebase.TaskHierarchyJson
 import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 abstract class RemoteProject<T : RemoteCustomTimeId>(

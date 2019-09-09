@@ -7,7 +7,7 @@ import android.text.TextUtils
 import android.widget.ArrayAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.common.utils.CustomTimeKey
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 

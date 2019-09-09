@@ -8,9 +8,13 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ScheduleDialogFragment
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.ScheduleType
+import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
+import com.krystianwsul.common.utils.CustomTimeKey
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 import java.util.*

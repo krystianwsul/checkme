@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.utils.time
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.common.utils.CustomTimeKey
 import kotlin.properties.Delegates
 
 class TimePairPersist private constructor(var customTimeKey: CustomTimeKey<*>?, _hourMinute: HourMinute) : Parcelable {

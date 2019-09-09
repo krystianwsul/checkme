@@ -2,14 +2,16 @@ package com.krystianwsul.checkme.utils.time
 
 import android.os.Parcelable
 import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.utils.CustomTimeKey
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 
 @Parcelize
-data class TimePair(val customTimeKey: CustomTimeKey<*>?, val hourMinute: HourMinute?) : Parcelable, Serializable {
+data class TimePair(
+        val customTimeKey: CustomTimeKey<*>?,
+        val hourMinute: HourMinute?) : Parcelable, Serializable {
 
     constructor(customTimeKey: CustomTimeKey<*>) : this(customTimeKey, null)
 

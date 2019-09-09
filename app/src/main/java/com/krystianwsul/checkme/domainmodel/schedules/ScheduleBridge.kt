@@ -1,11 +1,10 @@
 package com.krystianwsul.checkme.domainmodel.schedules
 
-import com.krystianwsul.checkme.utils.CustomTimeKey
-
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.utils.time.TimePair
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 interface ScheduleBridge {

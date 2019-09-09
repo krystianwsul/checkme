@@ -1,7 +1,4 @@
-package com.krystianwsul.checkme.utils
-
-import com.krystianwsul.common.utils.RemoteCustomTimeId
-import java.io.Serializable
+package com.krystianwsul.common.utils
 
 sealed class CustomTimeKey<T : RemoteCustomTimeId> : Serializable {
 

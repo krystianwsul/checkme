@@ -47,8 +47,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    productFlavors {
-    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -56,13 +54,9 @@ android {
     }
 }
 
-kapt {
-    generateStubs = true // todo do I need this?
-}
-
 ext {
     powermockVersion = '2.0.2'
-    lifecycleVersion = '2.2.0-alpha03'
+    lifecycleVersion = '2.2.0-alpha04'
     glideVersion = '4.9.0'
 }
 
@@ -81,8 +75,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0-alpha10'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
-    implementation 'androidx.preference:preference:1.1.0-rc01'
-    implementation 'androidx.sharetarget:sharetarget:1.0.0-alpha02'
+    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.sharetarget:sharetarget:1.0.0-beta01'
 
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"

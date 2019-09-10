@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.domainmodel.CustomTimeRecord
+import com.krystianwsul.common.domain.CustomTimeRecord
 import com.krystianwsul.common.domain.UserInfo
 
 import com.krystianwsul.common.firebase.json.CustomTimeJson

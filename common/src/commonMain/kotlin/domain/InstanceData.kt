@@ -1,7 +1,5 @@
-package com.krystianwsul.checkme.utils
+package com.krystianwsul.common.domain
 
-import com.krystianwsul.common.domain.CustomTime
-import com.krystianwsul.common.domain.InstanceRecord
 import com.krystianwsul.common.time.*
 
 sealed class InstanceData<T, U, V : InstanceRecord<U>> {
@@ -61,7 +59,5 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
         override val hidden = false
     }
-
-    class InconsistentInstanceException(message: String) : Exception(message)
 }
 

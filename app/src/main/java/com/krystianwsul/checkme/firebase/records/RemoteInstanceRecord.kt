@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
 
-import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.InstanceRecord
@@ -116,7 +115,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         val instanceDay = createObject.instanceDay
 
         if (((instanceYear != null) != (instanceMonth != null)) || (instanceYear != null) != (instanceDay != null))
-            ErrorLogger.instance.logException(InstanceData.InconsistentInstanceException("instance: " + remoteTaskRecord.key + " " + key + ", instanceYear: $instanceYear, instanceMonth: $instanceMonth, instanceDay: $instanceDay"))
+            ErrorLogger.instance.logException(InconsistentInstanceException("instance: " + remoteTaskRecord.key + " " + key + ", instanceYear: $instanceYear, instanceMonth: $instanceMonth, instanceDay: $instanceDay"))
 
         return if (instanceYear != null && instanceMonth != null && instanceDay != null)
             Date(instanceYear, instanceMonth, instanceDay)
@@ -219,4 +218,6 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         }
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
+
+    class InconsistentInstanceException(message: String) : Exception(message)
 }

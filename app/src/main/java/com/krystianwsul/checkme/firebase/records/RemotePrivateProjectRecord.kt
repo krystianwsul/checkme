@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId

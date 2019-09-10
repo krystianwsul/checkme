@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.common.domain.DeviceInfo
 
 object BackendNotifier {
 

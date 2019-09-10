@@ -2356,16 +2356,6 @@ class DomainFactory(
 
     fun getTaskIfPresent(taskKey: TaskKey) = remoteProjectFactory.getTaskIfPresent(taskKey)
 
-    fun getChildTaskHierarchies(parentTask: Task, exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
-        check(parentTask.current(exactTimeStamp))
-
-        return parentTask.getTaskHierarchiesByParentTaskKey(parentTask.taskKey)
-                .asSequence()
-                .filter { it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp) }
-                .sortedBy { it.ordinal }
-                .toList()
-    }
-
     private fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp, alwaysShow: Boolean = true, hierarchyExactTimeStamp: ExactTimeStamp = now): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp)
                 .asSequence()

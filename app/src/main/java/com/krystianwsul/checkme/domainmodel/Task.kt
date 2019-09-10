@@ -78,12 +78,6 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         }
     }
 
-    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp): List<TaskHierarchy> {
-        check(current(exactTimeStamp))
-
-        return domainFactory.getChildTaskHierarchies(this, exactTimeStamp)
-    }
-
     fun notDeleted(exactTimeStamp: ExactTimeStamp): Boolean {
         val endExactTimeStamp = getEndExactTimeStamp()
 
@@ -312,6 +306,11 @@ abstract class Task(protected val domainFactory: DomainFactory) {
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
 
     abstract fun getInstance(scheduleDateTime: DateTime): Instance
+
+    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getTaskHierarchiesByParentTaskKey(taskKey).asSequence()
+            .filter { it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp) }
+            .sortedBy { it.ordinal }
+            .toList()
 
     data class EndData(
             val exactTimeStamp: ExactTimeStamp,

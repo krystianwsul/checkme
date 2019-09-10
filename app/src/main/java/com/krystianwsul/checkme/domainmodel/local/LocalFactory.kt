@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel.local
 
 import android.annotation.SuppressLint
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -10,7 +11,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
 @SuppressLint("UseSparseArrays")
-class LocalFactory(private val persistenceManager: PersistenceManager = PersistenceManager.instance) {
+class LocalFactory(private val persistenceManager: PersistenceManager = PersistenceManager.instance) : Instance.ShownFactory {
 
     val instanceShownRecords: Collection<InstanceShownRecord>
         get() = persistenceManager.instanceShownRecords
@@ -25,7 +26,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
     fun save(source: SaveService.Source): Boolean = persistenceManager.save(source)
 
-    fun getInstanceShownRecord(projectId: String, taskId: String, scheduleYear: Int, scheduleMonth: Int, scheduleDay: Int, scheduleCustomTimeId: RemoteCustomTimeId?, scheduleHour: Int?, scheduleMinute: Int?): InstanceShownRecord? {
+    override fun getShown(projectId: String, taskId: String, scheduleYear: Int, scheduleMonth: Int, scheduleDay: Int, scheduleCustomTimeId: RemoteCustomTimeId?, scheduleHour: Int?, scheduleMinute: Int?): InstanceShownRecord? {
         val matches: List<InstanceShownRecord>
         if (scheduleCustomTimeId != null) {
             check(scheduleHour == null)
@@ -59,7 +60,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
         return matches.singleOrNull()
     }
 
-    fun createInstanceShownRecord(remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
+    override fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
         val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
                 .timePair
                 .destructureRemote()

@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
@@ -48,7 +47,7 @@ class DomainFactory(
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
         userSnapshot: DataSnapshot,
-        friendSnapshot: DataSnapshot) : Instance.ShownFactory, RemotePrivateCustomTime.AllRecordsSource {
+        friendSnapshot: DataSnapshot) : RemotePrivateCustomTime.AllRecordsSource {
 
     companion object {
 
@@ -1990,24 +1989,8 @@ class DomainFactory(
                 )
             }
 
-    fun getInstanceShownRecord(taskKey: TaskKey, scheduleDateTime: DateTime): InstanceShownRecord? {
-        val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
-                .timePair
-                .destructureRemote()
-
-        return localFactory.getInstanceShownRecord(
-                taskKey.remoteProjectId,
-                taskKey.remoteTaskId,
-                scheduleDateTime.date.year,
-                scheduleDateTime.date.month,
-                scheduleDateTime.date.day,
-                remoteCustomTimeId,
-                hour,
-                minute)
-    }
-
     private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
-        return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime, getInstanceShownRecord(taskKey, scheduleDateTime))
+        return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime, localFactory.getShown(taskKey, scheduleDateTime))
     }
 
     fun getInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
@@ -2783,12 +2766,6 @@ class DomainFactory(
             createChildTask(now, task, copiedChildTask.name, copiedChildTask.note, copiedChildTask.imageJson, copiedChildTask.taskKey)
         }
     }
-
-    override fun createShown(
-            remoteTaskId: String,
-            scheduleDateTime: DateTime,
-            projectId: String
-    ) = localFactory.createInstanceShownRecord(remoteTaskId, scheduleDateTime, projectId)
 
     class ProjectUndoData {
 

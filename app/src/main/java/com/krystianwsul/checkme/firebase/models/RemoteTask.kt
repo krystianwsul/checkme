@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.domainmodel.schedules.*
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.firebase.json.*
@@ -28,7 +27,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
-            .map { RemoteInstance(domainFactory, remoteProject, this, it, domainFactory.localFactory.getInstanceShownRecord(remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
+            .map { RemoteInstance(domainFactory.localFactory, remoteProject, this, it, domainFactory.localFactory.getShown(remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
@@ -181,7 +180,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)
 
         return existingInstance
-                ?: generateInstance(scheduleDateTime, domainFactory.getInstanceShownRecord(taskKey, scheduleDateTime))
+                ?: generateInstance(scheduleDateTime, domainFactory.localFactory.getShown(taskKey, scheduleDateTime))
     }
 
     fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<CreateTaskViewModel.ScheduleData>) {
@@ -280,7 +279,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") { it.getScheduleText(remoteProject) }
     }
 
-    fun generateInstance(scheduleDateTime: DateTime, instanceShownRecord: InstanceShownRecord?) = RemoteInstance(domainFactory, remoteProject, this, scheduleDateTime, instanceShownRecord)
+    fun generateInstance(scheduleDateTime: DateTime, shown: Instance.Shown?) = RemoteInstance(domainFactory.localFactory, remoteProject, this, scheduleDateTime, shown)
 
     override fun getScheduleText(exactTimeStamp: ExactTimeStamp, showParent: Boolean): String? {
         check(current(exactTimeStamp))

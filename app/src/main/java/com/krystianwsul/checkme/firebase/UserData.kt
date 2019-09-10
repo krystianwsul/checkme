@@ -7,6 +7,7 @@ import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
 
 import kotlinx.android.parcel.Parcelize
+import java.util.*
 
 @IgnoreExtraProperties
 @Parcelize
@@ -25,7 +26,7 @@ data class UserData(
             check(!TextUtils.isEmpty(email))
 
             val encoded = email.trim { it <= ' ' }
-                    .toLowerCase()
+                    .toLowerCase(Locale.ROOT)
                     .toByteArray(charset("UTF-8"))
             return Base64.encodeToString(encoded, Base64.URL_SAFE or Base64.NO_WRAP)
         }

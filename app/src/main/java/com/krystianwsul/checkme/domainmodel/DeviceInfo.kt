@@ -7,7 +7,7 @@ data class DeviceInfo(
         var token: String?) {
 
     constructor(firebaseUser: FirebaseUser, token: String?) : this(
-            UserInfo(firebaseUser),
+            firebaseUser.toUserInfo(),
             token)
 
     val email get() = userInfo.email

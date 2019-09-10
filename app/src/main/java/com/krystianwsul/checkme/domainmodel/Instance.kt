@@ -1,12 +1,12 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.firebase.models.RemoteSharedCustomTime
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.utils.toExactTimeStamp
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.time.*
@@ -227,7 +227,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         fun message(task: Task) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
 
         if (!parentTask.current(hierarchyExactTimeStamp.first)) {
-            MyCrashlytics.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
+            ErrorLogger.instance.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
             return null
         }
 

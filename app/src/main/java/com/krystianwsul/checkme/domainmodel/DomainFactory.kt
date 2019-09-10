@@ -48,7 +48,7 @@ class DomainFactory(
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
         userSnapshot: DataSnapshot,
-        friendSnapshot: DataSnapshot) : Instance.ShownFactory {
+        friendSnapshot: DataSnapshot) : Instance.ShownFactory, RemotePrivateCustomTime.AllRecordsSource {
 
     companion object {
 
@@ -1985,7 +1985,7 @@ class DomainFactory(
 
     private fun getExistingInstanceIfPresent(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)
 
-    fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
+    override fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
             .values
             .mapNotNull { it.getSharedTimeIfPresent(privateCustomTimeId) }
 

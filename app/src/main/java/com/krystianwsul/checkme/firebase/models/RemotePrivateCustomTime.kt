@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.common.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.common.firebase.records.RemotePrivateCustomTimeRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -8,7 +7,7 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemotePrivateCustomTime(
-        private val domainFactory: DomainFactory,
+        private val allRecordsSource: AllRecordsSource,
         override val remoteProject: RemotePrivateProject,
         override val remoteCustomTimeRecord: RemotePrivateCustomTimeRecord) : RemoteCustomTime<RemoteCustomTimeId.Private>() {
 
@@ -16,10 +15,9 @@ class RemotePrivateCustomTime(
 
     override val customTimeKey by lazy { CustomTimeKey.Private(projectId, id) }
 
-    private fun getSharedCustomTimes() = domainFactory.getSharedCustomTimes(id)
-
     override val allRecords
-        get() = getSharedCustomTimes().map { it.remoteCustomTimeRecord }
+        get() = allRecordsSource.getSharedCustomTimes(id)
+                .map { it.remoteCustomTimeRecord }
                 .toMutableList<RemoteCustomTimeRecord<*>>()
                 .apply { add(remoteCustomTimeRecord) }
 
@@ -45,5 +43,10 @@ class RemotePrivateCustomTime(
         remoteProject.deleteCustomTime(this)
 
         remoteCustomTimeRecord.delete()
+    }
+
+    interface AllRecordsSource {
+
+        fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private): List<RemoteSharedCustomTime>
     }
 }

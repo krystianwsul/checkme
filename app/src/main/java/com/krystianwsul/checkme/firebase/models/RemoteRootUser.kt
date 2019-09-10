@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.models
 
-import android.text.TextUtils
 import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
 
 
@@ -17,7 +16,7 @@ open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord
     open val photoUrl get() = remoteRootUserRecord.photoUrl
 
     fun removeFriend(friendId: String) {
-        check(!TextUtils.isEmpty(friendId))
+        check(friendId.isNotEmpty())
 
         remoteRootUserRecord.removeFriendOf(friendId)
     }

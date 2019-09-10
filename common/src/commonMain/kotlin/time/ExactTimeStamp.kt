@@ -9,11 +9,15 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
 
     fun toDateTimeSoy() = DateTimeSoy.fromUnix(long)
 
-    val date get() = Date(toDateTimeSoy().local)
+    fun toDateTimeTz() = toDateTimeSoy().local
 
-    val hourMilli get() = HourMilli(toDateTimeSoy())
+    val date get() = Date(toDateTimeTz())
 
-    constructor(date: Date, hourMilli: HourMilli) : this(DateTimeSoy.createAdjusted(
+    val hourMilli get() = HourMilli(toDateTimeTz())
+
+    constructor(dateTimeSoy: DateTimeSoy) : this(dateTimeSoy.unixMillisLong)
+
+    constructor(date: Date, hourMilli: HourMilli) : this(DateTimeSoy(
             date.year,
             date.month,
             date.day,
@@ -21,7 +25,7 @@ data class ExactTimeStamp(val long: Long) : Comparable<ExactTimeStamp> {
             hourMilli.minute,
             hourMilli.second,
             hourMilli.milli
-    ).unixMillisLong)
+    ).let { it - it.localOffset.time })
 
     override fun compareTo(other: ExactTimeStamp) = long.compareTo(other.long)
 

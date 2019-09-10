@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli
 import com.krystianwsul.common.utils.ScheduleKey
@@ -309,6 +310,8 @@ abstract class Task(protected val domainFactory: DomainFactory) {
     abstract fun updateProject(now: ExactTimeStamp, projectId: String): Task
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
+
+    abstract fun getInstance(scheduleDateTime: DateTime): Instance
 
     data class EndData(
             val exactTimeStamp: ExactTimeStamp,

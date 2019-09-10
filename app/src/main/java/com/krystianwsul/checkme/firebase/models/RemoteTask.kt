@@ -175,7 +175,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = existingRemoteInstances[scheduleKey]
 
-    fun getInstance(scheduleDateTime: DateTime): Instance {
+    override fun getInstance(scheduleDateTime: DateTime): Instance {
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)

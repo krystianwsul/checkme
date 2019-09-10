@@ -1,7 +1,5 @@
 package com.krystianwsul.checkme.firebase.models
 
-import android.text.TextUtils
-
 import com.krystianwsul.common.firebase.records.RemoteProjectUserRecord
 
 
@@ -14,7 +12,7 @@ class RemoteProjectUser(
     var name
         get() = remoteProjectUserRecord.name
         set(name) {
-            check(!TextUtils.isEmpty(name))
+            check(name.isNotEmpty())
 
             remoteProjectUserRecord.name = name
         }

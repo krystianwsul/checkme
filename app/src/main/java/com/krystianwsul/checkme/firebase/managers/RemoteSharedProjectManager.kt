@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.firebase.managers
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -51,7 +51,7 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.updateRecords(values).checkError(domainFactory, "RemoteSharedProjectManager.save")
+            AndroidDatabaseWrapper.updateRecords(values).checkError(domainFactory, "RemoteSharedProjectManager.save")
         }
 
         return isSaved

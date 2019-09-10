@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
@@ -65,7 +65,7 @@ class RemoteSharedProjectRecord(
     ) : this(
             remoteSharedProjectManager,
             true,
-            DatabaseWrapper.newSharedProjectRecordId(),
+            AndroidDatabaseWrapper.newSharedProjectRecordId(),
             uuid,
             jsonWrapper
     )
@@ -125,13 +125,13 @@ class RemoteSharedProjectRecord(
 
     override fun deleteFromParent() = check(remoteSharedProjectManager.remoteProjectRecords.remove(id) == this)
 
-    fun getCustomTimeRecordId() = RemoteCustomTimeId.Shared(DatabaseWrapper.newSharedCustomTimeRecordId(id))
+    fun getCustomTimeRecordId() = RemoteCustomTimeId.Shared(AndroidDatabaseWrapper.newSharedCustomTimeRecordId(id))
 
-    override fun getTaskRecordId() = DatabaseWrapper.newSharedTaskRecordId(id)
+    override fun getTaskRecordId() = AndroidDatabaseWrapper.newSharedTaskRecordId(id)
 
-    override fun getScheduleRecordId(taskId: String) = DatabaseWrapper.newSharedScheduleRecordId(id, taskId)
+    override fun getScheduleRecordId(taskId: String) = AndroidDatabaseWrapper.newSharedScheduleRecordId(id, taskId)
 
-    override fun getTaskHierarchyRecordId() = DatabaseWrapper.newSharedTaskHierarchyRecordId(id)
+    override fun getTaskHierarchyRecordId() = AndroidDatabaseWrapper.newSharedTaskHierarchyRecordId(id)
 
     override fun getCustomTimeRecord(id: String) = remoteCustomTimeRecords.getValue(RemoteCustomTimeId.Shared(id))
 

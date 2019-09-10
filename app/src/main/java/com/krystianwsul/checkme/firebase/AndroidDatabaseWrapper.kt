@@ -8,9 +8,10 @@ import com.google.firebase.database.FirebaseDatabase
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.firebase.records.*
+import com.krystianwsul.common.firebase.DatabaseWrapper
 
 
-object DatabaseWrapper {
+object AndroidDatabaseWrapper : DatabaseWrapper() {
 
     private const val USERS_KEY = "users"
     private const val RECORDS_KEY = "records"
@@ -28,6 +29,10 @@ object DatabaseWrapper {
         FirebaseDatabase.getInstance()
                 .reference
                 .child(root)
+    }
+
+    init {
+        instance = this
     }
 
     fun newSharedProjectRecordId() = rootReference.child(RECORDS_KEY).push().key!!
@@ -48,7 +53,7 @@ object DatabaseWrapper {
             .equalTo(true)
             .dataChanges()
 
-    fun getPrivateScheduleRecordId(projectId: String, taskId: String): String {
+    override fun getPrivateScheduleRecordId(projectId: String, taskId: String): String {
         val id = rootReference.child("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
                 .push()
                 .key!!
@@ -66,7 +71,7 @@ object DatabaseWrapper {
         return id
     }
 
-    fun getPrivateTaskRecordId(projectId: String): String {
+    override fun getPrivateTaskRecordId(projectId: String): String {
         val id = rootReference.child("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
                 .push()
                 .key!!
@@ -84,7 +89,7 @@ object DatabaseWrapper {
         return id
     }
 
-    fun getPrivateTaskHierarchyRecordId(projectId: String): String {
+    override fun getPrivateTaskHierarchyRecordId(projectId: String): String {
         val id = rootReference.child("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
                 .push()
                 .key!!
@@ -102,7 +107,7 @@ object DatabaseWrapper {
         return id
     }
 
-    fun getPrivateCustomTimeRecordId(projectId: String): String {
+    override fun getPrivateCustomTimeRecordId(projectId: String): String {
         val id = rootReference.child("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
                 .push()
                 .key!!

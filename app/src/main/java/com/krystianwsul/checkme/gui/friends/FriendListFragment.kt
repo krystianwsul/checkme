@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
@@ -242,7 +242,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))
 
-                DatabaseWrapper.addFriends(friendIds).checkError(DomainFactory.instance, "FriendListFragment.removeFriends.undo")
+                AndroidDatabaseWrapper.addFriends(friendIds).checkError(DomainFactory.instance, "FriendListFragment.removeFriends.undo")
             }
         }
     }

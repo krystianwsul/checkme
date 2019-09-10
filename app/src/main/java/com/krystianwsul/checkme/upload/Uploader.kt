@@ -7,7 +7,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.ImageState
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.TaskKey
@@ -18,7 +18,7 @@ object Uploader {
 
     private val storage = FirebaseStorage.getInstance()
             .getReference("taskImages")
-            .child(DatabaseWrapper.root)
+            .child(AndroidDatabaseWrapper.root)
 
     fun addUpload(taskKey: TaskKey, uuid: String, pair: Pair<String, Uri>) {
         Log.e("asdf", "image upload start")

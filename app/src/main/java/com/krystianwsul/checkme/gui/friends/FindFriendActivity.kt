@@ -18,7 +18,7 @@ import com.jakewharton.rxbinding3.widget.editorActionEvents
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.checkError
@@ -86,7 +86,7 @@ class FindFriendActivity : NavBarActivity() {
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            DatabaseWrapper.addFriend(userData!!.getKey()).checkError(DomainFactory.instance, "FindFriendActivity.addFriend")
+            AndroidDatabaseWrapper.addFriend(userData!!.getKey()).checkError(DomainFactory.instance, "FindFriendActivity.addFriend")
 
             finish()
         }
@@ -150,7 +150,7 @@ class FindFriendActivity : NavBarActivity() {
             }
         }
 
-        databaseReference = DatabaseWrapper.getUserDataDatabaseReference(key)
+        databaseReference = AndroidDatabaseWrapper.getUserDataDatabaseReference(key)
 
         databaseReference!!.addValueEventListener(valueEventListener!!)
     }

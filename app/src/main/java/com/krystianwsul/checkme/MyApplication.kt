@@ -15,7 +15,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.toUserInfo
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -95,21 +95,21 @@ class MyApplication : Application() {
         userInfoRelay.switchMap {
             MyCrashlytics.log("userInfoRelay: $it")
 
-            it.value?.let { DatabaseWrapper.getPrivateProjectObservable(it.key) }
+            it.value?.let { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key) }
                     ?: Observable.never()
         }
                 .subscribe { MyCrashlytics.log("independent private project event") }
 
         FactoryListener(
                 userInfoRelay,
-                { DatabaseWrapper.getPrivateProjectSingle(it.key) },
-                { DatabaseWrapper.getSharedProjectSingle(it.key) },
-                { DatabaseWrapper.getFriendSingle(it.key) },
-                { DatabaseWrapper.getUserSingle(it.key) },
-                { DatabaseWrapper.getPrivateProjectObservable(it.key) },
-                { DatabaseWrapper.getSharedProjectEvents(it.key) },
-                { DatabaseWrapper.getFriendObservable(it.key) },
-                { DatabaseWrapper.getUserObservable(it.key) },
+                { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key) },
+                { AndroidDatabaseWrapper.getSharedProjectSingle(it.key) },
+                { AndroidDatabaseWrapper.getFriendSingle(it.key) },
+                { AndroidDatabaseWrapper.getUserSingle(it.key) },
+                { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key) },
+                { AndroidDatabaseWrapper.getSharedProjectEvents(it.key) },
+                { AndroidDatabaseWrapper.getFriendObservable(it.key) },
+                { AndroidDatabaseWrapper.getUserObservable(it.key) },
                 { userInfo, privateProject, sharedProjects, friends, user -> DomainFactory(PersistenceManager.instance, userInfo, ExactTimeStamp.now, sharedProjects, privateProject, user, friends) },
                 { DomainFactory.nullableInstance?.clearUserInfo() },
                 DomainFactory::updatePrivateProjectRecord,

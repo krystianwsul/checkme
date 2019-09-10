@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
@@ -69,13 +69,13 @@ class RemotePrivateProjectRecord(
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    fun getCustomTimeRecordId() = RemoteCustomTimeId.Private(DatabaseWrapper.getPrivateCustomTimeRecordId(id))
+    fun getCustomTimeRecordId() = RemoteCustomTimeId.Private(DatabaseWrapper.instance.getPrivateCustomTimeRecordId(id))
 
-    override fun getTaskRecordId() = DatabaseWrapper.getPrivateTaskRecordId(id)
+    override fun getTaskRecordId() = DatabaseWrapper.instance.getPrivateTaskRecordId(id)
 
-    override fun getScheduleRecordId(taskId: String) = DatabaseWrapper.getPrivateScheduleRecordId(id, taskId)
+    override fun getScheduleRecordId(taskId: String) = DatabaseWrapper.instance.getPrivateScheduleRecordId(id, taskId)
 
-    override fun getTaskHierarchyRecordId() = DatabaseWrapper.getPrivateTaskHierarchyRecordId(id)
+    override fun getTaskHierarchyRecordId() = DatabaseWrapper.instance.getPrivateTaskHierarchyRecordId(id)
 
     override fun getCustomTimeRecord(id: String) = remoteCustomTimeRecords.getValue(RemoteCustomTimeId.Private(id))
 

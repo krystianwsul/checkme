@@ -8,7 +8,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.firebase.DatabaseWrapper
+import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.common.domain.DeviceInfo
 
@@ -32,7 +32,7 @@ object BackendNotifier {
     }
 
     fun notify(remoteProjects: Set<RemoteProject<*>>, deviceInfo: DeviceInfo, userKeys: Collection<String>) {
-        val production = when (DatabaseWrapper.root) {
+        val production = when (AndroidDatabaseWrapper.root) {
             "development" -> false
             "production" -> true
             else -> throw IllegalArgumentException()

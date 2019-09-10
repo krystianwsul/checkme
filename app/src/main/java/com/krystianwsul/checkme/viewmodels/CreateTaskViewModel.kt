@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
@@ -39,45 +40,47 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         internalStart()
     }
 
-    sealed class ScheduleData : Serializable {
+    sealed class ScheduleDataWrapper : Serializable {
 
-        abstract val timePair: TimePair
+        abstract val scheduleData: ScheduleData
+
+        val timePair get() = scheduleData.timePair
 
         abstract fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String
 
         abstract fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData
 
-        data class Single(val date: Date, override val timePair: TimePair) : ScheduleData() {
+        data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                return date.getDisplayText() + ", " + if (timePair.customTimeKey != null) {
+                return scheduleData.date.getDisplayText() + ", " + if (timePair.customTimeKey != null) {
                     check(timePair.hourMinute == null)
 
                     val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
 
-                    customTimeData.name + " (" + customTimeData.hourMinutes[date.dayOfWeek] + ")"
+                    customTimeData.name + " (" + customTimeData.hourMinutes[scheduleData.date.dayOfWeek] + ")"
                 } else {
                     timePair.hourMinute!!.toString()
                 }
             }
 
             override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
-                var monthDayNumber = date.day
+                var monthDayNumber = scheduleData.date.day
                 var beginningOfMonth = true
                 if (monthDayNumber > 28) {
-                    monthDayNumber = Utils.getDaysInMonth(date.year, date.month) - monthDayNumber + 1
+                    monthDayNumber = Utils.getDaysInMonth(scheduleData.date.year, scheduleData.date.month) - monthDayNumber + 1
                     beginningOfMonth = false
                 }
                 val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
 
-                return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(date.dayOfWeek), true, monthDayNumber, monthWeekNumber, date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.SINGLE)
+                return ScheduleDialogFragment.ScheduleDialogData(scheduleData.date, hashSetOf(scheduleData.date.dayOfWeek), true, monthDayNumber, monthWeekNumber, scheduleData.date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.SINGLE)
             }
         }
 
-        data class Weekly(val daysOfWeek: Set<DayOfWeek>, override val timePair: TimePair) : ScheduleData() {
+        data class Weekly(override val scheduleData: ScheduleData.Weekly) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                return daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
+                return scheduleData.daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
                     check(timePair.hourMinute == null)
 
                     customTimeDatas.getValue(timePair.customTimeKey!!).name
@@ -97,17 +100,14 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
                 val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
 
-                return ScheduleDialogFragment.ScheduleDialogData(date, daysOfWeek.toHashSet(), true, monthDayNumber, monthWeekNumber, date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.WEEKLY)
+                return ScheduleDialogFragment.ScheduleDialogData(date, scheduleData.daysOfWeek.toHashSet(), true, monthDayNumber, monthWeekNumber, date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.WEEKLY)
             }
         }
 
-        data class MonthlyDay(
-                val dayOfMonth: Int,
-                val beginningOfMonth: Boolean,
-                override val timePair: TimePair) : ScheduleData() {
+        data class MonthlyDay(override val scheduleData: ScheduleData.MonthlyDay) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                val day = Utils.ordinal(dayOfMonth) + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
+                val day = Utils.ordinal(scheduleData.dayOfMonth) + " " + context.getString(R.string.monthDay) + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
                 return "$day, " + if (timePair.customTimeKey != null) {
                     check(timePair.hourMinute == null)
@@ -123,20 +123,16 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 var date = scheduleHint?.date ?: today
 
-                date = Utils.getDateInMonth(date.year, date.month, dayOfMonth, beginningOfMonth)
+                date = Utils.getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.beginningOfMonth)
 
-                return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(date.dayOfWeek), true, dayOfMonth, (dayOfMonth - 1) / 7 + 1, date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.MONTHLY_DAY)
+                return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(date.dayOfWeek), true, scheduleData.dayOfMonth, (scheduleData.dayOfMonth - 1) / 7 + 1, date.dayOfWeek, scheduleData.beginningOfMonth, TimePairPersist(timePair), ScheduleType.MONTHLY_DAY)
             }
         }
 
-        data class MonthlyWeek(
-                val dayOfMonth: Int,
-                val dayOfWeek: DayOfWeek,
-                val beginningOfMonth: Boolean,
-                override val timePair: TimePair) : ScheduleData() {
+        data class MonthlyWeek(override val scheduleData: ScheduleData.MonthlyWeek) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                val day = Utils.ordinal(dayOfMonth) + " " + dayOfWeek + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
+                val day = Utils.ordinal(scheduleData.dayOfMonth) + " " + scheduleData.dayOfWeek + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
 
                 return "$day, " + if (timePair.customTimeKey != null) {
                     check(timePair.hourMinute == null)
@@ -152,9 +148,9 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 var date = scheduleHint?.date ?: today
 
-                date = Utils.getDateInMonth(date.year, date.month, dayOfMonth, dayOfWeek, beginningOfMonth)
+                date = Utils.getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth)
 
-                return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(dayOfWeek), false, date.day, dayOfMonth, dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.MONTHLY_WEEK)
+                return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(scheduleData.dayOfWeek), false, date.day, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth, TimePairPersist(timePair), ScheduleType.MONTHLY_WEEK)
             }
         }
     }
@@ -173,7 +169,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
     data class TaskData(
             val name: String,
             val parentKey: ParentKey?,
-            val scheduleDatas: List<ScheduleData>?,
+            val scheduleDataWrappers: List<ScheduleDataWrapper>?,
             val note: String?,
             val projectName: String?,
             val imageState: ImageState?)

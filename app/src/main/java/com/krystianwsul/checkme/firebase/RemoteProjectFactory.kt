@@ -11,16 +11,12 @@ import com.krystianwsul.checkme.firebase.managers.RemotePrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.checkme.firebase.models.*
 import com.krystianwsul.checkme.utils.TaskHierarchyKey
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
-import com.krystianwsul.common.utils.ScheduleId
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 import java.util.*
 
 class RemoteProjectFactory(
@@ -122,7 +118,7 @@ class RemoteProjectFactory(
         remotePrivateProject = RemotePrivateProject(this, domainFactory, remotePrivateProjectRecord, uuid, now)
     }
 
-    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
+    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<ScheduleData>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
         createSchedules(now, scheduleDatas)
     }
 

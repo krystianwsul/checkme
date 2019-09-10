@@ -738,7 +738,7 @@ class DomainFactory(
             val task = getTaskForce(taskKey)
 
             val parentKey: CreateTaskViewModel.ParentKey?
-            var scheduleDatas: List<CreateTaskViewModel.ScheduleData>? = null
+            var scheduleDataWrappers: List<CreateTaskViewModel.ScheduleDataWrapper>? = null
 
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
@@ -748,7 +748,7 @@ class DomainFactory(
                 parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
                 if (schedules.isNotEmpty())
-                    scheduleDatas = ScheduleGroup.getGroups(schedules).map { it.scheduleData }
+                    scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map { it.scheduleDataWrapper }
             } else {
                 val parentTask = task.getParentTask(now)!!
                 parentKey = CreateTaskViewModel.ParentKey.Task(parentTask.taskKey)
@@ -757,7 +757,7 @@ class DomainFactory(
 
             val projectName = task.project.name
 
-            taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDatas, task.note, projectName, task.image)
+            taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDataWrappers, task.note, projectName, task.image)
 
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             check(checkHintPresent(parentTreeDatas))
@@ -1150,7 +1150,7 @@ class DomainFactory(
             dataId: Int,
             source: SaveService.Source,
             name: String,
-            scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
+            scheduleDatas: List<ScheduleData>,
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
@@ -1190,7 +1190,7 @@ class DomainFactory(
             source: SaveService.Source,
             taskKey: TaskKey,
             name: String,
-            scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
+            scheduleDatas: List<ScheduleData>,
             note: String?,
             projectId: String?,
             imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
@@ -1242,7 +1242,7 @@ class DomainFactory(
             dataId: Int,
             source: SaveService.Source,
             name: String,
-            scheduleDatas: List<CreateTaskViewModel.ScheduleData>,
+            scheduleDatas: List<ScheduleData>,
             joinTaskKeys: List<TaskKey>,
             note: String?,
             projectId: String?,

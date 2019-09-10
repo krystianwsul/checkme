@@ -6,13 +6,13 @@ import com.krystianwsul.checkme.domainmodel.schedules.Schedule
 import com.krystianwsul.checkme.domainmodel.schedules.ScheduleGroup
 import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.firebase.models.RemoteProject
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
@@ -289,13 +289,13 @@ abstract class Task {
 
     abstract fun setName(name: String, note: String?)
 
-    fun updateSchedules(newScheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp) {
+    fun updateSchedules(scheduleDatas: List<ScheduleData>, now: ExactTimeStamp) {
         val removeSchedules = ArrayList<Schedule>()
-        val addScheduleDatas = ArrayList(newScheduleDatas)
+        val addScheduleDatas = ArrayList(scheduleDatas)
 
         val oldSchedules = getCurrentSchedules(now)
-        val scheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleData to it.schedules }
-        for ((key, value) in scheduleDatas) {
+        val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleDataWrapper.scheduleData to it.schedules }
+        for ((key, value) in oldScheduleDatas) {
             if (addScheduleDatas.contains(key)) {
                 addScheduleDatas.remove(key)
             } else {
@@ -309,7 +309,7 @@ abstract class Task {
             addSchedules(addScheduleDatas, now)
     }
 
-    protected abstract fun addSchedules(scheduleDatas: List<CreateTaskViewModel.ScheduleData>, now: ExactTimeStamp)
+    protected abstract fun addSchedules(scheduleDatas: List<ScheduleData>, now: ExactTimeStamp)
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp)
 

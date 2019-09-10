@@ -31,6 +31,7 @@ import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ScheduleData
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.util.*
@@ -521,10 +522,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         fun toScheduleEntry() = ScheduleEntry(when (scheduleType) {
-            ScheduleType.SINGLE -> CreateTaskViewModel.ScheduleData.Single(date, timePairPersist.timePair)
-            ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair)
-            ScheduleType.MONTHLY_DAY -> CreateTaskViewModel.ScheduleData.MonthlyDay(monthDayNumber, beginningOfMonth, timePairPersist.timePair)
-            ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleData.MonthlyWeek(monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist.timePair)
+            ScheduleType.SINGLE -> CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePairPersist.timePair))
+            ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair))
+            ScheduleType.MONTHLY_DAY -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(monthDayNumber, beginningOfMonth, timePairPersist.timePair))
+            ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist.timePair))
             else -> throw UnsupportedOperationException()
         })
     }

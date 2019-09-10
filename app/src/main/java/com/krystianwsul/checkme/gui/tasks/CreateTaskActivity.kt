@@ -39,6 +39,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.InstanceKey
+import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.TaskKey
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
@@ -159,7 +160,7 @@ class CreateTaskActivity : NavBarActivity() {
             scheduleHolder.scheduleText.text = null
         }
 
-        override fun onNewParent() = startActivityForResult(getCreateIntent(hint, ParentScheduleState(stateData.state.parentKey, stateData.state.schedules.map { ScheduleEntry(it.scheduleData) }.toMutableList())), REQUEST_CREATE_PARENT)
+        override fun onNewParent() = startActivityForResult(getCreateIntent(hint, ParentScheduleState(stateData.state.parentKey, stateData.state.schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList())), REQUEST_CREATE_PARENT)
     }
 
     private fun setupParent(view: View) {
@@ -201,11 +202,13 @@ class CreateTaskActivity : NavBarActivity() {
         override fun onChildViewDetachedFromWindow(view: View) = Unit
     }
 
-    private val scheduleDatas
+    private val scheduleDataWrappers
         get() = stateData.state
                 .schedules
-                .map { it.scheduleData }
+                .map { it.scheduleDataWrapper }
                 .apply { check(!isEmpty()) }
+
+    private val scheduleDatas = scheduleDataWrappers.map { it.scheduleData }
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 
@@ -715,10 +718,10 @@ class CreateTaskActivity : NavBarActivity() {
 
             data.run {
                 if (taskData != null) {
-                    if (taskData.scheduleDatas != null) {
-                        check(taskData.scheduleDatas.isNotEmpty())
+                    if (taskData.scheduleDataWrappers != null) {
+                        check(taskData.scheduleDataWrappers.isNotEmpty())
 
-                        schedules.addAll(taskData.scheduleDatas
+                        schedules.addAll(taskData.scheduleDataWrappers
                                 .asSequence()
                                 .map { ScheduleEntry(it) }
                                 .toMutableList())
@@ -792,10 +795,10 @@ class CreateTaskActivity : NavBarActivity() {
         }
 
         for (scheduleEntry in stateData.state.schedules) {
-            if (scheduleEntry.scheduleData !is CreateTaskViewModel.ScheduleData.Single)
+            if (scheduleEntry.scheduleDataWrapper !is CreateTaskViewModel.ScheduleDataWrapper.Single)
                 continue
 
-            if (!copy && data?.taskData?.scheduleDatas?.contains(scheduleEntry.scheduleData) == true) {
+            if (!copy && data?.taskData?.scheduleDataWrappers?.contains(scheduleEntry.scheduleDataWrapper) == true) {
                 if (data!!.taskData == null) {
                     continue
                 } else {
@@ -816,23 +819,23 @@ class CreateTaskActivity : NavBarActivity() {
                 }
             }
 
-            if (scheduleEntry.scheduleData.date > Date.today())
+            if (scheduleEntry.scheduleDataWrapper.scheduleData.date > Date.today())
                 continue
 
-            if (scheduleEntry.scheduleData.date < Date.today()) {
+            if (scheduleEntry.scheduleDataWrapper.scheduleData.date < Date.today()) {
                 setScheduleEntryError(scheduleEntry, R.string.error_date)
 
                 hasError = true
                 continue
             }
 
-            val timePair = scheduleEntry.scheduleData.timePair
+            val timePair = scheduleEntry.scheduleDataWrapper.timePair
             val hourMinute = if (timePair.customTimeKey != null) {
                 check(timePair.hourMinute == null)
 
                 data!!.customTimeDatas
                         .getValue(timePair.customTimeKey!!)
-                        .hourMinutes[scheduleEntry.scheduleData.date.dayOfWeek]
+                        .hourMinutes[scheduleEntry.scheduleDataWrapper.scheduleData.date.dayOfWeek]
             } else {
                 checkNotNull(timePair.hourMinute)
 
@@ -957,7 +960,7 @@ class CreateTaskActivity : NavBarActivity() {
         val (date, timePair) = scheduleHint?.let { Pair(it.date, it.timePair) }
                 ?: HourMinute.nextHour.let { Pair(it.first, TimePair(it.second)) }
 
-        return ScheduleEntry(CreateTaskViewModel.ScheduleData.Single(date, timePair))
+        return ScheduleEntry(CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
     }
 
     sealed class Hint : Serializable {
@@ -1043,7 +1046,7 @@ class CreateTaskActivity : NavBarActivity() {
                     }
 
                     scheduleText.run {
-                        setText(scheduleEntry.scheduleData.getText(data!!.customTimeDatas, this@CreateTaskActivity))
+                        setText(scheduleEntry.scheduleDataWrapper.getText(data!!.customTimeDatas, this@CreateTaskActivity))
 
                         setOnClickListener { onTextClick() }
 
@@ -1065,7 +1068,7 @@ class CreateTaskActivity : NavBarActivity() {
                         setOnClickListener {
                             val parameters = ScheduleDialogFragment.Parameters(
                                     null,
-                                    firstScheduleEntry().scheduleData.getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)),
+                                    firstScheduleEntry().scheduleDataWrapper.getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)),
                                     false)
 
                             parametersRelay.accept(parameters)
@@ -1177,7 +1180,7 @@ class CreateTaskActivity : NavBarActivity() {
 
                 val parameters = ScheduleDialogFragment.Parameters(
                         adapterPosition,
-                        scheduleEntry.scheduleData.getScheduleDialogData(Date.today(), hint as? Hint.Schedule),
+                        scheduleEntry.scheduleDataWrapper.getScheduleDialogData(Date.today(), hint as? Hint.Schedule),
                         true)
 
                 parametersRelay.accept(parameters)
@@ -1214,7 +1217,7 @@ class CreateTaskActivity : NavBarActivity() {
             if (other !is ParentScheduleState)
                 return false
 
-            fun ParentScheduleState.scheduleDatas() = schedules.map { it.scheduleData }
+            fun ParentScheduleState.scheduleDatas() = schedules.map { it.scheduleDataWrapper }
 
             return (parentKey == other.parentKey && scheduleDatas() == other.scheduleDatas())
         }

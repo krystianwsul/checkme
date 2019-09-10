@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.common.firebase.ProjectJson
-import com.krystianwsul.common.firebase.TaskHierarchyJson
-import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.firebase.json.ProjectJson
+import com.krystianwsul.common.firebase.json.TaskHierarchyJson
+import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 

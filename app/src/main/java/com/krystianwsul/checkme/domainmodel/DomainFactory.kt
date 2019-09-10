@@ -26,8 +26,8 @@ import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.viewmodels.*
-import com.krystianwsul.common.firebase.PrivateCustomTimeJson
-import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey

@@ -42,7 +42,7 @@ class RemotePrivateProject(
 
     override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) = throw UnsupportedOperationException()
 
-    fun newRemoteCustomTime(customTimeJson: com.krystianwsul.common.firebase.PrivateCustomTimeJson): RemotePrivateCustomTime {
+    fun newRemoteCustomTime(customTimeJson: com.krystianwsul.common.firebase.json.PrivateCustomTimeJson): RemotePrivateCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
         val remoteCustomTime = RemotePrivateCustomTime(domainFactory, this, remoteCustomTimeRecord)

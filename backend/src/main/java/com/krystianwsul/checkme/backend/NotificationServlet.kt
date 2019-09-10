@@ -12,7 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.krystianwsul.common.Notification
 import com.krystianwsul.common.Response
-import com.krystianwsul.common.firebase.UserJson
+import com.krystianwsul.common.firebase.json.UserJson
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import java.io.BufferedReader

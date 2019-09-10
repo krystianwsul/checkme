@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.ScheduleKey
-import com.krystianwsul.common.firebase.InstanceJson
+import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime

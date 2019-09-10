@@ -1,10 +1,8 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.common.firebase
 
-import android.os.Parcelable
+import com.krystianwsul.common.utils.Parcelable
+import com.krystianwsul.common.utils.Parcelize
 import com.krystianwsul.common.utils.toBase64
-
-import kotlinx.android.parcel.Parcelize
-import java.util.*
 
 @Parcelize
 data class UserData(
@@ -15,7 +13,7 @@ data class UserData(
     companion object {
 
         fun getKey(email: String) = email.trim { it <= ' ' }
-                .toLowerCase(Locale.ROOT)
+                .toLowerCase()
                 .toBase64()
     }
 

@@ -9,7 +9,7 @@ import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import com.krystianwsul.common.firebase.TaskJson
+import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli

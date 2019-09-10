@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.domainmodel.UserInfo
+import com.krystianwsul.common.domain.UserInfo
 
-import com.krystianwsul.common.firebase.PrivateCustomTimeJson
+import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 

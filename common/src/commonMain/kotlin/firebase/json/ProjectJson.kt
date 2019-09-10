@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase
+package com.krystianwsul.common.firebase.json
 
 interface ProjectJson {
 

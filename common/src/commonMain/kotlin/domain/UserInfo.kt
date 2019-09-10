@@ -1,6 +1,6 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.common.domain
 
-import com.krystianwsul.checkme.firebase.UserData
+import com.krystianwsul.common.firebase.UserData
 
 data class UserInfo(
         val email: String,

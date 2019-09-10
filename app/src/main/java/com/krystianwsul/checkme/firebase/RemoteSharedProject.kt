@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
-import com.krystianwsul.common.firebase.SharedCustomTimeJson
+import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey

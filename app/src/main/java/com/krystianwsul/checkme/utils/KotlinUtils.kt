@@ -26,7 +26,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
 import com.krystianwsul.checkme.gui.MyBottomBar
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.firebase.OldestVisibleJson
+import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp

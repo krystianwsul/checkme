@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.google.firebase.auth.FirebaseUser
+import com.krystianwsul.common.domain.UserInfo
 
 data class DeviceInfo(
         val userInfo: UserInfo,

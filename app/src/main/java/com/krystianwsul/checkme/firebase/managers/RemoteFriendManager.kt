@@ -5,7 +5,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.common.firebase.UserWrapper
+import com.krystianwsul.common.firebase.json.UserWrapper
 import java.util.*
 
 class RemoteFriendManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {

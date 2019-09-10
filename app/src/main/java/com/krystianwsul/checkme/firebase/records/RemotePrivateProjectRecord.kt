@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase.records
 
 import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
@@ -40,7 +40,7 @@ class RemotePrivateProjectRecord(
             uuid,
             projectJson)
 
-    fun newRemoteCustomTimeRecord(customTimeJson: com.krystianwsul.common.firebase.PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {
+    fun newRemoteCustomTimeRecord(customTimeJson: com.krystianwsul.common.firebase.json.PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {
         val remoteCustomTimeRecord = RemotePrivateCustomTimeRecord(this, customTimeJson)
         check(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.id))
 

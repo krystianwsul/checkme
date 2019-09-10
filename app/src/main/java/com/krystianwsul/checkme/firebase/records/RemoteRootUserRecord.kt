@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.UserData
-import com.krystianwsul.common.firebase.UserWrapper
+import com.krystianwsul.common.firebase.UserData
+import com.krystianwsul.common.firebase.json.UserWrapper
 
 
 open class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create) {

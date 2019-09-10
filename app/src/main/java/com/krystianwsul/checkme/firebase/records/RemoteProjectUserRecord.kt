@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.UserData
-import com.krystianwsul.common.firebase.UserJson
+import com.krystianwsul.common.firebase.UserData
+import com.krystianwsul.common.firebase.json.UserJson
 
 
 class RemoteProjectUserRecord(

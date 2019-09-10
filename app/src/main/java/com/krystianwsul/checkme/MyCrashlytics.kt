@@ -3,20 +3,23 @@ package com.krystianwsul.checkme
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.crashlytics.android.answers.Answers
+import com.krystianwsul.common.ErrorLogger
 import io.fabric.sdk.android.Fabric
 
-object MyCrashlytics {
+object MyCrashlytics : ErrorLogger() {
 
-    val enabled = MyApplication.context
+    override val enabled = MyApplication.context
             .resources
             .getBoolean(R.bool.crashlytics_enabled)
 
     init {
         if (enabled)
             Fabric.with(MyApplication.instance, Answers(), Crashlytics())
+
+        instance = this
     }
 
-    fun log(message: String) {
+    override fun log(message: String) {
         check(message.isNotEmpty())
 
         Log.e("asdf", "MyCrashLytics.log: $message")
@@ -24,13 +27,13 @@ object MyCrashlytics {
             Crashlytics.log(message)
     }
 
-    fun logException(throwable: Throwable) {
+    override fun logException(throwable: Throwable) {
         Log.e("asdf", "MyCrashLytics.logException", throwable)
         if (enabled)
             Crashlytics.logException(throwable)
     }
 
-    fun logMethod(obj: Any) {
+    override fun logMethod(obj: Any) {
         val stackTraceElements = Thread.currentThread().stackTrace
         val caller = stackTraceElements[3]
 
@@ -39,7 +42,7 @@ object MyCrashlytics {
         log(obj.javaClass.simpleName + "." + method + " " + obj.hashCode())
     }
 
-    fun logMethod(obj: Any, message: String) {
+    override fun logMethod(obj: Any, message: String) {
         val stackTraceElements = Thread.currentThread().stackTrace
         val caller = stackTraceElements[3]
 

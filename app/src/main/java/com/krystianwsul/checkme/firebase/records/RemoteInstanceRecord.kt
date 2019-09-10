@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.firebase.records
 
 
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.ScheduleKey
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute
@@ -116,7 +116,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         val instanceDay = createObject.instanceDay
 
         if (((instanceYear != null) != (instanceMonth != null)) || (instanceYear != null) != (instanceDay != null))
-            MyCrashlytics.logException(InstanceData.InconsistentInstanceException("instance: " + remoteTaskRecord.key + " " + key + ", instanceYear: $instanceYear, instanceMonth: $instanceMonth, instanceDay: $instanceDay"))
+            ErrorLogger.instance.logException(InstanceData.InconsistentInstanceException("instance: " + remoteTaskRecord.key + " " + key + ", instanceYear: $instanceYear, instanceMonth: $instanceMonth, instanceDay: $instanceDay"))
 
         return if (instanceYear != null && instanceMonth != null && instanceDay != null)
             Date(instanceYear, instanceMonth, instanceDay)

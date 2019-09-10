@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.utils
 
 import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.InstanceRecord
+import com.krystianwsul.common.domain.InstanceRecord
 import com.krystianwsul.common.time.*
 
 sealed class InstanceData<T, U, V : InstanceRecord<U>> {

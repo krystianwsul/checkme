@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.common.domain
 
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.JsonTime

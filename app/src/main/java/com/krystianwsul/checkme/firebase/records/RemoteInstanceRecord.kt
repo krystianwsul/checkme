@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.firebase.records
 
 
-import com.krystianwsul.checkme.domainmodel.InstanceRecord
 import com.krystianwsul.checkme.utils.InstanceData
 import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.domain.InstanceRecord
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.utils.toDate
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
@@ -115,7 +114,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                         add(Date(taskJson.oldestVisibleYear!!, taskJson.oldestVisibleMonth!!, taskJson.oldestVisibleDay!!))
                     } else {
                         if (taskJson.oldestVisibleYear != null || taskJson.oldestVisibleMonth != null || taskJson.oldestVisibleDay != null)
-                            MyCrashlytics.logException(MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
+                            ErrorLogger.instance.logException(MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
                     }
                 }
                 .min()
@@ -157,7 +156,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     init {
         if (taskJson.name.isEmpty())
-            MyCrashlytics.logException(MissingNameException("taskKey: $key"))
+            ErrorLogger.instance.logException(MissingNameException("taskKey: $key"))
 
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())

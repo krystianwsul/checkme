@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.TaskKey
-import com.krystianwsul.checkme.utils.fromDate
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.firebase.json.*

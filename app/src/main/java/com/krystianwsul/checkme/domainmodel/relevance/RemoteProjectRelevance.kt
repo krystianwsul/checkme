@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
-import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.checkme.firebase.models.RemoteProject
 
 class RemoteProjectRelevance(val remoteProject: RemoteProject<*>) {
 

@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.firebase.records.RemoteCustomTimeRecord

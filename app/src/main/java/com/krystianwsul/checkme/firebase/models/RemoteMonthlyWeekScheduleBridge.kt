@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.schedules.MonthlyWeekScheduleBridge

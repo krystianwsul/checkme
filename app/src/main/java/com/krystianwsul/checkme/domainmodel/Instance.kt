@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.firebase.RemoteProject
-import com.krystianwsul.checkme.firebase.RemoteSharedCustomTime
+import com.krystianwsul.checkme.firebase.models.RemoteProject
+import com.krystianwsul.checkme.firebase.models.RemoteSharedCustomTime
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskKey

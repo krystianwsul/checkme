@@ -14,7 +14,10 @@ import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.domainmodel.schedules.ScheduleGroup
-import com.krystianwsul.checkme.firebase.*
+import com.krystianwsul.checkme.firebase.RemoteFriendFactory
+import com.krystianwsul.checkme.firebase.RemoteProjectFactory
+import com.krystianwsul.checkme.firebase.RemoteUserFactory
+import com.krystianwsul.checkme.firebase.models.*
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment

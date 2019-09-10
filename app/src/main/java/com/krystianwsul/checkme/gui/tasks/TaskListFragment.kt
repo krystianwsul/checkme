@@ -14,7 +14,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.ImageState
+import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.ShowTaskInstancesActivity
 import com.krystianwsul.checkme.gui.instances.tree.*
@@ -225,8 +225,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                 check(expandedTaskIds!!.isNotEmpty())
             }
 
-            searchData = getParcelable<SearchData>(KEY_SEARCH_DATA)
-
+            searchData = getParcelable(KEY_SEARCH_DATA)
             showImage = getBoolean(KEY_SHOW_IMAGE)
         }
 
@@ -686,10 +685,10 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             if (query.isEmpty())
                 return false
 
-            if (name.toLowerCase().contains(query))
+            if (name.toLowerCase(Locale.getDefault()).contains(query))
                 return true
 
-            if (note?.toLowerCase()?.contains(query) == true)
+            if (note?.toLowerCase(Locale.getDefault())?.contains(query) == true)
                 return true
 
             return children.any { it.matchesSearch(searchData) }

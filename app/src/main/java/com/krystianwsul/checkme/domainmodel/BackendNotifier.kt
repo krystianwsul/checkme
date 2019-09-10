@@ -9,7 +9,7 @@ import com.android.volley.toolbox.Volley
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.common.domain.DeviceInfo
 
 object BackendNotifier {

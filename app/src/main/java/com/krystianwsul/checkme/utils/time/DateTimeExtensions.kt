@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.utils.time
 
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.firebase.RemoteProject
+import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.RemoteCustomTimeId

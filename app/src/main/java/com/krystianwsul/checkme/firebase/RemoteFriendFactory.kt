@@ -4,6 +4,7 @@ import android.text.TextUtils
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.managers.RemoteFriendManager
+import com.krystianwsul.checkme.firebase.models.RemoteRootUser
 import com.krystianwsul.common.firebase.json.UserJson
 
 class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {

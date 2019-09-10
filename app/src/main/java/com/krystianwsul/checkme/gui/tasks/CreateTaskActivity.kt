@@ -24,6 +24,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ShortcutManager
+import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -1241,7 +1242,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         data class Existing(val imageState: com.krystianwsul.checkme.firebase.models.ImageState) : ImageState() {
 
-            override val loader: (ImageView) -> Unit get() = { imageState.load(it, false) }
+            override val loader: (ImageView) -> Unit get() = { imageState.toImageLoader().load(it, false) }
         }
 
         object Removed : ImageState() {

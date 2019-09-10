@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
@@ -127,7 +128,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 rowContainer.visibility = View.GONE
                 rowBigImageLayout!!.visibility = View.VISIBLE
 
-                taskImage.imageState.load(rowBigImage!!)
+                taskImage.imageState
+                        .toImageLoader()
+                        .load(rowBigImage!!)
 
                 if (taskImage.showImage)
                     showImage(rowBigImage, taskImage)
@@ -246,7 +249,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     if (thumbnail != null) {
                         visibility = View.VISIBLE
 
-                        thumbnail!!.load(this, true)
+                        thumbnail!!.toImageLoader().load(this, true)
                     } else {
                         visibility = View.GONE
                     }
@@ -290,7 +293,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
     object MyImageLoader : ImageLoader<ImageState> {
 
         override fun loadImage(imageView: ImageView?, image: ImageState?) {
-            image!!.load(imageView!!)
+            image!!.toImageLoader().load(imageView!!)
         }
     }
 }

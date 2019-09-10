@@ -535,7 +535,7 @@ class DomainFactory(
             val instanceData = GroupListFragment.InstanceData(
                     instance.done,
                     instance.instanceKey,
-                    instance.getDisplayText(now),
+                    instance.getDisplayData(now)?.getDisplayText(),
                     instance.name,
                     instance.instanceDateTime.timeStamp,
                     task.current(now),
@@ -609,7 +609,7 @@ class DomainFactory(
             it.instanceKey to GroupListFragment.InstanceData(
                     it.done,
                     it.instanceKey,
-                    it.getDisplayText(now),
+                    it.getDisplayData(now)?.getDisplayText(),
                     it.name,
                     it.instanceDateTime.timeStamp,
                     task.current(now),
@@ -658,7 +658,7 @@ class DomainFactory(
             val instanceData = GroupListFragment.InstanceData(
                     instance.done,
                     instance.instanceKey,
-                    instance.getDisplayText(now),
+                    instance.getDisplayData(now)?.getDisplayText(),
                     instance.name,
                     instance.instanceDateTime.timeStamp,
                     task.current(now),

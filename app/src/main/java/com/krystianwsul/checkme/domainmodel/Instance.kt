@@ -3,20 +3,15 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.firebase.models.RemoteSharedCustomTime
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.time.calendar
-import com.krystianwsul.checkme.utils.time.getDisplayText
-import com.krystianwsul.checkme.utils.toExactTimeStamp
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
-import java.util.*
-import kotlin.collections.HashMap
+import com.soywiz.klock.days
 
 abstract class Instance(protected val domainFactory: DomainFactory) {
 
@@ -149,7 +144,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     fun isRootInstance(now: ExactTimeStamp) = getParentInstance(now) == null
 
-    fun getDisplayText(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime.getDisplayText() else null
+    fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
     abstract fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp)
 
@@ -203,9 +198,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
             return if (done != null) {
                 val cutoff = if (hack24) {
-                    now.calendar
-                            .apply { add(Calendar.DAY_OF_YEAR, -1) }
-                            .toExactTimeStamp()
+                    ExactTimeStamp(now.toDateTimeSoy() - 1.days)
                 } else {
                     ExactTimeStamp.now
                 }

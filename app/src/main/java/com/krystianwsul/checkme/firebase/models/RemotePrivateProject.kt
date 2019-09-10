@@ -12,7 +12,7 @@ class RemotePrivateProject(
         domainFactory: DomainFactory,
         override val remoteProjectRecord: RemotePrivateProjectRecord,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Private>(domainFactory, uuid) {
+        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Private>(domainFactory.remoteProjectFactory, domainFactory, uuid) {
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private>>

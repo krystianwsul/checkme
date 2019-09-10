@@ -20,6 +20,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
 abstract class RemoteProject<T : RemoteCustomTimeId>(
+        private val parent: Parent,
         protected val domainFactory: DomainFactory,
         val uuid: String) {
 
@@ -42,8 +43,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     private val startExactTimeStamp by lazy { ExactTimeStamp(remoteProjectRecord.startTime) }
 
     val endExactTimeStamp get() = remoteProjectRecord.endTime?.let { ExactTimeStamp(it) }
-
-    private val remoteFactory get() = domainFactory.remoteProjectFactory
 
     val taskKeys get() = remoteTasks.keys
 
@@ -170,7 +169,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     }
 
     fun delete() {
-        remoteFactory.deleteProject(this)
+        parent.deleteProject(this)
 
         remoteProjectRecord.delete()
     }
@@ -237,4 +236,9 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     }
 
     private class MissingTaskException(projectId: String, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")
+
+    interface Parent {
+
+        fun deleteProject(remoteProject: RemoteProject<*>)
+    }
 }

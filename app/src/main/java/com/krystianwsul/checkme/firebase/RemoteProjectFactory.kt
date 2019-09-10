@@ -28,7 +28,7 @@ class RemoteProjectFactory(
         sharedChildren: Iterable<DataSnapshot>,
         privateSnapshot: DataSnapshot,
         private val deviceInfo: DeviceInfo,
-        now: ExactTimeStamp) {
+        now: ExactTimeStamp) : RemoteProject.Parent {
 
     val uuid = domainFactory.uuid
 
@@ -219,7 +219,7 @@ class RemoteProjectFactory(
         return remoteProjects[projectId]
     }
 
-    fun deleteProject(remoteProject: RemoteProject<*>) {
+    override fun deleteProject(remoteProject: RemoteProject<*>) {
         val projectId = remoteProject.id
 
         check(remoteProjects.containsKey(projectId))

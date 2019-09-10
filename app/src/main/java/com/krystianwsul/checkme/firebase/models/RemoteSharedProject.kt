@@ -16,7 +16,7 @@ class RemoteSharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         deviceInfo: DeviceInfo,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(domainFactory, uuid) {
+        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(domainFactory.remoteProjectFactory, domainFactory, uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values

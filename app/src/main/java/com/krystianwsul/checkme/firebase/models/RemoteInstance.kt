@@ -2,12 +2,14 @@ package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.domain.InstanceData.Virtual
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteInstance<T : RemoteCustomTimeId> : Instance {
@@ -168,6 +170,30 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         } else {
             instanceTimePair
         }
+    }
+
+    override fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
+        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
+
+        val task = task
+
+        val scheduleDateTime = scheduleDateTime
+
+        val taskHierarchies = task.getTaskHierarchiesByParentTaskKey(task.taskKey)
+        val childInstances = HashMap<InstanceKey, Pair<Instance, TaskHierarchy>>()
+        for (taskHierarchy in taskHierarchies) {
+            val childTaskKey = taskHierarchy.childTaskKey
+
+            if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {
+                val childInstance = domainFactory.getInstance(childTaskKey, scheduleDateTime)
+
+                val parentInstance = childInstance.getParentInstance(now)
+                if (parentInstance?.instanceKey == instanceKey)
+                    childInstances[childInstance.instanceKey] = Pair(childInstance, taskHierarchy)
+            }
+        }
+
+        return ArrayList(childInstances.values)
     }
 
     private class RemoteReal<T : RemoteCustomTimeId>(private val remoteInstance: RemoteInstance<T>, remoteInstanceRecord: RemoteInstanceRecord<T>) : InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {

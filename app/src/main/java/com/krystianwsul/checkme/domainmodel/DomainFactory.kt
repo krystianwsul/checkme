@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
+import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
@@ -1988,14 +1989,24 @@ class DomainFactory(
             .values
             .mapNotNull { it.getSharedTimeIfPresent(privateCustomTimeId) }
 
-    private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
+    fun getInstanceShownRecord(taskKey: TaskKey, scheduleDateTime: DateTime): InstanceShownRecord? {
         val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
                 .timePair
                 .destructureRemote()
 
-        val instanceShownRecord = localFactory.getInstanceShownRecord(taskKey.remoteProjectId, taskKey.remoteTaskId, scheduleDateTime.date.year, scheduleDateTime.date.month, scheduleDateTime.date.day, remoteCustomTimeId, hour, minute)
+        return localFactory.getInstanceShownRecord(
+                taskKey.remoteProjectId,
+                taskKey.remoteTaskId,
+                scheduleDateTime.date.year,
+                scheduleDateTime.date.month,
+                scheduleDateTime.date.day,
+                remoteCustomTimeId,
+                hour,
+                minute)
+    }
 
-        return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime, instanceShownRecord)
+    private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
+        return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime, getInstanceShownRecord(taskKey, scheduleDateTime))
     }
 
     fun getInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {

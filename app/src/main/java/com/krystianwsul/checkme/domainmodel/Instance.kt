@@ -107,31 +107,9 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     fun exists() = (instanceData is InstanceData.Real)
 
-    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
-        val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
+    abstract fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>>
 
-        val task = task
-
-        val scheduleDateTime = scheduleDateTime
-
-        val taskHierarchies = task.getTaskHierarchiesByParentTaskKey(task.taskKey)
-        val childInstances = HashMap<InstanceKey, Pair<Instance, TaskHierarchy>>()
-        for (taskHierarchy in taskHierarchies) {
-            val childTaskKey = taskHierarchy.childTaskKey
-
-            if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {
-                val childInstance = domainFactory.getInstance(childTaskKey, scheduleDateTime)
-
-                val parentInstance = childInstance.getParentInstance(now)
-                if (parentInstance?.instanceKey == instanceKey)
-                    childInstances[childInstance.instanceKey] = Pair(childInstance, taskHierarchy)
-            }
-        }
-
-        return ArrayList(childInstances.values)
-    }
-
-    private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
+    protected fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
             Pair(now, "now"),
             Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"),
             task.getEndExactTimeStamp()?.let { Pair(it.minusOne(), "task end") },

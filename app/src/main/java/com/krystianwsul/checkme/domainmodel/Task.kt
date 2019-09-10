@@ -52,32 +52,9 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
-    fun getScheduleTextMultiline(exactTimeStamp: ExactTimeStamp): String? {
-        check(current(exactTimeStamp))
+    abstract fun getScheduleTextMultiline(exactTimeStamp: ExactTimeStamp): String?
 
-        val currentSchedules = getCurrentSchedules(exactTimeStamp)
-
-        check(currentSchedules.all { it.current(exactTimeStamp) })
-
-        return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") { it.getScheduleText(domainFactory) }
-    }
-
-    fun getScheduleText(exactTimeStamp: ExactTimeStamp, showParent: Boolean = false): String? {
-        check(current(exactTimeStamp))
-
-        val currentSchedules = getCurrentSchedules(exactTimeStamp)
-        val parentTask = getParentTask(exactTimeStamp)
-
-        return if (parentTask == null) {
-            check(currentSchedules.all { it.current(exactTimeStamp) })
-
-            ScheduleGroup.getGroups(currentSchedules).joinToString(", ") { it.getScheduleText(domainFactory) }
-        } else {
-            check(currentSchedules.isEmpty())
-
-            parentTask.name.takeIf { showParent }
-        }
-    }
+    abstract fun getScheduleText(exactTimeStamp: ExactTimeStamp, showParent: Boolean = false): String?
 
     fun notDeleted(exactTimeStamp: ExactTimeStamp): Boolean {
         val endExactTimeStamp = getEndExactTimeStamp()

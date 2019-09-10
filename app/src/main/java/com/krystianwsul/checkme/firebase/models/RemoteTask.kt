@@ -270,5 +270,32 @@ class RemoteTask<T : RemoteCustomTimeId>(
             domainFactory.convertRemoteToRemote(now, this, projectId)
     }
 
+    override fun getScheduleTextMultiline(exactTimeStamp: ExactTimeStamp): String? {
+        check(current(exactTimeStamp))
+
+        val currentSchedules = getCurrentSchedules(exactTimeStamp)
+
+        check(currentSchedules.all { it.current(exactTimeStamp) })
+
+        return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") { it.getScheduleText(remoteProject) }
+    }
+
     fun generateInstance(scheduleDateTime: DateTime, instanceShownRecord: InstanceShownRecord?) = RemoteInstance(domainFactory, remoteProject, this, scheduleDateTime, instanceShownRecord)
+
+    override fun getScheduleText(exactTimeStamp: ExactTimeStamp, showParent: Boolean): String? {
+        check(current(exactTimeStamp))
+
+        val currentSchedules = getCurrentSchedules(exactTimeStamp)
+        val parentTask = getParentTask(exactTimeStamp)
+
+        return if (parentTask == null) {
+            check(currentSchedules.all { it.current(exactTimeStamp) })
+
+            ScheduleGroup.getGroups(currentSchedules).joinToString(", ") { it.getScheduleText(remoteProject) }
+        } else {
+            check(currentSchedules.isEmpty())
+
+            parentTask.name.takeIf { showParent }
+        }
+    }
 }

@@ -381,10 +381,8 @@ class DomainFactory(
         val instance = getInstance(instanceKey)
         check(instance.isRootInstance(now))
 
-        if (instance.instanceTimePair.customTimeKey != null) {
-            val customTime = getCustomTime(instance.instanceTimePair.customTimeKey!!)
-
-            currentCustomTimes[customTime.customTimeKey] = customTime
+        (instance.instanceTime as? RemoteCustomTime<*>)?.let {
+            currentCustomTimes[it.customTimeKey] = it
         }
 
         val customTimeDatas = currentCustomTimes.mapValues {
@@ -413,10 +411,8 @@ class DomainFactory(
 
             instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(instance.instanceDateTime, instance.name, instance.done != null)
 
-            if (instance.instanceTimePair.customTimeKey != null) {
-                val customTime = getCustomTime(instance.instanceTimePair.customTimeKey!!)
-
-                currentCustomTimes[customTime.customTimeKey] = customTime
+            (instance.instanceTime as? CustomTime)?.let {
+                currentCustomTimes[it.customTimeKey] = it
             }
         }
 

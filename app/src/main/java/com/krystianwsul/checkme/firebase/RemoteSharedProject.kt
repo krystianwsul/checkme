@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey

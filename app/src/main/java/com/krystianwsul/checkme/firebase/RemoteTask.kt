@@ -5,13 +5,13 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.domainmodel.schedules.*
-import com.krystianwsul.checkme.firebase.records.RemoteInstanceRecord
-import com.krystianwsul.checkme.firebase.records.RemoteTaskRecord
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.firebase.json.*
+import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
+import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp

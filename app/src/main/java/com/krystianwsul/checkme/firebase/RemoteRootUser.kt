@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.krystianwsul.checkme.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
 
 
 open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {

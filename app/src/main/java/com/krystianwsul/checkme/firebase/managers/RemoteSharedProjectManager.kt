@@ -4,9 +4,9 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import java.util.*
 import kotlin.properties.Delegates
 

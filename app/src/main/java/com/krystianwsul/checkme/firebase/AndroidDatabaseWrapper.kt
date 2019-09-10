@@ -7,8 +7,8 @@ import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.firebase.records.*
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.records.*
 
 
 object AndroidDatabaseWrapper : DatabaseWrapper() {

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
 
-import com.krystianwsul.checkme.firebase.records.RemoteProjectUserRecord
+import com.krystianwsul.common.firebase.records.RemoteProjectUserRecord
 
 
 class RemoteProjectUser(

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.common.domain.CustomTime
+import com.krystianwsul.common.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair

@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
-import com.krystianwsul.checkme.firebase.records.RemoteSharedCustomTimeRecord
+import com.krystianwsul.common.firebase.records.RemoteSharedCustomTimeRecord
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 

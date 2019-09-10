@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.models
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
@@ -125,7 +124,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
     }
 
     override fun setName(name: String, note: String?) {
-        check(!TextUtils.isEmpty(name))
+        check(name.isNotEmpty())
 
         remoteTaskRecord.name = name
         remoteTaskRecord.note = note

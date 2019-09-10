@@ -2028,18 +2028,7 @@ class DomainFactory(
         return generateInstance(instanceKey.taskKey, dateTime) // DateTime -> timePair
     }
 
-    fun getPastInstances(task: Task, now: ExactTimeStamp): List<Instance> {
-        val allInstances = HashMap<InstanceKey, Instance>()
-
-        allInstances.putAll(task.existingInstances
-                .values
-                .filter { it.scheduleDateTime.timeStamp.toExactTimeStamp() <= now }
-                .associateBy { it.instanceKey })
-
-        allInstances.putAll(task.getInstances(null, now.plusOne(), now).associateBy { it.instanceKey })
-
-        return ArrayList(allInstances.values)
-    }
+    fun getPastInstances(task: Task, now: ExactTimeStamp) = task.getPastInstances(now)
 
     private fun getRootInstances(startExactTimeStamp: ExactTimeStamp?, endExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
         check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)

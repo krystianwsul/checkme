@@ -12,6 +12,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
@@ -202,9 +203,22 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         }
     }
 
+    fun getPastInstances(now: ExactTimeStamp): List<Instance> {
+        val allInstances = HashMap<InstanceKey, Instance>()
+
+        allInstances.putAll(existingInstances
+                .values
+                .filter { it.scheduleDateTime.timeStamp.toExactTimeStamp() <= now }
+                .associateBy { it.instanceKey })
+
+        allInstances.putAll(getInstances(null, now.plusOne(), now).associateBy { it.instanceKey })
+
+        return allInstances.values.toList()
+    }
+
     fun updateOldestVisible(now: ExactTimeStamp) {
         // 24 hack
-        val instances = domainFactory.getPastInstances(this, now)
+        val instances = getPastInstances(now)
 
         val optional = instances.asSequence()
                 .filter { it.isVisible(now, true) }

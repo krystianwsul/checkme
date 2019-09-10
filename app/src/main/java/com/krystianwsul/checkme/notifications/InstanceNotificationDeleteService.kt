@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Parcelable
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.common.utils.InstanceKey
 
 class InstanceNotificationDeleteService : IntentService("InstanceNotificationDeleteService") {
 

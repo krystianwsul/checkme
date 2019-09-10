@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.common.utils.InstanceKey
 
 
 class InstanceHourService : IntentService("InstanceHourService") {

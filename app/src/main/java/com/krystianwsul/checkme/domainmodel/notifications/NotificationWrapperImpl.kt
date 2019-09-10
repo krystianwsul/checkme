@@ -23,9 +23,9 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.notifications.*
-import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.InstanceKey
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers

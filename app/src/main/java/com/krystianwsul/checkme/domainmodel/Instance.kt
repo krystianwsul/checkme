@@ -2,15 +2,11 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.firebase.models.RemoteSharedCustomTime
-import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
-import com.krystianwsul.common.utils.ScheduleKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
 abstract class Instance(protected val domainFactory: DomainFactory) {

@@ -30,6 +30,7 @@ import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
@@ -1002,7 +1003,7 @@ class GroupListFragment @JvmOverloads constructor(
                 override val dataId: Int,
                 override val immediate: Boolean,
                 override val dataWrapper: DataWrapper,
-                val instanceKey: com.krystianwsul.checkme.utils.InstanceKey) : Parameters()
+                val instanceKey: com.krystianwsul.common.utils.InstanceKey) : Parameters()
 
         class InstanceKeys(
                 override val dataId: Int,

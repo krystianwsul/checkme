@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.InstanceKey
+import com.krystianwsul.common.utils.InstanceKey
 import java.util.*
 
 class GroupNotificationDeleteService : IntentService("GroupNotificationDeleteService") {

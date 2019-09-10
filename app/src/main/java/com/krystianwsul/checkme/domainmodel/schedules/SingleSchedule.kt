@@ -3,11 +3,11 @@ package com.krystianwsul.checkme.domainmodel.schedules
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
-import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.InstanceKey
 import java.util.*
 
 class SingleSchedule(

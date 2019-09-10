@@ -6,12 +6,12 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.*
 import java.util.*
 

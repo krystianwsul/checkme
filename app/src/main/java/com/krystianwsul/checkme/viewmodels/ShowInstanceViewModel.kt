@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
-import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.TaskKey
 
 class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {

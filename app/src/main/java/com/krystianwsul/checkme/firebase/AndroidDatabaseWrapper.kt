@@ -35,7 +35,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
         instance = this
     }
 
-    fun newSharedProjectRecordId() = rootReference.child(RECORDS_KEY).push().key!!
+    override fun newSharedProjectRecordId() = rootReference.child(RECORDS_KEY).push().key!!
 
     fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 
@@ -62,7 +62,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
         return id
     }
 
-    fun newSharedScheduleRecordId(projectId: String, taskId: String): String {
+    override fun newSharedScheduleRecordId(projectId: String, taskId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
                 .push()
                 .key!!
@@ -80,7 +80,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
         return id
     }
 
-    fun newSharedTaskRecordId(projectId: String): String {
+    override fun newSharedTaskRecordId(projectId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
                 .push()
                 .key!!
@@ -98,7 +98,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
         return id
     }
 
-    fun newSharedTaskHierarchyRecordId(projectId: String): String {
+    override fun newSharedTaskHierarchyRecordId(projectId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
                 .push()
                 .key!!
@@ -116,7 +116,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
         return id
     }
 
-    fun newSharedCustomTimeRecordId(projectId: String): String {
+    override fun newSharedCustomTimeRecordId(projectId: String): String {
         val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
                 .push()
                 .key!!

@@ -36,7 +36,7 @@ data class HourMinute(val hour: Int, val minute: Int) : Comparable<HourMinute>, 
 
     override fun compareTo(other: HourMinute) = compareValuesBy(this, other, { it.hour }, { it.minute })
 
-    override fun toString() = toDateTimeTz().toString(DateFormat.FORMAT_DATE.realLocale.formatTimeShort)
+    override fun toString() = toDateTimeTz().formatTime()
 
     fun toHourMilli() = HourMilli(hour, minute, 0, 0)
 

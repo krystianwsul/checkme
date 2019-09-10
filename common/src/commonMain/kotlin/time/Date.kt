@@ -3,7 +3,6 @@ package com.krystianwsul.common.time
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
 import com.krystianwsul.common.utils.Serializable
-import com.soywiz.klock.DateFormat
 import com.soywiz.klock.DateTimeTz
 import com.soywiz.klock.ISO8601
 import com.soywiz.klock.parse
@@ -24,7 +23,7 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     override fun compareTo(other: Date) = compareValuesBy(this, other, { it.year }, { it.month }, { it.day })
 
-    override fun toString() = toDateTimeTz().toString(DateFormat.FORMAT_DATE.realLocale.formatDateShort)
+    override fun toString() = toDateTimeTz().formatDate()
 
     fun toJson() = toDateTimeTz().format(ISO8601.DATE_CALENDAR_COMPLETE)
 

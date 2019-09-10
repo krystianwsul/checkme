@@ -23,7 +23,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         protected val domainFactory: DomainFactory,
         val uuid: String) {
 
-    protected abstract val remoteProjectRecord: RemoteProjectRecord<T>
+    abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
     protected abstract val remoteTasks: MutableMap<String, RemoteTask<T>>
     protected abstract val remoteTaskHierarchyContainer: TaskHierarchyContainer<String, RemoteTaskHierarchy<T>>

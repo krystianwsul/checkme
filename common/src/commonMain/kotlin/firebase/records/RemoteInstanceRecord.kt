@@ -68,9 +68,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                 val customTimeId = customTimeMatchResult.groupValues[4]
                 check(customTimeId.isNotEmpty())
 
-                val customTimeRecord = remoteProjectRecord.getCustomTimeRecord(customTimeId)
-
-                val customTimeKey = remoteProjectRecord.getRemoteCustomTimeKey(customTimeRecord.projectId, customTimeId)
+                val customTimeKey = remoteProjectRecord.getRemoteCustomTimeKey(customTimeId)
 
                 return Pair(ScheduleKey(Date(year, month, day), TimePair(customTimeKey)), customTimeKey.remoteCustomTimeId)
             }

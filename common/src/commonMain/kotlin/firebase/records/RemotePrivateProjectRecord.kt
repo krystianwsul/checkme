@@ -81,5 +81,5 @@ class RemotePrivateProjectRecord(
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
 
-    override fun getRemoteCustomTimeKey(projectId: String, customTimeId: String) = CustomTimeKey.Private(projectId, getRemoteCustomTimeId(customTimeId))
+    override fun getRemoteCustomTimeKey(remoteCustomTimeId: RemoteCustomTimeId.Private) = CustomTimeKey.Private(id, remoteCustomTimeId)
 }

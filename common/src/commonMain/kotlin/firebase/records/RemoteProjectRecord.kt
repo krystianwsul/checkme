@@ -100,5 +100,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
 
     abstract fun getRemoteCustomTimeId(id: String): T
 
-    abstract fun getRemoteCustomTimeKey(projectId: String, customTimeId: String): CustomTimeKey<T>
+    abstract fun getRemoteCustomTimeKey(remoteCustomTimeId: T): CustomTimeKey<T>
+
+    fun getRemoteCustomTimeKey(customTimeId: String) = getRemoteCustomTimeKey(getRemoteCustomTimeId(customTimeId))
 }

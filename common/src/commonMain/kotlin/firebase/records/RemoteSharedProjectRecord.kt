@@ -136,7 +136,7 @@ class RemoteSharedProjectRecord(
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
 
-    override fun getRemoteCustomTimeKey(projectId: String, customTimeId: String) = CustomTimeKey.Shared(projectId, getRemoteCustomTimeId(customTimeId))
+    override fun getRemoteCustomTimeKey(remoteCustomTimeId: RemoteCustomTimeId.Shared) = CustomTimeKey.Shared(id, remoteCustomTimeId)
 
     interface Parent {
 

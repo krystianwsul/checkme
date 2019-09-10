@@ -1,15 +1,16 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.schedules.WeeklyScheduleBridge
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteWeeklyScheduleRecord
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteWeeklyScheduleBridge<T : RemoteCustomTimeId>(
-        domainFactory: DomainFactory,
-        private val remoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord<T>) : RemoteScheduleBridge<T>(domainFactory, remoteWeeklyScheduleRecord), WeeklyScheduleBridge {
+        remoteProjectRecord: RemoteProjectRecord<T>,
+        private val remoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord<T>
+) : RemoteScheduleBridge<T>(remoteProjectRecord, remoteWeeklyScheduleRecord), WeeklyScheduleBridge {
 
     override val daysOfWeek get() = setOf(remoteWeeklyScheduleRecord.dayOfWeek)
 

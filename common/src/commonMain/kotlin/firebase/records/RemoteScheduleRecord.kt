@@ -27,7 +27,7 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord {
 
     val taskId get() = remoteTaskRecord.id
 
-    abstract val customTimeId: RemoteCustomTimeId?
+    abstract val customTimeId: T?
 
     constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(false) {
         this.id = id

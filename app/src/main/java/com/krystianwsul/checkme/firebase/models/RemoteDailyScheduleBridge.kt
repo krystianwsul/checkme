@@ -1,16 +1,17 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.schedules.WeeklyScheduleBridge
 import com.krystianwsul.checkme.utils.ScheduleId
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.common.firebase.records.RemoteDailyScheduleRecord
+import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteDailyScheduleBridge<T : RemoteCustomTimeId>(
-        domainFactory: DomainFactory,
-        private val remoteDailyScheduleRecord: RemoteDailyScheduleRecord<T>) : RemoteScheduleBridge<T>(domainFactory, remoteDailyScheduleRecord), WeeklyScheduleBridge {
+        remoteProjectRecord: RemoteProjectRecord<T>,
+        private val remoteDailyScheduleRecord: RemoteDailyScheduleRecord<T>
+) : RemoteScheduleBridge<T>(remoteProjectRecord, remoteDailyScheduleRecord), WeeklyScheduleBridge {
 
     override val startTime by lazy { remoteDailyScheduleRecord.startTime }
 

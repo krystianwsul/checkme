@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.domain.InstanceData
@@ -30,7 +29,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override var notified
         get() = shown?.notified == true
         set(value) {
-            createInstanceShownRecord()
+            createShown()
 
             shown!!.notified = value
         }
@@ -38,7 +37,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override var notificationShown
         get() = shown?.notificationShown == true
         set(value) {
-            createInstanceShownRecord()
+            createShown()
 
             shown!!.notificationShown = value
         }
@@ -67,12 +66,12 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
                 ?.let { (it as? JsonTime.Custom)?.let { Pair(remoteProject.id, it.id) } }
 
     constructor(
-            domainFactory: DomainFactory,
+            shownFactory: ShownFactory,
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
             remoteInstanceRecord: RemoteInstanceRecord<T>,
             shown: Shown?,
-            now: ExactTimeStamp) : super(domainFactory) {
+            now: ExactTimeStamp) : super(shownFactory) {
         this.remoteProject = remoteProject
         task = remoteTask
         val realInstanceData = RemoteReal(this, remoteInstanceRecord)
@@ -86,11 +85,11 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     }
 
     constructor(
-            domainFactory: DomainFactory,
+            shownFactory: ShownFactory,
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
             scheduleDateTime: DateTime,
-            shown: Shown?) : super(domainFactory) {
+            shown: Shown?) : super(shownFactory) {
         this.remoteProject = remoteProject
         task = remoteTask
         instanceData = Virtual(task.id, scheduleDateTime)
@@ -111,16 +110,16 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             }
         }
 
-        createInstanceShownRecord()
+        createShown()
 
         shown!!.notified = false
     }
 
-    private fun createInstanceShownRecord() {
+    private fun createShown() {
         if (shown != null)
             return
 
-        shown = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
+        shown = shownFactory.createShown(taskId, scheduleDateTime, task.remoteProject.id)
     }
 
     override fun createInstanceRecord(now: ExactTimeStamp): InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> = RemoteReal(this, task.createRemoteInstanceRecord(this, scheduleDateTime)).also {

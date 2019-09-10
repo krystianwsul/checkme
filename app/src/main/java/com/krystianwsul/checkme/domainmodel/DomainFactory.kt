@@ -48,7 +48,7 @@ class DomainFactory(
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
         userSnapshot: DataSnapshot,
-        friendSnapshot: DataSnapshot) {
+        friendSnapshot: DataSnapshot) : Instance.ShownFactory {
 
     companion object {
 
@@ -2834,7 +2834,7 @@ class DomainFactory(
         return dataWrapper
     }
 
-    fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey<*> {
+    private fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey<*> {
         return remoteProjectFactory.getRemoteCustomTime(remoteProjectId, remoteCustomTimeId).customTimeKey
     }
 
@@ -2848,6 +2848,12 @@ class DomainFactory(
             createChildTask(now, task, copiedChildTask.name, copiedChildTask.note, copiedChildTask.imageJson, copiedChildTask.taskKey)
         }
     }
+
+    override fun createShown(
+            remoteTaskId: String,
+            scheduleDateTime: DateTime,
+            projectId: String
+    ) = localFactory.createInstanceShownRecord(remoteTaskId, scheduleDateTime, projectId)
 
     class ProjectUndoData {
 

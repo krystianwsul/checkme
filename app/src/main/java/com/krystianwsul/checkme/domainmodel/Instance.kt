@@ -8,7 +8,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-abstract class Instance(protected val domainFactory: DomainFactory) {
+abstract class Instance(protected val shownFactory: ShownFactory) {
 
     companion object {
 
@@ -254,5 +254,10 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
         var notified: Boolean
         var notificationShown: Boolean
+    }
+
+    interface ShownFactory {
+
+        fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): Shown
     }
 }

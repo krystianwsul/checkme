@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.gui
 import android.os.Bundle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKey
 import java.io.Serializable
 
 class RemoveInstancesDialogFragment : AbstractDialogFragment() {

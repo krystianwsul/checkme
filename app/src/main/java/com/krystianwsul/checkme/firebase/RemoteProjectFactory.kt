@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.checkme.firebase.models.*
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.TaskHierarchyKey
-import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -21,6 +20,7 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleId
+import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
 class RemoteProjectFactory(

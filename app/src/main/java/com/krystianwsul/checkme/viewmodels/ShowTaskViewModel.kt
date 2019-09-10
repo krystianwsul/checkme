@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.viewmodels
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKey
 
 class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
 

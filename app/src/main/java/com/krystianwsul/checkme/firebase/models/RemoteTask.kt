@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.domainmodel.schedules.*
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
-import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.firebase.json.*
@@ -17,6 +16,7 @@ import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
 class RemoteTask<T : RemoteCustomTimeId>(

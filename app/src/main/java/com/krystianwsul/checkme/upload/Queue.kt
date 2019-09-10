@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.upload
 import android.annotation.SuppressLint
 import android.net.Uri
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKey
 import com.pacoworks.rxpaper2.RxPaperBook
 
 object Queue {

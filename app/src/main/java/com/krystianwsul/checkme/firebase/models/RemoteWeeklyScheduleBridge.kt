@@ -1,11 +1,11 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domainmodel.schedules.WeeklyScheduleBridge
-import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteWeeklyScheduleRecord
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleId
+import com.krystianwsul.common.utils.TaskKey
 
 class RemoteWeeklyScheduleBridge<T : RemoteCustomTimeId>(
         remoteProjectRecord: RemoteProjectRecord<T>,

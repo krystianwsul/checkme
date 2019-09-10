@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleKey
+import com.krystianwsul.common.utils.TaskKey
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 

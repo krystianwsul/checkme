@@ -6,7 +6,6 @@ import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.RemoteToRemoteConversion
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
-import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
@@ -18,6 +17,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.TaskKey
 
 abstract class RemoteProject<T : RemoteCustomTimeId>(
         protected val domainFactory: DomainFactory,

@@ -1,8 +1,4 @@
-package com.krystianwsul.checkme.utils
-
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-import java.io.Serializable
+package com.krystianwsul.common.utils
 
 @Parcelize
 data class TaskKey(val remoteProjectId: String, val remoteTaskId: String) : Parcelable, Serializable {

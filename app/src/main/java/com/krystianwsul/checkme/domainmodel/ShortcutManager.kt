@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKey
 import org.joda.time.LocalDateTime
 
 object ShortcutManager {

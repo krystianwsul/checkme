@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import android.view.View
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.utils.TaskKey
+import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode

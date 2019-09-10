@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.firebase.models
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.utils.TaskHierarchyKey
-import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.common.firebase.records.RemoteTaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.TaskKey
 
 
 class RemoteTaskHierarchy<T : RemoteCustomTimeId>(

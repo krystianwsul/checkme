@@ -68,7 +68,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         val taskHierarchyJson = TaskHierarchyJson(parentRemoteTask.id, childRemoteTask.id, now.long, null, null)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
-        val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
+        val remoteTaskHierarchy = RemoteTaskHierarchy(this, remoteTaskHierarchyRecord)
 
         remoteTaskHierarchyContainer.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
     }
@@ -136,7 +136,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         val taskHierarchyJson = TaskHierarchyJson(remoteParentTaskId, remoteChildTaskId, now.long, endTime, startTaskHierarchy.ordinal)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
-        val remoteTaskHierarchy = RemoteTaskHierarchy(domainFactory, this, remoteTaskHierarchyRecord)
+        val remoteTaskHierarchy = RemoteTaskHierarchy(this, remoteTaskHierarchyRecord)
 
         remoteTaskHierarchyContainer.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
 

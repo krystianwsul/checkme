@@ -50,7 +50,7 @@ class RemoteSharedProject(
 
         remoteProjectRecord.remoteTaskHierarchyRecords
                 .values
-                .map { RemoteTaskHierarchy(domainFactory, this, it) }
+                .map { RemoteTaskHierarchy(this, it) }
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
 
         updateUserInfo(deviceInfo.key, uuid, deviceInfo.token)

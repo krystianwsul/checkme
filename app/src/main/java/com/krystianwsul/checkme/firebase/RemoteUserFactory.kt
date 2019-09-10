@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.managers.RemoteUserManager
 import com.krystianwsul.checkme.firebase.models.RemoteMyUser
@@ -22,10 +23,20 @@ class RemoteUserFactory(
             remoteUserManager.isSaved = value
         }
 
+    init {
+        setTab()
+    }
+
+    private fun setTab() {
+        Preferences.tab = remoteUser.defaultTab
+    }
+
     fun onNewSnapshot(dataSnapshot: DataSnapshot) {
         val remoteUserRecord = remoteUserManager.newSnapshot(dataSnapshot)
 
         remoteUser = RemoteMyUser(remoteUserRecord)
+
+        setTab()
     }
 
     fun save() = remoteUserManager.save()

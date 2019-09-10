@@ -18,6 +18,10 @@ buildscript {
 
 android {
     compileSdkVersion 29
+
+    defaultConfig {
+        minSdkVersion 22
+    }
 }
 
 kotlin {

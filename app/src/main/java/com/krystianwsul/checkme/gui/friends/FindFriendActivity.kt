@@ -86,7 +86,7 @@ class FindFriendActivity : NavBarActivity() {
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            DatabaseWrapper.addFriend(userData!!.key).checkError(DomainFactory.instance, "FindFriendActivity.addFriend")
+            DatabaseWrapper.addFriend(userData!!.getKey()).checkError(DomainFactory.instance, "FindFriendActivity.addFriend")
 
             finish()
         }

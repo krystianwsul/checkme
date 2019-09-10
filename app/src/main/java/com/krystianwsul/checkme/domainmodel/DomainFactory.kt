@@ -412,7 +412,14 @@ class DomainFactory(
             }
         }
 
-        val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstancesViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
+        val customTimeDatas = currentCustomTimes.mapValues {
+            it.value.let {
+                EditInstancesViewModel.CustomTimeData(
+                        it.customTimeKey,
+                        it.name,
+                        it.hourMinutes.toSortedMap())
+            }
+        }
 
         val showHour = instanceDatas.values.all { it.instanceDateTime.timeStamp.toExactTimeStamp() < now }
 
@@ -771,7 +778,7 @@ class DomainFactory(
             check(checkHintPresent(parentTreeDatas))
         }
 
-        val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) }
+        val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes.toSortedMap()) }
 
         return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas, remoteUserFactory.remoteUser.defaultReminder)
     }

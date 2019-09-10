@@ -45,7 +45,7 @@ class EditInstancesViewModel : DomainViewModel<EditInstancesViewModel.Data>() {
     data class CustomTimeData(
             val customTimeKey: CustomTimeKey<*>,
             val name: String,
-            val hourMinutes: TreeMap<DayOfWeek, HourMinute>) {
+            val hourMinutes: SortedMap<DayOfWeek, HourMinute>) {
 
         init {
             check(name.isNotEmpty())

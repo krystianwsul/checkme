@@ -182,10 +182,8 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         val taskHierarchies = task.getTaskHierarchiesByParentTaskKey(task.taskKey)
         val childInstances = HashMap<InstanceKey, Pair<Instance, TaskHierarchy>>()
         for (taskHierarchy in taskHierarchies) {
-            val childTaskKey = taskHierarchy.childTaskKey
-
             if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {
-                val childInstance = domainFactory.getInstance(childTaskKey, scheduleDateTime)
+                val childInstance = (taskHierarchy.childTask as RemoteTask<*>).getInstance(scheduleDateTime)
 
                 val parentInstance = childInstance.getParentInstance(now)
                 if (parentInstance?.instanceKey == instanceKey)

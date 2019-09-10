@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.firebase.models
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.domainmodel.schedules.*
@@ -173,6 +174,15 @@ class RemoteTask<T : RemoteCustomTimeId>(
     }
 
     fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = existingRemoteInstances[scheduleKey]
+
+    fun getInstance(scheduleDateTime: DateTime): Instance {
+        val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
+
+        val existingInstance = getExistingInstanceIfPresent(scheduleKey)
+
+        return existingInstance
+                ?: generateInstance(scheduleDateTime, domainFactory.getInstanceShownRecord(taskKey, scheduleDateTime))
+    }
 
     fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<CreateTaskViewModel.ScheduleData>) {
         for (scheduleData in scheduleDatas) {

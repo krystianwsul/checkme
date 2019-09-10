@@ -149,7 +149,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         }
 
         if (!recursive) {
-            domainFactory.getParentTaskHierarchy(this, now)?.let {
+            getParentTaskHierarchy(now)?.let {
                 check(it.current(now))
 
                 taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
@@ -159,6 +159,27 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         }
 
         setMyEndExactTimeStamp(endData)
+    }
+
+    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy? {
+        val taskHierarchies = if (current(exactTimeStamp)) {
+            check(notDeleted(exactTimeStamp))
+
+            getParentTaskHierarchies().filter { it.current(exactTimeStamp) }
+        } else {
+            // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
+            // żeby można było dodawać child instances do past parent instance
+
+            check(notDeleted(exactTimeStamp))
+
+            getParentTaskHierarchies().filter { it.startExactTimeStamp == startExactTimeStamp }
+        }
+
+        return if (taskHierarchies.isEmpty()) {
+            null
+        } else {
+            taskHierarchies.single()
+        }
     }
 
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
@@ -248,7 +269,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
         for (schedule in schedules)
             instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp))
 
-        val taskHierarchies = getTaskHierarchiesByChildTaskKey(this.taskKey)
+        val taskHierarchies = getParentTaskHierarchies()
 
         instances.addAll(taskHierarchies.map { it.parentTask }
                 .flatMap { it.getInstances(startExactTimeStamp, endExactTimeStamp, now) }
@@ -263,7 +284,7 @@ abstract class Task(protected val domainFactory: DomainFactory) {
 
     fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).isNotEmpty()
 
-    abstract fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<TaskHierarchy>
+    abstract fun getParentTaskHierarchies(): Set<TaskHierarchy>
 
     abstract fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy>
 

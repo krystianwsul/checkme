@@ -22,7 +22,7 @@ class TaskRelevance(private val domainFactory: DomainFactory, val task: Task) {
 
         val taskKey = task.taskKey
 
-        (task.getTaskHierarchiesByChildTaskKey(taskKey) + task.getTaskHierarchiesByParentTaskKey(taskKey))
+        (task.getParentTaskHierarchies() + task.getTaskHierarchiesByParentTaskKey(taskKey))
                 .filter {
                     val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
                     it.notDeleted(hierarchyExactTimeStamp)

@@ -2317,36 +2317,7 @@ class DomainFactory(
                 .forEach { it.hide(now) }
     }
 
-    fun getParentTaskHierarchy(childTask: Task, exactTimeStamp: ExactTimeStamp): TaskHierarchy? {
-        if (childTask.current(exactTimeStamp)) {
-            check(childTask.notDeleted(exactTimeStamp))
-
-            val childTaskKey = childTask.taskKey
-
-            val taskHierarchies = childTask.getTaskHierarchiesByChildTaskKey(childTaskKey).filter { it.current(exactTimeStamp) }
-
-            return if (taskHierarchies.isEmpty()) {
-                null
-            } else {
-                taskHierarchies.single()
-            }
-        } else {
-            // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
-            // żeby można było dodawać child instances do past parent instance
-
-            check(childTask.notDeleted(exactTimeStamp))
-
-            val childTaskKey = childTask.taskKey
-
-            val taskHierarchies = childTask.getTaskHierarchiesByChildTaskKey(childTaskKey).filter { it.startExactTimeStamp == childTask.startExactTimeStamp }
-
-            return if (taskHierarchies.isEmpty()) {
-                null
-            } else {
-                taskHierarchies.single()
-            }
-        }
-    }
+    fun getParentTaskHierarchy(childTask: Task, exactTimeStamp: ExactTimeStamp) = childTask.getParentTaskHierarchy(exactTimeStamp)
 
     private fun getTasks() = remoteProjectFactory.tasks.asSequence()
 

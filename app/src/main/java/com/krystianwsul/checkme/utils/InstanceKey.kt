@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.utils
 import android.os.Parcelable
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.ScheduleKey
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
 
-import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.InstanceRecord
 import com.krystianwsul.common.firebase.json.InstanceJson
@@ -10,6 +9,7 @@ import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.JsonTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.ScheduleKey
 import kotlin.properties.Delegates.observable
 
 class RemoteInstanceRecord<T : RemoteCustomTimeId>(

@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.firebase.RemoteProject
 import com.krystianwsul.checkme.firebase.RemoteSharedCustomTime
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.ScheduleKey
 import com.krystianwsul.checkme.utils.TaskKey
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -16,6 +15,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.ScheduleKey
 import java.util.*
 import kotlin.collections.HashMap
 

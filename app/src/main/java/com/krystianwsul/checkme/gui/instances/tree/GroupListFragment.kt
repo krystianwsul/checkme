@@ -950,7 +950,7 @@ class GroupListFragment @JvmOverloads constructor(
         override val childSelectedDatas get() = children.values
     }
 
-    data class CustomTimeData(val Name: String, val HourMinutes: TreeMap<DayOfWeek, HourMinute>) {
+    data class CustomTimeData(val Name: String, val HourMinutes: SortedMap<DayOfWeek, HourMinute>) {
 
         init {
             check(Name.isNotEmpty())

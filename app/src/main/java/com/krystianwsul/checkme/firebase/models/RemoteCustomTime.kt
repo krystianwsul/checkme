@@ -6,7 +6,6 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.RemoteCustomTimeId
-import java.util.*
 
 abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
 
@@ -27,7 +26,7 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
     override val hourMinutes
         get() = DayOfWeek.values()
                 .map { it to getHourMinute(it) }
-                .toMap(TreeMap())
+                .toMap()
 
     override val timePair by lazy { TimePair(customTimeKey, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
 

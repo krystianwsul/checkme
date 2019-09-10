@@ -386,7 +386,9 @@ class DomainFactory(
             currentCustomTimes[customTime.customTimeKey] = customTime
         }
 
-        val customTimeDatas = currentCustomTimes.mapValues { it.value.let { EditInstanceViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes) } }
+        val customTimeDatas = currentCustomTimes.mapValues {
+            it.value.let { EditInstanceViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes.toSortedMap()) }
+        }
 
         return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
     }
@@ -500,7 +502,7 @@ class DomainFactory(
 
         val currentInstances = getRootInstances(startExactTimeStamp, endExactTimeStamp, now)
 
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
         val taskDatas = if (position == 0) {
             getTasks().filter { it.current(now) && it.isVisible(now, true) && it.isRootTask(now) && it.getCurrentSchedules(now).isEmpty() }
@@ -581,7 +583,7 @@ class DomainFactory(
         val task = getTaskForce(taskKey)
         val now = ExactTimeStamp.now
 
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
         val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
@@ -640,7 +642,7 @@ class DomainFactory(
                 .filter { it.isRootInstance(now) }
                 .sortedBy { it.instanceDateTime }
 
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
         val instanceDatas = instances.associate { instance ->
             val task = instance.task
@@ -2731,7 +2733,7 @@ class DomainFactory(
 
         val currentInstances = rootInstances.filter { it.instanceDateTime.timeStamp.compareTo(timeStamp) == 0 }
 
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
         val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
         for (instance in currentInstances) {
@@ -2774,7 +2776,7 @@ class DomainFactory(
             instance: Instance,
             task: Task,
             now: ExactTimeStamp): GroupListFragment.DataWrapper {
-        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes) }
+        val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
         val instanceDatas = instance.getChildInstances(now)
                 .map { (childInstance, taskHierarchy) ->

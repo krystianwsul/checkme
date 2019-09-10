@@ -20,10 +20,10 @@ import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
 class RemoteTask<T : RemoteCustomTimeId>(
-        domainFactory: DomainFactory,
+        private val domainFactory: DomainFactory,
         val remoteProject: RemoteProject<T>,
         private val remoteTaskRecord: RemoteTaskRecord<T>,
-        now: ExactTimeStamp) : Task(domainFactory) {
+        now: ExactTimeStamp) : Task() {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values

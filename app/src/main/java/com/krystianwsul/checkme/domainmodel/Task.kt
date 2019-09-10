@@ -17,7 +17,7 @@ import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
 import java.util.*
 
-abstract class Task(protected val domainFactory: DomainFactory) {
+abstract class Task {
 
     abstract val startExactTimeStamp: ExactTimeStamp
 

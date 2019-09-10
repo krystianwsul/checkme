@@ -60,6 +60,6 @@ class TaskHierarchyContainer<T, U : TaskHierarchy> {
         fun remove(taskKey: TaskKey, taskHierarchy: U) = values[taskKey]?.remove(taskHierarchy)
                 ?: false
 
-        fun get(taskKey: TaskKey) = values.getValue(taskKey).toMutableSet()
+        fun get(taskKey: TaskKey) = values[taskKey]?.toMutableSet() ?: setOf<U>()
     }
 }

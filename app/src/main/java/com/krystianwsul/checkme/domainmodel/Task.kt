@@ -193,7 +193,13 @@ abstract class Task(protected val domainFactory: DomainFactory) {
     fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
         check(notDeleted(exactTimeStamp))
 
-        return domainFactory.getParentTask(this, exactTimeStamp)
+        return getParentTaskHierarchy(exactTimeStamp)?.let {
+            check(it.notDeleted(exactTimeStamp))
+
+            it.parentTask.also {
+                check(it.notDeleted(exactTimeStamp))
+            }
+        }
     }
 
     fun updateOldestVisible(now: ExactTimeStamp) {

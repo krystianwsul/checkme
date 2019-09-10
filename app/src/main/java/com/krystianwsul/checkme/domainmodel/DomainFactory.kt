@@ -2079,22 +2079,6 @@ class DomainFactory(
 
     private fun getDateTime(date: Date, timePair: TimePair) = DateTime(date, getTime(timePair))
 
-    fun getParentTask(childTask: Task, exactTimeStamp: ExactTimeStamp): Task? {
-        check(childTask.notDeleted(exactTimeStamp))
-
-        val parentTaskHierarchy = getParentTaskHierarchy(childTask, exactTimeStamp)
-        return if (parentTaskHierarchy == null) {
-            null
-        } else {
-            check(parentTaskHierarchy.notDeleted(exactTimeStamp))
-
-            val parentTask = parentTaskHierarchy.parentTask
-            check(parentTask.notDeleted(exactTimeStamp))
-
-            parentTask
-        }
-    }
-
     fun getCustomTime(customTimeKey: CustomTimeKey<*>) = remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
 
     private fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = remoteProjectFactory.remotePrivateProject

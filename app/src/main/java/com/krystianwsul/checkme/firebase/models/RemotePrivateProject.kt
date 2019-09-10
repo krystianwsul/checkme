@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -9,10 +10,11 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 
 class RemotePrivateProject(
+        remoteProjectFactory: RemoteProjectFactory,
         domainFactory: DomainFactory,
         override val remoteProjectRecord: RemotePrivateProjectRecord,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Private>(domainFactory.remoteProjectFactory, domainFactory, uuid) {
+        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Private>(remoteProjectFactory, domainFactory, uuid) {
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private>>

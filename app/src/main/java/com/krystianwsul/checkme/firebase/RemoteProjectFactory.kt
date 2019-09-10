@@ -35,12 +35,12 @@ class RemoteProjectFactory(
     private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, deviceInfo, privateSnapshot, now)
     private val remoteSharedProjectManager = RemoteSharedProjectManager(domainFactory, sharedChildren)
 
-    var remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid, now)
+    var remotePrivateProject = RemotePrivateProject(this, domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid, now)
         private set
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .map { RemoteSharedProject(domainFactory, it, deviceInfo, uuid, now) }
+            .map { RemoteSharedProject(this, domainFactory, it, deviceInfo, uuid, now) }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -99,13 +99,13 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteSharedProjectManager.addChild(childEvent.dataSnapshot())
 
                 check(!remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(this, domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
             }
             is ChildChangeEvent -> {
                 val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(this, domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
             }
             is ChildRemoveEvent -> {
                 val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
@@ -119,7 +119,7 @@ class RemoteProjectFactory(
     fun onNewPrivate(dataSnapshot: DataSnapshot, now: ExactTimeStamp) {
         val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
 
-        remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectRecord, uuid, now)
+        remotePrivateProject = RemotePrivateProject(this, domainFactory, remotePrivateProjectRecord, uuid, now)
     }
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<CreateTaskViewModel.ScheduleData>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
@@ -146,7 +146,7 @@ class RemoteProjectFactory(
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteSharedProject(domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
+        val remoteProject = RemoteSharedProject(this, domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
 
         check(!remoteProjects.containsKey(remoteProject.id))
 

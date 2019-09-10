@@ -15,6 +15,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DeviceInfo
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
+import com.krystianwsul.checkme.domainmodel.toUserInfo
 import com.krystianwsul.checkme.firebase.DatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
@@ -83,7 +84,7 @@ class MyApplication : Application() {
                 .authStateChanges()
                 .map { NullableWrapper(it.currentUser) }
                 .startWith(NullableWrapper(FirebaseAuth.getInstance().currentUser))
-                .map { NullableWrapper(it.value?.let { DeviceInfo(it, token) }) }
+                .map { NullableWrapper(it.value?.let { DeviceInfo(it.toUserInfo(), token) }) }
                 .distinctUntilChanged()
                 .subscribe(userInfoRelay)
 

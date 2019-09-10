@@ -1,15 +1,10 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.google.firebase.auth.FirebaseUser
 import com.krystianwsul.common.domain.UserInfo
 
 data class DeviceInfo(
         val userInfo: UserInfo,
         var token: String?) {
-
-    constructor(firebaseUser: FirebaseUser, token: String?) : this(
-            firebaseUser.toUserInfo(),
-            token)
 
     val email get() = userInfo.email
     val name get() = userInfo.name

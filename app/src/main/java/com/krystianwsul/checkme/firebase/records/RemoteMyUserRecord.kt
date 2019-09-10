@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.RemoteMyUserInterface
+import com.krystianwsul.common.firebase.RemoteMyUserInterface
 import com.krystianwsul.common.firebase.json.UserWrapper
 
 

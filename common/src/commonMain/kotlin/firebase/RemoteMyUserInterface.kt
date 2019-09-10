@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase
+package com.krystianwsul.common.firebase
 
 interface RemoteMyUserInterface {
 

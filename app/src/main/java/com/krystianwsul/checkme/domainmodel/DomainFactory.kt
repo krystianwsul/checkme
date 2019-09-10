@@ -2508,7 +2508,7 @@ class DomainFactory(
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
                 .toMutableList()
-                .apply { removeAll(relevantInstances.map { it.instanceShownRecord }) }
+                .apply { removeAll(relevantInstances.map { it.shown }) }
         irrelevantInstanceShownRecords.forEach { it.delete() }
     }
 

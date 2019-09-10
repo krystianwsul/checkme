@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.Instance
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.domain.InstanceData.Virtual
@@ -16,7 +15,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
     override var instanceData: InstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>
 
-    override var instanceShownRecord: InstanceShownRecord? = null
+    override var shown: Shown? = null
         private set
 
     private val taskId
@@ -28,19 +27,19 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         }
 
     override var notified
-        get() = this.instanceShownRecord?.notified == true
+        get() = shown?.notified == true
         set(value) {
             createInstanceShownRecord()
 
-            instanceShownRecord!!.notified = value
+            shown!!.notified = value
         }
 
     override var notificationShown
-        get() = this.instanceShownRecord?.notificationShown == true
+        get() = shown?.notificationShown == true
         set(value) {
             createInstanceShownRecord()
 
-            instanceShownRecord!!.notificationShown = value
+            shown!!.notificationShown = value
         }
 
     override val scheduleCustomTimeKey
@@ -71,18 +70,18 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
             remoteInstanceRecord: RemoteInstanceRecord<T>,
-            instanceShownRecord: InstanceShownRecord?,
+            shown: Shown?,
             now: ExactTimeStamp) : super(domainFactory) {
         this.remoteProject = remoteProject
         task = remoteTask
         val realInstanceData = RemoteReal(this, remoteInstanceRecord)
         instanceData = realInstanceData
-        this.instanceShownRecord = instanceShownRecord
+        this.shown = shown
 
         val date = instanceDate
         val instanceTimeStamp = ExactTimeStamp(date, instanceTime.getHourMinute(date.dayOfWeek).toHourMilli())
         if (realInstanceData.instanceRecord.done != null || instanceTimeStamp > now)
-            instanceShownRecord?.notified = false
+            shown?.notified = false
     }
 
     constructor(
@@ -90,11 +89,11 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
             scheduleDateTime: DateTime,
-            instanceShownRecord: InstanceShownRecord?) : super(domainFactory) {
+            shown: Shown?) : super(domainFactory) {
         this.remoteProject = remoteProject
         task = remoteTask
         instanceData = Virtual(task.id, scheduleDateTime)
-        this.instanceShownRecord = instanceShownRecord
+        this.shown = shown
     }
 
     override fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp) {
@@ -113,14 +112,14 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
         createInstanceShownRecord()
 
-        instanceShownRecord!!.notified = false
+        shown!!.notified = false
     }
 
     private fun createInstanceShownRecord() {
-        if (instanceShownRecord != null)
+        if (shown != null)
             return
 
-        instanceShownRecord = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
+        shown = domainFactory.localFactory.createInstanceShownRecord(taskId, scheduleDateTime, task.remoteProject.id)
     }
 
     override fun createInstanceRecord(now: ExactTimeStamp): InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> = RemoteReal(this, task.createRemoteInstanceRecord(this, scheduleDateTime)).also {
@@ -131,7 +130,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         if (done) {
             createInstanceHierarchy(now).instanceRecord.done = now.long
 
-            instanceShownRecord?.notified = false
+            shown?.notified = false
         } else {
             (instanceData as RemoteReal).instanceRecord.done = null
         }

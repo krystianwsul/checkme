@@ -3,7 +3,6 @@ package com.krystianwsul.checkme.domainmodel
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.firebase.models.RemoteSharedCustomTime
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.InstanceKey
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -114,7 +113,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     abstract val customTimeKey: Pair<String, RemoteCustomTimeId>?
 
-    abstract val instanceShownRecord: InstanceShownRecord?
+    abstract val shown: Shown?
 
     fun exists() = (instanceData is InstanceData.Real)
 
@@ -285,4 +284,10 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
         }
 
     fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
+
+    interface Shown {
+
+        var notified: Boolean
+        var notificationShown: Boolean
+    }
 }

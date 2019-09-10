@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.krystianwsul.checkme.domainmodel.Instance
 import kotlin.properties.Delegates.observable
 
 class InstanceShownRecord(
@@ -17,7 +18,7 @@ class InstanceShownRecord(
         val scheduleMinute: Int?,
         mNotified: Boolean,
         mNotificationShown: Boolean,
-        mProjectId: String) : Record(created) {
+        mProjectId: String) : Record(created), Instance.Shown {
 
     companion object {
 
@@ -96,9 +97,9 @@ class InstanceShownRecord(
         fun getMaxId(sqLiteDatabase: SQLiteDatabase) = getMaxId(sqLiteDatabase, TABLE_INSTANCES_SHOWN, COLUMN_ID)
     }
 
-    var notified by observable(mNotified) { _, _, _ -> changed = true }
+    override var notified by observable(mNotified) { _, _, _ -> changed = true }
 
-    var notificationShown by observable(mNotificationShown) { _, _, _ -> changed = true }
+    override var notificationShown by observable(mNotificationShown) { _, _, _ -> changed = true }
 
     var projectId by observable(mProjectId) { _, _, _ -> changed = true }
 

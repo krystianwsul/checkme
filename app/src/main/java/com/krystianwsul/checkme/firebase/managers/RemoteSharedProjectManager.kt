@@ -10,7 +10,10 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import java.util.*
 import kotlin.properties.Delegates
 
-class RemoteSharedProjectManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
+class RemoteSharedProjectManager(
+        private val domainFactory: DomainFactory,
+        children: Iterable<DataSnapshot>
+) : RemoteSharedProjectRecord.Parent {
 
     private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(this@RemoteSharedProjectManager, domainFactory.uuid, key!!, getValue(JsonWrapper::class.java)!!)
 
@@ -61,5 +64,9 @@ class RemoteSharedProjectManager(private val domainFactory: DomainFactory, child
         check(!remoteProjectRecords.containsKey(it.id))
 
         remoteProjectRecords[it.id] = it
+    }
+
+    override fun deleteRemoteSharedProjectRecord(id: String) {
+        remoteProjectRecords.remove(id)
     }
 }

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.records
 
-import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
@@ -9,7 +8,7 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteSharedProjectRecord(
-        private val remoteSharedProjectManager: RemoteSharedProjectManager,
+        private val parent: Parent,
         create: Boolean,
         id: String,
         uuid: String,
@@ -46,12 +45,12 @@ class RemoteSharedProjectRecord(
     override val children get() = super.children + remoteUserRecords.values
 
     constructor(
-            remoteSharedProjectManager: RemoteSharedProjectManager,
+            parent: Parent,
             uuid: String,
             id: String,
             jsonWrapper: JsonWrapper
     ) : this(
-            remoteSharedProjectManager,
+            parent,
             false,
             id,
             uuid,
@@ -59,11 +58,11 @@ class RemoteSharedProjectRecord(
     )
 
     constructor(
-            remoteSharedProjectManager: RemoteSharedProjectManager,
+            parent: Parent,
             uuid: String,
             jsonWrapper: JsonWrapper
     ) : this(
-            remoteSharedProjectManager,
+            parent,
             true,
             DatabaseWrapper.instance.newSharedProjectRecordId(),
             uuid,
@@ -123,7 +122,7 @@ class RemoteSharedProjectRecord(
 
     override val childKey get() = "$key/$PROJECT_JSON"
 
-    override fun deleteFromParent() = check(remoteSharedProjectManager.remoteProjectRecords.remove(id) == this)
+    override fun deleteFromParent() = parent.deleteRemoteSharedProjectRecord(id)
 
     fun getCustomTimeRecordId() = RemoteCustomTimeId.Shared(DatabaseWrapper.instance.newSharedCustomTimeRecordId(id))
 
@@ -138,4 +137,9 @@ class RemoteSharedProjectRecord(
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
 
     override fun getRemoteCustomTimeKey(projectId: String, customTimeId: String) = CustomTimeKey.Shared(projectId, getRemoteCustomTimeId(customTimeId))
+
+    interface Parent {
+
+        fun deleteRemoteSharedProjectRecord(id: String)
+    }
 }

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.utils
 
-import com.krystianwsul.checkme.domainmodel.CustomTime
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceRecord
 import com.krystianwsul.common.time.*
 

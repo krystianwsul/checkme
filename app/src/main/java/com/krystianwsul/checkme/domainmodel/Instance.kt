@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.CustomTimeKey

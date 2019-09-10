@@ -1987,7 +1987,12 @@ class DomainFactory(
 
     override fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
             .values
-            .mapNotNull { it.getSharedTimeIfPresent(privateCustomTimeId) }
+            .mapNotNull {
+                it.getSharedTimeIfPresent(
+                        privateCustomTimeId,
+                        remoteProjectFactory.remotePrivateProject.id
+                )
+            }
 
     fun getInstanceShownRecord(taskKey: TaskKey, scheduleDateTime: DateTime): InstanceShownRecord? {
         val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time

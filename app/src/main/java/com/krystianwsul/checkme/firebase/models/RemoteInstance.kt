@@ -7,6 +7,7 @@ import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.domain.InstanceData.Virtual
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteInstance<T : RemoteCustomTimeId> : Instance {
@@ -147,6 +148,27 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     override fun belongsToRemoteProject() = true
 
     override fun getNullableOrdinal() = (instanceData as? RemoteReal<T>)?.instanceRecord?.ordinal
+
+    override fun getCreateTaskTimePair(ownerKey: String): TimePair {
+        val instanceTimePair = instanceTime.timePair
+        val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
+
+        return if (shared != null) {
+            val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.remoteCustomTimeId) as RemoteSharedCustomTime
+
+            if (sharedCustomTime.ownerKey == ownerKey) {
+                val privateCustomTimeKey = CustomTimeKey.Private(ownerKey, sharedCustomTime.privateKey!!)
+
+                TimePair(privateCustomTimeKey)
+            } else {
+                val hourMinute = sharedCustomTime.getHourMinute(instanceDate.dayOfWeek)
+
+                TimePair(hourMinute)
+            }
+        } else {
+            instanceTimePair
+        }
+    }
 
     private class RemoteReal<T : RemoteCustomTimeId>(private val remoteInstance: RemoteInstance<T>, remoteInstanceRecord: RemoteInstanceRecord<T>) : InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.firebase.models.RemoteProject
-import com.krystianwsul.checkme.firebase.models.RemoteSharedCustomTime
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceData
@@ -249,28 +248,7 @@ abstract class Instance(protected val domainFactory: DomainFactory) {
 
     val hidden get() = instanceData.hidden
 
-    val createTaskTimePair: TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
-        get() {
-            val instanceTimePair = instanceTime.timePair
-            val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
-
-            return if (shared != null) {
-                val sharedCustomTime = domainFactory.getCustomTime(shared) as RemoteSharedCustomTime
-
-                val privateProjectKey = domainFactory.remoteProjectFactory.remotePrivateProject.id
-                if (sharedCustomTime.ownerKey == privateProjectKey) {
-                    val privateCustomTimeKey = CustomTimeKey.Private(privateProjectKey, sharedCustomTime.privateKey!!)
-
-                    TimePair(privateCustomTimeKey)
-                } else {
-                    val hourMinute = sharedCustomTime.getHourMinute(instanceDate.dayOfWeek)
-
-                    TimePair(hourMinute)
-                }
-            } else {
-                instanceTimePair
-            }
-        }
+    abstract fun getCreateTaskTimePair(ownerKey: String): TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
 
     fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
 

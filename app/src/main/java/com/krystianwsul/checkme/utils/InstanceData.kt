@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.utils
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceRecord
 import com.krystianwsul.common.time.*
@@ -8,10 +7,10 @@ import com.krystianwsul.common.time.*
 sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
     abstract val scheduleDate: Date
-    abstract fun getScheduleTime(domainFactory: DomainFactory): Time
+    abstract val scheduleTime: Time
 
     abstract val instanceDate: Date
-    abstract fun getInstanceTime(domainFactory: DomainFactory): Time
+    abstract val instanceTime: Time
 
     abstract val done: Long?
 
@@ -25,31 +24,23 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
         override val scheduleDate get() = instanceRecord.let { Date(it.scheduleYear, it.scheduleMonth, it.scheduleDay) }
 
-        override fun getScheduleTime(domainFactory: DomainFactory): Time {
-            val customTimeId = instanceRecord.scheduleCustomTimeId
-            val hour = instanceRecord.scheduleHour
-            val minute = instanceRecord.scheduleMinute
-
-            check(hour == null == (minute == null))
-            check(customTimeId == null != (hour == null))
-
-            return customTimeId?.let { getCustomTime(it) } ?: NormalTime(hour!!, minute!!)
-        }
+        override val scheduleTime
+            get() = instanceRecord.run {
+                scheduleCustomTimeId?.let { getCustomTime(it) }
+                        ?: NormalTime(scheduleHour!!, scheduleMinute!!)
+            }
 
         override val instanceDate get() = instanceRecord.instanceDate ?: scheduleDate
 
-        override fun getInstanceTime(domainFactory: DomainFactory): Time {
-            val instanceJsonTime = instanceRecord.instanceJsonTime
-
-            return if (instanceJsonTime == null) {
-                getScheduleTime(domainFactory)
-            } else {
-                when (instanceJsonTime) {
-                    is JsonTime.Custom -> getCustomTime(instanceJsonTime.id)
-                    is JsonTime.Normal -> NormalTime(instanceJsonTime.hourMinute)
-                }
-            }
-        }
+        override val instanceTime
+            get() = instanceRecord.instanceJsonTime
+                    ?.let {
+                        when (it) {
+                            is JsonTime.Custom -> getCustomTime(it.id)
+                            is JsonTime.Normal -> NormalTime(it.hourMinute)
+                        }
+                    }
+                    ?: scheduleTime
 
         override val done get() = instanceRecord.done
 
@@ -60,11 +51,11 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
         override val scheduleDate by lazy { scheduleDateTime.date }
 
-        override fun getScheduleTime(domainFactory: DomainFactory) = scheduleDateTime.time
+        override val scheduleTime = scheduleDateTime.time
 
         override val instanceDate by lazy { scheduleDate }
 
-        override fun getInstanceTime(domainFactory: DomainFactory) = getScheduleTime(domainFactory)
+        override val instanceTime = scheduleTime
 
         override val done: Long? = null
 

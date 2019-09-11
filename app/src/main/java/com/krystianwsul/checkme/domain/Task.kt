@@ -296,7 +296,7 @@ abstract class Task {
         val addScheduleDatas = ArrayList(scheduleDatas)
 
         val oldSchedules = getCurrentSchedules(now)
-        val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleDataWrapper.scheduleData to it.schedules }
+        val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleData to it.schedules }
         for ((key, value) in oldScheduleDatas) {
             if (addScheduleDatas.contains(key)) {
                 addScheduleDatas.remove(key)

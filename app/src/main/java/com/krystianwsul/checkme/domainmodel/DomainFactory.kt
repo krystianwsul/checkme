@@ -747,7 +747,7 @@ class DomainFactory(
                 parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
                 if (schedules.isNotEmpty())
-                    scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map { it.scheduleDataWrapper }
+                    scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map { CreateTaskViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData) }
             } else {
                 val parentTask = task.getParentTask(now)!!
                 parentKey = CreateTaskViewModel.ParentKey.Task(parentTask.taskKey)

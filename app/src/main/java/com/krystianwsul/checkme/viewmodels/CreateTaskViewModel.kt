@@ -42,6 +42,16 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
     sealed class ScheduleDataWrapper : Serializable {
 
+        companion object {
+
+            fun fromScheduleData(scheduleData: ScheduleData) = when (scheduleData) {
+                is ScheduleData.Single -> Single(scheduleData)
+                is ScheduleData.Weekly -> Weekly(scheduleData)
+                is ScheduleData.MonthlyDay -> MonthlyDay(scheduleData)
+                is ScheduleData.MonthlyWeek -> MonthlyWeek(scheduleData)
+            }
+        }
+
         abstract val scheduleData: ScheduleData
 
         val timePair get() = scheduleData.timePair

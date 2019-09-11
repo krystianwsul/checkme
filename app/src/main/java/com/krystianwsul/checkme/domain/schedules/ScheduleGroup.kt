@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domain.schedules
 
-import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel.ScheduleDataWrapper
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
@@ -56,7 +55,7 @@ sealed class ScheduleGroup {
 
     abstract val customTimeKey: CustomTimeKey<*>?
 
-    abstract val scheduleDataWrapper: ScheduleDataWrapper
+    abstract val scheduleData: ScheduleData
 
     abstract val schedules: List<Schedule>
 
@@ -64,10 +63,7 @@ sealed class ScheduleGroup {
 
         override val customTimeKey get() = singleSchedule.customTimeKey
 
-        override val scheduleDataWrapper
-            get() = ScheduleDataWrapper.Single(ScheduleData.Single(
-                    singleSchedule.date,
-                    singleSchedule.timePair))
+        override val scheduleData get() = ScheduleData.Single(singleSchedule.date, singleSchedule.timePair)
 
         override val schedules get() = listOf(singleSchedule)
     }
@@ -78,7 +74,7 @@ sealed class ScheduleGroup {
 
         val daysOfWeek get() = weeklySchedules.flatMap { it.daysOfWeek }.toSet()
 
-        override val scheduleDataWrapper get() = ScheduleDataWrapper.Weekly(ScheduleData.Weekly(daysOfWeek, timePair))
+        override val scheduleData get() = ScheduleData.Weekly(daysOfWeek, timePair)
 
         override val schedules get() = weeklySchedules
     }
@@ -87,11 +83,12 @@ sealed class ScheduleGroup {
 
         override val customTimeKey get() = monthlyDaySchedule.customTimeKey
 
-        override val scheduleDataWrapper
-            get() = ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(
+        override val scheduleData
+            get() = ScheduleData.MonthlyDay(
                     monthlyDaySchedule.dayOfMonth,
                     monthlyDaySchedule.beginningOfMonth,
-                    monthlyDaySchedule.timePair))
+                    monthlyDaySchedule.timePair
+            )
 
         override val schedules get() = listOf(monthlyDaySchedule)
     }
@@ -100,12 +97,13 @@ sealed class ScheduleGroup {
 
         override val customTimeKey get() = monthlyWeekSchedule.customTimeKey
 
-        override val scheduleDataWrapper
-            get() = ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(
+        override val scheduleData
+            get() = ScheduleData.MonthlyWeek(
                     monthlyWeekSchedule.dayOfMonth,
                     monthlyWeekSchedule.dayOfWeek,
                     monthlyWeekSchedule.beginningOfMonth,
-                    monthlyWeekSchedule.timePair))
+                    monthlyWeekSchedule.timePair
+            )
 
         override val schedules get() = listOf(monthlyWeekSchedule)
     }

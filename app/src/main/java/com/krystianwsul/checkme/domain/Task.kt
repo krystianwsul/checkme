@@ -1,13 +1,12 @@
 package com.krystianwsul.checkme.domain
 
-import android.util.Log
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domain.schedules.Schedule
 import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.firebase.models.RemoteTask
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
@@ -223,9 +222,7 @@ abstract class Task {
 
         val message = "$name old oldest: $oldestVisible, new oldest: $date"
 
-        Log.e("asdf", message)
-
-        MyCrashlytics.logException(OldestVisibleException4(message))
+        ErrorLogger.instance.logException(OldestVisibleException4(message))
 
         setOldestVisible(date) // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
     }

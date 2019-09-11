@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domain
 
 import com.krystianwsul.checkme.firebase.models.RemoteInstance
 import com.krystianwsul.checkme.firebase.models.RemoteTask

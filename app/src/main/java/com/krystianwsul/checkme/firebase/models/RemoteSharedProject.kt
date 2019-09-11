@@ -14,11 +14,11 @@ import java.util.*
 
 class RemoteSharedProject(
         remoteProjectFactory: RemoteProjectFactory,
-        domainFactory: DomainFactory,
+        private val domainFactory: DomainFactory,
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         deviceInfo: DeviceInfo,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(remoteProjectFactory, domainFactory, uuid) {
+        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(domainFactory.localFactory, remoteProjectFactory, uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -44,7 +44,7 @@ class RemoteSharedProject(
 
         remoteTasks = remoteProjectRecord.remoteTaskRecords
                 .values
-                .map { RemoteTask(domainFactory, this, it, now) }
+                .map { RemoteTask(shownFactory, this, it, now) }
                 .associateBy { it.id }
                 .toMutableMap()
 

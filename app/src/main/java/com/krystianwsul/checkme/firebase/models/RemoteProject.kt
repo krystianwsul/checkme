@@ -1,10 +1,9 @@
 package com.krystianwsul.checkme.firebase.models
 
-import android.text.TextUtils
 import com.krystianwsul.checkme.domain.Instance
+import com.krystianwsul.checkme.domain.RemoteToRemoteConversion
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.RemoteToRemoteConversion
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.firebase.json.InstanceJson
@@ -20,9 +19,10 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
 abstract class RemoteProject<T : RemoteCustomTimeId>(
+        protected val shownFactory: Instance.ShownFactory,
         private val parent: Parent,
-        protected val domainFactory: DomainFactory,
-        val uuid: String) {
+        val uuid: String
+) {
 
     abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
@@ -35,7 +35,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     var name
         get() = remoteProjectRecord.name
         set(name) {
-            check(!TextUtils.isEmpty(name))
+            check(name.isNotEmpty())
 
             remoteProjectRecord.name = name
         }
@@ -57,7 +57,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask<T> {
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
-        val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
+        val remoteTask = RemoteTask(shownFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))
         remoteTasks[remoteTask.id] = remoteTask
 
@@ -103,7 +103,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
                 oldestVisible = oldestVisibleMap.toMutableMap())
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
-        val remoteTask = RemoteTask(domainFactory, this, remoteTaskRecord, now)
+        val remoteTask = RemoteTask(shownFactory, this, remoteTaskRecord, now)
         check(!remoteTasks.containsKey(remoteTask.id))
 
         remoteTasks[remoteTask.id] = remoteTask
@@ -128,8 +128,8 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     }
 
     fun <U : RemoteCustomTimeId> copyRemoteTaskHierarchy(now: ExactTimeStamp, startTaskHierarchy: RemoteTaskHierarchy<U>, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy<T> {
-        check(!TextUtils.isEmpty(remoteParentTaskId))
-        check(!TextUtils.isEmpty(remoteChildTaskId))
+        check(remoteParentTaskId.isNotEmpty())
+        check(remoteChildTaskId.isNotEmpty())
 
         val endTime = if (startTaskHierarchy.getEndExactTimeStamp() != null) startTaskHierarchy.getEndExactTimeStamp()!!.long else null
 
@@ -157,13 +157,13 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
             ?: throw MissingTaskException(id, taskId)
 
     fun getTaskHierarchiesByChildTaskKey(childTaskKey: TaskKey): Set<RemoteTaskHierarchy<T>> {
-        check(!TextUtils.isEmpty(childTaskKey.remoteTaskId))
+        check(childTaskKey.remoteTaskId.isNotEmpty())
 
         return remoteTaskHierarchyContainer.getByChildTaskKey(childTaskKey)
     }
 
     fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<RemoteTaskHierarchy<T>> {
-        check(!TextUtils.isEmpty(parentTaskKey.remoteTaskId))
+        check(parentTaskKey.remoteTaskId.isNotEmpty())
 
         return remoteTaskHierarchyContainer.getByParentTaskKey(parentTaskKey)
     }

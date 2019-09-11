@@ -9,10 +9,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domain.Instance
-import com.krystianwsul.checkme.domain.Task
-import com.krystianwsul.checkme.domain.TaskHierarchy
-import com.krystianwsul.checkme.domain.TaskUndoData
+import com.krystianwsul.checkme.domain.*
 import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager

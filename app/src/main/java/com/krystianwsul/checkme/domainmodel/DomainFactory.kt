@@ -13,7 +13,6 @@ import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domain.TaskHierarchy
 import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
-import com.krystianwsul.checkme.domain.schedules.ScheduleText
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper

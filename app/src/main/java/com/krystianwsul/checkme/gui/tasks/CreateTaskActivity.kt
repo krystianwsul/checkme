@@ -208,7 +208,7 @@ class CreateTaskActivity : NavBarActivity() {
                 .map { it.scheduleDataWrapper }
                 .apply { check(!isEmpty()) }
 
-    private val scheduleDatas = scheduleDataWrappers.map { it.scheduleData }
+    private val scheduleDatas get() = scheduleDataWrappers.map { it.scheduleData }
 
     private lateinit var createTaskViewModel: CreateTaskViewModel
 

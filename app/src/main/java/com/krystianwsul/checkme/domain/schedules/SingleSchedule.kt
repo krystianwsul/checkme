@@ -8,7 +8,6 @@ import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.InstanceKey
 import java.util.*
 
 class SingleSchedule(
@@ -25,7 +24,7 @@ class SingleSchedule(
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    fun getInstance(task: Task) = domainFactory.getInstance(InstanceKey(task.taskKey, date, timePair))
+    fun getInstance(task: Task) = getInstance(task, dateTime)
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 

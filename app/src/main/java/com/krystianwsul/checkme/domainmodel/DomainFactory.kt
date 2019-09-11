@@ -2007,7 +2007,7 @@ class DomainFactory(
 
         val dateTime = getDateTime(instanceKey.scheduleKey.scheduleDate, instanceKey.scheduleKey.scheduleTimePair)
 
-        return generateInstance(instanceKey.taskKey, dateTime) // DateTime -> timePair
+        return generateInstance(instanceKey.taskKey, dateTime)
     }
 
     fun getPastInstances(task: Task, now: ExactTimeStamp) = task.getPastInstances(now)

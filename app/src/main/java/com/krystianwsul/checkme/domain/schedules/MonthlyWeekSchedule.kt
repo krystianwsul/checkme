@@ -45,7 +45,7 @@ class MonthlyWeekSchedule(
         val scheduleDateTime = DateTime(date, time)
         check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
-        return domainFactory.getInstance(task.taskKey, scheduleDateTime)
+        return getInstance(task, scheduleDateTime)
     }
 
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {

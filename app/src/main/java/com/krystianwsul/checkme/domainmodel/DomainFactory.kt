@@ -707,10 +707,6 @@ class DomainFactory(
                 task.taskKey)
     }
 
-    fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let { getCustomTime(it) }
-            ?: NormalTime(timePair.hourMinute!!)
-
     @Synchronized
     fun getCreateTaskData(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?, parentTaskKeyHint: TaskKey?): CreateTaskViewModel.Data {
         MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
@@ -747,7 +743,7 @@ class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                customTimes.putAll(schedules.mapNotNull { it.customTimeKey }.map { it to getCustomTime(it) })
+                customTimes.putAll(schedules.mapNotNull { it.customTimeKey }.map { it to task.project.getRemoteCustomTime(it.remoteCustomTimeId) })
 
                 parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
@@ -2006,7 +2002,14 @@ class DomainFactory(
     fun getInstance(instanceKey: InstanceKey): Instance {
         getExistingInstanceIfPresent(instanceKey)?.let { return it }
 
-        val dateTime = getDateTime(instanceKey.scheduleKey.scheduleDate, instanceKey.scheduleKey.scheduleTimePair)
+        val dateTime = DateTime(
+                instanceKey.scheduleKey.scheduleDate,
+                instanceKey.scheduleKey.scheduleTimePair.run {
+                    customTimeKey?.let {
+                        remoteProjectFactory.getRemoteCustomTime(it.remoteProjectId, it.remoteCustomTimeId)
+                    } ?: NormalTime(hourMinute!!)
+                }
+        )
 
         return generateInstance(instanceKey.taskKey, dateTime)
     }
@@ -2048,10 +2051,6 @@ class DomainFactory(
 
         return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
     }
-
-    private fun getDateTime(date: Date, timePair: TimePair) = DateTime(date, getTime(timePair))
-
-    fun getCustomTime(customTimeKey: CustomTimeKey<*>) = remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
 
     private fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = remoteProjectFactory.remotePrivateProject
             .customTimes

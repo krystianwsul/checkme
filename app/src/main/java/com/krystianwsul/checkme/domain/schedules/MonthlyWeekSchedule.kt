@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domain.schedules
 
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.Utils
@@ -13,10 +12,9 @@ import com.krystianwsul.common.time.Date
 import java.util.*
 
 class MonthlyWeekSchedule(
-        domainFactory: DomainFactory,
         rootTask: RemoteTask<*>,
         private val monthlyWeekScheduleBridge: MonthlyWeekScheduleBridge
-) : RepeatingSchedule(domainFactory, rootTask) {
+) : RepeatingSchedule(rootTask) {
 
     override val scheduleBridge get() = monthlyWeekScheduleBridge
 
@@ -45,7 +43,7 @@ class MonthlyWeekSchedule(
         val scheduleDateTime = DateTime(date, time)
         check(task.current(scheduleDateTime.timeStamp.toExactTimeStamp()))
 
-        return getInstance(task, scheduleDateTime)
+        return task.getInstance(scheduleDateTime)
     }
 
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {

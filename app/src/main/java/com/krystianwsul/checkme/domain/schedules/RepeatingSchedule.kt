@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domain.schedules
 
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
@@ -11,10 +10,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli
 import java.util.*
 
-abstract class RepeatingSchedule(
-        domainFactory: DomainFactory,
-        rootTask: RemoteTask<*>
-) : Schedule(domainFactory, rootTask) {
+abstract class RepeatingSchedule(rootTask: RemoteTask<*>) : Schedule(rootTask) {
 
     override fun getInstances(task: Task, givenStartExactTimeStamp: ExactTimeStamp?, givenExactEndTimeStamp: ExactTimeStamp): List<Instance> {
         val myStartTimeStamp = startExactTimeStamp

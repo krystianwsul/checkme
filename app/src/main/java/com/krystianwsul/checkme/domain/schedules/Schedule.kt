@@ -2,19 +2,14 @@ package com.krystianwsul.checkme.domain.schedules
 
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.checkme.utils.ScheduleType
-import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimeStamp
 
 
-abstract class Schedule(
-        private val domainFactory: DomainFactory,
-        private val rootTask: RemoteTask<*>
-) {
+abstract class Schedule(private val rootTask: RemoteTask<*>) {
 
     protected abstract val scheduleBridge: ScheduleBridge
 
@@ -71,6 +66,4 @@ abstract class Schedule(
     }
 
     val scheduleId get() = scheduleBridge.scheduleId
-
-    fun getInstance(task: Task, scheduleDateTime: DateTime) = domainFactory.getInstance(task.taskKey, scheduleDateTime)
 }

@@ -597,7 +597,7 @@ class DomainFactory(
             val hierarchyData = if (task.isRootTask(hierarchyExactTimeStamp)) {
                 null
             } else {
-                val taskHierarchy = getParentTaskHierarchy(task, hierarchyExactTimeStamp)!!
+                val taskHierarchy = task.getParentTaskHierarchy(hierarchyExactTimeStamp)!!
 
                 HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal)
             }
@@ -1219,7 +1219,7 @@ class DomainFactory(
         task.setName(name, note)
 
         if (!task.isRootTask(now))
-            getParentTaskHierarchy(task, now)!!.setEndExactTimeStamp(now)
+            task.getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
 
         task.updateSchedules(scheduleDatas, now)
 
@@ -1395,7 +1395,7 @@ class DomainFactory(
 
         task.setName(name, note)
 
-        getParentTaskHierarchy(task, now)?.setEndExactTimeStamp(now)
+        task.getParentTaskHierarchy(now)?.setEndExactTimeStamp(now)
 
         task.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
 
@@ -1542,7 +1542,7 @@ class DomainFactory(
 
             newParentTask.addChild(task, now)
         } else if (oldParentTask !== newParentTask) {
-            getParentTaskHierarchy(task, now)!!.setEndExactTimeStamp(now)
+            task.getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
 
             newParentTask.addChild(task, now)
         }
@@ -2260,7 +2260,7 @@ class DomainFactory(
             if (joinTask.isRootTask(now)) {
                 joinTask.getCurrentSchedules(now).forEach { it.setEndExactTimeStamp(now) }
             } else {
-                val taskHierarchy = getParentTaskHierarchy(joinTask, now)!!
+                val taskHierarchy = joinTask.getParentTaskHierarchy(now)!!
 
                 taskHierarchy.setEndExactTimeStamp(now)
             }
@@ -2272,8 +2272,6 @@ class DomainFactory(
                 .filter { it.getParentInstance(now)?.task != newParentTask && it.isVisible(now, true) }
                 .forEach { it.hide(now) }
     }
-
-    fun getParentTaskHierarchy(childTask: Task, exactTimeStamp: ExactTimeStamp) = childTask.getParentTaskHierarchy(exactTimeStamp)
 
     private fun getTasks() = remoteProjectFactory.tasks.asSequence()
 

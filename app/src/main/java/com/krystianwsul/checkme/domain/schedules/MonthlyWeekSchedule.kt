@@ -4,12 +4,9 @@ import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.time.calendar
-import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ScheduleType
-import java.util.*
+import com.soywiz.klock.months
 
 class MonthlyWeekSchedule(
         rootTask: RemoteTask<*>,
@@ -47,32 +44,21 @@ class MonthlyWeekSchedule(
     }
 
     override fun getNextAlarm(now: ExactTimeStamp): TimeStamp? {
-        val today = now.date
-
-        val dateThisMonth = getDate(today.year, today.month)
-        val time = time
-        val thisMonth = DateTime(dateThisMonth, time).timeStamp
+        val dateThisMonth = now.date.run { getDate(year, month) }
+        val thisMonth = DateTime(dateThisMonth, time)
 
         val endExactTimeStamp = getEndExactTimeStamp()
 
-        if (thisMonth.toExactTimeStamp() > now) {
-            return if (endExactTimeStamp != null && endExactTimeStamp <= thisMonth.toExactTimeStamp())
-                null
-            else
-                thisMonth
+        val checkMonth = if (thisMonth.toExactTimeStamp() > now) {
+            thisMonth
         } else {
-            val calendar = now.calendar
-            calendar.add(Calendar.MONTH, 1)
+            DateTime(Date(now.toDateTimeTz() + 1.months), time)
+        }.timeStamp
 
-            val dateNextMonth = Date(calendar.toDateTimeTz())
-
-            val nextMonth = DateTime(dateNextMonth, time).timeStamp
-
-            return if (endExactTimeStamp != null && endExactTimeStamp <= nextMonth.toExactTimeStamp())
-                null
-            else
-                nextMonth
-        }
+        return if (endExactTimeStamp?.let { it <= checkMonth.toExactTimeStamp() } != false)
+            null
+        else
+            checkMonth
     }
 
     private fun getDate(year: Int, month: Int) = Utils.getDateInMonth(year, month, monthlyWeekScheduleBridge.dayOfMonth, dayOfWeek, monthlyWeekScheduleBridge.beginningOfMonth)

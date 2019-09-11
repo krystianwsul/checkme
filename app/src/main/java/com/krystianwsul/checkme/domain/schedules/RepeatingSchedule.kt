@@ -1,14 +1,13 @@
 package com.krystianwsul.checkme.domain.schedules
 
+import com.krystianwsul.checkme.domain.Instance
+import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.Instance
-import com.krystianwsul.checkme.domainmodel.Task
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli
-
 import java.util.*
 
 abstract class RepeatingSchedule(domainFactory: DomainFactory) : Schedule(domainFactory) {

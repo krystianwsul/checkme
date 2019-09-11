@@ -19,7 +19,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.notifications.*
@@ -317,13 +317,13 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     private inner class GroupData(
-            instances: Collection<com.krystianwsul.checkme.domainmodel.Instance>,
+            instances: Collection<com.krystianwsul.checkme.domain.Instance>,
             private val now: ExactTimeStamp,
             val silent: Boolean) {
 
         val instances = instances.map(::Instance)
 
-        inner class Instance(instance: com.krystianwsul.checkme.domainmodel.Instance) {
+        inner class Instance(instance: com.krystianwsul.checkme.domain.Instance) {
 
             val name = instance.name
             val instanceKey = instance.instanceKey

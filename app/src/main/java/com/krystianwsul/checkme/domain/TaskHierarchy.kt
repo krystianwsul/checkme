@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domain
 
 import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.common.time.ExactTimeStamp

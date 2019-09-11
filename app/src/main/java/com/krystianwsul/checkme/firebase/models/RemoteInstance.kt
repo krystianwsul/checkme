@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.domain.InstanceData.Virtual

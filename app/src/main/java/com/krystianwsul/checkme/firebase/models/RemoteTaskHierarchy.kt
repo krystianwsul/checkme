@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domainmodel.TaskHierarchy
+import com.krystianwsul.checkme.domain.TaskHierarchy
 import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.common.firebase.records.RemoteTaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp

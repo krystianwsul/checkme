@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel
+package com.krystianwsul.checkme.domain
 
 import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord

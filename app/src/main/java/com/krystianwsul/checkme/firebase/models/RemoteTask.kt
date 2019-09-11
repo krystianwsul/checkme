@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.firebase.models
 
+import com.krystianwsul.checkme.domain.Instance
+import com.krystianwsul.checkme.domain.Task
+import com.krystianwsul.checkme.domain.TaskHierarchy
 import com.krystianwsul.checkme.domain.schedules.*
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.Instance
-import com.krystianwsul.checkme.domainmodel.Task
-import com.krystianwsul.checkme.domainmodel.TaskHierarchy
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord

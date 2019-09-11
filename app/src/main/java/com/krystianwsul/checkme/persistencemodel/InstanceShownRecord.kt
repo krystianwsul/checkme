@@ -3,7 +3,7 @@ package com.krystianwsul.checkme.persistencemodel
 import android.content.ContentValues
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import com.krystianwsul.checkme.domainmodel.Instance
+import com.krystianwsul.checkme.domain.Instance
 import kotlin.properties.Delegates.observable
 
 class InstanceShownRecord(

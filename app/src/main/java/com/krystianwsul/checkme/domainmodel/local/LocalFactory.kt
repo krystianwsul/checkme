@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.domainmodel.local
 
 import android.annotation.SuppressLint
+import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.domainmodel.Instance
 import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService

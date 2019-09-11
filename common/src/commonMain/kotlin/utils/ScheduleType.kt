@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.utils
+package com.krystianwsul.common.utils
 
 enum class ScheduleType {
     SINGLE,

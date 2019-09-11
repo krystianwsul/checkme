@@ -3,10 +3,10 @@ package com.krystianwsul.checkme.domain.schedules
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.firebase.models.RemoteTask
-import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.ScheduleType
 
 
 abstract class Schedule(private val rootTask: RemoteTask<*>) {

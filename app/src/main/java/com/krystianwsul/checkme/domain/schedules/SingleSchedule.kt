@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domain.schedules
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
@@ -12,7 +13,9 @@ import java.util.*
 
 class SingleSchedule(
         domainFactory: DomainFactory,
-        private val singleScheduleBridge: SingleScheduleBridge) : Schedule(domainFactory) {
+        rootTask: RemoteTask<*>,
+        private val singleScheduleBridge: SingleScheduleBridge
+) : Schedule(domainFactory, rootTask) {
 
     override val scheduleBridge get() = singleScheduleBridge
 

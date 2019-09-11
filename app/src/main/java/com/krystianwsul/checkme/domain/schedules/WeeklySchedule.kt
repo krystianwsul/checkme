@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domain.schedules
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.checkme.utils.ScheduleType
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
@@ -12,7 +13,9 @@ import java.util.*
 
 class WeeklySchedule(
         domainFactory: DomainFactory,
-        private val mWeeklyScheduleBridge: WeeklyScheduleBridge) : RepeatingSchedule(domainFactory) {
+        rootTask: RemoteTask<*>,
+        private val mWeeklyScheduleBridge: WeeklyScheduleBridge
+) : RepeatingSchedule(domainFactory, rootTask) {
 
     val daysOfWeek
         get() = mWeeklyScheduleBridge.daysOfWeek

@@ -12,5 +12,5 @@ abstract class RemoteScheduleBridge<T : RemoteCustomTimeId>(
 ) : ScheduleBridge {
 
     // use project record instead
-    override val customTimeKey by lazy { remoteScheduleRecord.run { customTimeId?.let { remoteProjectRecord.getRemoteCustomTimeKey(it) } } }
+    override val customTimeKey by lazy { remoteScheduleRecord.customTimeId?.let { remoteProjectRecord.getRemoteCustomTimeKey(it) } }
 }

@@ -9,11 +9,11 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
+import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.domainmodel.relevance.*
-import com.krystianwsul.checkme.domainmodel.schedules.ScheduleGroup
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory

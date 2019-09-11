@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domainmodel.schedules.WeeklyScheduleBridge
+import com.krystianwsul.checkme.domain.schedules.WeeklyScheduleBridge
 import com.krystianwsul.common.firebase.records.RemoteDailyScheduleRecord
 import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.time.DayOfWeek

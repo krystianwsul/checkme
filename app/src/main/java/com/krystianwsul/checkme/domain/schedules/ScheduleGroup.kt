@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel.schedules
+package com.krystianwsul.checkme.domain.schedules
 
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R

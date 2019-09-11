@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel.schedules
+package com.krystianwsul.checkme.domain.schedules
 
 interface SingleScheduleBridge : ScheduleBridge {
 

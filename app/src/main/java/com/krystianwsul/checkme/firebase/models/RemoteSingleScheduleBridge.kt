@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domainmodel.schedules.SingleScheduleBridge
+import com.krystianwsul.checkme.domain.schedules.SingleScheduleBridge
 import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteSingleScheduleRecord
 import com.krystianwsul.common.utils.RemoteCustomTimeId

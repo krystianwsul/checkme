@@ -2,8 +2,8 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.util.Log
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.schedules.Schedule
-import com.krystianwsul.checkme.domainmodel.schedules.ScheduleGroup
+import com.krystianwsul.checkme.domain.schedules.Schedule
+import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
 import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.common.firebase.json.TaskJson

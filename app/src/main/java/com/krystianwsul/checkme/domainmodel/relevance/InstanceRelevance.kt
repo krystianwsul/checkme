@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
 import com.krystianwsul.checkme.domain.Instance
-import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 

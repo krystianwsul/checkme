@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.TaskHierarchy
-import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.common.firebase.records.RemoteTaskHierarchyRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
 
 
@@ -32,7 +32,7 @@ class RemoteTaskHierarchy<T : RemoteCustomTimeId>(
         get() = remoteTaskHierarchyRecord.ordinal ?: remoteTaskHierarchyRecord.startTime.toDouble()
         set(ordinal) = remoteTaskHierarchyRecord.setOrdinal(ordinal)
 
-    override val taskHierarchyKey by lazy { TaskHierarchyKey.RemoteTaskHierarchyKey(remoteProject.id, remoteTaskHierarchyRecord.id) }
+    override val taskHierarchyKey by lazy { TaskHierarchyKey.Remote(remoteProject.id, remoteTaskHierarchyRecord.id) }
 
     public override fun getEndExactTimeStamp() = remoteTaskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
 

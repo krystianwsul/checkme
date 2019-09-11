@@ -29,7 +29,6 @@ import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
-import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.viewmodels.*
@@ -1587,7 +1586,7 @@ class DomainFactory(
         val remoteProject: RemoteProject<*>?
         val taskHierarchy: TaskHierarchy
 
-        val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey as TaskHierarchyKey.RemoteTaskHierarchyKey
+        val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey as TaskHierarchyKey.Remote
 
         remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
         taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
@@ -1694,7 +1693,7 @@ class DomainFactory(
                 }
 
         taskUndoData.taskHierarchyKeys
-                .map { remoteProjectFactory.getTaskHierarchy(it as TaskHierarchyKey.RemoteTaskHierarchyKey) }
+                .map { remoteProjectFactory.getTaskHierarchy(it as TaskHierarchyKey.Remote) }
                 .forEach {
                     check(!it.current(now))
 

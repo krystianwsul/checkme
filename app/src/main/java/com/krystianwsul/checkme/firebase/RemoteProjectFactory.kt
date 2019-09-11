@@ -10,7 +10,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.managers.RemotePrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.checkme.firebase.models.*
-import com.krystianwsul.checkme.utils.TaskHierarchyKey
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
@@ -222,7 +221,7 @@ class RemoteProjectFactory(
         remoteSharedProjects.remove(projectId)
     }
 
-    fun getTaskHierarchy(remoteTaskHierarchyKey: TaskHierarchyKey.RemoteTaskHierarchyKey) = remoteProjects.getValue(remoteTaskHierarchyKey.projectId).getTaskHierarchy(remoteTaskHierarchyKey.taskHierarchyId)
+    fun getTaskHierarchy(remote: TaskHierarchyKey.Remote) = remoteProjects.getValue(remote.projectId).getTaskHierarchy(remote.taskHierarchyId)
 
     fun getSchedule(scheduleId: ScheduleId.Remote) = remoteProjects.getValue(scheduleId.projectId).getRemoteTaskForce(scheduleId.taskId)
             .schedules

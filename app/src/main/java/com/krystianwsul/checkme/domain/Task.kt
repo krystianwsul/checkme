@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.firebase.models.RemoteProject
+import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
@@ -53,9 +54,9 @@ abstract class Task {
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
-    abstract fun getScheduleTextMultiline(exactTimeStamp: ExactTimeStamp): String?
+    abstract fun getScheduleTextMultiline(scheduleTextFactory: RemoteTask.ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String?
 
-    abstract fun getScheduleText(exactTimeStamp: ExactTimeStamp, showParent: Boolean = false): String?
+    abstract fun getScheduleText(scheduleTextFactory: RemoteTask.ScheduleTextFactory, exactTimeStamp: ExactTimeStamp, showParent: Boolean = false): String?
 
     fun notDeleted(exactTimeStamp: ExactTimeStamp): Boolean {
         val endExactTimeStamp = getEndExactTimeStamp()

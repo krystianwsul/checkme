@@ -13,6 +13,7 @@ import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domain.TaskHierarchy
 import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
+import com.krystianwsul.checkme.domain.schedules.ScheduleText
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
@@ -804,7 +805,7 @@ class DomainFactory(
 
                     TaskListFragment.ChildTaskData(
                             childTask.name,
-                            childTask.getScheduleText(hierarchyTimeStamp),
+                            childTask.getScheduleText(ScheduleText, hierarchyTimeStamp),
                             getTaskListChildTaskDatas(childTask, now, true, hierarchyTimeStamp),
                             childTask.note,
                             childTask.startExactTimeStamp,
@@ -820,7 +821,7 @@ class DomainFactory(
         return ShowTaskViewModel.Data(
                 task.name,
                 task.getParentName(hierarchyTimeStamp),
-                task.getScheduleTextMultiline(hierarchyTimeStamp),
+                task.getScheduleTextMultiline(ScheduleText, hierarchyTimeStamp),
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
                 task.hasInstances(now),
                 task.image,
@@ -841,7 +842,7 @@ class DomainFactory(
                 .map { (task, hierarchyExactTimeStamp) ->
                     TaskListFragment.ChildTaskData(
                             task.name,
-                            task.getScheduleText(hierarchyExactTimeStamp),
+                            task.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
                             getTaskListChildTaskDatas(task, now, false, hierarchyExactTimeStamp),
                             task.note,
                             task.startExactTimeStamp,
@@ -2101,7 +2102,7 @@ class DomainFactory(
                                 childTask.name,
                                 getTaskListChildTaskDatas(now, childTask, excludedTaskKeys),
                                 CreateTaskViewModel.ParentKey.Task(childTask.taskKey),
-                                childTask.getScheduleText(now),
+                                childTask.getScheduleText(ScheduleText, now),
                                 childTask.note,
                                 CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
                                 (childTask.project as? RemoteSharedProject)?.id)
@@ -2150,7 +2151,7 @@ class DomainFactory(
                             it.name,
                             getTaskListChildTaskDatas(now, it, excludedTaskKeys),
                             taskParentKey,
-                            it.getScheduleText(now),
+                            it.getScheduleText(ScheduleText, now),
                             it.note,
                             CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
                             null)
@@ -2191,7 +2192,7 @@ class DomainFactory(
                             it.name,
                             getTaskListChildTaskDatas(now, it, excludedTaskKeys),
                             taskParentKey,
-                            it.getScheduleText(now),
+                            it.getScheduleText(ScheduleText, now),
                             it.note,
                             CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
                             (it.project as? RemoteSharedProject)?.id)
@@ -2291,7 +2292,7 @@ class DomainFactory(
 
                     TaskListFragment.ChildTaskData(
                             childTask.name,
-                            childTask.getScheduleText(hierarchyExactTimeStamp),
+                            childTask.getScheduleText(ScheduleText, hierarchyExactTimeStamp),
                             getTaskListChildTaskDatas(childTask, now, alwaysShow, hierarchyExactTimeStamp),
                             childTask.note,
                             childTask.startExactTimeStamp,

@@ -1,12 +1,7 @@
 package com.krystianwsul.checkme.domain.schedules
 
-import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.firebase.models.RemoteProject
-import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel.ScheduleDataWrapper
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -16,7 +11,7 @@ sealed class ScheduleGroup {
 
     companion object {
 
-        private val allDaysOfWeek by lazy { DayOfWeek.values().toSet() }
+        val allDaysOfWeek by lazy { DayOfWeek.values().toSet() }
 
         fun getGroups(schedules: List<Schedule>): List<ScheduleGroup> {
             fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek>) = daysOfWeek.map { day ->
@@ -65,9 +60,7 @@ sealed class ScheduleGroup {
 
     abstract val schedules: List<Schedule>
 
-    abstract fun getScheduleText(remoteProject: RemoteProject<*>): String
-
-    class Single(private val singleSchedule: SingleSchedule) : ScheduleGroup() {
+    class Single(val singleSchedule: SingleSchedule) : ScheduleGroup() {
 
         override val customTimeKey get() = singleSchedule.customTimeKey
 
@@ -77,8 +70,6 @@ sealed class ScheduleGroup {
                     singleSchedule.timePair))
 
         override val schedules get() = listOf(singleSchedule)
-
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = singleSchedule.dateTime.getDisplayText()
     }
 
     class Weekly(val timePair: TimePair, private val weeklySchedules: List<WeeklySchedule>) : ScheduleGroup() {
@@ -90,24 +81,9 @@ sealed class ScheduleGroup {
         override val scheduleDataWrapper get() = ScheduleDataWrapper.Weekly(ScheduleData.Weekly(daysOfWeek, timePair))
 
         override val schedules get() = weeklySchedules
-
-        override fun getScheduleText(remoteProject: RemoteProject<*>): String {
-            val days = daysOfWeek.let {
-                if (it == allDaysOfWeek)
-                    MyApplication.instance.getString(R.string.daily)
-                else
-                    daysOfWeek.sorted().joinToString(", ")
-            }
-
-            val time = timePair.customTimeKey?.let {
-                remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
-            } ?: NormalTime(timePair.hourMinute!!)
-
-            return "$days: $time"
-        }
     }
 
-    class MonthlyDay(private val monthlyDaySchedule: MonthlyDaySchedule) : ScheduleGroup() {
+    class MonthlyDay(val monthlyDaySchedule: MonthlyDaySchedule) : ScheduleGroup() {
 
         override val customTimeKey get() = monthlyDaySchedule.customTimeKey
 
@@ -118,15 +94,9 @@ sealed class ScheduleGroup {
                     monthlyDaySchedule.timePair))
 
         override val schedules get() = listOf(monthlyDaySchedule)
-
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = MyApplication.instance.run {
-            val day = monthlyDaySchedule.dayOfMonth.toString() + " " + getString(R.string.monthDay) + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (monthlyDaySchedule.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
-
-            "$day: ${monthlyDaySchedule.time}"
-        }
     }
 
-    class MonthlyWeek(private val monthlyWeekSchedule: MonthlyWeekSchedule) : ScheduleGroup() {
+    class MonthlyWeek(val monthlyWeekSchedule: MonthlyWeekSchedule) : ScheduleGroup() {
 
         override val customTimeKey get() = monthlyWeekSchedule.customTimeKey
 
@@ -138,11 +108,5 @@ sealed class ScheduleGroup {
                     monthlyWeekSchedule.timePair))
 
         override val schedules get() = listOf(monthlyWeekSchedule)
-
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = MyApplication.instance.run {
-            val day = monthlyWeekSchedule.dayOfMonth.toString() + " " + monthlyWeekSchedule.dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (monthlyWeekSchedule.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
-
-            "$day: ${monthlyWeekSchedule.time}"
-        }
     }
 }

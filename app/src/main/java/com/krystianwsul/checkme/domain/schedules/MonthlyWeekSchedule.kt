@@ -3,9 +3,9 @@ package com.krystianwsul.checkme.domain.schedules
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.firebase.models.RemoteTask
-import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType
+import com.krystianwsul.common.utils.getDateInMonth
 import com.soywiz.klock.months
 
 class MonthlyWeekSchedule(
@@ -61,5 +61,5 @@ class MonthlyWeekSchedule(
             checkMonth
     }
 
-    private fun getDate(year: Int, month: Int) = Utils.getDateInMonth(year, month, monthlyWeekScheduleBridge.dayOfMonth, dayOfWeek, monthlyWeekScheduleBridge.beginningOfMonth)
+    private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, monthlyWeekScheduleBridge.dayOfMonth, dayOfWeek, monthlyWeekScheduleBridge.beginningOfMonth)
 }

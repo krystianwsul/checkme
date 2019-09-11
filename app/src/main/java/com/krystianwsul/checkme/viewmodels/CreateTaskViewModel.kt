@@ -13,10 +13,8 @@ import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ScheduleData
-import com.krystianwsul.common.utils.ScheduleType
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
+import com.soywiz.klock.Month
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 import java.util.*
@@ -78,7 +76,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 var monthDayNumber = scheduleData.date.day
                 var beginningOfMonth = true
                 if (monthDayNumber > 28) {
-                    monthDayNumber = Utils.getDaysInMonth(scheduleData.date.year, scheduleData.date.month) - monthDayNumber + 1
+                    monthDayNumber = Month(scheduleData.date.month).days(scheduleData.date.year) - monthDayNumber + 1
                     beginningOfMonth = false
                 }
                 val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
@@ -105,7 +103,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 var monthDayNumber = date.day
                 var beginningOfMonth = true
                 if (monthDayNumber > 28) {
-                    monthDayNumber = Utils.getDaysInMonth(date.year, date.month) - monthDayNumber + 1
+                    monthDayNumber = Month(date.month).days(date.year) - monthDayNumber + 1
                     beginningOfMonth = false
                 }
                 val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
@@ -133,7 +131,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 var date = scheduleHint?.date ?: today
 
-                date = Utils.getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.beginningOfMonth)
+                date = getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.beginningOfMonth)
 
                 return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(date.dayOfWeek), true, scheduleData.dayOfMonth, (scheduleData.dayOfMonth - 1) / 7 + 1, date.dayOfWeek, scheduleData.beginningOfMonth, TimePairPersist(timePair), ScheduleType.MONTHLY_DAY)
             }
@@ -158,7 +156,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             override fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData {
                 var date = scheduleHint?.date ?: today
 
-                date = Utils.getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth)
+                date = getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth)
 
                 return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(scheduleData.dayOfWeek), false, date.day, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth, TimePairPersist(timePair), ScheduleType.MONTHLY_WEEK)
             }

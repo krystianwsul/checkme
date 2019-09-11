@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.domain.TaskUndoData
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -30,7 +31,7 @@ abstract class AbstractActivity : AppCompatActivity() {
             this.snackbarData = snackbarData
         }
 
-        fun setSnackbar(taskUndoData: DomainFactory.TaskUndoData) = setSnackbar(TaskSnackbarData(taskUndoData))
+        fun setSnackbar(taskUndoData: TaskUndoData) = setSnackbar(TaskSnackbarData(taskUndoData))
     }
 
     protected val createDisposable = CompositeDisposable()

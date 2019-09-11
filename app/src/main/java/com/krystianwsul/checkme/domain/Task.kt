@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domain
 
 import com.krystianwsul.checkme.domain.schedules.Schedule
 import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.firebase.models.RemoteTask
@@ -16,7 +15,6 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
-import java.util.*
 
 abstract class Task {
 
@@ -98,7 +96,7 @@ abstract class Task {
 
     fun setEndData(
             endData: EndData,
-            taskUndoData: DomainFactory.TaskUndoData? = null,
+            taskUndoData: TaskUndoData? = null,
             recursive: Boolean = false) {
         val now = endData.exactTimeStamp
 

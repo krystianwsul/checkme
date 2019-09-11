@@ -12,6 +12,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domain.TaskHierarchy
+import com.krystianwsul.checkme.domain.TaskUndoData
 import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
@@ -2770,13 +2771,6 @@ class DomainFactory(
 
         val projectIds = mutableSetOf<String>()
         val taskUndoData = TaskUndoData()
-    }
-
-    class TaskUndoData {
-
-        val taskKeys = mutableSetOf<TaskKey>()
-        val scheduleIds = mutableSetOf<ScheduleId>()
-        val taskHierarchyKeys = mutableSetOf<TaskHierarchyKey>()
     }
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)

@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.Instance
-import com.krystianwsul.checkme.utils.time.destructureRemote
+import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.domain.InstanceData.Virtual
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
@@ -96,17 +96,21 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         this.shown = shown
     }
 
-    override fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp) {
+    override fun setInstanceDateTime(dateTime: DateTime, now: ExactTimeStamp) {
         check(isRootInstance(now))
 
         createInstanceHierarchy(now)
 
         (instanceData as RemoteReal).instanceRecord.let {
-            it.instanceDate = date
+            it.instanceDate = dateTime.date
 
-            it.instanceJsonTime = timePair.run {
-                hourMinute?.let { JsonTime.Normal<T>(it) }
-                        ?: JsonTime.Custom(destructureRemote(remoteProject).first!!)
+            it.instanceJsonTime = project.getOrCopyTime(dateTime.time).let {
+                @Suppress("UNCHECKED_CAST")
+                when (it) {
+                    is CustomTime -> JsonTime.Custom(it.customTimeKey.remoteCustomTimeId as T)
+                    is NormalTime -> JsonTime.Normal(it.hourMinute)
+                    else -> throw IllegalArgumentException()
+                }
             }
         }
 

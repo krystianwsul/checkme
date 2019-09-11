@@ -7,10 +7,7 @@ import com.krystianwsul.checkme.firebase.models.RemoteProject
 import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.DateTime
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMilli
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.ScheduleKey
@@ -286,15 +283,16 @@ abstract class Task {
 
     abstract fun setName(name: String, note: String?)
 
-    fun updateSchedules(scheduleDatas: List<ScheduleData>, now: ExactTimeStamp) {
+    fun updateSchedules(scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
         val removeSchedules = ArrayList<Schedule>()
         val addScheduleDatas = ArrayList(scheduleDatas)
 
         val oldSchedules = getCurrentSchedules(now)
         val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleData to it.schedules }
         for ((key, value) in oldScheduleDatas) {
-            if (addScheduleDatas.contains(key)) {
-                addScheduleDatas.remove(key)
+            val existing = addScheduleDatas.singleOrNull { it.first == key }
+            if (existing != null) {
+                addScheduleDatas.remove(existing)
             } else {
                 removeSchedules.addAll(value)
             }
@@ -306,7 +304,7 @@ abstract class Task {
             addSchedules(addScheduleDatas, now)
     }
 
-    protected abstract fun addSchedules(scheduleDatas: List<ScheduleData>, now: ExactTimeStamp)
+    protected abstract fun addSchedules(scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp)
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp)
 

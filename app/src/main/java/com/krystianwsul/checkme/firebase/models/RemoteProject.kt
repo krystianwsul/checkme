@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.*
-import com.krystianwsul.checkme.utils.time.destructureRemote
+import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
@@ -10,7 +10,8 @@ import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.time.NormalTime
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
@@ -109,18 +110,69 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         return remoteTask
     }
 
+    abstract fun getOrCreateCustomTime(remoteCustomTime: RemoteCustomTime<*>): RemoteCustomTime<T>
+
+    fun getOrCopyTime(time: Time) = time.let {
+        when (it) {
+            is CustomTime -> getOrCreateCustomTime(it as RemoteCustomTime<*>)
+            is NormalTime -> it
+            else -> throw IllegalArgumentException()
+        }
+    }
+
+    fun getOrCopyAndDestructureTime(time: Time) = when (val newTime = getOrCopyTime(time)) {
+        is CustomTime -> Triple(newTime.customTimeKey.remoteCustomTimeId, null, null)
+        is NormalTime -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
+        else -> throw java.lang.IllegalArgumentException()
+    }
+
     private fun getInstanceJson(instance: Instance): InstanceJson {
         val done = instance.done?.long
 
         val instanceDate = instance.instanceDate
-        val instanceTimePair = instance.instanceTimePair
 
-        val (instanceRemoteCustomTimeId, instanceHour, instanceMinute) = instanceTimePair.destructureRemote(this)
+        val newInstanceTime = instance.instanceTime.let {
+            when (it) {
+                is CustomTime -> getOrCreateCustomTime(it as RemoteCustomTime<*>)
+                is NormalTime -> it
+                else -> throw IllegalArgumentException()
+            }
+        }
 
-        val instanceTime = instanceRemoteCustomTimeId?.value
-                ?: instanceTimePair.hourMinute?.toJson()
+        val instanceCustomTimeId: String?
+        val instanceHour: Int?
+        val instanceMinute: Int?
+        val instanceTimeString: String
 
-        return InstanceJson(done, instanceDate.toJson(), instanceDate.year, instanceDate.month, instanceDate.day, instanceTime, instanceRemoteCustomTimeId?.value, instanceHour, instanceMinute, instance.ordinal)
+        when (newInstanceTime) {
+            is CustomTime -> {
+                instanceCustomTimeId = newInstanceTime.customTimeKey
+                        .remoteCustomTimeId
+                        .value
+                instanceHour = null
+                instanceMinute = null
+                instanceTimeString = instanceCustomTimeId
+            }
+            is NormalTime -> {
+                instanceCustomTimeId = null
+                instanceHour = newInstanceTime.hourMinute.hour
+                instanceMinute = newInstanceTime.hourMinute.minute
+                instanceTimeString = newInstanceTime.hourMinute.toJson()
+            }
+            else -> throw IllegalArgumentException()
+        }
+
+        return InstanceJson(
+                done,
+                instanceDate.toJson(),
+                instanceDate.year,
+                instanceDate.month,
+                instanceDate.day,
+                instanceTimeString,
+                instanceCustomTimeId,
+                instanceHour,
+                instanceMinute,
+                instance.ordinal)
     }
 
     fun <U : RemoteCustomTimeId> copyRemoteTaskHierarchy(now: ExactTimeStamp, startTaskHierarchy: RemoteTaskHierarchy<U>, remoteParentTaskId: String, remoteChildTaskId: String): RemoteTaskHierarchy<T> {
@@ -197,8 +249,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     fun getTaskHierarchy(id: String) = remoteTaskHierarchyContainer.getById(id)
 
     abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>)
-
-    abstract fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey<*>): CustomTimeKey<T>
 
     abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<T>
 

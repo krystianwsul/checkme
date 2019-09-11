@@ -140,7 +140,7 @@ abstract class Instance(protected val shownFactory: ShownFactory) {
 
     fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
-    abstract fun setInstanceDateTime(date: Date, timePair: TimePair, now: ExactTimeStamp)
+    abstract fun setInstanceDateTime(dateTime: DateTime, now: ExactTimeStamp)
 
     fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *, *> {
         (instanceData as? InstanceData.Real)?.let {

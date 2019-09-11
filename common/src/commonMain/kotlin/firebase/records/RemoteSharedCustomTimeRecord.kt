@@ -30,10 +30,10 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
 
     override fun mine(userInfo: UserInfo) = ownerKey == userInfo.key
 
-    var ownerKey: String
+    var ownerKey: String?
         get() = customTimeJson.ownerKey
         set(value) {
-            check(value.isNotEmpty())
+            check(!value.isNullOrEmpty())
 
             if (customTimeJson.ownerKey == value)
                 return
@@ -43,7 +43,7 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
         }
 
     var privateKey: RemoteCustomTimeId.Private?
-        get() = customTimeJson.privateKey.takeIf { it.isNotEmpty() }?.let { RemoteCustomTimeId.Private(customTimeJson.privateKey) }
+        get() = customTimeJson.privateKey.takeUnless { it.isNullOrEmpty() }?.let { RemoteCustomTimeId.Private(it) }
         set(value) {
             checkNotNull(value)
 

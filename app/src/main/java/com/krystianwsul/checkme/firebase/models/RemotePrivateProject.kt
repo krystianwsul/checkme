@@ -3,9 +3,10 @@ package com.krystianwsul.checkme.firebase.models
 import com.krystianwsul.checkme.domain.TaskHierarchyContainer
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
+import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
+import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 
@@ -44,7 +45,7 @@ class RemotePrivateProject(
 
     override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) = throw UnsupportedOperationException()
 
-    fun newRemoteCustomTime(customTimeJson: com.krystianwsul.common.firebase.json.PrivateCustomTimeJson): RemotePrivateCustomTime {
+    fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
         val remoteCustomTime = RemotePrivateCustomTime(domainFactory, this, remoteCustomTimeRecord)
@@ -62,11 +63,6 @@ class RemotePrivateProject(
         remoteCustomTimes.remove(remoteCustomTime.id)
     }
 
-    override fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey<*>): CustomTimeKey.Private = when (customTimeKey) {
-        is CustomTimeKey.Private -> customTimeKey
-        is CustomTimeKey.Shared -> throw UnsupportedOperationException()
-    }
-
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemotePrivateCustomTime {
         check(remoteCustomTimes.containsKey(remoteCustomTimeId))
 
@@ -74,4 +70,34 @@ class RemotePrivateProject(
     }
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
+
+    override fun getOrCreateCustomTime(remoteCustomTime: RemoteCustomTime<*>) = when (remoteCustomTime) {
+        is RemotePrivateCustomTime -> remoteCustomTime
+        is RemoteSharedCustomTime -> {
+            if (remoteCustomTime.ownerKey == id) {
+                customTimes.single { it.id == remoteCustomTime.privateKey }
+            } else {
+                val customTimeJson = PrivateCustomTimeJson(
+                        remoteCustomTime.name,
+                        remoteCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour,
+                        remoteCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute,
+                        remoteCustomTime.getHourMinute(DayOfWeek.MONDAY).hour,
+                        remoteCustomTime.getHourMinute(DayOfWeek.MONDAY).minute,
+                        remoteCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour,
+                        remoteCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute,
+                        remoteCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour,
+                        remoteCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute,
+                        remoteCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour,
+                        remoteCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute,
+                        remoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour,
+                        remoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute,
+                        remoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour,
+                        remoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute
+                )
+
+                newRemoteCustomTime(customTimeJson)
+            }
+        }
+        else -> throw IllegalArgumentException()
+    }
 }

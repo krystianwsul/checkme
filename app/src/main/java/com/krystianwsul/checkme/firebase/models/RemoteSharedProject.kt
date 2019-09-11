@@ -8,7 +8,6 @@ import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 
@@ -104,6 +103,25 @@ class RemoteSharedProject(
         }
     }
 
+    fun deleteCustomTime(remoteCustomTime: RemoteSharedCustomTime) {
+        check(remoteCustomTimes.containsKey(remoteCustomTime.id))
+
+        remoteCustomTimes.remove(remoteCustomTime.id)
+    }
+
+    fun getSharedTimeIfPresent(
+            privateCustomTimeId: RemoteCustomTimeId.Private,
+            ownerKey: String
+    ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId }
+
+    override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteSharedCustomTime {
+        check(remoteCustomTimes.containsKey(remoteCustomTimeId))
+
+        return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Shared)
+    }
+
+    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
+
     private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): RemoteSharedCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
@@ -116,49 +134,37 @@ class RemoteSharedProject(
         return remoteCustomTime
     }
 
-    fun deleteCustomTime(remoteCustomTime: RemoteSharedCustomTime) {
-        check(remoteCustomTimes.containsKey(remoteCustomTime.id))
+    override fun getOrCreateCustomTime(remoteCustomTime: RemoteCustomTime<*>): RemoteSharedCustomTime {
+        fun copy(): RemoteSharedCustomTime {
+            val private = remoteCustomTime as? RemotePrivateCustomTime
 
-        remoteCustomTimes.remove(remoteCustomTime.id)
-    }
+            val customTimeJson = SharedCustomTimeJson(
+                    remoteCustomTime.name,
+                    remoteCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour,
+                    remoteCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute,
+                    remoteCustomTime.getHourMinute(DayOfWeek.MONDAY).hour,
+                    remoteCustomTime.getHourMinute(DayOfWeek.MONDAY).minute,
+                    remoteCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour,
+                    remoteCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute,
+                    remoteCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour,
+                    remoteCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute,
+                    remoteCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour,
+                    remoteCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute,
+                    remoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour,
+                    remoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute,
+                    remoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour,
+                    remoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute,
+                    private?.projectId,
+                    private?.id?.value
+            )
 
-    fun getSharedTimeIfPresent(
-            privateCustomTimeId: RemoteCustomTimeId.Private,
-            ownerKey: String
-    ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId }
-
-    override fun getRemoteCustomTimeKey(customTimeKey: CustomTimeKey<*>): CustomTimeKey.Shared {
-        val privateProject = domainFactory.remoteProjectFactory.remotePrivateProject
-
-        return when (customTimeKey) {
-            is CustomTimeKey.Private -> {
-                val remotePrivateCustomTime = privateProject.getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
-
-                val sharedCustomTime = getSharedTimeIfPresent(
-                        remotePrivateCustomTime.id,
-                        privateProject.id
-                )
-                if (sharedCustomTime != null) {
-                    sharedCustomTime.customTimeKey
-                } else {
-                    val customTimeJson = SharedCustomTimeJson(remotePrivateCustomTime.name, remotePrivateCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.MONDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.MONDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute, remotePrivateCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour, remotePrivateCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute, privateProject.id, remotePrivateCustomTime.id.value)
-
-                    newRemoteCustomTime(customTimeJson).customTimeKey
-                }
-            }
-            is CustomTimeKey.Shared -> {
-                check(customTimeKey.remoteProjectId == id)
-
-                customTimeKey
-            }
+            return newRemoteCustomTime(customTimeJson)
         }
+
+        return when (remoteCustomTime) {
+            is RemotePrivateCustomTime -> getSharedTimeIfPresent(remoteCustomTime.id, domainFactory.remoteProjectFactory.remotePrivateProject.id)
+            is RemoteSharedCustomTime -> remoteCustomTime.takeIf { it.projectId == id }
+            else -> throw IllegalArgumentException()
+        } ?: copy()
     }
-
-    override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteSharedCustomTime {
-        check(remoteCustomTimes.containsKey(remoteCustomTimeId))
-
-        return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Shared)
-    }
-
-    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
 }

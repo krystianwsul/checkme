@@ -4,13 +4,13 @@ import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domain.TaskHierarchy
 import com.krystianwsul.checkme.domain.schedules.*
-import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.ScheduleKey
@@ -128,7 +128,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         remoteTaskRecord.note = note
     }
 
-    override fun addSchedules(scheduleDatas: List<ScheduleData>, now: ExactTimeStamp) = createSchedules(now, scheduleDatas)
+    override fun addSchedules(scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) = createSchedules(now, scheduleDatas)
 
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is RemoteTask<*>)
@@ -181,10 +181,9 @@ class RemoteTask<T : RemoteCustomTimeId>(
                 ?: generateInstance(scheduleDateTime, shownFactory.getShown(taskKey, scheduleDateTime))
     }
 
-    fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<ScheduleData>) {
-        for (scheduleData in scheduleDatas) {
-            val timePair = scheduleData.timePair
-            val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteProject)
+    fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
+        for ((scheduleData, time) in scheduleDatas) {
+            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(time)
 
             when (scheduleData) {
                 is ScheduleData.Single -> {
@@ -221,8 +220,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     fun copySchedules(now: ExactTimeStamp, schedules: Collection<Schedule>) {
         for (schedule in schedules) {
-            val timePair = schedule.timePair
-            val (remoteCustomTimeId, hour, minute) = timePair.destructureRemote(remoteProject)
+            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(schedule.time)
 
             when (schedule) {
                 is SingleSchedule -> {

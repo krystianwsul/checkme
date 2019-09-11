@@ -15,6 +15,7 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 import java.util.*
 
@@ -117,7 +118,7 @@ class RemoteProjectFactory(
         remotePrivateProject = RemotePrivateProject(this, domainFactory, remotePrivateProjectRecord, uuid, now)
     }
 
-    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<ScheduleData>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
+    fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<Pair<ScheduleData, Time>>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
         createSchedules(now, scheduleDatas)
     }
 

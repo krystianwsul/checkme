@@ -936,7 +936,7 @@ class DomainFactory(
 
         val instances = instanceKeys.map(this::getInstance)
 
-        instances.forEach { it.setInstanceDateTime(instanceDate, instanceTimePair, now) }
+        instances.forEach { it.setInstanceDateTime(DateTime(instanceDate, getTime(instanceTimePair)), now) }
 
         val remoteProjects = instances
                 .filter { it.belongsToRemoteProject() }
@@ -964,7 +964,7 @@ class DomainFactory(
         val date = Date(calendar.toDateTimeTz())
         val hourMinute = HourMinute(calendar.toDateTimeTz())
 
-        instance.setInstanceDateTime(date, TimePair(hourMinute), now)
+        instance.setInstanceDateTime(DateTime(date, NormalTime(hourMinute)), now)
         instance.notificationShown = false
 
         updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
@@ -984,13 +984,12 @@ class DomainFactory(
 
         val date = Date(calendar.toDateTimeTz())
         val hourMinute = HourMinute(calendar.toDateTimeTz())
-        val timePair = TimePair(hourMinute)
 
         val instances = instanceKeys.map(this::getInstance)
 
         val instanceDateTimes = instances.associate { it.instanceKey to it.instanceDateTime }
 
-        instances.forEach { it.setInstanceDateTime(date, timePair, now) }
+        instances.forEach { it.setInstanceDateTime(DateTime(date, NormalTime(hourMinute)), now) }
 
         updateNotifications(now)
 
@@ -1013,7 +1012,7 @@ class DomainFactory(
         val pairs = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) -> Pair(getInstance(instanceKey), instanceDateTime) }
 
         pairs.forEach { (instance, instanceDateTime) ->
-            instance.setInstanceDateTime(instanceDateTime.date, instanceDateTime.time.timePair, now)
+            instance.setInstanceDateTime(instanceDateTime, now)
         }
 
         updateNotifications(now)
@@ -1163,7 +1162,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val task = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId, imageUuid)
+        val task = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas.map { it to getTime(it.timePair) }, note, finalProjectId, imageUuid)
 
         copyTaskKey?.let { copyTask(now, task, it) }
 
@@ -1213,7 +1212,7 @@ class DomainFactory(
         if (!task.isRootTask(now))
             task.getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
 
-        task.updateSchedules(scheduleDatas, now)
+        task.updateSchedules(scheduleDatas.map { it to getTime(it.timePair) }, now)
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
@@ -1260,7 +1259,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val newParentTask = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId, imageUuid)
+        val newParentTask = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas.map { it to getTime(it.timePair) }, note, finalProjectId, imageUuid)
 
         joinTasks = joinTasks.map { it.updateProject(this, now, finalProjectId) }
 
@@ -2000,11 +1999,7 @@ class DomainFactory(
 
         val dateTime = DateTime(
                 instanceKey.scheduleKey.scheduleDate,
-                instanceKey.scheduleKey.scheduleTimePair.run {
-                    customTimeKey?.let {
-                        remoteProjectFactory.getRemoteCustomTime(it.remoteProjectId, it.remoteCustomTimeId)
-                    } ?: NormalTime(hourMinute!!)
-                }
+                getTime(instanceKey.scheduleKey.scheduleTimePair)
         )
 
         return generateInstance(instanceKey.taskKey, dateTime)
@@ -2763,6 +2758,12 @@ class DomainFactory(
             createChildTask(now, task, copiedChildTask.name, copiedChildTask.note, copiedChildTask.imageJson, copiedChildTask.taskKey)
         }
     }
+
+    private fun getTime(timePair: TimePair) = timePair.customTimeKey
+            ?.let { getCustomTime(it) }
+            ?: NormalTime(timePair.hourMinute!!)
+
+    private fun getCustomTime(customTimeKey: CustomTimeKey<*>) = remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 

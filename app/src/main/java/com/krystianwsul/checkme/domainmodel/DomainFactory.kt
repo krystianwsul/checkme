@@ -2764,12 +2764,6 @@ class DomainFactory(
         }
     }
 
-    class ProjectUndoData {
-
-        val projectIds = mutableSetOf<String>()
-        val taskUndoData = TaskUndoData()
-    }
-
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 
     class ReadTimes(start: ExactTimeStamp, read: ExactTimeStamp, stop: ExactTimeStamp) {

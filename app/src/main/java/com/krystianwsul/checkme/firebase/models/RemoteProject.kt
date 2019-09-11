@@ -1,9 +1,9 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.Instance
+import com.krystianwsul.checkme.domain.ProjectUndoData
 import com.krystianwsul.checkme.domain.RemoteToRemoteConversion
 import com.krystianwsul.checkme.domain.Task
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.firebase.json.InstanceJson
@@ -180,7 +180,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp, projectUndoData: DomainFactory.ProjectUndoData, removeInstances: Boolean) {
+    fun setEndExactTimeStamp(now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
         check(current(now))
 
         remoteTasks.values

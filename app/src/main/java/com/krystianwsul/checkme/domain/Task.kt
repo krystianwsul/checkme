@@ -316,7 +316,7 @@ abstract class Task {
 
     abstract fun belongsToRemoteProject(): Boolean
 
-    abstract fun updateProject(now: ExactTimeStamp, projectId: String): Task
+    abstract fun updateProject(projectUpdater: RemoteTask.ProjectUpdater, now: ExactTimeStamp, projectId: String): Task
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
 

@@ -4,7 +4,6 @@ import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domain.TaskHierarchy
 import com.krystianwsul.checkme.domain.schedules.*
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
@@ -16,17 +15,16 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.ScheduleKey
 import com.krystianwsul.common.utils.TaskKey
-import java.util.*
 
 class RemoteTask<T : RemoteCustomTimeId>(
-        private val domainFactory: DomainFactory,
+        private val shownFactory: Instance.ShownFactory,
         val remoteProject: RemoteProject<T>,
         private val remoteTaskRecord: RemoteTaskRecord<T>,
         now: ExactTimeStamp) : Task() {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
-            .map { RemoteInstance(domainFactory.localFactory, remoteProject, this, it, domainFactory.localFactory.getShown(remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
+            .map { RemoteInstance(shownFactory, remoteProject, this, it, shownFactory.getShown(remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
@@ -180,7 +178,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)
 
         return existingInstance
-                ?: generateInstance(scheduleDateTime, domainFactory.localFactory.getShown(taskKey, scheduleDateTime))
+                ?: generateInstance(scheduleDateTime, shownFactory.getShown(taskKey, scheduleDateTime))
     }
 
     fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<ScheduleData>) {
@@ -262,11 +260,11 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun belongsToRemoteProject() = true
 
-    override fun updateProject(now: ExactTimeStamp, projectId: String): RemoteTask<*> {
+    override fun updateProject(projectUpdater: ProjectUpdater, now: ExactTimeStamp, projectId: String): RemoteTask<*> {
         return if (projectId == remoteProject.id)
             this
         else
-            domainFactory.convertRemoteToRemote(now, this, projectId)
+            projectUpdater.convertRemoteToRemote(now, this, projectId)
     }
 
     override fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String? {
@@ -279,7 +277,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") { scheduleTextFactory.getScheduleText(it, remoteProject) }
     }
 
-    fun generateInstance(scheduleDateTime: DateTime, shown: Instance.Shown?) = RemoteInstance(domainFactory.localFactory, remoteProject, this, scheduleDateTime, shown)
+    fun generateInstance(scheduleDateTime: DateTime, shown: Instance.Shown?) = RemoteInstance(shownFactory, remoteProject, this, scheduleDateTime, shown)
 
     override fun getScheduleText(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp, showParent: Boolean): String? {
         check(current(exactTimeStamp))
@@ -301,5 +299,10 @@ class RemoteTask<T : RemoteCustomTimeId>(
     interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup, remoteProject: RemoteProject<*>): String
+    }
+
+    interface ProjectUpdater {
+
+        fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*>
     }
 }

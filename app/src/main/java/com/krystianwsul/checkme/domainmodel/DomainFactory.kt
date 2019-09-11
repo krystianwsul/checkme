@@ -50,7 +50,7 @@ class DomainFactory(
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
         userSnapshot: DataSnapshot,
-        friendSnapshot: DataSnapshot) : RemotePrivateCustomTime.AllRecordsSource {
+        friendSnapshot: DataSnapshot) : RemotePrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
 
     companion object {
 
@@ -1209,7 +1209,7 @@ class DomainFactory(
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
 
-        task = task.updateProject(now, finalProjectId)
+        task = task.updateProject(this, now, finalProjectId)
 
         task.setName(name, note)
 
@@ -1265,7 +1265,7 @@ class DomainFactory(
 
         val newParentTask = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas, note, finalProjectId, imageUuid)
 
-        joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
+        joinTasks = joinTasks.map { it.updateProject(this, now, finalProjectId) }
 
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
@@ -1348,7 +1348,7 @@ class DomainFactory(
 
         val newParentTask = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId, imageUuid)
 
-        joinTasks = joinTasks.map { it.updateProject(now, finalProjectId) }
+        joinTasks = joinTasks.map { it.updateProject(this, now, finalProjectId) }
 
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
@@ -1386,7 +1386,7 @@ class DomainFactory(
 
         val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
 
-        task = task.updateProject(now, finalProjectId)
+        task = task.updateProject(this, now, finalProjectId)
 
         task.setName(name, note)
 
@@ -2200,7 +2200,7 @@ class DomainFactory(
                 .toMap()
     }
 
-    fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*> {
+    override fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*> {
         check(projectId.isNotEmpty())
 
         val remoteToRemoteConversion = RemoteToRemoteConversion<T>()

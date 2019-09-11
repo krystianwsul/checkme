@@ -6,9 +6,8 @@ import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.checkme.utils.time.calendar
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.ScheduleType
-import java.util.*
+import com.soywiz.klock.days
 
 class WeeklySchedule(
         rootTask: RemoteTask<*>,
@@ -58,12 +57,14 @@ class WeeklySchedule(
         }
 
         val ordinalDifference = nextDayOfWeek.ordinal - nowDayOfWeek.ordinal
-        val thisCalendar = today.calendar
-        if (ordinalDifference > 0 || ordinalDifference == 0 && time.getHourMinute(nowDayOfWeek) > nowHourMinute)
-            thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference)
+        val addDays = if (ordinalDifference == 0 && time.getHourMinute(nowDayOfWeek) > nowHourMinute)
+            0
+        else if (ordinalDifference > 0)
+            ordinalDifference
         else
-            thisCalendar.add(Calendar.DAY_OF_WEEK, ordinalDifference + 7)
-        val thisDate = Date(thisCalendar.toDateTimeTz())
+            ordinalDifference + 7
+
+        val thisDate = Date(today.toDateTimeTz() + addDays.days)
 
         return DateTime(thisDate, time).timeStamp
     }

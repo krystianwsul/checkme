@@ -3,12 +3,10 @@ package com.krystianwsul.checkme.domain.schedules
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.firebase.models.RemoteTask
-import com.krystianwsul.checkme.utils.time.calendar
-import com.krystianwsul.checkme.utils.time.toDateTimeTz
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMilli
-import java.util.*
+import com.soywiz.klock.days
 
 abstract class RepeatingSchedule(rootTask: RemoteTask<*>) : Schedule(rootTask) {
 
@@ -38,13 +36,12 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*>) : Schedule(rootTask) {
         } else {
             instances.add(getInstanceInDate(task, startExactTimeStamp.date, startExactTimeStamp.hourMilli, null))
 
-            val loopStartCalendar = startExactTimeStamp.date.calendar
-            loopStartCalendar.add(Calendar.DATE, 1)
-            val loopEndCalendar = endExactTimeStamp.date.calendar
+            var loopStartCalendar = startExactTimeStamp.date.toDateTimeTz() + 1.days
+            val loopEndCalendar = endExactTimeStamp.date.toDateTimeTz()
 
-            while (loopStartCalendar.before(loopEndCalendar)) {
-                instances.add(getInstanceInDate(task, Date(loopStartCalendar.toDateTimeTz()), null, null))
-                loopStartCalendar.add(Calendar.DATE, 1)
+            while (loopStartCalendar < loopEndCalendar) {
+                instances.add(getInstanceInDate(task, Date(loopStartCalendar), null, null))
+                loopStartCalendar += 1.days
             }
 
             instances.add(getInstanceInDate(task, endExactTimeStamp.date, null, endExactTimeStamp.hourMilli))

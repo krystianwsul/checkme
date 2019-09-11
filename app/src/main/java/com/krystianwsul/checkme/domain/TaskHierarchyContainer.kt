@@ -1,6 +1,5 @@
-package com.krystianwsul.checkme.utils
+package com.krystianwsul.checkme.domain
 
-import com.krystianwsul.checkme.domain.TaskHierarchy
 import com.krystianwsul.common.utils.TaskKey
 
 class TaskHierarchyContainer<T, U : TaskHierarchy> {

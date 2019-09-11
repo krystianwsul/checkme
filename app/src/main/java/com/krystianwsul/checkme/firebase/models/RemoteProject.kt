@@ -1,10 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domain.Instance
-import com.krystianwsul.checkme.domain.ProjectUndoData
-import com.krystianwsul.checkme.domain.RemoteToRemoteConversion
-import com.krystianwsul.checkme.domain.Task
-import com.krystianwsul.checkme.utils.TaskHierarchyContainer
+import com.krystianwsul.checkme.domain.*
 import com.krystianwsul.checkme.utils.time.destructureRemote
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson

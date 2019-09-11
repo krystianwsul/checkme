@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.firebase.models
 
+import com.krystianwsul.checkme.domain.TaskHierarchyContainer
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
-import com.krystianwsul.checkme.utils.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.CustomTimeKey

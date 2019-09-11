@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
+import com.soywiz.klock.Month
 import io.reactivex.Single
 import java.util.*
 
@@ -24,15 +25,12 @@ object Utils {
         activity.startActivity(Intent.createChooser(intent, activity.getString(R.string.sendTo)))
     }
 
-    fun getDaysInMonth(year: Int, month: Int) = GregorianCalendar(year, month - 1, 1).getActualMaximum(Calendar.DAY_OF_MONTH)
-
-    fun getDateInMonth(year: Int, month: Int, dayOfMonth: Int, beginningOfMonth: Boolean): Date {
-        return if (beginningOfMonth) {
-            Date(year, month, dayOfMonth)
-        } else {
-            Date(year, month, getDaysInMonth(year, month) - dayOfMonth + 1)
-        }
-    }
+    fun getDateInMonth(
+            year: Int,
+            month: Int,
+            dayOfMonth: Int,
+            beginningOfMonth: Boolean
+    ) = Date(year, month, if (beginningOfMonth) dayOfMonth else Month(month).days(year) - dayOfMonth + 1)
 
     fun getDateInMonth(year: Int, month: Int, dayOfMonth: Int, dayOfWeek: DayOfWeek, beginningOfMonth: Boolean): Date {
         if (beginningOfMonth) {
@@ -46,7 +44,7 @@ object Utils {
 
             return Date(year, month, day)
         } else {
-            val daysInMonth = getDaysInMonth(year, month)
+            val daysInMonth = Month(month).days(year)
 
             val last = Date(year, month, daysInMonth)
 
@@ -74,15 +72,6 @@ object Utils {
         }
 
         return ret
-    }
-}
-
-inline fun <reified T, U> T.getPrivateField(name: String): U {
-    return T::class.java.getDeclaredField(name).let {
-        it.isAccessible = true
-
-        @Suppress("UNCHECKED_CAST")
-        it.get(this) as U
     }
 }
 

@@ -252,7 +252,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun getParentTaskHierarchies(): Set<TaskHierarchy> = remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)
 
-    override fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy> = remoteProject.getTaskHierarchiesByParentTaskKey(parentTaskKey)
+    override fun getChildTaskHierarchies() = remoteProject.getTaskHierarchiesByParentTaskKey(taskKey)
 
     override fun belongsToRemoteProject() = true
 

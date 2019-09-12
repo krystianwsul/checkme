@@ -116,7 +116,7 @@ abstract class Instance {
 
         val scheduleDateTime = scheduleDateTime
 
-        val taskHierarchies = task.getTaskHierarchiesByParentTaskKey(task.taskKey)
+        val taskHierarchies = task.getChildTaskHierarchies()
         val childInstances = HashMap<InstanceKey, Pair<Instance, TaskHierarchy>>()
         for (taskHierarchy in taskHierarchies) {
             if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {

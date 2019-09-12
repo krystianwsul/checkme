@@ -277,8 +277,6 @@ abstract class Task {
 
     abstract fun getParentTaskHierarchies(): Set<TaskHierarchy>
 
-    abstract fun getTaskHierarchiesByParentTaskKey(parentTaskKey: TaskKey): Set<TaskHierarchy>
-
     abstract fun delete()
 
     abstract fun setName(name: String, note: String?)
@@ -320,7 +318,9 @@ abstract class Task {
 
     abstract fun getInstance(scheduleDateTime: DateTime): Instance
 
-    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getTaskHierarchiesByParentTaskKey(taskKey).asSequence()
+    abstract fun getChildTaskHierarchies(): Set<TaskHierarchy>
+
+    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().asSequence()
             .filter { it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp) }
             .sortedBy { it.ordinal }
             .toList()

@@ -13,15 +13,17 @@ class TaskRelevance(val task: Task) {
     var relevant = false
         private set
 
-    fun setRelevant(taskRelevances: Map<TaskKey, TaskRelevance>, taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>, instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>, now: ExactTimeStamp) {
+    fun setRelevant(
+            taskRelevances: Map<TaskKey, TaskRelevance>,
+            taskHierarchyRelevances: Map<TaskHierarchyKey, TaskHierarchyRelevance>,
+            instanceRelevances: MutableMap<InstanceKey, InstanceRelevance>,
+            now: ExactTimeStamp) {
         if (relevant)
             return
 
         relevant = true
 
-        val taskKey = task.taskKey
-
-        (task.getParentTaskHierarchies() + task.getTaskHierarchiesByParentTaskKey(taskKey))
+        (task.getParentTaskHierarchies() + task.getChildTaskHierarchies())
                 .filter {
                     val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
                     it.notDeleted(hierarchyExactTimeStamp)

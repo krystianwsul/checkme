@@ -5,3 +5,5 @@ expect annotation class Parcelize()
 expect interface Parcelable
 
 expect fun String.toBase64(): String
+
+expect fun log(message: String)

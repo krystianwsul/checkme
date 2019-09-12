@@ -936,7 +936,7 @@ class DomainFactory(
 
         val instances = instanceKeys.map(this::getInstance)
 
-        instances.forEach { it.setInstanceDateTime(ownerKey, DateTime(instanceDate, getTime(instanceTimePair)), now) }
+        instances.forEach { it.setInstanceDateTime(localFactory, ownerKey, DateTime(instanceDate, getTime(instanceTimePair)), now) }
 
         val remoteProjects = instances
                 .filter { it.belongsToRemoteProject() }
@@ -964,8 +964,8 @@ class DomainFactory(
         val date = Date(calendar.toDateTimeTz())
         val hourMinute = HourMinute(calendar.toDateTimeTz())
 
-        instance.setInstanceDateTime(ownerKey, DateTime(date, NormalTime(hourMinute)), now)
-        instance.notificationShown = false
+        instance.setInstanceDateTime(localFactory, ownerKey, DateTime(date, NormalTime(hourMinute)), now)
+        instance.setNotificationShown(localFactory, false)
 
         updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
 
@@ -989,7 +989,7 @@ class DomainFactory(
 
         val instanceDateTimes = instances.associate { it.instanceKey to it.instanceDateTime }
 
-        instances.forEach { it.setInstanceDateTime(ownerKey, DateTime(date, NormalTime(hourMinute)), now) }
+        instances.forEach { it.setInstanceDateTime(localFactory, ownerKey, DateTime(date, NormalTime(hourMinute)), now) }
 
         updateNotifications(now)
 
@@ -1012,7 +1012,7 @@ class DomainFactory(
         val pairs = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) -> Pair(getInstance(instanceKey), instanceDateTime) }
 
         pairs.forEach { (instance, instanceDateTime) ->
-            instance.setInstanceDateTime(ownerKey, instanceDateTime, now)
+            instance.setInstanceDateTime(localFactory, ownerKey, instanceDateTime, now)
         }
 
         updateNotifications(now)
@@ -1035,7 +1035,7 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         instance.setDone(true, now)
-        instance.notificationShown = false
+        instance.setNotificationShown(localFactory, false)
 
         updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
 
@@ -1078,8 +1078,8 @@ class DomainFactory(
             check(!instance.notificationShown)
             check(instance.isRootInstance(now))
 
-            instance.notified = false
-            instance.notificationShown = false
+            instance.setNotified(localFactory, false)
+            instance.setNotificationShown(localFactory, false)
         }
 
         updateNotifications(now)
@@ -2549,10 +2549,10 @@ class DomainFactory(
         val hideInstanceKeys = shownInstanceKeys.filter { !notificationInstances.containsKey(it) }.toSet()
 
         for (showInstanceKey in showInstanceKeys)
-            getInstance(showInstanceKey).notificationShown = true
+            getInstance(showInstanceKey).setNotificationShown(localFactory, true)
 
         for (hideInstanceKey in hideInstanceKeys)
-            getInstance(hideInstanceKey).notificationShown = false
+            getInstance(hideInstanceKey).setNotificationShown(localFactory, false)
 
         Preferences.logLineHour("silent? $silent")
 
@@ -2643,8 +2643,8 @@ class DomainFactory(
 
     private fun setInstanceNotified(instanceKey: InstanceKey) {
         getInstance(instanceKey).apply {
-            notified = true
-            notificationShown = false
+            setNotified(localFactory, true)
+            setNotificationShown(localFactory, false)
         }
     }
 

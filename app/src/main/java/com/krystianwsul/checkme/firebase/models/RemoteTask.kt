@@ -24,7 +24,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
-            .map { RemoteInstance(shownFactory, remoteProject, this, it, shownFactory.getShown(remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
+            .map { RemoteInstance(remoteProject, this, it, shownFactory.getShown(remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
@@ -275,7 +275,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") { scheduleTextFactory.getScheduleText(it, remoteProject) }
     }
 
-    fun generateInstance(scheduleDateTime: DateTime, shown: Instance.Shown?) = RemoteInstance(shownFactory, remoteProject, this, scheduleDateTime, shown)
+    fun generateInstance(scheduleDateTime: DateTime, shown: Instance.Shown?) = RemoteInstance(remoteProject, this, scheduleDateTime, shown)
 
     override fun getScheduleText(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp, showParent: Boolean): String? {
         check(current(exactTimeStamp))

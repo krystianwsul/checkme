@@ -8,7 +8,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-abstract class Instance(protected val shownFactory: ShownFactory) {
+abstract class Instance {
 
     companion object {
 
@@ -93,9 +93,9 @@ abstract class Instance(protected val shownFactory: ShownFactory) {
     instance, in the past, and not done.  If either of the last two are changed, this flag gets
     reset.  As far as being a root instance, there's no simple way to catch that moment.
      */
-    abstract var notified: Boolean
+    abstract val notified: Boolean
 
-    abstract var notificationShown: Boolean // Is the notification visible?
+    abstract val notificationShown: Boolean // Is the notification visible?
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
 
@@ -104,6 +104,10 @@ abstract class Instance(protected val shownFactory: ShownFactory) {
     abstract val customTimeKey: Pair<String, RemoteCustomTimeId>?
 
     abstract val shown: Shown?
+
+    abstract fun setNotified(shownFactory: ShownFactory, notified: Boolean)
+
+    abstract fun setNotificationShown(shownFactory: ShownFactory, notificationShown: Boolean)
 
     fun exists() = (instanceData is InstanceData.Real)
 
@@ -139,7 +143,7 @@ abstract class Instance(protected val shownFactory: ShownFactory) {
 
     fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
-    abstract fun setInstanceDateTime(ownerKey: String, dateTime: DateTime, now: ExactTimeStamp)
+    abstract fun setInstanceDateTime(shownFactory: ShownFactory, ownerKey: String, dateTime: DateTime, now: ExactTimeStamp)
 
     fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *, *> {
         (instanceData as? InstanceData.Real)?.let {

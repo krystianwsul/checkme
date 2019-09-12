@@ -10,8 +10,8 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteSharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord,
-        deviceDbInfo: DeviceDbInfo
-) : RemoteProject<RemoteCustomTimeId.Shared>(deviceDbInfo.uuid) {
+        deviceDbInfo: DeviceDbInfo // todo
+) : RemoteProject<RemoteCustomTimeId.Shared>() {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values

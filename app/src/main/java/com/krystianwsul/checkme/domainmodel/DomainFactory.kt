@@ -2183,7 +2183,7 @@ class DomainFactory(
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
-            val remoteTask = remoteProject.copyTask(ownerKey, pair.first, pair.second, now)
+            val remoteTask = remoteProject.copyTask(deviceDbInfo, pair.first, pair.second, now)
             remoteToRemoteConversion.endTasks[pair.first.id] = remoteTask
         }
 

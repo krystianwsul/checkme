@@ -36,7 +36,7 @@ class RemotePrivateProjectRecord(
 
     constructor(deviceInfoDbInfo: DeviceDbInfo, projectJson: PrivateProjectJson) : this(
             true,
-            deviceInfoDbInfo.deviceInfo.key,
+            deviceInfoDbInfo.key,
             deviceInfoDbInfo.uuid,
             projectJson)
 

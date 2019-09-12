@@ -29,7 +29,7 @@ class RemoteProjectFactory(
     private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, privateSnapshot, now)
     private val remoteSharedProjectManager = RemoteSharedProjectManager(domainFactory, sharedChildren)
 
-    var remotePrivateProject = RemotePrivateProject(remotePrivateProjectManager.remoteProjectRecord, domainFactory.deviceDbInfo.uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
+    var remotePrivateProject = RemotePrivateProject(remotePrivateProjectManager.remoteProjectRecord).apply { fixNotificationShown(domainFactory.localFactory, now) }
         private set
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
@@ -105,7 +105,7 @@ class RemoteProjectFactory(
     fun onNewPrivate(dataSnapshot: DataSnapshot, now: ExactTimeStamp) {
         val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
 
-        remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord, domainFactory.deviceDbInfo.uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
+        remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord).apply { fixNotificationShown(domainFactory.localFactory, now) }
     }
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<Pair<ScheduleData, Time>>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {

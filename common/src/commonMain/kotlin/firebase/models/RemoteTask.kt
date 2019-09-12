@@ -215,9 +215,9 @@ class RemoteTask<T : RemoteCustomTimeId>(
         }
     }
 
-    fun copySchedules(ownerKey: String, now: ExactTimeStamp, schedules: Collection<Schedule>) {
+    fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp, schedules: Collection<Schedule>) {
         for (schedule in schedules) {
-            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(ownerKey, schedule.time)
+            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
 
             when (schedule) {
                 is SingleSchedule -> {

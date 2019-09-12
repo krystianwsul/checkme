@@ -6,10 +6,7 @@ import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-class RemotePrivateProject(
-        override val remoteProjectRecord: RemotePrivateProjectRecord,
-        uuid: String
-) : RemoteProject<RemoteCustomTimeId.Private>(uuid) {
+class RemotePrivateProject(override val remoteProjectRecord: RemotePrivateProjectRecord) : RemoteProject<RemoteCustomTimeId.Private>() {
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private>>

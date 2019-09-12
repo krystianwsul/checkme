@@ -15,7 +15,7 @@ import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
-abstract class RemoteProject<T : RemoteCustomTimeId>(val uuid: String) {
+abstract class RemoteProject<T : RemoteCustomTimeId> {
 
     abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
@@ -68,7 +68,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(val uuid: String) {
         remoteTaskHierarchyContainer.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
     }
 
-    fun copyTask(ownerKey: String, task: Task, instances: Collection<Instance>, now: ExactTimeStamp): RemoteTask<T> {
+    fun copyTask(deviceDbInfo: DeviceDbInfo, task: Task, instances: Collection<Instance>, now: ExactTimeStamp): RemoteTask<T> {
         val endTime = task.getEndExactTimeStamp()?.long
 
         val oldestVisible = task.getOldestVisible()
@@ -77,13 +77,13 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(val uuid: String) {
         val oldestVisibleDay = oldestVisible?.day
 
         val instanceJsons = instances.associate {
-            val instanceJson = getInstanceJson(ownerKey, it)
+            val instanceJson = getInstanceJson(deviceDbInfo.key, it)
             val scheduleKey = it.scheduleKey
 
             RemoteInstanceRecord.scheduleKeyToString(scheduleKey) to instanceJson
         }.toMutableMap()
 
-        val oldestVisibleMap = oldestVisible?.let { mapOf(uuid to OldestVisibleJson.fromDate(Date(it.year, it.month, it.day))) }
+        val oldestVisibleMap = oldestVisible?.let { mapOf(deviceDbInfo.uuid to OldestVisibleJson.fromDate(Date(it.year, it.month, it.day))) }
                 ?: mapOf()
 
         val taskJson = TaskJson(
@@ -103,7 +103,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(val uuid: String) {
 
         remoteTasks[remoteTask.id] = remoteTask
 
-        remoteTask.copySchedules(ownerKey, now, task.getCurrentSchedules(now))
+        remoteTask.copySchedules(deviceDbInfo, now, task.getCurrentSchedules(now))
 
         return remoteTask
     }

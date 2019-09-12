@@ -8,10 +8,7 @@ import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-class RemoteSharedProject(
-        override val remoteProjectRecord: RemoteSharedProjectRecord,
-        deviceDbInfo: DeviceDbInfo // todo
-) : RemoteProject<RemoteCustomTimeId.Shared>() {
+class RemoteSharedProject(override val remoteProjectRecord: RemoteSharedProjectRecord) : RemoteProject<RemoteCustomTimeId.Shared>() {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -45,8 +42,6 @@ class RemoteSharedProject(
                 .values
                 .map { RemoteTaskHierarchy(this, it) }
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
-
-        updateUserInfo(deviceDbInfo)
     }
 
     private fun addUser(remoteRootUser: RemoteRootUser) {
@@ -68,9 +63,9 @@ class RemoteSharedProject(
     }
 
     fun updateUserInfo(deviceDbInfo: DeviceDbInfo) {
-        check(remoteUsers.containsKey(deviceDbInfo.deviceInfo.key))
+        check(remoteUsers.containsKey(deviceDbInfo.key))
 
-        val remoteProjectUser = remoteUsers[deviceDbInfo.deviceInfo.key]!!
+        val remoteProjectUser = remoteUsers[deviceDbInfo.key]!!
 
         remoteProjectUser.setToken(deviceDbInfo)
     }

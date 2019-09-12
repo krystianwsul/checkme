@@ -34,7 +34,12 @@ class RemoteProjectFactory(
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .map { RemoteSharedProject(it, domainFactory.deviceDbInfo).apply { fixNotificationShown(domainFactory.localFactory, now) } }
+            .map {
+                RemoteSharedProject(it).apply {
+                    fixNotificationShown(domainFactory.localFactory, now)
+                    updateUserInfo(domainFactory.deviceDbInfo)
+                }
+            }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -91,7 +96,10 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord, domainFactory.deviceDbInfo).apply { fixNotificationShown(domainFactory.localFactory, now) }
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
+                    fixNotificationShown(domainFactory.localFactory, now)
+                    updateUserInfo(domainFactory.deviceDbInfo)
+                }
             }
             is ChildRemoveEvent -> {
                 val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
@@ -132,7 +140,7 @@ class RemoteProjectFactory(
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteSharedProject(remoteProjectRecord, domainFactory.deviceDbInfo)
+        val remoteProject = RemoteSharedProject(remoteProjectRecord)
 
         check(!remoteProjects.containsKey(remoteProject.id))
 

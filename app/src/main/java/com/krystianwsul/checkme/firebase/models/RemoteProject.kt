@@ -50,10 +50,10 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     val taskHierarchies get() = remoteTaskHierarchyContainer.all
 
-    fun newRemoteTask(taskJson: TaskJson, now: ExactTimeStamp): RemoteTask<T> {
+    fun newRemoteTask(taskJson: TaskJson): RemoteTask<T> {
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
-        val remoteTask = RemoteTask(shownFactory, this, remoteTaskRecord, now)
+        val remoteTask = RemoteTask(shownFactory, this, remoteTaskRecord)
         check(!remoteTasks.containsKey(remoteTask.id))
         remoteTasks[remoteTask.id] = remoteTask
 
@@ -99,7 +99,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
                 oldestVisible = oldestVisibleMap.toMutableMap())
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
-        val remoteTask = RemoteTask(shownFactory, this, remoteTaskRecord, now)
+        val remoteTask = RemoteTask(shownFactory, this, remoteTaskRecord)
         check(!remoteTasks.containsKey(remoteTask.id))
 
         remoteTasks[remoteTask.id] = remoteTask
@@ -278,6 +278,12 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
             convertRemoteToRemoteHelper(now, remoteToRemoteConversion, it)
         }
+    }
+
+    fun fixNotificationShown(now: ExactTimeStamp) = tasks.forEach {
+        it.existingInstances
+                .values
+                .forEach { it.fixNotificationShown(now) }
     }
 
     private class MissingTaskException(projectId: String, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")

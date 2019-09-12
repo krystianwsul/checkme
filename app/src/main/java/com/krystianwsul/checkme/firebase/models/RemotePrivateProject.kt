@@ -1,19 +1,18 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.TaskHierarchyContainer
-import com.krystianwsul.checkme.domainmodel.DomainFactory // todo js
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
-import java.util.* // todo js
+import java.util.*
 
 class RemotePrivateProject(
         domainFactory: DomainFactory,
         override val remoteProjectRecord: RemotePrivateProjectRecord,
-        uuid: String,
-        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Private>(domainFactory.localFactory, uuid) {
+        uuid: String
+) : RemoteProject<RemoteCustomTimeId.Private>(domainFactory.localFactory, uuid) {
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private>>
@@ -31,7 +30,7 @@ class RemotePrivateProject(
 
         remoteTasks = remoteProjectRecord.remoteTaskRecords
                 .values
-                .map { RemoteTask(shownFactory, this, it, now) }
+                .map { RemoteTask(shownFactory, this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 

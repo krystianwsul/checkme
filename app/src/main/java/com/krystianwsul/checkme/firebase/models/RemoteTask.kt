@@ -19,12 +19,27 @@ import com.krystianwsul.common.utils.TaskKey
 class RemoteTask<T : RemoteCustomTimeId>(
         private val shownFactory: Instance.ShownFactory,
         val remoteProject: RemoteProject<T>,
-        private val remoteTaskRecord: RemoteTaskRecord<T>,
-        now: ExactTimeStamp) : Task() {
+        private val remoteTaskRecord: RemoteTaskRecord<T>
+) : Task() {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
-            .map { RemoteInstance(remoteProject, this, it, shownFactory.getShown(remoteProject.id, it.taskId, it.scheduleYear, it.scheduleMonth, it.scheduleDay, it.scheduleCustomTimeId, it.scheduleHour, it.scheduleMinute), now) }
+            .map {
+                RemoteInstance(
+                        remoteProject,
+                        this,
+                        it,
+                        shownFactory.getShown(
+                                remoteProject.id,
+                                it.taskId,
+                                it.scheduleYear,
+                                it.scheduleMonth,
+                                it.scheduleDay,
+                                it.scheduleCustomTimeId,
+                                it.scheduleHour,
+                                it.scheduleMinute)
+                )
+            }
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
@@ -103,7 +118,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task {
         val taskJson = TaskJson(name, now.long, null, null, null, null, note, image = image)
 
-        val childTask = remoteProject.newRemoteTask(taskJson, now)
+        val childTask = remoteProject.newRemoteTask(taskJson)
 
         remoteProject.createTaskHierarchy(this, childTask, now)
 

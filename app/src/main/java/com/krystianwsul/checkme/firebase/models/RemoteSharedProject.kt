@@ -6,7 +6,6 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 
@@ -14,8 +13,8 @@ class RemoteSharedProject(
         shownFactory: Instance.ShownFactory,
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         deviceInfo: DeviceInfo,
-        uuid: String,
-        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(shownFactory, uuid) {
+        uuid: String
+) : RemoteProject<RemoteCustomTimeId.Shared>(shownFactory, uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -41,7 +40,7 @@ class RemoteSharedProject(
 
         remoteTasks = remoteProjectRecord.remoteTaskRecords
                 .values
-                .map { RemoteTask(shownFactory, this, it, now) }
+                .map { RemoteTask(shownFactory, this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 

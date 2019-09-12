@@ -69,18 +69,12 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
             remoteInstanceRecord: RemoteInstanceRecord<T>,
-            shown: Shown?,
-            now: ExactTimeStamp) {
+            shown: Shown?) {
         this.remoteProject = remoteProject
         task = remoteTask
         val realInstanceData = RemoteReal(this, remoteInstanceRecord)
         instanceData = realInstanceData
         this.shown = shown
-
-        val date = instanceDate
-        val instanceTimeStamp = ExactTimeStamp(date, instanceTime.getHourMinute(date.dayOfWeek).toHourMilli())
-        if (realInstanceData.instanceRecord.done != null || instanceTimeStamp > now)
-            shown?.notified = false
     }
 
     constructor(
@@ -92,6 +86,11 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         task = remoteTask
         instanceData = Virtual(task.id, scheduleDateTime)
         this.shown = shown
+    }
+
+    fun fixNotificationShown(now: ExactTimeStamp) {
+        if (done != null || instanceDateTime.toExactTimeStamp() > now)
+            shown?.notified = false
     }
 
     override fun setInstanceDateTime(shownFactory: ShownFactory, ownerKey: String, dateTime: DateTime, now: ExactTimeStamp) {

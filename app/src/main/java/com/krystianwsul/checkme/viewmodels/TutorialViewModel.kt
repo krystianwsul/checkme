@@ -36,7 +36,7 @@ class TutorialViewModel : ViewModel() {
 
                             MyCrashlytics.logException(exception)
 
-                            MyApplication.instance.googleSigninClient.signOut()
+                            MyApplication.instance.googleSignInClient.signOut()
 
                             state.apply {
                                 accept(State.Error)

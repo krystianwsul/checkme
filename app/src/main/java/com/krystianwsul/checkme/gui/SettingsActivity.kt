@@ -94,7 +94,7 @@ class SettingsActivity : NavBarActivity() {
                         if (it.value != null)
                             settingsActivity.updateFromAccount(it.value)
                         else
-                            startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
+                            startActivityForResult(MyApplication.instance.googleSignInClient.signInIntent, RC_SIGN_IN)
                     }
                     .addTo(createDisposable)
 

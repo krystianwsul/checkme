@@ -28,7 +28,6 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.Maybe
-import io.reactivex.Observable
 import net.danlew.android.joda.JodaTimeAndroid
 import java.io.File
 
@@ -55,13 +54,13 @@ class MyApplication : Application() {
                 .putString(TOKEN_KEY, value)
                 .apply()
 
-    val googleSigninClient by lazy { getClient() }
+    val googleSignInClient by lazy { getClient() }
 
-    private val userInfoRelay = BehaviorRelay.createDefault(NullableWrapper<DeviceInfo>())
+    private val deviceInfoRelay = BehaviorRelay.createDefault(NullableWrapper<DeviceInfo>())
 
-    val userInfo get() = userInfoRelay.value!!.value!!
+    val userInfo get() = deviceInfoRelay.value!!.value!!
 
-    val hasUserInfo get() = userInfoRelay.value!!.value != null
+    val hasUserInfo get() = deviceInfoRelay.value!!.value != null
 
     @SuppressLint("CheckResult")
     override fun onCreate() {
@@ -86,22 +85,14 @@ class MyApplication : Application() {
                 .startWith(NullableWrapper(FirebaseAuth.getInstance().currentUser))
                 .map { NullableWrapper(it.value?.let { DeviceInfo(it.toUserInfo(), token) }) }
                 .distinctUntilChanged()
-                .subscribe(userInfoRelay)
+                .subscribe(deviceInfoRelay)
 
-        userInfoRelay.firstOrError()
+        deviceInfoRelay.firstOrError()
                 .filter { it.value != null }
-                .subscribe { _ -> DomainFactory.firstRun = true }
-
-        userInfoRelay.switchMap {
-            MyCrashlytics.log("userInfoRelay: $it")
-
-            it.value?.let { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key) }
-                    ?: Observable.never()
-        }
-                .subscribe { MyCrashlytics.log("independent private project event") }
+                .subscribe { DomainFactory.firstRun = true }
 
         FactoryListener(
-                userInfoRelay,
+                deviceInfoRelay,
                 { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key) },
                 { AndroidDatabaseWrapper.getSharedProjectSingle(it.key) },
                 { AndroidDatabaseWrapper.getFriendSingle(it.key) },
@@ -131,9 +122,9 @@ class MyApplication : Application() {
                     .setANRListener { MyCrashlytics.logException(it) }
                     .start()
 
-        userInfoRelay.switchMapMaybe {
+        deviceInfoRelay.switchMapMaybe {
             it.value?.let {
-                googleSigninClient.silentSignIn()
+                googleSignInClient.silentSignIn()
                         .toSingle()
                         .toMaybe()
             } ?: Maybe.empty()

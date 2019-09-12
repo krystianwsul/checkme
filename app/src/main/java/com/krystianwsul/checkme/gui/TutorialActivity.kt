@@ -104,7 +104,7 @@ class TutorialActivity : NavBarActivity() {
 
     private fun startSignIn() {
         tutorialViewModel.startSignIn()
-        startActivityForResult(MyApplication.instance.googleSigninClient.signInIntent, RC_SIGN_IN)
+        startActivityForResult(MyApplication.instance.googleSignInClient.signInIntent, RC_SIGN_IN)
     }
 
     private fun startMain() {

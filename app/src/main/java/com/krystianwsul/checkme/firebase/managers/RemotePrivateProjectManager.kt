@@ -5,7 +5,6 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -14,14 +13,13 @@ import kotlin.properties.Delegates
 
 class RemotePrivateProjectManager(
         private val domainFactory: DomainFactory,
-        deviceInfo: DeviceInfo,
         dataSnapshot: DataSnapshot,
         now: ExactTimeStamp) {
 
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemotePrivateProjectManager.isSaved = $value") }
 
     var remoteProjectRecord = if (dataSnapshot.value == null) {
-        RemotePrivateProjectRecord(deviceInfo, domainFactory.uuid, PrivateProjectJson(startTime = now.long))
+        RemotePrivateProjectRecord(domainFactory.deviceDbInfo, PrivateProjectJson(startTime = now.long))
     } else {
         dataSnapshot.toRecord()
     }

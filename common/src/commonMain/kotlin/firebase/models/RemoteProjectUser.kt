@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.records.RemoteProjectUserRecord
 
 
@@ -33,5 +34,5 @@ class RemoteProjectUser(
         remoteProjectUserRecord.delete()
     }
 
-    fun setToken(token: String?, uuid: String) = remoteProjectUserRecord.setToken(token, uuid)
+    fun setToken(deviceDbInfo: DeviceDbInfo) = remoteProjectUserRecord.setToken(deviceDbInfo)
 }

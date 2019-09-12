@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserJson
 
@@ -42,14 +43,14 @@ class RemoteProjectUserRecord(
             addValue("$key/photoUrl", value)
         }
 
-    fun setToken(token: String?, uuid: String) {
-        check(uuid.isNotEmpty())
+    fun setToken(deviceDbInfo: DeviceDbInfo) {
+        check(deviceDbInfo.uuid.isNotEmpty())
 
-        if (token == createObject.tokens[uuid])
+        if (deviceDbInfo.deviceInfo.token == createObject.tokens[deviceDbInfo.uuid])
             return
 
-        createObject.tokens[uuid] = token
-        addValue("$key/tokens/$uuid", token)
+        createObject.tokens[deviceDbInfo.uuid] = deviceDbInfo.deviceInfo.token
+        addValue("$key/tokens/$deviceDbInfo.uuid", deviceDbInfo.deviceInfo.token)
     }
 
     override fun deleteFromParent() = check(remoteProjectRecord.remoteUserRecords.remove(id) == this)

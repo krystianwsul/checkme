@@ -43,7 +43,7 @@ import java.util.*
 @Suppress("LeakingThis")
 class DomainFactory(
         persistenceManager: PersistenceManager,
-        private var deviceInfo: DeviceInfo,
+        deviceInfo: DeviceInfo,
         remoteStart: ExactTimeStamp,
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
@@ -134,12 +134,16 @@ class DomainFactory(
 
     val domainChanged = BehaviorRelay.createDefault(setOf<Int>())
 
+    var deviceDbInfo: DeviceDbInfo
+        private set
+
     init {
         Preferences.logLineHour("DomainFactory.init")
 
         val start = ExactTimeStamp.now
 
         localFactory = LocalFactory(persistenceManager)
+        deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
 
         val localRead = ExactTimeStamp.now
 
@@ -151,7 +155,7 @@ class DomainFactory(
 
         val remoteRead = ExactTimeStamp.now
 
-        remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, deviceInfo, remoteRead)
+        remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, remoteRead)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 
@@ -906,7 +910,7 @@ class DomainFactory(
             name = remoteProject.name
 
             userListDatas = remoteProject.users
-                    .filterNot { it.id == deviceInfo.key }
+                    .filterNot { it.id == deviceDbInfo.key }
                     .map { ShowProjectViewModel.UserListData(it.name, it.email, it.id, it.photoUrl) }
                     .toSet()
         } else {
@@ -1806,7 +1810,7 @@ class DomainFactory(
         MyCrashlytics.log("DomainFactory.removeFriends")
         check(!remoteFriendFactory.isSaved)
 
-        keys.forEach { remoteFriendFactory.removeFriend(deviceInfo.key, it) }
+        keys.forEach { remoteFriendFactory.removeFriend(deviceDbInfo.key, it) }
 
         remoteFriendFactory.save()
     }
@@ -1816,10 +1820,10 @@ class DomainFactory(
         MyCrashlytics.log("DomainFactory.updateToken")
         if (remoteUserFactory.isSaved || remoteProjectFactory.isSharedSaved) throw SavedFactoryException()
 
-        deviceInfo = deviceInfo.copy(token = token)
+        deviceDbInfo = deviceDbInfo.copy(deviceInfo = deviceDbInfo.deviceInfo.copy(token = token))
 
         remoteUserFactory.remoteUser.setToken(token)
-        remoteProjectFactory.updateDeviceInfo(deviceInfo)
+        remoteProjectFactory.updateDeviceInfo(deviceDbInfo)
 
         save(0, source)
     }
@@ -1830,7 +1834,7 @@ class DomainFactory(
         if (remoteUserFactory.isSaved || remoteProjectFactory.isSharedSaved) throw SavedFactoryException()
 
         remoteUserFactory.remoteUser.photoUrl = photoUrl
-        remoteProjectFactory.updatePhotoUrl(deviceInfo, photoUrl)
+        remoteProjectFactory.updatePhotoUrl(deviceDbInfo.deviceInfo, photoUrl)
 
         save(0, source)
     }
@@ -1886,7 +1890,7 @@ class DomainFactory(
 
         val recordOf = HashSet(friends)
 
-        val key = deviceInfo.key
+        val key = deviceDbInfo.key
         check(!recordOf.contains(key))
         recordOf.add(key)
 
@@ -2313,10 +2317,10 @@ class DomainFactory(
         remotePrivateProject?.let {
             remoteProjects.remove(it)
 
-            userKeys.add(deviceInfo.key)
+            userKeys.add(deviceDbInfo.key)
         }
 
-        BackendNotifier.notify(remoteProjects, deviceInfo, userKeys)
+        BackendNotifier.notify(remoteProjects, deviceDbInfo.deviceInfo, userKeys)
     }
 
     private fun updateNotifications(

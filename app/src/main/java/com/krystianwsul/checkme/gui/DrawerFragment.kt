@@ -65,7 +65,7 @@ class DrawerFragment : NoCollapseBottomSheetDialogFragment() {
                         R.id.main_drawer_sign_out -> {
                             DomainFactory.instance.updateToken(SaveService.Source.GUI, null)
 
-                            MyApplication.instance.googleSigninClient.signOut()
+                            MyApplication.instance.googleSignInClient.signOut()
                             FirebaseAuth.getInstance().signOut()
 
                             finish()

@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.utils.CustomTimeKey
@@ -34,10 +34,10 @@ class RemotePrivateProjectRecord(
             uuid,
             projectJson)
 
-    constructor(deviceInfo: DeviceInfo, uuid: String, projectJson: PrivateProjectJson) : this(
+    constructor(deviceInfoDbInfo: DeviceDbInfo, projectJson: PrivateProjectJson) : this(
             true,
-            deviceInfo.key,
-            uuid,
+            deviceInfoDbInfo.deviceInfo.key,
+            deviceInfoDbInfo.uuid,
             projectJson)
 
     fun newRemoteCustomTimeRecord(customTimeJson: com.krystianwsul.common.firebase.json.PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {

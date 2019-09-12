@@ -9,6 +9,7 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.managers.RemotePrivateProjectManager
 import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedProjectJson
@@ -23,20 +24,17 @@ class RemoteProjectFactory(
         private val domainFactory: DomainFactory,
         sharedChildren: Iterable<DataSnapshot>,
         privateSnapshot: DataSnapshot,
-        private val deviceInfo: DeviceInfo,
         now: ExactTimeStamp) : RemoteProject.Parent {
 
-    val uuid = domainFactory.uuid
-
-    private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, deviceInfo, privateSnapshot, now)
+    private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, privateSnapshot, now)
     private val remoteSharedProjectManager = RemoteSharedProjectManager(domainFactory, sharedChildren)
 
-    var remotePrivateProject = RemotePrivateProject(remotePrivateProjectManager.remoteProjectRecord, uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
+    var remotePrivateProject = RemotePrivateProject(remotePrivateProjectManager.remoteProjectRecord, domainFactory.deviceDbInfo.uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
         private set
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .map { RemoteSharedProject(it, deviceInfo, uuid).apply { fixNotificationShown(domainFactory.localFactory, now) } }
+            .map { RemoteSharedProject(it, domainFactory.deviceDbInfo).apply { fixNotificationShown(domainFactory.localFactory, now) } }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -93,7 +91,7 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord, deviceInfo, uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord, domainFactory.deviceDbInfo).apply { fixNotificationShown(domainFactory.localFactory, now) }
             }
             is ChildRemoveEvent -> {
                 val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
@@ -107,7 +105,7 @@ class RemoteProjectFactory(
     fun onNewPrivate(dataSnapshot: DataSnapshot, now: ExactTimeStamp) {
         val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
 
-        remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord, uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
+        remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord, domainFactory.deviceDbInfo.uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
     }
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<Pair<ScheduleData, Time>>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
@@ -115,7 +113,7 @@ class RemoteProjectFactory(
     }
 
     fun createRemoteTaskHelper(now: ExactTimeStamp, name: String, note: String?, projectId: String, imageUuid: String?): RemoteTask<*> {
-        val image = imageUuid?.let { TaskJson.Image(imageUuid, uuid) }
+        val image = imageUuid?.let { TaskJson.Image(imageUuid, domainFactory.deviceDbInfo.uuid) }
         val taskJson = TaskJson(name, now.long, null, null, null, null, note, image = image)
 
         return getRemoteProjectForce(projectId).newRemoteTask(taskJson)
@@ -125,16 +123,16 @@ class RemoteProjectFactory(
         check(!TextUtils.isEmpty(name))
 
         val friendIds = HashSet(recordOf)
-        friendIds.remove(deviceInfo.key)
+        friendIds.remove(domainFactory.deviceDbInfo.key)
 
         val userJsons = domainFactory.remoteFriendFactory.getUserJsons(friendIds)
-        userJsons[deviceInfo.key] = remoteRootUser.userJson
+        userJsons[domainFactory.deviceDbInfo.key] = remoteRootUser.userJson
 
         val projectJson = SharedProjectJson(name, now.long, users = userJsons)
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteSharedProject(remoteProjectRecord, deviceInfo, uuid)
+        val remoteProject = RemoteSharedProject(remoteProjectRecord, domainFactory.deviceDbInfo)
 
         check(!remoteProjects.containsKey(remoteProject.id))
 
@@ -190,7 +188,7 @@ class RemoteProjectFactory(
         return getRemoteProjectIfPresent(taskKey)?.getRemoteTaskIfPresent(taskKey.remoteTaskId)
     }
 
-    fun updateDeviceInfo(deviceInfo: DeviceInfo) = remoteSharedProjects.values.forEach { it.updateUserInfo(deviceInfo, uuid) }
+    fun updateDeviceInfo(deviceDbInfo: DeviceDbInfo) = remoteSharedProjects.values.forEach { it.updateUserInfo(deviceDbInfo) }
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }
 

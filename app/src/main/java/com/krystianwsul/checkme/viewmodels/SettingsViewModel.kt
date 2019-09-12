@@ -23,7 +23,7 @@ class SettingsViewModel : DomainViewModel<SettingsViewModel.Data>() {
 
     fun silentSignIn() {
         MyApplication.instance
-                .googleSigninClient
+                .googleSignInClient
                 .silentSignIn()
                 .toSingle()
                 .subscribe(relay)

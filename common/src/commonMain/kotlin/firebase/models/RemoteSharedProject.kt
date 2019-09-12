@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
@@ -9,9 +10,8 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteSharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord,
-        deviceInfo: DeviceInfo,
-        uuid: String
-) : RemoteProject<RemoteCustomTimeId.Shared>(uuid) {
+        deviceDbInfo: DeviceDbInfo
+) : RemoteProject<RemoteCustomTimeId.Shared>(deviceDbInfo.uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -46,7 +46,7 @@ class RemoteSharedProject(
                 .map { RemoteTaskHierarchy(this, it) }
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
 
-        updateUserInfo(deviceInfo, uuid)
+        updateUserInfo(deviceDbInfo)
     }
 
     private fun addUser(remoteRootUser: RemoteRootUser) {
@@ -67,12 +67,12 @@ class RemoteSharedProject(
         remoteUsers.remove(id)
     }
 
-    fun updateUserInfo(deviceInfo: DeviceInfo, uuid: String) {
-        check(remoteUsers.containsKey(deviceInfo.key))
+    fun updateUserInfo(deviceDbInfo: DeviceDbInfo) {
+        check(remoteUsers.containsKey(deviceDbInfo.deviceInfo.key))
 
-        val remoteProjectUser = remoteUsers[deviceInfo.key]!!
+        val remoteProjectUser = remoteUsers[deviceDbInfo.deviceInfo.key]!!
 
-        remoteProjectUser.setToken(deviceInfo.token, uuid)
+        remoteProjectUser.setToken(deviceDbInfo)
     }
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) {

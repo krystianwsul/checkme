@@ -12,10 +12,10 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.toImageLoader
-import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.checkme.utils.setIndent
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode

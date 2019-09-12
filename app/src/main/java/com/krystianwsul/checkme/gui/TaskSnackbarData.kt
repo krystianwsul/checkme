@@ -1,8 +1,8 @@
 package com.krystianwsul.checkme.gui
 
-import com.krystianwsul.checkme.domain.TaskUndoData
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.common.domain.TaskUndoData
 
 class TaskSnackbarData(private val taskUndoData: TaskUndoData) : SnackbarData {
 

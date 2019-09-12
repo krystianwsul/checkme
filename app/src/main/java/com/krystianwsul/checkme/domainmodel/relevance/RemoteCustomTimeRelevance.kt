@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
-import com.krystianwsul.checkme.firebase.models.RemoteCustomTime
+import com.krystianwsul.common.firebase.models.RemoteCustomTime
 
 class RemoteCustomTimeRelevance(val remoteCustomTime: RemoteCustomTime<*>) {
 

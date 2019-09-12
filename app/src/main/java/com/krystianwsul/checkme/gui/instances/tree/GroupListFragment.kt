@@ -20,7 +20,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.EditInstancesFragment
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
@@ -28,6 +27,7 @@ import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.toDateTimeTz
+import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.InstanceKey

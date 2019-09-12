@@ -11,10 +11,10 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.circle
 import com.krystianwsul.checkme.utils.dpToPx
+import com.krystianwsul.common.domain.Task
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers

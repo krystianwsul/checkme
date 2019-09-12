@@ -7,9 +7,9 @@ import androidx.core.graphics.drawable.IconCompat
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domain.Task
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
+import com.krystianwsul.common.domain.Task
 import io.reactivex.BackpressureStrategy
 import io.reactivex.schedulers.Schedulers
 

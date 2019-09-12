@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.os.Build
-import com.krystianwsul.checkme.domain.Instance
+import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 

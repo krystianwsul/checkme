@@ -1247,7 +1247,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         object None : ImageState()
 
-        data class Existing(val imageState: com.krystianwsul.checkme.firebase.models.ImageState) : ImageState() {
+        data class Existing(val imageState: com.krystianwsul.common.firebase.models.ImageState) : ImageState() {
 
             override val loader: (ImageView) -> Unit get() = { imageState.toImageLoader().load(it, false) }
         }

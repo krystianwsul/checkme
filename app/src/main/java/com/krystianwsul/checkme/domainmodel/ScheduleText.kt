@@ -2,10 +2,10 @@ package com.krystianwsul.checkme.domainmodel
 
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
-import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
-import com.krystianwsul.checkme.firebase.models.RemoteProject
-import com.krystianwsul.checkme.firebase.models.RemoteTask
 import com.krystianwsul.checkme.utils.time.getDisplayText
+import com.krystianwsul.common.domain.schedules.ScheduleGroup
+import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.NormalTime
 
 sealed class ScheduleText {

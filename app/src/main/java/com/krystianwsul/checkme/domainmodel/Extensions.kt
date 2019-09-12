@@ -1,5 +1,5 @@
 package com.krystianwsul.checkme.domainmodel
 
-import com.krystianwsul.checkme.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.ImageState
 
 fun ImageState.toImageLoader() = ImageLoader(this)

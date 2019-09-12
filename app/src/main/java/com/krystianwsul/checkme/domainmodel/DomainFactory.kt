@@ -9,8 +9,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
-import com.krystianwsul.checkme.domain.*
-import com.krystianwsul.checkme.domain.schedules.ScheduleGroup
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
@@ -18,7 +16,6 @@ import com.krystianwsul.checkme.domainmodel.relevance.*
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
-import com.krystianwsul.checkme.firebase.models.*
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
@@ -30,10 +27,11 @@ import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.viewmodels.*
-import com.krystianwsul.common.domain.CustomTime
-import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.domain.*
+import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*

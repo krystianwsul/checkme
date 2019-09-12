@@ -4,9 +4,9 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.krystianwsul.checkme.GlideApp
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.firebase.models.ImageState
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.circle
+import com.krystianwsul.common.firebase.models.ImageState
 
 class ImageLoader(val imageState: ImageState) {
 

@@ -5,7 +5,6 @@ import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.RemoteCustomTimeId
-import java.util.*
 
 class RemotePrivateProject(
         override val remoteProjectRecord: RemotePrivateProjectRecord,

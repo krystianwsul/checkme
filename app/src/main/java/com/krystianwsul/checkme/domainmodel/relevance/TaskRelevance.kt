@@ -33,7 +33,7 @@ class TaskRelevance(val task: Task) {
         val oldestVisible = task.getOldestVisible()!!
 
         // mark instances relevant
-        task.getPastInstances(now)
+        task.getPastRootInstances(now)
                 .asSequence()
                 .filter { it.scheduleDate >= oldestVisible }
                 .map { instance ->

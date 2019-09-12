@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
-import java.io.Serializable
+import com.krystianwsul.common.utils.Serializable
 
 sealed class ImageState : Serializable {
 

@@ -1816,10 +1816,10 @@ class DomainFactory(
         MyCrashlytics.log("DomainFactory.updateToken")
         if (remoteUserFactory.isSaved || remoteProjectFactory.isSharedSaved) throw SavedFactoryException()
 
-        deviceInfo.token = token
+        deviceInfo = deviceInfo.copy(token = token)
 
         remoteUserFactory.remoteUser.setToken(token)
-        remoteProjectFactory.updateToken(token)
+        remoteProjectFactory.updateDeviceInfo(deviceInfo)
 
         save(0, source)
     }

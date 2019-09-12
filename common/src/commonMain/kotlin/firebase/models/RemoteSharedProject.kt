@@ -46,7 +46,7 @@ class RemoteSharedProject(
                 .map { RemoteTaskHierarchy(this, it) }
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
 
-        updateUserInfo(deviceInfo.key, uuid, deviceInfo.token)
+        updateUserInfo(deviceInfo, uuid)
     }
 
     private fun addUser(remoteRootUser: RemoteRootUser) {
@@ -67,12 +67,12 @@ class RemoteSharedProject(
         remoteUsers.remove(id)
     }
 
-    fun updateUserInfo(key: String, uuid: String, token: String?) {
-        check(remoteUsers.containsKey(key))
+    fun updateUserInfo(deviceInfo: DeviceInfo, uuid: String) {
+        check(remoteUsers.containsKey(deviceInfo.key))
 
-        val remoteProjectUser = remoteUsers[key]!!
+        val remoteProjectUser = remoteUsers[deviceInfo.key]!!
 
-        remoteProjectUser.setToken(token, uuid)
+        remoteProjectUser.setToken(deviceInfo.token, uuid)
     }
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) {

@@ -190,7 +190,7 @@ class RemoteProjectFactory(
         return getRemoteProjectIfPresent(taskKey)?.getRemoteTaskIfPresent(taskKey.remoteTaskId)
     }
 
-    fun updateToken(token: String?) = remoteSharedProjects.values.forEach { it.updateUserInfo(deviceInfo.key, uuid, token) }
+    fun updateDeviceInfo(deviceInfo: DeviceInfo) = remoteSharedProjects.values.forEach { it.updateUserInfo(deviceInfo, uuid) }
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }
 

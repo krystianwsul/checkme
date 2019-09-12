@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.domain
 
 import com.krystianwsul.checkme.firebase.models.RemoteProject
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord // todo js
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceData
@@ -269,7 +268,7 @@ abstract class Instance(protected val shownFactory: ShownFactory) {
                 scheduleDay: Int,
                 scheduleCustomTimeId: RemoteCustomTimeId?,
                 scheduleHour: Int?,
-                scheduleMinute: Int?): InstanceShownRecord?
+                scheduleMinute: Int?): Shown?
 
         fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
             val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time

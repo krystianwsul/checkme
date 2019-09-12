@@ -230,7 +230,7 @@ abstract class Task {
 
     fun getInstances(givenStartExactTimeStamp: ExactTimeStamp?, givenEndExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
         val startExactTimeStamp = listOfNotNull(
-                givenEndExactTimeStamp,
+                givenStartExactTimeStamp,
                 startExactTimeStamp,
                 getOldestVisible()?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) } // 24 hack
         ).max()!!

@@ -47,7 +47,7 @@ class DomainFactory(
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
         userSnapshot: DataSnapshot,
-        friendSnapshot: DataSnapshot) : RemotePrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
+        friendSnapshot: DataSnapshot) : CustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
 
     companion object {
 
@@ -1749,13 +1749,13 @@ class DomainFactory(
 
         val customTime = remoteProjectFactory.remotePrivateProject.getRemoteCustomTime(customTimeId)
 
-        customTime.name = name
+        customTime.setName(this, name)
 
         for (dayOfWeek in DayOfWeek.values()) {
             val hourMinute = hourMinutes.getValue(dayOfWeek)
 
             if (hourMinute != customTime.getHourMinute(dayOfWeek))
-                customTime.setHourMinute(dayOfWeek, hourMinute)
+                customTime.setHourMinute(this, dayOfWeek, hourMinute)
         }
 
         save(dataId, source)

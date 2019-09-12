@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
+import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.common.firebase.records.RemotePrivateCustomTimeRecord
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -7,9 +8,10 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemotePrivateCustomTime(
-        private val allRecordsSource: AllRecordsSource,
+        private val allRecordsSource: CustomTime.AllRecordsSource,
         override val remoteProject: RemotePrivateProject,
-        override val remoteCustomTimeRecord: RemotePrivateCustomTimeRecord) : RemoteCustomTime<RemoteCustomTimeId.Private>() {
+        override val remoteCustomTimeRecord: RemotePrivateCustomTimeRecord
+) : RemoteCustomTime<RemoteCustomTimeId.Private>() {
 
     override val id = remoteCustomTimeRecord.id
 
@@ -17,7 +19,7 @@ class RemotePrivateCustomTime(
 
     override val allRecords
         get() = allRecordsSource.getSharedCustomTimes(id)
-                .map { it.remoteCustomTimeRecord }
+                .map { (it as RemoteCustomTime<*>).remoteCustomTimeRecord }
                 .toMutableList<RemoteCustomTimeRecord<*>>()
                 .apply { add(remoteCustomTimeRecord) }
 
@@ -43,10 +45,5 @@ class RemotePrivateCustomTime(
         remoteProject.deleteCustomTime(this)
 
         remoteCustomTimeRecord.delete()
-    }
-
-    interface AllRecordsSource { // todo js replace with per-method interface
-
-        fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private): List<RemoteSharedCustomTime>
     }
 }

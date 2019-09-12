@@ -13,15 +13,11 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
 
     abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord<T>
 
-    protected abstract val allRecords: List<RemoteCustomTimeRecord<*>>
+    protected abstract val allRecords: List<RemoteCustomTimeRecord<*>> // todo js
 
     abstract val id: T
 
-    override var name
-        get() = remoteCustomTimeRecord.name
-        set(value) {
-            allRecords.forEach { it.name = value }
-        }
+    override val name get() = remoteCustomTimeRecord.name
 
     override val hourMinutes
         get() = DayOfWeek.values()
@@ -46,5 +42,11 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
 
     abstract fun delete()
 
-    override fun setHourMinute(dayOfWeek: DayOfWeek, hourMinute: HourMinute) = allRecords.forEach { it.setHourMinute(dayOfWeek, hourMinute) }
+    override fun setHourMinute(
+            allRecordsSource: CustomTime.AllRecordsSource,
+            dayOfWeek: DayOfWeek,
+            hourMinute: HourMinute
+    ) = allRecords.forEach { it.setHourMinute(dayOfWeek, hourMinute) }
+
+    override fun setName(allRecordsSource: CustomTime.AllRecordsSource, name: String) = allRecords.forEach { it.name = name }
 }

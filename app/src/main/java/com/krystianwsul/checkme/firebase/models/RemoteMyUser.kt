@@ -1,6 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.common.firebase.RemoteMyUserInterface // todo js
+import com.krystianwsul.common.firebase.RemoteMyUserInterface
 import com.krystianwsul.common.firebase.records.RemoteMyUserRecord
 
 

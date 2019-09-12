@@ -2,22 +2,20 @@ package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.TaskHierarchyContainer
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory // todo js
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
-import java.util.* // todo js
+import java.util.*
 
 class RemoteSharedProject(
-        remoteProjectFactory: RemoteProjectFactory,
         shownFactory: Instance.ShownFactory,
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         deviceInfo: DeviceInfo,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(shownFactory, remoteProjectFactory, uuid) {
+        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(shownFactory, uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values

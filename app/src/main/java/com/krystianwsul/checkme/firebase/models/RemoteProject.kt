@@ -17,7 +17,6 @@ import com.krystianwsul.common.utils.TaskKey
 
 abstract class RemoteProject<T : RemoteCustomTimeId>(
         protected val shownFactory: Instance.ShownFactory,
-        private val parent: Parent,
         val uuid: String
 ) {
 
@@ -216,7 +215,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         return remoteTaskHierarchyContainer.getByParentTaskKey(parentTaskKey)
     }
 
-    fun delete() {
+    fun delete(parent: Parent) {
         parent.deleteProject(this)
 
         remoteProjectRecord.delete()
@@ -283,7 +282,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     private class MissingTaskException(projectId: String, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")
 
-    interface Parent { // todo js replace with per-method interface
+    interface Parent {
 
         fun deleteProject(remoteProject: RemoteProject<*>)
     }

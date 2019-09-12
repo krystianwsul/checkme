@@ -294,12 +294,12 @@ class RemoteTask<T : RemoteCustomTimeId>(
         }
     }
 
-    interface ScheduleTextFactory { // todo js replace with per-method interface
+    interface ScheduleTextFactory {
 
         fun getScheduleText(scheduleGroup: ScheduleGroup, remoteProject: RemoteProject<*>): String
     }
 
-    interface ProjectUpdater { // todo js replace with per-method interface
+    interface ProjectUpdater {
 
         fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*>
     }

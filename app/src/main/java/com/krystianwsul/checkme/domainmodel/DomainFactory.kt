@@ -2423,7 +2423,7 @@ class DomainFactory(
 
         val irrelevantRemoteProjects = ArrayList(remoteProjects)
         irrelevantRemoteProjects.removeAll(relevantRemoteProjects)
-        irrelevantRemoteProjects.forEach { it.delete() }
+        irrelevantRemoteProjects.forEach { it.delete(remoteProjectFactory) }
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
                 .toMutableList()

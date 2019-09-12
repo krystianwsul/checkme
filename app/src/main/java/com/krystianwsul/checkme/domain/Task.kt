@@ -283,7 +283,7 @@ abstract class Task {
 
     abstract fun setName(name: String, note: String?)
 
-    fun updateSchedules(scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
+    fun updateSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
         val removeSchedules = ArrayList<Schedule>()
         val addScheduleDatas = ArrayList(scheduleDatas)
 
@@ -301,10 +301,10 @@ abstract class Task {
         removeSchedules.forEach { it.setEndExactTimeStamp(now) }
 
         if (addScheduleDatas.isNotEmpty())
-            addSchedules(addScheduleDatas, now)
+            addSchedules(ownerKey, addScheduleDatas, now)
     }
 
-    protected abstract fun addSchedules(scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp)
+    protected abstract fun addSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp)
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp)
 

@@ -96,7 +96,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         this.shown = shown
     }
 
-    override fun setInstanceDateTime(dateTime: DateTime, now: ExactTimeStamp) {
+    override fun setInstanceDateTime(ownerKey: String, dateTime: DateTime, now: ExactTimeStamp) {
         check(isRootInstance(now))
 
         createInstanceHierarchy(now)
@@ -104,7 +104,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         (instanceData as RemoteReal).instanceRecord.let {
             it.instanceDate = dateTime.date
 
-            it.instanceJsonTime = project.getOrCopyTime(dateTime.time).let {
+            it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
                 @Suppress("UNCHECKED_CAST")
                 when (it) {
                     is CustomTime -> JsonTime.Custom(it.customTimeKey.remoteCustomTimeId as T)

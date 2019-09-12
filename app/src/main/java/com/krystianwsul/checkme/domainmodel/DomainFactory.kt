@@ -936,7 +936,7 @@ class DomainFactory(
 
         val instances = instanceKeys.map(this::getInstance)
 
-        instances.forEach { it.setInstanceDateTime(DateTime(instanceDate, getTime(instanceTimePair)), now) }
+        instances.forEach { it.setInstanceDateTime(ownerKey, DateTime(instanceDate, getTime(instanceTimePair)), now) }
 
         val remoteProjects = instances
                 .filter { it.belongsToRemoteProject() }
@@ -964,7 +964,7 @@ class DomainFactory(
         val date = Date(calendar.toDateTimeTz())
         val hourMinute = HourMinute(calendar.toDateTimeTz())
 
-        instance.setInstanceDateTime(DateTime(date, NormalTime(hourMinute)), now)
+        instance.setInstanceDateTime(ownerKey, DateTime(date, NormalTime(hourMinute)), now)
         instance.notificationShown = false
 
         updateNotifications(now, sourceName = "setInstanceAddHourService ${instance.name}")
@@ -989,7 +989,7 @@ class DomainFactory(
 
         val instanceDateTimes = instances.associate { it.instanceKey to it.instanceDateTime }
 
-        instances.forEach { it.setInstanceDateTime(DateTime(date, NormalTime(hourMinute)), now) }
+        instances.forEach { it.setInstanceDateTime(ownerKey, DateTime(date, NormalTime(hourMinute)), now) }
 
         updateNotifications(now)
 
@@ -1012,7 +1012,7 @@ class DomainFactory(
         val pairs = hourUndoData.instanceDateTimes.map { (instanceKey, instanceDateTime) -> Pair(getInstance(instanceKey), instanceDateTime) }
 
         pairs.forEach { (instance, instanceDateTime) ->
-            instance.setInstanceDateTime(instanceDateTime, now)
+            instance.setInstanceDateTime(ownerKey, instanceDateTime, now)
         }
 
         updateNotifications(now)
@@ -1212,7 +1212,7 @@ class DomainFactory(
         if (!task.isRootTask(now))
             task.getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
 
-        task.updateSchedules(scheduleDatas.map { it to getTime(it.timePair) }, now)
+        task.updateSchedules(ownerKey, scheduleDatas.map { it to getTime(it.timePair) }, now)
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
@@ -2192,6 +2192,8 @@ class DomainFactory(
                 .toMap()
     }
 
+    private val ownerKey get() = remoteProjectFactory.remotePrivateProject.id
+
     override fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*> {
         check(projectId.isNotEmpty())
 
@@ -2202,7 +2204,7 @@ class DomainFactory(
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
-            val remoteTask = remoteProject.copyTask(pair.first, pair.second, now)
+            val remoteTask = remoteProject.copyTask(ownerKey, pair.first, pair.second, now)
             remoteToRemoteConversion.endTasks[pair.first.id] = remoteTask
         }
 
@@ -2309,7 +2311,7 @@ class DomainFactory(
                         childTask.image)
             }
 
-    private fun setIrrelevant(now: ExactTimeStamp) { // todo move to class, iterate over projects, don't use factories
+    private fun setIrrelevant(now: ExactTimeStamp) { // todo js move to class, iterate over projects, don't use factories
         val tasks = getTasks()
 
         for (task in tasks)

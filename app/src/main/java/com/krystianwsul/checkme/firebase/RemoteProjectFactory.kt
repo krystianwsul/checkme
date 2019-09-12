@@ -36,7 +36,7 @@ class RemoteProjectFactory(
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .map { RemoteSharedProject(this, domainFactory, it, deviceInfo, uuid, now) }
+            .map { RemoteSharedProject(this, domainFactory.localFactory, it, deviceInfo, uuid, now) }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -95,13 +95,13 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteSharedProjectManager.addChild(childEvent.dataSnapshot())
 
                 check(!remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(this, domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(this, domainFactory.localFactory, remoteProjectRecord, deviceInfo, uuid, now)
             }
             is ChildChangeEvent -> {
                 val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(this, domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(this, domainFactory.localFactory, remoteProjectRecord, deviceInfo, uuid, now)
             }
             is ChildRemoveEvent -> {
                 val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
@@ -119,7 +119,7 @@ class RemoteProjectFactory(
     }
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<Pair<ScheduleData, Time>>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
-        createSchedules(now, scheduleDatas)
+        createSchedules(remotePrivateProject.id, now, scheduleDatas)
     }
 
     fun createRemoteTaskHelper(now: ExactTimeStamp, name: String, note: String?, projectId: String, imageUuid: String?): RemoteTask<*> {
@@ -142,7 +142,7 @@ class RemoteProjectFactory(
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteSharedProject(this, domainFactory, remoteProjectRecord, deviceInfo, uuid, now)
+        val remoteProject = RemoteSharedProject(this, domainFactory.localFactory, remoteProjectRecord, deviceInfo, uuid, now)
 
         check(!remoteProjects.containsKey(remoteProject.id))
 

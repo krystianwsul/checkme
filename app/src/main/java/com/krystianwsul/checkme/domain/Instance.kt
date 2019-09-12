@@ -1,7 +1,7 @@
 package com.krystianwsul.checkme.domain
 
 import com.krystianwsul.checkme.firebase.models.RemoteProject
-import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord
+import com.krystianwsul.checkme.persistencemodel.InstanceShownRecord // todo js
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.InstanceData
@@ -140,7 +140,7 @@ abstract class Instance(protected val shownFactory: ShownFactory) {
 
     fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
-    abstract fun setInstanceDateTime(dateTime: DateTime, now: ExactTimeStamp)
+    abstract fun setInstanceDateTime(ownerKey: String, dateTime: DateTime, now: ExactTimeStamp)
 
     fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *, *> {
         (instanceData as? InstanceData.Real)?.let {

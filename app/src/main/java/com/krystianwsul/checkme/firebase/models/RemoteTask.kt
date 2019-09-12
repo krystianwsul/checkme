@@ -128,7 +128,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         remoteTaskRecord.note = note
     }
 
-    override fun addSchedules(scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) = createSchedules(now, scheduleDatas)
+    override fun addSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) = createSchedules(ownerKey, now, scheduleDatas)
 
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
         check(childTask is RemoteTask<*>)
@@ -181,9 +181,9 @@ class RemoteTask<T : RemoteCustomTimeId>(
                 ?: generateInstance(scheduleDateTime, shownFactory.getShown(taskKey, scheduleDateTime))
     }
 
-    fun createSchedules(now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
+    fun createSchedules(ownerKey: String, now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
         for ((scheduleData, time) in scheduleDatas) {
-            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(time)
+            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(ownerKey, time)
 
             when (scheduleData) {
                 is ScheduleData.Single -> {
@@ -218,9 +218,9 @@ class RemoteTask<T : RemoteCustomTimeId>(
         }
     }
 
-    fun copySchedules(now: ExactTimeStamp, schedules: Collection<Schedule>) {
+    fun copySchedules(ownerKey: String, now: ExactTimeStamp, schedules: Collection<Schedule>) {
         for (schedule in schedules) {
-            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(schedule.time)
+            val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(ownerKey, schedule.time)
 
             when (schedule) {
                 is SingleSchedule -> {
@@ -294,12 +294,12 @@ class RemoteTask<T : RemoteCustomTimeId>(
         }
     }
 
-    interface ScheduleTextFactory {
+    interface ScheduleTextFactory { // todo js replace with per-method interface
 
         fun getScheduleText(scheduleGroup: ScheduleGroup, remoteProject: RemoteProject<*>): String
     }
 
-    interface ProjectUpdater {
+    interface ProjectUpdater { // todo js replace with per-method interface
 
         fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*>
     }

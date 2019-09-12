@@ -1,14 +1,14 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.TaskHierarchyContainer
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory // todo js
+import com.krystianwsul.checkme.firebase.RemoteProjectFactory // todo js
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
-import java.util.*
+import java.util.* // todo js
 
 class RemotePrivateProject(
         remoteProjectFactory: RemoteProjectFactory,
@@ -71,7 +71,7 @@ class RemotePrivateProject(
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
 
-    override fun getOrCreateCustomTime(remoteCustomTime: RemoteCustomTime<*>) = when (remoteCustomTime) {
+    override fun getOrCreateCustomTime(ownerKey: String, remoteCustomTime: RemoteCustomTime<*>) = when (remoteCustomTime) {
         is RemotePrivateCustomTime -> remoteCustomTime
         is RemoteSharedCustomTime -> {
             if (remoteCustomTime.ownerKey == id) {

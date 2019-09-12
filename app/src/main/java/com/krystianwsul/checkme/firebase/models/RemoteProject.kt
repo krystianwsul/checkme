@@ -70,7 +70,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         remoteTaskHierarchyContainer.add(remoteTaskHierarchy.id, remoteTaskHierarchy)
     }
 
-    fun copyTask(task: Task, instances: Collection<Instance>, now: ExactTimeStamp): RemoteTask<T> {
+    fun copyTask(ownerKey: String, task: Task, instances: Collection<Instance>, now: ExactTimeStamp): RemoteTask<T> {
         val endTime = task.getEndExactTimeStamp()?.long
 
         val oldestVisible = task.getOldestVisible()
@@ -79,7 +79,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         val oldestVisibleDay = oldestVisible?.day
 
         val instanceJsons = instances.associate {
-            val instanceJson = getInstanceJson(it)
+            val instanceJson = getInstanceJson(ownerKey, it)
             val scheduleKey = it.scheduleKey
 
             RemoteInstanceRecord.scheduleKeyToString(scheduleKey) to instanceJson
@@ -105,35 +105,35 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
         remoteTasks[remoteTask.id] = remoteTask
 
-        remoteTask.copySchedules(now, task.getCurrentSchedules(now))
+        remoteTask.copySchedules(ownerKey, now, task.getCurrentSchedules(now))
 
         return remoteTask
     }
 
-    abstract fun getOrCreateCustomTime(remoteCustomTime: RemoteCustomTime<*>): RemoteCustomTime<T>
+    abstract fun getOrCreateCustomTime(ownerKey: String, remoteCustomTime: RemoteCustomTime<*>): RemoteCustomTime<T>
 
-    fun getOrCopyTime(time: Time) = time.let {
+    fun getOrCopyTime(ownerKey: String, time: Time) = time.let {
         when (it) {
-            is CustomTime -> getOrCreateCustomTime(it as RemoteCustomTime<*>)
+            is CustomTime -> getOrCreateCustomTime(ownerKey, it as RemoteCustomTime<*>)
             is NormalTime -> it
             else -> throw IllegalArgumentException()
         }
     }
 
-    fun getOrCopyAndDestructureTime(time: Time) = when (val newTime = getOrCopyTime(time)) {
+    fun getOrCopyAndDestructureTime(ownerKey: String, time: Time) = when (val newTime = getOrCopyTime(ownerKey, time)) {
         is CustomTime -> Triple(newTime.customTimeKey.remoteCustomTimeId, null, null)
         is NormalTime -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
         else -> throw java.lang.IllegalArgumentException()
     }
 
-    private fun getInstanceJson(instance: Instance): InstanceJson {
+    private fun getInstanceJson(ownerKey: String, instance: Instance): InstanceJson {
         val done = instance.done?.long
 
         val instanceDate = instance.instanceDate
 
         val newInstanceTime = instance.instanceTime.let {
             when (it) {
-                is CustomTime -> getOrCreateCustomTime(it as RemoteCustomTime<*>)
+                is CustomTime -> getOrCreateCustomTime(ownerKey, it as RemoteCustomTime<*>)
                 is NormalTime -> it
                 else -> throw IllegalArgumentException()
             }
@@ -283,7 +283,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
 
     private class MissingTaskException(projectId: String, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")
 
-    interface Parent {
+    interface Parent { // todo js replace with per-method interface
 
         fun deleteProject(remoteProject: RemoteProject<*>)
     }

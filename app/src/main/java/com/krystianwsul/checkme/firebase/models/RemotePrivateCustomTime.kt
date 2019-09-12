@@ -45,7 +45,7 @@ class RemotePrivateCustomTime(
         remoteCustomTimeRecord.delete()
     }
 
-    interface AllRecordsSource {
+    interface AllRecordsSource { // todo js replace with per-method interface
 
         fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private): List<RemoteSharedCustomTime>
     }

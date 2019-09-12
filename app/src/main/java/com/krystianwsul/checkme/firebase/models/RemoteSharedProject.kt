@@ -1,23 +1,23 @@
 package com.krystianwsul.checkme.firebase.models
 
+import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.TaskHierarchyContainer
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory
+import com.krystianwsul.checkme.firebase.RemoteProjectFactory // todo js
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
-import java.util.*
+import java.util.* // todo js
 
 class RemoteSharedProject(
         remoteProjectFactory: RemoteProjectFactory,
-        private val domainFactory: DomainFactory,
+        shownFactory: Instance.ShownFactory,
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         deviceInfo: DeviceInfo,
         uuid: String,
-        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(domainFactory.localFactory, remoteProjectFactory, uuid) {
+        now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Shared>(shownFactory, remoteProjectFactory, uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -134,7 +134,7 @@ class RemoteSharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(remoteCustomTime: RemoteCustomTime<*>): RemoteSharedCustomTime {
+    override fun getOrCreateCustomTime(ownerKey: String, remoteCustomTime: RemoteCustomTime<*>): RemoteSharedCustomTime {
         fun copy(): RemoteSharedCustomTime {
             val private = remoteCustomTime as? RemotePrivateCustomTime
 
@@ -162,7 +162,7 @@ class RemoteSharedProject(
         }
 
         return when (remoteCustomTime) {
-            is RemotePrivateCustomTime -> getSharedTimeIfPresent(remoteCustomTime.id, domainFactory.remoteProjectFactory.remotePrivateProject.id)
+            is RemotePrivateCustomTime -> getSharedTimeIfPresent(remoteCustomTime.id, ownerKey)
             is RemoteSharedCustomTime -> remoteCustomTime.takeIf { it.projectId == id }
             else -> throw IllegalArgumentException()
         } ?: copy()

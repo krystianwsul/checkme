@@ -11,6 +11,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
@@ -45,6 +46,8 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(val uuid: String) {
     abstract val customTimes: Collection<RemoteCustomTime<T>>
 
     val taskHierarchies get() = remoteTaskHierarchyContainer.all
+
+    val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
     fun newRemoteTask(taskJson: TaskJson): RemoteTask<T> {
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
@@ -280,6 +283,42 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(val uuid: String) {
         it.existingInstances
                 .values
                 .forEach { it.fixNotificationShown(shownFactory, now) }
+    }
+
+    fun getRootInstances(startExactTimeStamp: ExactTimeStamp?, endExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
+        check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
+
+        val allInstances = HashMap<InstanceKey, Instance>()
+
+        for (instance in existingInstances) {
+            val instanceExactTimeStamp = instance.instanceDateTime
+                    .timeStamp
+                    .toExactTimeStamp()
+
+            if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
+                continue
+
+            if (endExactTimeStamp <= instanceExactTimeStamp)
+                continue
+
+            allInstances[instance.instanceKey] = instance
+        }
+
+        tasks.forEach { task ->
+            for (instance in task.getInstances(startExactTimeStamp, endExactTimeStamp, now)) {
+                val instanceExactTimeStamp = instance.instanceDateTime.timeStamp.toExactTimeStamp()
+
+                if (startExactTimeStamp != null && startExactTimeStamp > instanceExactTimeStamp)
+                    continue
+
+                if (endExactTimeStamp <= instanceExactTimeStamp)
+                    continue
+
+                allInstances[instance.instanceKey] = instance
+            }
+        }
+
+        return allInstances.values.filter { it.isRootInstance(now) && it.isVisible(now, true) }
     }
 
     private class MissingTaskException(projectId: String, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")

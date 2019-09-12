@@ -71,9 +71,7 @@ class RemoteProjectFactory(
                 .sum()
 
     val existingInstances
-        get() = remoteProjects.values
-                .flatMap { it.tasks }
-                .flatMap { it.existingInstances.values }
+        get() = remoteProjects.values.flatMap { it.existingInstances }
 
     val taskKeys
         get() = remoteProjects.values

@@ -79,7 +79,7 @@ object ImageManager {
         }
 
         fun prefetch(tasks: List<Task>, callback: () -> Unit) {
-            val tasksWithImages = tasks.filter { it.image?.uuid != null }.associateBy { it.image!!.uuid!! }
+            val tasksWithImages = tasks.filter { it.getImage()?.uuid != null }.associateBy { it.getImage()!!.uuid!! }
 
             val taskUuids = tasksWithImages.keys
             val presentUuids = imageStates.keys
@@ -111,7 +111,7 @@ object ImageManager {
             val tasksToDownload = imagesToDownload.map { it to tasksWithImages.getValue(it) }
 
             imageStates.putAll(tasksToDownload.map { (uuid, task) ->
-                val target = task.image!!
+                val target = task.getImage()!!
                         .toImageLoader()
                         .requestBuilder!!
                         .circle(circle)

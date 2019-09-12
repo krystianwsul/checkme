@@ -37,7 +37,9 @@ abstract class Task {
 
     abstract val imageJson: TaskJson.Image?
 
-    abstract var image: ImageState?
+    abstract fun getImage(): ImageState?
+
+    abstract fun setImage(imageState: ImageState?)
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {
         val startExactTimeStamp = startExactTimeStamp

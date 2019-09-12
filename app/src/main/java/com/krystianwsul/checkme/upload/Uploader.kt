@@ -25,7 +25,7 @@ object Uploader {
 
         val task = DomainFactory.instance.getTaskForce(taskKey)
 
-        check(task.image == ImageState.Local(uuid))
+        check(task.getImage() == ImageState.Local(uuid))
 
         val entry = Queue.addEntry(taskKey, uuid, pair.first, pair.second)
 
@@ -69,7 +69,7 @@ object Uploader {
                         val task = domainFactory.getTaskIfPresent(entry.taskKey)
                                 ?: return@forEach
 
-                        if (task.image != ImageState.Local(entry.uuid))
+                        if (task.getImage() != ImageState.Local(entry.uuid))
                             return@forEach
 
                         Log.e("asdf", "image upload start")

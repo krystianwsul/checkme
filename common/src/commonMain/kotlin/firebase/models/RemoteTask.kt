@@ -49,27 +49,27 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override val imageJson get() = remoteTaskRecord.image
 
-    override var image: ImageState?
-        get() {
-            val image = remoteTaskRecord.image ?: return null
+    override fun getImage(): ImageState? {
+        val image = remoteTaskRecord.image ?: return null
 
-            return if (image.uploaderUuid != null) {
-                if (image.uploaderUuid == uuid)
-                    ImageState.Local(image.imageUuid)
-                else
-                    ImageState.Uploading
-            } else {
-                ImageState.Remote(image.imageUuid)
-            }
+        return if (image.uploaderUuid != null) {
+            if (image.uploaderUuid == uuid)
+                ImageState.Local(image.imageUuid)
+            else
+                ImageState.Uploading
+        } else {
+            ImageState.Remote(image.imageUuid)
         }
-        set(value) {
-            remoteTaskRecord.image = when (value) {
-                null -> null
-                is ImageState.Remote -> TaskJson.Image(value.uuid)
-                is ImageState.Local -> TaskJson.Image(value.uuid, uuid)
-                is ImageState.Uploading -> throw IllegalArgumentException()
-            }
+    }
+
+    override fun setImage(imageState: ImageState?) {
+        remoteTaskRecord.image = when (imageState) {
+            null -> null
+            is ImageState.Remote -> TaskJson.Image(imageState.uuid)
+            is ImageState.Local -> TaskJson.Image(imageState.uuid, uuid)
+            is ImageState.Uploading -> throw IllegalArgumentException()
         }
+    }
 
     init {
         remoteSchedules.addAll(remoteTaskRecord.remoteSingleScheduleRecords

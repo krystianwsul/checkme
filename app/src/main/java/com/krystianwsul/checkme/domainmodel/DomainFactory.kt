@@ -514,7 +514,7 @@ class DomainFactory(
                                 getGroupListChildTaskDatas(it, now),
                                 it.startExactTimeStamp,
                                 it.note,
-                                it.image)
+                                it.getImage())
                     }
                     .toList()
         } else {
@@ -545,7 +545,7 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.image)
+                    task.getImage())
 
             children.values.forEach { it.instanceDataParent = instanceData }
             instanceDatas[instanceData.instanceKey] = instanceData
@@ -619,7 +619,7 @@ class DomainFactory(
                     hierarchyData,
                     it.ordinal,
                     it.getNotificationShown(localFactory),
-                    task.image)
+                    task.getImage())
         }.toMutableMap()
 
         return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(
@@ -668,7 +668,7 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.image)
+                    task.getImage())
 
             children.values.forEach { it.instanceDataParent = instanceData }
             instance.instanceKey to instanceData
@@ -758,7 +758,13 @@ class DomainFactory(
 
             val projectName = task.project.name
 
-            taskData = CreateTaskViewModel.TaskData(task.name, parentKey, scheduleDataWrappers, task.note, projectName, task.image)
+            taskData = CreateTaskViewModel.TaskData(
+                    task.name,
+                    parentKey,
+                    scheduleDataWrappers,
+                    task.note,
+                    projectName,
+                    task.getImage())
 
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             check(checkHintPresent(parentTreeDatas))
@@ -808,7 +814,7 @@ class DomainFactory(
                             childTask.startExactTimeStamp,
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
-                            childTask.image,
+                            childTask.getImage(),
                             childTask.current(now),
                             childTask.hasInstances(now),
                             true)
@@ -821,7 +827,7 @@ class DomainFactory(
                 task.getScheduleTextMultiline(ScheduleText, hierarchyTimeStamp),
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
                 task.hasInstances(now),
-                task.image,
+                task.getImage(),
                 task.current(now))
     }
 
@@ -845,7 +851,7 @@ class DomainFactory(
                             task.startExactTimeStamp,
                             task.taskKey,
                             null,
-                            task.image,
+                            task.getImage(),
                             task.current(now),
                             task.hasInstances(now),
                             false)
@@ -1221,7 +1227,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
-            task.image = imageUuid?.let { ImageState.Local(imageUuid) }
+            task.setImage(imageUuid?.let { ImageState.Local(imageUuid) })
 
         updateNotifications(now)
 
@@ -1397,7 +1403,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
-            task.image = imageUuid?.let { ImageState.Local(imageUuid) }
+            task.setImage(imageUuid?.let { ImageState.Local(imageUuid) })
 
         updateNotifications(now)
 
@@ -1545,7 +1551,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
-            task.image = imageUuid?.let { ImageState.Local(imageUuid) }
+            task.setImage(imageUuid?.let { ImageState.Local(imageUuid) })
 
         updateNotifications(now)
 
@@ -1954,10 +1960,10 @@ class DomainFactory(
 
         val task = getTaskIfPresent(taskKey) ?: return
 
-        if (task.image != ImageState.Local(imageUuid))
+        if (task.getImage() != ImageState.Local(imageUuid))
             return
 
-        task.image = ImageState.Remote(imageUuid)
+        task.setImage(ImageState.Remote(imageUuid))
 
         save(0, source)
 
@@ -2045,7 +2051,7 @@ class DomainFactory(
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                             childInstance.ordinal,
                             childInstance.getNotificationShown(localFactory),
-                            childTask.image)
+                            childTask.getImage())
 
                     children.values.forEach { it.instanceDataParent = instanceData }
                     childInstance.instanceKey to instanceData
@@ -2261,7 +2267,7 @@ class DomainFactory(
                             childTask.startExactTimeStamp,
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
-                            childTask.image,
+                            childTask.getImage(),
                             childTask.current(now),
                             childTask.hasInstances(now),
                             alwaysShow)
@@ -2281,7 +2287,7 @@ class DomainFactory(
                         getGroupListChildTaskDatas(childTask, now),
                         childTask.startExactTimeStamp,
                         childTask.note,
-                        childTask.image)
+                        childTask.getImage())
             }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
@@ -2546,7 +2552,7 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.image)
+                    task.getImage())
 
             children.values.forEach { it.instanceDataParent = instanceData }
             instanceDatas[instance.instanceKey] = instanceData
@@ -2589,7 +2595,7 @@ class DomainFactory(
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                             childInstance.ordinal,
                             childInstance.getNotificationShown(localFactory),
-                            childTask.image)
+                            childTask.getImage())
 
                     children.values.forEach { it.instanceDataParent = instanceData }
                     childInstance.instanceKey to instanceData
@@ -2603,7 +2609,7 @@ class DomainFactory(
                 listOf(),
                 task.note,
                 instanceDatas,
-                task.image)
+                task.getImage())
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 
@@ -2619,7 +2625,7 @@ class DomainFactory(
 
         copiedTask.getChildTaskHierarchies(now).forEach {
             val copiedChildTask = it.childTask
-            copiedChildTask.image?.let { check(it is ImageState.Remote) }
+            copiedChildTask.getImage()?.let { check(it is ImageState.Remote) }
 
             createChildTask(now, task, copiedChildTask.name, copiedChildTask.note, copiedChildTask.imageJson, copiedChildTask.taskKey)
         }

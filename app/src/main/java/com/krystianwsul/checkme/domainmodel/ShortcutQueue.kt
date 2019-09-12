@@ -61,6 +61,6 @@ object ShortcutQueue {
 
         val taskKey = task.taskKey
         val name = task.name
-        val uuid = task.image?.uuid
+        val uuid = task.getImage()?.uuid
     }
 }

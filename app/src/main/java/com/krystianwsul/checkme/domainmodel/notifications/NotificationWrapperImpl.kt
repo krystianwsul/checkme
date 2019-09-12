@@ -419,12 +419,25 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     protected inner class InstanceData(instance: Instance, now: ExactTimeStamp, val silent: Boolean) {
 
         val notificationId = instance.notificationId
+
         val instanceKey = instance.instanceKey
+
         val note = instance.task.note
-        val uuid = instance.task.image?.uuid
-        val timeStampLong = instance.instanceDateTime.timeStamp.long
-        val startExactTimeStamp = instance.task.startExactTimeStamp.toString()
+
+        val uuid = instance.task
+                .getImage()
+                ?.uuid
+
+        val timeStampLong = instance.instanceDateTime
+                .timeStamp
+                .long
+
+        val startExactTimeStamp = instance.task
+                .startExactTimeStamp
+                .toString()
+
         val name = instance.name
+
         val childNames = getChildNames(instance, now)
     }
 }

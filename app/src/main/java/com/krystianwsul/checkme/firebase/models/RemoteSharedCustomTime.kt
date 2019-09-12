@@ -16,8 +16,6 @@ class RemoteSharedCustomTime(
     val ownerKey get() = remoteCustomTimeRecord.ownerKey
     val privateKey get() = remoteCustomTimeRecord.privateKey
 
-    override val allRecords = listOf(remoteCustomTimeRecord)
-
     override fun delete() {
         remoteProject.deleteCustomTime(this)
 

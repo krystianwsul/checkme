@@ -1,16 +1,16 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.TaskHierarchyContainer
-import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.DomainFactory // todo js
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.RemoteCustomTimeId
-import java.util.*
+import java.util.* // todo js
 
 class RemotePrivateProject(
-        private val domainFactory: DomainFactory,
+        domainFactory: DomainFactory,
         override val remoteProjectRecord: RemotePrivateProjectRecord,
         uuid: String,
         now: ExactTimeStamp) : RemoteProject<RemoteCustomTimeId.Private>(domainFactory.localFactory, uuid) {
@@ -24,7 +24,7 @@ class RemotePrivateProject(
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
             @Suppress("LeakingThis")
-            val remoteCustomTime = RemotePrivateCustomTime(domainFactory, this, remoteCustomTimeRecord)
+            val remoteCustomTime = RemotePrivateCustomTime(this, remoteCustomTimeRecord)
 
             remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
         }
@@ -46,7 +46,7 @@ class RemotePrivateProject(
     fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
-        val remoteCustomTime = RemotePrivateCustomTime(domainFactory, this, remoteCustomTimeRecord)
+        val remoteCustomTime = RemotePrivateCustomTime(this, remoteCustomTimeRecord)
 
         check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
 

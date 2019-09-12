@@ -167,7 +167,7 @@ abstract class Instance {
             val date = scheduleDate
 
             if (oldestVisible != null && date < oldestVisible) {
-                if (exists()) {
+                if (exists() && isRootInstance(now)) { // root because oldest visible now checked only for task's own schedules
                     task.correctOldestVisible(date) // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
                 } else {
                     return false

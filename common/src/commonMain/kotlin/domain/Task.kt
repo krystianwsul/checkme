@@ -178,7 +178,7 @@ abstract class Task {
         }
     }
 
-    fun getPastInstances(now: ExactTimeStamp): List<Instance> {
+    fun getPastRootInstances(now: ExactTimeStamp): List<Instance> {
         val allInstances = HashMap<InstanceKey, Instance>()
 
         allInstances.putAll(existingInstances
@@ -188,12 +188,14 @@ abstract class Task {
 
         allInstances.putAll(getInstances(null, now.plusOne(), now).associateBy { it.instanceKey })
 
-        return allInstances.values.toList()
+        return allInstances.values
+                .toList()
+                .filter { it.isRootInstance(now) }
     }
 
     fun updateOldestVisible(now: ExactTimeStamp) {
         // 24 hack
-        val instances = getPastInstances(now)
+        val instances = getPastRootInstances(now)
 
         val optional = instances.asSequence()
                 .filter { it.isVisible(now, true) }
@@ -219,7 +221,7 @@ abstract class Task {
 
         val message = "$name old oldest: $oldestVisible, new oldest: $date"
 
-        ErrorLogger.instance.logException(OldestVisibleException4(message))
+        ErrorLogger.instance.logException(OldestVisibleException5(message))
 
         setOldestVisible(date) // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
     }
@@ -227,19 +229,24 @@ abstract class Task {
     protected abstract fun setOldestVisible(date: Date)
 
     fun getInstances(givenStartExactTimeStamp: ExactTimeStamp?, givenEndExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
-        val correctedStartExactTimeStamp = givenStartExactTimeStamp
-                ?: getOldestVisible()?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) } // 24 hack
+        val startExactTimeStamp = listOfNotNull(
+                givenEndExactTimeStamp,
+                startExactTimeStamp,
+                getOldestVisible()?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) } // 24 hack
+        ).max()!!
 
-        val startExactTimeStamp = listOfNotNull(correctedStartExactTimeStamp, startExactTimeStamp).max()!!
-        val endExactTimeStamp = listOfNotNull(getEndExactTimeStamp(), givenEndExactTimeStamp).min()!!
+        val endExactTimeStamp = listOfNotNull(
+                getEndExactTimeStamp(),
+                givenEndExactTimeStamp
+        ).min()!!
 
-        if (startExactTimeStamp >= endExactTimeStamp)
-            return listOf()
-
-        val scheduleInstances = schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp) }
+        val scheduleInstances = if (startExactTimeStamp >= endExactTimeStamp)
+            listOf()
+        else
+            schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp) }
 
         val parentInstances = getParentTaskHierarchies().map { it.parentTask }
-                .flatMap { it.getInstances(startExactTimeStamp, endExactTimeStamp, now) }
+                .flatMap { it.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now) }
                 .flatMap { it.getChildInstances(now) }
                 .asSequence()
                 .map { it.first }
@@ -284,7 +291,7 @@ abstract class Task {
 
     abstract fun deleteSchedule(schedule: Schedule)
 
-    private class OldestVisibleException4(message: String) : Exception(message)
+    private class OldestVisibleException5(message: String) : Exception(message)
 
     abstract fun belongsToRemoteProject(): Boolean
 

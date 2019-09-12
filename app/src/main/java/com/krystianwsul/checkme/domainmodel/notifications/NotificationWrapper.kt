@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.domainmodel.notifications
 
 import android.os.Build
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
@@ -20,7 +21,7 @@ abstract class NotificationWrapper {
 
     abstract fun cancelNotification(id: Int)
 
-    abstract fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp)
+    abstract fun notifyInstance(deviceDbInfo: DeviceDbInfo, instance: Instance, silent: Boolean, now: ExactTimeStamp)
 
     abstract fun notifyGroup(instances: Collection<Instance>, silent: Boolean, now: ExactTimeStamp)
 

@@ -14,6 +14,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.circle
 import com.krystianwsul.checkme.utils.dpToPx
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.Task
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -46,7 +47,7 @@ object ImageManager {
     fun init() = downloaders.forEach { it.init() }
 
     @Synchronized
-    fun prefetch(tasks: List<Task>, callback: () -> Unit) = downloaders.forEach { it.prefetch(tasks, callback) }
+    fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task>, callback: () -> Unit) = downloaders.forEach { it.prefetch(deviceDbInfo, tasks, callback) }
 
     @Synchronized
     fun getLargeIcon(uuid: String?) = largeIconDownloader.getImage(uuid)
@@ -78,8 +79,10 @@ object ImageManager {
                     .subscribe()
         }
 
-        fun prefetch(tasks: List<Task>, callback: () -> Unit) {
-            val tasksWithImages = tasks.filter { it.getImage()?.uuid != null }.associateBy { it.getImage()!!.uuid!! }
+        fun prefetch(deviceDbInfo: DeviceDbInfo, tasks: List<Task>, callback: () -> Unit) {
+            val tasksWithImages = tasks.map { it to it.getImage(deviceDbInfo)?.uuid }
+                    .filter { it.second != null }
+                    .associate { it.second!! to it.first }
 
             val taskUuids = tasksWithImages.keys
             val presentUuids = imageStates.keys
@@ -111,7 +114,7 @@ object ImageManager {
             val tasksToDownload = imagesToDownload.map { it to tasksWithImages.getValue(it) }
 
             imageStates.putAll(tasksToDownload.map { (uuid, task) ->
-                val target = task.getImage()!!
+                val target = task.getImage(deviceDbInfo)!!
                         .toImageLoader()
                         .requestBuilder!!
                         .circle(circle)

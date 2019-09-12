@@ -1,5 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.domain.TaskHierarchy
@@ -45,15 +46,13 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override val project get() = remoteProject
 
-    private val uuid get() = remoteProject.uuid
-
     override val imageJson get() = remoteTaskRecord.image
 
-    override fun getImage(): ImageState? {
+    override fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
         val image = remoteTaskRecord.image ?: return null
 
         return if (image.uploaderUuid != null) {
-            if (image.uploaderUuid == uuid)
+            if (image.uploaderUuid == deviceDbInfo.uuid)
                 ImageState.Local(image.imageUuid)
             else
                 ImageState.Uploading
@@ -62,11 +61,11 @@ class RemoteTask<T : RemoteCustomTimeId>(
         }
     }
 
-    override fun setImage(imageState: ImageState?) {
+    override fun setImage(deviceDbInfo: DeviceDbInfo, imageState: ImageState?) {
         remoteTaskRecord.image = when (imageState) {
             null -> null
             is ImageState.Remote -> TaskJson.Image(imageState.uuid)
-            is ImageState.Local -> TaskJson.Image(imageState.uuid, uuid)
+            is ImageState.Local -> TaskJson.Image(imageState.uuid, deviceDbInfo.uuid)
             is ImageState.Uploading -> throw IllegalArgumentException()
         }
     }

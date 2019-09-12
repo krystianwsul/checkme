@@ -22,6 +22,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.notifications.*
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
@@ -62,12 +63,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.cancel(id)
     }
 
-    final override fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) { // consider queueing all notifications and group in a batch
-        val instanceData = getInstanceData(instance, silent, now)
+    final override fun notifyInstance(deviceDbInfo: DeviceDbInfo, instance: Instance, silent: Boolean, now: ExactTimeStamp) { // consider queueing all notifications and group in a batch
+        val instanceData = getInstanceData(deviceDbInfo, instance, silent, now)
         notificationRelay.accept { notifyInstanceHelper(instanceData) }
     }
 
-    protected open fun getInstanceData(instance: Instance, silent: Boolean, now: ExactTimeStamp): InstanceData {
+    protected open fun getInstanceData(deviceDbInfo: DeviceDbInfo, instance: Instance, silent: Boolean, now: ExactTimeStamp): InstanceData {
         val reallySilent = if (silent) {
             true
         } else {
@@ -79,7 +80,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         if (!reallySilent)
             lastNotificationBeeps[instance.instanceKey] = SystemClock.elapsedRealtime()
 
-        return InstanceData(instance, now, reallySilent)
+        return InstanceData(deviceDbInfo, instance, now, reallySilent)
     }
 
     private fun notifyInstanceHelper(instanceData: InstanceData) {
@@ -416,7 +417,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    protected inner class InstanceData(instance: Instance, now: ExactTimeStamp, val silent: Boolean) {
+    protected inner class InstanceData(deviceDbInfo: DeviceDbInfo, instance: Instance, now: ExactTimeStamp, val silent: Boolean) {
 
         val notificationId = instance.notificationId
 
@@ -425,7 +426,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val note = instance.task.note
 
         val uuid = instance.task
-                .getImage()
+                .getImage(deviceDbInfo)
                 ?.uuid
 
         val timeStampLong = instance.instanceDateTime

@@ -207,7 +207,7 @@ class DomainFactory(
     private fun updateShortcuts() {
         val now = ExactTimeStamp.now
 
-        ImageManager.prefetch(getTasks().toList()) { updateNotifications(ExactTimeStamp.now) }
+        ImageManager.prefetch(deviceDbInfo, getTasks().toList()) { updateNotifications(ExactTimeStamp.now) }
 
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
@@ -223,7 +223,7 @@ class DomainFactory(
         val shortcutDatas = shortcutTasks.filter { it.second.isVisible(now, false) }
                 .sortedBy { it.first }
                 .takeLast(maxShortcuts)
-                .map { ShortcutQueue.ShortcutData(it.second) }
+                .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second) }
 
         ShortcutQueue.updateShortcuts(shortcutDatas)
     }
@@ -514,7 +514,7 @@ class DomainFactory(
                                 getGroupListChildTaskDatas(it, now),
                                 it.startExactTimeStamp,
                                 it.note,
-                                it.getImage())
+                                it.getImage(deviceDbInfo))
                     }
                     .toList()
         } else {
@@ -545,7 +545,7 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.getImage())
+                    task.getImage(deviceDbInfo))
 
             children.values.forEach { it.instanceDataParent = instanceData }
             instanceDatas[instanceData.instanceKey] = instanceData
@@ -619,7 +619,7 @@ class DomainFactory(
                     hierarchyData,
                     it.ordinal,
                     it.getNotificationShown(localFactory),
-                    task.getImage())
+                    task.getImage(deviceDbInfo))
         }.toMutableMap()
 
         return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(
@@ -668,7 +668,7 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.getImage())
+                    task.getImage(deviceDbInfo))
 
             children.values.forEach { it.instanceDataParent = instanceData }
             instance.instanceKey to instanceData
@@ -764,7 +764,7 @@ class DomainFactory(
                     scheduleDataWrappers,
                     task.note,
                     projectName,
-                    task.getImage())
+                    task.getImage(deviceDbInfo))
 
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             check(checkHintPresent(parentTreeDatas))
@@ -814,7 +814,7 @@ class DomainFactory(
                             childTask.startExactTimeStamp,
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
-                            childTask.getImage(),
+                            childTask.getImage(deviceDbInfo),
                             childTask.current(now),
                             childTask.hasInstances(now),
                             true)
@@ -827,7 +827,7 @@ class DomainFactory(
                 task.getScheduleTextMultiline(ScheduleText, hierarchyTimeStamp),
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
                 task.hasInstances(now),
-                task.getImage(),
+                task.getImage(deviceDbInfo),
                 task.current(now))
     }
 
@@ -851,7 +851,7 @@ class DomainFactory(
                             task.startExactTimeStamp,
                             task.taskKey,
                             null,
-                            task.getImage(),
+                            task.getImage(deviceDbInfo),
                             task.current(now),
                             task.hasInstances(now),
                             false)
@@ -1184,7 +1184,7 @@ class DomainFactory(
         notifyCloud(task.project)
 
         imageUuid?.let {
-            Uploader.addUpload(task.taskKey, it, imagePath)
+            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
         }
 
         return task.taskKey
@@ -1227,7 +1227,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
-            task.setImage(imageUuid?.let { ImageState.Local(imageUuid) })
+            task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
         updateNotifications(now)
 
@@ -1236,7 +1236,7 @@ class DomainFactory(
         notifyCloud(task.project)
 
         imageUuid?.let {
-            Uploader.addUpload(task.taskKey, it, imagePath.value)
+            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
         }
 
         return task.taskKey
@@ -1283,7 +1283,7 @@ class DomainFactory(
         notifyCloud(newParentTask.project)
 
         imageUuid?.let {
-            Uploader.addUpload(newParentTask.taskKey, it, imagePath)
+            Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
         }
 
         return newParentTask.taskKey
@@ -1320,7 +1320,7 @@ class DomainFactory(
         notifyCloud(task.project)
 
         imageUuid?.let {
-            Uploader.addUpload(task.taskKey, it, imagePath)
+            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath)
         }
 
         return task.taskKey
@@ -1366,7 +1366,7 @@ class DomainFactory(
         notifyCloud(newParentTask.project)
 
         imageUuid?.let {
-            Uploader.addUpload(newParentTask.taskKey, it, imagePath)
+            Uploader.addUpload(deviceDbInfo, newParentTask.taskKey, it, imagePath)
         }
 
         return newParentTask.taskKey
@@ -1403,7 +1403,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
-            task.setImage(imageUuid?.let { ImageState.Local(imageUuid) })
+            task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
         updateNotifications(now)
 
@@ -1412,7 +1412,7 @@ class DomainFactory(
         notifyCloud(task.project)
 
         imageUuid?.let {
-            Uploader.addUpload(task.taskKey, it, imagePath.value)
+            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
         }
 
         return task.taskKey
@@ -1448,7 +1448,7 @@ class DomainFactory(
         notifyCloud(childTask.project)
 
         imageUuid?.let {
-            Uploader.addUpload(childTask.taskKey, it, imagePath)
+            Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
         }
 
         return childTask.taskKey
@@ -1509,7 +1509,7 @@ class DomainFactory(
         notifyCloud(childTask.project)
 
         imageUuid?.let {
-            Uploader.addUpload(childTask.taskKey, it, imagePath)
+            Uploader.addUpload(deviceDbInfo, childTask.taskKey, it, imagePath)
         }
 
         return childTask.taskKey
@@ -1551,7 +1551,7 @@ class DomainFactory(
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)
-            task.setImage(imageUuid?.let { ImageState.Local(imageUuid) })
+            task.setImage(deviceDbInfo, imageUuid?.let { ImageState.Local(imageUuid) })
 
         updateNotifications(now)
 
@@ -1560,7 +1560,7 @@ class DomainFactory(
         notifyCloud(task.project) // todo image on server, purge images after this call
 
         imageUuid?.let {
-            Uploader.addUpload(task.taskKey, it, imagePath.value)
+            Uploader.addUpload(deviceDbInfo, task.taskKey, it, imagePath.value)
         }
 
         return task.taskKey
@@ -1960,10 +1960,10 @@ class DomainFactory(
 
         val task = getTaskIfPresent(taskKey) ?: return
 
-        if (task.getImage() != ImageState.Local(imageUuid))
+        if (task.getImage(deviceDbInfo) != ImageState.Local(imageUuid))
             return
 
-        task.setImage(ImageState.Remote(imageUuid))
+        task.setImage(deviceDbInfo, ImageState.Remote(imageUuid))
 
         save(0, source)
 
@@ -2051,7 +2051,7 @@ class DomainFactory(
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                             childInstance.ordinal,
                             childInstance.getNotificationShown(localFactory),
-                            childTask.getImage())
+                            childTask.getImage(deviceDbInfo))
 
                     children.values.forEach { it.instanceDataParent = instanceData }
                     childInstance.instanceKey to instanceData
@@ -2267,7 +2267,7 @@ class DomainFactory(
                             childTask.startExactTimeStamp,
                             childTask.taskKey,
                             HierarchyData(it.taskHierarchyKey, it.ordinal),
-                            childTask.getImage(),
+                            childTask.getImage(deviceDbInfo),
                             childTask.current(now),
                             childTask.hasInstances(now),
                             alwaysShow)
@@ -2287,7 +2287,7 @@ class DomainFactory(
                         getGroupListChildTaskDatas(childTask, now),
                         childTask.startExactTimeStamp,
                         childTask.note,
-                        childTask.getImage())
+                        childTask.getImage(deviceDbInfo))
             }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
@@ -2507,9 +2507,9 @@ class DomainFactory(
             Preferences.logLineHour("next tick: $nextAlarm")
     }
 
-    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(instance, silent, now)
+    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, silent, now)
 
-    private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(instance, true, now)
+    private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, true, now)
 
     private fun setInstanceNotified(instanceKey: InstanceKey) {
         getInstance(instanceKey).apply {
@@ -2552,7 +2552,7 @@ class DomainFactory(
                     null,
                     instance.ordinal,
                     instance.getNotificationShown(localFactory),
-                    task.getImage())
+                    task.getImage(deviceDbInfo))
 
             children.values.forEach { it.instanceDataParent = instanceData }
             instanceDatas[instance.instanceKey] = instanceData
@@ -2595,7 +2595,7 @@ class DomainFactory(
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                             childInstance.ordinal,
                             childInstance.getNotificationShown(localFactory),
-                            childTask.getImage())
+                            childTask.getImage(deviceDbInfo))
 
                     children.values.forEach { it.instanceDataParent = instanceData }
                     childInstance.instanceKey to instanceData
@@ -2609,7 +2609,7 @@ class DomainFactory(
                 listOf(),
                 task.note,
                 instanceDatas,
-                task.getImage())
+                task.getImage(deviceDbInfo))
 
         instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
 
@@ -2625,7 +2625,7 @@ class DomainFactory(
 
         copiedTask.getChildTaskHierarchies(now).forEach {
             val copiedChildTask = it.childTask
-            copiedChildTask.getImage()?.let { check(it is ImageState.Remote) }
+            copiedChildTask.getImage(deviceDbInfo)?.let { check(it is ImageState.Remote) }
 
             createChildTask(now, task, copiedChildTask.name, copiedChildTask.note, copiedChildTask.imageJson, copiedChildTask.taskKey)
         }

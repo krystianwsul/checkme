@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.utils.TaskKey
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -20,12 +21,12 @@ object Uploader {
             .getReference("taskImages")
             .child(AndroidDatabaseWrapper.root)
 
-    fun addUpload(taskKey: TaskKey, uuid: String, pair: Pair<String, Uri>) {
+    fun addUpload(deviceDbInfo: DeviceDbInfo, taskKey: TaskKey, uuid: String, pair: Pair<String, Uri>) {
         Log.e("asdf", "image upload start")
 
         val task = DomainFactory.instance.getTaskForce(taskKey)
 
-        check(task.getImage() == ImageState.Local(uuid))
+        check(task.getImage(deviceDbInfo) == ImageState.Local(uuid))
 
         val entry = Queue.addEntry(taskKey, uuid, pair.first, pair.second)
 
@@ -69,7 +70,7 @@ object Uploader {
                         val task = domainFactory.getTaskIfPresent(entry.taskKey)
                                 ?: return@forEach
 
-                        if (task.getImage() != ImageState.Local(entry.uuid))
+                        if (task.getImage(domainFactory.deviceDbInfo) != ImageState.Local(entry.uuid))
                             return@forEach
 
                         Log.e("asdf", "image upload start")

@@ -227,52 +227,26 @@ abstract class Task {
     protected abstract fun setOldestVisible(date: Date)
 
     fun getInstances(givenStartExactTimeStamp: ExactTimeStamp?, givenEndExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
-        var correctedStartExactTimeStamp = givenStartExactTimeStamp
-        if (correctedStartExactTimeStamp == null) { // 24 hack
-            val oldestVisible = getOldestVisible()
-            if (oldestVisible != null) {
-                val zero = HourMilli(0, 0, 0, 0)
-                correctedStartExactTimeStamp = ExactTimeStamp(oldestVisible, zero)
-            }
-        }
+        val correctedStartExactTimeStamp = givenStartExactTimeStamp
+                ?: getOldestVisible()?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) } // 24 hack
 
-        val myStartTimeStamp = startExactTimeStamp
-        val myEndTimeStamp = getEndExactTimeStamp()
-
-        val startExactTimeStamp: ExactTimeStamp
-        val endExactTimeStamp: ExactTimeStamp
-
-        startExactTimeStamp = if (correctedStartExactTimeStamp == null || correctedStartExactTimeStamp < myStartTimeStamp)
-            myStartTimeStamp
-        else
-            correctedStartExactTimeStamp
-
-        endExactTimeStamp = if (myEndTimeStamp == null || myEndTimeStamp > givenEndExactTimeStamp)
-            givenEndExactTimeStamp
-        else
-            myEndTimeStamp
-
-        val instances = ArrayList<Instance>()
+        val startExactTimeStamp = listOfNotNull(correctedStartExactTimeStamp, startExactTimeStamp).max()!!
+        val endExactTimeStamp = listOfNotNull(getEndExactTimeStamp(), givenEndExactTimeStamp).min()!!
 
         if (startExactTimeStamp >= endExactTimeStamp)
-            return instances
+            return listOf()
 
-        check(startExactTimeStamp < endExactTimeStamp)
+        val scheduleInstances = schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp) }
 
-        for (schedule in schedules)
-            instances.addAll(schedule.getInstances(this, startExactTimeStamp, endExactTimeStamp))
-
-        val taskHierarchies = getParentTaskHierarchies()
-
-        instances.addAll(taskHierarchies.map { it.parentTask }
+        val parentInstances = getParentTaskHierarchies().map { it.parentTask }
                 .flatMap { it.getInstances(startExactTimeStamp, endExactTimeStamp, now) }
                 .flatMap { it.getChildInstances(now) }
                 .asSequence()
                 .map { it.first }
                 .filter { it.taskKey == taskKey }
-                .toList())
+                .toList()
 
-        return instances
+        return scheduleInstances + parentInstances
     }
 
     fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).isNotEmpty()

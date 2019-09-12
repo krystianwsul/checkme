@@ -539,7 +539,7 @@ class DomainFactory(
                     children,
                     null,
                     instance.ordinal,
-                    instance.notificationShown,
+                    instance.getNotificationShown(localFactory),
                     task.image)
 
             children.values.forEach { it.instanceDataParent = instanceData }
@@ -613,7 +613,7 @@ class DomainFactory(
                     children,
                     hierarchyData,
                     it.ordinal,
-                    it.notificationShown,
+                    it.getNotificationShown(localFactory),
                     task.image)
         }.toMutableMap()
 
@@ -662,7 +662,7 @@ class DomainFactory(
                     children,
                     null,
                     instance.ordinal,
-                    instance.notificationShown,
+                    instance.getNotificationShown(localFactory),
                     task.image)
 
             children.values.forEach { it.instanceDataParent = instanceData }
@@ -698,7 +698,7 @@ class DomainFactory(
                 parentInstance == null,
                 instance.exists(),
                 getGroupListData(instance, task, now),
-                instance.notificationShown,
+                instance.getNotificationShown(localFactory),
                 displayText,
                 task.taskKey)
     }
@@ -1034,7 +1034,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        instance.setDone(true, now)
+        instance.setDone(localFactory, true, now)
         instance.setNotificationShown(localFactory, false)
 
         updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
@@ -1053,7 +1053,7 @@ class DomainFactory(
 
         val instance = getInstance(instanceKey)
 
-        instance.setDone(done, now)
+        instance.setDone(localFactory, done, now)
 
         updateNotifications(now)
 
@@ -1075,7 +1075,7 @@ class DomainFactory(
             val instance = getInstance(it)
             check(instance.done == null)
             check(instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
-            check(!instance.notificationShown)
+            check(!instance.getNotificationShown(localFactory))
             check(instance.isRootInstance(now))
 
             instance.setNotified(localFactory, false)
@@ -1096,7 +1096,7 @@ class DomainFactory(
 
         val instances = instanceKeys.map(this::getInstance)
 
-        instances.forEach { it.setDone(done, now) }
+        instances.forEach { it.setDone(localFactory, done, now) }
 
         val remoteProjects = instances.mapNotNull(Instance::project).toSet()
 
@@ -1985,7 +1985,7 @@ class DomainFactory(
             }
 
     private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
-        return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime, localFactory.getShown(taskKey, scheduleDateTime))
+        return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime)
     }
 
     fun getInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
@@ -2071,7 +2071,7 @@ class DomainFactory(
                             children,
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                             childInstance.ordinal,
-                            childInstance.notificationShown,
+                            childInstance.getNotificationShown(localFactory),
                             childTask.image)
 
                     children.values.forEach { it.instanceDataParent = instanceData }
@@ -2427,7 +2427,7 @@ class DomainFactory(
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
                 .toMutableList()
-                .apply { removeAll(relevantInstances.map { it.shown }) }
+                .apply { removeAll(relevantInstances.map { it.getShown(localFactory) }) }
         irrelevantInstanceShownRecords.forEach { it.delete() }
     }
 
@@ -2479,7 +2479,7 @@ class DomainFactory(
         else
             getRootInstances(null, now.plusOne(), now /* 24 hack */).filter {
                 it.done == null
-                        && !it.notified
+                        && !it.getNotified(localFactory)
                         && it.instanceDateTime.timeStamp.toExactTimeStamp() <= now
                         && !removedTaskKeys.contains(it.taskKey)
             }.associateBy { it.instanceKey }
@@ -2681,7 +2681,7 @@ class DomainFactory(
                     children,
                     null,
                     instance.ordinal,
-                    instance.notificationShown,
+                    instance.getNotificationShown(localFactory),
                     task.image)
 
             children.values.forEach { it.instanceDataParent = instanceData }
@@ -2724,7 +2724,7 @@ class DomainFactory(
                             children,
                             HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
                             childInstance.ordinal,
-                            childInstance.notificationShown,
+                            childInstance.getNotificationShown(localFactory),
                             childTask.image)
 
                     children.values.forEach { it.instanceDataParent = instanceData }

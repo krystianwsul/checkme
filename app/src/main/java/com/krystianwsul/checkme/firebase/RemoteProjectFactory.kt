@@ -31,12 +31,12 @@ class RemoteProjectFactory(
     private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, deviceInfo, privateSnapshot, now)
     private val remoteSharedProjectManager = RemoteSharedProjectManager(domainFactory, sharedChildren)
 
-    var remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectManager.remoteProjectRecord, uuid).apply { fixNotificationShown(now) }
+    var remotePrivateProject = RemotePrivateProject(remotePrivateProjectManager.remoteProjectRecord, uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
         private set
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .map { RemoteSharedProject(domainFactory.localFactory, it, deviceInfo, uuid).apply { fixNotificationShown(now) } }
+            .map { RemoteSharedProject(it, deviceInfo, uuid).apply { fixNotificationShown(domainFactory.localFactory, now) } }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -95,7 +95,7 @@ class RemoteProjectFactory(
                 val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(domainFactory.localFactory, remoteProjectRecord, deviceInfo, uuid).apply { fixNotificationShown(now) }
+                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord, deviceInfo, uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
             }
             is ChildRemoveEvent -> {
                 val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
@@ -109,7 +109,7 @@ class RemoteProjectFactory(
     fun onNewPrivate(dataSnapshot: DataSnapshot, now: ExactTimeStamp) {
         val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
 
-        remotePrivateProject = RemotePrivateProject(domainFactory, remotePrivateProjectRecord, uuid).apply { fixNotificationShown(now) }
+        remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord, uuid).apply { fixNotificationShown(domainFactory.localFactory, now) }
     }
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<Pair<ScheduleData, Time>>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {
@@ -136,7 +136,7 @@ class RemoteProjectFactory(
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
 
-        val remoteProject = RemoteSharedProject(domainFactory.localFactory, remoteProjectRecord, deviceInfo, uuid)
+        val remoteProject = RemoteSharedProject(remoteProjectRecord, deviceInfo, uuid)
 
         check(!remoteProjects.containsKey(remoteProject.id))
 

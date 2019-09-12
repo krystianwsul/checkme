@@ -15,31 +15,20 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
 
     override var instanceData: InstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>
 
-    override var shown: Shown? = null
-        private set
+    private val shownHolder = ShownHolder()
 
-    private val taskId
-        get() = instanceData.let {
-            when (it) {
-                is InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord.taskId
-                is Virtual<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.taskId
-            }
-        }
+    override fun getShown(shownFactory: ShownFactory) = shownHolder.getShown(shownFactory)
 
-    override val notified get() = shown?.notified == true
+    override fun getNotified(shownFactory: ShownFactory) = getShown(shownFactory)?.notified == true
 
     override fun setNotified(shownFactory: ShownFactory, notified: Boolean) {
-        createShown(shownFactory)
-
-        shown!!.notified = notified
+        shownHolder.forceShown(shownFactory).notified = notified
     }
 
-    override val notificationShown get() = shown?.notificationShown == true
+    override fun getNotificationShown(shownFactory: ShownFactory) = getShown(shownFactory)?.notificationShown == true
 
     override fun setNotificationShown(shownFactory: ShownFactory, notificationShown: Boolean) {
-        createShown(shownFactory)
-
-        shown!!.notificationShown = notificationShown
+        shownHolder.forceShown(shownFactory).notificationShown = notificationShown
     }
 
     override val scheduleCustomTimeKey
@@ -68,29 +57,25 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     constructor(
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
-            remoteInstanceRecord: RemoteInstanceRecord<T>,
-            shown: Shown?) {
+            remoteInstanceRecord: RemoteInstanceRecord<T>) {
         this.remoteProject = remoteProject
         task = remoteTask
         val realInstanceData = RemoteReal(this, remoteInstanceRecord)
         instanceData = realInstanceData
-        this.shown = shown
     }
 
     constructor(
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
-            scheduleDateTime: DateTime,
-            shown: Shown?) {
+            scheduleDateTime: DateTime) {
         this.remoteProject = remoteProject
         task = remoteTask
         instanceData = Virtual(task.id, scheduleDateTime)
-        this.shown = shown
     }
 
-    fun fixNotificationShown(now: ExactTimeStamp) {
+    fun fixNotificationShown(shownFactory: ShownFactory, now: ExactTimeStamp) {
         if (done != null || instanceDateTime.toExactTimeStamp() > now)
-            shown?.notified = false
+            getShown(shownFactory)?.notified = false
     }
 
     override fun setInstanceDateTime(shownFactory: ShownFactory, ownerKey: String, dateTime: DateTime, now: ExactTimeStamp) {
@@ -111,27 +96,18 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             }
         }
 
-        createShown(shownFactory)
-
-        shown!!.notified = false
-    }
-
-    private fun createShown(shownFactory: ShownFactory) {
-        if (shown != null)
-            return
-
-        shown = shownFactory.createShown(taskId, scheduleDateTime, task.remoteProject.id)
+        shownHolder.forceShown(shownFactory).notified = false
     }
 
     override fun createInstanceRecord(now: ExactTimeStamp): InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> = RemoteReal(this, task.createRemoteInstanceRecord(this, scheduleDateTime)).also {
         instanceData = it
     }
 
-    override fun setDone(done: Boolean, now: ExactTimeStamp) {
+    override fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
         if (done) {
             createInstanceHierarchy(now).instanceRecord.done = now.long
 
-            shown?.notified = false
+            getShown(shownFactory)?.notified = false
         } else {
             (instanceData as RemoteReal).instanceRecord.done = null
         }
@@ -175,5 +151,23 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         override fun getCustomTime(customTimeId: RemoteCustomTimeId) = remoteInstance.remoteProject.getRemoteCustomTime(customTimeId)
 
         override fun getSignature() = "${remoteInstance.name} ${remoteInstance.instanceKey}"
+    }
+
+    private inner class ShownHolder {
+
+        private var first = true
+        private var shown: Shown? = null
+
+        fun getShown(shownFactory: ShownFactory): Shown? {
+            if (first)
+                shown = shownFactory.getShown(taskKey, scheduleDateTime)
+            return shown
+        }
+
+        fun forceShown(shownFactory: ShownFactory): Shown {
+            if (getShown(shownFactory) == null)
+                shown = shownFactory.createShown(taskKey.remoteTaskId, scheduleDateTime, taskKey.remoteProjectId)
+            return shown!!
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase.models
 
-import com.krystianwsul.checkme.domain.Instance
 import com.krystianwsul.checkme.domain.TaskHierarchyContainer
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
@@ -10,11 +9,10 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 
 class RemoteSharedProject(
-        shownFactory: Instance.ShownFactory,
         override val remoteProjectRecord: RemoteSharedProjectRecord,
         deviceInfo: DeviceInfo,
         uuid: String
-) : RemoteProject<RemoteCustomTimeId.Shared>(shownFactory, uuid) {
+) : RemoteProject<RemoteCustomTimeId.Shared>(uuid) {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -40,7 +38,7 @@ class RemoteSharedProject(
 
         remoteTasks = remoteProjectRecord.remoteTaskRecords
                 .values
-                .map { RemoteTask(shownFactory, this, it) }
+                .map { RemoteTask(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 

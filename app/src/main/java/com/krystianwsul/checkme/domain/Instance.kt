@@ -93,9 +93,9 @@ abstract class Instance {
     instance, in the past, and not done.  If either of the last two are changed, this flag gets
     reset.  As far as being a root instance, there's no simple way to catch that moment.
      */
-    abstract val notified: Boolean
+    abstract fun getNotified(shownFactory: ShownFactory): Boolean
 
-    abstract val notificationShown: Boolean // Is the notification visible?
+    abstract fun getNotificationShown(shownFactory: ShownFactory): Boolean // Is the notification visible?
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
 
@@ -103,7 +103,7 @@ abstract class Instance {
 
     abstract val customTimeKey: Pair<String, RemoteCustomTimeId>?
 
-    abstract val shown: Shown?
+    abstract fun getShown(shownFactory: ShownFactory): Shown?
 
     abstract fun setNotified(shownFactory: ShownFactory, notified: Boolean)
 
@@ -157,7 +157,7 @@ abstract class Instance {
 
     protected abstract fun createInstanceRecord(now: ExactTimeStamp): InstanceData.Real<*, *, *>
 
-    abstract fun setDone(done: Boolean, now: ExactTimeStamp)
+    abstract fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp)
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         val isVisible = isVisibleHelper(now, hack24)

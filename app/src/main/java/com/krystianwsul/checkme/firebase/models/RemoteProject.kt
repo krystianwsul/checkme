@@ -15,10 +15,7 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
-abstract class RemoteProject<T : RemoteCustomTimeId>(
-        protected val shownFactory: Instance.ShownFactory,
-        val uuid: String
-) {
+abstract class RemoteProject<T : RemoteCustomTimeId>(val uuid: String) {
 
     abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
@@ -53,7 +50,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
     fun newRemoteTask(taskJson: TaskJson): RemoteTask<T> {
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
-        val remoteTask = RemoteTask(shownFactory, this, remoteTaskRecord)
+        val remoteTask = RemoteTask(this, remoteTaskRecord)
         check(!remoteTasks.containsKey(remoteTask.id))
         remoteTasks[remoteTask.id] = remoteTask
 
@@ -99,7 +96,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
                 oldestVisible = oldestVisibleMap.toMutableMap())
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
-        val remoteTask = RemoteTask(shownFactory, this, remoteTaskRecord)
+        val remoteTask = RemoteTask(this, remoteTaskRecord)
         check(!remoteTasks.containsKey(remoteTask.id))
 
         remoteTasks[remoteTask.id] = remoteTask
@@ -280,10 +277,10 @@ abstract class RemoteProject<T : RemoteCustomTimeId>(
         }
     }
 
-    fun fixNotificationShown(now: ExactTimeStamp) = tasks.forEach {
+    fun fixNotificationShown(shownFactory: Instance.ShownFactory, now: ExactTimeStamp) = tasks.forEach {
         it.existingInstances
                 .values
-                .forEach { it.fixNotificationShown(now) }
+                .forEach { it.fixNotificationShown(shownFactory, now) }
     }
 
     private class MissingTaskException(projectId: String, taskId: String) : Exception("projectId: $projectId, taskId: $taskId")

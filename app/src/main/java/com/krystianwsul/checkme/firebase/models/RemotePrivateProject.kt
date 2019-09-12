@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase.models
 
 import com.krystianwsul.checkme.domain.TaskHierarchyContainer
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
@@ -9,10 +8,9 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import java.util.*
 
 class RemotePrivateProject(
-        domainFactory: DomainFactory,
         override val remoteProjectRecord: RemotePrivateProjectRecord,
         uuid: String
-) : RemoteProject<RemoteCustomTimeId.Private>(domainFactory.localFactory, uuid) {
+) : RemoteProject<RemoteCustomTimeId.Private>(uuid) {
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private>>
@@ -30,7 +28,7 @@ class RemotePrivateProject(
 
         remoteTasks = remoteProjectRecord.remoteTaskRecords
                 .values
-                .map { RemoteTask(shownFactory, this, it) }
+                .map { RemoteTask(this, it) }
                 .associateBy { it.id }
                 .toMutableMap()
 

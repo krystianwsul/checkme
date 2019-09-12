@@ -2006,8 +2006,6 @@ class DomainFactory(
         return generateInstance(instanceKey.taskKey, dateTime)
     }
 
-    fun getPastInstances(task: Task, now: ExactTimeStamp) = task.getPastInstances(now)
-
     private fun getRootInstances(startExactTimeStamp: ExactTimeStamp?, endExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
         return remoteProjectFactory.remoteProjects
                 .values
@@ -2285,7 +2283,7 @@ class DomainFactory(
     private fun setIrrelevant(now: ExactTimeStamp) {
         val relevantInstances = remoteProjectFactory.remoteProjects
                 .values
-                .flatMap { Irrelevant.setIrrelevant(this, remoteProjectFactory, it, now) }
+                .flatMap { Irrelevant.setIrrelevant(remoteProjectFactory, it, now) }
 
         val irrelevantInstanceShownRecords = localFactory.instanceShownRecords
                 .toMutableList()

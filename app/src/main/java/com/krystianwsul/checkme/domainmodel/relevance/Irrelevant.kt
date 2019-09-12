@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.utils.time.toExactTimeStamp
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.firebase.models.RemotePrivateProject
@@ -9,14 +8,14 @@ import com.krystianwsul.common.time.ExactTimeStamp
 
 object Irrelevant {
 
-    fun setIrrelevant(domainFactory: DomainFactory, parent: RemoteProject.Parent, project: RemoteProject<*>, now: ExactTimeStamp): Collection<Instance> {
+    fun setIrrelevant(parent: RemoteProject.Parent, project: RemoteProject<*>, now: ExactTimeStamp): Collection<Instance> {
         val tasks = project.tasks
 
         for (task in tasks)
             task.updateOldestVisible(now)
 
         // relevant hack
-        val taskRelevances = tasks.map { it.taskKey to TaskRelevance(domainFactory, it) }.toMap()
+        val taskRelevances = tasks.map { it.taskKey to TaskRelevance(it) }.toMap()
 
         val taskHierarchies = project.taskHierarchies
         val taskHierarchyRelevances = taskHierarchies.associate { it.taskHierarchyKey to TaskHierarchyRelevance(it) }

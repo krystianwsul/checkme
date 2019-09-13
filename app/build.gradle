@@ -52,6 +52,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    packagingOptions {
+        exclude '/META-INF/kotlinx-serialization-runtime.kotlin_module'
+    }
 }
 
 ext {
@@ -137,7 +141,7 @@ dependencies {
     implementation 'com.github.stfalcon:stfalcon-imageviewer:0.1.0'
 
     implementation project(path: ':treeadapter')
-    implementation project(path: ':common', configuration: 'default')
+    implementation project(':common')
 
     implementation "com.soywiz.korlibs.klock:klock:1.6.0"
 }

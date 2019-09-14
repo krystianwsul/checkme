@@ -7,6 +7,7 @@ import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.merge
 
 abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
 
@@ -37,8 +38,7 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
 
                         val imageData = groupHolderNode.imageData
 
-                        if (imageData != null)
-                        else
+                        if (imageData == null)
                             treeNode.onClick(this)
                     }
                     .addTo(compositeDisposable)
@@ -61,7 +61,10 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
                     }
                     .addTo(compositeDisposable)
 
-            rowCheckBox.clicks()
+            listOf(
+                    rowCheckBoxFrame.clicks().doOnNext { rowCheckBox.toggle() },
+                    rowCheckBox.clicks()
+            ).merge()
                     .subscribe {
                         // todo rowCheckBox.setOnClickListener(null)
 

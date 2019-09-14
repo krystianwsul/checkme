@@ -18,7 +18,6 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
-
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
@@ -181,7 +180,8 @@ class ShowCustomTimeActivity : NavBarActivity() {
         if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
             check(!intent.hasExtra(NEW_KEY))
 
-            customTimeId = intent.getParcelableExtra(CUSTOM_TIME_ID_KEY)!!
+            @Suppress("CAST_NEVER_SUCCEEDS") // because the IDE isn't recognizing it's a subclass
+            customTimeId = intent.getParcelableExtra<Parcelable>(CUSTOM_TIME_ID_KEY) as RemoteCustomTimeId.Private
 
             showCustomTimeViewModel = getViewModel<ShowCustomTimeViewModel>().apply {
                 start(customTimeId!!)

@@ -17,7 +17,7 @@ import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.CustomTimeKey
 import com.krystianwsul.checkme.utils.InstanceKey
-import com.krystianwsul.checkme.utils.fixClicks
+import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.utils.time.Date
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
@@ -143,17 +143,11 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         myView = requireActivity().layoutInflater
                 .inflate(R.layout.fragment_edit_instances, null)
                 .apply {
-                    editInstanceDate.apply {
-                        setOnClickListener {
+                    editInstanceDate.setFixedOnClickListener {
                             val datePickerDialogFragment = DatePickerDialogFragment.newInstance(date!!)
                             datePickerDialogFragment.listener = datePickerDialogFragmentListener
                             datePickerDialogFragment.show(childFragmentManager, DATE_FRAGMENT_TAG)
-                        }
-
-                        fixClicks()
                     }
-
-                    editInstanceTime.fixClicks()
 
                     editInstanceSave.setOnClickListener {
                         checkNotNull(date)
@@ -258,8 +252,9 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         val timePickerDialogFragment = childFragmentManager.findFragmentByTag(TIME_FRAGMENT_TAG) as? TimePickerDialogFragment
         timePickerDialogFragment?.listener = timePickerDialogFragmentListener
 
-        myView.editInstanceTime.setOnClickListener {
-            val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(data.customTimeDatas.values
+        myView.editInstanceTime.setFixedOnClickListener {
+            val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(data.customTimeDatas
+                    .values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
                     .sortedBy { it.hourMinutes[date!!.dayOfWeek] }
                     .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[date!!.dayOfWeek] + ")") })

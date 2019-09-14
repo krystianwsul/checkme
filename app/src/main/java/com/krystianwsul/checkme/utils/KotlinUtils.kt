@@ -19,6 +19,7 @@ import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.textfield.TextInputLayout
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
@@ -221,7 +222,13 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
 
 fun newUuid() = UUID.randomUUID().toString()
 
-fun AutoCompleteTextView.fixClicks() = setOnTouchListener { _, _ -> false }
+fun AutoCompleteTextView.setFixedOnClickListener(action: () -> Unit) {
+    setOnClickListener { action() }
+
+    setOnTouchListener { _, _ -> false }
+
+    (parent.parent as TextInputLayout).setEndIconOnClickListener { action() }
+}
 
 fun <T> serialize(obj: T): String {
     return ByteArrayOutputStream().let {

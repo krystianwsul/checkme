@@ -19,7 +19,7 @@ import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
 
-import com.krystianwsul.checkme.utils.fixClicks
+import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.time.DayOfWeek
 import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
@@ -54,7 +54,10 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         private val sDefaultHourMinute = HourMinute(9, 0)
 
-        fun getEditIntent(customTimeId: RemoteCustomTimeId.Private, context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply { putExtra(CUSTOM_TIME_ID_KEY, customTimeId as Parcelable) }
+        fun getEditIntent(customTimeId: RemoteCustomTimeId.Private, context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply {
+            @Suppress("CAST_NEVER_SUCCEEDS")
+            putExtra(CUSTOM_TIME_ID_KEY, customTimeId as Parcelable)
+        }
 
         fun getCreateIntent(context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply { putExtra(NEW_KEY, true) }
     }
@@ -63,7 +66,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
     private var data: ShowCustomTimeViewModel.Data? = null
 
-    private val timeViews = HashMap<DayOfWeek, TextView>()
+    private val timeViews = HashMap<DayOfWeek, AutoCompleteTextView>()
     private val hourMinutes = HashMap<DayOfWeek, HourMinute>()
 
     private var editedDayOfWeek: DayOfWeek? = null
@@ -78,7 +81,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
             check(hourMinutes.containsKey(it))
 
             hourMinutes[it] = hourMinute
-            timeViews[it]!!.text = hourMinute.toString()
+            timeViews[it]!!.setText(hourMinute.toString())
         }
 
         editedDayOfWeek = null
@@ -208,7 +211,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         timeName.text = dayOfWeek.toString()
 
-        timeViews[dayOfWeek] = findViewById<AutoCompleteTextView>(timeId)!!.apply { fixClicks() }
+        timeViews[dayOfWeek] = findViewById(timeId)!!
     }
 
     public override fun onSaveInstanceState(outState: Bundle) {
@@ -240,9 +243,9 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
             val hourMinute = hourMinutes[dayOfWeek]!!
 
-            timeView.text = hourMinute.toString()
+            timeView.setText(hourMinute.toString())
 
-            timeView.setOnClickListener {
+            timeView.setFixedOnClickListener {
                 editedDayOfWeek = dayOfWeek
 
                 val currHourMinute = hourMinutes[dayOfWeek]!!

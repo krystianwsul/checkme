@@ -168,9 +168,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
 
             scheduleDialogCancel.setOnClickListener { dialog.cancel() }
-
-            scheduleDialogDate.fixClicks()
-            scheduleDialogTime.fixClicks()
         }
 
         return TransparentNavigationDialog().apply {
@@ -209,7 +206,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             })
         }
 
-        customView.scheduleDialogTime.setOnClickListener {
+        customView.scheduleDialogTime.setFixedOnClickListener {
             check(customTimeDatas != null)
 
             val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Private }
@@ -231,7 +228,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.listener = timePickerDialogFragmentListener
 
-        customView.scheduleDialogDate.setOnClickListener {
+        customView.scheduleDialogDate.setFixedOnClickListener {
             check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
             DatePickerDialogFragment.newInstance(scheduleDialogData.date).let {

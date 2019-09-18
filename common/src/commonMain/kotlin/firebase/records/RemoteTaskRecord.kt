@@ -11,7 +11,6 @@ import com.krystianwsul.common.utils.ScheduleKey
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
-        private val uuid: String,
         val id: String,
         private val remoteProjectRecord: RemoteProjectRecord<T>,
         private val taskJson: TaskJson) : RemoteRecord(create) {
@@ -131,24 +130,20 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     constructor(
             id: String,
-            uuid: String,
             remoteProjectRecord: RemoteProjectRecord<T>,
             taskJson: TaskJson
     ) : this(
             false,
-            uuid,
             id,
             remoteProjectRecord,
             taskJson
     )
 
     constructor(
-            uuid: String,
             remoteProjectRecord: RemoteProjectRecord<T>,
             taskJson: TaskJson
     ) : this(
             true,
-            uuid,
             remoteProjectRecord.getTaskRecordId(),
             remoteProjectRecord,
             taskJson
@@ -213,7 +208,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         }
     }
 
-    private val oldestVisibleJson get() = taskJson.oldestVisible[uuid]
+    private fun getOldestVisibleJson(uuid: String) = taskJson.oldestVisible[uuid]
 
     override val children
         get() = remoteInstanceRecords.values +
@@ -223,8 +218,8 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                 remoteMonthlyDayScheduleRecords.values +
                 remoteMonthlyWeekScheduleRecords.values
 
-    fun setOldestVisible(newOldestVisibleJson: OldestVisibleJson) {
-        val oldOldestVisibleJson = oldestVisibleJson
+    fun setOldestVisible(uuid: String, newOldestVisibleJson: OldestVisibleJson) {
+        val oldOldestVisibleJson = getOldestVisibleJson(uuid)
 
         taskJson.oldestVisible[uuid] = newOldestVisibleJson
 

@@ -226,12 +226,12 @@ abstract class RemoteProject<T : RemoteCustomTimeId> {
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
-    fun setEndExactTimeStamp(now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
+    fun setEndExactTimeStamp(uuid: String, now: ExactTimeStamp, projectUndoData: ProjectUndoData, removeInstances: Boolean) {
         check(current(now))
 
         remoteTasks.values
                 .filter { it.current(now) }
-                .forEach { it.setEndData(Task.EndData(now, removeInstances), projectUndoData.taskUndoData) }
+                .forEach { it.setEndData(uuid, Task.EndData(now, removeInstances), projectUndoData.taskUndoData) }
 
         projectUndoData.projectIds.add(id)
 

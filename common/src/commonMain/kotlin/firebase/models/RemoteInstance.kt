@@ -103,7 +103,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         instanceData = it
     }
 
-    override fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
+    override fun setDone(uuid: String, shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
         if (done) {
             createInstanceHierarchy(now).instanceRecord.done = now.long
 
@@ -112,7 +112,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             (instanceData as RemoteReal).instanceRecord.done = null
         }
 
-        task.updateOldestVisible(now)
+        task.updateOldestVisible(uuid, now)
     }
 
     override fun delete() {

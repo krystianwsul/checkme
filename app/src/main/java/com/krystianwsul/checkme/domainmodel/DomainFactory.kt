@@ -1059,7 +1059,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        instance.setDone(localFactory, true, now)
+        instance.setDone(uuid, localFactory, true, now)
         instance.setNotificationShown(localFactory, false)
 
         updateNotifications(now, sourceName = "setInstanceNotificationDone ${instance.name}")
@@ -1078,7 +1078,7 @@ class DomainFactory(
 
         val instance = getInstance(instanceKey)
 
-        instance.setDone(localFactory, done, now)
+        instance.setDone(uuid, localFactory, done, now)
 
         updateNotifications(now)
 
@@ -1121,7 +1121,7 @@ class DomainFactory(
 
         val instances = instanceKeys.map(this::getInstance)
 
-        instances.forEach { it.setDone(localFactory, done, now) }
+        instances.forEach { it.setDone(uuid, localFactory, done, now) }
 
         val remoteProjects = instances.mapNotNull(Instance::project).toSet()
 
@@ -1641,7 +1641,7 @@ class DomainFactory(
 
         val taskUndoData = TaskUndoData()
 
-        tasks.forEach { it.setEndData(Task.EndData(now, deleteInstances), taskUndoData) }
+        tasks.forEach { it.setEndData(uuid, Task.EndData(now, deleteInstances), taskUndoData) }
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
@@ -1711,7 +1711,7 @@ class DomainFactory(
                 .forEach {
                     check(!it.current(now))
 
-                    it.clearEndExactTimeStamp(now)
+                    it.clearEndExactTimeStamp(uuid, now)
                 }
 
         taskUndoData.taskHierarchyKeys
@@ -1934,7 +1934,7 @@ class DomainFactory(
 
         val projectUndoData = ProjectUndoData()
 
-        remoteProjects.forEach { it.setEndExactTimeStamp(now, projectUndoData, removeInstances) }
+        remoteProjects.forEach { it.setEndExactTimeStamp(uuid, now, projectUndoData, removeInstances) }
 
         updateNotifications(now)
 
@@ -2219,13 +2219,13 @@ class DomainFactory(
         for (pair in remoteToRemoteConversion.startTasks.values) {
             pair.second.forEach {
                 if (!it.hidden)
-                    it.hide(now)
+                    it.hide(uuid, now)
             }
 
             if (pair.first.getEndData() != null)
                 check(pair.first.getEndData() == endData)
             else
-                pair.first.setEndData(endData)
+                pair.first.setEndData(uuid, endData)
         }
 
         return remoteToRemoteConversion.endTasks[startingRemoteTask.id]!!
@@ -2255,7 +2255,7 @@ class DomainFactory(
 
         removeInstanceKeys.map(::getInstance)
                 .filter { it.getParentInstance(now)?.task != newParentTask && it.isVisible(now, true) }
-                .forEach { it.hide(now) }
+                .forEach { it.hide(uuid, now) }
     }
 
     private fun getTasks() = remoteProjectFactory.tasks.asSequence()

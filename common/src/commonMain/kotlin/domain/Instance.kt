@@ -155,7 +155,7 @@ abstract class Instance {
 
     protected abstract fun createInstanceRecord(now: ExactTimeStamp): InstanceData.Real<*, *, *>
 
-    abstract fun setDone(shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp)
+    abstract fun setDone(uuid: String, shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp)
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         val isVisible = isVisibleHelper(now, hack24)
@@ -240,12 +240,12 @@ abstract class Instance {
         (instanceData as InstanceData.Real).instanceRecord.ordinal = ordinal
     }
 
-    fun hide(now: ExactTimeStamp) {
+    fun hide(uuid: String, now: ExactTimeStamp) {
         check(!instanceData.hidden)
 
         createInstanceHierarchy(now).instanceRecord.hidden = true
 
-        task.updateOldestVisible(now)
+        task.updateOldestVisible(uuid, now)
     }
 
     val hidden get() = instanceData.hidden

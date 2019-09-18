@@ -91,9 +91,10 @@ abstract class Task {
         return getParentTask(exactTimeStamp) == null
     }
 
-    protected abstract fun setMyEndExactTimeStamp(now: ExactTimeStamp, endData: EndData?)
+    protected abstract fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: EndData?)
 
     fun setEndData(
+            uuid: String,
             endData: EndData,
             taskUndoData: TaskUndoData? = null,
             recursive: Boolean = false) {
@@ -117,7 +118,7 @@ abstract class Task {
         }
 
         getChildTaskHierarchies(now).forEach {
-            it.childTask.setEndData(endData, taskUndoData, true)
+            it.childTask.setEndData(uuid, endData, taskUndoData, true)
 
             taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
 
@@ -134,7 +135,7 @@ abstract class Task {
             }
         }
 
-        setMyEndExactTimeStamp(now, endData)
+        setMyEndExactTimeStamp(uuid, now, endData)
     }
 
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy? {
@@ -158,10 +159,10 @@ abstract class Task {
         }
     }
 
-    fun clearEndExactTimeStamp(now: ExactTimeStamp) {
+    fun clearEndExactTimeStamp(uuid: String, now: ExactTimeStamp) {
         check(!current(now))
 
-        setMyEndExactTimeStamp(now, null)
+        setMyEndExactTimeStamp(uuid, now, null)
     }
 
     abstract fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task
@@ -193,7 +194,7 @@ abstract class Task {
                 .filter { it.isRootInstance(now) }
     }
 
-    fun updateOldestVisible(now: ExactTimeStamp) {
+    fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
         // 24 hack
         val instances = getPastRootInstances(now)
 
@@ -212,7 +213,7 @@ abstract class Task {
             oldestVisible = now.date
         }
 
-        setOldestVisible(oldestVisible)
+        setOldestVisible(uuid, oldestVisible)
     }
 
     fun correctOldestVisible(date: Date) {
@@ -222,7 +223,7 @@ abstract class Task {
         ErrorLogger.instance.logException(OldestVisibleException6("$name real oldest: $oldestVisible, correct oldest: $date"))
     }
 
-    protected abstract fun setOldestVisible(date: Date)
+    protected abstract fun setOldestVisible(uuid: String, date: Date)
 
     fun getInstances(givenStartExactTimeStamp: ExactTimeStamp?, givenEndExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
         val startExactTimeStamp = listOfNotNull(

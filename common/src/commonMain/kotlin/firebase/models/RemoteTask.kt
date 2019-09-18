@@ -94,10 +94,10 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun getEndData() = remoteTaskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 
-    override fun setMyEndExactTimeStamp(now: ExactTimeStamp, endData: EndData?) {
+    override fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: EndData?) {
         remoteTaskRecord.endData = endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
 
-        updateOldestVisible(now)
+        updateOldestVisible(uuid, now)
     }
 
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task {
@@ -112,7 +112,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun getOldestVisible() = remoteTaskRecord.oldestVisible
 
-    override fun setOldestVisible(date: Date) = remoteTaskRecord.setOldestVisible(OldestVisibleJson.fromDate(date))
+    override fun setOldestVisible(uuid: String, date: Date) = remoteTaskRecord.setOldestVisible(uuid, OldestVisibleJson.fromDate(date))
 
     override fun delete() {
         schedules.toMutableList().forEach { it.delete() }

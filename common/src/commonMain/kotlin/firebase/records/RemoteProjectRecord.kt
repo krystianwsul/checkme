@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
         create: Boolean,
         val id: String,
-        private val uuid: String) : RemoteRecord(create) {
+        private val uuid: String) : RemoteRecord(create) { // todo remove uuid
 
     companion object {
 
@@ -26,7 +26,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
                 .mapValues { (id, taskJson) ->
                     check(id.isNotEmpty())
 
-                    RemoteTaskRecord(id, uuid, this, taskJson)
+                    RemoteTaskRecord(id, this, taskJson)
                 }
                 .toMutableMap()
     }

@@ -11,9 +11,6 @@ object Irrelevant {
     fun setIrrelevant(parent: RemoteProject.Parent, project: RemoteProject<*>, now: ExactTimeStamp): Collection<Instance> {
         val tasks = project.tasks
 
-        for (task in tasks)
-            task.updateOldestVisible(now)
-
         // relevant hack
         val taskRelevances = tasks.map { it.taskKey to TaskRelevance(it) }.toMap()
 

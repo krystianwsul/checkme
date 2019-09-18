@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.graphics.Paint
 import android.graphics.Rect
 import android.view.View
 import android.widget.ImageView
@@ -37,7 +36,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
         const val TOTAL_LINES = 3
 
-        val textWidths = mutableMapOf<Triple<Int, Boolean, Int>, Int>()
+        private val textWidths = mutableMapOf<WidthKey, Int>()
     }
 
     protected abstract val treeNode: TreeNode<NodeHolder>
@@ -139,7 +138,12 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 rowBigImageLayout?.visibility = View.GONE
 
                 val checkBoxVisibility = checkBoxVisibility
-                val widthKey = Triple(indentation, checkBoxVisibility == View.GONE, rowContainer.orientation)
+                val widthKey = WidthKey(
+                        indentation,
+                        checkBoxVisibility == View.GONE,
+                        rowContainer.orientation,
+                        avatarImage != null,
+                        thumbnail != null)
 
                 rowContainer.setIndent(indentation)
 
@@ -151,12 +155,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 fun TextView.allocateLines() {
                     fun getWantLines(text: String) = Rect().run {
                         if (textWidth != null) {
-                            val currentSize = textSize
-
-                            Paint().let {
-                                it.textSize = currentSize
-                                it.getTextBounds(text, 0, text.length, this)
-                            }
+                            paint.getTextBounds(text, 0, text.length, this)
 
                             ceil(width().toDouble() / textWidth).toInt()
                         } else {
@@ -166,9 +165,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
                     val wantLines = text.toString()
                             .split('\n')
-                            .map {
-                                getWantLines(it)
-                            }.sum()
+                            .map { getWantLines(it) }.sum()
 
                     val lines = listOf(wantLines, remainingLines + 1).min()!!
 
@@ -295,4 +292,11 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             image!!.toImageLoader().load(imageView!!)
         }
     }
+
+    private data class WidthKey(
+            val indentation: Int,
+            val checkBoxVisible: Boolean,
+            val orientation: Int,
+            val avatarVisible: Boolean,
+            val thumbnailVisible: Boolean)
 }

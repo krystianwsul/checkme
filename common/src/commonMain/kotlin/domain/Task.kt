@@ -219,11 +219,7 @@ abstract class Task {
         val oldestVisible = getOldestVisible()
         check(oldestVisible != null && date < oldestVisible)
 
-        val message = "$name old oldest: $oldestVisible, new oldest: $date"
-
-        ErrorLogger.instance.logException(OldestVisibleException6(message))
-
-        setOldestVisible(date) // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
+        ErrorLogger.instance.logException(OldestVisibleException6("$name real oldest: $oldestVisible, correct oldest: $date"))
     }
 
     protected abstract fun setOldestVisible(date: Date)

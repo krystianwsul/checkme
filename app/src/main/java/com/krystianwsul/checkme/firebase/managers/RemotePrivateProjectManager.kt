@@ -25,7 +25,7 @@ class RemotePrivateProjectManager(
     }
         private set
 
-    private fun DataSnapshot.toRecord() = RemotePrivateProjectRecord(key!!, domainFactory.uuid, getValue(PrivateProjectJson::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemotePrivateProjectRecord(key!!, getValue(PrivateProjectJson::class.java)!!)
 
     fun newSnapshot(dataSnapshot: DataSnapshot): RemotePrivateProjectRecord {
         remoteProjectRecord = dataSnapshot.toRecord()

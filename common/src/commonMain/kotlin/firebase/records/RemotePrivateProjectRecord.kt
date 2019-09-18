@@ -9,12 +9,10 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 class RemotePrivateProjectRecord(
         create: Boolean,
         id: String,
-        uuid: String,
         override val projectJson: PrivateProjectJson
 ) : RemoteProjectRecord<RemoteCustomTimeId.Private>(
         create,
-        id,
-        uuid
+        id
 ) {
 
     override val remoteCustomTimeRecords = projectJson.customTimes
@@ -28,16 +26,14 @@ class RemotePrivateProjectRecord(
             .toMap()
             .toMutableMap()
 
-    constructor(id: String, uuid: String, projectJson: PrivateProjectJson) : this(
+    constructor(id: String, projectJson: PrivateProjectJson) : this(
             false,
             id,
-            uuid,
             projectJson)
 
     constructor(deviceInfoDbInfo: DeviceDbInfo, projectJson: PrivateProjectJson) : this(
             true,
             deviceInfoDbInfo.key,
-            deviceInfoDbInfo.uuid,
             projectJson)
 
     fun newRemoteCustomTimeRecord(customTimeJson: com.krystianwsul.common.firebase.json.PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {

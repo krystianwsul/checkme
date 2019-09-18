@@ -11,12 +11,10 @@ class RemoteSharedProjectRecord(
         private val parent: Parent,
         create: Boolean,
         id: String,
-        uuid: String,
         private val jsonWrapper: JsonWrapper
 ) : RemoteProjectRecord<RemoteCustomTimeId.Shared>(
         create,
-        id,
-        uuid
+        id
 ) {
 
     override val projectJson = jsonWrapper.projectJson
@@ -46,26 +44,22 @@ class RemoteSharedProjectRecord(
 
     constructor(
             parent: Parent,
-            uuid: String,
             id: String,
             jsonWrapper: JsonWrapper
     ) : this(
             parent,
             false,
             id,
-            uuid,
             jsonWrapper
     )
 
     constructor(
             parent: Parent,
-            uuid: String,
             jsonWrapper: JsonWrapper
     ) : this(
             parent,
             true,
             DatabaseWrapper.instance.newSharedProjectRecordId(),
-            uuid,
             jsonWrapper
     )
 

@@ -15,7 +15,7 @@ class RemoteSharedProjectManager(
         children: Iterable<DataSnapshot>
 ) : RemoteSharedProjectRecord.Parent {
 
-    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(this@RemoteSharedProjectManager, domainFactory.uuid, key!!, getValue(JsonWrapper::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(this@RemoteSharedProjectManager, key!!, getValue(JsonWrapper::class.java)!!)
 
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemoteSharedProjectManager.isSaved = $value") }
 
@@ -60,7 +60,7 @@ class RemoteSharedProjectManager(
         return isSaved
     }
 
-    fun newRemoteProjectRecord(domainFactory: DomainFactory, jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(this, domainFactory.uuid, jsonWrapper).also {
+    fun newRemoteProjectRecord(jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(this, jsonWrapper).also {
         check(!remoteProjectRecords.containsKey(it.id))
 
         remoteProjectRecords[it.id] = it

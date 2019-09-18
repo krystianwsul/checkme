@@ -9,8 +9,8 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 @Suppress("LeakingThis")
 abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
         create: Boolean,
-        val id: String,
-        private val uuid: String) : RemoteRecord(create) { // todo remove uuid
+        val id: String
+) : RemoteRecord(create) {
 
     companion object {
 
@@ -75,7 +75,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
                 remoteCustomTimeRecords.values
 
     fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T> {
-        val remoteTaskRecord = RemoteTaskRecord(uuid, this, taskJson)
+        val remoteTaskRecord = RemoteTaskRecord(this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
         remoteTaskRecords[remoteTaskRecord.id] = remoteTaskRecord

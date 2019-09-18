@@ -138,7 +138,7 @@ class RemoteProjectFactory(
 
         val projectJson = SharedProjectJson(name, now.long, users = userJsons)
 
-        val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(domainFactory, JsonWrapper(recordOf, projectJson))
+        val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(JsonWrapper(recordOf, projectJson))
 
         val remoteProject = RemoteSharedProject(remoteProjectRecord)
 

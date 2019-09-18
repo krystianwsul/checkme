@@ -93,7 +93,7 @@ class RemoteProjectFactory(
     fun onChildEvent(childEvent: ChildEvent, now: ExactTimeStamp) {
         when (childEvent) {
             is ChildAddEvent, is ChildChangeEvent -> {
-                val remoteProjectRecord = remoteSharedProjectManager.changeChild(childEvent.dataSnapshot())
+                val remoteProjectRecord = remoteSharedProjectManager.setChild(childEvent.dataSnapshot())
 
                 check(remoteProjects.containsKey(remoteProjectRecord.id))
                 remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {

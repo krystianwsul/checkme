@@ -21,18 +21,8 @@ class RemoteSharedProjectManager(
 
     val remoteProjectRecords = children.associate { child -> child.key!! to child.toRecord() }.toMutableMap()
 
-    fun addChild(dataSnapshot: DataSnapshot): RemoteSharedProjectRecord {
+    fun setChild(dataSnapshot: DataSnapshot): RemoteSharedProjectRecord {
         val key = dataSnapshot.key!!
-        check(!remoteProjectRecords.containsKey(key))
-
-        return dataSnapshot.toRecord().also {
-            remoteProjectRecords[key] = it
-        }
-    }
-
-    fun changeChild(dataSnapshot: DataSnapshot): RemoteSharedProjectRecord {
-        val key = dataSnapshot.key!!
-        check(remoteProjectRecords.containsKey(key))
 
         return dataSnapshot.toRecord().also {
             remoteProjectRecords[key] = it

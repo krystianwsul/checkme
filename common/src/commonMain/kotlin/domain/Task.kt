@@ -221,7 +221,7 @@ abstract class Task {
 
         val message = "$name old oldest: $oldestVisible, new oldest: $date"
 
-        ErrorLogger.instance.logException(OldestVisibleException5(message))
+        ErrorLogger.instance.logException(OldestVisibleException6(message))
 
         setOldestVisible(date) // miejmy nadzieję że coś to później zapisze. nota bene: mogą wygenerować się instances dla wcześniej ukończonych czasów
     }
@@ -291,7 +291,7 @@ abstract class Task {
 
     abstract fun deleteSchedule(schedule: Schedule)
 
-    private class OldestVisibleException5(message: String) : Exception(message)
+    private class OldestVisibleException6(message: String) : Exception(message)
 
     abstract fun belongsToRemoteProject(): Boolean
 

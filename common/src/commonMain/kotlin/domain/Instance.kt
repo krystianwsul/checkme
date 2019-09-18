@@ -160,14 +160,14 @@ abstract class Instance {
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         val isVisible = isVisibleHelper(now, hack24)
 
-        if (isVisible) {
+        if (isVisible && isRootInstance(now)) { // root because oldest visible now checked only for task's own schedules
             val task = task
 
             val oldestVisible = task.getOldestVisible()
             val date = scheduleDate
 
             if (oldestVisible != null && date < oldestVisible) {
-                if (exists() && isRootInstance(now)) { // root because oldest visible now checked only for task's own schedules
+                if (exists()) {
                     task.correctOldestVisible(date) // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
                 } else {
                     return false

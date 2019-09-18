@@ -244,6 +244,8 @@ abstract class Instance {
         check(!instanceData.hidden)
 
         createInstanceHierarchy(now).instanceRecord.hidden = true
+
+        task.updateOldestVisible(now)
     }
 
     val hidden get() = instanceData.hidden

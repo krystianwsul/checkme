@@ -111,6 +111,8 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         } else {
             (instanceData as RemoteReal).instanceRecord.done = null
         }
+
+        task.updateOldestVisible(now)
     }
 
     override fun delete() {

@@ -91,7 +91,7 @@ abstract class Task {
         return getParentTask(exactTimeStamp) == null
     }
 
-    protected abstract fun setMyEndExactTimeStamp(endData: EndData?)
+    protected abstract fun setMyEndExactTimeStamp(now: ExactTimeStamp, endData: EndData?)
 
     fun setEndData(
             endData: EndData,
@@ -134,7 +134,7 @@ abstract class Task {
             }
         }
 
-        setMyEndExactTimeStamp(endData)
+        setMyEndExactTimeStamp(now, endData)
     }
 
     fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy? {
@@ -161,7 +161,7 @@ abstract class Task {
     fun clearEndExactTimeStamp(now: ExactTimeStamp) {
         check(!current(now))
 
-        setMyEndExactTimeStamp(null)
+        setMyEndExactTimeStamp(now, null)
     }
 
     abstract fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task

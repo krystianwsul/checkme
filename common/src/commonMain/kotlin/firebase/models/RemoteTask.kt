@@ -94,8 +94,10 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun getEndData() = remoteTaskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 
-    override fun setMyEndExactTimeStamp(endData: EndData?) {
+    override fun setMyEndExactTimeStamp(now: ExactTimeStamp, endData: EndData?) {
         remoteTaskRecord.endData = endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
+
+        updateOldestVisible(now)
     }
 
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task {

@@ -1,10 +1,10 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
-import com.krystianwsul.checkme.utils.time.toExactTimeStamp
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.firebase.models.RemotePrivateProject
 import com.krystianwsul.common.firebase.models.RemoteProject
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.soywiz.klock.days
 
 object Irrelevant {
 
@@ -28,7 +28,7 @@ object Irrelevant {
                 .toMap()
                 .toMutableMap()
 
-        val yesterday = org.joda.time.DateTime(now.long).minusDays(1).toExactTimeStamp()
+        val yesterday = ExactTimeStamp(now.toDateTimeSoy() - 1.days)
 
         fun getIrrelevantNow(endExactTimeStamp: ExactTimeStamp?) = endExactTimeStamp?.takeIf { it > yesterday } // delay deleting removed tasks by a day
                 ?.minusOne()

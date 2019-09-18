@@ -1024,14 +1024,12 @@ class CreateTaskActivity : NavBarActivity() {
                     scheduleText.run {
                         setText(this@CreateTaskActivity.stateData.parent?.name)
 
-                        setOnClickListener {
+                        setFixedOnClickListener {
                             ParentPickerFragment.newInstance(this@CreateTaskActivity.stateData.parent != null).let {
                                 it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
                                 it.initialize(data!!.parentTreeDatas, parentFragmentListener)
                             }
                         }
-
-                        fixClicks()
                     }
                 }
                 in (elementsBeforeSchedules until (elementsBeforeSchedules + stateData.state.schedules.size)) -> (holder as ScheduleHolder).run {
@@ -1048,9 +1046,7 @@ class CreateTaskActivity : NavBarActivity() {
                     scheduleText.run {
                         setText(scheduleEntry.scheduleDataWrapper.getText(data!!.customTimeDatas, this@CreateTaskActivity))
 
-                        setOnClickListener { onTextClick() }
-
-                        fixClicks()
+                        setFixedOnClickListener { onTextClick() }
                     }
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size -> (holder as ScheduleHolder).run {
@@ -1065,7 +1061,7 @@ class CreateTaskActivity : NavBarActivity() {
                     scheduleText.run {
                         text = null
 
-                        setOnClickListener {
+                        setFixedOnClickListener {
                             val parameters = ScheduleDialogFragment.Parameters(
                                     null,
                                     firstScheduleEntry().scheduleDataWrapper.getScheduleDialogData(Date.today(), (this@CreateTaskActivity.hint as? Hint.Schedule)),
@@ -1073,8 +1069,6 @@ class CreateTaskActivity : NavBarActivity() {
 
                             parametersRelay.accept(parameters)
                         }
-
-                        fixClicks()
                     }
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size + 1 -> {
@@ -1096,13 +1090,11 @@ class CreateTaskActivity : NavBarActivity() {
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size + 2 -> {
                     (holder as ImageHolder).run {
-                        listOf(imageLayoutText, imageImage, imageEdit).forEach {
-                            it.setOnClickListener {
-                                CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
-                            }
-                        }
+                        fun listener() = CameraGalleryFragment.newInstance(imageUrl.value!!.loader != null).show(supportFragmentManager, TAG_CAMERA_GALLERY)
 
-                        imageLayoutText.fixClicks()
+                        imageImage.setOnClickListener { listener() }
+                        imageEdit.setOnClickListener { listener() }
+                        imageLayoutText.setFixedOnClickListener(::listener)
                     }
                 }
                 else -> throw IllegalArgumentException()

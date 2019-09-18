@@ -450,16 +450,16 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         dayViewModel = getViewModel()
 
         mainDaysPager.addOneShotGlobalLayoutListener {
-            var selectedByTab: Int? = null
-            var selectedByPager = false
+            var state: PagerScrollState = PagerScrollState.Settled
 
             mainDaysPager.pageSelections()
                     .subscribe {
-                        if (selectedByTab != null) {
-                            if (it == selectedByTab)
-                                selectedByTab = null
+                        val currState = state
+                        if (currState is PagerScrollState.TabTarget) {
+                            if (it == currState.position)
+                                state = PagerScrollState.Settled
                         } else {
-                            selectedByPager = true
+                            state = PagerScrollState.PagerTarget
                             mainTabLayout.apply { selectTab(getTabAt(it)) }
                         }
                     }
@@ -470,11 +470,10 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
             mainTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
 
                 override fun onTabSelected(tab: TabLayout.Tab) {
-                    if (selectedByPager) {
-                        selectedByPager = false
+                    if (state == PagerScrollState.PagerTarget) {
+                        state = PagerScrollState.Settled
                     } else {
-                        selectedByTab = tab.position
-
+                        state = PagerScrollState.TabTarget(tab.position)
                         mainDaysPager.smoothScrollToPosition(tab.position)
                     }
                 }
@@ -486,6 +485,13 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         }
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+    }
+
+    private sealed class PagerScrollState {
+
+        object Settled : PagerScrollState()
+        object PagerTarget : PagerScrollState()
+        class TabTarget(val position: Int) : PagerScrollState()
     }
 
     override fun onStart() {

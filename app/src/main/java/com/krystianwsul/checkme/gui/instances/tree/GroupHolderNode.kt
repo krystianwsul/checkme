@@ -260,10 +260,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
                 }
 
-                rowCheckBox.run {
-                    visibility = checkBoxVisibility
-                    isChecked = checkBoxChecked
-                }
+                rowCheckBoxFrame.visibility = checkBoxVisibility
+
+                rowCheckBox.isChecked = checkBoxChecked
 
                 if (avatarImage != null) {
                     rowImage!!.run {

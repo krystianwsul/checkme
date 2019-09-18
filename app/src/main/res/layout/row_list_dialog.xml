@@ -16,11 +16,18 @@
         android:minHeight="36dp"
         android:gravity="center_vertical">
 
-        <CheckBox
-            android:id="@+id/rowCheckbox"
+        <FrameLayout
+            android:id="@+id/rowCheckboxFrame"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp" />
+            android:layout_height="wrap_content">
+
+            <CheckBox
+                android:id="@+id/rowCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp" />
+
+        </FrameLayout>
 
         <View
             android:id="@+id/rowMargin"

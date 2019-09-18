@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="@dimen/listVerticalPadding"
     android:foreground="@drawable/item_background_material"
     tools:ignore="UnusedAttribute">
 
@@ -14,14 +13,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:minHeight="36dp"
+        android:minHeight="51dp"
         android:gravity="center_vertical">
 
-        <CheckBox
-            android:id="@+id/rowCheckbox"
+        <FrameLayout
+            android:id="@+id/rowCheckboxFrame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"/>
+            android:paddingTop="8dp"
+            android:paddingBottom="7dp">
+
+            <CheckBox
+                android:id="@+id/rowCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp" />
+
+        </FrameLayout>
 
         <View
             android:id="@+id/rowMargin"
@@ -35,6 +43,8 @@
             android:layout_height="@dimen/listImage"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="7dp"
             android:visibility="gone" />
 
         <LinearLayout
@@ -42,6 +52,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="7dp"
             android:orientation="vertical">
 
             <TextView
@@ -77,12 +89,16 @@
             android:id="@+id/rowThumbnail"
             android:layout_width="36dp"
             android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="7dp"
             android:visibility="gone" />
 
         <ImageView
             android:id="@+id/rowExpand"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:paddingTop="8dp"
+            android:paddingBottom="7dp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:contentDescription="@string/expand"
@@ -95,10 +111,10 @@
         android:id="@+id/rowBigImageLayout"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="15dp"
         android:visibility="gone">
 
         <ProgressBar
@@ -118,7 +134,6 @@
         android:id="@+id/rowSeparator"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="7dp"
         android:background="?android:attr/listDivider"
         android:visibility="invisible"/>
 

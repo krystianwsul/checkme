@@ -29,7 +29,7 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.addOneShotGlobalLayoutListener
-import com.krystianwsul.checkme.utils.fixClicks
+import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel

@@ -23,7 +23,7 @@ import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.fixClicks
+import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel

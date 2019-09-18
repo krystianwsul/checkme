@@ -18,10 +18,7 @@ import com.krystianwsul.checkme.gui.DiscardDialogFragment
 import com.krystianwsul.checkme.gui.NavBarActivity
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.persistencemodel.SaveService
-import com.krystianwsul.checkme.utils.fixClicks
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
-import com.krystianwsul.checkme.utils.time.DayOfWeek
-import com.krystianwsul.checkme.utils.time.HourMinute
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.DayOfWeek

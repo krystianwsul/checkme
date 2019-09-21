@@ -14,7 +14,10 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
         fun today() = Date(DateTimeTz.nowLocal())
 
-        fun fromJson(json: String) = ISO8601.DATE_CALENDAR_COMPLETE.parse(json).let { Date(it) }
+        fun fromJson(json: String) = ISO8601.DATE_CALENDAR_COMPLETE
+                .parse(json)
+                .utc
+                .let { Date(it.yearInt, it.month1, it.dayOfMonth) }
     }
 
     val dayOfWeek get() = DayOfWeek.fromDate(this)

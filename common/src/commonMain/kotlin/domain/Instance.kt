@@ -182,7 +182,7 @@ abstract class Instance {
         if (instanceData.hidden)
             return false
 
-        if (task.run { !notDeleted(now) && getEndData()!!.deleteInstances && done == null })
+        if (task.run { !notDeleted(now) && getEndData()!!.deleteInstances && done == null }) // todo it doesn't make sense to update this after setting done, because of the 24 hour delay
             return false
 
         val parentInstance = getParentInstance(now)

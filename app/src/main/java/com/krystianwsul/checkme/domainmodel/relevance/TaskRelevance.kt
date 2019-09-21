@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.domainmodel.relevance
 
+import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -30,12 +31,14 @@ class TaskRelevance(val task: Task) {
                 }
                 .forEach { taskHierarchyRelevances.getValue(it.taskHierarchyKey).setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
 
-        val oldestVisible = task.getOldestVisible()!!
+        val oldestVisible = task.getOldestVisible()
+
+        fun Instance.filterOldestVisible() = oldestVisible?.let { scheduleDate >= it } ?: true
 
         // mark instances relevant
         task.getPastRootInstances(now)
                 .asSequence()
-                .filter { it.scheduleDate >= oldestVisible }
+                .filter { it.filterOldestVisible() }
                 .map { instance ->
                     val instanceKey = instance.instanceKey
 
@@ -49,7 +52,7 @@ class TaskRelevance(val task: Task) {
 
         task.existingInstances
                 .values
-                .filter { it.scheduleDate >= oldestVisible || it.hidden }
+                .filter { it.filterOldestVisible() || it.hidden }
                 .map { instanceRelevances[it.instanceKey]!! }
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }

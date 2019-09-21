@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.records
 
 abstract class RemoteRecord(create: Boolean) {
 
-    protected var delete = false
+    protected var shouldDelete = false
 
     var update = if (create) null else mutableMapOf<String, Any?>()
 
@@ -16,11 +16,11 @@ abstract class RemoteRecord(create: Boolean) {
     protected abstract fun deleteFromParent()
 
     fun getValues(values: MutableMap<String, Any?>): Boolean {
-        if (delete) {
+        if (shouldDelete) {
             check(update != null)
 
             values[key] = null
-            delete = false
+            shouldDelete = false
 
             deleteFromParent()
 
@@ -53,15 +53,15 @@ abstract class RemoteRecord(create: Boolean) {
     }
 
     protected fun addValue(key: String, obj: Any?) {
-        check(!delete)
+        check(!shouldDelete)
 
         update?.put(key, obj)
     }
 
     fun delete() {
-        check(!delete)
+        check(!shouldDelete)
         check(update != null)
 
-        delete = true
+        shouldDelete = true
     }
 }

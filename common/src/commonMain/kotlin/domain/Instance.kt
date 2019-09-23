@@ -214,7 +214,7 @@ abstract class Instance {
 
         fun message(task: Task) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
 
-        if (!parentTask.current(hierarchyExactTimeStamp.first)) {
+        if (!parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
             ErrorLogger.instance.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
             return null
         }

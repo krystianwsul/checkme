@@ -2305,6 +2305,8 @@ class DomainFactory(
             }
 
     private fun setIrrelevant(now: ExactTimeStamp) {
+        getTasks().forEach { it.updateOldestVisible(uuid, now) }
+
         val relevantInstances = remoteProjectFactory.remoteProjects
                 .values
                 .flatMap { Irrelevant.setIrrelevant(remoteProjectFactory, it, now) }

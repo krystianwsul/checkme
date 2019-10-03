@@ -1,6 +1,8 @@
 package com.krystianwsul.checkme.gui
 
 import android.content.Context
+import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.Fragment
 
 import com.krystianwsul.checkme.MyCrashlytics
@@ -12,22 +14,27 @@ abstract class AbstractFragment : Fragment() {
     protected val viewCreatedDisposable = CompositeDisposable()
 
     override fun onAttach(context: Context) {
-        MyCrashlytics.log(javaClass.simpleName + ".onAttach " + hashCode())
+        MyCrashlytics.logMethod(this)
         super.onAttach(context)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        MyCrashlytics.logMethod(this)
+        super.onViewCreated(view, savedInstanceState)
+    }
+
     override fun onResume() {
-        MyCrashlytics.log(javaClass.simpleName + ".onResume " + hashCode())
+        MyCrashlytics.logMethod(this)
         super.onResume()
     }
 
     override fun onPause() {
-        MyCrashlytics.log(javaClass.simpleName + ".onPause " + hashCode())
+        MyCrashlytics.logMethod(this)
         super.onPause()
     }
 
     override fun onDestroyView() {
-        MyCrashlytics.log(javaClass.simpleName + ".onDestroyView " + hashCode())
+        MyCrashlytics.logMethod(this)
 
         viewCreatedDisposable.clear()
 
@@ -35,7 +42,7 @@ abstract class AbstractFragment : Fragment() {
     }
 
     override fun onDestroy() {
-        MyCrashlytics.log(javaClass.simpleName + ".onDestroy " + hashCode())
+        MyCrashlytics.logMethod(this)
 
         createDisposable.dispose()
 
@@ -43,7 +50,7 @@ abstract class AbstractFragment : Fragment() {
     }
 
     override fun onDetach() {
-        MyCrashlytics.log(javaClass.simpleName + ".onDetach " + hashCode())
+        MyCrashlytics.logMethod(this)
         super.onDetach()
     }
 }

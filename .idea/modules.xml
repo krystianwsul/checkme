@@ -7,6 +7,8 @@
       <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
       <module fileurl="file://$PROJECT_DIR$/common/common_commonMain.iml" filepath="$PROJECT_DIR$/common/common_commonMain.iml" group="common" />
       <module fileurl="file://$PROJECT_DIR$/common/common_commonTest.iml" filepath="$PROJECT_DIR$/common/common_commonTest.iml" group="common" />
+      <module fileurl="file://$PROJECT_DIR$/common/common_jsMain.iml" filepath="$PROJECT_DIR$/common/common_jsMain.iml" group="common" />
+      <module fileurl="file://$PROJECT_DIR$/common/common_jsTest.iml" filepath="$PROJECT_DIR$/common/common_jsTest.iml" group="common" />
       <module fileurl="file://$PROJECT_DIR$/treeadapter/treeadapter.iml" filepath="$PROJECT_DIR$/treeadapter/treeadapter.iml" />
     </modules>
   </component>

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import android.util.Log
 import com.android.volley.NoConnectionError
 import com.android.volley.Request
+import com.android.volley.ServerError
 import com.android.volley.TimeoutError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
@@ -68,10 +69,10 @@ object BackendNotifier {
                     }
                 },
                 {
-                    if (it is TimeoutError || it is NoConnectionError) {
-                        Log.e("asdf", "BackendNotifier error", it)
-                    } else {
-                        MyCrashlytics.logException(it)
+                    when (it) {
+                        is TimeoutError, is NoConnectionError -> Log.e("asdf", "BackendNotifier error", it)
+                        is ServerError -> MyCrashlytics.logException(ServerErrorWrapper("message: ${it.message},  networkResponse: " + it.networkResponse?.let { "code: ${it.statusCode}, data: ${String(it.data)}" }))
+                        else -> MyCrashlytics.logException(it)
                     }
                 })
 
@@ -79,4 +80,6 @@ object BackendNotifier {
     }
 
     private class BackendException(message: String) : Exception(message)
+
+    private class ServerErrorWrapper(message: String) : Exception(message)
 }

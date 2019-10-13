@@ -34,6 +34,6 @@ task clean(type: Delete) {
 
 ext {
     appCompatVersion = '1.1.0'
-    materialVersion = '1.1.0-alpha10'
+    materialVersion = '1.1.0-beta01'
     jodaVersion = '2.10.3'
 }

@@ -163,7 +163,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                         dismiss()
                     }
 
-                    editInstanceCancel.setOnClickListener { dialog.cancel() }
+                    editInstanceCancel.setOnClickListener { dialog!!.cancel() }
                 }
 
         return BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme).apply {
@@ -222,7 +222,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
                 override fun show(snackbarListener: SnackbarListener) = snackbarListener.showInstanceMarkedDone()
             })
 
-            dialog.cancel()
+            dialog!!.cancel()
             return
         }
 

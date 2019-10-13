@@ -39,7 +39,7 @@ class CameraGalleryFragment : NoCollapseBottomSheetDialogFragment() {
     override fun onStart() {
         super.onStart()
 
-        dialog.findViewById<NavigationView>(R.id.cameraGalleryNavigation)!!.apply {
+        dialog!!.findViewById<NavigationView>(R.id.cameraGalleryNavigation)!!.apply {
             menu.findItem(R.id.camera_gallery_remove).isVisible = showRemove
 
             setNavigationItemSelectedListener {

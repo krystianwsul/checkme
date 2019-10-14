@@ -14,5 +14,5 @@ enum class DayOfWeek {
         fun fromDate(date: Date) = values()[date.toDateTimeTz().dayOfWeekInt]
     }
 
-    override fun toString() = com.soywiz.klock.DayOfWeek[ordinal].localName
+    override fun toString() = com.soywiz.klock.DayOfWeek[ordinal].localName.capitalize()
 }

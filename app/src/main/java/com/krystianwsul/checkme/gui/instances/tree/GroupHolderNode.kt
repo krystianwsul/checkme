@@ -8,7 +8,6 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.MyApplication
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.toImageLoader
 import com.krystianwsul.checkme.utils.loadPhoto
@@ -91,15 +90,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
         override fun same(other: ModelState) = (other as State).id == id
     }
 
-    private fun checkStale() {
-        if (treeNode.treeNodeCollection.stale) {
-            if (MyCrashlytics.enabled)
-                MyCrashlytics.logException(StaleTreeNodeException())
-            else
-                throw StaleTreeNodeException()
-        }
-    }
-
     protected fun showImage(rowBigImage: ImageView, taskImage: ImageNode.ImageData) {
         val viewer = StfalconImageViewer.Builder(rowBigImage.context, listOf(taskImage.imageState), MyImageLoader)
                 .withTransitionFrom(rowBigImage)
@@ -111,8 +101,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
     final override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, startingDrag: Boolean) {
         val groupHolder = viewHolder as NodeHolder
-
-        checkStale()
 
         groupHolder.run {
             val taskImage = imageData
@@ -277,8 +265,6 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             rowSeparator.visibility = if (treeNode.separatorVisible) View.VISIBLE else View.INVISIBLE
         }
     }
-
-    class StaleTreeNodeException : Exception()
 
     object MyImageLoader : ImageLoader<ImageState> {
 

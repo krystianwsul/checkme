@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.gui.instances.tree
 
 import com.jakewharton.rxbinding3.view.clicks
 import com.jakewharton.rxbinding3.view.longClicks
-import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.treeadapter.TreeModelAdapter
 import com.krystianwsul.treeadapter.TreeNodeCollection
 import io.reactivex.Observable
@@ -13,18 +12,7 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
 
     protected abstract val treeNodeCollection: TreeNodeCollection<NodeHolder>
 
-    private fun checkStale() {
-        if (treeNodeCollection.stale) {
-            if (MyCrashlytics.enabled)
-                MyCrashlytics.logException(GroupHolderNode.StaleTreeNodeException())
-            else
-                throw GroupHolderNode.StaleTreeNodeException()
-        }
-    }
-
     final override fun onViewAttachedToWindow(holder: NodeHolder) {
-        checkStale()
-
         holder.apply {
             fun Observable<*>.mapNodes() = map { adapterPosition }.filter { it >= 0 }.map {
                 treeNodeCollection.getNode(it).let {
@@ -35,33 +23,19 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
             itemView.clicks()
                     .mapNodes()
                     .subscribe { (treeNode, groupHolderNode) ->
-                        checkStale()
-
-                        val imageData = groupHolderNode.imageData
-
-                        if (imageData == null)
+                        if (groupHolderNode.imageData == null)
                             treeNode.onClick(this)
                     }
                     .addTo(compositeDisposable)
 
             itemView.longClicks { true }
                     .mapNodes()
-                    .subscribe { (_, groupHolderNode) ->
-                        groupHolderNode.apply {
-                            checkStale()
-
-                            onLongClick(holder)
-                        }
-                    }
+                    .subscribe { (_, groupHolderNode) -> groupHolderNode.onLongClick(holder) }
                     .addTo(compositeDisposable)
 
             rowExpand.clicks()
                     .mapNodes()
-                    .subscribe { (treeNode, _) ->
-                        checkStale()
-
-                        treeNode.onExpandClick()
-                    }
+                    .subscribe { (treeNode, _) -> treeNode.onExpandClick() }
                     .addTo(compositeDisposable)
 
             listOf(
@@ -70,11 +44,7 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
             ).merge()
                     .mapNodes()
                     .subscribe { (_, groupHolderNode) ->
-                        groupHolderNode.apply {
-                            checkStale()
-
-                            (checkBoxState as? GroupHolderNode.CheckBoxState.Visible)?.listener?.invoke()
-                        }
+                        (groupHolderNode.checkBoxState as? GroupHolderNode.CheckBoxState.Visible)?.listener?.invoke()
                     }
                     .addTo(compositeDisposable)
         }

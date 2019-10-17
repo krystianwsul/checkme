@@ -9,8 +9,6 @@ class TreeNodeCollection<T : RecyclerView.ViewHolder>(val treeViewAdapter: TreeV
 
     private lateinit var treeNodes: MutableList<TreeNode<T>>
 
-    var stale = false // todo remove
-
     val selectedNodes: List<TreeNode<T>>
         get() {
             if (!this::treeNodes.isInitialized)

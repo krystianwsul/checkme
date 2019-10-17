@@ -32,8 +32,6 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
     val updates = PublishRelay.create<Unit>()
 
     fun setTreeNodeCollection(treeNodeCollection: TreeNodeCollection<T>) {
-        this.treeNodeCollection?.stale = true
-
         this.treeNodeCollection = treeNodeCollection
     }
 
@@ -50,16 +48,11 @@ class TreeViewAdapter<T : RecyclerView.ViewHolder>(
 
     fun decrementSelected(x: Placeholder) = treeModelAdapter.decrementSelected(x)
 
-    fun updateDisplayedNodes(action: () -> Unit) = updateDisplayedNodes(false, action)
-
-    fun updateDisplayedNodes(forceChange: Boolean, action: () -> Unit) {
+    fun updateDisplayedNodes(action: () -> Unit) {
         if (treeNodeCollection == null)
             throw SetTreeNodeCollectionNotCalledException()
 
         check(!updating)
-
-        if (forceChange)
-            treeNodeCollection!!.stale = true
 
         val oldStates = treeNodeCollection!!.displayedNodes.map { it.state }
         val showPadding = paddingLayout != null

@@ -122,7 +122,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
 
             expandedParentKeys = if (expanded.isEmpty()) null else expanded
 
-            treeViewAdapter!!.updateDisplayedNodes(true) {
+            treeViewAdapter!!.updateDisplayedNodes {
                 (treeViewAdapter!!.treeModelAdapter as TaskAdapter).initialize(taskDatas!!, expandedParentKeys)
 
                 query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }

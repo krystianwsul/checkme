@@ -150,7 +150,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         if (this::treeViewAdapter.isInitialized) {
             saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
-            treeViewAdapter.updateDisplayedNodes(true) {
+            treeViewAdapter.updateDisplayedNodes {
                 (treeViewAdapter.treeModelAdapter as FriendListAdapter).initialize(data!!.userListDatas, saveState)
             }
         } else {

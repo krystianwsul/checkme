@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.common.utils.InstanceKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -65,7 +64,7 @@ class DividerNode(indentation: Int, val nodeCollection: NodeCollection) : GroupH
 
     override val name get() = NameData(groupListFragment.activity.getString(R.string.done))
 
-    override val checkBoxVisibility = View.INVISIBLE
+    override val checkBoxState = CheckBoxState.Invisible
 
     fun remove(doneInstanceNode: DoneInstanceNode, x: TreeViewAdapter.Placeholder) {
         check(doneInstanceNodes.contains(doneInstanceNode))

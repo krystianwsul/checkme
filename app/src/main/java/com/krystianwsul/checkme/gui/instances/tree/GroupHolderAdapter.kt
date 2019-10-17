@@ -71,7 +71,7 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
                         getTreeNode().getGroupNode().apply {
                             checkStale()
 
-                            checkBoxOnClickListener()
+                            (checkBoxState as? GroupHolderNode.CheckBoxState.Visible)?.listener?.invoke()
                         }
                     }
                     .addTo(compositeDisposable)

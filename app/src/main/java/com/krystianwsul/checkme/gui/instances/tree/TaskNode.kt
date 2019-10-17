@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.gui.tasks.ShowTaskActivity
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -93,7 +92,7 @@ class TaskNode(
         groupListFragment.activity.startActivity(ShowTaskActivity.newIntent(taskData.taskKey))
     }
 
-    override val checkBoxVisibility = View.INVISIBLE
+    override val checkBoxState = CheckBoxState.Invisible
 
     override val isSelectable = true
 

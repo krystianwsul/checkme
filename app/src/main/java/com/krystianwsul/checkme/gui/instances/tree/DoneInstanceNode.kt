@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -85,34 +84,29 @@ class DoneInstanceNode(
 
     override val children get() = NotDoneGroupNode.NotDoneInstanceNode.getChildrenNew(treeNode, instanceData)
 
-    override val checkBoxVisibility
+    override val checkBoxState
         get() = if (groupListFragment.selectionCallback.hasActionMode) {
-            View.INVISIBLE
+            CheckBoxState.Invisible
         } else {
-            View.VISIBLE
-        }
+            CheckBoxState.Visible(true) {
+                val nodeCollection = dividerNode.nodeCollection
+                val groupAdapter = nodeCollection.groupAdapter
 
-    override val checkBoxChecked = true
+                groupAdapter.treeNodeCollection
+                        .treeViewAdapter
+                        .updateDisplayedNodes {
+                            instanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.instanceKey, false)
 
-    override fun checkBoxOnClickListener() {
-        val nodeCollection = dividerNode.nodeCollection
+                            dividerNode.remove(this, TreeViewAdapter.Placeholder)
 
-        val groupAdapter = nodeCollection.groupAdapter
+                            nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
+                        }
 
-        groupAdapter.treeNodeCollection
-                .treeViewAdapter
-                .updateDisplayedNodes {
-                    instanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceData.instanceKey, false)
-
-                    dividerNode.remove(this, TreeViewAdapter.Placeholder)
-
-                    nodeCollection.notDoneGroupCollection.add(instanceData, TreeViewAdapter.Placeholder)
+                groupListFragment.listener.showSnackbarNotDone(1) {
+                    DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceData.instanceKey, true)
                 }
-
-        groupListFragment.listener.showSnackbarNotDone(1) {
-            DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceData.instanceKey, true)
+            }
         }
-    }
 
     override fun compareTo(other: ModelNode<NodeHolder>): Int {
         checkNotNull(instanceData.done)

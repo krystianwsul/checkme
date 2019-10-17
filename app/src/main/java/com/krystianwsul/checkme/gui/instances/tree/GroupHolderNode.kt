@@ -47,13 +47,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
     protected open val children: Pair<String, Int>? = null
 
-    protected open val checkBoxVisibility = View.GONE
-
-    protected open val checkBoxChecked = false
+    open val checkBoxState: CheckBoxState = CheckBoxState.Gone
 
     protected open val avatarImage: NullableWrapper<String>? = null
-
-    open fun checkBoxOnClickListener() = Unit
 
     open fun onLongClick(viewHolder: RecyclerView.ViewHolder) = treeNode.onLongClick()
 
@@ -76,8 +72,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 indentation,
                 treeNode.expandVisible,
                 treeNode.isExpanded,
-                checkBoxVisibility,
-                checkBoxChecked,
+                checkBoxState,
                 imageData?.imageState)
 
     protected open val colorBackground = GroupHolderNode.colorBackground
@@ -90,8 +85,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val indentation: Int,
             val expandVisible: Boolean,
             val isExpanded: Boolean,
-            val checkboxVisibility: Int,
-            val checkboxChecked: Boolean,
+            val checkBoxState: CheckBoxState,
             val imageState: ImageState?) : ModelState {
 
         override fun same(other: ModelState) = (other as State).id == id
@@ -137,10 +131,10 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 rowContainer.visibility = View.VISIBLE
                 rowBigImageLayout?.visibility = View.GONE
 
-                val checkBoxVisibility = checkBoxVisibility
+                val checkBoxState = checkBoxState
                 val widthKey = WidthKey(
                         indentation,
-                        checkBoxVisibility == View.GONE,
+                        checkBoxState.visibility == View.GONE,
                         rowContainer.orientation,
                         avatarImage != null,
                         thumbnail != null)
@@ -257,9 +251,9 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     setImageResource(if (treeNode.isExpanded) R.drawable.ic_expand_less_black_36dp else R.drawable.ic_expand_more_black_36dp)
                 }
 
-                rowCheckBoxFrame.visibility = checkBoxVisibility
+                rowCheckBoxFrame.visibility = checkBoxState.visibility
 
-                rowCheckBox.isChecked = checkBoxChecked
+                rowCheckBox.isChecked = checkBoxState.checked
 
                 if (avatarImage != null) {
                     rowImage!!.run {
@@ -270,7 +264,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                     rowImage?.visibility = View.GONE
                 }
 
-                rowMargin.visibility = if (checkBoxVisibility == View.GONE && avatarImage == null) View.VISIBLE else View.GONE
+                rowMargin.visibility = if (checkBoxState.visibility == View.GONE && avatarImage == null) View.VISIBLE else View.GONE
 
                 itemView.run {
                     setBackgroundColor(if (treeNode.isSelected && !(isPressed && startingDrag)) colorSelected else colorBackground)
@@ -299,4 +293,40 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val orientation: Int,
             val avatarVisible: Boolean,
             val thumbnailVisible: Boolean)
+
+    sealed class CheckBoxState {
+
+        abstract val visibility: Int
+        open val checked: Boolean = false
+
+        object Gone : CheckBoxState() {
+
+            override val visibility = View.GONE
+        }
+
+        object Invisible : CheckBoxState() {
+
+            override val visibility = View.INVISIBLE
+        }
+
+        class Visible(override val checked: Boolean, val listener: () -> Unit) : CheckBoxState() {
+
+            override val visibility = View.VISIBLE
+
+            override fun hashCode() = (if (checked) 1 else 0) + 31 * visibility
+
+            override fun equals(other: Any?): Boolean {
+                if (other === null) return false
+                if (other === this) return true
+
+                if (other !is Visible)
+                    return false
+
+                if (other.checked != checked)
+                    return false
+
+                return true
+            }
+        }
+    }
 }

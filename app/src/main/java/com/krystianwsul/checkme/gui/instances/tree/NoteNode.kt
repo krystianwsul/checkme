@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.NodeContainer
 import com.krystianwsul.treeadapter.TreeNode
@@ -39,5 +38,5 @@ class NoteNode(private val note: String, instance: Boolean) : GroupHolderNode(0)
 
     override fun compareTo(other: ModelNode<NodeHolder>) = -1
 
-    override val checkBoxVisibility = if (instance) View.INVISIBLE else View.GONE
+    override val checkBoxState = if (instance) CheckBoxState.Invisible else CheckBoxState.Gone
 }

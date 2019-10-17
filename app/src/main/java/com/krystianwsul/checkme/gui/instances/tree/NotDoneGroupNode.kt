@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.instances.ShowGroupActivity
@@ -178,48 +177,40 @@ class NotDoneGroupNode(
             null
         }
 
-    override val checkBoxVisibility
+    override val checkBoxState
         get() = if (singleInstance()) {
             if (groupListFragment.selectionCallback.hasActionMode || treeNode.isSelected/* drag hack */) {
-                View.INVISIBLE
+                CheckBoxState.Invisible
             } else {
-                View.VISIBLE
+                CheckBoxState.Visible(false) {
+                    val groupAdapter = nodeCollection.groupAdapter
+
+                    val instanceKey = singleInstanceData.instanceKey
+
+                    groupAdapter.treeNodeCollection
+                            .treeViewAdapter
+                            .updateDisplayedNodes {
+                                singleInstanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceKey, true)!!
+
+                                GroupListFragment.recursiveExists(singleInstanceData)
+
+                                nodeCollection.dividerNode.add(singleInstanceData, TreeViewAdapter.Placeholder)
+
+                                notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
+                            }
+
+                    groupListFragment.listener.showSnackbarDone(1) {
+                        DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
+                    }
+
+                }
             }
         } else {
-            if (treeNode.isExpanded) {
-                View.GONE
-            } else {
-                View.INVISIBLE
-            }
+            if (treeNode.isExpanded)
+                CheckBoxState.Gone
+            else
+                CheckBoxState.Invisible
         }
-
-    override val checkBoxChecked = false
-
-    override fun checkBoxOnClickListener() {
-        val groupAdapter = nodeCollection.groupAdapter
-
-        check(singleInstance())
-
-        check(!groupAdapter.groupListFragment.selectionCallback.hasActionMode)
-
-        val instanceKey = singleInstanceData.instanceKey
-
-        groupAdapter.treeNodeCollection
-                .treeViewAdapter
-                .updateDisplayedNodes {
-                    singleInstanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceKey, true)!!
-
-                    GroupListFragment.recursiveExists(singleInstanceData)
-
-                    nodeCollection.dividerNode.add(singleInstanceData, TreeViewAdapter.Placeholder)
-
-                    notDoneGroupCollection.remove(this, TreeViewAdapter.Placeholder)
-                }
-
-        groupListFragment.listener.showSnackbarDone(1) {
-            DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
-        }
-    }
 
     override fun onLongClick(viewHolder: RecyclerView.ViewHolder) {
         val groupListFragment = groupAdapter.groupListFragment
@@ -467,35 +458,34 @@ class NotDoneGroupNode(
 
         override val children get() = getChildrenNew(treeNode, instanceData)
 
-        override val checkBoxVisibility get() = if (groupListFragment.selectionCallback.hasActionMode) View.INVISIBLE else View.VISIBLE
+        override val checkBoxState
+            get() = if (groupListFragment.selectionCallback.hasActionMode) {
+                CheckBoxState.Invisible
+            } else {
+                CheckBoxState.Visible(false) {
+                    val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
+                    check(notDoneGroupTreeNode.isExpanded)
 
-        override val checkBoxChecked = false
+                    val groupAdapter = parentNodeCollection.groupAdapter
+                    val instanceKey = instanceData.instanceKey
 
-        override fun checkBoxOnClickListener() {
-            val notDoneGroupTreeNode = parentNotDoneGroupNode.treeNode
-            check(notDoneGroupTreeNode.isExpanded)
+                    groupAdapter.treeNodeCollection
+                            .treeViewAdapter
+                            .updateDisplayedNodes {
+                                instanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceKey, true)!!
 
-            val groupAdapter = parentNodeCollection.groupAdapter
-            check(!groupAdapter.groupListFragment.selectionCallback.hasActionMode)
+                                GroupListFragment.recursiveExists(instanceData)
 
-            val instanceKey = instanceData.instanceKey
+                                parentNotDoneGroupNode.remove(this, TreeViewAdapter.Placeholder)
 
-            groupAdapter.treeNodeCollection
-                    .treeViewAdapter
-                    .updateDisplayedNodes {
-                        instanceData.done = DomainFactory.instance.setInstanceDone(groupAdapter.dataId, SaveService.Source.GUI, instanceKey, true)!!
+                                parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
+                            }
 
-                        GroupListFragment.recursiveExists(instanceData)
-
-                        parentNotDoneGroupNode.remove(this, TreeViewAdapter.Placeholder)
-
-                        parentNodeCollection.dividerNode.add(instanceData, TreeViewAdapter.Placeholder)
+                    groupListFragment.listener.showSnackbarDone(1) {
+                        DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
                     }
-
-            groupListFragment.listener.showSnackbarDone(1) {
-                DomainFactory.instance.setInstanceDone(0, SaveService.Source.GUI, instanceKey, false)
+                }
             }
-        }
 
         override fun onClick(holder: NodeHolder) = groupListFragment.activity.startActivity(ShowInstanceActivity.getIntent(groupListFragment.activity, instanceData.instanceKey))
 

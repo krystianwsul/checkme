@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui.instances.tree
 
-import android.view.View
 import com.krystianwsul.checkme.R
 import com.krystianwsul.common.utils.TaskKey
 import com.krystianwsul.treeadapter.ModelNode
@@ -66,5 +65,5 @@ class UnscheduledNode(private val nodeCollection: NodeCollection) : GroupHolderN
 
     override val isVisibleWhenEmpty = false
 
-    override val checkBoxVisibility = View.INVISIBLE
+    override val checkBoxState = CheckBoxState.Invisible
 }

@@ -8,7 +8,8 @@ import com.krystianwsul.common.firebase.json.UserJson
 class RemoteProjectUserRecord(
         create: Boolean,
         private val remoteProjectRecord: RemoteSharedProjectRecord,
-        override val createObject: UserJson) : RemoteRecord(create) {
+        override val createObject: UserJson
+) : RemoteRecord(create) {
 
     companion object {
 
@@ -19,29 +20,11 @@ class RemoteProjectUserRecord(
 
     override val key by lazy { remoteProjectRecord.childKey + "/" + USERS + "/" + id }
 
-    var name: String
-        get() = createObject.name
-        set(name) {
-            if (name == createObject.name)
-                return
-
-            createObject.name = name
-            addValue("$key/name", name)
-        }
+    var name by Committer(createObject::name)
 
     val email by lazy { createObject.email }
 
-    var photoUrl: String?
-        get() = createObject.photoUrl
-        set(value) {
-            if (value == createObject.photoUrl)
-                return
-
-            check(!value.isNullOrEmpty())
-
-            createObject.photoUrl = value
-            addValue("$key/photoUrl", value)
-        }
+    var photoUrl by Committer(createObject::photoUrl)
 
     fun setToken(deviceDbInfo: DeviceDbInfo) {
         check(deviceDbInfo.uuid.isNotEmpty())

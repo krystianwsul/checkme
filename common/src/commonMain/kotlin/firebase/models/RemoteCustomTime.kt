@@ -11,7 +11,7 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
 
     protected abstract val remoteProject: RemoteProject<T>
 
-    abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord<T>
+    abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord<T, *>
 
     abstract val id: T
 

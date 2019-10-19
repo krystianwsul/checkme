@@ -19,7 +19,7 @@ class RemotePrivateCustomTime(
 
     private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(id)
             .map { (it as RemoteCustomTime<*>).remoteCustomTimeRecord }
-            .toMutableList<RemoteCustomTimeRecord<*>>()
+            .toMutableList<RemoteCustomTimeRecord<*, *>>()
             .apply { add(remoteCustomTimeRecord) }
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {

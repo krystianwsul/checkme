@@ -19,7 +19,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
 
     protected abstract val projectJson: ProjectJson
 
-    abstract val remoteCustomTimeRecords: Map<out T, RemoteCustomTimeRecord<T>>
+    abstract val remoteCustomTimeRecords: Map<out T, RemoteCustomTimeRecord<T, *>>
 
     val remoteTaskRecords by lazy {
         projectJson.tasks
@@ -45,29 +45,11 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
 
     abstract val childKey: String
 
-    var name: String
-        get() = projectJson.name
-        set(name) {
-            check(name.isNotEmpty())
-
-            if (name == projectJson.name)
-                return
-
-            projectJson.name = name
-            addValue("$id/$PROJECT_JSON/name", name)
-        }
+    var name by Committer(projectJson::name, "$id/$PROJECT_JSON")
 
     val startTime get() = projectJson.startTime
 
-    var endTime
-        get() = projectJson.endTime
-        set(value) {
-            if (value == projectJson.endTime)
-                return
-
-            projectJson.endTime = value
-            addValue("$id/$PROJECT_JSON/endTime", value)
-        }
+    var endTime by Committer(projectJson::endTime, "$id/$PROJECT_JSON")
 
     override val children
         get() = remoteTaskRecords.values +
@@ -96,7 +78,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
 
     abstract fun getScheduleRecordId(taskId: String): String
 
-    abstract fun getCustomTimeRecord(id: String): RemoteCustomTimeRecord<T>
+    abstract fun getCustomTimeRecord(id: String): RemoteCustomTimeRecord<T, *>
 
     abstract fun getRemoteCustomTimeId(id: String): T
 

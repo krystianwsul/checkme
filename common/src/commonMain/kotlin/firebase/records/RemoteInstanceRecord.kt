@@ -116,31 +116,10 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
     }
 
     override var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
-        val instanceYear = value!!.year
-        val instanceMonth = value.month
-        val instanceDay = value.day
-
-        if (instanceYear != createObject.instanceYear) {
-            createObject.instanceYear = instanceYear
-            addValue("$key/instanceYear", instanceYear)
-        }
-
-        if (instanceMonth != createObject.instanceMonth) {
-            createObject.instanceMonth = instanceMonth
-            addValue("$key/instanceMonth", instanceMonth)
-        }
-
-        if (instanceDay != createObject.instanceDay) {
-            createObject.instanceDay = instanceDay
-            addValue("$key/instanceDay", instanceDay)
-        }
-
-        val json = value.toJson()
-
-        if (json != createObject.instanceDate) {
-            createObject.instanceDate = json
-            addValue("$key/instanceDate", json)
-        }
+        setProperty(createObject::instanceYear, value!!.year)
+        setProperty(createObject::instanceMonth, value.month)
+        setProperty(createObject::instanceDay, value.day)
+        setProperty(createObject::instanceDate, value.toJson())
     }
 
     private val initialInstanceJsonTime: JsonTime<T>?
@@ -161,32 +140,16 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
     override var instanceJsonTime by observable(initialInstanceJsonTime) { _, _, value ->
         var customTimeId: T? = null
         var hourMinute: HourMinute? = null
+
         when (value) {
             is JsonTime.Custom -> customTimeId = value.id
             is JsonTime.Normal -> hourMinute = value.hourMinute
         }
 
-        if (customTimeId != createObject.instanceCustomTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) }) {
-            createObject.instanceCustomTimeId = customTimeId?.value
-            addValue("$key/instanceCustomTimeId", customTimeId?.value)
-        }
-
-        if (hourMinute?.hour != createObject.instanceHour) {
-            createObject.instanceHour = hourMinute?.hour
-            addValue("$key/instanceHour", hourMinute?.hour)
-        }
-
-        if (hourMinute?.minute != createObject.instanceMinute) {
-            createObject.instanceMinute = hourMinute?.minute
-            addValue("$key/instanceMinute", hourMinute?.minute)
-        }
-
-        val instanceTime = value?.toJson()
-
-        if (instanceTime != createObject.instanceTime) {
-            createObject.instanceTime = instanceTime
-            addValue("$key/instanceTime", instanceTime)
-        }
+        setProperty(createObject::instanceCustomTimeId, customTimeId?.value)
+        setProperty(createObject::instanceHour, hourMinute?.hour)
+        setProperty(createObject::instanceMinute, hourMinute?.minute)
+        setProperty(createObject::instanceTime, value?.toJson())
     }
 
     override var ordinal by Committer(createObject::ordinal)

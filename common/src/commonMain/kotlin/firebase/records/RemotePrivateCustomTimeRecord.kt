@@ -27,23 +27,6 @@ class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.
 
     override fun mine(userInfo: UserInfo) = true
 
-    var current: Boolean
-        get() = customTimeJson.current
-        set(value) {
-            if (customTimeJson.current == value)
-                return
-
-            customTimeJson.current = value
-            addValue("$key/current", value)
-        }
-
-    var endTime
-        get() = customTimeJson.endTime
-        set(value) {
-            if (value == customTimeJson.endTime)
-                return
-
-            customTimeJson.endTime = value
-            addValue("$key/endTime", value)
-        }
+    var current by Committer(customTimeJson::current)
+    var endTime by Committer(customTimeJson::endTime)
 }

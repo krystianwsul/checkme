@@ -190,7 +190,6 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
     }
 
     override var ordinal by Committer(createObject::ordinal)
-
     override var hidden by Committer(createObject::hidden)
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)

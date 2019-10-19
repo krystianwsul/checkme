@@ -11,15 +11,7 @@ class RemoteWeeklyScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRecord<
 
     override val startTime by lazy { weeklyScheduleJson.startTime }
 
-    override var endTime
-        get() = weeklyScheduleJson.endTime
-        set(value) {
-            if (value == weeklyScheduleJson.endTime)
-                return
-
-            weeklyScheduleJson.endTime = value
-            addValue("$key/weeklyScheduleJson/endTime", value)
-        }
+    override var endTime by Committer(weeklyScheduleJson::endTime, "$key/weeklyScheduleJson")
 
     val dayOfWeek by lazy { weeklyScheduleJson.dayOfWeek }
 

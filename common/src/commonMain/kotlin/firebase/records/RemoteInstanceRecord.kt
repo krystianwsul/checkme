@@ -79,15 +79,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
 
     val taskId by lazy { remoteTaskRecord.id }
 
-    override var done: Long?
-        get() = createObject.done
-        set(done) {
-            if (done == createObject.done)
-                return
-
-            createObject.done = done
-            addValue("$key/done", done)
-        }
+    override var done by Committer(createObject::done)
 
     override val scheduleYear by lazy { scheduleKey.scheduleDate.year }
     override val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
@@ -197,25 +189,9 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         }
     }
 
-    override var ordinal
-        get() = createObject.ordinal
-        set(ordinal) {
-            if (ordinal == createObject.ordinal)
-                return
+    override var ordinal by Committer(createObject::ordinal)
 
-            createObject.ordinal = ordinal
-            addValue("$key/ordinal", ordinal)
-        }
-
-    override var hidden
-        get() = createObject.hidden
-        set(value) {
-            if (value == createObject.hidden)
-                return
-
-            createObject.hidden = value
-            addValue("$key/hidden", value)
-        }
+    override var hidden by Committer(createObject::hidden)
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
 

@@ -8,7 +8,8 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 class RemoteDailyScheduleRecord<T : RemoteCustomTimeId>(
         id: String,
         remoteTaskRecord: RemoteTaskRecord<T>,
-        scheduleWrapper: ScheduleWrapper) : RemoteScheduleRecord<T>(id, remoteTaskRecord, scheduleWrapper) {
+        scheduleWrapper: ScheduleWrapper
+) : RemoteScheduleRecord<T>(id, remoteTaskRecord, scheduleWrapper) {
 
     private val dailyScheduleJson by lazy { scheduleWrapper.dailyScheduleJson!! }
 
@@ -20,15 +21,7 @@ class RemoteDailyScheduleRecord<T : RemoteCustomTimeId>(
 
     override val startTime by lazy { dailyScheduleJson.startTime }
 
-    override var endTime
-        get() = dailyScheduleJson.endTime
-        set(value) {
-            if (value == dailyScheduleJson.endTime)
-                return
-
-            dailyScheduleJson.endTime = value
-            addValue("$key/dailyScheduleJson/endTime", value)
-        }
+    override var endTime by Committer(dailyScheduleJson::endTime, "$key/dailyScheduleJson")
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteDailyScheduleRecords.remove(id) == this)
 }

@@ -8,9 +8,6 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.KProperty
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
@@ -71,19 +68,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     var name by Committer(taskJson::name)
 
-    private inner class Committer<T>(private val innerProperty: KMutableProperty0<T>) : ReadWriteProperty<RemoteTaskRecord<*>, T> {
-
-        override fun getValue(thisRef: RemoteTaskRecord<*>, property: KProperty<*>) = innerProperty.get()
-
-        override fun setValue(thisRef: RemoteTaskRecord<*>, property: KProperty<*>, value: T) {
-            if (innerProperty.get() == value)
-                return
-
-            innerProperty.set(value)
-            addValue("$key/${property.name}", value)
-        }
-    }
-
     val startTime get() = taskJson.startTime
 
     var endData
@@ -99,15 +83,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             addValue("$key/endData", value)
         }
 
-    var note
-        get() = taskJson.note
-        set(note) {
-            if (note == taskJson.note)
-                return
-
-            taskJson.note = note
-            addValue("$key/note", note)
-        }
+    var note by Committer(taskJson::note)
 
     val oldestVisible
         get() = taskJson.oldestVisible
@@ -124,15 +100,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                 }
                 .min()
 
-    var image
-        get() = taskJson.image
-        set(value) {
-            if (value == taskJson.image)
-                return
-
-            taskJson.image = value
-            addValue("$key/image", value)
-        }
+    var image by Committer(taskJson::image)
 
     constructor(
             id: String,

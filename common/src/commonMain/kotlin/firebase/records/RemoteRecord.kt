@@ -1,5 +1,9 @@
 package com.krystianwsul.common.firebase.records
 
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KProperty
+
 
 abstract class RemoteRecord(create: Boolean) {
 
@@ -63,5 +67,18 @@ abstract class RemoteRecord(create: Boolean) {
         check(update != null)
 
         shouldDelete = true
+    }
+
+    protected inner class Committer<T>(private val innerProperty: KMutableProperty0<T>) : ReadWriteProperty<RemoteTaskRecord<*>, T> {
+
+        override fun getValue(thisRef: RemoteTaskRecord<*>, property: KProperty<*>) = innerProperty.get()
+
+        override fun setValue(thisRef: RemoteTaskRecord<*>, property: KProperty<*>, value: T) {
+            if (innerProperty.get() == value)
+                return
+
+            innerProperty.set(value)
+            addValue("$key/${property.name}", value)
+        }
     }
 }

@@ -7,17 +7,16 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
-abstract class RemoteProjectRecord<T : RemoteCustomTimeId>(
+abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson>(
         create: Boolean,
-        val id: String
+        val id: String,
+        protected val projectJson: U
 ) : RemoteRecord(create) {
 
     companion object {
 
         const val PROJECT_JSON = "projectJson"
     }
-
-    protected abstract val projectJson: ProjectJson
 
     abstract val remoteCustomTimeRecords: Map<out T, RemoteCustomTimeRecord<T, *>>
 

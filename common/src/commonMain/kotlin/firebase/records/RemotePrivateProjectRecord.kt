@@ -9,10 +9,11 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 class RemotePrivateProjectRecord(
         create: Boolean,
         id: String,
-        override val projectJson: PrivateProjectJson
-) : RemoteProjectRecord<RemoteCustomTimeId.Private>(
+        projectJson: PrivateProjectJson
+) : RemoteProjectRecord<RemoteCustomTimeId.Private, PrivateProjectJson>(
         create,
-        id
+        id,
+        projectJson
 ) {
 
     override val remoteCustomTimeRecords = projectJson.customTimes

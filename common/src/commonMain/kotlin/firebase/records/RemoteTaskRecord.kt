@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.ScheduleKey
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
         val id: String,
-        private val remoteProjectRecord: RemoteProjectRecord<T>,
+        private val remoteProjectRecord: RemoteProjectRecord<T, *>,
         private val taskJson: TaskJson) : RemoteRecord(create) {
 
     companion object {
@@ -101,7 +101,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     constructor(
             id: String,
-            remoteProjectRecord: RemoteProjectRecord<T>,
+            remoteProjectRecord: RemoteProjectRecord<T, *>,
             taskJson: TaskJson
     ) : this(
             false,
@@ -111,7 +111,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     )
 
     constructor(
-            remoteProjectRecord: RemoteProjectRecord<T>,
+            remoteProjectRecord: RemoteProjectRecord<T, *>,
             taskJson: TaskJson
     ) : this(
             true,

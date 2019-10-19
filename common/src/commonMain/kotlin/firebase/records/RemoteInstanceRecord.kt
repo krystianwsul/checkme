@@ -44,7 +44,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             return key
         }
 
-        fun <T : RemoteCustomTimeId> stringToScheduleKey(remoteProjectRecord: RemoteProjectRecord<T>, key: String): Pair<ScheduleKey, T?> {
+        fun <T : RemoteCustomTimeId> stringToScheduleKey(remoteProjectRecord: RemoteProjectRecord<T, *>, key: String): Pair<ScheduleKey, T?> {
             val hourMinuteMatchResult = hourMinuteKeyRegex.find(key)
 
             fun MatchResult.getInt(position: Int) = groupValues[position].toInt()

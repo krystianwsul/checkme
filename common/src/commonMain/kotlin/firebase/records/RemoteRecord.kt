@@ -79,7 +79,7 @@ abstract class RemoteRecord(create: Boolean) {
 
     protected inner class Committer<T>(
             private val innerProperty: KMutableProperty0<T>,
-            private val path: String = key
+            private val path: String? = null
     ) : ReadWriteProperty<RemoteRecord, T> {
 
         override fun getValue(thisRef: RemoteRecord, property: KProperty<*>) = innerProperty.get()
@@ -88,6 +88,6 @@ abstract class RemoteRecord(create: Boolean) {
                 thisRef: RemoteRecord,
                 property: KProperty<*>,
                 value: T
-        ) = setProperty(innerProperty, value, path)
+        ) = setProperty(innerProperty, value, path ?: key)
     }
 }

@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
@@ -12,12 +13,11 @@ class RemoteSharedProjectRecord(
         create: Boolean,
         id: String,
         private val jsonWrapper: JsonWrapper
-) : RemoteProjectRecord<RemoteCustomTimeId.Shared>(
+) : RemoteProjectRecord<RemoteCustomTimeId.Shared, SharedProjectJson>(
         create,
-        id
+        id,
+        jsonWrapper.projectJson
 ) {
-
-    override val projectJson = jsonWrapper.projectJson
 
     override val remoteCustomTimeRecords = projectJson.customTimes
             .map { (id, customTimeJson) ->

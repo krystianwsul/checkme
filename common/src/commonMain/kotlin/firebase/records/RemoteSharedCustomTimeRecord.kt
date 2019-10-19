@@ -30,14 +30,12 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
     var ownerKey by Committer(customTimeJson::ownerKey)
 
     var privateKey: RemoteCustomTimeId.Private?
-        get() = customTimeJson.privateKey.takeUnless { it.isNullOrEmpty() }?.let { RemoteCustomTimeId.Private(it) }
+        get() = customTimeJson.privateKey
+                .takeUnless { it.isNullOrEmpty() }
+                ?.let { RemoteCustomTimeId.Private(it) }
         set(value) {
             checkNotNull(value)
 
-            if (customTimeJson.privateKey == value.value)
-                return
-
-            customTimeJson.privateKey = value.value
-            addValue("$key/privateKey", value.value)
+            setProperty(customTimeJson::privateKey, value.value)
         }
 }

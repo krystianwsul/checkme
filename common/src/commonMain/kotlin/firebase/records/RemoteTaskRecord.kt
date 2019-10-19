@@ -8,6 +8,9 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KProperty
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
@@ -66,17 +69,20 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     val projectId get() = remoteProjectRecord.id
 
-    var name
-        get() = taskJson.name
-        set(name) {
-            check(name.isNotEmpty())
+    var name by Committer(taskJson::name)
 
-            if (name == taskJson.name)
+    private inner class Committer<T>(private val innerProperty: KMutableProperty0<T>) : ReadWriteProperty<RemoteTaskRecord<*>, T> {
+
+        override fun getValue(thisRef: RemoteTaskRecord<*>, property: KProperty<*>) = innerProperty.get()
+
+        override fun setValue(thisRef: RemoteTaskRecord<*>, property: KProperty<*>, value: T) {
+            if (innerProperty.get() == value)
                 return
 
-            taskJson.name = name
-            addValue("$key/name", name)
+            innerProperty.set(value)
+            addValue("$key/${property.name}", value)
         }
+    }
 
     val startTime get() = taskJson.startTime
 
@@ -150,7 +156,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     )
 
     init {
-        if (taskJson.name.isEmpty())
+        if (name.isEmpty())
             ErrorLogger.instance.logException(MissingNameException("taskKey: $key"))
 
         for ((key, instanceJson) in taskJson.instances) {

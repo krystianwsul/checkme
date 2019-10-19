@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.json.CustomTimeJson
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
-abstract class RemoteCustomTimeRecord<T : RemoteCustomTimeId>(create: Boolean) : RemoteRecord(create), CustomTimeRecord {
+abstract class RemoteCustomTimeRecord<T : RemoteCustomTimeId, U : CustomTimeJson>(create: Boolean, protected val customTimeJson: U) : RemoteRecord(create), CustomTimeRecord {
 
     companion object {
 
@@ -18,159 +18,28 @@ abstract class RemoteCustomTimeRecord<T : RemoteCustomTimeId>(create: Boolean) :
 
     protected abstract val remoteProjectRecord: RemoteProjectRecord<T>
 
-    protected abstract val customTimeJson: CustomTimeJson
+    override var name by Committer(customTimeJson::name)
 
-    override var name: String
-        get() = customTimeJson.name
-        set(value) {
-            check(value.isNotEmpty())
+    override var sundayHour by Committer(customTimeJson::sundayHour)
+    override var sundayMinute by Committer(customTimeJson::sundayMinute)
 
-            if (customTimeJson.name == value)
-                return
+    override var mondayHour by Committer(customTimeJson::mondayHour)
+    override var mondayMinute by Committer(customTimeJson::mondayMinute)
 
-            customTimeJson.name = value
-            addValue("$key/name", value)
-        }
+    override var tuesdayHour by Committer(customTimeJson::tuesdayHour)
+    override var tuesdayMinute by Committer(customTimeJson::tuesdayMinute)
 
-    override var sundayHour: Int
-        get() = customTimeJson.sundayHour
-        set(value) {
-            if (customTimeJson.sundayHour == value)
-                return
+    override var wednesdayHour by Committer(customTimeJson::wednesdayHour)
+    override var wednesdayMinute by Committer(customTimeJson::wednesdayMinute)
 
-            customTimeJson.sundayHour = value
-            addValue("$key/sundayHour", value)
-        }
+    override var thursdayHour by Committer(customTimeJson::thursdayHour)
+    override var thursdayMinute by Committer(customTimeJson::thursdayMinute)
 
-    override var sundayMinute: Int
-        get() = customTimeJson.sundayMinute
-        set(value) {
-            if (customTimeJson.sundayMinute == value)
-                return
+    override var fridayHour by Committer(customTimeJson::fridayHour)
+    override var fridayMinute by Committer(customTimeJson::fridayMinute)
 
-            customTimeJson.sundayMinute = value
-            addValue("$key/sundayMinute", value)
-        }
-
-    override var mondayHour: Int
-        get() = customTimeJson.mondayHour
-        set(value) {
-            if (customTimeJson.mondayHour == value)
-                return
-
-            customTimeJson.mondayHour = value
-            addValue("$key/mondayHour", value)
-        }
-
-    override var mondayMinute: Int
-        get() = customTimeJson.mondayMinute
-        set(minute) {
-            if (customTimeJson.mondayMinute == minute)
-                return
-
-            customTimeJson.mondayMinute = minute
-            addValue("$key/mondayMinute", minute)
-        }
-
-    override var tuesdayHour: Int
-        get() = customTimeJson.tuesdayHour
-        set(hour) {
-            if (customTimeJson.tuesdayHour == hour)
-                return
-
-            customTimeJson.tuesdayHour = hour
-            addValue("$key/tuesdayHour", hour)
-        }
-
-    override var tuesdayMinute: Int
-        get() = customTimeJson.tuesdayMinute
-        set(minute) {
-            if (customTimeJson.tuesdayMinute == minute)
-                return
-
-            customTimeJson.tuesdayMinute = minute
-            addValue("$key/tuesdayMinute", minute)
-        }
-
-    override var wednesdayHour: Int
-        get() = customTimeJson.wednesdayHour
-        set(hour) {
-            if (customTimeJson.wednesdayHour == hour)
-                return
-
-            customTimeJson.wednesdayHour = hour
-            addValue("$key/wednesdayHour", hour)
-        }
-
-    override var wednesdayMinute: Int
-        get() = customTimeJson.wednesdayMinute
-        set(minute) {
-            if (customTimeJson.wednesdayMinute == minute)
-                return
-
-            customTimeJson.wednesdayMinute = minute
-            addValue("$key/wednesdayMinute", minute)
-        }
-
-    override var thursdayHour: Int
-        get() = customTimeJson.thursdayHour
-        set(hour) {
-            if (customTimeJson.thursdayHour == hour)
-                return
-
-            customTimeJson.thursdayHour = hour
-            addValue("$key/thursdayHour", hour)
-        }
-
-    override var thursdayMinute: Int
-        get() = customTimeJson.thursdayMinute
-        set(minute) {
-            if (customTimeJson.thursdayMinute == minute)
-                return
-
-            customTimeJson.thursdayMinute = minute
-            addValue("$key/thursdayMinute", minute)
-        }
-
-    override var fridayHour: Int
-        get() = customTimeJson.fridayHour
-        set(hour) {
-            if (customTimeJson.fridayHour == hour)
-                return
-
-            customTimeJson.fridayHour = hour
-            addValue("$key/fridayHour", hour)
-        }
-
-    override var fridayMinute: Int
-        get() = customTimeJson.fridayMinute
-        set(minute) {
-            if (customTimeJson.fridayMinute == minute)
-                return
-
-            customTimeJson.fridayMinute = minute
-            addValue("$key/fridayMinute", minute)
-        }
-
-    override var saturdayHour: Int
-        get() = customTimeJson.saturdayHour
-        set(hour) {
-            if (customTimeJson.saturdayHour == hour)
-                return
-
-            customTimeJson.saturdayHour = hour
-            addValue("$key/saturdayHour", hour)
-        }
-
-    override var saturdayMinute: Int
-        get() = customTimeJson.saturdayMinute
-        set(minute) {
-            if (customTimeJson.sundayMinute == minute)
-                return
-
-            customTimeJson.saturdayMinute = minute
-            addValue("$key/saturdayMinute", minute)
-        }
+    override var saturdayHour by Committer(customTimeJson::saturdayHour)
+    override var saturdayMinute by Committer(customTimeJson::saturdayMinute)
 
     val projectId get() = remoteProjectRecord.id
 

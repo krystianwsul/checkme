@@ -69,16 +69,16 @@ abstract class RemoteRecord(create: Boolean) {
         shouldDelete = true
     }
 
-    protected inner class Committer<T>(private val innerProperty: KMutableProperty0<T>) : ReadWriteProperty<RemoteTaskRecord<*>, T> {
+    protected inner class Committer<T>(private val innerProperty: KMutableProperty0<T>) : ReadWriteProperty<RemoteRecord, T> {
 
-        override fun getValue(thisRef: RemoteTaskRecord<*>, property: KProperty<*>) = innerProperty.get()
+        override fun getValue(thisRef: RemoteRecord, property: KProperty<*>) = innerProperty.get()
 
-        override fun setValue(thisRef: RemoteTaskRecord<*>, property: KProperty<*>, value: T) {
+        override fun setValue(thisRef: RemoteRecord, property: KProperty<*>, value: T) {
             if (innerProperty.get() == value)
                 return
 
             innerProperty.set(value)
-            addValue("$key/${property.name}", value)
+            addValue("$key/${innerProperty.name}", value)
         }
     }
 }

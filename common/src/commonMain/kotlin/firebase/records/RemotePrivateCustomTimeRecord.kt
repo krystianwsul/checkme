@@ -6,22 +6,19 @@ import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
-class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.Private> {
+class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.Private, PrivateCustomTimeJson> {
 
     override val id: RemoteCustomTimeId.Private
     override val remoteProjectRecord: RemotePrivateProjectRecord
-    override val customTimeJson: PrivateCustomTimeJson
 
-    constructor(id: RemoteCustomTimeId.Private, remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(false) {
+    constructor(id: RemoteCustomTimeId.Private, remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(false, customTimeJson) {
         this.id = id
         this.remoteProjectRecord = remoteProjectRecord
-        this.customTimeJson = customTimeJson
     }
 
-    constructor(remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(true) {
+    constructor(remoteProjectRecord: RemotePrivateProjectRecord, customTimeJson: PrivateCustomTimeJson) : super(true, customTimeJson) {
         id = remoteProjectRecord.getCustomTimeRecordId()
         this.remoteProjectRecord = remoteProjectRecord
-        this.customTimeJson = customTimeJson
     }
 
     override val createObject get() = customTimeJson

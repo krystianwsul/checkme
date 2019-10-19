@@ -16,17 +16,9 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
     val id by lazy { UserData.getKey(userJson.email) }
 
-    override val key by lazy { id }
+    final override val key by lazy { id }
 
-    var name: String
-        get() = userJson.name
-        set(name) {
-            if (name == userJson.name)
-                return
-
-            userJson.name = name
-            addValue("$key/$USER_DATA/name", name)
-        }
+    var name by Committer(userJson::name, "$key/$USER_DATA")
 
     val email by lazy { userJson.email }
 

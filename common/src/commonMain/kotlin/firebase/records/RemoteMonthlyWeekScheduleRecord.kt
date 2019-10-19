@@ -27,15 +27,7 @@ class RemoteMonthlyWeekScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRe
 
     override val startTime by lazy { monthlyWeekScheduleJson.startTime }
 
-    override var endTime
-        get() = monthlyWeekScheduleJson.endTime
-        set(value) {
-            if (value == monthlyWeekScheduleJson.endTime)
-                return
-
-            monthlyWeekScheduleJson.endTime = value
-            addValue("$key/monthlyWeekScheduleJson/endTime", value)
-        }
+    override var endTime by Committer(monthlyWeekScheduleJson::endTime, "$key/monthlyWeekScheduleJson")
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteMonthlyWeekScheduleRecords.remove(id) == this)
 }

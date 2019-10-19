@@ -27,17 +27,7 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
 
     override fun mine(userInfo: UserInfo) = ownerKey == userInfo.key
 
-    var ownerKey: String?
-        get() = customTimeJson.ownerKey
-        set(value) {
-            check(!value.isNullOrEmpty())
-
-            if (customTimeJson.ownerKey == value)
-                return
-
-            customTimeJson.ownerKey = value
-            addValue("$key/ownerKey", value)
-        }
+    var ownerKey by Committer(customTimeJson::ownerKey)
 
     var privateKey: RemoteCustomTimeId.Private?
         get() = customTimeJson.privateKey.takeUnless { it.isNullOrEmpty() }?.let { RemoteCustomTimeId.Private(it) }

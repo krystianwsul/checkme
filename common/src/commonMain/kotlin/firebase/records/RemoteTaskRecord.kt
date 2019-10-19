@@ -76,11 +76,8 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             if (value == taskJson.endData)
                 return
 
-            taskJson.endData = value
-            addValue("$key/endData", value)
-
-            taskJson.endTime = value?.time
-            addValue("$key/endData", value)
+            setProperty(taskJson::endData, value)
+            setProperty(taskJson::endTime, value?.time)
         }
 
     var note by Committer(taskJson::note)
@@ -209,20 +206,9 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         if (oldOldestVisibleJson?.day != newOldestVisibleJson.day)
             addValue("$key/oldestVisible/$uuid/day", newOldestVisibleJson.day)
 
-        if (newOldestVisibleJson.year != taskJson.oldestVisibleYear) {
-            taskJson.oldestVisibleYear = newOldestVisibleJson.year
-            addValue("$key/oldestVisibleYear", newOldestVisibleJson.year)
-        }
-
-        if (newOldestVisibleJson.month != taskJson.oldestVisibleMonth) {
-            taskJson.oldestVisibleMonth = newOldestVisibleJson.month
-            addValue("$key/oldestVisibleMonth", newOldestVisibleJson.month)
-        }
-
-        if (newOldestVisibleJson.day != taskJson.oldestVisibleDay) {
-            taskJson.oldestVisibleDay = newOldestVisibleJson.day
-            addValue("$key/oldestVisibleDay", newOldestVisibleJson.day)
-        }
+        setProperty(taskJson::oldestVisibleYear, newOldestVisibleJson.year)
+        setProperty(taskJson::oldestVisibleMonth, newOldestVisibleJson.month)
+        setProperty(taskJson::oldestVisibleDay, newOldestVisibleJson.day)
     }
 
     fun newRemoteInstanceRecord(

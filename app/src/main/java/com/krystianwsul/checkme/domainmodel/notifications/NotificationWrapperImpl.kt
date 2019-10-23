@@ -43,6 +43,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
         @JvmStatic
         protected val MAX_INBOX_LINES = 5
+
+        const val NOTIFICATION_ID_GROUP = 0
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -358,7 +360,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val notificationHash = NotificationHash(
                 title,
                 text,
-                0,
+                NOTIFICATION_ID_GROUP,
                 null,
                 styleHash,
                 "0",
@@ -367,7 +369,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notify(
                 title,
                 text,
-                0,
+                NOTIFICATION_ID_GROUP,
                 pendingDeleteIntent,
                 pendingContentIntent,
                 groupData.silent,

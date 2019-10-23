@@ -112,4 +112,5 @@
     <string name="version">Wersja</string>
     <string name="from">Od</string>
     <string name="until">Do</string>
+    <string name="endDate">Data końcowa nie może być przed datą startową</string>
 </resources>

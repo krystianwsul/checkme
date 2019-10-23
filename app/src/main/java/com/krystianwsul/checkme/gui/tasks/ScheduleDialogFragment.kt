@@ -24,8 +24,10 @@ import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.TimePairPersist
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ScheduleData
 import com.krystianwsul.common.utils.ScheduleType
@@ -124,27 +126,67 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     }
 
     //cached data doesn't contain new custom time
-    private val isValid: Boolean
-        get() {
-            if (customTimeDatas == null)
-                return false
+    private fun isValid(): Boolean {
+        if (customTimeDatas == null)
+            return false
 
-            if (scheduleDialogData.scheduleType != ScheduleType.SINGLE)
-                return true
+        if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
+            return if (scheduleDialogData.date < Date.today()) {
+                customView.scheduleDialogDateLayout.error = getString(R.string.error_date)
+                customView.scheduleDialogTimeLayout.error = null
 
-            val customTimeKey = scheduleDialogData.timePairPersist.customTimeKey
-
-            val hourMinute = if (customTimeKey != null) {
-                customTimeDatas!![customTimeKey]
-                        ?.hourMinutes
-                        ?.get(scheduleDialogData.date.dayOfWeek)
-                        ?: return false
+                false
             } else {
-                scheduleDialogData.timePairPersist.hourMinute
+                val customTimeKey = scheduleDialogData.timePairPersist.customTimeKey
+
+                val hourMinute = if (customTimeKey != null) {
+                    customTimeDatas!![customTimeKey]
+                            ?.hourMinutes
+                            ?.get(scheduleDialogData.date.dayOfWeek)
+                            ?: return false
+                } else {
+                    scheduleDialogData.timePairPersist.hourMinute
+                }
+
+                if (hourMinute < HourMinute.now) {
+                    customView.scheduleDialogDateLayout.error = null
+                    customView.scheduleDialogTimeLayout.error = getString(R.string.error_time)
+
+                    false
+                } else {
+                    customView.scheduleDialogDateLayout.error = null
+                    customView.scheduleDialogTimeLayout.error = null
+
+                    true
+                }
+            }
+        } else {
+            var valid = true
+
+            customView.scheduleDialogFromLayout.error = null
+            scheduleDialogData.from?.let { from ->
+                if (from < Date.today()) {
+                    customView.scheduleDialogFromLayout.error = getString(R.string.error_date)
+                    valid = false
+                }
             }
 
-            return TimeStamp(scheduleDialogData.date, hourMinute) > TimeStamp.now
+            customView.scheduleDialogUntilLayout.error = null
+            scheduleDialogData.until?.let { until ->
+                if (until < Date.today()) {
+                    customView.scheduleDialogUntilLayout.error = getString(R.string.error_date)
+                    valid = false
+                } else if (scheduleDialogData.from?.let { it > until } == true) {
+                    customView.scheduleDialogUntilLayout.error = getString(R.string.endDate)
+                    valid = false
+                }
+            }
+
+            return valid
         }
+    }
+
+    private fun checkValid() = isValid().also { customView.scheduleDialogSave.isEnabled = it }
 
     private var position: Int? = null
 
@@ -175,7 +217,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
             scheduleDialogSave.setOnClickListener {
                 check(customTimeDatas != null)
-                check(isValid)
+                check(checkValid())
 
                 result.accept(Result.Change(position, scheduleDialogData))
 
@@ -274,28 +316,29 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 val field: AutoCompleteTextView,
                 val date: () -> Date,
                 val listener: (Date) -> Unit,
-                val tag: String
+                val tag: String,
+                val min: (() -> Date)? = null
         )
 
         listOf(
                 DateFieldData(
                         customView.scheduleDialogFrom,
-                        { Date.today() },
+                        { scheduleDialogData.from ?: Date.today() },
                         fromPickerDialogFragmentListener,
                         TAG_FROM_FRAGMENT
                 ),
                 DateFieldData(
                         customView.scheduleDialogUntil,
-                        { Date.today() },
+                        { scheduleDialogData.until ?: Date.today() },
                         untilPickerDialogFragmentListener,
-                        TAG_UNTIL_FRAGMENT
+                        TAG_UNTIL_FRAGMENT,
+                        { listOfNotNull(scheduleDialogData.from, Date.today()).max()!! }
                 )
-        ).forEach { (field, value, listener, tag) ->
+        ).forEach { (field, value, listener, tag, min) ->
             field.setFixedOnClickListener {
                 check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
 
-                DatePickerDialogFragment.newInstance(value()).let {
-                    // todo from current value
+                DatePickerDialogFragment.newInstance(value(), min?.invoke()).let {
                     it.listener = listener
                     it.show(childFragmentManager, tag)
                 }
@@ -524,23 +567,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             customView.scheduleDialogUntil.setText(scheduleDialogData.until?.getDisplayText())
         }
 
-        if (isValid) {
-            customView.scheduleDialogSave.isEnabled = true
-
-            customView.scheduleDialogDateLayout.error = null
-            customView.scheduleDialogTimeLayout.error = null
-        } else {
-            check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
-            customView.scheduleDialogSave.isEnabled = false
-
-            if (scheduleDialogData.date >= Date.today()) {
-                customView.scheduleDialogDateLayout.error = null
-                customView.scheduleDialogTimeLayout.error = getString(R.string.error_time)
-            } else {
-                customView.scheduleDialogDateLayout.error = getString(R.string.error_date)
-                customView.scheduleDialogTimeLayout.error = null
-            }
-        }
+        checkValid()
     }
 
     override fun onCancel(dialog: DialogInterface) {

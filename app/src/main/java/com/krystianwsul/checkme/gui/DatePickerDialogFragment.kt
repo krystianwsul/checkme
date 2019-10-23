@@ -5,6 +5,8 @@ import android.app.Dialog
 import android.os.Bundle
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.TimeStamp
 
 
 class DatePickerDialogFragment : AbstractDialogFragment() {
@@ -12,10 +14,12 @@ class DatePickerDialogFragment : AbstractDialogFragment() {
     companion object {
 
         private const val DATE_KEY = "date"
+        private const val KEY_MIN = "min"
 
-        fun newInstance(date: Date) = DatePickerDialogFragment().apply {
+        fun newInstance(date: Date, min: Date? = null) = DatePickerDialogFragment().apply {
             arguments = Bundle().apply {
                 putParcelable(DATE_KEY, date)
+                putParcelable(KEY_MIN, min)
             }
         }
     }
@@ -27,12 +31,18 @@ class DatePickerDialogFragment : AbstractDialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        check(arguments!!.containsKey(DATE_KEY))
-
         val date = arguments!!.getParcelable<Date>(DATE_KEY)!!
+        val min = arguments!!.getParcelable<Date>(KEY_MIN)
 
-        val datePickerDialog = DatePickerDialog(requireActivity(), mOnDateSetListener, date.year, date.month - 1, date.day)
-        datePickerDialog.datePicker.minDate = ExactTimeStamp.now.long - 1000 // -1000 odejmuje sekundę żeby obejść bug na ver. < 5.0
+        val datePickerDialog = DatePickerDialog(
+                requireActivity(),
+                mOnDateSetListener,
+                date.year,
+                date.month - 1,
+                date.day
+        )
+        datePickerDialog.datePicker.minDate = min?.let { TimeStamp(it, HourMinute.now).long }
+                ?: ExactTimeStamp.now.long
 
         return datePickerDialog
     }

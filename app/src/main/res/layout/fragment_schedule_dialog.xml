@@ -193,7 +193,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:errorEnabled="true"
-            app:hintEnabled="false">
+            app:hintEnabled="true">
 
             <AutoCompleteTextView
                 android:id="@+id/scheduleDialogFrom"
@@ -211,7 +211,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:errorEnabled="true"
-            app:hintEnabled="false">
+            app:hintEnabled="true">
 
             <AutoCompleteTextView
                 android:id="@+id/scheduleDialogUntil"

@@ -12,4 +12,7 @@ class MonthlyWeekScheduleJson @JvmOverloads constructor(
         val beginningOfMonth: Boolean = false,
         val customTimeId: String? = null,
         val hour: Int? = null,
-        val minute: Int? = null) : ScheduleJson
+        val minute: Int? = null,
+        var from: String? = null,
+        var until: String? = null
+) : ScheduleJson

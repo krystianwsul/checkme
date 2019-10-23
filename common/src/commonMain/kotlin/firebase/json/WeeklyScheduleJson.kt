@@ -10,4 +10,7 @@ class WeeklyScheduleJson @JvmOverloads constructor(
         val dayOfWeek: Int = 0,
         val customTimeId: String? = null,
         val hour: Int? = null,
-        val minute: Int? = null) : ScheduleJson
+        val minute: Int? = null,
+        var from: String? = null,
+        var until: String? = null
+) : ScheduleJson

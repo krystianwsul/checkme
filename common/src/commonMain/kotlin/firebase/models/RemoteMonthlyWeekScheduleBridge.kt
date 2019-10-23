@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.domain.schedules.MonthlyWeekScheduleBridge
 import com.krystianwsul.common.firebase.records.RemoteMonthlyWeekScheduleRecord
 import com.krystianwsul.common.firebase.records.RemoteProjectRecord
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
@@ -39,4 +40,16 @@ class RemoteMonthlyWeekScheduleBridge<T : RemoteCustomTimeId>(
     override fun delete() = remoteMonthlyWeekScheduleRecord.delete()
 
     override val scheduleId get() = ScheduleId.Remote(remoteMonthlyWeekScheduleRecord.projectId, remoteMonthlyWeekScheduleRecord.taskId, remoteMonthlyWeekScheduleRecord.id)
+
+    override var from
+        get() = remoteMonthlyWeekScheduleRecord.from?.let { Date.fromJson(it) }
+        set(value) {
+            remoteMonthlyWeekScheduleRecord.from = value?.toJson()
+        }
+
+    override var until
+        get() = remoteMonthlyWeekScheduleRecord.until?.let { Date.fromJson(it) }
+        set(value) {
+            remoteMonthlyWeekScheduleRecord.until = value?.toJson()
+        }
 }

@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.utils.time
 
+import androidx.annotation.StringRes
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.common.time.*
@@ -7,7 +8,7 @@ import com.krystianwsul.common.time.Date
 import java.util.*
 import org.joda.time.DateTime as DateTimeJoda
 
-fun Date.getDisplayText(): String {
+fun Date.getDisplayText(capitalize: Boolean = true): String {
     val todayCalendar = Calendar.getInstance()
     val todayDate = Date(todayCalendar.toDateTimeTz())
 
@@ -19,12 +20,19 @@ fun Date.getDisplayText(): String {
     tomorrowCalendar.add(Calendar.DATE, 1)
     val tomorrowDate = Date(tomorrowCalendar.toDateTimeTz())
 
-    val context = MyApplication.context
+    fun getString(@StringRes id: Int) = MyApplication.context
+            .getString(id)
+            .let {
+                if (capitalize)
+                    it
+                else
+                    it.toLowerCase(Locale.getDefault())
+            }
 
     return when (this) {
-        todayDate -> context.getString(R.string.today)
-        yesterdayDate -> context.getString(R.string.yesterday)
-        tomorrowDate -> context.getString(R.string.tomorrow)
+        todayDate -> getString(R.string.today)
+        yesterdayDate -> getString(R.string.yesterday)
+        tomorrowDate -> getString(R.string.tomorrow)
         else -> dayOfWeek.toString() + ", " + toString()
     }
 }

@@ -72,8 +72,8 @@ sealed class ScheduleGroup {
     class Weekly(
             val timePair: TimePair,
             private val weeklySchedules: List<WeeklySchedule>,
-            private val from: Date?,
-            private val until: Date? // todo from text for from/until
+            val from: Date?,
+            val until: Date?
     ) : ScheduleGroup() {
 
         override val customTimeKey get() = timePair.customTimeKey

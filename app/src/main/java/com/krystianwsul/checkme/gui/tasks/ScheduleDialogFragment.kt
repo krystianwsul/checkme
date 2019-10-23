@@ -596,8 +596,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             var beginningOfMonth: Boolean,
             val timePairPersist: TimePairPersist,
             var scheduleType: ScheduleType,
-            var from: Date? = null, // todo from require
-            var until: Date? = null
+            var from: Date?,
+            var until: Date?
     ) : Parcelable {
 
         init {
@@ -608,10 +608,31 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         fun toScheduleEntry() = ScheduleEntry(when (scheduleType) {
-            ScheduleType.SINGLE -> CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePairPersist.timePair))
-            ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(daysOfWeek, timePairPersist.timePair))
-            ScheduleType.MONTHLY_DAY -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(monthDayNumber, beginningOfMonth, timePairPersist.timePair))
-            ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(monthWeekNumber, monthWeekDay, beginningOfMonth, timePairPersist.timePair))
+            ScheduleType.SINGLE -> CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(
+                    date,
+                    timePairPersist.timePair
+            ))
+            ScheduleType.WEEKLY -> CreateTaskViewModel.ScheduleDataWrapper.Weekly(ScheduleData.Weekly(
+                    daysOfWeek,
+                    timePairPersist.timePair,
+                    from,
+                    until
+            ))
+            ScheduleType.MONTHLY_DAY -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyDay(ScheduleData.MonthlyDay(
+                    monthDayNumber,
+                    beginningOfMonth,
+                    timePairPersist.timePair,
+                    from,
+                    until
+            ))
+            ScheduleType.MONTHLY_WEEK -> CreateTaskViewModel.ScheduleDataWrapper.MonthlyWeek(ScheduleData.MonthlyWeek(
+                    monthWeekNumber,
+                    monthWeekDay,
+                    beginningOfMonth,
+                    timePairPersist.timePair,
+                    from,
+                    until
+            ))
             else -> throw UnsupportedOperationException()
         })
     }

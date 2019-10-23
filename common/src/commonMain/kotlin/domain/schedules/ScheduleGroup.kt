@@ -1,5 +1,6 @@
 package com.krystianwsul.common.domain.schedules
 
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
@@ -28,8 +29,8 @@ sealed class ScheduleGroup {
 
             val weeklySchedules = schedules.asSequence()
                     .filterIsInstance<WeeklySchedule>()
-                    .groupBy { it.timePair }
-                    .map { it.value.first().time to Weekly(it.key, it.value) }
+                    .groupBy { Triple(it.timePair, it.from, it.until) }
+                    .map { it.value.first().time to Weekly(it.key.first, it.value, it.key.second, it.key.third) }
                     .sortedBy { it.first.getTimeFloat(it.second.daysOfWeek) }
                     .map { it.second }
                     .toList()
@@ -68,13 +69,18 @@ sealed class ScheduleGroup {
         override val schedules get() = listOf(singleSchedule)
     }
 
-    class Weekly(val timePair: TimePair, private val weeklySchedules: List<WeeklySchedule>) : ScheduleGroup() {
+    class Weekly(
+            val timePair: TimePair,
+            private val weeklySchedules: List<WeeklySchedule>,
+            private val from: Date?,
+            private val until: Date? // todo from text for from/until
+    ) : ScheduleGroup() {
 
         override val customTimeKey get() = timePair.customTimeKey
 
         val daysOfWeek get() = weeklySchedules.flatMap { it.daysOfWeek }.toSet()
 
-        override val scheduleData get() = ScheduleData.Weekly(daysOfWeek, timePair)
+        override val scheduleData get() = ScheduleData.Weekly(daysOfWeek, timePair, from, until)
 
         override val schedules get() = weeklySchedules
     }
@@ -87,7 +93,9 @@ sealed class ScheduleGroup {
             get() = ScheduleData.MonthlyDay(
                     monthlyDaySchedule.dayOfMonth,
                     monthlyDaySchedule.beginningOfMonth,
-                    monthlyDaySchedule.timePair
+                    monthlyDaySchedule.timePair,
+                    monthlyDaySchedule.from,
+                    monthlyDaySchedule.until
             )
 
         override val schedules get() = listOf(monthlyDaySchedule)
@@ -102,7 +110,9 @@ sealed class ScheduleGroup {
                     monthlyWeekSchedule.dayOfMonth,
                     monthlyWeekSchedule.dayOfWeek,
                     monthlyWeekSchedule.beginningOfMonth,
-                    monthlyWeekSchedule.timePair
+                    monthlyWeekSchedule.timePair,
+                    monthlyWeekSchedule.from,
+                    monthlyWeekSchedule.until
             )
 
         override val schedules get() = listOf(monthlyWeekSchedule)

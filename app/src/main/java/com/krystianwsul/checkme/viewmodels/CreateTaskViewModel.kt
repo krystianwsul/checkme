@@ -90,7 +90,9 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                         scheduleData.date.dayOfWeek,
                         beginningOfMonth,
                         TimePairPersist(timePair),
-                        ScheduleType.SINGLE
+                        ScheduleType.SINGLE,
+                        null,
+                        null
                 )
             }
         }
@@ -118,7 +120,19 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
                 val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
 
-                return ScheduleDialogFragment.ScheduleDialogData(date, scheduleData.daysOfWeek.toHashSet(), true, monthDayNumber, monthWeekNumber, date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.WEEKLY)
+                return ScheduleDialogFragment.ScheduleDialogData(
+                        date,
+                        scheduleData.daysOfWeek.toHashSet(),
+                        true,
+                        monthDayNumber,
+                        monthWeekNumber,
+                        date.dayOfWeek,
+                        beginningOfMonth,
+                        TimePairPersist(timePair),
+                        ScheduleType.WEEKLY,
+                        scheduleData.from,
+                        scheduleData.until
+                )
             }
         }
 
@@ -143,7 +157,19 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
                 date = getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.beginningOfMonth)
 
-                return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(date.dayOfWeek), true, scheduleData.dayOfMonth, (scheduleData.dayOfMonth - 1) / 7 + 1, date.dayOfWeek, scheduleData.beginningOfMonth, TimePairPersist(timePair), ScheduleType.MONTHLY_DAY)
+                return ScheduleDialogFragment.ScheduleDialogData(
+                        date,
+                        hashSetOf(date.dayOfWeek),
+                        true,
+                        scheduleData.dayOfMonth,
+                        (scheduleData.dayOfMonth - 1) / 7 + 1,
+                        date.dayOfWeek,
+                        scheduleData.beginningOfMonth,
+                        TimePairPersist(timePair),
+                        ScheduleType.MONTHLY_DAY,
+                        scheduleData.from,
+                        scheduleData.until
+                )
             }
         }
 
@@ -168,7 +194,19 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
                 date = getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth)
 
-                return ScheduleDialogFragment.ScheduleDialogData(date, hashSetOf(scheduleData.dayOfWeek), false, date.day, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth, TimePairPersist(timePair), ScheduleType.MONTHLY_WEEK)
+                return ScheduleDialogFragment.ScheduleDialogData(
+                        date,
+                        hashSetOf(scheduleData.dayOfWeek),
+                        false,
+                        date.day,
+                        scheduleData.dayOfMonth,
+                        scheduleData.dayOfWeek,
+                        scheduleData.beginningOfMonth,
+                        TimePairPersist(timePair),
+                        ScheduleType.MONTHLY_WEEK,
+                        scheduleData.from,
+                        scheduleData.until
+                )
             }
         }
     }

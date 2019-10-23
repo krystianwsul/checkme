@@ -2360,6 +2360,8 @@ class DomainFactory(
             return
         }
 
+        NotificationWrapper.instance.hideTemporary()
+
         val notificationInstances = if (clear)
             mapOf()
         else

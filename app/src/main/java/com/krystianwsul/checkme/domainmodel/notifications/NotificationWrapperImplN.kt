@@ -55,7 +55,7 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
     override fun getNotificationBuilder(
             title: String,
             text: String?,
-            deleteIntent: PendingIntent,
+            deleteIntent: PendingIntent?,
             contentIntent: PendingIntent,
             silent: Boolean,
             actions: List<NotificationCompat.Action>,

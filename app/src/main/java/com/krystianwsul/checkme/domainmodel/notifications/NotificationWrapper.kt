@@ -30,4 +30,8 @@ abstract class NotificationWrapper {
     abstract fun updateAlarm(nextAlarm: TimeStamp?)
 
     abstract fun logNotificationIds(source: String)
+
+    abstract fun notifyTemporary()
+
+    abstract fun hideTemporary()
 }

@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.notifications.*
@@ -44,7 +45,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         @JvmStatic
         protected val MAX_INBOX_LINES = 5
 
-        const val NOTIFICATION_ID_GROUP = 0
+        private const val NOTIFICATION_ID_GROUP = 0
+        private const val NOTIFICATION_ID_TEMPORARY = 1
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -220,7 +222,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     protected open fun getNotificationBuilder(
             title: String,
             text: String?,
-            deleteIntent: PendingIntent,
+            deleteIntent: PendingIntent?,
             contentIntent: PendingIntent,
             silent: Boolean,
             actions: List<NotificationCompat.Action>,
@@ -236,7 +238,6 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val builder = newBuilder(silent)
                 .setContentTitle(title)
                 .setSmallIcon(R.drawable.ikona_bez)
-                .setDeleteIntent(deleteIntent)
                 .setContentIntent(contentIntent)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -244,6 +245,8 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 .setOnlyAlertOnce(true)
                 .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
                 .addExtras(Bundle().apply { putInt(KEY_HASH_CODE, notificationHash.hashCode()) })
+
+        deleteIntent?.let { builder.setDeleteIntent(it) }
 
         if (!text.isNullOrEmpty())
             builder.setContentText(text)
@@ -275,7 +278,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             title: String,
             text: String?,
             notificationId: Int,
-            deleteIntent: PendingIntent,
+            deleteIntent: PendingIntent?,
             contentIntent: PendingIntent,
             silent: Boolean,
             actions: List<NotificationCompat.Action>,
@@ -401,6 +404,40 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun logNotificationIds(source: String) = Unit
+
+    override fun notifyTemporary() {
+        val contentIntent = MainActivity.newIntent()
+        val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val title = "You may have new reminders" // todo resource
+
+        notify(
+                title,
+                null,
+                NOTIFICATION_ID_TEMPORARY,
+                null,
+                pendingContentIntent,
+                true,
+                listOf(),
+                null,
+                null,
+                autoCancel = true,
+                summary = false,
+                sortKey = "1",
+                largeIcon = null,
+                notificationHash = NotificationHash(
+                        title,
+                        null,
+                        NOTIFICATION_ID_TEMPORARY,
+                        null,
+                        null,
+                        "1",
+                        null
+                )
+        )
+    }
+
+    override fun hideTemporary() = cancelNotification(NOTIFICATION_ID_TEMPORARY)
 
     protected data class NotificationHash(
             val title: String,

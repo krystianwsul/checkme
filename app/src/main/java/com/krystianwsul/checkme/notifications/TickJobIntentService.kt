@@ -8,6 +8,7 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.TickData
+import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.persistencemodel.SaveService
 
 
@@ -15,7 +16,11 @@ class TickJobIntentService : JobIntentService() {
 
     companion object {
 
-        fun start(intent: Intent) = enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
+        private fun start(intent: Intent) {
+            NotificationWrapper.instance.notifyTemporary()
+
+            enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
+        }
 
         const val MAX_NOTIFICATIONS = 3
         const val GROUP_KEY = "group"
@@ -50,6 +55,9 @@ class TickJobIntentService : JobIntentService() {
 
             if (!MyApplication.instance.hasUserInfo) {
                 Preferences.logLineHour("TickJobIntentService.tick skipping, no userInfo")
+
+                NotificationWrapper.instance.hideTemporary()
+
                 listener?.invoke()
             } else {
                 val listeners = listOfNotNull(listener)

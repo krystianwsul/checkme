@@ -405,11 +405,20 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     override fun logNotificationIds(source: String) = Unit
 
+    private val showTemporary by lazy {
+        !MyApplication.instance
+                .resources
+                .getBoolean(R.bool.release)
+    }
+
     override fun notifyTemporary() {
+        if (!showTemporary)
+            return
+
         val contentIntent = MainActivity.newIntent()
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val title = "You may have new reminders" // todo resource
+        val title = "You may have new reminders"
 
         notify(
                 title,
@@ -437,7 +446,10 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         )
     }
 
-    override fun hideTemporary() = cancelNotification(NOTIFICATION_ID_TEMPORARY)
+    override fun hideTemporary() {
+        if (showTemporary)
+            cancelNotification(NOTIFICATION_ID_TEMPORARY)
+    }
 
     protected data class NotificationHash(
             val title: String,

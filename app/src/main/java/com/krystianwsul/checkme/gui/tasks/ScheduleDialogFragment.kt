@@ -34,6 +34,7 @@ import com.krystianwsul.common.utils.ScheduleType
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_schedule_dialog.view.*
 import java.util.*
+import kotlin.reflect.KMutableProperty0
 
 class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
@@ -111,20 +112,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         updateFields()
     }
 
-    private val fromPickerDialogFragmentListener = { date: Date ->
-        check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
-
-        scheduleDialogData.from = date
-        updateFields()
-    }
-
-    private val untilPickerDialogFragmentListener = { date: Date ->
-        check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
-
-        scheduleDialogData.until = date
-        updateFields()
-    }
-
     //cached data doesn't contain new custom time
     private fun isValid(): Boolean {
         if (customTimeDatas == null)
@@ -191,6 +178,22 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private var position: Int? = null
 
     val result = PublishRelay.create<Result>()
+
+    private val dateFieldDatas by lazy {
+        listOf(
+                DateFieldData(
+                        customView.scheduleDialogFrom,
+                        scheduleDialogData::from,
+                        TAG_FROM_FRAGMENT
+                ),
+                DateFieldData(
+                        customView.scheduleDialogUntil,
+                        scheduleDialogData::until,
+                        TAG_UNTIL_FRAGMENT,
+                        { listOfNotNull(scheduleDialogData.from, Date.today()).max()!! }
+                )
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -312,42 +315,21 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             listener = datePickerDialogFragmentListener
         }
 
-        data class DateFieldData(
-                val field: AutoCompleteTextView,
-                val date: () -> Date,
-                val listener: (Date) -> Unit,
-                val tag: String,
-                val min: (() -> Date)? = null
-        )
-
-        listOf(
-                DateFieldData(
-                        customView.scheduleDialogFrom,
-                        { scheduleDialogData.from ?: Date.today() },
-                        fromPickerDialogFragmentListener,
-                        TAG_FROM_FRAGMENT
-                ),
-                DateFieldData(
-                        customView.scheduleDialogUntil,
-                        { scheduleDialogData.until ?: Date.today() },
-                        untilPickerDialogFragmentListener,
-                        TAG_UNTIL_FRAGMENT,
-                        { listOfNotNull(scheduleDialogData.from, Date.today()).max()!! }
-                )
-        ).forEach { (field, value, listener, tag, min) ->
-            field.setFixedOnClickListener {
+        dateFieldDatas.forEach { data ->
+            data.field.setFixedOnClickListener {
                 check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
 
-                DatePickerDialogFragment.newInstance(value(), min?.invoke()).let {
-                    it.listener = listener
-                    it.show(childFragmentManager, tag)
+                DatePickerDialogFragment.newInstance(data.property.get()
+                        ?: Date.today(), data.min?.invoke()).let {
+                    it.listener = data.listener
+                    it.show(childFragmentManager, data.tag)
                 }
             }
 
-            (childFragmentManager.findFragmentByTag(tag) as? DatePickerDialogFragment)?.let {
+            (childFragmentManager.findFragmentByTag(data.tag) as? DatePickerDialogFragment)?.let {
                 check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
 
-                it.listener = listener
+                it.listener = data.listener
             }
         }
 
@@ -616,5 +598,20 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         class Delete(val position: Int?) : Result()
 
         object Cancel : Result()
+    }
+
+    private inner class DateFieldData(
+            val field: AutoCompleteTextView,
+            val property: KMutableProperty0<Date?>,
+            val tag: String,
+            val min: (() -> Date)? = null
+    ) {
+
+        val listener = { date: Date ->
+            check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+
+            property.set(date)
+            updateFields()
+        }
     }
 }

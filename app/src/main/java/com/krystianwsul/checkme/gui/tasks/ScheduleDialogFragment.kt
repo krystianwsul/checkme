@@ -64,7 +64,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private lateinit var scheduleDialogData: ScheduleDialogData
 
-    private var broadcastReceiver: BroadcastReceiver? = null
+    private val broadcastReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context, intent: Intent) {
+            if (customTimeDatas != null)
+                updateFields()
+        }
+    }
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
@@ -249,13 +255,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             listener = datePickerDialogFragmentListener
         }
 
-        broadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (customTimeDatas != null)
-                    updateFields()
-            }
-        }
-
         val dayListener = { day: DayOfWeek, isChecked: Boolean ->
             scheduleDialogData.daysOfWeek.run { if (isChecked) add(day) else remove(day) }
 
@@ -379,10 +378,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             initialize()
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
 
-        requireActivity().startTicks(broadcastReceiver!!)
+        requireActivity().startTicks(broadcastReceiver)
 
         if (customTimeDatas != null)
             updateFields()
@@ -425,10 +424,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         updateFields()
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        requireActivity().unregisterReceiver(broadcastReceiver)
 
-        activity!!.unregisterReceiver(broadcastReceiver)
+        super.onStop()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -446,24 +445,26 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     @SuppressLint("SetTextI18n")
     private fun updateFields() {
-        check(customTimeDatas != null)
+        checkNotNull(customTimeDatas)
+
+        val customTimeData = scheduleDialogData.timePairPersist
+                .customTimeKey
+                ?.let { customTimeDatas!!.getValue(it) }
+
+        val hourMinuteString by lazy {
+            scheduleDialogData.timePairPersist
+                    .hourMinute
+                    .toString()
+        }
 
         if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
             customView.scheduleDialogDate.setText(scheduleDialogData.date.getDisplayText())
 
-            customView.scheduleDialogTime.setText(if (scheduleDialogData.timePairPersist.customTimeKey != null) {
-                val customTimeData = customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!)
-
-                customTimeData.name + " (" + customTimeData.hourMinutes[scheduleDialogData.date.dayOfWeek] + ")"
-            } else {
-                scheduleDialogData.timePairPersist.hourMinute.toString()
-            })
+            customView.scheduleDialogTime.setText(customTimeData?.let {
+                it.name + " (" + customTimeData.hourMinutes[scheduleDialogData.date.dayOfWeek] + ")"
+            } ?: hourMinuteString)
         } else {
-            customView.scheduleDialogTime.setText(if (scheduleDialogData.timePairPersist.customTimeKey != null) {
-                customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!).name
-            } else {
-                scheduleDialogData.timePairPersist.hourMinute.toString()
-            })
+            customView.scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)
         }
 
         if (isValid) {

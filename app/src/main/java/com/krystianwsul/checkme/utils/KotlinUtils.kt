@@ -218,12 +218,12 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
 
 fun newUuid() = UUID.randomUUID().toString()
 
-fun AutoCompleteTextView.setFixedOnClickListener(action: () -> Unit) {
-    setOnClickListener { action() }
+fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) {
+    setOnClickListener { listener() }
 
     setOnTouchListener { _, _ -> false }
 
-    (parent.parent as TextInputLayout).setEndIconOnClickListener { action() }
+    (parent.parent as TextInputLayout).setEndIconOnClickListener { listener() }
 }
 
 fun <T> serialize(obj: T): String {
@@ -275,3 +275,12 @@ fun Window.setTransparentNavigation(landscape: Boolean) {
 val Resources.isLandscape get() = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
 fun <T> RequestBuilder<T>.circle(circle: Boolean) = if (circle) apply(RequestOptions.circleCropTransform()) else this
+
+inline fun <reified T, U> T.getPrivateField(name: String): U {
+    return T::class.java.getDeclaredField(name).let {
+        it.isAccessible = true
+
+        @Suppress("UNCHECKED_CAST")
+        it.get(this) as U
+    }
+}

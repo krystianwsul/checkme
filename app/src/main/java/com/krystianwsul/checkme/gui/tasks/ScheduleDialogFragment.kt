@@ -9,9 +9,11 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
+import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.DatePickerDialogFragment
@@ -20,6 +22,7 @@ import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.getPrivateField
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.utils.time.getDisplayText
@@ -183,11 +186,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         listOf(
                 DateFieldData(
                         customView.scheduleDialogFrom,
+                        customView.scheduleDialogFromLayout,
                         scheduleDialogData::from,
                         TAG_FROM_FRAGMENT
                 ),
                 DateFieldData(
                         customView.scheduleDialogUntil,
+                        customView.scheduleDialogUntilLayout,
                         scheduleDialogData::until,
                         TAG_UNTIL_FRAGMENT,
                         { listOfNotNull(scheduleDialogData.from, Date.today()).max()!! }
@@ -316,16 +321,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         dateFieldDatas.forEach { data ->
-            data.field.setFixedOnClickListener {
-                check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
-
-                DatePickerDialogFragment.newInstance(data.property.get()
-                        ?: Date.today(), data.min?.invoke()).let {
-                    it.listener = data.listener
-                    it.show(childFragmentManager, data.tag)
-                }
-            }
-
             (childFragmentManager.findFragmentByTag(data.tag) as? DatePickerDialogFragment)?.let {
                 check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
 
@@ -545,8 +540,40 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             } ?: hourMinuteString)
         } else {
             customView.scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)
-            customView.scheduleDialogFrom.setText(scheduleDialogData.from?.getDisplayText())
-            customView.scheduleDialogUntil.setText(scheduleDialogData.until?.getDisplayText())
+
+            dateFieldDatas.forEach { data ->
+                val date = data.property.get()
+
+                val dropdown = date == null
+
+                data.field.setText(date?.getDisplayText())
+
+                data.layout.endIconMode = if (dropdown) TextInputLayout.END_ICON_DROPDOWN_MENU else TextInputLayout.END_ICON_CLEAR_TEXT
+
+                data.field.apply {
+                    setFixedOnClickListener {
+                        check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+
+                        DatePickerDialogFragment.newInstance(
+                                data.property.get() ?: Date.today(),
+                                data.min?.invoke()
+                        ).let {
+                            it.listener = data.listener
+                            it.show(childFragmentManager, data.tag)
+                        }
+                    }
+                }
+
+                val listeners = data.field.getPrivateField<TextView, ArrayList<TextWatcher>>("mListeners")
+                data.field.removeTextChangedListener(listeners.last()) // prevent password mode from running animation that hides icon
+
+                if (!dropdown) {
+                    data.layout.setEndIconOnClickListener {
+                        data.property.set(null)
+                        updateFields()
+                    }
+                }
+            }
         }
 
         checkValid()
@@ -602,6 +629,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private inner class DateFieldData(
             val field: AutoCompleteTextView,
+            val layout: TextInputLayout,
             val property: KMutableProperty0<Date?>,
             val tag: String,
             val min: (() -> Date)? = null

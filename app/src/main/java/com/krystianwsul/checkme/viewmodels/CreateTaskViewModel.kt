@@ -81,7 +81,17 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 }
                 val monthWeekNumber = (monthDayNumber - 1) / 7 + 1
 
-                return ScheduleDialogFragment.ScheduleDialogData(scheduleData.date, hashSetOf(scheduleData.date.dayOfWeek), true, monthDayNumber, monthWeekNumber, scheduleData.date.dayOfWeek, beginningOfMonth, TimePairPersist(timePair), ScheduleType.SINGLE)
+                return ScheduleDialogFragment.ScheduleDialogData(
+                        scheduleData.date,
+                        hashSetOf(scheduleData.date.dayOfWeek),
+                        true,
+                        monthDayNumber,
+                        monthWeekNumber,
+                        scheduleData.date.dayOfWeek,
+                        beginningOfMonth,
+                        TimePairPersist(timePair),
+                        ScheduleType.SINGLE
+                )
             }
         }
 

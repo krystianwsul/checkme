@@ -112,14 +112,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private val fromPickerDialogFragmentListener = { date: Date ->
         check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
 
-        // todo from record
+        scheduleDialogData.from = date
         updateFields()
     }
 
     private val untilPickerDialogFragmentListener = { date: Date ->
         check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
 
-        // todo from record
+        scheduleDialogData.until = date
         updateFields()
     }
 
@@ -520,6 +520,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             } ?: hourMinuteString)
         } else {
             customView.scheduleDialogTime.setText(customTimeData?.name ?: hourMinuteString)
+            customView.scheduleDialogFrom.setText(scheduleDialogData.from?.getDisplayText())
+            customView.scheduleDialogUntil.setText(scheduleDialogData.until?.getDisplayText())
         }
 
         if (isValid) {
@@ -557,7 +559,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             var monthWeekDay: DayOfWeek,
             var beginningOfMonth: Boolean,
             val timePairPersist: TimePairPersist,
-            var scheduleType: ScheduleType) : Parcelable {
+            var scheduleType: ScheduleType,
+            var from: Date? = null, // todo from require
+            var until: Date? = null
+    ) : Parcelable {
 
         init {
             check(monthDayNumber > 0)

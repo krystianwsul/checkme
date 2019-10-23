@@ -10,10 +10,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.CheckBox
-import android.widget.CompoundButton
+import android.widget.*
 import androidx.core.content.ContextCompat
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.R
@@ -45,6 +42,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         private const val SHOW_DELETE_KEY = "showDelete"
 
         private const val DATE_FRAGMENT_TAG = "dateFragment"
+        private const val TAG_FROM_FRAGMENT = "fromFragment"
+        private const val TAG_UNTIL_FRAGMENT = "untilFragment"
         private const val TIME_LIST_FRAGMENT_TAG = "timeListFragment"
         private const val TIME_PICKER_TAG = "timePicker"
 
@@ -107,6 +106,20 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
 
         scheduleDialogData.date = date
+        updateFields()
+    }
+
+    private val fromPickerDialogFragmentListener = { date: Date ->
+        check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+
+        // todo from record
+        updateFields()
+    }
+
+    private val untilPickerDialogFragmentListener = { date: Date ->
+        check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+
+        // todo from record
         updateFields()
     }
 
@@ -221,7 +234,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         customView.scheduleDialogTime.setFixedOnClickListener {
-            check(customTimeDatas != null)
+            checkNotNull(customTimeDatas)
 
             val list = customTimeDatas!!.values.filter { it.customTimeKey is CustomTimeKey.Private }
 
@@ -257,14 +270,52 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             listener = datePickerDialogFragmentListener
         }
 
-        val dayListener = { day: DayOfWeek, isChecked: Boolean ->
-            scheduleDialogData.daysOfWeek.run { if (isChecked) add(day) else remove(day) }
+        data class DateFieldData(
+                val field: AutoCompleteTextView,
+                val date: () -> Date,
+                val listener: (Date) -> Unit,
+                val tag: String
+        )
 
-            updateFields()
+        listOf(
+                DateFieldData(
+                        customView.scheduleDialogFrom,
+                        { Date.today() },
+                        fromPickerDialogFragmentListener,
+                        TAG_FROM_FRAGMENT
+                ),
+                DateFieldData(
+                        customView.scheduleDialogUntil,
+                        { Date.today() },
+                        untilPickerDialogFragmentListener,
+                        TAG_UNTIL_FRAGMENT
+                )
+        ).forEach { (field, value, listener, tag) ->
+            field.setFixedOnClickListener {
+                check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+
+                DatePickerDialogFragment.newInstance(value()).let {
+                    // todo from current value
+                    it.listener = listener
+                    it.show(childFragmentManager, tag)
+                }
+            }
+
+            (childFragmentManager.findFragmentByTag(tag) as? DatePickerDialogFragment)?.let {
+                check(scheduleDialogData.scheduleType != ScheduleType.SINGLE)
+
+                it.listener = listener
+            }
         }
 
         scheduleDialogData.daysOfWeek.forEach { scheduleDialogDays.getValue(it).isChecked = true }
-        scheduleDialogDays.forEach { (day, view) -> view.setOnCheckedChangeListener { _, isChecked -> dayListener(day, isChecked) } }
+        scheduleDialogDays.forEach { (day, view) ->
+            view.setOnCheckedChangeListener { _, isChecked ->
+                scheduleDialogData.daysOfWeek.run { if (isChecked) add(day) else remove(day) }
+
+                updateFields()
+            }
+        }
 
         val textPrimary = ContextCompat.getColor(requireContext(), R.color.textPrimary)
         val textDisabledSpinner = ContextCompat.getColor(requireContext(), R.color.textDisabledSpinner)

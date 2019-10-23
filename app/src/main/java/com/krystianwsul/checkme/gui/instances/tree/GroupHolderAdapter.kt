@@ -22,10 +22,7 @@ abstract class GroupHolderAdapter : TreeModelAdapter<NodeHolder> {
 
             itemView.clicks()
                     .mapNodes()
-                    .subscribe { (treeNode, groupHolderNode) ->
-                        if (groupHolderNode.imageData == null)
-                            treeNode.onClick(this)
-                    }
+                    .subscribe { (treeNode, _) -> treeNode.onClick(this) }
                     .addTo(compositeDisposable)
 
             itemView.longClicks { true }

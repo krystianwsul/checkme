@@ -404,29 +404,21 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 customView.scheduleDialogDateLayout.visibility = View.VISIBLE
                 customView.scheduleDialogDayLayout.visibility = View.GONE
                 customView.scheduleDialogMonthLayout.visibility = View.GONE
-                customView.scheduleDialogTimeLayout.visibility = View.VISIBLE
-                customView.scheduleDialogTimeLayout.isErrorEnabled = true
             }
             ScheduleType.DAILY -> {
                 customView.scheduleDialogDateLayout.visibility = View.GONE
                 customView.scheduleDialogDayLayout.visibility = View.GONE
                 customView.scheduleDialogMonthLayout.visibility = View.GONE
-                customView.scheduleDialogTimeLayout.visibility = View.VISIBLE
-                customView.scheduleDialogTimeLayout.isErrorEnabled = false
             }
             ScheduleType.WEEKLY -> {
                 customView.scheduleDialogDateLayout.visibility = View.GONE
                 customView.scheduleDialogDayLayout.visibility = View.VISIBLE
                 customView.scheduleDialogMonthLayout.visibility = View.GONE
-                customView.scheduleDialogTimeLayout.visibility = View.VISIBLE
-                customView.scheduleDialogTimeLayout.isErrorEnabled = false
             }
             ScheduleType.MONTHLY_DAY, ScheduleType.MONTHLY_WEEK -> {
                 customView.scheduleDialogDateLayout.visibility = View.GONE
                 customView.scheduleDialogDayLayout.visibility = View.GONE
                 customView.scheduleDialogMonthLayout.visibility = View.VISIBLE
-                customView.scheduleDialogTimeLayout.visibility = View.VISIBLE
-                customView.scheduleDialogTimeLayout.isErrorEnabled = false
             }
         }
 

@@ -110,4 +110,6 @@
     <string name="removeInstancesNo">Nie</string>
     <string name="removeInstancesYes">Tak</string>
     <string name="version">Wersja</string>
+    <string name="from">Od</string>
+    <string name="until">Do</string>
 </resources>

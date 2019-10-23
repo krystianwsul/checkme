@@ -187,6 +187,42 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/scheduleDialogFromLayout"
+            style="@style/MySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:errorEnabled="true"
+            app:hintEnabled="false">
+
+            <AutoCompleteTextView
+                android:id="@+id/scheduleDialogFrom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/MySpinnerText"
+                tools:ignore="LabelFor"
+                android:hint="@string/from" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/scheduleDialogUntilLayout"
+            style="@style/MySpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:errorEnabled="true"
+            app:hintEnabled="false">
+
+            <AutoCompleteTextView
+                android:id="@+id/scheduleDialogUntil"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/MySpinnerText"
+                tools:ignore="LabelFor"
+                android:hint="@string/until" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/scheduleDialogSave"
             android:layout_width="match_parent"

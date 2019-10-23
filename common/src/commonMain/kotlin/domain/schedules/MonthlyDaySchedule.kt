@@ -10,14 +10,14 @@ import com.soywiz.klock.months
 
 class MonthlyDaySchedule(
         rootTask: RemoteTask<*>,
-        private val monthlyDayScheduleBridge: MonthlyDayScheduleBridge
+        override val repeatingScheduleBridge: MonthlyDayScheduleBridge
 ) : RepeatingSchedule(rootTask) {
 
-    override val scheduleBridge get() = monthlyDayScheduleBridge
+    override val scheduleBridge get() = repeatingScheduleBridge
 
-    val dayOfMonth get() = monthlyDayScheduleBridge.dayOfMonth
+    val dayOfMonth get() = repeatingScheduleBridge.dayOfMonth
 
-    val beginningOfMonth get() = monthlyDayScheduleBridge.beginningOfMonth
+    val beginningOfMonth get() = repeatingScheduleBridge.beginningOfMonth
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
@@ -59,5 +59,5 @@ class MonthlyDaySchedule(
             checkMonth
     }
 
-    private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, monthlyDayScheduleBridge.dayOfMonth, monthlyDayScheduleBridge.beginningOfMonth)
+    private fun getDate(year: Int, month: Int) = getDateInMonth(year, month, repeatingScheduleBridge.dayOfMonth, repeatingScheduleBridge.beginningOfMonth)
 }

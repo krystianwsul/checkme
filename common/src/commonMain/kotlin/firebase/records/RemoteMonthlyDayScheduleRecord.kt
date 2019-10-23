@@ -18,8 +18,8 @@ class RemoteMonthlyDayScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRec
     val hour by lazy { monthlyDayScheduleJson.hour }
     val minute by lazy { monthlyDayScheduleJson.minute }
 
-    var from by Committer(monthlyDayScheduleJson::from)
-    var until by Committer(monthlyDayScheduleJson::until)
+    val from by lazy { monthlyDayScheduleJson.from }
+    val until by lazy { monthlyDayScheduleJson.until }
 
     constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
 

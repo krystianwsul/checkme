@@ -9,16 +9,16 @@ import com.soywiz.klock.days
 
 class WeeklySchedule(
         rootTask: RemoteTask<*>,
-        private val mWeeklyScheduleBridge: WeeklyScheduleBridge
+        override val repeatingScheduleBridge: WeeklyScheduleBridge
 ) : RepeatingSchedule(rootTask) {
 
     val daysOfWeek
-        get() = mWeeklyScheduleBridge.daysOfWeek
+        get() = repeatingScheduleBridge.daysOfWeek
                 .asSequence()
                 .map { DayOfWeek.values()[it] }
                 .toSet()
 
-    override val scheduleBridge get() = mWeeklyScheduleBridge
+    override val scheduleBridge get() = repeatingScheduleBridge
 
     override fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance? {
         val day = date.dayOfWeek

@@ -12,6 +12,6 @@ class MonthlyDayScheduleJson @JvmOverloads constructor(
         val customTimeId: String? = null,
         val hour: Int? = null,
         val minute: Int? = null,
-        var from: String? = null,
-        var until: String? = null
+        val from: String? = null,
+        val until: String? = null
 ) : ScheduleJson

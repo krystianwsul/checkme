@@ -35,15 +35,11 @@ class RemoteWeeklyScheduleBridge<T : RemoteCustomTimeId>(
 
     override val scheduleId get() = ScheduleId.Remote(remoteWeeklyScheduleRecord.projectId, remoteWeeklyScheduleRecord.taskId, remoteWeeklyScheduleRecord.id)
 
-    override var from
-        get() = remoteWeeklyScheduleRecord.from?.let { Date.fromJson(it) }
-        set(value) {
-            remoteWeeklyScheduleRecord.from = value?.toJson()
-        }
+    override val from by lazy {
+        remoteWeeklyScheduleRecord.from?.let { Date.fromJson(it) }
+    }
 
-    override var until
-        get() = remoteWeeklyScheduleRecord.until?.let { Date.fromJson(it) }
-        set(value) {
-            remoteWeeklyScheduleRecord.until = value?.toJson()
-        }
+    override val until by lazy {
+        remoteWeeklyScheduleRecord.until?.let { Date.fromJson(it) }
+    }
 }

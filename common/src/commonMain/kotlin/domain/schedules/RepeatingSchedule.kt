@@ -3,16 +3,36 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.firebase.models.RemoteTask
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.HourMilli
+import com.krystianwsul.common.time.*
 import com.soywiz.klock.days
 
 abstract class RepeatingSchedule(rootTask: RemoteTask<*>) : Schedule(rootTask) {
 
-    override fun getInstances(task: Task, givenStartExactTimeStamp: ExactTimeStamp?, givenExactEndTimeStamp: ExactTimeStamp): List<Instance> {
-        val myStartTimeStamp = startExactTimeStamp
-        val myEndTimeStamp = getEndExactTimeStamp()
+    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge
+
+    val from get() = repeatingScheduleBridge.from
+    val until get() = repeatingScheduleBridge.until
+
+    override fun getInstances(
+            task: Task,
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenExactEndTimeStamp: ExactTimeStamp
+    ): List<Instance> {
+        val myStartTimeStamp = listOfNotNull(
+                startExactTimeStamp,
+                repeatingScheduleBridge.from
+                        ?.let { TimeStamp(it, HourMinute(0, 0)) }
+                        ?.toExactTimeStamp()
+        ).max()!!
+
+        val myEndTimeStamp = listOfNotNull(
+                getEndExactTimeStamp(),
+                repeatingScheduleBridge.until
+                        ?.let { TimeStamp(it, HourMinute(0, 0)) }
+                        ?.toDateTimeSoy()
+                        ?.plus(1.days)
+                        ?.let { ExactTimeStamp(it) }
+        ).min() // todo from delete task after until
 
         val instances = ArrayList<Instance?>()
 

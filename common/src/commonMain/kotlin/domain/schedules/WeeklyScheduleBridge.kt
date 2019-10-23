@@ -1,11 +1,6 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.time.Date
-
-interface WeeklyScheduleBridge : ScheduleBridge {
+interface WeeklyScheduleBridge : RepeatingScheduleBridge {
 
     val daysOfWeek: Set<Int>
-
-    var from: Date?
-    var until: Date?
 }

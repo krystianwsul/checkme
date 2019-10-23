@@ -119,11 +119,13 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             if (scheduleDialogData.scheduleType != ScheduleType.SINGLE)
                 return true
 
-            val hourMinute = if (scheduleDialogData.timePairPersist.customTimeKey != null) {
-                if (!customTimeDatas!!.containsKey(scheduleDialogData.timePairPersist.customTimeKey!!))
-                    return false
+            val customTimeKey = scheduleDialogData.timePairPersist.customTimeKey
 
-                customTimeDatas!!.getValue(scheduleDialogData.timePairPersist.customTimeKey!!).hourMinutes[scheduleDialogData.date.dayOfWeek]!!
+            val hourMinute = if (customTimeKey != null) {
+                customTimeDatas!![customTimeKey]
+                        ?.hourMinutes
+                        ?.get(scheduleDialogData.date.dayOfWeek)
+                        ?: return false
             } else {
                 scheduleDialogData.timePairPersist.hourMinute
             }

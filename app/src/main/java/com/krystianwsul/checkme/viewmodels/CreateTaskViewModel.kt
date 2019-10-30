@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ScheduleDialogFragment
-import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
@@ -59,14 +58,12 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                return scheduleData.date.getDisplayText() + ", " + if (timePair.customTimeKey != null) {
-                    check(timePair.hourMinute == null)
+                return ScheduleText.Single.getScheduleText(scheduleData.date, scheduleData.timePair) {
+                    timePair.customTimeKey?.let {
+                        val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
 
-                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
-
-                    customTimeData.name + " (" + customTimeData.hourMinutes[scheduleData.date.dayOfWeek] + ")"
-                } else {
-                    timePair.hourMinute!!.toString()
+                        customTimeData.name + " (" + customTimeData.hourMinutes[scheduleData.date.dayOfWeek] + ")"
+                    } ?: timePair.hourMinute!!.toString()
                 }
             }
 

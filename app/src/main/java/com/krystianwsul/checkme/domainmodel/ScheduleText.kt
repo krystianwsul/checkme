@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.models.RemoteProject
 import com.krystianwsul.common.firebase.models.RemoteTask
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimePair
@@ -37,9 +38,23 @@ sealed class ScheduleText {
 
     class Single(private val scheduleGroup: ScheduleGroup.Single) : ScheduleText() {
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = scheduleGroup.singleSchedule
-                .dateTime
-                .getDisplayText()
+        companion object {
+
+            fun getScheduleText(
+                    date: Date,
+                    timePair: TimePair,
+                    timePairCallback: (TimePair) -> String
+            ) = date.getDisplayText() + ", " + timePairCallback(timePair)
+        }
+
+        override fun getScheduleText(remoteProject: RemoteProject<*>) = Companion.getScheduleText(
+                scheduleGroup.singleSchedule.date,
+                scheduleGroup.singleSchedule.timePair
+        ) {
+            (it.customTimeKey?.let {
+                remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
+            } ?: NormalTime(it.hourMinute!!)).toString()
+        }
     }
 
     class Weekly(private val scheduleGroup: ScheduleGroup.Weekly) : ScheduleText() {

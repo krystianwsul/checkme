@@ -11,7 +11,7 @@ sealed class ScheduleGroup {
 
     companion object {
 
-        val allDaysOfWeek by lazy { DayOfWeek.values().toSet() }
+        private val allDaysOfWeek by lazy { DayOfWeek.values().toSet() }
 
         fun getGroups(schedules: List<Schedule>): List<ScheduleGroup> {
             fun Time.getTimeFloat(daysOfWeek: Collection<DayOfWeek>) = daysOfWeek.map { day ->

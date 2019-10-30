@@ -121,11 +121,10 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             return false
 
         if (scheduleDialogData.scheduleType == ScheduleType.SINGLE) {
-            return if (scheduleDialogData.date < Date.today()) {
-                customView.scheduleDialogDateLayout.error = getString(R.string.error_date)
-                customView.scheduleDialogTimeLayout.error = null
+            val today = Date.today()
 
-                false
+            val (dateError, timeError) = if (scheduleDialogData.date < today) {
+                Pair(getString(R.string.error_date), null)
             } else {
                 val customTimeKey = scheduleDialogData.timePairPersist.customTimeKey
 
@@ -138,18 +137,16 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     scheduleDialogData.timePairPersist.hourMinute
                 }
 
-                if (hourMinute < HourMinute.now) {
-                    customView.scheduleDialogDateLayout.error = null
-                    customView.scheduleDialogTimeLayout.error = getString(R.string.error_time)
-
-                    false
-                } else {
-                    customView.scheduleDialogDateLayout.error = null
-                    customView.scheduleDialogTimeLayout.error = null
-
-                    true
-                }
+                if (scheduleDialogData.date == today && hourMinute < HourMinute.now)
+                    Pair(null, getString(R.string.error_time))
+                else
+                    Pair(null, null)
             }
+
+            customView.scheduleDialogDateLayout.error = dateError
+            customView.scheduleDialogTimeLayout.error = timeError
+
+            return dateError.isNullOrEmpty() && timeError.isNullOrEmpty()
         } else {
             var valid = true
 

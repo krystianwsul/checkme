@@ -31,8 +31,9 @@ abstract class Schedule(private val rootTask: RemoteTask<*>) {
 
     val time
         get() = timePair.run {
-            customTimeKey?.let { rootTask.remoteProject.getRemoteCustomTime(it.remoteCustomTimeId) }
-                    ?: NormalTime(hourMinute!!)
+            customTimeKey?.let {
+                rootTask.remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
+            } ?: NormalTime(hourMinute!!)
         }
 
     fun setEndExactTimeStamp(endExactTimeStamp: ExactTimeStamp) {
@@ -47,17 +48,13 @@ abstract class Schedule(private val rootTask: RemoteTask<*>) {
         scheduleBridge.endTime = null
     }
 
-    fun current(exactTimeStamp: ExactTimeStamp): Boolean {
-        val startExactTimeStamp = startExactTimeStamp
-        val endExactTimeStamp = getEndExactTimeStamp()
-
-        return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
-    }
+    fun current(exactTimeStamp: ExactTimeStamp) =
+            startExactTimeStamp <= exactTimeStamp && (getEndExactTimeStamp()?.let { it > exactTimeStamp } != false)
 
     abstract fun getInstances(
             task: Task,
             givenStartExactTimeStamp: ExactTimeStamp?,
-            givenExactEndTimeStamp: ExactTimeStamp
+            givenExactEndTimeStamp: ExactTimeStamp?
     ): Sequence<Instance>
 
     abstract fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean

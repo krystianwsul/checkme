@@ -9,6 +9,7 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.models.RemoteProject
 import com.krystianwsul.common.firebase.models.RemoteTask
+import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimePair
 import com.krystianwsul.common.utils.ScheduleData
@@ -23,17 +24,26 @@ sealed class ScheduleText {
             is ScheduleGroup.Weekly -> Weekly(scheduleGroup)
             is ScheduleGroup.MonthlyDay -> MonthlyDay(scheduleGroup)
             is ScheduleGroup.MonthlyWeek -> MonthlyWeek(scheduleGroup)
-        }.getScheduleText(remoteProject) // todo from show from/until in rows in create task
+        }.getScheduleText(remoteProject)
+
+        fun fromUntil(from: Date?, until: Date?): String {
+            fun getString(@StringRes id: Int) = MyApplication.instance
+                    .getString(id)
+                    .toLowerCase(Locale.getDefault())
+
+            val fromStr = from
+                    ?.let { " ${getString(R.string.from)} ${it.getDisplayText(false)}" }
+                    ?: ""
+
+            val untilStr = until
+                    ?.let { " ${getString(R.string.until)} ${it.getDisplayText(false)}" }
+                    ?: ""
+
+            return "$fromStr$untilStr"
+        }
     }
 
-    private fun getString(@StringRes id: Int) = MyApplication.instance
-            .getString(id)
-            .toLowerCase(Locale.getDefault())
-
-    protected val fromStr by lazy { getString(R.string.from) }
-    protected val untilStr by lazy { getString(R.string.until) }
-
-    abstract fun getScheduleText(remoteProject: RemoteProject<*>): String // todo from use activity context
+    abstract fun getScheduleText(remoteProject: RemoteProject<*>): String
 
     protected fun timePairCallback(timePair: TimePair, remoteProject: RemoteProject<*>): String {
         return (timePair.customTimeKey?.let {
@@ -66,24 +76,14 @@ sealed class ScheduleText {
             ): String {
                 val days = scheduleData.daysOfWeek.prettyPrint()
                 val time = timePairCallback(scheduleData.timePair)
-                return "$days$time"
+                return "$days$time" + fromUntil(scheduleData.from, scheduleData.until)
             }
         }
 
         override fun getScheduleText(remoteProject: RemoteProject<*>): String {
-            val text = Companion.getScheduleText(scheduleGroup.scheduleData) {
+            return Companion.getScheduleText(scheduleGroup.scheduleData) {
                 timePairCallback(it, remoteProject)
             }
-
-            val from = scheduleGroup.from
-                    ?.let { " $fromStr ${it.getDisplayText(false)}" }
-                    ?: ""
-
-            val until = scheduleGroup.until
-                    ?.let { " $untilStr ${it.getDisplayText(false)}" }
-                    ?: ""
-
-            return "$text$from$until"
         }
     }
 
@@ -97,26 +97,12 @@ sealed class ScheduleText {
             ): String {
                 return MyApplication.instance.run {
                     Utils.ordinal(scheduleData.dayOfMonth) + " " + getString(R.string.monthDay) + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
-                } + ": " + timePairCallback(scheduleData.timePair)
+                } + ": " + timePairCallback(scheduleData.timePair) + fromUntil(scheduleData.from, scheduleData.until)
             }
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = MyApplication.instance.run {
-            val text = Companion.getScheduleText(scheduleGroup.scheduleData) {
-                timePairCallback(it, remoteProject)
-            }
-
-            val from = scheduleGroup.monthlyDaySchedule
-                    .from
-                    ?.let { " $fromStr ${it.getDisplayText(false)}" }
-                    ?: ""
-
-            val until = scheduleGroup.monthlyDaySchedule
-                    .until
-                    ?.let { " $untilStr ${it.getDisplayText(false)}" }
-                    ?: ""
-
-            "$text$from$until"
+        override fun getScheduleText(remoteProject: RemoteProject<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+            timePairCallback(it, remoteProject)
         }
     }
 
@@ -130,26 +116,12 @@ sealed class ScheduleText {
             ): String {
                 return MyApplication.instance.run {
                     Utils.ordinal(scheduleData.dayOfMonth) + " " + scheduleData.dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
-                } + ": " + timePairCallback(scheduleData.timePair)
+                } + ": " + timePairCallback(scheduleData.timePair) + fromUntil(scheduleData.from, scheduleData.until)
             }
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = MyApplication.instance.run {
-            val text = Companion.getScheduleText(scheduleGroup.scheduleData) {
-                timePairCallback(it, remoteProject)
-            }
-
-            val from = scheduleGroup.monthlyWeekSchedule
-                    .from
-                    ?.let { " $fromStr ${it.getDisplayText(false)}" }
-                    ?: ""
-
-            val until = scheduleGroup.monthlyWeekSchedule
-                    .until
-                    ?.let { " $untilStr ${it.getDisplayText(false)}" }
-                    ?: ""
-
-            "$text$from$until"
+        override fun getScheduleText(remoteProject: RemoteProject<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+            timePairCallback(it, remoteProject)
         }
     }
 }

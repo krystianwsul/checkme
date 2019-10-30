@@ -235,8 +235,7 @@ class DomainFactory(
         if (maxShortcuts <= 0)
             return
 
-        val shortcutDatas = shortcutTasks.filter { it.second.isVisible(now, false) }
-                .sortedBy { it.first }
+        val shortcutDatas = shortcutTasks.sortedBy { it.first }
                 .takeLast(maxShortcuts)
                 .map { ShortcutQueue.ShortcutData(deviceDbInfo, it.second) }
 

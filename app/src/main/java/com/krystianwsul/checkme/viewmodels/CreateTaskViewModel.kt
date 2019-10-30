@@ -45,6 +45,19 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
                 is ScheduleData.MonthlyDay -> MonthlyDay(scheduleData)
                 is ScheduleData.MonthlyWeek -> MonthlyWeek(scheduleData)
             }
+
+            private fun timePairCallback(
+                    timePair: TimePair,
+                    customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
+                    dayOfWeek: DayOfWeek? = null
+            ): String {
+                return timePair.customTimeKey?.let {
+                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
+
+                    customTimeData.name + (dayOfWeek?.let { " (" + customTimeData.hourMinutes[it] + ")" }
+                            ?: "")
+                } ?: timePair.hourMinute!!.toString()
+            }
         }
 
         abstract val scheduleData: ScheduleData
@@ -59,11 +72,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
                 return ScheduleText.Single.getScheduleText(scheduleData) {
-                    timePair.customTimeKey?.let {
-                        val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
-
-                        customTimeData.name + " (" + customTimeData.hourMinutes[scheduleData.date.dayOfWeek] + ")"
-                    } ?: timePair.hourMinute!!.toString()
+                    timePairCallback(it, customTimeDatas, scheduleData.date.dayOfWeek)
                 }
             }
 
@@ -96,9 +105,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
                 return ScheduleText.Weekly.getScheduleText(scheduleData) {
-                    timePair.customTimeKey?.let {
-                        customTimeDatas.getValue(it).name
-                    } ?: timePair.hourMinute!!.toString()
+                    timePairCallback(it, customTimeDatas)
                 }
             }
 
@@ -133,9 +140,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
                 return ScheduleText.MonthlyDay.getScheduleText(scheduleData) {
-                    timePair.customTimeKey?.let {
-                        customTimeDatas.getValue(it).name
-                    } ?: timePair.hourMinute!!.toString()
+                    timePairCallback(it, customTimeDatas)
                 }
             }
 
@@ -164,9 +169,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
                 return ScheduleText.MonthlyWeek.getScheduleText(scheduleData) {
-                    timePair.customTimeKey?.let {
-                        customTimeDatas.getValue(it).name
-                    } ?: timePair.hourMinute!!.toString()
+                    timePairCallback(it, customTimeDatas)
                 }
             }
 

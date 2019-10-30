@@ -3,11 +3,14 @@ package com.krystianwsul.checkme.domainmodel
 import androidx.annotation.StringRes
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.models.RemoteProject
 import com.krystianwsul.common.firebase.models.RemoteTask
+import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.NormalTime
+import com.krystianwsul.common.time.TimePair
 import java.util.*
 
 sealed class ScheduleText {
@@ -40,18 +43,24 @@ sealed class ScheduleText {
 
     class Weekly(private val scheduleGroup: ScheduleGroup.Weekly) : ScheduleText() {
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>): String {
-            val days = scheduleGroup.daysOfWeek.let {
-                if (it == ScheduleGroup.allDaysOfWeek)
-                    MyApplication.instance.getString(R.string.daily)
-                else
-                    it.sorted().joinToString(", ")
-            }
+        companion object {
 
-            val time = scheduleGroup.run {
-                timePair.customTimeKey?.let {
+            fun getScheduleText(
+                    daysOfWeek: Set<DayOfWeek>,
+                    timePair: TimePair,
+                    timePairCallback: (TimePair) -> String
+            ): String {
+                val days = daysOfWeek.prettyPrint()
+                val time = timePairCallback(timePair)
+                return "$days$time"
+            }
+        }
+
+        override fun getScheduleText(remoteProject: RemoteProject<*>): String {
+            val text = Companion.getScheduleText(scheduleGroup.daysOfWeek, scheduleGroup.timePair) {
+                (it.customTimeKey?.let {
                     remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
-                } ?: NormalTime(timePair.hourMinute!!)
+                } ?: NormalTime(it.hourMinute!!)).toString()
             }
 
             val from = scheduleGroup.from
@@ -62,7 +71,7 @@ sealed class ScheduleText {
                     ?.let { " $untilStr ${it.getDisplayText(false)}" }
                     ?: ""
 
-            return "$days: $time$from$until"
+            return "$text$from$until"
         }
     }
 

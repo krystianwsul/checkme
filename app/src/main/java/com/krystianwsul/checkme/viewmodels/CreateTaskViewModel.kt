@@ -5,10 +5,10 @@ import android.os.Parcelable
 import android.text.TextUtils
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ScheduleDialogFragment
 import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
@@ -100,12 +100,10 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         data class Weekly(override val scheduleData: ScheduleData.Weekly) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                return scheduleData.daysOfWeek.prettyPrint() + if (timePair.customTimeKey != null) {
-                    check(timePair.hourMinute == null)
-
-                    customTimeDatas.getValue(timePair.customTimeKey!!).name
-                } else {
-                    timePair.hourMinute!!.toString()
+                return ScheduleText.Weekly.getScheduleText(scheduleData.daysOfWeek, timePair) {
+                    timePair.customTimeKey?.let {
+                        customTimeDatas.getValue(it).name
+                    } ?: timePair.hourMinute!!.toString()
                 }
             }
 
@@ -215,12 +213,14 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             val taskData: TaskData?,
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
             val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
-            val defaultReminder: Boolean) : DomainData()
+            val defaultReminder: Boolean
+    ) : DomainData()
 
     data class CustomTimeData(
             val customTimeKey: CustomTimeKey<*>,
             val name: String,
-            val hourMinutes: SortedMap<DayOfWeek, HourMinute>)
+            val hourMinutes: SortedMap<DayOfWeek, HourMinute>
+    )
 
     data class TaskData(
             val name: String,
@@ -228,7 +228,8 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             val scheduleDataWrappers: List<ScheduleDataWrapper>?,
             val note: String?,
             val projectName: String?,
-            val imageState: ImageState?)
+            val imageState: ImageState?
+    )
 
     data class ParentTreeData(
             val name: String,
@@ -237,7 +238,8 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             val scheduleText: String?,
             val note: String?,
             val sortKey: SortKey,
-            val projectId: String?) {
+            val projectId: String?
+    ) {
 
         fun matchesSearch(query: String?): Boolean {
             if (query.isNullOrEmpty())

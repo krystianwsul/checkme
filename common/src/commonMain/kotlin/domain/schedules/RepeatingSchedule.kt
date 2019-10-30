@@ -76,6 +76,7 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*>) : Schedule(rootTask) {
     override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {
         check(current(now))
 
-        return true
+        return until?.let { getInstances(task, null, null).any { it.isVisible(now, hack24) } }
+                ?: true
     }
 }

@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.domainmodel
 import androidx.annotation.StringRes
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
@@ -32,7 +33,7 @@ sealed class ScheduleText {
     protected val fromStr by lazy { getString(R.string.from) }
     protected val untilStr by lazy { getString(R.string.until) }
 
-    abstract fun getScheduleText(remoteProject: RemoteProject<*>): String
+    abstract fun getScheduleText(remoteProject: RemoteProject<*>): String // todo from use activity context
 
     class Single(private val scheduleGroup: ScheduleGroup.Single) : ScheduleText() {
 
@@ -77,19 +78,41 @@ sealed class ScheduleText {
 
     class MonthlyDay(private val scheduleGroup: ScheduleGroup.MonthlyDay) : ScheduleText() {
 
+        companion object {
+
+            fun getScheduleText(
+                    dayOfMonth: Int,
+                    beginningOfMonth: Boolean,
+                    timePair: TimePair,
+                    timePairCallback: (TimePair) -> String
+            ): String {
+                return MyApplication.instance.run {
+                    Utils.ordinal(dayOfMonth) + " " + getString(R.string.monthDay) + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
+                } + ": " + timePairCallback(timePair)
+            }
+        }
+
         override fun getScheduleText(remoteProject: RemoteProject<*>) = MyApplication.instance.run {
-            val day = scheduleGroup.monthlyDaySchedule.dayOfMonth.toString() + " " + getString(R.string.monthDay) + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleGroup.monthlyDaySchedule.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
+            val text = Companion.getScheduleText(
+                    scheduleGroup.monthlyDaySchedule.dayOfMonth,
+                    scheduleGroup.monthlyDaySchedule.beginningOfMonth,
+                    scheduleGroup.monthlyDaySchedule.timePair) {
+                (it.customTimeKey?.let {
+                    remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
+                } ?: NormalTime(it.hourMinute!!)).toString()
+            }
 
             val from = scheduleGroup.monthlyDaySchedule
                     .from
                     ?.let { " $fromStr ${it.getDisplayText(false)}" }
+                    ?: ""
 
             val until = scheduleGroup.monthlyDaySchedule
                     .until
                     ?.let { " $untilStr ${it.getDisplayText(false)}" }
                     ?: ""
 
-            "$day: ${scheduleGroup.monthlyDaySchedule.time}$from$until"
+            "$text$from$until"
         }
     }
 

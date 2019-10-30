@@ -178,11 +178,16 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
                 date = getDateInMonth(date.year, date.month, scheduleData.dayOfMonth, scheduleData.dayOfWeek, scheduleData.beginningOfMonth)
 
+                val dayNumber = if (scheduleData.beginningOfMonth)
+                    date.day
+                else
+                    Month(date.month).days(date.year) - date.day + 1
+
                 return ScheduleDialogFragment.ScheduleDialogData(
                         date,
                         hashSetOf(scheduleData.dayOfWeek),
                         false,
-                        date.day,
+                        listOf(dayNumber, ScheduleDialogFragment.ScheduleDialogData.MAX_MONTH_DAY).min()!!,
                         scheduleData.dayOfMonth,
                         scheduleData.dayOfWeek,
                         scheduleData.beginningOfMonth,

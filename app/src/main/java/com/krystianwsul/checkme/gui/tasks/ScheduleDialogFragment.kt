@@ -597,9 +597,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             var until: Date?
     ) : Parcelable {
 
+        companion object {
+
+            const val MAX_MONTH_DAY = 28
+        }
+
         init {
             check(monthDayNumber > 0)
-            check(monthDayNumber < 29)
+            check(monthDayNumber <= MAX_MONTH_DAY)
             check(monthWeekNumber > 0)
             check(monthWeekNumber < 5)
         }

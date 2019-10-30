@@ -17,33 +17,25 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*>) : Schedule(rootTask) {
     override fun getInstances(
             task: Task,
             givenStartExactTimeStamp: ExactTimeStamp?,
-            givenExactEndTimeStamp: ExactTimeStamp?
+            givenExactEndTimeStamp: ExactTimeStamp? // can be null only if until or endExactTimeStamp are set
     ): Sequence<Instance> {
-        val myStartTimeStamp = listOfNotNull(
+        val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleBridge.from
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
-                        ?.toExactTimeStamp()
+                        ?.toExactTimeStamp(),
+                givenStartExactTimeStamp
         ).max()!!
 
-        val myEndTimeStamp = listOfNotNull(
+        val endExactTimeStamp = listOfNotNull(
                 getEndExactTimeStamp(),
                 repeatingScheduleBridge.until
                         ?.let { TimeStamp(it, HourMinute(0, 0)) }
                         ?.toDateTimeSoy()
                         ?.plus(1.days)
-                        ?.let { ExactTimeStamp(it) }
-        ).min() // todo from delete task after until
-
-        val startExactTimeStamp = if (givenStartExactTimeStamp == null || givenStartExactTimeStamp < myStartTimeStamp)
-            myStartTimeStamp
-        else
-            givenStartExactTimeStamp
-
-        val endExactTimeStamp = if (myEndTimeStamp == null || myEndTimeStamp > givenExactEndTimeStamp!!) // todo until no exclamation
-            givenExactEndTimeStamp!! // todo until no exclamation
-        else
-            myEndTimeStamp
+                        ?.let { ExactTimeStamp(it) },
+                givenExactEndTimeStamp
+        ).min()!! // todo from delete task after until
 
         if (startExactTimeStamp >= endExactTimeStamp)
             return emptySequence()

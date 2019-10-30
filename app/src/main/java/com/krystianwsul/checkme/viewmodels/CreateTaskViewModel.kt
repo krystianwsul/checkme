@@ -3,12 +3,10 @@ package com.krystianwsul.checkme.viewmodels
 import android.content.Context
 import android.os.Parcelable
 import android.text.TextUtils
-import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
 import com.krystianwsul.checkme.gui.tasks.ScheduleDialogFragment
-import com.krystianwsul.checkme.utils.Utils
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.time.*
@@ -171,16 +169,15 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         data class MonthlyWeek(override val scheduleData: ScheduleData.MonthlyWeek) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                val day = Utils.ordinal(scheduleData.dayOfMonth) + " " + scheduleData.dayOfWeek + " " + context.getString(R.string.monthDayStart) + " " + context.resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + context.getString(R.string.monthDayEnd)
-
-                return "$day, " + if (timePair.customTimeKey != null) {
-                    check(timePair.hourMinute == null)
-
-                    val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
-
-                    customTimeData.name
-                } else {
-                    timePair.hourMinute!!.toString()
+                return ScheduleText.MonthlyWeek.getScheduleText(
+                        scheduleData.dayOfMonth,
+                        scheduleData.dayOfWeek,
+                        scheduleData.beginningOfMonth,
+                        scheduleData.timePair
+                ) {
+                    timePair.customTimeKey?.let {
+                        customTimeDatas.getValue(it).name
+                    } ?: timePair.hourMinute!!.toString()
                 }
             }
 

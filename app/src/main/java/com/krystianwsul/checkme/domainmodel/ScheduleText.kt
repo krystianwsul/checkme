@@ -96,7 +96,8 @@ sealed class ScheduleText {
             val text = Companion.getScheduleText(
                     scheduleGroup.monthlyDaySchedule.dayOfMonth,
                     scheduleGroup.monthlyDaySchedule.beginningOfMonth,
-                    scheduleGroup.monthlyDaySchedule.timePair) {
+                    scheduleGroup.monthlyDaySchedule.timePair
+            ) {
                 (it.customTimeKey?.let {
                     remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
                 } ?: NormalTime(it.hourMinute!!)).toString()
@@ -118,19 +119,44 @@ sealed class ScheduleText {
 
     class MonthlyWeek(private val scheduleGroup: ScheduleGroup.MonthlyWeek) : ScheduleText() {
 
+        companion object {
+
+            fun getScheduleText(
+                    dayOfMonth: Int,
+                    dayOfWeek: DayOfWeek,
+                    beginningOfMonth: Boolean,
+                    timePair: TimePair,
+                    timePairCallback: (TimePair) -> String
+            ): String {
+                return MyApplication.instance.run {
+                    Utils.ordinal(dayOfMonth) + " " + dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
+                } + ": " + timePairCallback(timePair)
+            }
+        }
+
         override fun getScheduleText(remoteProject: RemoteProject<*>) = MyApplication.instance.run {
-            val day = scheduleGroup.monthlyWeekSchedule.dayOfMonth.toString() + " " + scheduleGroup.monthlyWeekSchedule.dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleGroup.monthlyWeekSchedule.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
+            val text = Companion.getScheduleText(
+                    scheduleGroup.monthlyWeekSchedule.dayOfMonth,
+                    scheduleGroup.monthlyWeekSchedule.dayOfWeek,
+                    scheduleGroup.monthlyWeekSchedule.beginningOfMonth,
+                    scheduleGroup.monthlyWeekSchedule.timePair
+            ) {
+                (it.customTimeKey?.let {
+                    remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
+                } ?: NormalTime(it.hourMinute!!)).toString()
+            }
 
             val from = scheduleGroup.monthlyWeekSchedule
                     .from
                     ?.let { " $fromStr ${it.getDisplayText(false)}" }
+                    ?: ""
 
             val until = scheduleGroup.monthlyWeekSchedule
                     .until
                     ?.let { " $untilStr ${it.getDisplayText(false)}" }
                     ?: ""
 
-            "$day: ${scheduleGroup.monthlyWeekSchedule.time}$from$until"
+            "$text$from$until"
         }
     }
 }

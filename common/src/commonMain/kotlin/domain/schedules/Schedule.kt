@@ -54,7 +54,11 @@ abstract class Schedule(private val rootTask: RemoteTask<*>) {
         return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
     }
 
-    abstract fun getInstances(task: Task, givenStartExactTimeStamp: ExactTimeStamp?, givenExactEndTimeStamp: ExactTimeStamp): List<Instance>
+    abstract fun getInstances(
+            task: Task,
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenExactEndTimeStamp: ExactTimeStamp
+    ): Sequence<Instance>
 
     abstract fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean
 

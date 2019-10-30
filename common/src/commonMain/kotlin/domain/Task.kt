@@ -240,7 +240,7 @@ abstract class Task {
         val scheduleInstances = if (startExactTimeStamp >= endExactTimeStamp)
             listOf()
         else
-            schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp) }
+            schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp).toList() }
 
         val parentInstances = getParentTaskHierarchies().map { it.parentTask }
                 .flatMap { it.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now) }

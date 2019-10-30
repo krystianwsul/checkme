@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.viewmodels.*
+import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.*
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson

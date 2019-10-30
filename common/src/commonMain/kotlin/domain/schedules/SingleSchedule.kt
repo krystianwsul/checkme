@@ -25,24 +25,24 @@ class SingleSchedule(
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 
-    override fun getInstances(task: Task, givenStartExactTimeStamp: ExactTimeStamp?, givenExactEndTimeStamp: ExactTimeStamp): List<Instance> {
-        val instances = ArrayList<Instance>()
-
+    override fun getInstances(
+            task: Task,
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenExactEndTimeStamp: ExactTimeStamp
+    ): Sequence<Instance> {
         val singleScheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
         if (givenStartExactTimeStamp != null && givenStartExactTimeStamp > singleScheduleExactTimeStamp)
-            return instances
+            return emptySequence()
 
         if (givenExactEndTimeStamp <= singleScheduleExactTimeStamp)
-            return instances
+            return emptySequence()
 
         val endExactTimeStamp = getEndExactTimeStamp()
         if (endExactTimeStamp != null && singleScheduleExactTimeStamp >= endExactTimeStamp)// timezone hack
-            return instances
+            return emptySequence()
 
-        instances.add(getInstance(task))
-
-        return instances
+        return sequenceOf(getInstance(task))
     }
 
     override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {

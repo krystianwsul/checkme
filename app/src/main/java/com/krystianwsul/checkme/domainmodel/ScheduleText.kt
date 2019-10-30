@@ -9,10 +9,9 @@ import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.models.RemoteProject
 import com.krystianwsul.common.firebase.models.RemoteTask
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.ScheduleData
 import java.util.*
 
 sealed class ScheduleText {
@@ -41,16 +40,12 @@ sealed class ScheduleText {
         companion object {
 
             fun getScheduleText(
-                    date: Date,
-                    timePair: TimePair,
+                    scheduleData: ScheduleData.Single,
                     timePairCallback: (TimePair) -> String
-            ) = date.getDisplayText() + ", " + timePairCallback(timePair)
+            ) = scheduleData.date.getDisplayText() + ", " + timePairCallback(scheduleData.timePair)
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = Companion.getScheduleText(
-                scheduleGroup.singleSchedule.date,
-                scheduleGroup.singleSchedule.timePair
-        ) {
+        override fun getScheduleText(remoteProject: RemoteProject<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
             (it.customTimeKey?.let {
                 remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
             } ?: NormalTime(it.hourMinute!!)).toString()
@@ -62,18 +57,17 @@ sealed class ScheduleText {
         companion object {
 
             fun getScheduleText(
-                    daysOfWeek: Set<DayOfWeek>,
-                    timePair: TimePair,
+                    scheduleData: ScheduleData.Weekly,
                     timePairCallback: (TimePair) -> String
             ): String {
-                val days = daysOfWeek.prettyPrint()
-                val time = timePairCallback(timePair)
+                val days = scheduleData.daysOfWeek.prettyPrint()
+                val time = timePairCallback(scheduleData.timePair)
                 return "$days$time"
             }
         }
 
         override fun getScheduleText(remoteProject: RemoteProject<*>): String {
-            val text = Companion.getScheduleText(scheduleGroup.daysOfWeek, scheduleGroup.timePair) {
+            val text = Companion.getScheduleText(scheduleGroup.scheduleData) {
                 (it.customTimeKey?.let {
                     remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
                 } ?: NormalTime(it.hourMinute!!)).toString()
@@ -96,23 +90,17 @@ sealed class ScheduleText {
         companion object {
 
             fun getScheduleText(
-                    dayOfMonth: Int,
-                    beginningOfMonth: Boolean,
-                    timePair: TimePair,
+                    scheduleData: ScheduleData.MonthlyDay,
                     timePairCallback: (TimePair) -> String
             ): String {
                 return MyApplication.instance.run {
-                    Utils.ordinal(dayOfMonth) + " " + getString(R.string.monthDay) + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
-                } + ": " + timePairCallback(timePair)
+                    Utils.ordinal(scheduleData.dayOfMonth) + " " + getString(R.string.monthDay) + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
+                } + ": " + timePairCallback(scheduleData.timePair)
             }
         }
 
         override fun getScheduleText(remoteProject: RemoteProject<*>) = MyApplication.instance.run {
-            val text = Companion.getScheduleText(
-                    scheduleGroup.monthlyDaySchedule.dayOfMonth,
-                    scheduleGroup.monthlyDaySchedule.beginningOfMonth,
-                    scheduleGroup.monthlyDaySchedule.timePair
-            ) {
+            val text = Companion.getScheduleText(scheduleGroup.scheduleData) {
                 (it.customTimeKey?.let {
                     remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
                 } ?: NormalTime(it.hourMinute!!)).toString()
@@ -137,25 +125,17 @@ sealed class ScheduleText {
         companion object {
 
             fun getScheduleText(
-                    dayOfMonth: Int,
-                    dayOfWeek: DayOfWeek,
-                    beginningOfMonth: Boolean,
-                    timePair: TimePair,
+                    scheduleData: ScheduleData.MonthlyWeek,
                     timePairCallback: (TimePair) -> String
             ): String {
                 return MyApplication.instance.run {
-                    Utils.ordinal(dayOfMonth) + " " + dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
-                } + ": " + timePairCallback(timePair)
+                    Utils.ordinal(scheduleData.dayOfMonth) + " " + scheduleData.dayOfWeek + " " + getString(R.string.monthDayStart) + " " + resources.getStringArray(R.array.month)[if (scheduleData.beginningOfMonth) 0 else 1] + " " + getString(R.string.monthDayEnd)
+                } + ": " + timePairCallback(scheduleData.timePair)
             }
         }
 
         override fun getScheduleText(remoteProject: RemoteProject<*>) = MyApplication.instance.run {
-            val text = Companion.getScheduleText(
-                    scheduleGroup.monthlyWeekSchedule.dayOfMonth,
-                    scheduleGroup.monthlyWeekSchedule.dayOfWeek,
-                    scheduleGroup.monthlyWeekSchedule.beginningOfMonth,
-                    scheduleGroup.monthlyWeekSchedule.timePair
-            ) {
+            val text = Companion.getScheduleText(scheduleGroup.scheduleData) {
                 (it.customTimeKey?.let {
                     remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
                 } ?: NormalTime(it.hourMinute!!)).toString()

@@ -58,7 +58,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                return ScheduleText.Single.getScheduleText(scheduleData.date, scheduleData.timePair) {
+                return ScheduleText.Single.getScheduleText(scheduleData) {
                     timePair.customTimeKey?.let {
                         val customTimeData = customTimeDatas.getValue(timePair.customTimeKey!!)
 
@@ -95,7 +95,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         data class Weekly(override val scheduleData: ScheduleData.Weekly) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                return ScheduleText.Weekly.getScheduleText(scheduleData.daysOfWeek, timePair) {
+                return ScheduleText.Weekly.getScheduleText(scheduleData) {
                     timePair.customTimeKey?.let {
                         customTimeDatas.getValue(it).name
                     } ?: timePair.hourMinute!!.toString()
@@ -132,10 +132,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         data class MonthlyDay(override val scheduleData: ScheduleData.MonthlyDay) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                return ScheduleText.MonthlyDay.getScheduleText(
-                        scheduleData.dayOfMonth,
-                        scheduleData.beginningOfMonth,
-                        scheduleData.timePair) {
+                return ScheduleText.MonthlyDay.getScheduleText(scheduleData) {
                     timePair.customTimeKey?.let {
                         customTimeDatas.getValue(it).name
                     } ?: timePair.hourMinute!!.toString()
@@ -166,12 +163,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
         data class MonthlyWeek(override val scheduleData: ScheduleData.MonthlyWeek) : ScheduleDataWrapper() {
 
             override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
-                return ScheduleText.MonthlyWeek.getScheduleText(
-                        scheduleData.dayOfMonth,
-                        scheduleData.dayOfWeek,
-                        scheduleData.beginningOfMonth,
-                        scheduleData.timePair
-                ) {
+                return ScheduleText.MonthlyWeek.getScheduleText(scheduleData) {
                     timePair.customTimeKey?.let {
                         customTimeDatas.getValue(it).name
                     } ?: timePair.hourMinute!!.toString()

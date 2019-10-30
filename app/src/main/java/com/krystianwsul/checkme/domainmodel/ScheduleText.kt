@@ -31,15 +31,17 @@ sealed class ScheduleText {
                     .getString(id)
                     .toLowerCase(Locale.getDefault())
 
-            val fromStr = from
-                    ?.let { " ${getString(R.string.from)} ${it.getDisplayText(false)}" }
-                    ?: ""
+            val fromStr by lazy { from!!.getDisplayText() }
+            val untilStr by lazy { until!!.getDisplayText() }
 
-            val untilStr = until
-                    ?.let { " ${getString(R.string.until)} ${it.getDisplayText(false)}" }
-                    ?: ""
+            val ret = when {
+                from != null && until != null -> "$fromStr - $untilStr"
+                from != null -> "${getString(R.string.from)} $fromStr"
+                until != null -> "${getString(R.string.until)} $untilStr"
+                else -> null
+            }
 
-            return "$fromStr$untilStr"
+            return ret?.let { " ($it)" } ?: ""
         }
     }
 

@@ -977,7 +977,7 @@ class GroupListFragment @JvmOverloads constructor(
         override val childSelectedDatas get() = children
     }
 
-    sealed class Parameters {
+    sealed class Parameters(val draggable: Boolean = true) {
 
         abstract val dataId: Int
         abstract val immediate: Boolean
@@ -989,30 +989,35 @@ class GroupListFragment @JvmOverloads constructor(
                 override val dataWrapper: DataWrapper,
                 val position: Int,
                 val timeRange: MainActivity.TimeRange,
-                val differentPage: Boolean) : Parameters()
+                val differentPage: Boolean
+        ) : Parameters(false)
 
         class TimeStamp(
                 override val dataId: Int,
                 override val immediate: Boolean,
                 override val dataWrapper: DataWrapper,
-                val timeStamp: com.krystianwsul.common.time.TimeStamp) : Parameters()
+                val timeStamp: com.krystianwsul.common.time.TimeStamp
+        ) : Parameters()
 
         class InstanceKey(
                 override val dataId: Int,
                 override val immediate: Boolean,
                 override val dataWrapper: DataWrapper,
-                val instanceKey: com.krystianwsul.common.utils.InstanceKey) : Parameters()
+                val instanceKey: com.krystianwsul.common.utils.InstanceKey
+        ) : Parameters()
 
         class InstanceKeys(
                 override val dataId: Int,
                 override val immediate: Boolean,
-                override val dataWrapper: DataWrapper) : Parameters()
+                override val dataWrapper: DataWrapper
+        ) : Parameters(false)
 
         class TaskKey(
                 override val dataId: Int,
                 override val immediate: Boolean,
                 override val dataWrapper: DataWrapper,
-                val taskKey: com.krystianwsul.common.utils.TaskKey) : Parameters()
+                val taskKey: com.krystianwsul.common.utils.TaskKey
+        ) : Parameters(false)
     }
 
     private class NoSelectionException(message: String) : Exception(message)

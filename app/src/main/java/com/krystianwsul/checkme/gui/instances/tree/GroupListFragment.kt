@@ -921,7 +921,8 @@ class GroupListFragment @JvmOverloads constructor(
             val hierarchyData: HierarchyData?,
             var ordinal: Double,
             var notificationShown: Boolean,
-            val imageState: ImageState?) : InstanceDataParent, Comparable<InstanceData>, SelectedData {
+            val imageState: ImageState?
+    ) : InstanceDataParent, Comparable<InstanceData>, SelectedData {
 
         lateinit var instanceDataParent: InstanceDataParent
 

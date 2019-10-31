@@ -535,8 +535,7 @@ class DomainFactory(
             listOf()
         }
 
-        val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
-        for (instance in currentInstances) {
+        val instanceDatas = currentInstances.map { instance ->
             val task = instance.task
 
             val isRootTask = if (task.current(now)) task.isRootTask(now) else null
@@ -562,13 +561,14 @@ class DomainFactory(
                     task.getImage(deviceDbInfo))
 
             children.values.forEach { it.instanceDataParent = instanceData }
-            instanceDatas[instanceData.instanceKey] = instanceData
+
+            instanceData
         }
 
         val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, taskDatas, null, instanceDatas, null)
         val data = DayViewModel.DayData(dataWrapper)
 
-        instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+        instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
         return data
     }
@@ -606,7 +606,7 @@ class DomainFactory(
 
         val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 
-        val instanceDatas = instances.associate {
+        val instanceDatas = instances.map {
             val children = getChildInstanceDatas(it, now)
 
             val hierarchyData = if (task.isRootTask(hierarchyExactTimeStamp)) {
@@ -617,7 +617,7 @@ class DomainFactory(
                 HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal)
             }
 
-            it.instanceKey to GroupListFragment.InstanceData(
+            GroupListFragment.InstanceData(
                     it.done,
                     it.instanceKey,
                     it.getDisplayData(now)?.getDisplayText(),
@@ -634,7 +634,7 @@ class DomainFactory(
                     it.ordinal,
                     it.getNotificationShown(localFactory),
                     task.getImage(deviceDbInfo))
-        }.toMutableMap()
+        }
 
         return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(
                 customTimeDatas,
@@ -659,7 +659,7 @@ class DomainFactory(
 
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
-        val instanceDatas = instances.associate { instance ->
+        val instanceDatas = instances.map { instance ->
             val task = instance.task
 
             val isRootTask = if (task.current(now)) task.isRootTask(now) else null
@@ -685,12 +685,13 @@ class DomainFactory(
                     task.getImage(deviceDbInfo))
 
             children.values.forEach { it.instanceDataParent = instanceData }
-            instance.instanceKey to instanceData
-        }.toMutableMap()
+
+            instanceData
+        }
 
         val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, listOf(), null, instanceDatas, null)
 
-        instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+        instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
         return ShowNotificationGroupViewModel.Data(dataWrapper)
     }
@@ -2546,8 +2547,7 @@ class DomainFactory(
 
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
-        val instanceDatas = HashMap<InstanceKey, GroupListFragment.InstanceData>()
-        for (instance in currentInstances) {
+        val instanceDatas = currentInstances.map { instance ->
             val task = instance.task
 
             val isRootTask = if (task.current(now)) task.isRootTask(now) else null
@@ -2573,12 +2573,13 @@ class DomainFactory(
                     task.getImage(deviceDbInfo))
 
             children.values.forEach { it.instanceDataParent = instanceData }
-            instanceDatas[instance.instanceKey] = instanceData
+
+            instanceData
         }
 
         val dataWrapper = GroupListFragment.DataWrapper(customTimeDatas, null, listOf(), null, instanceDatas, null)
 
-        instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+        instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
         return dataWrapper
     }
@@ -2586,40 +2587,40 @@ class DomainFactory(
     private fun getGroupListData(
             instance: Instance,
             task: Task,
-            now: ExactTimeStamp): GroupListFragment.DataWrapper {
+            now: ExactTimeStamp
+    ): GroupListFragment.DataWrapper {
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
 
-        val instanceDatas = instance.getChildInstances(now)
-                .map { (childInstance, taskHierarchy) ->
-                    val childTask = childInstance.task
+        val instanceDatas = instance.getChildInstances(now).map { (childInstance, taskHierarchy) ->
+            val childTask = childInstance.task
 
-                    val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
+            val isRootTask = if (childTask.current(now)) childTask.isRootTask(now) else null
 
-                    val children = getChildInstanceDatas(childInstance, now)
+            val children = getChildInstanceDatas(childInstance, now)
 
-                    val instanceData = GroupListFragment.InstanceData(
-                            childInstance.done,
-                            childInstance.instanceKey,
-                            null,
-                            childInstance.name,
-                            childInstance.instanceDateTime.timeStamp,
-                            childTask.current(now),
-                            childInstance.isRootInstance(now),
-                            isRootTask,
-                            childInstance.exists(),
-                            childInstance.getCreateTaskTimePair(remoteProjectFactory.remotePrivateProject.id),
-                            childTask.note,
-                            children,
-                            HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
-                            childInstance.ordinal,
-                            childInstance.getNotificationShown(localFactory),
-                            childTask.getImage(deviceDbInfo))
+            val instanceData = GroupListFragment.InstanceData(
+                    childInstance.done,
+                    childInstance.instanceKey,
+                    null,
+                    childInstance.name,
+                    childInstance.instanceDateTime.timeStamp,
+                    childTask.current(now),
+                    childInstance.isRootInstance(now),
+                    isRootTask,
+                    childInstance.exists(),
+                    childInstance.getCreateTaskTimePair(remoteProjectFactory.remotePrivateProject.id),
+                    childTask.note,
+                    children,
+                    HierarchyData(taskHierarchy.taskHierarchyKey, taskHierarchy.ordinal),
+                    childInstance.ordinal,
+                    childInstance.getNotificationShown(localFactory),
+                    childTask.getImage(deviceDbInfo)
+            )
 
-                    children.values.forEach { it.instanceDataParent = instanceData }
-                    childInstance.instanceKey to instanceData
-                }
-                .toMap()
-                .toMutableMap()
+            children.values.forEach { it.instanceDataParent = instanceData }
+
+            instanceData
+        }
 
         val dataWrapper = GroupListFragment.DataWrapper(
                 customTimeDatas,
@@ -2627,9 +2628,10 @@ class DomainFactory(
                 listOf(),
                 task.note,
                 instanceDatas,
-                task.getImage(deviceDbInfo))
+                task.getImage(deviceDbInfo)
+        )
 
-        instanceDatas.values.forEach { it.instanceDataParent = dataWrapper }
+        instanceDatas.forEach { it.instanceDataParent = dataWrapper }
 
         return dataWrapper
     }

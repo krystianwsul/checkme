@@ -397,7 +397,6 @@ class GroupListFragment @JvmOverloads constructor(
         get() {
             val instanceDatas = parameters.dataWrapper
                     .instanceDatas
-                    .values
                     .sorted()
 
             val lines = mutableListOf<String>()
@@ -553,13 +552,12 @@ class GroupListFragment @JvmOverloads constructor(
                         parameters.dataId,
                         parameters.dataWrapper.customTimeDatas,
                         useGroups(),
-                        parameters.dataWrapper
-                                .instanceDatas
-                                .values,
+                        parameters.dataWrapper.instanceDatas,
                         state,
                         parameters.dataWrapper.taskDatas,
                         parameters.dataWrapper.note,
-                        parameters.dataWrapper.imageData)
+                        parameters.dataWrapper.imageData
+                )
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
             }
         } else {
@@ -568,13 +566,12 @@ class GroupListFragment @JvmOverloads constructor(
                     parameters.dataId,
                     parameters.dataWrapper.customTimeDatas,
                     useGroups(),
-                    parameters.dataWrapper
-                            .instanceDatas
-                            .values,
+                    parameters.dataWrapper.instanceDatas,
                     state,
                     parameters.dataWrapper.taskDatas,
                     parameters.dataWrapper.note,
-                    parameters.dataWrapper.imageData)
+                    parameters.dataWrapper.imageData
+            )
             treeViewAdapter = groupAdapter.treeViewAdapter
             groupListRecycler.adapter = treeViewAdapter
 
@@ -895,8 +892,9 @@ class GroupListFragment @JvmOverloads constructor(
             val taskEditable: Boolean?,
             val taskDatas: List<TaskData>,
             val note: String?,
-            val instanceDatas: MutableMap<InstanceKey, InstanceData>,
-            val imageData: ImageState?) : InstanceDataParent
+            val instanceDatas: List<InstanceData>,
+            val imageData: ImageState?
+    ) : InstanceDataParent
 
     interface SelectedData {
 

@@ -57,7 +57,8 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     constructor(
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
-            remoteInstanceRecord: RemoteInstanceRecord<T>) {
+            remoteInstanceRecord: RemoteInstanceRecord<T>
+    ) { // todo to primary constructor
         this.remoteProject = remoteProject
         task = remoteTask
         val realInstanceData = RemoteReal(this, remoteInstanceRecord)
@@ -67,7 +68,8 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
     constructor(
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
-            scheduleDateTime: DateTime) {
+            scheduleDateTime: DateTime
+    ) {
         this.remoteProject = remoteProject
         task = remoteTask
         instanceData = Virtual(task.id, scheduleDateTime)

@@ -189,11 +189,7 @@ abstract class Task {
 
     fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
         // 24 hack
-        val instances = getPastRootInstances(now)
-
-        val optional = instances.asSequence()
-                .filter { it.isVisible(now, true) }
-                .minBy { it.scheduleDateTime }
+        val optional = getPastRootInstances(now).filter { it.isVisible(now, true) }.minBy { it.scheduleDateTime }
 
         val oldestVisible = listOfNotNull(optional?.scheduleDate, now.date).min()!!
 

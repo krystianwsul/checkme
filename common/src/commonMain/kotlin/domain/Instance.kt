@@ -112,30 +112,23 @@ abstract class Instance {
     fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
-        val task = task
-
         val scheduleDateTime = scheduleDateTime
 
-        val taskHierarchies = task.getChildTaskHierarchies()
-        val childInstances = HashMap<InstanceKey, Pair<Instance, TaskHierarchy>>()
-        for (taskHierarchy in taskHierarchies) {
-            if (taskHierarchy.notDeleted(hierarchyExactTimeStamp) && taskHierarchy.childTask.notDeleted(hierarchyExactTimeStamp)) {
-                val childInstance = taskHierarchy.childTask.getInstance(scheduleDateTime)
-
-                val parentInstance = childInstance.getParentInstance(now)
-                if (parentInstance?.instanceKey == instanceKey)
-                    childInstances[childInstance.instanceKey] = Pair(childInstance, taskHierarchy)
-            }
-        }
-
-        return ArrayList(childInstances.values)
+        return task.getChildTaskHierarchies()
+                .filter { it.notDeleted(hierarchyExactTimeStamp) && it.childTask.notDeleted(hierarchyExactTimeStamp) }
+                .map { Pair(it, it.childTask.getInstance(scheduleDateTime)) }
+                .filter { it.second.getParentInstance(now)?.instanceKey == instanceKey }
+                .associate { (taskHierarchy, childInstance) -> childInstance.instanceKey to Pair(childInstance, taskHierarchy) }
+                .values
+                .toList()
     }
 
     private fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(
             Pair(now, "now"),
             Pair(scheduleDateTime.timeStamp.toExactTimeStamp(), "schedule"),
             task.getEndExactTimeStamp()?.let { Pair(it.minusOne(), "task end") },
-            done?.let { Pair(it.minusOne(), "done") }).minBy { it.first }!!
+            done?.let { Pair(it.minusOne(), "done") }
+    ).minBy { it.first }!!
 
     fun isRootInstance(now: ExactTimeStamp) = getParentInstance(now) == null
 
@@ -161,12 +154,9 @@ abstract class Instance {
         val isVisible = isVisibleHelper(now, hack24)
 
         if (isVisible && isRootInstance(now)) { // root because oldest visible now checked only for task's own schedules
-            val task = task
-
-            val oldestVisible = task.getOldestVisible()
             val date = scheduleDate
 
-            if (oldestVisible != null && date < oldestVisible) {
+            if (task.getOldestVisible()?.let { date < it } == true) {
                 if (exists()) {
                     task.correctOldestVisible(date) // po pierwsze bo syf straszny, po drugie dlatego że edycja z root na child może dodać instances w przeszłości
                 } else {
@@ -207,8 +197,6 @@ abstract class Instance {
 
     fun getParentInstance(now: ExactTimeStamp): Instance? {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
-
-        val task = task
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
 
@@ -272,7 +260,8 @@ abstract class Instance {
                 scheduleDay: Int,
                 scheduleCustomTimeId: RemoteCustomTimeId?,
                 scheduleHour: Int?,
-                scheduleMinute: Int?): Shown?
+                scheduleMinute: Int?
+        ): Shown?
 
         fun getShown(taskKey: TaskKey, scheduleDateTime: DateTime): Shown? {
             val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
@@ -287,7 +276,8 @@ abstract class Instance {
                     scheduleDateTime.date.day,
                     remoteCustomTimeId,
                     hour,
-                    minute)
+                    minute
+            )
         }
     }
 }

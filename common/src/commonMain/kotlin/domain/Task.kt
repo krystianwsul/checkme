@@ -187,6 +187,7 @@ abstract class Task {
                 .filter { it.isRootInstance(now) }
     }
 
+    // there might be an issue here when moving task across projects
     fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
         // 24 hack
         val optional = getPastRootInstances(now).filter { it.isVisible(now, true) }.minBy { it.scheduleDateTime }

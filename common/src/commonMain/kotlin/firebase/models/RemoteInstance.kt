@@ -58,7 +58,7 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
             remoteProject: RemoteProject<T>,
             remoteTask: RemoteTask<T>,
             remoteInstanceRecord: RemoteInstanceRecord<T>
-    ) { // todo to primary constructor
+    ) {
         this.remoteProject = remoteProject
         task = remoteTask
         val realInstanceData = RemoteReal(this, remoteInstanceRecord)
@@ -150,7 +150,10 @@ class RemoteInstance<T : RemoteCustomTimeId> : Instance {
         }
     }
 
-    private class RemoteReal<T : RemoteCustomTimeId>(private val remoteInstance: RemoteInstance<T>, remoteInstanceRecord: RemoteInstanceRecord<T>) : InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
+    private class RemoteReal<T : RemoteCustomTimeId>(
+            private val remoteInstance: RemoteInstance<T>,
+            remoteInstanceRecord: RemoteInstanceRecord<T>
+    ) : InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
 
         override fun getCustomTime(customTimeId: RemoteCustomTimeId) = remoteInstance.remoteProject.getRemoteCustomTime(customTimeId)
 

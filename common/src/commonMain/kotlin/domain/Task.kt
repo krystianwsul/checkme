@@ -41,12 +41,7 @@ abstract class Task {
 
     abstract fun setImage(deviceDbInfo: DeviceDbInfo, imageState: ImageState?)
 
-    fun current(exactTimeStamp: ExactTimeStamp): Boolean {
-        val startExactTimeStamp = startExactTimeStamp
-        val endExactTimeStamp = getEndExactTimeStamp()
-
-        return startExactTimeStamp <= exactTimeStamp && (endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp)
-    }
+    fun current(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp && notDeleted(exactTimeStamp)
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
@@ -54,11 +49,7 @@ abstract class Task {
 
     abstract fun getScheduleText(scheduleTextFactory: RemoteTask.ScheduleTextFactory, exactTimeStamp: ExactTimeStamp, showParent: Boolean = false): String?
 
-    fun notDeleted(exactTimeStamp: ExactTimeStamp): Boolean {
-        val endExactTimeStamp = getEndExactTimeStamp()
-
-        return endExactTimeStamp == null || endExactTimeStamp > exactTimeStamp
-    }
+    fun notDeleted(exactTimeStamp: ExactTimeStamp) = getEndExactTimeStamp()?.let { it > exactTimeStamp } != false
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         if (!current(now))
@@ -76,8 +67,9 @@ abstract class Task {
         return false
     }// bo inheritance i testy
 
-    private fun getRootTask(exactTimeStamp: ExactTimeStamp): Task = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp)
-            ?: this
+    private fun getRootTask(
+            exactTimeStamp: ExactTimeStamp
+    ): Task = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(current(exactTimeStamp))
@@ -97,7 +89,8 @@ abstract class Task {
             uuid: String,
             endData: EndData,
             taskUndoData: TaskUndoData? = null,
-            recursive: Boolean = false) {
+            recursive: Boolean = false
+    ) {
         val now = endData.exactTimeStamp
 
         check(current(now))
@@ -202,16 +195,7 @@ abstract class Task {
                 .filter { it.isVisible(now, true) }
                 .minBy { it.scheduleDateTime }
 
-        var oldestVisible: Date
-
-        if (optional != null) {
-            oldestVisible = optional.scheduleDate
-
-            if (oldestVisible > now.date)
-                oldestVisible = now.date
-        } else {
-            oldestVisible = now.date
-        }
+        val oldestVisible = listOfNotNull(optional?.scheduleDate, now.date).min()!!
 
         setOldestVisible(uuid, oldestVisible)
     }
@@ -300,12 +284,12 @@ abstract class Task {
 
     abstract fun getChildTaskHierarchies(): Set<TaskHierarchy>
 
-    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().asSequence()
-            .filter { it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp) }
-            .sortedBy { it.ordinal }
-            .toList()
+    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
+        it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp)
+    }.sortedBy { it.ordinal }
 
     data class EndData(
             val exactTimeStamp: ExactTimeStamp,
-            val deleteInstances: Boolean)
+            val deleteInstances: Boolean
+    )
 }

@@ -9,3 +9,7 @@
 
 *.iml
 /.idea/caches/build_file_checksums.ser
+/app/fabric.properties
+/app/google-services.json
+/backend/src/main/webapp/WEB-INF/check-me-add47-firebase-adminsdk-5hvuz-436ce98200.json
+/krystianwsul.jks

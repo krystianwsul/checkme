@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import android.text.TextUtils
 import com.androidhuman.rxfirebase2.database.childEvents
 import com.androidhuman.rxfirebase2.database.data
 import com.androidhuman.rxfirebase2.database.dataChanges
@@ -10,14 +9,9 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.records.*
 
 
 object AndroidDatabaseWrapper : DatabaseWrapper() {
-
-    private const val USERS_KEY = "users"
-    private const val RECORDS_KEY = "records"
-    private const val PRIVATE_PROJECTS_KEY = "privateProjects"
 
     val root: String by lazy {
         MyApplication.instance
@@ -37,8 +31,6 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
         instance = this
     }
 
-    override fun newSharedProjectRecordId() = rootReference.child(RECORDS_KEY).push().key!!
-
     fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 
     fun addFriend(friendKey: String) = rootReference.child("$USERS_KEY/$friendKey/friendOf/${userInfo.key}").setValue(true)
@@ -55,77 +47,9 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
             .equalTo(true)
             .dataChanges()
 
-    override fun getPrivateScheduleRecordId(projectId: String, taskId: String): String {
-        val id = rootReference.child("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
-                .push()
-                .key!!
-        check(!TextUtils.isEmpty(id))
-
-        return id
-    }
-
-    override fun newSharedScheduleRecordId(projectId: String, taskId: String): String {
-        val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
-                .push()
-                .key!!
-        check(!TextUtils.isEmpty(id))
-
-        return id
-    }
-
-    override fun getPrivateTaskRecordId(projectId: String): String {
-        val id = rootReference.child("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
-                .push()
-                .key!!
-        check(!TextUtils.isEmpty(id))
-
-        return id
-    }
-
-    override fun newSharedTaskRecordId(projectId: String): String {
-        val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
-                .push()
-                .key!!
-        check(!TextUtils.isEmpty(id))
-
-        return id
-    }
-
-    override fun getPrivateTaskHierarchyRecordId(projectId: String): String {
-        val id = rootReference.child("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
-                .push()
-                .key!!
-        check(!TextUtils.isEmpty(id))
-
-        return id
-    }
-
-    override fun newSharedTaskHierarchyRecordId(projectId: String): String {
-        val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
-                .push()
-                .key!!
-        check(!TextUtils.isEmpty(id))
-
-        return id
-    }
-
-    override fun getPrivateCustomTimeRecordId(projectId: String): String {
-        val id = rootReference.child("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
-                .push()
-                .key!!
-        check(!TextUtils.isEmpty(id))
-
-        return id
-    }
-
-    override fun newSharedCustomTimeRecordId(projectId: String): String {
-        val id = rootReference.child("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
-                .push()
-                .key!!
-        check(!TextUtils.isEmpty(id))
-
-        return id
-    }
+    override fun getNewId(path: String) = rootReference.child(path)
+            .push()
+            .key!!
 
     private fun sharedProjectQuery(key: String) = rootReference.child(RECORDS_KEY)
             .orderByChild("recordOf/$key")

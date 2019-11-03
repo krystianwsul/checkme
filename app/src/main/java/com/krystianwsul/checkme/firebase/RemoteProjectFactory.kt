@@ -7,8 +7,8 @@ import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.firebase.managers.AndroidRemoteSharedProjectManager
 import com.krystianwsul.checkme.firebase.managers.RemotePrivateProjectManager
-import com.krystianwsul.checkme.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.JsonWrapper
@@ -24,10 +24,11 @@ class RemoteProjectFactory(
         private val domainFactory: DomainFactory,
         sharedChildren: Iterable<DataSnapshot>,
         privateSnapshot: DataSnapshot,
-        now: ExactTimeStamp) : RemoteProject.Parent {
+        now: ExactTimeStamp
+) : RemoteProject.Parent {
 
     private val remotePrivateProjectManager = RemotePrivateProjectManager(domainFactory, privateSnapshot, now)
-    private val remoteSharedProjectManager = RemoteSharedProjectManager(domainFactory, sharedChildren)
+    private val remoteSharedProjectManager = AndroidRemoteSharedProjectManager(domainFactory, sharedChildren)
 
     var remotePrivateProject = RemotePrivateProject(remotePrivateProjectManager.remoteProjectRecord).apply { fixNotificationShown(domainFactory.localFactory, now) }
         private set

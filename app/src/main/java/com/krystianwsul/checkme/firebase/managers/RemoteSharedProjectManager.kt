@@ -2,36 +2,24 @@ package com.krystianwsul.checkme.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import java.util.*
 import kotlin.properties.Delegates
 
-class RemoteSharedProjectManager(
-        private val domainFactory: DomainFactory,
-        children: Iterable<DataSnapshot>
-) : RemoteSharedProjectRecord.Parent {
-
-    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(this@RemoteSharedProjectManager, key!!, getValue(JsonWrapper::class.java)!!)
+abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
 
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemoteSharedProjectManager.isSaved = $value") }
 
-    val remoteProjectRecords = children.associate { child -> child.key!! to child.toRecord() }.toMutableMap()
-
-    fun setChild(dataSnapshot: DataSnapshot): RemoteSharedProjectRecord {
-        val key = dataSnapshot.key!!
-
-        return dataSnapshot.toRecord().also {
-            remoteProjectRecords[key] = it
-        }
-    }
+    abstract val remoteProjectRecords: MutableMap<String, RemoteSharedProjectRecord>
 
     fun removeChild(dataSnapshot: DataSnapshot) = dataSnapshot.key!!.also {
         check(remoteProjectRecords.remove(it) != null)
     }
+
+    protected abstract fun getDatabaseCallback(): DatabaseCallback
 
     fun save(): Boolean {
         val values = HashMap<String, Any?>()
@@ -44,7 +32,7 @@ class RemoteSharedProjectManager(
             check(!isSaved)
 
             isSaved = true
-            AndroidDatabaseWrapper.updateRecords(values, checkError(domainFactory, "RemoteSharedProjectManager.save"))
+            AndroidDatabaseWrapper.updateRecords(values, getDatabaseCallback())
         }
 
         return isSaved

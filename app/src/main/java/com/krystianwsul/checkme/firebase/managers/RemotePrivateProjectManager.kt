@@ -25,7 +25,7 @@ abstract class RemotePrivateProjectManager {
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.instance.updatePrivateProject(values, getDatabaseCallback(values))
+            DatabaseWrapper.instance.updatePrivateProjects(values, getDatabaseCallback(values))
         }
 
         return isSaved

@@ -10,7 +10,7 @@ abstract class DatabaseWrapper {
         const val RECORDS_KEY = "records"
         const val PRIVATE_PROJECTS_KEY = "privateProjects"
 
-        lateinit var instance: DatabaseWrapper
+        lateinit var instance: DatabaseWrapper // todo injection
     }
 
     protected abstract fun getNewId(path: String): String
@@ -35,5 +35,5 @@ abstract class DatabaseWrapper {
 
     abstract fun updateRecords(values: Map<String, Any?>, callback: DatabaseCallback)
 
-    abstract fun updatePrivateProject(values: Map<String, Any?>, callback: DatabaseCallback)
+    abstract fun updatePrivateProjects(values: Map<String, Any?>, callback: DatabaseCallback)
 }

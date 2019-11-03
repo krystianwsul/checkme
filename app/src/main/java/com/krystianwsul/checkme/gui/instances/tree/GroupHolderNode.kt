@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.toImageLoader
@@ -19,6 +20,7 @@ import com.krystianwsul.treeadapter.ModelState
 import com.krystianwsul.treeadapter.TreeNode
 import com.stfalcon.imageviewer.StfalconImageViewer
 import com.stfalcon.imageviewer.loader.ImageLoader
+import io.reactivex.rxkotlin.addTo
 import kotlin.math.ceil
 
 abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeHolder> {
@@ -35,7 +37,18 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
 
         const val TOTAL_LINES = 3
 
-        private val textWidths = mutableMapOf<WidthKey, Int>()
+        private val textWidths = InitMap<WidthKey, BehaviorRelay<Int>> { BehaviorRelay.create() }
+    }
+
+    private class InitMap<T, U>(private val initializer: (T) -> U) {
+
+        private val map = mutableMapOf<T, U>()
+
+        operator fun get(key: T): U {
+            if (!map.containsKey(key))
+                map[key] = initializer(key)
+            return map.getValue(key)
+        }
     }
 
     protected abstract val treeNode: TreeNode<NodeHolder>
@@ -72,7 +85,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 treeNode.expandVisible,
                 treeNode.isExpanded,
                 checkBoxState,
-                imageData?.imageState)
+                imageData?.imageState
+        )
 
     protected open val colorBackground = GroupHolderNode.colorBackground
 
@@ -85,7 +99,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val expandVisible: Boolean,
             val isExpanded: Boolean,
             val checkBoxState: CheckBoxState,
-            val imageState: ImageState?) : ModelState {
+            val imageState: ImageState?
+    ) : ModelState {
 
         override fun same(other: ModelState) = (other as State).id == id
     }
@@ -123,45 +138,53 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                 val widthKey = WidthKey(
                         indentation,
                         checkBoxState.visibility == View.GONE,
-                        rowContainer.orientation,
+                        rowContainer.context
+                                .resources
+                                .configuration
+                                .orientation,
                         avatarImage != null,
-                        thumbnail != null)
+                        thumbnail != null
+                )
 
                 rowContainer.setIndent(indentation)
 
-                val textWidth = textWidths[widthKey]
+                val textWidthRelay = textWidths[widthKey]
 
                 val minLines = 1 + (details?.let { 1 } ?: 0) + (children?.let { 1 } ?: 0)
                 var remainingLines = TOTAL_LINES - minLines
 
-                fun TextView.allocateLines() {
-                    fun getWantLines(text: String) = Rect().run {
-                        if (textWidth != null) {
-                            paint.getTextBounds(text, 0, text.length, this)
+                fun allocateLines(textViews: List<TextView>) {
+                    textViews.forEach { textView ->
+                        fun getWantLines(text: String) = Rect().run {
+                            if (textWidthRelay.value != null) {
+                                textView.paint.getTextBounds(text, 0, text.length, this)
 
-                            ceil(width().toDouble() / textWidth).toInt()
+                                ceil(width().toDouble() / textWidthRelay.value!!).toInt()
+                            } else {
+                                1
+                            }
+                        }
+
+                        val wantLines = textView.text.toString()
+                                .split('\n')
+                                .map { getWantLines(it) }.sum()
+
+                        val lines = listOf(wantLines, remainingLines + 1).min()!!
+
+                        remainingLines -= (lines - 1)
+
+                        if (lines == 1) {
+                            textView.setSingleLine()
                         } else {
-                            1
+                            check(lines > 1)
+
+                            textView.isSingleLine = false
+                            textView.setLines(lines)
                         }
                     }
-
-                    val wantLines = text.toString()
-                            .split('\n')
-                            .map { getWantLines(it) }.sum()
-
-                    val lines = listOf(wantLines, remainingLines + 1).min()!!
-
-                    remainingLines -= (lines - 1)
-
-                    if (lines == 1) {
-                        setSingleLine()
-                    } else {
-                        check(lines > 1)
-
-                        isSingleLine = false
-                        setLines(lines)
-                    }
                 }
+
+                val allocateTextViews = mutableListOf<TextView>()
 
                 rowName.run {
                     name.let {
@@ -174,7 +197,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                                 maxLines = Int.MAX_VALUE
                                 isSingleLine = false
                             } else {
-                                allocateLines()
+                                allocateTextViews += this
                             }
                         } else {
                             visibility = View.INVISIBLE
@@ -195,7 +218,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                             text = it.first
                             setTextColor(it.second)
 
-                            allocateLines()
+                            allocateTextViews += this
                         } else {
                             visibility = View.GONE
                         }
@@ -211,16 +234,24 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                             text = it.first
                             setTextColor(it.second)
 
-                            allocateLines()
+                            allocateTextViews += this
                         } else {
                             visibility = View.GONE
                         }
                     }
                 }
 
+                allocateLines(allocateTextViews)
+
+                if (textWidthRelay.value == null) {
+                    textWidthRelay.distinctUntilChanged()
+                            .subscribe { allocateLines(allocateTextViews) }
+                            .addTo(groupHolder.compositeDisposable)
+                }
+
                 rowTextLayout.apply {
                     viewTreeObserver.addOnGlobalLayoutListener {
-                        textWidths[widthKey] = measuredWidth
+                        textWidths[widthKey].accept(measuredWidth)
                     }
                 }
 
@@ -278,7 +309,8 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
             val checkBoxVisible: Boolean,
             val orientation: Int,
             val avatarVisible: Boolean,
-            val thumbnailVisible: Boolean)
+            val thumbnailVisible: Boolean
+    )
 
     sealed class CheckBoxState {
 

@@ -12,7 +12,6 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.domainmodel.relevance.Irrelevant
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
@@ -33,6 +32,7 @@ import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*

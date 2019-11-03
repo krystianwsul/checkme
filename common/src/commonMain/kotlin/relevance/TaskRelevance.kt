@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.domainmodel.relevance
+package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.domain.Task

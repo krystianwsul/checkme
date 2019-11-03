@@ -7,6 +7,7 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemotePrivateProjectRecord(
+        private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
         id: String,
         projectJson: PrivateProjectJson
@@ -27,12 +28,14 @@ class RemotePrivateProjectRecord(
             .toMap()
             .toMutableMap()
 
-    constructor(id: String, projectJson: PrivateProjectJson) : this(
+    constructor(databaseWrapper: DatabaseWrapper, id: String, projectJson: PrivateProjectJson) : this(
+            databaseWrapper,
             false,
             id,
             projectJson)
 
-    constructor(deviceInfoDbInfo: DeviceDbInfo, projectJson: PrivateProjectJson) : this(
+    constructor(databaseWrapper: DatabaseWrapper, deviceInfoDbInfo: DeviceDbInfo, projectJson: PrivateProjectJson) : this(
+            databaseWrapper,
             true,
             deviceInfoDbInfo.key,
             projectJson)
@@ -66,13 +69,13 @@ class RemotePrivateProjectRecord(
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    fun getCustomTimeRecordId() = RemoteCustomTimeId.Private(DatabaseWrapper.instance.getPrivateCustomTimeRecordId(id))
+    fun getCustomTimeRecordId() = RemoteCustomTimeId.Private(databaseWrapper.getPrivateCustomTimeRecordId(id))
 
-    override fun getTaskRecordId() = DatabaseWrapper.instance.getPrivateTaskRecordId(id)
+    override fun getTaskRecordId() = databaseWrapper.getPrivateTaskRecordId(id)
 
-    override fun getScheduleRecordId(taskId: String) = DatabaseWrapper.instance.getPrivateScheduleRecordId(id, taskId)
+    override fun getScheduleRecordId(taskId: String) = databaseWrapper.getPrivateScheduleRecordId(id, taskId)
 
-    override fun getTaskHierarchyRecordId() = DatabaseWrapper.instance.getPrivateTaskHierarchyRecordId(id)
+    override fun getTaskHierarchyRecordId() = databaseWrapper.getPrivateTaskHierarchyRecordId(id)
 
     override fun getCustomTimeRecord(id: String) = remoteCustomTimeRecords.getValue(RemoteCustomTimeId.Private(id))
 

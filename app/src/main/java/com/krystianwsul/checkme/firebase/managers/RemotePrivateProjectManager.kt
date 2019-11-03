@@ -10,6 +10,8 @@ abstract class RemotePrivateProjectManager {
 
     var isSaved by Delegates.observable(false) { _, _, value -> ErrorLogger.instance.log("RemotePrivateProjectManager.isSaved = $value") }
 
+    abstract val databaseWrapper: DatabaseWrapper
+
     abstract val remotePrivateProjectRecords: List<RemotePrivateProjectRecord>
 
     protected abstract fun getDatabaseCallback(values: Any): DatabaseCallback
@@ -25,7 +27,7 @@ abstract class RemotePrivateProjectManager {
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.instance.updatePrivateProjects(values, getDatabaseCallback(values))
+            databaseWrapper.updatePrivateProjects(values, getDatabaseCallback(values))
         }
 
         return isSaved

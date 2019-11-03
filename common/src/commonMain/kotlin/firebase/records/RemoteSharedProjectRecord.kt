@@ -9,6 +9,7 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteSharedProjectRecord(
+        private val databaseWrapper: DatabaseWrapper,
         private val parent: Parent,
         create: Boolean,
         id: String,
@@ -43,10 +44,12 @@ class RemoteSharedProjectRecord(
     override val children get() = super.children + remoteUserRecords.values
 
     constructor(
+            databaseWrapper: DatabaseWrapper,
             parent: Parent,
             id: String,
             jsonWrapper: JsonWrapper
     ) : this(
+            databaseWrapper,
             parent,
             false,
             id,
@@ -54,12 +57,14 @@ class RemoteSharedProjectRecord(
     )
 
     constructor(
+            databaseWrapper: DatabaseWrapper,
             parent: Parent,
             jsonWrapper: JsonWrapper
     ) : this(
+            databaseWrapper,
             parent,
             true,
-            DatabaseWrapper.instance.newSharedProjectRecordId(),
+            databaseWrapper.newSharedProjectRecordId(),
             jsonWrapper
     )
 
@@ -116,13 +121,13 @@ class RemoteSharedProjectRecord(
 
     override fun deleteFromParent() = parent.deleteRemoteSharedProjectRecord(id)
 
-    fun getCustomTimeRecordId() = RemoteCustomTimeId.Shared(DatabaseWrapper.instance.newSharedCustomTimeRecordId(id))
+    fun getCustomTimeRecordId() = RemoteCustomTimeId.Shared(databaseWrapper.newSharedCustomTimeRecordId(id))
 
-    override fun getTaskRecordId() = DatabaseWrapper.instance.newSharedTaskRecordId(id)
+    override fun getTaskRecordId() = databaseWrapper.newSharedTaskRecordId(id)
 
-    override fun getScheduleRecordId(taskId: String) = DatabaseWrapper.instance.newSharedScheduleRecordId(id, taskId)
+    override fun getScheduleRecordId(taskId: String) = databaseWrapper.newSharedScheduleRecordId(id, taskId)
 
-    override fun getTaskHierarchyRecordId() = DatabaseWrapper.instance.newSharedTaskHierarchyRecordId(id)
+    override fun getTaskHierarchyRecordId() = databaseWrapper.newSharedTaskHierarchyRecordId(id)
 
     override fun getCustomTimeRecord(id: String) = remoteCustomTimeRecords.getValue(RemoteCustomTimeId.Shared(id))
 

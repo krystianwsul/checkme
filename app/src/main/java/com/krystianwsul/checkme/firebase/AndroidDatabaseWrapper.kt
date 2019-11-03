@@ -27,10 +27,6 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
                 .child(root)
     }
 
-    init {
-        instance = this
-    }
-
     fun getUserDataDatabaseReference(key: String) = rootReference.child("$USERS_KEY/$key/userData")
 
     fun addFriend(friendKey: String) = rootReference.child("$USERS_KEY/$friendKey/friendOf/${userInfo.key}").setValue(true)

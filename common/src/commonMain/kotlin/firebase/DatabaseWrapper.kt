@@ -9,8 +9,6 @@ abstract class DatabaseWrapper {
         const val USERS_KEY = "users"
         const val RECORDS_KEY = "records"
         const val PRIVATE_PROJECTS_KEY = "privateProjects"
-
-        lateinit var instance: DatabaseWrapper // todo injection
     }
 
     protected abstract fun getNewId(path: String): String

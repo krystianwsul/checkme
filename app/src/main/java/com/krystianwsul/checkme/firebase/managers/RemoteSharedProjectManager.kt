@@ -13,6 +13,8 @@ abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
 
     abstract val remoteProjectRecords: MutableMap<String, RemoteSharedProjectRecord>
 
+    abstract val databaseWrapper: DatabaseWrapper
+
     protected abstract fun getDatabaseCallback(): DatabaseCallback
 
     fun save(): Boolean {
@@ -26,13 +28,13 @@ abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
             check(!isSaved)
 
             isSaved = true
-            DatabaseWrapper.instance.updateRecords(values, getDatabaseCallback())
+            databaseWrapper.updateRecords(values, getDatabaseCallback())
         }
 
         return isSaved
     }
 
-    fun newRemoteProjectRecord(jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(this, jsonWrapper).also {
+    fun newRemoteProjectRecord(jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
         check(!remoteProjectRecords.containsKey(it.id))
 
         remoteProjectRecords[it.id] = it

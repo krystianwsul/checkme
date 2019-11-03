@@ -11,10 +11,11 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import java.util.*
 import kotlin.properties.Delegates
 
-class RemotePrivateProjectManager(
+abstract class RemotePrivateProjectManager(
         private val domainFactory: DomainFactory,
         dataSnapshot: DataSnapshot,
-        now: ExactTimeStamp) {
+        now: ExactTimeStamp
+) {
 
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemotePrivateProjectManager.isSaved = $value") }
 

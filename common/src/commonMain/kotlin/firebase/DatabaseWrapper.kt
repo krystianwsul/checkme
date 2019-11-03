@@ -34,4 +34,6 @@ abstract class DatabaseWrapper {
     fun newSharedCustomTimeRecordId(projectId: String) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
 
     abstract fun updateRecords(values: Map<String, Any?>, callback: DatabaseCallback)
+
+    abstract fun updatePrivateProject(values: Map<String, Any?>, callback: DatabaseCallback)
 }

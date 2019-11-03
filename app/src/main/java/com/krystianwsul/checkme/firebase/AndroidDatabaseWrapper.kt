@@ -71,7 +71,11 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
 
     fun getPrivateProjectObservable(key: String) = privateProjectQuery(key).dataChanges()
 
-    fun updatePrivateProject(values: Map<String, Any?>) = rootReference.child(PRIVATE_PROJECTS_KEY).updateChildren(values)
+    override fun updatePrivateProject(values: Map<String, Any?>, callback: DatabaseCallback) {
+        rootReference.child(PRIVATE_PROJECTS_KEY)
+                .updateChildren(values)
+                .addOnCompleteListener { callback(it.getMessage(), it.isSuccessful, it.exception) }
+    }
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 

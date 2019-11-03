@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.FirebaseWriteException
 import com.krystianwsul.checkme.gui.MyBottomBar
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
@@ -152,25 +153,58 @@ fun Context.startTicks(receiver: BroadcastReceiver) {
 
 fun <T> Observable<NullableWrapper<T>>.filterNotNull() = filter { it.value != null }.map { it.value!! }!!
 
-fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: Any? = null) {
-    fun getTaskKeys() = Pair(ExactTimeStamp.now, domainFactory.remoteProjectFactory
-            .remotePrivateProject
-            .taskKeys)
+private typealias TaskKeys = Pair<ExactTimeStamp, Set<String>>
 
-    val taskKeysBefore = values?.let { getTaskKeys() }
+private fun DomainFactory.getTaskKeys(): TaskKeys = Pair(
+        ExactTimeStamp.now,
+        remoteProjectFactory.remotePrivateProject.taskKeys
+)
+
+private fun onComplete(
+        domainFactory: DomainFactory,
+        caller: String,
+        values: Any?,
+        taskKeysBefore: TaskKeys?,
+        databaseMessage: String?,
+        successful: Boolean,
+        exception: Exception?
+) {
+    val message = "firebase write: $caller $databaseMessage " + (values?.let { ", \nvalues: $values" }
+            ?: "")
+    if (successful) {
+        MyCrashlytics.log(message)
+    } else {
+        val taskData = values?.let {
+            val taskKeysAfter = domainFactory.getTaskKeys()
+            ", \ntask keys before: $taskKeysBefore, \ntask keys after: $taskKeysAfter"
+        } ?: ""
+        MyCrashlytics.logException(FirebaseWriteException(message + taskData, exception))
+    }
+}
+
+fun checkError(domainFactory: DomainFactory, caller: String, values: Any? = null): DatabaseCallback {
+    val taskKeysBefore = values?.let { domainFactory.getTaskKeys() }
+
+    return { databaseMessage, successful, exception ->
+        onComplete(domainFactory, caller, values, taskKeysBefore, databaseMessage, successful, exception)
+    }
+}
+
+fun Task<Void>.getMessage() = "isCanceled: $isCanceled, isComplete: $isComplete, isSuccessful: $isSuccessful, exception: $exception"
+
+fun Task<Void>.checkError(domainFactory: DomainFactory, caller: String, values: Any? = null) {
+    val taskKeysBefore = values?.let { domainFactory.getTaskKeys() }
 
     addOnCompleteListener {
-        val message = "firebase write: $caller isCanceled: " + it.isCanceled + ", isComplete: " + it.isComplete + ", isSuccessful: " + it.isSuccessful + ", exception: " + it.exception + (values?.let { ", \nvalues: $values" }
-                ?: "")
-        if (it.isSuccessful) {
-            MyCrashlytics.log(message)
-        } else {
-            val taskData = values?.let {
-                val taskKeysAfter = getTaskKeys()
-                ", \ntask keys before: $taskKeysBefore, \ntask keys after: $taskKeysAfter"
-            } ?: ""
-            MyCrashlytics.logException(FirebaseWriteException(message + taskData, it.exception))
-        }
+        onComplete(
+                domainFactory,
+                caller,
+                values,
+                taskKeysBefore,
+                it.getMessage(),
+                it.isSuccessful,
+                it.exception
+        )
     }
 }
 

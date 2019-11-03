@@ -7,6 +7,8 @@ import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
+import com.krystianwsul.checkme.utils.getMessage
+import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.*
 
@@ -133,7 +135,11 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
 
     fun getSharedProjectEvents(key: String) = sharedProjectQuery(key).childEvents()
 
-    fun updateRecords(values: Map<String, Any?>) = rootReference.child(RECORDS_KEY).updateChildren(values)
+    fun updateRecords(values: Map<String, Any?>, callback: DatabaseCallback) {
+        rootReference.child(RECORDS_KEY)
+                .updateChildren(values)
+                .addOnCompleteListener { callback(it.getMessage(), it.isSuccessful, it.exception) }
+    }
 
     private fun privateProjectQuery(key: String) = rootReference.child("$PRIVATE_PROJECTS_KEY/$key")
 

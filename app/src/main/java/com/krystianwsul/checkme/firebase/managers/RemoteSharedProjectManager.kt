@@ -44,7 +44,7 @@ class RemoteSharedProjectManager(
             check(!isSaved)
 
             isSaved = true
-            AndroidDatabaseWrapper.updateRecords(values).checkError(domainFactory, "RemoteSharedProjectManager.save")
+            AndroidDatabaseWrapper.updateRecords(values, checkError(domainFactory, "RemoteSharedProjectManager.save"))
         }
 
         return isSaved

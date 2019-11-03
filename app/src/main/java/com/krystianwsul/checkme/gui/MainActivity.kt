@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.gui
 
-import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -14,6 +13,7 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.TransitionManager
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -51,7 +51,14 @@ import org.joda.time.Days
 import org.joda.time.LocalDate
 import java.io.Serializable
 
-class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, ShowCustomTimesFragment.CustomTimesListListener, TaskListFragment.TaskListListener, DayFragment.Host, FriendListFragment.FriendListListener, ProjectListFragment.ProjectListListener {
+class MainActivity :
+        ToolbarActivity(),
+        GroupListFragment.GroupListListener,
+        ShowCustomTimesFragment.CustomTimesListListener,
+        TaskListFragment.TaskListListener,
+        DayFragment.Host,
+        FriendListFragment.FriendListListener,
+        ProjectListFragment.ProjectListListener {
 
     companion object {
 
@@ -812,7 +819,7 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
         if (calendarHeight == null)
             return
 
-        val targetHeight = if (calendarOpen) calendarHeight!! else 0
+        val targetHeight = if (calendarOpen) ViewGroup.LayoutParams.WRAP_CONTENT else 0
 
         fun setHeight(height: Int) {
             val layoutParams = mainCalendar.layoutParams
@@ -825,13 +832,8 @@ class MainActivity : ToolbarActivity(), GroupListFragment.GroupListListener, Sho
 
             calendarInitial = false
         } else {
-            val animation = ValueAnimator.ofInt(mainCalendar.height, targetHeight)
-            animation.addUpdateListener {
-                val height = it.animatedValue as Int
-                setHeight(height)
-            }
-            animation.duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
-            animation.start()
+            TransitionManager.beginDelayedTransition(mainCalendar.parent as ViewGroup)
+            setHeight(targetHeight)
         }
     }
 

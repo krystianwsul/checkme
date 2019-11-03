@@ -17,4 +17,6 @@ abstract class DatabaseWrapper {
     abstract fun newSharedTaskRecordId(projectId: String): String
     abstract fun newSharedTaskHierarchyRecordId(projectId: String): String
     abstract fun newSharedCustomTimeRecordId(projectId: String): String
+
+    abstract fun updateRecords(values: Map<String, Any?>, callback: DatabaseCallback)
 }

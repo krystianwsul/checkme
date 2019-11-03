@@ -135,7 +135,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
 
     fun getSharedProjectEvents(key: String) = sharedProjectQuery(key).childEvents()
 
-    fun updateRecords(values: Map<String, Any?>, callback: DatabaseCallback) {
+    override fun updateRecords(values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.child(RECORDS_KEY)
                 .updateChildren(values)
                 .addOnCompleteListener { callback(it.getMessage(), it.isSuccessful, it.exception) }

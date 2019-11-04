@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase.managers
+package com.krystianwsul.common.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics

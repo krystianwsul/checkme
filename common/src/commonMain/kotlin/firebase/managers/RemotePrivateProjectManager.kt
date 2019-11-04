@@ -1,4 +1,4 @@
-package com.krystianwsul.checkme.firebase.managers
+package com.krystianwsul.common.firebase.managers
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.DatabaseCallback

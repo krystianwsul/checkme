@@ -46,7 +46,8 @@ class DomainFactory(
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
         userSnapshot: DataSnapshot,
-        friendSnapshot: DataSnapshot) : RemotePrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
+        friendSnapshot: DataSnapshot
+) : RemotePrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
 
     companion object {
 

@@ -14,9 +14,12 @@ class JsPrivateProjectManager(
 
     override val remotePrivateProjectRecords = privateProjectJsons.map { RemotePrivateProjectRecord(databaseWrapper, it.key, it.value) }
 
+    var saveCallback: (() -> Unit)? = null
+
     override fun getDatabaseCallback(values: Any): DatabaseCallback {
         return { message, _, _ ->
             ErrorLogger.instance.log(message)
+            saveCallback?.invoke()
         }
     }
 }

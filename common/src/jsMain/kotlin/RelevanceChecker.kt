@@ -14,14 +14,21 @@ object RelevanceChecker {
             // todo production
             val databaseWrapper = JsDatabaseWrapper(admin, root)
 
-            var privateProjects: List<RemotePrivateProject>? = null
-            var sharedProjects: MutableMap<String, RemoteSharedProject>? = null
+            var privateProjectManager: JsPrivateProjectManager? = null
+            var sharedProjectManager: JsSharedProjectManager? = null
 
             fun callback() {
-                @Suppress("NAME_SHADOWING")
-                val privateProjects = privateProjects ?: return
-                @Suppress("NAME_SHADOWING")
-                val sharedProjects = sharedProjects ?: return
+                if (privateProjectManager == null || sharedProjectManager == null)
+                    return
+
+                val privateProjects = privateProjectManager!!.remotePrivateProjectRecords.map {
+                    RemotePrivateProject(it)
+                }
+
+                val sharedProjects = sharedProjectManager!!.remoteProjectRecords
+                        .entries
+                        .associate { it.key to RemoteSharedProject(it.value) }
+                        .toMutableMap()
 
                 val now = ExactTimeStamp.now
 
@@ -49,26 +56,38 @@ object RelevanceChecker {
 
                 sharedProjects.values.forEach { project -> Irrelevant.setIrrelevant(parent, project, now) }
 
-                onComplete()
+                var privateSaved = false
+                var sharedSaved = false
+
+                privateProjectManager!!.apply {
+                    saveCallback = {
+                        privateSaved = true
+                        if (sharedSaved)
+                            onComplete()
+                    }
+
+                    save()
+                }
+
+                sharedProjectManager!!.apply {
+                    saveCallback = {
+                        sharedSaved = true
+                        if (privateSaved)
+                            onComplete()
+                    }
+
+                    save()
+                }
             }
 
             databaseWrapper.getPrivateProjects {
-                val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
-
-                privateProjects = privateProjectManager.remotePrivateProjectRecords.map {
-                    RemotePrivateProject(it)
-                }
+                privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
                 callback()
             }
 
             databaseWrapper.getSharedProjects {
-                val sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
-
-                sharedProjects = sharedProjectManager.remoteProjectRecords
-                        .entries
-                        .associate { it.key to RemoteSharedProject(it.value) }
-                        .toMutableMap()
+                sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
 
                 callback()
             }

@@ -54,7 +54,11 @@ object RelevanceChecker {
                     }
                 }
 
-                sharedProjects.values.forEach { project -> Irrelevant.setIrrelevant(parent, project, now) }
+                sharedProjects.values.forEach {
+                    response += "checking relevance for shared project ${it.id}: ${it.name}"
+
+                    Irrelevant.setIrrelevant(parent, it, now)
+                }
 
                 var privateSaved = false
                 var sharedSaved = false

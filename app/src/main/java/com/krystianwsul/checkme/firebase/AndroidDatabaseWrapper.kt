@@ -55,8 +55,8 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
 
     fun getSharedProjectEvents(key: String) = sharedProjectQuery(key).childEvents()
 
-    override fun updateRecords(values: Map<String, Any?>, callback: DatabaseCallback) {
-        rootReference.child(RECORDS_KEY)
+    override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
+        rootReference.child(path)
                 .updateChildren(values)
                 .addOnCompleteListener { callback(it.getMessage(), it.isSuccessful, it.exception) }
     }
@@ -66,12 +66,6 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
     fun getPrivateProjectSingle(key: String) = privateProjectQuery(key).data()
 
     fun getPrivateProjectObservable(key: String) = privateProjectQuery(key).dataChanges()
-
-    override fun updatePrivateProjects(values: Map<String, Any?>, callback: DatabaseCallback) {
-        rootReference.child(PRIVATE_PROJECTS_KEY)
-                .updateChildren(values)
-                .addOnCompleteListener { callback(it.getMessage(), it.isSuccessful, it.exception) }
-    }
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 

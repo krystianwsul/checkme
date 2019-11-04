@@ -3,17 +3,20 @@ package firebase
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 
-class JsDatabaseWrapper(private val root: String) : DatabaseWrapper() {
+external fun require(module: String): dynamic
 
-    override fun getNewId(path: String): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+class JsDatabaseWrapper(root: String) : DatabaseWrapper() {
 
-    override fun updateRecords(values: Map<String, Any?>, callback: DatabaseCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    private val admin = require("firebase-admin")
+    private val rootReference = admin.database().ref(root)
 
-    override fun updatePrivateProjects(values: Map<String, Any?>, callback: DatabaseCallback) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getNewId(path: String) = rootReference.child(path)
+            .push()
+            .key as String
+
+    override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
+        rootReference.child(path).update(values) { error ->
+            callback("error: $error", error == null, null)
+        }
     }
 }

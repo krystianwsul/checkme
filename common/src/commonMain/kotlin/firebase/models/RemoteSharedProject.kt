@@ -8,7 +8,9 @@ import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-class RemoteSharedProject(override val remoteProjectRecord: RemoteSharedProjectRecord) : RemoteProject<RemoteCustomTimeId.Shared>() {
+class RemoteSharedProject(
+        override val remoteProjectRecord: RemoteSharedProjectRecord
+) : RemoteProject<RemoteCustomTimeId.Shared>() {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values

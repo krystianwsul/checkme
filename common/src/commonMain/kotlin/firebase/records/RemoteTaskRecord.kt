@@ -89,12 +89,14 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
                 .map { it.toDate() }
                 .toMutableList()
                 .apply {
-                    if (taskJson.oldestVisibleYear != null && taskJson.oldestVisibleMonth != null && taskJson.oldestVisibleDay != null) {
-                        add(Date(taskJson.oldestVisibleYear!!, taskJson.oldestVisibleMonth!!, taskJson.oldestVisibleDay!!))
-                    } else {
-                        if (taskJson.oldestVisibleYear != null || taskJson.oldestVisibleMonth != null || taskJson.oldestVisibleDay != null)
-                            ErrorLogger.instance.logException(MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
-                    }
+                    val year = taskJson.oldestVisibleYear
+                    val month = taskJson.oldestVisibleMonth
+                    val day = taskJson.oldestVisibleDay
+
+                    if (year != null && month != null && day != null)
+                        add(Date(year, month, day))
+                    else if (year != null || month != null || day != null)
+                        ErrorLogger.instance.logException(MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
                 }
                 .min()
 

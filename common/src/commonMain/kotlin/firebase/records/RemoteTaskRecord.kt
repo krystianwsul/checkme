@@ -13,7 +13,8 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
         val id: String,
         private val remoteProjectRecord: RemoteProjectRecord<T, *>,
-        private val taskJson: TaskJson) : RemoteRecord(create) {
+        private val taskJson: TaskJson
+) : RemoteRecord(create) {
 
     companion object {
 
@@ -82,7 +83,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     var note by Committer(taskJson::note)
 
-    val oldestVisible
+    val oldestVisible // todo factor in that not all users may have written values
         get() = taskJson.oldestVisible
                 .values
                 .map { it.toDate() }

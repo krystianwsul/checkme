@@ -82,6 +82,8 @@ object RelevanceChecker {
 
                     save()
                 }
+
+                onComplete() // todo
             }
 
             databaseWrapper.getPrivateProjects {

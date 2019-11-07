@@ -17,18 +17,24 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
             .key as String
 
     override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
-        /* todo enable saving
-        rootReference.child(path).update(values) { error ->
-            callback("error: $error", error == null, null)
-        }
-         */
+        check(values.values.all { it == null })
 
-        callback("not actually saving", true, null)
+        val dynamicValues: dynamic = object {}
+
+        values.forEach {
+            dynamicValues[it.key] = it.value
+        }
+
+        rootReference.child(path).update(dynamicValues) { error ->
+            callback("error: " + error?.toString(), error == null, null)
+        }
     }
 
     fun getPrivateProjects(callback: (Map<String, PrivateProjectJson>) -> Unit) {
         rootReference.child(PRIVATE_PROJECTS_KEY).once("value") { snapshot ->
             callback(parse(PrivateProjects.serializer(), object {
+
+                @Suppress("unused")
                 val privateProjectJsons = snapshot
             }).privateProjectJsons)
         }
@@ -40,6 +46,8 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
     fun getSharedProjects(callback: (Map<String, JsonWrapper>) -> Unit) {
         rootReference.child(RECORDS_KEY).once("value") { snapshot ->
             callback(parse(SharedProjects.serializer(), object {
+
+                @Suppress("unused")
                 val jsonWrappers = snapshot
             }).jsonWrappers)
         }

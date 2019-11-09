@@ -11,7 +11,7 @@ import firebase.managers.JsSharedProjectManager
 object RelevanceChecker {
 
     fun checkRelevance(admin: dynamic, response: MutableList<String>, onComplete: () -> Unit) {
-        val roots = listOf("development"/*, "production"*/)
+        val roots = listOf("development", "production")
 
         val completed = roots.map {
             listOf(
@@ -38,8 +38,7 @@ object RelevanceChecker {
             }
         }
 
-        listOf("development"/*, "production"*/).forEach { root ->
-            // todo production, call onComplete after both finish
+        roots.forEach { root ->
             val databaseWrapper = JsDatabaseWrapper(admin, root)
 
             databaseWrapper.getPrivateProjects {

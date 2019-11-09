@@ -1,3 +1,4 @@
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.RemotePrivateProject
 import com.krystianwsul.common.firebase.models.RemoteProject
 import com.krystianwsul.common.firebase.models.RemoteSharedProject
@@ -10,25 +11,43 @@ import firebase.managers.JsSharedProjectManager
 object RelevanceChecker {
 
     fun checkRelevance(admin: dynamic, response: MutableList<String>, onComplete: () -> Unit) {
+        val roots = listOf("development"/*, "production"*/)
+
+        val completed = roots.map {
+            listOf(
+                    it to true,
+                    it to false
+            )
+        }
+                .flatten()
+                .associateWith { false }
+                .toMutableMap()
+
+        fun callback(root: String, private: Boolean) {
+            val key = root to private
+            check(!completed.getValue(key))
+
+            completed[key] = true
+
+            ErrorLogger.instance.log(completed.toString())
+
+            if (completed.values.all { it }) {
+                ErrorLogger.instance.log("calling onComplete")
+
+                onComplete()
+            }
+        }
+
         listOf("development"/*, "production"*/).forEach { root ->
-            // todo production
+            // todo production, call onComplete after both finish
             val databaseWrapper = JsDatabaseWrapper(admin, root)
 
-            var privateProjectManager: JsPrivateProjectManager? = null
-            var sharedProjectManager: JsSharedProjectManager? = null
+            databaseWrapper.getPrivateProjects {
+                val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
-            fun callback() {
-                if (privateProjectManager == null || sharedProjectManager == null)
-                    return
-
-                val privateProjects = privateProjectManager!!.remotePrivateProjectRecords.map {
+                val privateProjects = privateProjectManager.remotePrivateProjectRecords.map {
                     RemotePrivateProject(it)
                 }
-
-                val sharedProjects = sharedProjectManager!!.remoteProjectRecords
-                        .entries
-                        .associate { it.key to RemoteSharedProject(it.value) }
-                        .toMutableMap()
 
                 val now = ExactTimeStamp.now
 
@@ -45,6 +64,23 @@ object RelevanceChecker {
                     )
                 }
 
+                privateProjectManager.apply {
+                    saveCallback = { callback(root, true) }
+
+                    save()
+                }
+            }
+
+            databaseWrapper.getSharedProjects {
+                val sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
+
+                val sharedProjects = sharedProjectManager.remoteProjectRecords
+                        .entries
+                        .associate { it.key to RemoteSharedProject(it.value) }
+                        .toMutableMap()
+
+                val now = ExactTimeStamp.now
+
                 val parent = object : RemoteProject.Parent {
 
                     override fun deleteProject(remoteProject: RemoteProject<*>) {
@@ -60,42 +96,11 @@ object RelevanceChecker {
                     Irrelevant.setIrrelevant(parent, it, now)
                 }
 
-                var privateSaved = false
-                var sharedSaved = false
-
-                privateProjectManager!!.apply {
-                    saveCallback = {
-                        privateSaved = true
-                        if (sharedSaved)
-                            onComplete()
-                    }
+                sharedProjectManager.apply {
+                    saveCallback = { callback(root, false) }
 
                     save()
                 }
-
-                sharedProjectManager!!.apply {
-                    saveCallback = {
-                        sharedSaved = true
-                        if (privateSaved)
-                            onComplete()
-                    }
-
-                    save()
-                }
-
-                onComplete() // todo
-            }
-
-            databaseWrapper.getPrivateProjects {
-                privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
-
-                callback()
-            }
-
-            databaseWrapper.getSharedProjects {
-                sharedProjectManager = JsSharedProjectManager(databaseWrapper, it)
-
-                callback()
             }
         }
     }

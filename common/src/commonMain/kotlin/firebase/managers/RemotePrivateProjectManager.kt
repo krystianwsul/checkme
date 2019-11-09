@@ -16,6 +16,8 @@ abstract class RemotePrivateProjectManager {
 
     protected abstract fun getDatabaseCallback(values: Any): DatabaseCallback
 
+    open val saveCallback: (() -> Unit)? = null
+
     fun save(): Boolean {
         val values = HashMap<String, Any?>()
 
@@ -28,6 +30,8 @@ abstract class RemotePrivateProjectManager {
 
             isSaved = true
             databaseWrapper.updatePrivateProjects(values, getDatabaseCallback(values))
+        } else {
+            saveCallback?.invoke()
         }
 
         return isSaved

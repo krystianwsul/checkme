@@ -17,6 +17,8 @@ abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
 
     protected abstract fun getDatabaseCallback(): DatabaseCallback
 
+    open val saveCallback: (() -> Unit)? = null
+
     fun save(): Boolean {
         val values = HashMap<String, Any?>()
 
@@ -29,6 +31,8 @@ abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
 
             isSaved = true
             databaseWrapper.updateRecords(values, getDatabaseCallback())
+        } else {
+            saveCallback?.invoke()
         }
 
         return isSaved

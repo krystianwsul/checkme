@@ -16,7 +16,7 @@ class JsSharedProjectManager(
             .associate { it.key to RemoteSharedProjectRecord(databaseWrapper, this, it.key, it.value) }
             .toMutableMap()
 
-    var saveCallback: (() -> Unit)? = null
+    override var saveCallback: (() -> Unit)? = null
 
     override fun getDatabaseCallback(): DatabaseCallback {
         return { message, _, _ ->

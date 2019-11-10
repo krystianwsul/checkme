@@ -78,11 +78,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/mainDaysLayout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
+
+                    <ProgressBar
+                        android:id="@+id/mainDaysProgress"
+                        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:indeterminate="true"
+                        android:elevation="6dp"
+                        android:layout_marginTop="-7dp"
+                        android:layout_below="@id/mainTabLayout" />
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/mainTabLayout"
@@ -97,14 +107,16 @@
                         app:tabTextColor="@color/textSecondaryWhite"
                         app:tabSelectedTextColor="@color/textPrimaryWhite"
                         app:tabRippleColor="@color/textPrimaryWhite"
-                        app:tabIndicatorColor="@color/secondaryColor" />
+                        app:tabIndicatorColor="@color/secondaryColor"
+                        android:layout_alignParentTop="true" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/mainDaysPager"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:layout_below="@id/mainDaysProgress" />
 
-                </LinearLayout>
+                </RelativeLayout>
 
                 <FrameLayout
                     android:id="@+id/mainTaskListFrame"

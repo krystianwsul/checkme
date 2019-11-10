@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.os.Parcelable
 import android.view.View
 import android.view.ViewGroup
@@ -492,6 +493,19 @@ class MainActivity :
         }
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+
+        fun loop(hide: Boolean) {
+            Handler().postDelayed({
+                TransitionManager.beginDelayedTransition(mainDaysLayout)
+                mainDaysProgress.layoutParams = mainDaysProgress.layoutParams.apply {
+                    height = if (hide) 0 else ViewGroup.LayoutParams.WRAP_CONTENT
+                }
+
+                loop(!hide)
+            }, 2000)
+        }
+
+        loop(true)
     }
 
     private sealed class PagerScrollState {

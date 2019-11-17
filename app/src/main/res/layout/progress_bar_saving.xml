@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+<FrameLayout android:id="@+id/clippedProgressBar"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:indeterminate="true"
-    android:elevation="6dp" /> <!-- todo progress invisible -->
+    android:layout_height="4dp"
+    tools:ignore="UselessParent"
+    android:elevation="6dp"
+    android:layout_marginTop="-1dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:layout_gravity="center_vertical">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:indeterminate="true" />
+
+    </FrameLayout>
+
+</FrameLayout>

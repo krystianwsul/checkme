@@ -493,6 +493,7 @@ class MainActivity :
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
 
+        /* todo move into progress subclass
         DomainFactory.isSaved
                 .subscribe {
                     val list = listOf(Pair(mainDaysProgress, HideType.INVISIBLE))
@@ -502,7 +503,8 @@ class MainActivity :
                         animateVisibility2(listOf(), list)
                 }
                 .addTo(createDisposable)
-
+                */
+        mainDaysProgress.visibility = View.VISIBLE
         /*
         fun loop(hide: Boolean) {
             Handler().postDelayed({
@@ -642,8 +644,10 @@ class MainActivity :
 
         if (tab == Tab.INSTANCES) {
             showViews.add(mainDaysLayout)
+            hideViews += mainProgressLayout
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
         } else {
+            showViews += mainProgressLayout
             hideViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
             calendarOpen = false

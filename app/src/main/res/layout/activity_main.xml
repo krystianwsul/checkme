@@ -11,56 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/mainActivityAppBarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
-            android:stateListAnimator="@null"
-            android:theme="@style/AppTheme.AppBarOverlay"
-            tools:targetApi="lollipop">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_scrollFlags="scroll|enterAlways">
-
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/mainActivityToolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/colorPrimary"
-                    android:theme="@style/AppTheme.AppBarOverlay"
-                    app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/mainSearchToolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/colorPrimary"
-                    android:theme="@style/AppTheme.AppBarOverlay"
-                    app:popupTheme="@style/AppTheme.PopupOverlay"
-                    android:visibility="gone">
-
-                    <EditText
-                        android:id="@+id/mainSearchText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/search"
-                        android:imeOptions="actionSearch"
-                        android:importantForAutofill="no"
-                        android:inputType="text"
-                        android:singleLine="true"
-                        android:textColor="@color/textPrimaryWhite"
-                        android:textColorHint="@color/textDisabledWhite"
-                        tools:targetApi="o" />
-
-                </androidx.appcompat.widget.Toolbar>
-
-            </FrameLayout>
-
-        </com.google.android.material.appbar.AppBarLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -84,16 +34,13 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <ProgressBar
+                    <include
+                        layout="@layout/progress_bar_saving"
                         android:id="@+id/mainDaysProgress"
-                        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:indeterminate="true"
-                        android:elevation="6dp"
                         android:layout_marginTop="-7dp"
-                        android:layout_below="@id/mainTabLayout"
-                        android:visibility="invisible" />
+                        android:layout_below="@id/mainTabLayout" />
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/mainTabLayout"
@@ -164,6 +111,74 @@
             </FrameLayout>
 
         </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/mainProgressLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="49dp"
+            app:layout_anchor="@id/mainActivityAppBarLayout"
+            app:layout_anchorGravity="bottom"
+            android:layout_gravity="top"
+            android:visibility="gone">
+
+            <include
+                layout="@layout/progress_bar_saving"
+                android:id="@+id/mainProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </FrameLayout>
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/mainActivityAppBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
+            android:stateListAnimator="@null"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            tools:targetApi="lollipop">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_scrollFlags="scroll|enterAlways">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/mainActivityToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorPrimary"
+                    android:theme="@style/AppTheme.AppBarOverlay"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/mainSearchToolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorPrimary"
+                    android:theme="@style/AppTheme.AppBarOverlay"
+                    app:popupTheme="@style/AppTheme.PopupOverlay"
+                    android:visibility="gone">
+
+                    <EditText
+                        android:id="@+id/mainSearchText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/search"
+                        android:imeOptions="actionSearch"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textColor="@color/textPrimaryWhite"
+                        android:textColorHint="@color/textDisabledWhite"
+                        tools:targetApi="o" />
+
+                </androidx.appcompat.widget.Toolbar>
+
+            </FrameLayout>
+
+        </com.google.android.material.appbar.AppBarLayout>
 
         <include layout="@layout/bottom" />
 

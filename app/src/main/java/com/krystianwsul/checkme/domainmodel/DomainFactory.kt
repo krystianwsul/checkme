@@ -54,17 +54,23 @@ class DomainFactory(
 
         val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())
 
+        init {
+            instanceRelay.subscribe { Log.e("asdf", "isSaved domain relay: ${it.value}") }
+        }
+
         val nullableInstance get() = instanceRelay.value!!.value
 
-        val instance get() = instanceRelay.value!!.value!!
+        val instance get() = nullableInstance!!
 
         private val firebaseListeners = mutableListOf<Pair<(DomainFactory) -> Unit, String>>()
 
         var firstRun = false
 
         val isSaved = instanceRelay.switchMap { it.value?.isSaved ?: Observable.just(false) }
+                .distinctUntilChanged()
                 .doOnNext { Log.e("asdf", "DomainFactory.isSaved: $it") }
-                .subscribe()
+                .replay(1)!!
+                .apply { connect() }
 
         @Synchronized // still running?
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
@@ -161,6 +167,9 @@ class DomainFactory(
     val isSaved = BehaviorRelay.createDefault(false)
 
     init {
+        isSaved.subscribe { Log.e("asdf", "DomainFactory instance.isSaved: $it") }
+
+
         Preferences.logLineHour("DomainFactory.init")
 
         val start = ExactTimeStamp.now
@@ -207,9 +216,7 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
-    fun updateIsSaved() {
-        isSaved.accept(SaveService.isSaved && remoteProjectFactory.eitherSaved && remoteUserFactory.isSaved && remoteFriendFactory.isSaved)
-    }
+    private fun updateIsSaved() = isSaved.accept(remoteProjectFactory.eitherSaved || remoteUserFactory.isSaved || remoteFriendFactory.isSaved)
 
     fun save(dataId: Int, source: SaveService.Source) = save(setOf(dataId), source)
 

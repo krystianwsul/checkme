@@ -92,7 +92,8 @@
                         android:indeterminate="true"
                         android:elevation="6dp"
                         android:layout_marginTop="-7dp"
-                        android:layout_below="@id/mainTabLayout" />
+                        android:layout_below="@id/mainTabLayout"
+                        android:visibility="invisible" />
 
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/mainTabLayout"

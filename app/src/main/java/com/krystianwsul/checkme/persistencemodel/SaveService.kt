@@ -1,24 +1,13 @@
 package com.krystianwsul.checkme.persistencemodel
 
 import android.util.Log
-import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import kotlin.properties.Delegates.observable
 
 object SaveService {
 
-    var isSaved by observable(false) { _, oldValue, newValue ->
-        Log.e("asdf", "SaveService.isSaved changing from $oldValue to $newValue")
-        DomainFactory.nullableInstance?.updateIsSaved()
-    }
-        private set
-
     private fun save(insertCommands: List<InsertCommand>, updateCommands: List<UpdateCommand>, deleteCommands: List<DeleteCommand>) {
         Log.e("asdf", "SaveService.save")
-
-        check(isSaved)
 
         val sqLiteDatabase = MySQLiteHelper.database
 
@@ -37,7 +26,6 @@ object SaveService {
             sqLiteDatabase.setTransactionSuccessful()
         } finally {
             sqLiteDatabase.endTransaction()
-            isSaved = false
         }
     }
 
@@ -53,9 +41,6 @@ object SaveService {
         private class FactoryImpl : Factory() {
 
             override fun startService(persistenceManager: PersistenceManager, source: Source): Boolean {
-                MyCrashlytics.logMethod(this, "previous saved: $isSaved")
-                check(!isSaved)
-
                 val collections = persistenceManager.instanceShownRecords
 
                 val insertCommands = collections.asSequence()
@@ -75,8 +60,6 @@ object SaveService {
                 val hasChanges = insertCommands.any() || updateCommands.any() || deleteCommands.any()
 
                 if (hasChanges) {
-                    isSaved = true
-
                     when (source) {
                         Source.GUI -> Observable.fromCallable { save(insertCommands, updateCommands, deleteCommands) }
                                 .subscribeOn(Schedulers.io())

@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.google.firebase.database.DataSnapshot
@@ -35,6 +36,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
+import io.reactivex.Observable
 import java.util.*
 
 @Suppress("LeakingThis")
@@ -59,6 +61,10 @@ class DomainFactory(
         private val firebaseListeners = mutableListOf<Pair<(DomainFactory) -> Unit, String>>()
 
         var firstRun = false
+
+        val isSaved = instanceRelay.switchMap { it.value?.isSaved ?: Observable.just(false) }
+                .doOnNext { Log.e("asdf", "DomainFactory.isSaved: $it") }
+                .subscribe()
 
         @Synchronized // still running?
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
@@ -152,6 +158,8 @@ class DomainFactory(
                     }
                 }
 
+    val isSaved = BehaviorRelay.createDefault(false)
+
     init {
         Preferences.logLineHour("DomainFactory.init")
 
@@ -199,6 +207,10 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
+    fun updateIsSaved() {
+        isSaved.accept(SaveService.isSaved && remoteProjectFactory.eitherSaved && remoteUserFactory.isSaved && remoteFriendFactory.isSaved)
+    }
+
     fun save(dataId: Int, source: SaveService.Source) = save(setOf(dataId), source)
 
     fun save(dataIds: Set<Int>, source: SaveService.Source) {
@@ -215,8 +227,11 @@ class DomainFactory(
         val remoteChanges = remoteProjectFactory.save()
         val userChanges = remoteUserFactory.save()
 
-        if (localChanges || remoteChanges || userChanges)
+        if (localChanges || remoteChanges || userChanges) {
             domainChanged.accept(dataIds)
+
+            updateIsSaved()
+        }
     }
 
     private fun updateShortcuts() {
@@ -304,6 +319,8 @@ class DomainFactory(
 
         if (remoteProjectFactory.eitherSaved || remoteFriendFactory.isSaved || remoteUserFactory.isSaved)
             return
+
+        updateIsSaved()
 
         check(aggregateData == null)
 

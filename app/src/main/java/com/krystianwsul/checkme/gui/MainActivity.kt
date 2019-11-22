@@ -504,7 +504,7 @@ class MainActivity :
                 }
                 .addTo(createDisposable)
                 */
-        mainDaysProgress.visibility = View.VISIBLE
+        mainDaysProgress.visibility = View.INVISIBLE
         /*
         fun loop(hide: Boolean) {
             Handler().postDelayed({

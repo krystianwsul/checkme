@@ -40,17 +40,13 @@ object ShortcutQueue {
 
                     val existingShortcuts = ShortcutManagerCompat.getDynamicShortcuts(MyApplication.instance).map { it.id }
 
-                    val constructor = ShortcutManagerCompat::class.java.getDeclaredConstructor()
-                    constructor.isAccessible = true
-                    val shortcutManagerCompat = constructor.newInstance()
-
                     val addShortcuts = shortcuts.filter { it.id !in existingShortcuts }
                     val updateShortcuts = shortcuts.filter { it.id in existingShortcuts }
 
                     val shortcutIds = shortcuts.map { it.id }
                     val removeShortcuts = existingShortcuts.filter { it !in shortcutIds }
 
-                    shortcutManagerCompat.removeDynamicShortcuts(MyApplication.instance, removeShortcuts)
+                    ShortcutManagerCompat.removeDynamicShortcuts(MyApplication.instance, removeShortcuts)
                     ShortcutManagerCompat.addDynamicShortcuts(MyApplication.instance, addShortcuts)
                     ShortcutManagerCompat.updateShortcuts(MyApplication.instance, updateShortcuts)
                 }

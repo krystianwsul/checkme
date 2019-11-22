@@ -83,13 +83,13 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     var note by Committer(taskJson::note)
 
-    val oldestVisible // todo factor in that not all users may have written values
+    val oldestVisible
         get() = taskJson.oldestVisible
                 .values
                 .map { it.toDate() }
                 .toMutableList()
                 .apply {
-                    val year = taskJson.oldestVisibleYear
+                    val year = taskJson.oldestVisibleYear // todo add date variable like in oldestVisibleJson
                     val month = taskJson.oldestVisibleMonth
                     val day = taskJson.oldestVisibleDay
 

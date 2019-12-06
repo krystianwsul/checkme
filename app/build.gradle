@@ -60,7 +60,7 @@ android {
 
 ext {
     powermockVersion = '2.0.4'
-    lifecycleVersion = '2.2.0-rc02'
+    lifecycleVersion = '2.2.0-rc03'
     glideVersion = '4.10.0'
 }
 
@@ -80,7 +80,7 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta3'
     implementation 'androidx.preference:preference:1.1.0'
-    implementation 'androidx.sharetarget:sharetarget:1.0.0-beta02'
+    implementation 'androidx.sharetarget:sharetarget:1.0.0-rc01'
 
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
@@ -88,13 +88,11 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
 
     implementation 'com.google.firebase:firebase-core:17.2.1'
-    implementation 'com.google.firebase:firebase-auth:19.1.0'
+    implementation 'com.google.firebase:firebase-auth:19.2.0'
     implementation 'com.google.firebase:firebase-database:19.2.0'
     implementation 'com.google.firebase:firebase-messaging:20.0.1'
     implementation 'com.google.firebase:firebase-config:19.0.3'
     implementation 'com.google.firebase:firebase-storage:19.1.0'
-
-    implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
     implementation 'com.firebaseui:firebase-ui-storage:4.3.2'
 

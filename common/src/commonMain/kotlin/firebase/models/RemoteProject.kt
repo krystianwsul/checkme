@@ -72,9 +72,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId> {
         val endTime = task.getEndExactTimeStamp()?.long
 
         val oldestVisible = task.getOldestVisible()
-        val oldestVisibleYear = oldestVisible?.year
-        val oldestVisibleMonth = oldestVisible?.month
-        val oldestVisibleDay = oldestVisible?.day
 
         val instanceJsons = instances.associate {
             val instanceJson = getInstanceJson(deviceDbInfo.key, it)
@@ -90,9 +87,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId> {
                 task.name,
                 now.long,
                 endTime,
-                oldestVisibleYear,
-                oldestVisibleMonth,
-                oldestVisibleDay,
                 task.note,
                 instanceJsons,
                 oldestVisible = oldestVisibleMap.toMutableMap())

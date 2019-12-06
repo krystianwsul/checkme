@@ -101,7 +101,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
     }
 
     override fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task {
-        val taskJson = TaskJson(name, now.long, null, null, null, null, note, image = image)
+        val taskJson = TaskJson(name, now.long, null, note, image = image)
 
         val childTask = remoteProject.newRemoteTask(taskJson)
 

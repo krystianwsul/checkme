@@ -7,6 +7,7 @@ import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
+import kotlinx.serialization.json.Json
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
@@ -112,8 +113,17 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     )
 
     init {
-        if (name.isEmpty())
-            ErrorLogger.instance.logException(MissingNameException("taskKey: $key"))
+        val malformedOldestVisible = taskJson.oldestVisible.filter {
+            try {
+                it.value.toDate()
+                false
+            } catch (exception: Exception) {
+                true
+            }
+        }
+
+        if (malformedOldestVisible.isNotEmpty() || name.isEmpty())
+            ErrorLogger.instance.logException(MalformedTaskException("taskKey: $key, taskJson: " + Json.stringify(TaskJson.serializer(), taskJson)))
 
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
@@ -250,5 +260,5 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
 
-    private class MissingNameException(message: String) : Exception(message)
+    private class MalformedTaskException(message: String) : Exception(message)
 }

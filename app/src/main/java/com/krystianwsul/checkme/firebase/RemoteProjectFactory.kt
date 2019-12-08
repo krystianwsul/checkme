@@ -123,7 +123,7 @@ class RemoteProjectFactory(
 
     fun createRemoteTaskHelper(now: ExactTimeStamp, name: String, note: String?, projectId: String, imageUuid: String?): RemoteTask<*> {
         val image = imageUuid?.let { TaskJson.Image(imageUuid, domainFactory.deviceDbInfo.uuid) }
-        val taskJson = TaskJson(name, now.long, null, null, null, null, note, image = image)
+        val taskJson = TaskJson(name, now.long, null, note, image = image)
 
         return getRemoteProjectForce(projectId).newRemoteTask(taskJson)
     }

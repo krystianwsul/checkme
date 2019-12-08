@@ -159,7 +159,7 @@ abstract class GroupHolderNode(protected val indentation: Int) : ModelNode<NodeH
                             if (textWidthRelay.value != null) {
                                 textView.paint.getTextBounds(text, 0, text.length, this)
 
-                                ceil(width().toDouble() / textWidthRelay.value!!).toInt()
+                                ceil((width() + 1).toDouble() / textWidthRelay.value!!).toInt()
                             } else {
                                 1
                             }

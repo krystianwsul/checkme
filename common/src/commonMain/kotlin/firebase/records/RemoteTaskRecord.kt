@@ -5,9 +5,9 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
+import kotlinx.serialization.json.Json
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
@@ -83,21 +83,10 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     var note by Committer(taskJson::note)
 
-    val oldestVisible // todo factor in that not all users may have written values
+    val oldestVisible
         get() = taskJson.oldestVisible
                 .values
                 .map { it.toDate() }
-                .toMutableList()
-                .apply {
-                    val year = taskJson.oldestVisibleYear
-                    val month = taskJson.oldestVisibleMonth
-                    val day = taskJson.oldestVisibleDay
-
-                    if (year != null && month != null && day != null)
-                        add(Date(year, month, day))
-                    else if (year != null || month != null || day != null)
-                        ErrorLogger.instance.logException(MissingDayException("projectId: $projectId, taskId: $id, oldestVisibleYear: ${taskJson.oldestVisibleYear}, oldestVisibleMonth: ${taskJson.oldestVisibleMonth}, oldestVisibleDay: ${taskJson.oldestVisibleDay}"))
-                }
                 .min()
 
     var image by Committer(taskJson::image)
@@ -124,8 +113,17 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     )
 
     init {
-        if (name.isEmpty())
-            ErrorLogger.instance.logException(MissingNameException("taskKey: $key"))
+        val malformedOldestVisible = taskJson.oldestVisible.filter {
+            try {
+                it.value.toDate()
+                false
+            } catch (exception: Exception) {
+                true
+            }
+        }
+
+        if (malformedOldestVisible.isNotEmpty() || name.isEmpty())
+            ErrorLogger.instance.logException(MalformedTaskException("taskKey: $key, taskJson: " + Json.stringify(TaskJson.serializer(), taskJson)))
 
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
@@ -208,10 +206,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
         if (oldOldestVisibleJson?.day != newOldestVisibleJson.day)
             addValue("$key/oldestVisible/$uuid/day", newOldestVisibleJson.day)
-
-        setProperty(taskJson::oldestVisibleYear, newOldestVisibleJson.year)
-        setProperty(taskJson::oldestVisibleMonth, newOldestVisibleJson.month)
-        setProperty(taskJson::oldestVisibleDay, newOldestVisibleJson.day)
     }
 
     fun newRemoteInstanceRecord(
@@ -266,7 +260,5 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
 
-    private class MissingNameException(message: String) : Exception(message)
-
-    private class MissingDayException(message: String) : Exception(message)
+    private class MalformedTaskException(message: String) : Exception(message)
 }

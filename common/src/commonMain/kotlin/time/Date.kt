@@ -22,6 +22,11 @@ data class Date(val year: Int, val month: Int, val day: Int) : Comparable<Date>,
 
     val dayOfWeek get() = DayOfWeek.fromDate(this)
 
+    init {
+        check(month in (1..12))
+        check(day in (1..31))
+    }
+
     constructor(dateTimeTz: DateTimeTz) : this(dateTimeTz.yearInt, dateTimeTz.month1, dateTimeTz.dayOfMonth)
 
     override fun compareTo(other: Date) = compareValuesBy(this, other, { it.year }, { it.month }, { it.day })

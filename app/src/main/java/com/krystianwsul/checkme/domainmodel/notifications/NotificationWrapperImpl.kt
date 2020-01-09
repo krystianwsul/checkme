@@ -418,7 +418,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         val contentIntent = MainActivity.newIntent()
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val title = "You may have new reminders"
+        val title = "You may have new reminders" // todo this does show up. foreground service?
 
         notify(
                 title,

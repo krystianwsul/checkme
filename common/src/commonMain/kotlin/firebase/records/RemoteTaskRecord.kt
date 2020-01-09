@@ -124,10 +124,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
         if (malformedOldestVisible.isNotEmpty() || name.isEmpty()) {
             if (taskJson == TaskJson(oldestVisible = taskJson.oldestVisible)) {
-                val onlyVisibilityPresentException = OnlyVisibilityPresentException("taskKey: $key")
-                ErrorLogger.instance.logException(onlyVisibilityPresentException)
-
-                throw onlyVisibilityPresentException
+                throw OnlyVisibilityPresentException("taskKey: $key")
             } else {
                 val malformedTaskException = MalformedTaskException("taskKey: $key, taskJson: " + Json.stringify(TaskJson.serializer(), taskJson))
                 ErrorLogger.instance.logException(malformedTaskException)

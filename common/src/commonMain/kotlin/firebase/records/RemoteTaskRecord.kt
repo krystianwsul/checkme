@@ -122,8 +122,17 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             }
         }
 
-        if (malformedOldestVisible.isNotEmpty() || name.isEmpty())
-            ErrorLogger.instance.logException(MalformedTaskException("taskKey: $key, taskJson: " + Json.stringify(TaskJson.serializer(), taskJson)))
+        if (malformedOldestVisible.isNotEmpty() || name.isEmpty()) {
+            if (taskJson == TaskJson(oldestVisible = taskJson.oldestVisible)) {
+                val onlyVisibilityPresentException = OnlyVisibilityPresentException("taskKey: $key")
+                ErrorLogger.instance.logException(onlyVisibilityPresentException)
+
+                throw onlyVisibilityPresentException
+            } else {
+                val malformedTaskException = MalformedTaskException("taskKey: $key, taskJson: " + Json.stringify(TaskJson.serializer(), taskJson))
+                ErrorLogger.instance.logException(malformedTaskException)
+            }
+        }
 
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
@@ -261,4 +270,6 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
 
     private class MalformedTaskException(message: String) : Exception(message)
+
+    class OnlyVisibilityPresentException(message: String) : Exception(message)
 }

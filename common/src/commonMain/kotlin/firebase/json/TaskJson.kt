@@ -13,7 +13,8 @@ class TaskJson @JvmOverloads constructor(
         var schedules: MutableMap<String, ScheduleWrapper> = mutableMapOf(),
         val oldestVisible: MutableMap<String, OldestVisibleJson> = mutableMapOf(),
         var image: Image? = null,
-        var endData: EndData? = null) {
+        var endData: EndData? = null
+) {
 
     @Serializable
     data class Image(

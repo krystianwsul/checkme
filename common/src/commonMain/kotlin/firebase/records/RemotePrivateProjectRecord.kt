@@ -2,6 +2,7 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
+import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
@@ -28,19 +29,19 @@ class RemotePrivateProjectRecord(
             .toMap()
             .toMutableMap()
 
-    constructor(databaseWrapper: DatabaseWrapper, id: String, projectJson: PrivateProjectJson) : this(
-            databaseWrapper,
-            false,
-            id,
-            projectJson)
+    constructor(
+            databaseWrapper: DatabaseWrapper,
+            id: String,
+            projectJson: PrivateProjectJson
+    ) : this(databaseWrapper, false, id, projectJson)
 
-    constructor(databaseWrapper: DatabaseWrapper, deviceInfoDbInfo: DeviceDbInfo, projectJson: PrivateProjectJson) : this(
-            databaseWrapper,
-            true,
-            deviceInfoDbInfo.key,
-            projectJson)
+    constructor(
+            databaseWrapper: DatabaseWrapper,
+            deviceInfoDbInfo: DeviceDbInfo,
+            projectJson: PrivateProjectJson
+    ) : this(databaseWrapper, true, deviceInfoDbInfo.key, projectJson)
 
-    fun newRemoteCustomTimeRecord(customTimeJson: com.krystianwsul.common.firebase.json.PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {
+    fun newRemoteCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {
         val remoteCustomTimeRecord = RemotePrivateCustomTimeRecord(this, customTimeJson)
         check(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.id))
 

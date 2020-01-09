@@ -71,7 +71,7 @@ class MyApplication : Application() {
 
         JodaTimeAndroid.init(this)
 
-        Preferences.logLineDate("MyApplication.onCreate")
+        Preferences.tickLog.logLineDate("MyApplication.onCreate")
 
         FirebaseDatabase.getInstance().apply {
             setLogLevel(Logger.Level.DEBUG)

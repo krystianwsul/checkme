@@ -25,7 +25,7 @@ object Preferences {
                 .putLong(LAST_TICK_KEY, value)
                 .apply()
 
-    var tickLog by ReadWriteStrPref(TICK_LOG)
+    val tickLog = Logger(TICK_LOG)
 
     var tab by observable(sharedPreferences.getInt(TAB_KEY, 0)) { _, _, newValue ->
         sharedPreferences.edit()
@@ -44,33 +44,40 @@ object Preferences {
         shortcutString = serialize(newValue)
     }
 
-    fun logLineDate(line: String) {
-        logLine("")
-        logLine(ExactTimeStamp.now.date.toString())
-        logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
-    }
-
-    fun logLineHour(line: String) = logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
-
-    private fun logLine(line: String) {
-        MyCrashlytics.log("Preferences.logLine: $line")
-
-        tickLog = tickLog.split('\n')
-                .take(100)
-                .toMutableList()
-                .apply { add(0, line) }
-                .joinToString("\n")
-    }
-
-    open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
+    private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 
         final override fun getValue(thisRef: Any, property: KProperty<*>): String = sharedPreferences.getString(key, "")!!
     }
 
-    class ReadWriteStrPref(key: String) : ReadOnlyStrPref(key), ReadWriteProperty<Any, String> {
+    private class ReadWriteStrPref(key: String) : ReadOnlyStrPref(key), ReadWriteProperty<Any, String> {
 
         override fun setValue(thisRef: Any, property: KProperty<*>, value: String) = sharedPreferences.edit()
                 .putString(key, value)
                 .apply()
+    }
+
+    class Logger(key: String) {
+
+        private var logString by ReadWriteStrPref(key)
+
+        val log get() = logString
+
+        fun logLineDate(line: String) {
+            logLine("")
+            logLine(ExactTimeStamp.now.date.toString())
+            logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+        }
+
+        fun logLineHour(line: String) = logLine(ExactTimeStamp.now.hourMilli.toString() + " " + line)
+
+        private fun logLine(line: String) {
+            MyCrashlytics.log("Preferences.logLine: $line")
+
+            logString = logString.split('\n')
+                    .take(100)
+                    .toMutableList()
+                    .apply { add(0, line) }
+                    .joinToString("\n")
+        }
     }
 }

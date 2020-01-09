@@ -31,12 +31,12 @@ class TickJobIntentService : JobIntentService() {
         // DON'T HOLD STATE IN STATIC VARIABLES
 
         fun startServiceSilent(context: Context, source: String) {
-            Preferences.logLineDate("TickJobIntentService.startServiceSilent from $source")
+            Preferences.tickLog.logLineDate("TickJobIntentService.startServiceSilent from $source")
             start(getIntent(context, true, source))
         }
 
         fun startServiceNormal(context: Context, source: String) {
-            Preferences.logLineDate("TickJobIntentService.startServiceNormal from $source")
+            Preferences.tickLog.logLineDate("TickJobIntentService.startServiceNormal from $source")
             start(getIntent(context, false, source))
         }
 
@@ -51,10 +51,10 @@ class TickJobIntentService : JobIntentService() {
 
         // still running?
         private fun tick(silent: Boolean, sourceName: String) {
-            Preferences.logLineHour("TickJobIntentService.tick from $sourceName")
+            Preferences.tickLog.logLineHour("TickJobIntentService.tick from $sourceName")
 
             if (!MyApplication.instance.hasUserInfo) {
-                Preferences.logLineHour("TickJobIntentService.tick skipping, no userInfo")
+                Preferences.tickLog.logLineHour("TickJobIntentService.tick skipping, no userInfo")
 
                 NotificationWrapper.instance.hideTemporary()
             } else {

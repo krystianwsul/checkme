@@ -38,7 +38,7 @@ class DebugFragment : AbstractFragment() {
         debugLoad.setOnClickListener {
             debugData.text = StringBuilder().apply {
                 val lastTick = Preferences.lastTick
-                val tickLog = Preferences.tickLog
+                val tickLog = Preferences.tickLog.log
 
                 val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
 

@@ -87,7 +87,7 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
             setGroupSummary(true)
     }
 
-    override fun logNotificationIds(source: String) = Preferences.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })
+    override fun logNotificationIds(source: String) = Preferences.tickLog.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })
 
     private class NotificationException(
             lastNotificationId: Int,

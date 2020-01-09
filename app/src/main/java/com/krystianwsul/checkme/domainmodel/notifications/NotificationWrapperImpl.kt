@@ -63,7 +63,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun cancelNotification(id: Int) {
-        Preferences.logLineHour("NotificationManager.cancel $id")
+        Preferences.tickLog.logLineHour("NotificationManager.cancel $id")
         notificationManager.cancel(id)
     }
 
@@ -290,7 +290,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash) {
         if (unchanged(notificationHash)) {
-            Preferences.logLineHour("skipping notification update for $title")
+            Preferences.tickLog.logLineHour("skipping notification update for $title")
             return
         }
 

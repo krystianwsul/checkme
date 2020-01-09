@@ -235,7 +235,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     }
 
     private fun setInstanceNotified() {
-        Preferences.logLineHour("ShowInstanceActivity: setting notified")
+        Preferences.tickLog.logLineHour("ShowInstanceActivity: setting notified")
         if (intent.hasExtra(NOTIFICATION_ID_KEY)) {
             DomainFactory.addFirebaseListener {
                 it.setInstanceNotified(data?.dataId ?: 0, SaveService.Source.GUI, instanceKey)

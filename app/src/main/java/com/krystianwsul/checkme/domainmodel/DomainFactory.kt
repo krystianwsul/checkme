@@ -99,13 +99,13 @@ class DomainFactory(
         fun addFirebaseListener(source: String, firebaseListener: (DomainFactory) -> Unit) {
             val domainFactory = nullableInstance
             if (domainFactory?.remoteProjectFactory?.eitherSaved == false && !domainFactory.remoteFriendFactory.isSaved) {
-                Preferences.logLineHour("running firebaseListener $source")
+                Preferences.tickLog.logLineHour("running firebaseListener $source")
                 firebaseListener(domainFactory)
             } else {
-                Preferences.logLineHour("queuing firebaseListener $source")
-                Preferences.logLineHour("listeners before: " + firebaseListeners.joinToString("; ") { it.second })
+                Preferences.tickLog.logLineHour("queuing firebaseListener $source")
+                Preferences.tickLog.logLineHour("listeners before: " + firebaseListeners.joinToString("; ") { it.second })
                 firebaseListeners.add(Pair(firebaseListener, source))
-                Preferences.logLineHour("listeners after: " + firebaseListeners.joinToString("; ") { it.second })
+                Preferences.tickLog.logLineHour("listeners after: " + firebaseListeners.joinToString("; ") { it.second })
             }
         }
     }
@@ -153,7 +153,7 @@ class DomainFactory(
                 }
 
     init {
-        Preferences.logLineHour("DomainFactory.init")
+        Preferences.tickLog.logLineHour("DomainFactory.init")
 
         val start = ExactTimeStamp.now
 
@@ -203,7 +203,7 @@ class DomainFactory(
 
     fun save(dataIds: Set<Int>, source: SaveService.Source) {
         val skipping = aggregateData != null
-        Preferences.logLineHour("DomainFactory.save: skipping? $skipping")
+        Preferences.tickLog.logLineHour("DomainFactory.save: skipping? $skipping")
 
         if (skipping) {
             check(dataIds.single() == 0)
@@ -309,7 +309,7 @@ class DomainFactory(
 
         aggregateData = AggregateData()
 
-        Preferences.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
+        Preferences.tickLog.logLineHour("DomainFactory: notifiying ${firebaseListeners.size} listeners")
         firebaseListeners.forEach { it.first(this) }
         firebaseListeners.clear()
 
@@ -988,7 +988,7 @@ class DomainFactory(
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
-        Preferences.logLineHour("DomainFactory: adding hour to ${instance.name}")
+        Preferences.tickLog.logLineHour("DomainFactory: adding hour to ${instance.name}")
 
         val now = ExactTimeStamp.now
         val calendar = now.calendar.apply { add(Calendar.HOUR_OF_DAY, 1) }
@@ -1062,7 +1062,7 @@ class DomainFactory(
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
         val instance = getInstance(instanceKey)
-        Preferences.logLineHour("DomainFactory: setting ${instance.name} done")
+        Preferences.tickLog.logLineHour("DomainFactory: setting ${instance.name} done")
 
         val now = ExactTimeStamp.now
 
@@ -1153,7 +1153,7 @@ class DomainFactory(
 
         val instance = getInstance(instanceKey)
 
-        Preferences.logLineHour("DomainFactory: setting notified: ${instance.name}")
+        Preferences.tickLog.logLineHour("DomainFactory: setting notified: ${instance.name}")
         setInstanceNotified(instanceKey)
 
         save(dataId, source)
@@ -2367,7 +2367,7 @@ class DomainFactory(
             sourceName: String = "other") {
         val skipSave = aggregateData != null
 
-        Preferences.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
+        Preferences.tickLog.logLineDate("updateNotifications start $sourceName, skipping? $skipSave")
 
         if (skipSave) {
             TickHolder.addTickData(TickData.Normal(silent, sourceName))
@@ -2386,7 +2386,7 @@ class DomainFactory(
                         && !removedTaskKeys.contains(it.taskKey)
             }.associateBy { it.instanceKey }
 
-        Preferences.logLineHour("notification instances: " + notificationInstances.values.joinToString(", ") { it.name })
+        Preferences.tickLog.logLineHour("notification instances: " + notificationInstances.values.joinToString(", ") { it.name })
 
         val instanceShownPairs = localFactory.instanceShownRecords
                 .filter { it.notificationShown }
@@ -2446,7 +2446,7 @@ class DomainFactory(
 
         val showInstanceKeys = notificationInstances.keys.filter { !shownInstanceKeys.contains(it) }
 
-        Preferences.logLineHour("shown instances: " + shownInstanceKeys.joinToString(", ") { getInstance(it).name })
+        Preferences.tickLog.logLineHour("shown instances: " + shownInstanceKeys.joinToString(", ") { getInstance(it).name })
 
         val hideInstanceKeys = shownInstanceKeys.filter { !notificationInstances.containsKey(it) }.toSet()
 
@@ -2456,7 +2456,7 @@ class DomainFactory(
         for (hideInstanceKey in hideInstanceKeys)
             getInstance(hideInstanceKey).setNotificationShown(localFactory, false)
 
-        Preferences.logLineHour("silent? $silent")
+        Preferences.tickLog.logLineHour("silent? $silent")
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             if (notificationInstances.size > TickJobIntentService.MAX_NOTIFICATIONS) { // show group
@@ -2490,29 +2490,29 @@ class DomainFactory(
             }
         } else {
             if (notificationInstances.isEmpty()) {
-                Preferences.logLineHour("hiding group")
+                Preferences.tickLog.logLineHour("hiding group")
                 NotificationWrapper.instance.cancelNotification(0)
             } else {
-                Preferences.logLineHour("showing group")
+                Preferences.tickLog.logLineHour("showing group")
                 NotificationWrapper.instance.notifyGroup(notificationInstances.values, true, now)
             }
 
             for (hideInstanceKey in hideInstanceKeys) {
                 val instance = getInstance(hideInstanceKey)
-                Preferences.logLineHour("hiding '" + instance.name + "'")
+                Preferences.tickLog.logLineHour("hiding '" + instance.name + "'")
                 NotificationWrapper.instance.cancelNotification(instance.notificationId)
             }
 
             for (showInstanceKey in showInstanceKeys) {
                 val instance = notificationInstances.getValue(showInstanceKey)
-                Preferences.logLineHour("showing '" + instance.name + "'")
+                Preferences.tickLog.logLineHour("showing '" + instance.name + "'")
                 notifyInstance(instance, silent, now)
             }
 
             val updateInstances = notificationInstances.values.filter { !showInstanceKeys.contains(it.instanceKey) }
 
             updateInstances.forEach {
-                Preferences.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
+                Preferences.tickLog.logLineHour("updating '" + it.name + "' " + it.instanceDateTime)
                 updateInstance(it, now)
             }
         }
@@ -2536,7 +2536,7 @@ class DomainFactory(
         NotificationWrapper.instance.updateAlarm(nextAlarm)
 
         if (nextAlarm != null)
-            Preferences.logLineHour("next tick: $nextAlarm")
+            Preferences.tickLog.logLineHour("next tick: $nextAlarm")
     }
 
     private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, silent, now)

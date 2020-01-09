@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
+import android.os.Handler
 import android.util.Base64
 import android.view.*
 import android.widget.AutoCompleteTextView
@@ -317,4 +318,20 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
         @Suppress("UNCHECKED_CAST")
         it.get(this) as U
     }
+}
+
+fun View.animateProgress() {
+    fun loop(hide: Boolean) {
+        Handler().postDelayed({
+            val list = listOf(Pair(this, HideType.INVISIBLE))
+            if (hide)
+                animateVisibility2(listOf(), list)
+            else
+                animateVisibility2(list, listOf())
+
+            loop(!hide)
+        }, 2000)
+    }
+
+    loop(true)
 }

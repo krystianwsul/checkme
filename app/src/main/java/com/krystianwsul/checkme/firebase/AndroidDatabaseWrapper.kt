@@ -51,6 +51,10 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
             .orderByChild("recordOf/$key")
             .equalTo(true)
 
+    /* todo
+    Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding '".indexOn": "recordOf/cGF0cmljaXVzQGdtYWlsLmNvbQ=="' at production/records to your security and Firebase Database rules for better performance
+     */
+
     fun getSharedProjectSingle(key: String) = sharedProjectQuery(key).data()
 
     fun getSharedProjectEvents(key: String) = sharedProjectQuery(key).childEvents()

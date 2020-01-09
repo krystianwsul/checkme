@@ -20,13 +20,13 @@ sealed class TickData {
     abstract fun sharedTriggered()
 
     abstract fun release()
-    abstract fun notifyAndRelease()
 
     override fun toString() = super.toString() + " silent: $silent, source: $source"
 
     class Normal(
             override val silent: Boolean,
-            override val source: String) : TickData() {
+            override val source: String
+    ) : TickData() {
 
         override var shouldClear = false
             private set
@@ -39,16 +39,14 @@ sealed class TickData {
         override fun release() {
             shouldClear = true
         }
-
-        override fun notifyAndRelease() = release()
     }
 
     class Lock(
             override val silent: Boolean,
             override val source: String,
-            val listeners: List<() -> Unit> = listOf(),
             var waitingForPrivate: Boolean = true,
-            var waitingForShared: Boolean = true) : TickData() {
+            var waitingForShared: Boolean = true
+    ) : TickData() {
 
         companion object {
 
@@ -80,13 +78,6 @@ sealed class TickData {
         override fun release() {
             if (wakelock.isHeld)
                 wakelock.release()
-        }
-
-        override fun notifyAndRelease() {
-            for (listener in listeners)
-                listener()
-
-            release()
         }
 
         override fun toString() = super.toString() + ", waitingForPrivate: $waitingForPrivate, waitingForShared: $waitingForShared, expires: $expires"

@@ -50,19 +50,15 @@ class TickJobIntentService : JobIntentService() {
         }
 
         // still running?
-        fun tick(silent: Boolean, sourceName: String, listener: (() -> Unit)? = null) {
+        private fun tick(silent: Boolean, sourceName: String) {
             Preferences.logLineHour("TickJobIntentService.tick from $sourceName")
 
             if (!MyApplication.instance.hasUserInfo) {
                 Preferences.logLineHour("TickJobIntentService.tick skipping, no userInfo")
 
                 NotificationWrapper.instance.hideTemporary()
-
-                listener?.invoke()
             } else {
-                val listeners = listOfNotNull(listener)
-
-                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName, listeners))
+                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName))
             }
         }
     }

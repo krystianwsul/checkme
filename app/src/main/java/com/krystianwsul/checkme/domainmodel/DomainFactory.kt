@@ -78,8 +78,8 @@ class DomainFactory(
                 if (tickData?.waiting == true) {
                     TickHolder.addTickData(newTickData)
                 } else {
-                    tickData?.notifyAndRelease()
-                    newTickData.notifyAndRelease()
+                    tickData?.release()
+                    newTickData.release()
                 }
             }
         }
@@ -322,7 +322,7 @@ class DomainFactory(
             updateNotificationsTick(now, tickData.silent && !forceNotify, tickData.source)
 
             if (!tickData.waiting)
-                tickData.notifyAndRelease()
+                tickData.release()
         }
 
         fun notify() {

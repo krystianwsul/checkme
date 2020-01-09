@@ -20,25 +20,27 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
         val statusBarNotifications = notificationManager.activeNotifications!!
 
         if (lastNotificationId != null) {
-            if (statusBarNotifications.size > 2) {
-                cancelNotification(lastNotificationId)
-            } else if (statusBarNotifications.size < 2) {
-                if (statusBarNotifications.isNotEmpty())
-                    MyCrashlytics.logException(NotificationException(lastNotificationId, statusBarNotifications))
+            when (statusBarNotifications.size) {
+                in (0..1) -> {
+                    if (statusBarNotifications.isNotEmpty())
+                        MyCrashlytics.logException(NotificationException(lastNotificationId, statusBarNotifications))
 
-                // guessing, basically
-                cancelNotification(0)
-                cancelNotification(lastNotificationId)
-            } else {
-                check(statusBarNotifications.size == 2)
-
-                if (statusBarNotifications.none { it.id == 0 })
-                    throw NotificationException(lastNotificationId, statusBarNotifications)
-
-                if (statusBarNotifications.any { it.id == lastNotificationId }) {
+                    // guessing, basically
                     cancelNotification(0)
                     cancelNotification(lastNotificationId)
                 }
+                2 -> {
+                    check(statusBarNotifications.size == 2)
+
+                    if (statusBarNotifications.none { it.id == 0 })
+                        throw NotificationException(lastNotificationId, statusBarNotifications)
+
+                    if (statusBarNotifications.any { it.id == lastNotificationId }) {
+                        cancelNotification(0)
+                        cancelNotification(lastNotificationId)
+                    }
+                }
+                else -> cancelNotification(lastNotificationId)
             }
         } else {
             if (statusBarNotifications.size != 1)
@@ -87,5 +89,8 @@ open class NotificationWrapperImplN : NotificationWrapperImplM() {
 
     override fun logNotificationIds(source: String) = Preferences.logLineHour("NotificationManager ids ($source): " + notificationManager.activeNotifications.map { it.id })
 
-    private class NotificationException(lastNotificationId: Int, statusBarNotifications: Array<StatusBarNotification>) : RuntimeException("last id: $lastNotificationId, shown ids: " + statusBarNotifications.joinToString(", ") { it.id.toString() })
+    private class NotificationException(
+            lastNotificationId: Int,
+            statusBarNotifications: Array<StatusBarNotification>
+    ) : RuntimeException("last id: $lastNotificationId, shown ids: " + statusBarNotifications.joinToString(", ") { it.id.toString() })
 }

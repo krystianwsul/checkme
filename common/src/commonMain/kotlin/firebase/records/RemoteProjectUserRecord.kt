@@ -33,7 +33,7 @@ class RemoteProjectUserRecord(
             return
 
         createObject.tokens[deviceDbInfo.uuid] = deviceDbInfo.deviceInfo.token
-        addValue("$key/tokens/$deviceDbInfo.uuid", deviceDbInfo.deviceInfo.token)
+        addValue("$key/tokens/${deviceDbInfo.uuid}", deviceDbInfo.deviceInfo.token)
     }
 
     override fun deleteFromParent() = check(remoteProjectRecord.remoteUserRecords.remove(id) == this)

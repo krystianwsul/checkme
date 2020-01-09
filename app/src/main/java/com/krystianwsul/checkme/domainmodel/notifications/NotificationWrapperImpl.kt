@@ -46,7 +46,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         protected val MAX_INBOX_LINES = 5
 
         private const val NOTIFICATION_ID_GROUP = 0
-        private const val NOTIFICATION_ID_TEMPORARY = 1
+
+        @JvmStatic
+        protected val NOTIFICATION_ID_TEMPORARY = 1
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -405,13 +407,15 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     override fun logNotificationIds(source: String) = Unit
 
-    private val showTemporary by lazy {
+    protected val showTemporary by lazy {
         !MyApplication.instance
                 .resources
                 .getBoolean(R.bool.release)
     }
 
-    override fun notifyTemporary() {
+    override fun notifyTemporary(source: String) {
+        Preferences.temporaryNotificationLog.logLineDate("notifyTemporary $source")
+
         if (!showTemporary)
             return
 
@@ -446,9 +450,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         )
     }
 
-    override fun hideTemporary() {
+    override fun hideTemporary(source: String) {
         if (showTemporary)
-            cancelNotification(NOTIFICATION_ID_TEMPORARY)
+            throw UnsupportedOperationException()
     }
 
     protected data class NotificationHash(

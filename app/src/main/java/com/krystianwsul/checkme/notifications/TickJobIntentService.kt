@@ -17,7 +17,7 @@ class TickJobIntentService : JobIntentService() {
     companion object {
 
         private fun start(intent: Intent) {
-            NotificationWrapper.instance.notifyTemporary()
+            NotificationWrapper.instance.notifyTemporary("TickJobIntentService.start")
 
             enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
         }
@@ -56,8 +56,10 @@ class TickJobIntentService : JobIntentService() {
             if (!MyApplication.instance.hasUserInfo) {
                 Preferences.tickLog.logLineHour("TickJobIntentService.tick skipping, no userInfo")
 
-                NotificationWrapper.instance.hideTemporary()
+                NotificationWrapper.instance.hideTemporary("TickJobIntentService.tick skipping")
             } else {
+                NotificationWrapper.instance.hideTemporary("TickJobIntentService.tick $sourceName")
+
                 DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName))
             }
         }

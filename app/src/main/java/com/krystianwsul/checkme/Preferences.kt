@@ -16,6 +16,7 @@ object Preferences {
     private const val TICK_LOG = "tickLog"
     private const val TAB_KEY = "tab"
     private const val KEY_SHORTCUTS = "shortcuts2"
+    private const val KEY_TEMPORARY_NOTIFICATION_LOG = "temporaryNotificationLog"
 
     private val sharedPreferences by lazy { MyApplication.sharedPreferences }
 
@@ -43,6 +44,8 @@ object Preferences {
             ?: mapOf()) { _, _, newValue ->
         shortcutString = serialize(newValue)
     }
+
+    val temporaryNotificationLog = Logger(KEY_TEMPORARY_NOTIFICATION_LOG)
 
     private open class ReadOnlyStrPref(protected val key: String) : ReadOnlyProperty<Any, String> {
 

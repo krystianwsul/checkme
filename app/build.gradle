@@ -61,7 +61,7 @@ android {
 ext {
     powermockVersion = '2.0.4'
     lifecycleVersion = '2.2.0-rc03'
-    glideVersion = '4.10.0'
+    glideVersion = '4.11.0'
 }
 
 androidExtensions {
@@ -70,7 +70,7 @@ androidExtensions {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    testImplementation 'junit:junit:4.13-rc-2'
+    testImplementation 'junit:junit:4.13'
     testImplementation "org.powermock:powermock-module-junit4:$powermockVersion"
     testImplementation "org.powermock:powermock-module-junit4-rule:$powermockVersion"
     testImplementation "org.powermock:powermock-api-mockito2:$powermockVersion"
@@ -78,7 +78,7 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta3'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
     implementation 'androidx.preference:preference:1.1.0'
     implementation 'androidx.sharetarget:sharetarget:1.0.0-rc01'
 
@@ -90,8 +90,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:17.2.1'
     implementation 'com.google.firebase:firebase-auth:19.2.0'
     implementation 'com.google.firebase:firebase-database:19.2.0'
-    implementation 'com.google.firebase:firebase-messaging:20.0.1'
-    implementation 'com.google.firebase:firebase-config:19.0.3'
+    implementation 'com.google.firebase:firebase-messaging:20.1.0'
+    implementation 'com.google.firebase:firebase-config:19.1.0'
     implementation 'com.google.firebase:firebase-storage:19.1.0'
 
     implementation 'com.firebaseui:firebase-ui-storage:4.3.2'

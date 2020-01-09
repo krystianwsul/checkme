@@ -633,16 +633,22 @@ class DomainFactory(
                     hierarchyData,
                     it.ordinal,
                     it.getNotificationShown(localFactory),
-                    task.getImage(deviceDbInfo))
+                    task.getImage(deviceDbInfo)
+            )
         }
 
-        return ShowTaskInstancesViewModel.Data(GroupListFragment.DataWrapper(
+        val dataWrapper = GroupListFragment.DataWrapper(
                 customTimeDatas,
                 task.current(now),
                 listOf(),
                 null,
                 instanceDatas,
-                null))
+                null
+        )
+
+        instanceDatas.forEach { it.instanceDataParent = dataWrapper }
+
+        return ShowTaskInstancesViewModel.Data(dataWrapper)
     }
 
     @Synchronized

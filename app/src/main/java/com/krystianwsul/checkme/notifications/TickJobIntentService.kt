@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.notifications
 
 import android.content.Context
 import android.content.Intent
-import android.text.TextUtils
 import androidx.core.app.JobIntentService
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
@@ -16,8 +15,8 @@ class TickJobIntentService : JobIntentService() {
 
     companion object {
 
-        private fun start(intent: Intent) {
-            NotificationWrapper.instance.notifyTemporary("TickJobIntentService.start")
+        private fun start(intent: Intent, source: String) {
+            NotificationWrapper.instance.notifyTemporary("TickJobIntentService.start $source")
 
             enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
         }
@@ -32,16 +31,16 @@ class TickJobIntentService : JobIntentService() {
 
         fun startServiceSilent(context: Context, source: String) {
             Preferences.tickLog.logLineDate("TickJobIntentService.startServiceSilent from $source")
-            start(getIntent(context, true, source))
+            start(getIntent(context, true, source), source)
         }
 
         fun startServiceNormal(context: Context, source: String) {
             Preferences.tickLog.logLineDate("TickJobIntentService.startServiceNormal from $source")
-            start(getIntent(context, false, source))
+            start(getIntent(context, false, source), source)
         }
 
         private fun getIntent(context: Context, silent: Boolean, source: String): Intent {
-            check(!TextUtils.isEmpty(source))
+            check(source.isNotEmpty())
 
             return Intent(context, TickJobIntentService::class.java).apply {
                 putExtra(SILENT_KEY, silent)
@@ -72,7 +71,7 @@ class TickJobIntentService : JobIntentService() {
         val silent = intent.getBooleanExtra(SILENT_KEY, false)
 
         val sourceName = intent.getStringExtra(SOURCE_KEY)!!
-        check(!TextUtils.isEmpty(sourceName))
+        check(sourceName.isNotEmpty())
 
         tick(silent, sourceName)
     }

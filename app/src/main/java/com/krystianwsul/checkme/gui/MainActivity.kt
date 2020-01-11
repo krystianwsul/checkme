@@ -499,6 +499,7 @@ class MainActivity :
                 }
                 .addTo(createDisposable)
                 */
+        mainProgress.animateProgress()
         mainDaysProgress.animateProgress()
         /*
         fun loop(hide: Boolean) {
@@ -639,10 +640,10 @@ class MainActivity :
 
         if (tab == Tab.INSTANCES) {
             showViews.add(mainDaysLayout)
-            hideViews += mainProgressLayout
+            hideViews += mainProgress
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
         } else {
-            showViews += mainProgressLayout
+            showViews += mainProgress
             hideViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
             calendarOpen = false

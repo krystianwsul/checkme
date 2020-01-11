@@ -17,8 +17,7 @@
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             android:stateListAnimator="@null"
-            tools:targetApi="lollipop"
-            android:background="@null">
+            tools:targetApi="lollipop">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -57,18 +56,13 @@
 
                 </androidx.appcompat.widget.Toolbar>
 
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/mainProgressLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:visibility="gone">
-
                 <include
                     layout="@layout/progress_bar_saving"
-                    android:id="@+id/mainProgress" />
+                    android:id="@+id/mainProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="-1dp" />
 
             </FrameLayout>
 
@@ -90,43 +84,47 @@
                 android:layout_height="match_parent"
                 android:background="#FFF">
 
-                <RelativeLayout
+                <LinearLayout
                     android:id="@+id/mainDaysLayout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <include
-                        layout="@layout/progress_bar_saving"
-                        android:id="@+id/mainDaysProgress"
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="4dp"
-                        android:layout_below="@id/mainTabLayout"
-                        android:layout_marginTop="-1dp" />
+                        android:layout_height="wrap_content">
 
-                    <com.google.android.material.tabs.TabLayout
-                        android:id="@+id/mainTabLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/colorPrimary"
-                        android:elevation="6dp"
-                        android:theme="@style/AppTheme.AppBarOverlay"
-                        app:tabGravity="center"
-                        app:tabMode="scrollable"
-                        tools:ignore="UnusedAttribute"
-                        app:tabTextColor="@color/textSecondaryWhite"
-                        app:tabSelectedTextColor="@color/textPrimaryWhite"
-                        app:tabRippleColor="@color/textPrimaryWhite"
-                        app:tabIndicatorColor="@color/secondaryColor"
-                        android:layout_alignParentTop="true" />
+                        <com.google.android.material.tabs.TabLayout
+                            android:id="@+id/mainTabLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/colorPrimary"
+                            android:elevation="6dp"
+                            android:theme="@style/AppTheme.AppBarOverlay"
+                            app:tabGravity="center"
+                            app:tabMode="scrollable"
+                            tools:ignore="UnusedAttribute"
+                            app:tabTextColor="@color/textSecondaryWhite"
+                            app:tabSelectedTextColor="@color/textPrimaryWhite"
+                            app:tabRippleColor="@color/textPrimaryWhite"
+                            app:tabIndicatorColor="@color/secondaryColor" />
+
+                        <include
+                            layout="@layout/progress_bar_saving"
+                            android:id="@+id/mainDaysProgress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:layout_marginBottom="-1dp" />
+
+                    </FrameLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/mainDaysPager"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_below="@id/mainDaysProgress" />
+                        android:layout_height="match_parent" />
 
-                </RelativeLayout>
+                </LinearLayout>
 
                 <FrameLayout
                     android:id="@+id/mainTaskListFrame"

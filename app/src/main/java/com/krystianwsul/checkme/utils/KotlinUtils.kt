@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.utils
 
+import android.animation.ValueAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -32,6 +33,7 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
+import kotlinx.android.synthetic.main.progress_bar_saving.view.*
 import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -321,17 +323,30 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
 }
 
 fun View.animateProgress() {
-    fun loop(hide: Boolean) {
-        Handler().postDelayed({
-            val list = listOf(Pair(this, HideType.INVISIBLE))
-            if (hide)
-                animateVisibility2(listOf(), list)
-            else
-                animateVisibility2(list, listOf())
+    clippedProgress.apply {
+        fun loop(hide: Boolean) {
+            Handler().postDelayed(
+                    {
+                        fun setHeight(height: Int) {
+                            layoutParams = layoutParams.also {
+                                it.height = height
+                            }
+                        }
 
-            loop(!hide)
-        }, 2000)
+                        val animation = ValueAnimator.ofInt(height, if (hide) 0 else dpToPx(4).toInt())
+                        animation.addUpdateListener {
+                            val height = it.animatedValue as Int
+                            setHeight(height)
+                        }
+                        animation.duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
+                        animation.start()
+
+                        loop(!hide)
+                    },
+                    2000
+            )
+        }
+
+        loop(true)
     }
-
-    loop(true)
 }

@@ -46,7 +46,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         protected val MAX_INBOX_LINES = 5
 
         private const val NOTIFICATION_ID_GROUP = 0
-        private const val NOTIFICATION_ID_TEMPORARY = 1
+
+        @JvmStatic
+        protected val NOTIFICATION_ID_TEMPORARY = 1
     }
 
     protected val notificationManager by lazy { MyApplication.instance.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
@@ -63,7 +65,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
     }
 
     override fun cancelNotification(id: Int) {
-        Preferences.logLineHour("NotificationManager.cancel $id")
+        Preferences.tickLog.logLineHour("NotificationManager.cancel $id")
         notificationManager.cancel(id)
     }
 
@@ -290,7 +292,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
             largeIcon: (() -> Bitmap)?,
             notificationHash: NotificationHash) {
         if (unchanged(notificationHash)) {
-            Preferences.logLineHour("skipping notification update for $title")
+            Preferences.tickLog.logLineHour("skipping notification update for $title")
             return
         }
 
@@ -405,20 +407,22 @@ open class NotificationWrapperImpl : NotificationWrapper() {
 
     override fun logNotificationIds(source: String) = Unit
 
-    private val showTemporary by lazy {
+    protected val showTemporary by lazy {
         !MyApplication.instance
                 .resources
                 .getBoolean(R.bool.release)
     }
 
-    override fun notifyTemporary() {
+    override fun notifyTemporary(source: String) {
+        Preferences.temporaryNotificationLog.logLineDate("notifyTemporary $source")
+
         if (!showTemporary)
             return
 
         val contentIntent = MainActivity.newIntent()
         val pendingContentIntent = PendingIntent.getActivity(MyApplication.instance, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
-        val title = "You may have new reminders"
+        val title = "You may have new reminders" // todo this does show up. foreground service?
 
         notify(
                 title,
@@ -446,9 +450,9 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         )
     }
 
-    override fun hideTemporary() {
+    override fun hideTemporary(source: String) {
         if (showTemporary)
-            cancelNotification(NOTIFICATION_ID_TEMPORARY)
+            throw UnsupportedOperationException()
     }
 
     protected data class NotificationHash(

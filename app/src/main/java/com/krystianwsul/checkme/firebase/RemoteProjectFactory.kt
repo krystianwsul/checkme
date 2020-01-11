@@ -15,6 +15,7 @@ import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.managers.AndroidRemotePrivateProjectManager
 import com.krystianwsul.common.firebase.managers.AndroidRemoteSharedProjectManager
 import com.krystianwsul.common.firebase.models.*
+import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
@@ -94,12 +95,16 @@ class RemoteProjectFactory(
     fun onChildEvent(childEvent: ChildEvent, now: ExactTimeStamp) {
         when (childEvent) {
             is ChildAddEvent, is ChildChangeEvent -> {
-                val remoteProjectRecord = remoteSharedProjectManager.setChild(childEvent.dataSnapshot())
+                try {
+                    val remoteProjectRecord = remoteSharedProjectManager.setChild(childEvent.dataSnapshot())
 
-                check(remoteProjects.containsKey(remoteProjectRecord.id))
-                remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
-                    fixNotificationShown(domainFactory.localFactory, now)
-                    updateUserInfo(domainFactory.deviceDbInfo)
+                    check(remoteProjects.containsKey(remoteProjectRecord.id))
+                    remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
+                        fixNotificationShown(domainFactory.localFactory, now)
+                        updateUserInfo(domainFactory.deviceDbInfo)
+                    }
+                } catch (malformedTaskException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+                    // hack for oldestVisible being set on records removed by cloud function
                 }
             }
             is ChildRemoveEvent -> {
@@ -112,9 +117,18 @@ class RemoteProjectFactory(
     }
 
     fun onNewPrivate(dataSnapshot: DataSnapshot, now: ExactTimeStamp) {
-        val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
+        try {
+            val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
 
-        remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord).apply { fixNotificationShown(domainFactory.localFactory, now) }
+            remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord).apply { fixNotificationShown(domainFactory.localFactory, now) }
+        } catch (malformedTaskException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+            // hack for oldestVisible being set on records removed by cloud function
+
+            /*
+            todo: either set oldestVisible once you're sure the database has been updated, or find
+              a better mechanism than oldestVisible
+             */
+        }
     }
 
     fun createScheduleRootTask(now: ExactTimeStamp, name: String, scheduleDatas: List<Pair<ScheduleData, Time>>, note: String?, projectId: String, uuid: String?) = createRemoteTaskHelper(now, name, note, projectId, uuid).apply {

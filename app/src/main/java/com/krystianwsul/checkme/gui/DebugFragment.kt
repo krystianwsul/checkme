@@ -38,7 +38,7 @@ class DebugFragment : AbstractFragment() {
         debugLoad.setOnClickListener {
             debugData.text = StringBuilder().apply {
                 val lastTick = Preferences.lastTick
-                val tickLog = Preferences.tickLog
+                val tickLog = Preferences.tickLog.log
 
                 val lastTickExactTimeStamp = ExactTimeStamp(lastTick)
 
@@ -88,6 +88,9 @@ class DebugFragment : AbstractFragment() {
 
                 append("\ncrashlytics enabled: ")
                 append(MyCrashlytics.enabled)
+
+                append("\n\ntemporary notification log:")
+                append(Preferences.temporaryNotificationLog.log)
 
                 append("\n\nlast beeping tick: ")
                 append(lastTickExactTimeStamp.toString())

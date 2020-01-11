@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.notifications
 
 import android.content.Context
 import android.content.Intent
-import android.text.TextUtils
 import androidx.core.app.JobIntentService
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.Preferences
@@ -16,8 +15,8 @@ class TickJobIntentService : JobIntentService() {
 
     companion object {
 
-        private fun start(intent: Intent) {
-            NotificationWrapper.instance.notifyTemporary()
+        private fun start(intent: Intent, source: String) {
+            NotificationWrapper.instance.notifyTemporary("TickJobIntentService.start $source")
 
             enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
         }
@@ -31,17 +30,17 @@ class TickJobIntentService : JobIntentService() {
         // DON'T HOLD STATE IN STATIC VARIABLES
 
         fun startServiceSilent(context: Context, source: String) {
-            Preferences.logLineDate("TickJobIntentService.startServiceSilent from $source")
-            start(getIntent(context, true, source))
+            Preferences.tickLog.logLineDate("TickJobIntentService.startServiceSilent from $source")
+            start(getIntent(context, true, source), source)
         }
 
         fun startServiceNormal(context: Context, source: String) {
-            Preferences.logLineDate("TickJobIntentService.startServiceNormal from $source")
-            start(getIntent(context, false, source))
+            Preferences.tickLog.logLineDate("TickJobIntentService.startServiceNormal from $source")
+            start(getIntent(context, false, source), source)
         }
 
         private fun getIntent(context: Context, silent: Boolean, source: String): Intent {
-            check(!TextUtils.isEmpty(source))
+            check(source.isNotEmpty())
 
             return Intent(context, TickJobIntentService::class.java).apply {
                 putExtra(SILENT_KEY, silent)
@@ -50,19 +49,17 @@ class TickJobIntentService : JobIntentService() {
         }
 
         // still running?
-        fun tick(silent: Boolean, sourceName: String, listener: (() -> Unit)? = null) {
-            Preferences.logLineHour("TickJobIntentService.tick from $sourceName")
+        private fun tick(silent: Boolean, sourceName: String) {
+            Preferences.tickLog.logLineHour("TickJobIntentService.tick from $sourceName")
 
             if (!MyApplication.instance.hasUserInfo) {
-                Preferences.logLineHour("TickJobIntentService.tick skipping, no userInfo")
+                Preferences.tickLog.logLineHour("TickJobIntentService.tick skipping, no userInfo")
 
-                NotificationWrapper.instance.hideTemporary()
-
-                listener?.invoke()
+                NotificationWrapper.instance.hideTemporary("TickJobIntentService.tick skipping")
             } else {
-                val listeners = listOfNotNull(listener)
+                NotificationWrapper.instance.hideTemporary("TickJobIntentService.tick $sourceName")
 
-                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName, listeners))
+                DomainFactory.setFirebaseTickListener(SaveService.Source.SERVICE, TickData.Lock(silent, sourceName))
             }
         }
     }
@@ -74,7 +71,7 @@ class TickJobIntentService : JobIntentService() {
         val silent = intent.getBooleanExtra(SILENT_KEY, false)
 
         val sourceName = intent.getStringExtra(SOURCE_KEY)!!
-        check(!TextUtils.isEmpty(sourceName))
+        check(sourceName.isNotEmpty())
 
         tick(silent, sourceName)
     }

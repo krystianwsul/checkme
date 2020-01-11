@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.gui
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,12 +9,12 @@ import android.os.Parcelable
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import androidx.appcompat.view.ActionMode
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.TransitionManager
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding3.widget.textChanges
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -110,7 +111,6 @@ class MainActivity :
     var debug = false
 
     private var calendarOpen = false
-    private var calendarHeight: Int? = null
     private var calendarInitial: Boolean = true
 
     private lateinit var mainViewModel: MainViewModel
@@ -239,7 +239,6 @@ class MainActivity :
 
                 calendarOpen = getBoolean(CALENDAR_KEY)
 
-                updateCalendarHeight()
                 updateCalendarDate()
 
                 states = getParcelableArrayList<ParcelableState>(DAY_STATES_KEY)!!.associate {
@@ -410,11 +409,7 @@ class MainActivity :
             adapter = MyFragmentStatePagerAdapter()
         }
 
-        mainCalendar.addOneShotGlobalLayoutListener {
-            calendarHeight = mainCalendar.height
-
-            updateCalendarHeight()
-        }
+        mainFrame.addOneShotGlobalLayoutListener { updateCalendarHeight() }
 
         showTab(visibleTab.value!!, true)
 
@@ -846,15 +841,15 @@ class MainActivity :
     }
 
     private fun updateCalendarHeight() {
-        if (calendarHeight == null)
+        if (mainCalendar.height == 0) // prevent executing before global layout
             return
 
-        val targetHeight = if (calendarOpen) ViewGroup.LayoutParams.WRAP_CONTENT else 0
+        val targetHeight = if (calendarOpen) mainCalendar.height else 0
 
         fun setHeight(height: Int) {
-            val layoutParams = mainCalendar.layoutParams
-            layoutParams.height = height
-            mainCalendar.layoutParams = layoutParams
+            mainFrame.layoutParams = (mainFrame.layoutParams as FrameLayout.LayoutParams).apply {
+                topMargin = height
+            }
         }
 
         if (calendarInitial) {
@@ -862,8 +857,13 @@ class MainActivity :
 
             calendarInitial = false
         } else {
-            TransitionManager.beginDelayedTransition(mainCalendar.parent as ViewGroup)
-            setHeight(targetHeight)
+            val animation = ValueAnimator.ofInt(mainFrame.top, targetHeight)
+            animation.addUpdateListener {
+                val height = it.animatedValue as Int
+                setHeight(height)
+            }
+            animation.duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
+            animation.start()
         }
     }
 

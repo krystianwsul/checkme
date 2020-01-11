@@ -27,7 +27,7 @@ class InstanceHourService : IntentService("InstanceHourService") {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        Preferences.logLineDate("InstanceHourService.onHandleIntent")
+        Preferences.tickLog.logLineDate("InstanceHourService.onHandleIntent")
 
         check(intent!!.hasExtra(INSTANCE_KEY))
         check(intent.hasExtra(NOTIFICATION_ID_KEY))

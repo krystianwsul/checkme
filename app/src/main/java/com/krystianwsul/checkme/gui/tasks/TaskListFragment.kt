@@ -418,7 +418,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun hint() = rootTaskData?.let { CreateTaskActivity.Hint.Task(it.taskKey) }
 
     private fun updateFabVisibility(source: String) {
-        Preferences.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
+        Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
         taskListFragmentFab?.run {
             if (data != null && !selectionCallback.hasActionMode) {
                 show()

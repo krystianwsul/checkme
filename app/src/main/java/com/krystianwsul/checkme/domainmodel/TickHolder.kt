@@ -12,12 +12,11 @@ object TickHolder {
         val source = "merged (${oldTickData.source}, ${newTickData.source})"
 
         val locks = listOf(oldTickData, newTickData).filterIsInstance<TickData.Lock>()
-        val listeners = locks.flatMap { it.listeners }
         val waitingForPrivate = locks.all { it.waitingForPrivate }
         val waitingForShared = locks.all { it.waitingForShared }
 
         return if (waitingForPrivate || waitingForShared) {
-            TickData.Lock(silent, source, listeners, waitingForPrivate, waitingForShared)
+            TickData.Lock(silent, source, waitingForPrivate, waitingForShared)
         } else {
             check(locks.isEmpty())
 

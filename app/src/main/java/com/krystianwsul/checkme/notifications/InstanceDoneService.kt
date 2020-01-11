@@ -26,7 +26,7 @@ class InstanceDoneService : IntentService("InstanceDoneService") {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        Preferences.logLineDate("InstanceDoneService.onHandleIntent")
+        Preferences.tickLog.logLineDate("InstanceDoneService.onHandleIntent")
 
         check(intent!!.hasExtra(INSTANCE_KEY))
         check(intent.hasExtra(NOTIFICATION_ID_KEY))

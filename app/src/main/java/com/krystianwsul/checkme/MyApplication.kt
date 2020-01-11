@@ -58,9 +58,8 @@ class MyApplication : Application() {
 
     private val deviceInfoRelay = BehaviorRelay.createDefault(NullableWrapper<DeviceInfo>())
 
-    val userInfo get() = deviceInfoRelay.value!!.value!!
-
     val hasUserInfo get() = deviceInfoRelay.value!!.value != null
+    val userInfo get() = deviceInfoRelay.value!!.value!!
 
     @SuppressLint("CheckResult")
     override fun onCreate() {
@@ -72,7 +71,7 @@ class MyApplication : Application() {
 
         JodaTimeAndroid.init(this)
 
-        Preferences.logLineDate("MyApplication.onCreate")
+        Preferences.tickLog.logLineDate("MyApplication.onCreate")
 
         FirebaseDatabase.getInstance().apply {
             setLogLevel(Logger.Level.DEBUG)
@@ -101,7 +100,17 @@ class MyApplication : Application() {
                 { AndroidDatabaseWrapper.getSharedProjectEvents(it.key) },
                 { AndroidDatabaseWrapper.getFriendObservable(it.key) },
                 { AndroidDatabaseWrapper.getUserObservable(it.key) },
-                { userInfo, privateProject, sharedProjects, friends, user -> DomainFactory(PersistenceManager.instance, userInfo, ExactTimeStamp.now, sharedProjects, privateProject, user, friends) },
+                { userInfo, privateProject, sharedProjects, friends, user ->
+                    DomainFactory(
+                            PersistenceManager.instance,
+                            userInfo,
+                            ExactTimeStamp.now,
+                            sharedProjects,
+                            privateProject,
+                            user,
+                            friends
+                    )
+                },
                 { DomainFactory.nullableInstance?.clearUserInfo() },
                 DomainFactory::updatePrivateProjectRecord,
                 DomainFactory::updateSharedProjectRecords,
@@ -152,9 +161,7 @@ class MyApplication : Application() {
     }
 
     private fun clearPaparazzo() {
-        val paparazzo = MyApplication.instance
-                .filesDir
-                .absolutePath + "/RxPaparazzo/"
+        val paparazzo = instance.filesDir.absolutePath + "/RxPaparazzo/"
 
         val queued = Queue.getEntries().map { it.path }
 

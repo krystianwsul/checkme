@@ -31,7 +31,7 @@ abstract class NotificationWrapper {
 
     abstract fun logNotificationIds(source: String)
 
-    abstract fun notifyTemporary()
+    abstract fun notifyTemporary(source: String)
 
-    abstract fun hideTemporary()
+    abstract fun hideTemporary(source: String)
 }

@@ -10,7 +10,8 @@
     <FrameLayout
         android:id="@+id/clippedProgress"
         android:layout_width="match_parent"
-        android:layout_height="4dp">
+        android:layout_height="4dp"
+        android:elevation="6dp">
 
         <FrameLayout
             android:layout_width="match_parent"

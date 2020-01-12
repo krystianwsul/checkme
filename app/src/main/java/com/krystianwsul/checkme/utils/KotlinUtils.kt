@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.utils
 
-import android.animation.ValueAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -8,7 +7,6 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
-import android.os.Handler
 import android.util.Base64
 import android.view.*
 import android.widget.AutoCompleteTextView
@@ -33,7 +31,6 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
-import kotlinx.android.synthetic.main.progress_bar_saving.view.*
 import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -323,30 +320,4 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
 }
 
 fun View.animateProgress() {
-    clippedProgress.apply {
-        fun loop(hide: Boolean) {
-            Handler().postDelayed(
-                    {
-                        fun setHeight(height: Int) {
-                            layoutParams = layoutParams.also {
-                                it.height = height
-                            }
-                        }
-
-                        val animation = ValueAnimator.ofInt(height, if (hide) 0 else dpToPx(4).toInt())
-                        animation.addUpdateListener {
-                            val height = it.animatedValue as Int
-                            setHeight(height)
-                        }
-                        animation.duration = resources.getInteger(android.R.integer.config_mediumAnimTime).toLong()
-                        animation.start()
-
-                        loop(!hide)
-                    },
-                    2000
-            )
-        }
-
-        loop(true)
-    }
 }

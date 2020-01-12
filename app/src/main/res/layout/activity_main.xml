@@ -56,8 +56,7 @@
 
                 </androidx.appcompat.widget.Toolbar>
 
-                <include
-                    layout="@layout/progress_bar_saving"
+                <com.krystianwsul.checkme.gui.ToolbarProgress
                     android:id="@+id/mainProgress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

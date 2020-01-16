@@ -7,7 +7,8 @@ class TreeNode<T : RecyclerView.ViewHolder>(
         val modelNode: ModelNode<T>,
         val parent: NodeContainer<T>,
         private var expanded: Boolean,
-        private var selected: Boolean) : Comparable<TreeNode<T>>, NodeContainer<T> {
+        private var selected: Boolean
+) : Comparable<TreeNode<T>>, NodeContainer<T> {
 
     override val isExpanded get() = expanded
 
@@ -436,7 +437,8 @@ class TreeNode<T : RecyclerView.ViewHolder>(
             val isSelected: Boolean,
             val expandVisible: Boolean,
             val separatorVisibility: Boolean,
-            val modelState: ModelState)
+            val modelState: ModelState
+    )
 
     override val id get() = modelNode.id
 }

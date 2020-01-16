@@ -540,7 +540,8 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             fun initialize(
                     selectedTaskKeys: List<TaskKey>?,
                     nodeContainer: NodeContainer<NodeHolder>,
-                    expandedTaskKeys: List<TaskKey>?): TreeNode<NodeHolder> {
+                    expandedTaskKeys: List<TaskKey>?
+            ): TreeNode<NodeHolder> {
                 val selected = if (selectedTaskKeys != null) {
                     check(selectedTaskKeys.isNotEmpty())
                     selectedTaskKeys.contains(childTaskData.taskKey)
@@ -548,7 +549,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     false
                 }
 
-                val expanded = if (expandedTaskKeys != null) {
+                val expanded = if (expandedTaskKeys != null && childTaskData.children.isNotEmpty()) {
                     check(expandedTaskKeys.isNotEmpty())
                     expandedTaskKeys.contains(childTaskData.taskKey)
                 } else {

@@ -36,4 +36,5 @@
         android:orderInCategory="700"
         android:icon="@drawable/ic_notifications_white_24dp"
         app:showAsAction="ifRoom"/>
+    <!-- todo add copy task -->
 </menu>

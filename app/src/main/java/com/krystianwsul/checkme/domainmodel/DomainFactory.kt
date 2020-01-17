@@ -730,7 +730,11 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun getCreateTaskData(taskKey: TaskKey?, joinTaskKeys: List<TaskKey>?, parentTaskKeyHint: TaskKey?): CreateTaskViewModel.Data {
+    fun getCreateTaskData(
+            taskKey: TaskKey?,
+            joinTaskKeys: List<TaskKey>?,
+            parentTaskKeyHint: TaskKey?
+    ): CreateTaskViewModel.Data {
         MyCrashlytics.logMethod(this, "parentTaskKeyHint: $parentTaskKeyHint")
 
         check(taskKey == null || joinTaskKeys == null)
@@ -747,11 +751,14 @@ class DomainFactory(
 
         val includeTaskKeys = listOfNotNull(parentTaskKeyHint).toMutableSet()
 
-        fun checkHintPresent(task: CreateTaskViewModel.ParentKey.Task, parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>): Boolean {
-            return parentTreeDatas.containsKey(task) || parentTreeDatas.any { checkHintPresent(task, it.value.parentTreeDatas) }
-        }
+        fun checkHintPresent(
+                task: CreateTaskViewModel.ParentKey.Task,
+                parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>
+        ): Boolean = parentTreeDatas.containsKey(task) || parentTreeDatas.any { checkHintPresent(task, it.value.parentTreeDatas) }
 
-        fun checkHintPresent(parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>) = parentTaskKeyHint?.let { checkHintPresent(CreateTaskViewModel.ParentKey.Task(it), parentTreeDatas) }
+        fun checkHintPresent(
+                parentTreeDatas: Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData>
+        ) = parentTaskKeyHint?.let { checkHintPresent(CreateTaskViewModel.ParentKey.Task(it), parentTreeDatas) }
                 ?: true
 
         var taskData: CreateTaskViewModel.TaskData? = null
@@ -765,12 +772,20 @@ class DomainFactory(
             if (task.isRootTask(now)) {
                 val schedules = task.getCurrentSchedules(now)
 
-                customTimes.putAll(schedules.mapNotNull { it.customTimeKey }.map { it to task.project.getRemoteCustomTime(it.remoteCustomTimeId) })
+                customTimes.putAll(schedules.mapNotNull { it.customTimeKey }.map {
+                    it to task.project.getRemoteCustomTime(it.remoteCustomTimeId)
+                }
+                )
 
-                parentKey = task.project.takeIf { it is RemoteSharedProject }?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
+                parentKey = task.project
+                        .takeIf { it is RemoteSharedProject }
+                        ?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
-                if (schedules.isNotEmpty())
-                    scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map { CreateTaskViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData) }
+                if (schedules.isNotEmpty()) {
+                    scheduleDataWrappers = ScheduleGroup.getGroups(schedules).map {
+                        CreateTaskViewModel.ScheduleDataWrapper.fromScheduleData(it.scheduleData)
+                    }
+                }
             } else {
                 val parentTask = task.getParentTask(now)!!
                 parentKey = CreateTaskViewModel.ParentKey.Task(parentTask.taskKey)
@@ -785,7 +800,8 @@ class DomainFactory(
                     scheduleDataWrappers,
                     task.note,
                     projectName,
-                    task.getImage(deviceDbInfo))
+                    task.getImage(deviceDbInfo)
+            )
 
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             check(checkHintPresent(parentTreeDatas))
@@ -846,7 +862,7 @@ class DomainFactory(
                 task.name,
                 task.getParentName(hierarchyTimeStamp),
                 task.getScheduleTextMultiline(ScheduleText, hierarchyTimeStamp),
-                TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note),
+                TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note, task.current(now)),
                 task.hasInstances(now),
                 task.getImage(deviceDbInfo),
                 task.current(now))
@@ -880,7 +896,10 @@ class DomainFactory(
                 .sortedDescending()
                 .toMutableList()
 
-        return MainViewModel.Data(TaskListFragment.TaskData(childTaskDatas, null), remoteUserFactory.remoteUser.defaultTab)
+        return MainViewModel.Data(
+                TaskListFragment.TaskData(childTaskDatas, null, true),
+                remoteUserFactory.remoteUser.defaultTab
+        )
     }
 
     @Synchronized
@@ -2102,7 +2121,11 @@ class DomainFactory(
                     .toList()
                     .toMap()
 
-    private fun Task.showAsParent(now: ExactTimeStamp, excludedTaskKeys: Set<TaskKey>, includedTaskKeys: Set<TaskKey>): Boolean {
+    private fun Task.showAsParent(
+            now: ExactTimeStamp,
+            excludedTaskKeys: Set<TaskKey>,
+            includedTaskKeys: Set<TaskKey>
+    ): Boolean {
         check(excludedTaskKeys.intersect(includedTaskKeys).isEmpty())
 
         if (!current(now)) {

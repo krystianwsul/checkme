@@ -347,7 +347,7 @@ class GroupListFragment @JvmOverloads constructor(
                         R.id.action_group_join to false,
                         R.id.action_group_delete_task to instanceData.taskCurrent,
                         R.id.action_group_add_task to instanceData.taskCurrent,
-                        R.id.actionGroupCopyTask to true
+                        R.id.actionGroupCopyTask to instanceData.taskCurrent
                 ))
             } else {
                 check(selectedDatas.size > 1)

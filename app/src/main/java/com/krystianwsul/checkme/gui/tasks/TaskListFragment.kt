@@ -142,7 +142,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
                     R.id.action_task_edit to single,
                     R.id.action_task_add to single,
                     R.id.action_task_show_instances to (childTaskDatas.singleOrNull()?.hasInstances == true),
-                    R.id.actionTaskCopy to single
+                    R.id.actionTaskCopy to (childTaskDatas.singleOrNull()?.current == true)
             )
         }
 
@@ -420,7 +420,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
     private fun updateFabVisibility(source: String) {
         Preferences.tickLog.logLineHour("fab ${hashCode()} $source ${taskListFragmentFab != null}, ${data != null}, ${!selectionCallback.hasActionMode}")
         taskListFragmentFab?.run {
-            if (data != null && !selectionCallback.hasActionMode) {
+            if (data?.taskData?.showFab == true && !selectionCallback.hasActionMode) {
                 show()
             } else {
                 hide()
@@ -648,9 +648,17 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
         val taskAdapter: TaskAdapter
     }
 
-    data class Data(val dataId: Int, val immediate: Boolean, val taskData: TaskData)
+    data class Data(
+            val dataId: Int,
+            val immediate: Boolean,
+            val taskData: TaskData
+    )
 
-    data class TaskData(val childTaskDatas: MutableList<ChildTaskData>, val note: String?)
+    data class TaskData(
+            val childTaskDatas: MutableList<ChildTaskData>,
+            val note: String?,
+            val showFab: Boolean
+    )
 
     data class ChildTaskData(
             val name: String,

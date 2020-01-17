@@ -27,7 +27,8 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
             val taskData: TaskListFragment.TaskData,
             val hasInstances: Boolean,
             val imageData: ImageState?,
-            val current: Boolean) : DomainData() {
+            val current: Boolean
+    ) : DomainData() {
 
         init {
             check(name.isNotEmpty())

@@ -499,23 +499,6 @@ class MainActivity :
                 }
                 .addTo(createDisposable)
                 */
-        mainProgress.animateProgress()
-        mainDaysProgress.animateProgress()
-        /*
-        fun loop(hide: Boolean) {
-            Handler().postDelayed({
-                val list = listOf(Pair(mainDaysProgress, HideType.INVISIBLE))
-                if (hide)
-                    animateVisibility2(listOf(), list)
-                else
-                    animateVisibility2(list, listOf())
-
-                loop(!hide)
-            }, 2000)
-        }
-
-        loop(true)
-        */
     }
 
     private sealed class PagerScrollState {

@@ -48,5 +48,4 @@ class ToolbarProgress @JvmOverloads constructor(
             loop(true)
         }
     }
-
 }

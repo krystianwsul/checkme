@@ -318,6 +318,3 @@ inline fun <reified T, U> T.getPrivateField(name: String): U {
         it.get(this) as U
     }
 }
-
-fun View.animateProgress() {
-}

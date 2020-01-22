@@ -108,8 +108,7 @@
                             app:tabRippleColor="@color/textPrimaryWhite"
                             app:tabIndicatorColor="@color/secondaryColor" />
 
-                        <include
-                            layout="@layout/progress_bar_saving"
+                        <com.krystianwsul.checkme.gui.ToolbarProgress
                             android:id="@+id/mainDaysProgress"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
-class TaskJson @JvmOverloads constructor(
+data class TaskJson @JvmOverloads constructor(
         var name: String = "",
         val startTime: Long = 0,
         var endTime: Long? = null,

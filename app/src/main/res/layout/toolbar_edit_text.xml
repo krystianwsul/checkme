@@ -7,47 +7,59 @@
     android:layout_height="wrap_content"
     android:id="@+id/editToolbarAppBar">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="6dp"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        app:layout_scrollFlags="scroll"
-        tools:ignore="UnusedAttribute">
+        app:layout_scrollFlags="scroll">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/toolbarLayout"
-            android:layout_marginTop="56dp"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="invisible"
-            app:hintAnimationEnabled="false"
-            app:errorEnabled="true"
-            style="@style/OldTextInput"
-            android:textColorHint="@color/textDisabledWhite">
+            android:minHeight="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="6dp"
+            android:theme="@style/AppTheme.AppBarOverlay"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            tools:ignore="UnusedAttribute">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/toolbarEditText"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/toolbarLayout"
+                android:layout_marginTop="56dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:inputType="text"
-                android:textColor="@color/textPrimaryWhite"
-                android:hint="@string/name_hint"
-                android:textColorHint="@color/textDisabledWhite"
-                tools:ignore="Deprecated"
-                android:importantForAutofill="noExcludeDescendants">
+                android:visibility="invisible"
+                app:hintAnimationEnabled="false"
+                app:errorEnabled="true"
+                style="@style/OldTextInput"
+                android:textColorHint="@color/textDisabledWhite">
 
-                <requestFocus/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/toolbarEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:inputType="text"
+                    android:textColor="@color/textPrimaryWhite"
+                    android:hint="@string/name_hint"
+                    android:textColorHint="@color/textDisabledWhite"
+                    tools:ignore="Deprecated"
+                    android:importantForAutofill="noExcludeDescendants">
 
-            </com.google.android.material.textfield.TextInputEditText>
+                    <requestFocus />
 
-        </com.google.android.material.textfield.TextInputLayout>
+                </com.google.android.material.textfield.TextInputEditText>
 
-    </androidx.appcompat.widget.Toolbar>
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <com.krystianwsul.checkme.gui.ToolbarProgress
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="-1dp" />
+
+    </FrameLayout>
 
 </com.google.android.material.appbar.AppBarLayout>

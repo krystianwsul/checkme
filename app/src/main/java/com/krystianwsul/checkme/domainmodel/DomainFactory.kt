@@ -164,7 +164,7 @@ class DomainFactory(
                     }
                 }
 
-    val isSaved = BehaviorRelay.createDefault(false)
+    val isSaved = BehaviorRelay.createDefault(false) // todo actually update this
 
     init {
         isSaved.subscribe { Log.e("asdf", "DomainFactory instance.isSaved: $it") }

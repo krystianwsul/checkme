@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
-class SingleScheduleJson @JvmOverloads constructor(
+data class SingleScheduleJson @JvmOverloads constructor(
         override val startTime: Long = 0,
         override var endTime: Long? = null,
         val year: Int = 0,
@@ -12,4 +12,5 @@ class SingleScheduleJson @JvmOverloads constructor(
         val day: Int = 0,
         val customTimeId: String? = null,
         val hour: Int? = null,
-        val minute: Int? = null) : ScheduleJson
+        val minute: Int? = null
+) : ScheduleJson

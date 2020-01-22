@@ -19,10 +19,12 @@ data class TaskJson @JvmOverloads constructor(
     @Serializable
     data class Image(
             val imageUuid: String = "",
-            val uploaderUuid: String? = null)
+            val uploaderUuid: String? = null
+    )
 
     @Serializable
     data class EndData(
             val time: Long = 0,
-            val deleteInstances: Boolean = false)
+            val deleteInstances: Boolean = false
+    )
 }

@@ -18,7 +18,8 @@ class InstanceShownRecord(
         val scheduleMinute: Int?,
         mNotified: Boolean,
         mNotificationShown: Boolean,
-        mProjectId: String) : Record(created), Instance.Shown {
+        mProjectId: String
+) : Record(created), Instance.Shown {
 
     companion object {
 

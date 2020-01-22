@@ -1,10 +1,11 @@
-package com.krystianwsul.common.firebase.managers
+package com.krystianwsul.checkme.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.JsonWrapper
+import com.krystianwsul.common.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 
 class AndroidRemoteSharedProjectManager(

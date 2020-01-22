@@ -113,7 +113,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVersion"
 
-    api 'com.google.guava:guava:28.1-android'
+    api 'com.google.guava:guava:28.2-android'
 
     implementation('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
         transitive = true

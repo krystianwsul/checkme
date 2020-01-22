@@ -9,7 +9,8 @@ import com.krystianwsul.common.utils.TaskKey
 class PersistenceManager(
         private val _instanceShownRecords: MutableList<InstanceShownRecord> = mutableListOf(),
         private var instanceShownMaxId: Int = 0,
-        private val uuidRecord: UuidRecord = UuidRecord(true, UuidRecord.newUuid())) {
+        private val uuidRecord: UuidRecord = UuidRecord(true, UuidRecord.newUuid())
+) {
 
     companion object {
 
@@ -32,19 +33,39 @@ class PersistenceManager(
 
     fun save(source: SaveService.Source) = SaveService.Factory.instance.startService(this, source)
 
-    fun createInstanceShownRecord(remoteTaskId: String, scheduleDate: Date, remoteCustomTimeId: RemoteCustomTimeId?, hour: Int?, minute: Int?, projectId: String): InstanceShownRecord {
+    fun createInstanceShownRecord(
+            remoteTaskId: String,
+            scheduleDate: Date,
+            remoteCustomTimeId: RemoteCustomTimeId?,
+            hour: Int?,
+            minute: Int?,
+            projectId: String
+    ): InstanceShownRecord {
         check(remoteTaskId.isNotEmpty())
         check(projectId.isNotEmpty())
 
         val id = ++instanceShownMaxId
 
-        return InstanceShownRecord(false, id, remoteTaskId, scheduleDate.year, scheduleDate.month, scheduleDate.day, remoteCustomTimeId?.value, hour, minute, false, false, projectId).also {
-            _instanceShownRecords.add(it)
-        }
+        return InstanceShownRecord(
+                false,
+                id,
+                remoteTaskId,
+                scheduleDate.year,
+                scheduleDate.month,
+                scheduleDate.day,
+                remoteCustomTimeId?.value,
+                hour,
+                minute,
+                mNotified = false,
+                mNotificationShown = false,
+                mProjectId = projectId
+        ).also { _instanceShownRecords.add(it) }
     }
 
     fun deleteInstanceShownRecords(taskKeys: Set<TaskKey>) {
-        val remove = _instanceShownRecords.filterNot { instanceShownRecord -> taskKeys.any { taskKey -> instanceShownRecord.projectId == taskKey.remoteProjectId && instanceShownRecord.taskId == taskKey.remoteTaskId } }
+        val remove = _instanceShownRecords.filterNot {
+            taskKeys.any { taskKey -> it.projectId == taskKey.remoteProjectId && it.taskId == taskKey.remoteTaskId }
+        }
 
         remove.forEach { it.delete() }
     }

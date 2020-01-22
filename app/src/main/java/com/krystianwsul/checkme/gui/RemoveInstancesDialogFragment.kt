@@ -21,7 +21,7 @@ class RemoveInstancesDialogFragment : AbstractDialogFragment() {
         }
     }
 
-    lateinit var payload: Serializable
+    private lateinit var payload: Serializable
 
     lateinit var listener: (Serializable, Boolean) -> Unit
 

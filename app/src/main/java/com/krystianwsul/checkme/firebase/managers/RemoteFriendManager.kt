@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.managers
+package com.krystianwsul.checkme.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory

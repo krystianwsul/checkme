@@ -226,7 +226,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         fun initialize(projectDatas: SortedMap<String, ProjectListViewModel.ProjectData>) {
             projectNodes = projectDatas.values
-                    .map { ProjectNode(this, it) }
+                    .map(::ProjectNode)
                     .toMutableList()
 
             treeNodeCollection = TreeNodeCollection(treeViewAdapter)
@@ -243,15 +243,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
 
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
 
-        private fun remove(projectNode: ProjectNode, x: TreeViewAdapter.Placeholder) {
-            check(projectNodes.contains(projectNode))
-
-            projectNodes.remove(projectNode)
-
-            treeNodeCollection.remove(projectNode.treeNode, x)
-        }
-
-        inner class ProjectNode(private val projectListAdapter: ProjectListAdapter, val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
+        inner class ProjectNode(val projectData: ProjectListViewModel.ProjectData) : GroupHolderNode(0) {
 
             override val ripple = true
 

@@ -18,6 +18,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.Task
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import java.io.File
 
@@ -139,7 +140,7 @@ object ImageManager {
                                 }
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe { _ ->
+                                        .subscribeBy {
                                             check(imageStates.getValue(uuid) is State.Downloading)
 
                                             imageStates[uuid] = State.Downloaded

@@ -7,7 +7,7 @@ import kotlin.reflect.KProperty
 
 abstract class RemoteRecord(create: Boolean) {
 
-    protected var shouldDelete = false
+    private var shouldDelete = false
 
     var update = if (create) null else mutableMapOf<String, Any?>()
 

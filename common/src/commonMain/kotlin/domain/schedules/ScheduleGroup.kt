@@ -60,7 +60,7 @@ sealed class ScheduleGroup {
 
     abstract val schedules: List<Schedule>
 
-    class Single(val singleSchedule: SingleSchedule) : ScheduleGroup() {
+    class Single(private val singleSchedule: SingleSchedule) : ScheduleGroup() {
 
         override val customTimeKey get() = singleSchedule.customTimeKey
 
@@ -85,7 +85,7 @@ sealed class ScheduleGroup {
         override val schedules get() = weeklySchedules
     }
 
-    class MonthlyDay(val monthlyDaySchedule: MonthlyDaySchedule) : ScheduleGroup() {
+    class MonthlyDay(private val monthlyDaySchedule: MonthlyDaySchedule) : ScheduleGroup() {
 
         override val customTimeKey get() = monthlyDaySchedule.customTimeKey
 
@@ -101,7 +101,7 @@ sealed class ScheduleGroup {
         override val schedules get() = listOf(monthlyDaySchedule)
     }
 
-    class MonthlyWeek(val monthlyWeekSchedule: MonthlyWeekSchedule) : ScheduleGroup() {
+    class MonthlyWeek(private val monthlyWeekSchedule: MonthlyWeekSchedule) : ScheduleGroup() {
 
         override val customTimeKey get() = monthlyWeekSchedule.customTimeKey
 

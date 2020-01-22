@@ -190,6 +190,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
             findItem(R.id.instance_menu_delete_task).isVisible = data?.taskCurrent == true
             findItem(R.id.instance_menu_select_all).isVisible = selectAllVisible
             findItem(R.id.instance_menu_add_task).isVisible = data?.run { isRootInstance && instanceDateTime.timeStamp > TimeStamp.now } == true
+            findItem(R.id.instanceMenuCopyTask).isVisible = data?.taskCurrent == true
         }
     }
 

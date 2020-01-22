@@ -11,7 +11,8 @@ import com.jakewharton.rxrelay2.PublishRelay
 
 class TreeViewAdapter<T : RecyclerView.ViewHolder>(
         val treeModelAdapter: TreeModelAdapter<T>,
-        @param:LayoutRes @field:LayoutRes private val paddingLayout: Int?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+        @param:LayoutRes @field:LayoutRes private val paddingLayout: Int?
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
 

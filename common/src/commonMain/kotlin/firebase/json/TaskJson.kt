@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
-class TaskJson @JvmOverloads constructor(
+data class TaskJson @JvmOverloads constructor(
         var name: String = "",
         val startTime: Long = 0,
         var endTime: Long? = null,
@@ -19,10 +19,12 @@ class TaskJson @JvmOverloads constructor(
     @Serializable
     data class Image(
             val imageUuid: String = "",
-            val uploaderUuid: String? = null)
+            val uploaderUuid: String? = null
+    )
 
     @Serializable
     data class EndData(
             val time: Long = 0,
-            val deleteInstances: Boolean = false)
+            val deleteInstances: Boolean = false
+    )
 }

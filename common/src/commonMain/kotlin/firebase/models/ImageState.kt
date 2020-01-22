@@ -4,10 +4,6 @@ import com.krystianwsul.common.utils.Serializable
 
 sealed class ImageState : Serializable {
 
-    companion object {
-
-    }
-
     abstract val uuid: String?
 
     data class Local(override val uuid: String) : ImageState() {

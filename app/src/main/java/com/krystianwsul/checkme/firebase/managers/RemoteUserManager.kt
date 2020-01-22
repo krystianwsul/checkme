@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.managers
+package com.krystianwsul.checkme.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.MyCrashlytics
@@ -16,7 +16,8 @@ class RemoteUserManager(
         private val domainFactory: DomainFactory,
         deviceInfo: DeviceInfo,
         private val uuid: String,
-        dataSnapshot: DataSnapshot) {
+        dataSnapshot: DataSnapshot
+) {
 
     var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemoteUserManager.isSaved = $value") }
 

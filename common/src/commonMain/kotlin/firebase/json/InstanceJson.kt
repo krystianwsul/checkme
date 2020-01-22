@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
 @Serializable
-class InstanceJson @JvmOverloads constructor(
+data class InstanceJson @JvmOverloads constructor(
         var done: Long? = null,
         var instanceDate: String? = null,
         var instanceYear: Int? = null,

@@ -7,7 +7,6 @@ import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
-import kotlinx.serialization.json.Json
 
 class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
         create: Boolean,
@@ -126,7 +125,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
             if (taskJson == TaskJson(oldestVisible = taskJson.oldestVisible)) {
                 throw OnlyVisibilityPresentException("taskKey: $key")
             } else {
-                val malformedTaskException = MalformedTaskException("taskKey: $key, taskJson: " + Json.stringify(TaskJson.serializer(), taskJson))
+                val malformedTaskException = MalformedTaskException("taskKey: $key, taskJson: $taskJson")
                 ErrorLogger.instance.logException(malformedTaskException)
             }
         }

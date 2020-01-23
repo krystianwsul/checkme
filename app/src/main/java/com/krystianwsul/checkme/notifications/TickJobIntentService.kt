@@ -18,7 +18,11 @@ class TickJobIntentService : JobIntentService() {
         private fun start(intent: Intent, source: String) {
             NotificationWrapper.instance.notifyTemporary("TickJobIntentService.start $source")
 
-            enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
+            val silent = intent.getBooleanExtra(SILENT_KEY, false)
+
+            tick(silent, source) // todo if this works, clean up calls
+
+            //enqueueWork(MyApplication.instance, TickJobIntentService::class.java, 1, intent)
         }
 
         const val MAX_NOTIFICATIONS = 3

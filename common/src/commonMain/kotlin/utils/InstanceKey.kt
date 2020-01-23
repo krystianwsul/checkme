@@ -14,6 +14,4 @@ data class InstanceKey(
             scheduleDate: Date,
             scheduleTimePair: TimePair
     ) : this(taskKey, ScheduleKey(scheduleDate, scheduleTimePair))
-
-    override fun toString() = super.toString() + ": " + taskKey + ", " + scheduleKey
 }

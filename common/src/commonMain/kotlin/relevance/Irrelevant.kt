@@ -55,7 +55,9 @@ object Irrelevant {
 
         val irrelevantTasks = tasks - relevantTasks
 
-        check(irrelevantTasks.none { it.isVisible(now, true) })
+        val visibleIrrelevantTasks = irrelevantTasks.filter { it.isVisible(now, true) }
+        if (visibleIrrelevantTasks.isNotEmpty())
+            throw VisibleIrrelevantTasksException(visibleIrrelevantTasks.joinToString(", ") { it.taskKey.toString() })
 
         val relevantTaskHierarchyRelevances = taskHierarchyRelevances.values.filter { it.relevant }
         val relevantTaskHierarchies = relevantTaskHierarchyRelevances.map { it.taskHierarchy }
@@ -69,7 +71,9 @@ object Irrelevant {
         val relevantExistingInstances = relevantInstances.filter { it.exists() }
         val irrelevantExistingInstances = existingInstances - relevantExistingInstances
 
-        check(irrelevantExistingInstances.none { it.isVisible(now, true) })
+        val visibleIrrelevantExistingInstances = irrelevantExistingInstances.filter { it.isVisible(now, true) }
+        if (visibleIrrelevantExistingInstances.isNotEmpty())
+            throw VisibleIrrelevantExistingInstancesException(visibleIrrelevantExistingInstances.joinToString(", ") { it.instanceKey.toString() })
 
         irrelevantExistingInstances.forEach { it.delete() }
         irrelevantTasks.forEach { it.delete() }
@@ -115,4 +119,7 @@ object Irrelevant {
 
         return relevantInstances
     }
+
+    private class VisibleIrrelevantTasksException(message: String) : Exception(message)
+    private class VisibleIrrelevantExistingInstancesException(message: String) : Exception(message)
 }

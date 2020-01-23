@@ -2265,7 +2265,8 @@ class DomainFactory(
             newParentTask: Task,
             joinTasks: List<Task>,
             now: ExactTimeStamp,
-            removeInstanceKeys: List<InstanceKey>) {
+            removeInstanceKeys: List<InstanceKey>
+    ) {
         check(newParentTask.current(now))
         check(joinTasks.size > 1)
 

@@ -36,10 +36,15 @@ class RemoteProjectFactory(
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .map {
-                RemoteSharedProject(it).apply {
-                    fixNotificationShown(domainFactory.localFactory, now)
-                    updateUserInfo(domainFactory.deviceDbInfo)
+            .mapNotNull {
+                try {
+                    RemoteSharedProject(it).apply {
+                        fixNotificationShown(domainFactory.localFactory, now)
+                        updateUserInfo(domainFactory.deviceDbInfo)
+                    }
+                } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+                    // hack for oldestVisible being set on records removed by cloud function
+                    null
                 }
             }
             .associateBy { it.id }
@@ -103,7 +108,7 @@ class RemoteProjectFactory(
                         fixNotificationShown(domainFactory.localFactory, now)
                         updateUserInfo(domainFactory.deviceDbInfo)
                     }
-                } catch (malformedTaskException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+                } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
                     // hack for oldestVisible being set on records removed by cloud function
                 }
             }
@@ -121,7 +126,7 @@ class RemoteProjectFactory(
             val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
 
             remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord).apply { fixNotificationShown(domainFactory.localFactory, now) }
-        } catch (malformedTaskException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+        } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
             // hack for oldestVisible being set on records removed by cloud function
 
             /*

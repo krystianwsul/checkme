@@ -10,7 +10,8 @@ import com.krystianwsul.common.firebase.models.RemoteMyUser
 class RemoteUserFactory(
         domainFactory: DomainFactory,
         userSnapshot: DataSnapshot,
-        deviceInfo: DeviceInfo) {
+        deviceInfo: DeviceInfo
+) {
 
     private val remoteUserManager = RemoteUserManager(domainFactory, deviceInfo, domainFactory.uuid, userSnapshot)
 

@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.domainmodel
 
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import androidx.core.content.pm.ShortcutManagerCompat
 import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.google.firebase.database.DataSnapshot
@@ -54,10 +53,6 @@ class DomainFactory(
 
         val instanceRelay = BehaviorRelay.createDefault(NullableWrapper<DomainFactory>())
 
-        init {
-            instanceRelay.subscribe { Log.e("asdf", "isSaved domain relay: ${it.value}") }
-        }
-
         val nullableInstance get() = instanceRelay.value!!.value
 
         val instance get() = nullableInstance!!
@@ -68,7 +63,6 @@ class DomainFactory(
 
         val isSaved = instanceRelay.switchMap { it.value?.isSaved ?: Observable.just(false) }
                 .distinctUntilChanged()
-                .doOnNext { Log.e("asdf", "DomainFactory.isSaved: $it") }
                 .replay(1)!!
                 .apply { connect() }
 
@@ -164,11 +158,9 @@ class DomainFactory(
                     }
                 }
 
-    val isSaved = BehaviorRelay.createDefault(false) // todo actually update this
+    val isSaved = BehaviorRelay.createDefault(false)
 
     init {
-        isSaved.subscribe { Log.e("asdf", "DomainFactory instance.isSaved: $it") }
-
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
         val start = ExactTimeStamp.now
@@ -1223,7 +1215,8 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null): TaskKey {
+            copyTaskKey: TaskKey? = null
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1241,6 +1234,8 @@ class DomainFactory(
         copyTaskKey?.let { copyTask(now, task, it) }
 
         updateNotifications(now)
+
+        task.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1316,7 +1311,8 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>): TaskKey {
+            removeInstanceKeys: List<InstanceKey>
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1341,6 +1337,8 @@ class DomainFactory(
 
         updateNotifications(now)
 
+        newParentTask.updateOldestVisible(uuid, now)
+
         save(dataId, source)
 
         notifyCloud(newParentTask.project)
@@ -1360,7 +1358,8 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null): TaskKey {
+            copyTaskKey: TaskKey? = null
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1377,6 +1376,8 @@ class DomainFactory(
         copyTaskKey?.let { copyTask(now, task, it) }
 
         updateNotifications(now)
+
+        task.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1398,7 +1399,8 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>): TaskKey {
+            removeInstanceKeys: List<InstanceKey>
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1423,6 +1425,8 @@ class DomainFactory(
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
+
+        newParentTask.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1489,7 +1493,8 @@ class DomainFactory(
             name: String,
             note: String?,
             imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null): TaskKey {
+            copyTaskKey: TaskKey? = null
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1505,6 +1510,8 @@ class DomainFactory(
         val childTask = createChildTask(now, parentTask, name, note, imageUuid?.let { TaskJson.Image(it, uuid) }, copyTaskKey)
 
         updateNotifications(now)
+
+        childTask.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1543,7 +1550,8 @@ class DomainFactory(
             joinTaskKeys: List<TaskKey>,
             note: String?,
             imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>): TaskKey {
+            removeInstanceKeys: List<InstanceKey>
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1566,6 +1574,8 @@ class DomainFactory(
         joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
+
+        childTask.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 

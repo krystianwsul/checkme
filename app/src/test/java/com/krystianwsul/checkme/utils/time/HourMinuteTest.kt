@@ -1,6 +1,10 @@
 package com.krystianwsul.checkme.utils.time
 
-import junit.framework.Assert
+import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.time.HourMilli
+import com.krystianwsul.common.time.HourMinute
+import org.junit.Assert
 
 import org.junit.Test
 

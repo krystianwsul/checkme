@@ -2,11 +2,11 @@ package com.krystianwsul.checkme.loaders
 
 import android.text.TextUtils
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
-import junit.framework.Assert
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner

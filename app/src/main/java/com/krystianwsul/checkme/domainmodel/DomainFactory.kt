@@ -602,7 +602,7 @@ class DomainFactory(
 
         val isRootTask = if (task.current(now)) task.isRootTask(now) else null
 
-        val instances = task.existingInstances.values + task.getInstances(null, now, now)
+        val instances = (task.existingInstances.values + task.getInstances(null, now, now)).toSet()
 
         val hierarchyExactTimeStamp = task.getHierarchyExactTimeStamp(now)
 

@@ -36,18 +36,12 @@ class RemoteProjectFactory(
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .mapNotNull {
-                try {
-                    RemoteSharedProject(it).apply {
-                        fixNotificationShown(domainFactory.localFactory, now)
-                        updateUserInfo(domainFactory.deviceDbInfo)
-                    }
-                } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
-                    // hack for oldestVisible being set on records removed by cloud function
-                    null
+            .associate {
+                it.id to RemoteSharedProject(it).apply {
+                    fixNotificationShown(domainFactory.localFactory, now)
+                    updateUserInfo(domainFactory.deviceDbInfo)
                 }
             }
-            .associateBy { it.id }
             .toMutableMap()
 
     val remoteProjects

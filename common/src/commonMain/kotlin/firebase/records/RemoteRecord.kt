@@ -19,7 +19,7 @@ abstract class RemoteRecord(create: Boolean) {
 
     protected abstract fun deleteFromParent()
 
-    fun getValues(values: MutableMap<String, Any?>): Boolean {
+    fun getValues(values: MutableMap<String, Any?>) {
         if (shouldDelete) {
             check(update != null)
 
@@ -27,8 +27,6 @@ abstract class RemoteRecord(create: Boolean) {
             shouldDelete = false
 
             deleteFromParent()
-
-            return true
         } else {
             if (update == null) {
                 values[key] = createObject
@@ -43,8 +41,6 @@ abstract class RemoteRecord(create: Boolean) {
 
                 children.forEach { it.getValues(values) }
             }
-
-            return false
         }
     }
 

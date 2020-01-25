@@ -20,15 +20,13 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson>(
 
     abstract val remoteCustomTimeRecords: Map<out T, RemoteCustomTimeRecord<T, *>>
 
-    val remoteTaskRecords by lazy {
-        projectJson.tasks
-                .mapValues { (id, taskJson) ->
-                    check(id.isNotEmpty())
+    val remoteTaskRecords = projectJson.tasks
+            .mapValues { (id, taskJson) ->
+                check(id.isNotEmpty())
 
-                    RemoteTaskRecord(id, this, taskJson)
-                }
-                .toMutableMap()
-    }
+                RemoteTaskRecord(id, this, taskJson)
+            }
+            .toMutableMap()
 
     val remoteTaskHierarchyRecords by lazy {
         projectJson.taskHierarchies

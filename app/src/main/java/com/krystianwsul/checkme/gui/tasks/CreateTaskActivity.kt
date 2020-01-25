@@ -71,6 +71,7 @@ class CreateTaskActivity : NavBarActivity() {
         private const val KEY_COPY = "copy"
 
         private const val KEY_HINT = "hint"
+        private const val KEY_NAME_HINT = "nameHint"
         private const val KEY_REMOVE_INSTANCE_KEYS = "removeInstanceKeys"
         private const val KEY_PARENT_PROJECT = "parentProject"
         private const val KEY_PARENT_TASK = "parentTask"
@@ -89,15 +90,21 @@ class CreateTaskActivity : NavBarActivity() {
 
         private const val REQUEST_CREATE_PARENT = 982
 
-        fun getCreateIntent(hint: Hint? = null, parentScheduleState: ParentScheduleState? = null) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+        fun getCreateIntent(
+                hint: Hint? = null,
+                parentScheduleState: ParentScheduleState? = null,
+                nameHint: String? = null
+        ) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             hint?.let { putExtra(KEY_HINT, hint) }
             parentScheduleState?.let { putExtra(KEY_INITIAL_STATE, parentScheduleState) }
+            putExtra(KEY_NAME_HINT, nameHint)
         }
 
         fun getJoinIntent(
                 joinTaskKeys: List<TaskKey>,
                 hint: Hint? = null,
-                removeInstanceKeys: List<InstanceKey> = listOf()) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
+                removeInstanceKeys: List<InstanceKey> = listOf()
+        ) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             check(joinTaskKeys.size > 1)
 
             putParcelableArrayListExtra(TASK_KEYS_KEY, ArrayList(joinTaskKeys))
@@ -105,7 +112,10 @@ class CreateTaskActivity : NavBarActivity() {
             putParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS, ArrayList(removeInstanceKeys))
         }
 
-        fun getEditIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
+        fun getEditIntent(taskKey: TaskKey) = Intent(
+                MyApplication.instance,
+                CreateTaskActivity::class.java
+        ).apply { putExtra(TASK_KEY_KEY, taskKey as Parcelable) }
 
         fun getCopyIntent(taskKey: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             putExtra(TASK_KEY_KEY, taskKey as Parcelable)
@@ -160,7 +170,19 @@ class CreateTaskActivity : NavBarActivity() {
             scheduleHolder.scheduleText.text = null
         }
 
-        override fun onNewParent() = startActivityForResult(getCreateIntent(hint, ParentScheduleState(stateData.state.parentKey, stateData.state.schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList())), REQUEST_CREATE_PARENT)
+        override fun onNewParent(nameHint: String?) = startActivityForResult(
+                getCreateIntent(
+                        hint,
+                        stateData.state.run {
+                            ParentScheduleState(
+                                    parentKey,
+                                    schedules.map { ScheduleEntry(it.scheduleDataWrapper) }.toMutableList()
+                            )
+                        },
+                        nameHint
+                ),
+                REQUEST_CREATE_PARENT
+        )
     }
 
     private fun setupParent(view: View) {
@@ -526,6 +548,8 @@ class CreateTaskActivity : NavBarActivity() {
                     }
                     else -> null
                 }
+
+                nameHint = getStringExtra(KEY_NAME_HINT)
             }
 
             removeInstanceKeys = getParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS) ?: listOf()
@@ -596,11 +620,11 @@ class CreateTaskActivity : NavBarActivity() {
                         is ScheduleDialogFragment.Result.Delete -> {
                             checkNotNull(result.position)
                             check(result.position >= createTaskAdapter.elementsBeforeSchedules())
-                                checkNotNull(data)
+                            checkNotNull(data)
 
-                                stateData.state
-                                        .schedules
-                                        .removeAt(result.position - createTaskAdapter.elementsBeforeSchedules())
+                            stateData.state
+                                    .schedules
+                                    .removeAt(result.position - createTaskAdapter.elementsBeforeSchedules())
 
                             createTaskAdapter.notifyItemRemoved(result.position)
                         }
@@ -979,7 +1003,10 @@ class CreateTaskActivity : NavBarActivity() {
 
         class Schedule(val date: Date, val timePair: TimePair) : Hint() {
 
-            constructor(date: Date, pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date)) : this(pair.first, TimePair(pair.second))
+            constructor(
+                    date: Date,
+                    pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date)
+            ) : this(pair.first, TimePair(pair.second))
 
             constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
         }

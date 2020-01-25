@@ -1984,6 +1984,8 @@ class DomainFactory(
 
         val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteUserFactory.remoteUser)
 
+        remoteFriendFactory.updateProjects(remoteProject.id, friends, setOf())
+
         save(dataId, source)
 
         notifyCloud(remoteProject)

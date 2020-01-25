@@ -3,7 +3,7 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
 
 
-open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) {
+open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord) { // todo delegate
 
     val id by lazy { remoteRootUserRecord.id }
 
@@ -15,9 +15,9 @@ open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord
 
     open val photoUrl get() = remoteRootUserRecord.photoUrl
 
-    fun removeFriend(friendId: String) {
-        check(friendId.isNotEmpty())
+    fun removeFriend(friendId: String) = remoteRootUserRecord.removeFriendOf(friendId)
 
-        remoteRootUserRecord.removeFriendOf(friendId)
-    }
+    fun addProject(projectId: String) = remoteRootUserRecord.addProject(projectId)
+
+    fun removeProject(projectId: String) = remoteRootUserRecord.removeProject(projectId)
 }

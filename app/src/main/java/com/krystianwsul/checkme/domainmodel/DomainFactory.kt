@@ -126,8 +126,7 @@ class DomainFactory(
 
     val localFactory: LocalFactory
 
-    var remoteProjectFactory: RemoteProjectFactory
-        private set
+    val remoteProjectFactory: RemoteProjectFactory
 
     private val remoteUserFactory: RemoteUserFactory
 
@@ -224,8 +223,9 @@ class DomainFactory(
         val localChanges = localFactory.save(source)
         val remoteChanges = remoteProjectFactory.save()
         val userChanges = remoteUserFactory.save()
+        val friendChanges = remoteFriendFactory.save()
 
-        if (localChanges || remoteChanges || userChanges) {
+        if (localChanges || remoteChanges || userChanges || friendChanges) {
             domainChanged.accept(dataIds)
 
             updateIsSaved()
@@ -1939,7 +1939,14 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateProject(dataId: Int, source: SaveService.Source, projectId: String, name: String, addedFriends: Set<String>, removedFriends: Set<String>) {
+    fun updateProject(
+            dataId: Int,
+            source: SaveService.Source,
+            projectId: String,
+            name: String,
+            addedFriends: Set<String>,
+            removedFriends: Set<String>
+    ) {
         MyCrashlytics.log("DomainFactory.updateProject")
 
         check(projectId.isNotEmpty())
@@ -1951,6 +1958,8 @@ class DomainFactory(
 
         remoteProject.name = name
         remoteProject.updateRecordOf(addedFriends.map { remoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
+
+        remoteFriendFactory.updateProjects(projectId, addedFriends, removedFriends)
 
         updateNotifications(now)
 

@@ -185,13 +185,13 @@ class DomainFactory(
         remoteUserFactory.remoteUser.setToken(deviceInfo.token)
 
         val sharedProjectIds = sharedSnapshot.children.map { it.key!! } // don't use remoteProjectFactory because of OnlyVisibilityPresentException
-        val existingProjectIds = remoteUserFactory.remoteUser.projectIds
+        val existingProjectIds = remoteUserFactory.remoteUser.projectIds // todo change to checking if ids exist in remoteProjectsList, and remove deleted projects
 
         val addProjects = sharedProjectIds - existingProjectIds
         val removeProjects = existingProjectIds - sharedProjectIds
 
         addProjects.forEach(remoteUserFactory.remoteUser::addProject)
-        removeProjects.forEach(remoteUserFactory.remoteUser::removeProject)
+        removeProjects.forEach(remoteUserFactory.remoteUser::removeProject) // todo remove after a while
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 

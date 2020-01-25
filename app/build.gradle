@@ -60,7 +60,7 @@ android {
 
 ext {
     powermockVersion = '2.0.4'
-    lifecycleVersion = '2.2.0-rc03'
+    lifecycleVersion = '2.2.0'
     glideVersion = '4.11.0'
 }
 

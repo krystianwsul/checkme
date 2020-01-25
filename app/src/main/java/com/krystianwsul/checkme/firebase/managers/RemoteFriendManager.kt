@@ -7,7 +7,6 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
-import java.util.*
 
 class RemoteFriendManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
@@ -16,7 +15,7 @@ class RemoteFriendManager(private val domainFactory: DomainFactory, children: It
     val remoteRootUserRecords = children.map { RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!) }.associateBy { it.id }
 
     fun save() {
-        val values = HashMap<String, Any?>()
+        val values = mutableMapOf<String, Any?>()
 
         remoteRootUserRecords.values.forEach { it.getValues(values) }
 

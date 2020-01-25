@@ -10,7 +10,7 @@ import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RemoteMyUserRecord
 import java.util.*
-import kotlin.properties.Delegates
+import kotlin.properties.Delegates.observable
 
 class RemoteUserManager(
         private val domainFactory: DomainFactory,
@@ -19,10 +19,14 @@ class RemoteUserManager(
         dataSnapshot: DataSnapshot
 ) {
 
-    var isSaved by Delegates.observable(false) { _, _, value -> MyCrashlytics.log("RemoteUserManager.isSaved = $value") }
+    var isSaved by observable(false) { _, _, value -> MyCrashlytics.log("RemoteUserManager.isSaved = $value") }
 
     var remoteUserRecord = if (dataSnapshot.value == null) {
-        val userWrapper = UserWrapper(mutableMapOf(), UserJson(deviceInfo.email, deviceInfo.name, mutableMapOf(uuid to deviceInfo.token)))
+        val userWrapper = UserWrapper(
+                mutableMapOf(),
+                deviceInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) }
+        )
+
         RemoteMyUserRecord(true, userWrapper, uuid)
     } else {
         dataSnapshot.toRecord()

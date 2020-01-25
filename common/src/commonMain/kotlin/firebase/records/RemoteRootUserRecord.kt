@@ -25,6 +25,11 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
     open val photoUrl get() = userJson.photoUrl
 
+    val projectIds
+        get() = createObject.projects
+                .keys
+                .toSet()
+
     fun removeFriendOf(friendId: String) {
         check(friendId.isNotEmpty())
 

@@ -184,6 +184,15 @@ class DomainFactory(
         remoteUserFactory = RemoteUserFactory(this, userSnapshot, deviceInfo)
         remoteUserFactory.remoteUser.setToken(deviceInfo.token)
 
+        val sharedProjectIds = sharedSnapshot.children.map { it.key!! } // don't use remoteProjectFactory because of OnlyVisibilityPresentException
+        val existingProjectIds = remoteUserFactory.remoteUser.projectIds
+
+        val addProjects = sharedProjectIds - existingProjectIds
+        val removeProjects = existingProjectIds - sharedProjectIds
+
+        addProjects.forEach(remoteUserFactory.remoteUser::addProject)
+        removeProjects.forEach(remoteUserFactory.remoteUser::removeProject)
+
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
         tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.init", if (firstRun) RunType.APP_START else RunType.SIGN_IN)

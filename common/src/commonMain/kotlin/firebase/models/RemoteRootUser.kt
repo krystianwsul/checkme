@@ -15,6 +15,8 @@ open class RemoteRootUser(private val remoteRootUserRecord: RemoteRootUserRecord
 
     open val photoUrl get() = remoteRootUserRecord.photoUrl
 
+    val projectIds get() = remoteRootUserRecord.projectIds
+
     fun removeFriend(friendId: String) = remoteRootUserRecord.removeFriendOf(friendId)
 
     fun addProject(projectId: String) = remoteRootUserRecord.addProject(projectId)

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.gui
 
 import android.app.DatePickerDialog
-import android.app.Dialog
 import android.os.Bundle
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -30,20 +29,17 @@ class DatePickerDialogFragment : AbstractDialogFragment() {
         listener(Date(year, month + 1, dayOfMonth))
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val date = arguments!!.getParcelable<Date>(DATE_KEY)!!
-        val min = arguments!!.getParcelable<Date>(KEY_MIN)
-
-        val datePickerDialog = DatePickerDialog(
+    override fun onCreateDialog(savedInstanceState: Bundle?) = arguments!!.getParcelable<Date>(DATE_KEY)!!.let { date ->
+        DatePickerDialog(
                 requireActivity(),
                 mOnDateSetListener,
                 date.year,
                 date.month - 1,
                 date.day
-        )
-        datePickerDialog.datePicker.minDate = min?.let { TimeStamp(it, HourMinute.now).long }
-                ?: ExactTimeStamp.now.long
-
-        return datePickerDialog
+        ).apply {
+            datePicker.minDate = arguments!!.getParcelable<Date>(KEY_MIN)
+                    ?.let { TimeStamp(it, HourMinute.now).long }
+                    ?: ExactTimeStamp.now.long
+        }
     }
 }

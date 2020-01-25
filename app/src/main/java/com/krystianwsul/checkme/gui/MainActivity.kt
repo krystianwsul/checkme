@@ -487,6 +487,18 @@ class MainActivity :
         }
 
         (supportFragmentManager.findFragmentByTag(TAG_DELETE_INSTANCES) as? RemoveInstancesDialogFragment)?.listener = deleteInstancesListener
+
+        /* todo move into progress subclass
+        DomainFactory.isSaved
+                .subscribe {
+                    val list = listOf(Pair(mainDaysProgress, HideType.INVISIBLE))
+                    if (it)
+                        animateVisibility2(list, listOf())
+                    else
+                        animateVisibility2(listOf(), list)
+                }
+                .addTo(createDisposable)
+                */
     }
 
     private sealed class PagerScrollState {
@@ -611,8 +623,10 @@ class MainActivity :
 
         if (tab == Tab.INSTANCES) {
             showViews.add(mainDaysLayout)
+            hideViews += mainProgress
             ViewCompat.setElevation(mainActivityAppBarLayout, INSTANCES_ELEVATION * density)
         } else {
+            showViews += mainProgress
             hideViews.add(mainDaysLayout)
             ViewCompat.setElevation(mainActivityAppBarLayout, NORMAL_ELEVATION * density)
             calendarOpen = false

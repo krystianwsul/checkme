@@ -9,33 +9,45 @@
     android:orientation="vertical"
     android:fitsSystemWindows="true">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/findFriendToolbar"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="6dp"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        tools:ignore="UnusedAttribute">
+        android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/findFriendEmail"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/findFriendToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="6dp"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            tools:ignore="UnusedAttribute">
+
+            <EditText
+                android:id="@+id/findFriendEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/textPrimaryWhite"
+                android:hint="@string/email_hint"
+                android:textColorHint="@color/textDisabledWhite"
+                android:imeOptions="actionSearch"
+                tools:ignore="Deprecated"
+                android:importantForAutofill="no">
+
+                <requestFocus />
+
+            </EditText>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <com.krystianwsul.checkme.gui.ToolbarProgress
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:inputType="textEmailAddress"
-            android:textColor="@color/textPrimaryWhite"
-            android:hint="@string/email_hint"
-            android:textColorHint="@color/textDisabledWhite"
-            android:imeOptions="actionSearch"
-            tools:ignore="Deprecated"
-            android:importantForAutofill="no">
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="-1dp" />
 
-            <requestFocus/>
-
-        </EditText>
-
-    </androidx.appcompat.widget.Toolbar>
+    </FrameLayout>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/findFriendCoordinator"

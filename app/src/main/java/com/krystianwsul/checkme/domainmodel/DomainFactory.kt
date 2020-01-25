@@ -35,6 +35,7 @@ import com.krystianwsul.common.firebase.models.*
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.utils.*
+import io.reactivex.Observable
 import java.util.*
 
 @Suppress("LeakingThis")
@@ -54,11 +55,16 @@ class DomainFactory(
 
         val nullableInstance get() = instanceRelay.value!!.value
 
-        val instance get() = instanceRelay.value!!.value!!
+        val instance get() = nullableInstance!!
 
         private val firebaseListeners = mutableListOf<Pair<(DomainFactory) -> Unit, String>>()
 
         var firstRun = false
+
+        val isSaved = instanceRelay.switchMap { it.value?.isSaved ?: Observable.just(false) }
+                .distinctUntilChanged()
+                .replay(1)!!
+                .apply { connect() }
 
         @Synchronized // still running?
         fun setFirebaseTickListener(source: SaveService.Source, newTickData: TickData) {
@@ -152,6 +158,8 @@ class DomainFactory(
                     }
                 }
 
+    val isSaved = BehaviorRelay.createDefault(false)
+
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
@@ -199,6 +207,8 @@ class DomainFactory(
 
     val uuid get() = localFactory.uuid
 
+    private fun updateIsSaved() = isSaved.accept(remoteProjectFactory.eitherSaved || remoteUserFactory.isSaved || remoteFriendFactory.isSaved)
+
     fun save(dataId: Int, source: SaveService.Source) = save(setOf(dataId), source)
 
     fun save(dataIds: Set<Int>, source: SaveService.Source) {
@@ -215,8 +225,11 @@ class DomainFactory(
         val remoteChanges = remoteProjectFactory.save()
         val userChanges = remoteUserFactory.save()
 
-        if (localChanges || remoteChanges || userChanges)
+        if (localChanges || remoteChanges || userChanges) {
             domainChanged.accept(dataIds)
+
+            updateIsSaved()
+        }
     }
 
     private fun updateShortcuts() {
@@ -304,6 +317,8 @@ class DomainFactory(
 
         if (remoteProjectFactory.eitherSaved || remoteFriendFactory.isSaved || remoteUserFactory.isSaved)
             return
+
+        updateIsSaved()
 
         check(aggregateData == null)
 
@@ -1200,7 +1215,8 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null): TaskKey {
+            copyTaskKey: TaskKey? = null
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1218,6 +1234,8 @@ class DomainFactory(
         copyTaskKey?.let { copyTask(now, task, it) }
 
         updateNotifications(now)
+
+        task.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1293,7 +1311,8 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>): TaskKey {
+            removeInstanceKeys: List<InstanceKey>
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createScheduleJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1318,6 +1337,8 @@ class DomainFactory(
 
         updateNotifications(now)
 
+        newParentTask.updateOldestVisible(uuid, now)
+
         save(dataId, source)
 
         notifyCloud(newParentTask.project)
@@ -1337,7 +1358,8 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null): TaskKey {
+            copyTaskKey: TaskKey? = null
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1354,6 +1376,8 @@ class DomainFactory(
         copyTaskKey?.let { copyTask(now, task, it) }
 
         updateNotifications(now)
+
+        task.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1375,7 +1399,8 @@ class DomainFactory(
             note: String?,
             projectId: String?,
             imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>): TaskKey {
+            removeInstanceKeys: List<InstanceKey>
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1400,6 +1425,8 @@ class DomainFactory(
         joinTasks(newParentTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
+
+        newParentTask.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1466,7 +1493,8 @@ class DomainFactory(
             name: String,
             note: String?,
             imagePath: Pair<String, Uri>?,
-            copyTaskKey: TaskKey? = null): TaskKey {
+            copyTaskKey: TaskKey? = null
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1482,6 +1510,8 @@ class DomainFactory(
         val childTask = createChildTask(now, parentTask, name, note, imageUuid?.let { TaskJson.Image(it, uuid) }, copyTaskKey)
 
         updateNotifications(now)
+
+        childTask.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 
@@ -1520,7 +1550,8 @@ class DomainFactory(
             joinTaskKeys: List<TaskKey>,
             note: String?,
             imagePath: Pair<String, Uri>?,
-            removeInstanceKeys: List<InstanceKey>): TaskKey {
+            removeInstanceKeys: List<InstanceKey>
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.createJoinChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1543,6 +1574,8 @@ class DomainFactory(
         joinTasks(childTask, joinTasks, now, removeInstanceKeys)
 
         updateNotifications(now)
+
+        childTask.updateOldestVisible(uuid, now)
 
         save(dataId, source)
 

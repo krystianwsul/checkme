@@ -265,7 +265,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             note,
                                             projectId,
                                             writeImagePath?.value,
-                                            taskKey!!).also { createdTaskKey = it }
+                                            taskKey!!
+                                    ).also { createdTaskKey = it }
                                 }
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
@@ -280,7 +281,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             scheduleDatas,
                                             note,
                                             projectId,
-                                            writeImagePath)
+                                            writeImagePath
+                                    )
                                 }
                                 taskKeys != null -> {
                                     check(data!!.taskData == null)
@@ -296,7 +298,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             note,
                                             projectId,
                                             writeImagePath?.value,
-                                            removeInstanceKeys).also { createdTaskKey = it }
+                                            removeInstanceKeys
+                                    ).also { createdTaskKey = it }
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
@@ -309,7 +312,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             scheduleDatas,
                                             note,
                                             projectId,
-                                            writeImagePath?.value).also { createdTaskKey = it }
+                                            writeImagePath?.value
+                                    ).also { createdTaskKey = it }
                                 }
                             }
                         }
@@ -334,7 +338,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             name,
                                             note,
                                             writeImagePath?.value,
-                                            taskKey!!).also { createdTaskKey = it }
+                                            taskKey!!
+                                    ).also { createdTaskKey = it }
                                 }
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
@@ -349,7 +354,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             name,
                                             parentTaskKey,
                                             note,
-                                            writeImagePath)
+                                            writeImagePath
+                                    )
                                 }
                                 taskKeys != null -> {
                                     check(data!!.taskData == null)
@@ -363,7 +369,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             taskKeys!!,
                                             note,
                                             writeImagePath?.value,
-                                            removeInstanceKeys).also { createdTaskKey = it }
+                                            removeInstanceKeys
+                                    ).also { createdTaskKey = it }
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
@@ -375,7 +382,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             parentTaskKey,
                                             name,
                                             note,
-                                            writeImagePath?.value).also { createdTaskKey = it }
+                                            writeImagePath?.value
+                                    ).also { createdTaskKey = it }
                                 }
                             }
                         }
@@ -395,7 +403,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             note,
                                             projectId,
                                             writeImagePath?.value,
-                                            taskKey!!).also { createdTaskKey = it }
+                                            taskKey!!
+                                    ).also { createdTaskKey = it }
                                 }
                                 taskKey != null -> {
                                     checkNotNull(data!!.taskData)
@@ -409,7 +418,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             name,
                                             note,
                                             projectId,
-                                            writeImagePath)
+                                            writeImagePath
+                                    )
                                 }
                                 taskKeys != null -> {
                                     check(data!!.taskData == null)
@@ -422,7 +432,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             note,
                                             projectId,
                                             writeImagePath?.value,
-                                            removeInstanceKeys).also { createdTaskKey = it }
+                                            removeInstanceKeys
+                                    ).also { createdTaskKey = it }
                                 }
                                 else -> {
                                     check(data!!.taskData == null)
@@ -434,7 +445,8 @@ class CreateTaskActivity : NavBarActivity() {
                                             name,
                                             note,
                                             projectId,
-                                            writeImagePath?.value).also { createdTaskKey = it }
+                                            writeImagePath?.value
+                                    ).also { createdTaskKey = it }
                                 }
                             }
                         }

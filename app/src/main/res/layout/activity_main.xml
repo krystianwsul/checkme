@@ -17,7 +17,6 @@
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
             android:stateListAnimator="@null"
-            android:theme="@style/AppTheme.AppBarOverlay"
             tools:targetApi="lollipop">
 
             <FrameLayout
@@ -57,6 +56,13 @@
 
                 </androidx.appcompat.widget.Toolbar>
 
+                <com.krystianwsul.checkme.gui.ToolbarProgress
+                    android:id="@+id/mainProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="-1dp" />
+
             </FrameLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -83,20 +89,33 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <com.google.android.material.tabs.TabLayout
-                        android:id="@+id/mainTabLayout"
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/colorPrimary"
-                        android:elevation="6dp"
-                        android:theme="@style/AppTheme.AppBarOverlay"
-                        app:tabGravity="center"
-                        app:tabMode="scrollable"
-                        tools:ignore="UnusedAttribute"
-                        app:tabTextColor="@color/textSecondaryWhite"
-                        app:tabSelectedTextColor="@color/textPrimaryWhite"
-                        app:tabRippleColor="@color/textPrimaryWhite"
-                        app:tabIndicatorColor="@color/secondaryColor" />
+                        android:layout_height="wrap_content">
+
+                        <com.google.android.material.tabs.TabLayout
+                            android:id="@+id/mainTabLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/colorPrimary"
+                            android:elevation="6dp"
+                            android:theme="@style/AppTheme.AppBarOverlay"
+                            app:tabGravity="center"
+                            app:tabMode="scrollable"
+                            tools:ignore="UnusedAttribute"
+                            app:tabTextColor="@color/textSecondaryWhite"
+                            app:tabSelectedTextColor="@color/textPrimaryWhite"
+                            app:tabRippleColor="@color/textPrimaryWhite"
+                            app:tabIndicatorColor="@color/secondaryColor" />
+
+                        <com.krystianwsul.checkme.gui.ToolbarProgress
+                            android:id="@+id/mainDaysProgress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom"
+                            android:layout_marginBottom="-1dp" />
+
+                    </FrameLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/mainDaysPager"

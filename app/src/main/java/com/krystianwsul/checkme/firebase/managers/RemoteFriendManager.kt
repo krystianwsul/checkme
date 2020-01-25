@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase.managers
 
 import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
@@ -18,6 +19,8 @@ class RemoteFriendManager(private val domainFactory: DomainFactory, children: It
         val values = HashMap<String, Any?>()
 
         remoteRootUserRecords.values.forEach { it.getValues(values) }
+
+        MyCrashlytics.log("RemoteFriendManager.save values: $values")
 
         if (values.isNotEmpty()) {
             check(!isSaved)

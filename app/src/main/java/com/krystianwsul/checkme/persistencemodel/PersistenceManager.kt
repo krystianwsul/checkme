@@ -31,7 +31,9 @@ class PersistenceManager(
 
     val uuid get() = uuidRecord.uuid
 
-    fun save(source: SaveService.Source) = SaveService.Factory.instance.startService(this, source)
+    fun save(source: SaveService.Source) = SaveService.Factory
+            .instance
+            .startService(this, source)
 
     fun createInstanceShownRecord(
             remoteTaskId: String,

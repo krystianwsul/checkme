@@ -35,6 +35,12 @@
             tools:ignore="UnusedAttribute"
             app:layout_collapseMode="pin" />
 
+        <com.krystianwsul.checkme.gui.ToolbarProgress
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="-1dp" />
+
     </com.google.android.material.appbar.CollapsingToolbarLayout>
 
 </com.google.android.material.appbar.AppBarLayout>

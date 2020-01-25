@@ -35,24 +35,27 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
 
     for ((view, hideType) in show) {
         view.run {
-            resetAlpha()
+            cancelAnimations()
 
             check(visibility != hideType.opposite)
 
-            if (visibility == View.VISIBLE) {
+            if (visibility == View.VISIBLE && alpha == 1f) {
                 showWaiting--
                 callOnEnd()
 
                 return@run
             }
 
-            visibility = View.VISIBLE
-
             if (immediate) {
+                visibility = View.VISIBLE
+
                 showWaiting--
                 callOnEnd()
             } else {
-                alpha = 0f
+                if (visibility != View.VISIBLE) {
+                    visibility = View.VISIBLE
+                    alpha = 0f
+                }
 
                 animate().setDuration(shortAnimTime.toLong())
                         .alpha(1f)
@@ -68,7 +71,7 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
 
     for ((view, hideType) in hide) {
         view.run {
-            resetAlpha()
+            cancelAnimations()
 
             check(visibility != hideType.opposite)
 
@@ -85,8 +88,10 @@ fun animateVisibility2(show: List<Pair<View, HideType>>, hide: List<Pair<View, H
                 hideWaiting--
                 callOnEnd()
             } else {
-                visibility = View.VISIBLE
-                alpha = 1f
+                if (visibility != View.VISIBLE) {
+                    visibility = View.VISIBLE
+                    alpha = 1f
+                }
 
                 animate().setDuration(shortAnimTime.toLong())
                         .alpha(0f)
@@ -109,9 +114,13 @@ private fun ViewPropertyAnimator.onEnd(action: () -> Unit) {
     })
 }
 
-fun View.resetAlpha() {
+fun View.cancelAnimations() {
     clearAnimation()
     animate().cancel()
+}
+
+fun View.resetAlpha() {
+    cancelAnimations()
     alpha = 1f
 }
 

@@ -97,7 +97,6 @@ class RemoteProjectFactory(
                 try {
                     val remoteProjectRecord = remoteSharedProjectManager.setChild(childEvent.dataSnapshot())
 
-                    check(remoteProjects.containsKey(remoteProjectRecord.id))
                     remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
                         fixNotificationShown(domainFactory.localFactory, now)
                         updateUserInfo(domainFactory.deviceDbInfo)

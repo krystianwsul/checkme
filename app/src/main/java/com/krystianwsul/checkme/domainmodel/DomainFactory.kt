@@ -3,7 +3,10 @@ package com.krystianwsul.checkme.domainmodel
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.pm.ShortcutManagerCompat
+import com.androidhuman.rxfirebase2.database.ChildAddEvent
+import com.androidhuman.rxfirebase2.database.ChildChangeEvent
 import com.androidhuman.rxfirebase2.database.ChildEvent
+import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
@@ -302,6 +305,16 @@ class DomainFactory(
         MyCrashlytics.log("updateSharedProjectRecord")
 
         updateShortcuts()
+
+        remoteUserFactory.remoteUser.apply {
+            val projectId = childEvent.dataSnapshot().key!!
+
+            when (childEvent) {
+                is ChildAddEvent, is ChildChangeEvent -> addProject(projectId)
+                is ChildRemoveEvent -> removeProject(projectId)
+                else -> throw IllegalArgumentException()
+            }
+        }
 
         val now = ExactTimeStamp.now
 

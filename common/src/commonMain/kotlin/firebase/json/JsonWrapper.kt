@@ -5,7 +5,7 @@ import kotlin.jvm.JvmOverloads
 
 @Serializable
 class JsonWrapper @JvmOverloads constructor(
-        private val recordOf: MutableMap<String, Boolean> = mutableMapOf(),
+        val recordOf: MutableMap<String, Boolean> = mutableMapOf(),
         var projectJson: SharedProjectJson = SharedProjectJson()
 ) {
 

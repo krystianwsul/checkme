@@ -51,4 +51,17 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
 
         _friends.remove(friendId)
     }
+
+    fun updateProjects(projectId: String, addedUsers: Set<String>, removedUsers: Set<String>) {
+        val addedFriends = addedUsers.mapNotNull(_friends::get)
+        val addedStrangers = addedUsers - addedFriends.map { it.id }
+
+        val removedFriends = removedUsers.mapNotNull(_friends::get)
+        val removedStrangers = removedUsers - removedFriends.map { it.id }
+
+        addedFriends.forEach { it.addProject(projectId) }
+        removedFriends.forEach { it.removeProject(projectId) }
+
+        remoteFriendManager.updateStrangerProjects(projectId, addedStrangers, removedStrangers)
+    }
 }

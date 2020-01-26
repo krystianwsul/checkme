@@ -14,18 +14,40 @@ class RemoteFriendManager(private val domainFactory: DomainFactory, children: It
 
     val remoteRootUserRecords = children.map { RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!) }.associateBy { it.id }
 
-    fun save() {
+    private var strangerProjects: Pair<String, List<Pair<String, Boolean>>>? = null
+
+    fun save(): Boolean {
         val values = mutableMapOf<String, Any?>()
 
         remoteRootUserRecords.values.forEach { it.getValues(values) }
-
-        MyCrashlytics.log("RemoteFriendManager.save values: $values")
 
         if (values.isNotEmpty()) {
             check(!isSaved)
 
             isSaved = true
-            AndroidDatabaseWrapper.updateFriends(values).checkError(domainFactory, "RemoteFriendManager.save")
         }
+
+        strangerProjects?.let { (projectId, userValues) ->
+            userValues.forEach { (userId, add) ->
+                values["$userId/${RemoteRootUserRecord.PROJECTS}/$projectId"] = if (add) true else null
+            }
+        }
+        strangerProjects = null
+
+        MyCrashlytics.log("RemoteFriendManager.save values: $values")
+
+        if (values.isNotEmpty())
+            AndroidDatabaseWrapper.updateFriends(values).checkError(domainFactory, "RemoteFriendManager.save")
+
+        return isSaved
+    }
+
+    fun updateStrangerProjects(projectId: String, addedStrangers: Set<String>, removedStrangers: Set<String>) {
+        check(strangerProjects == null)
+
+        strangerProjects = Pair(
+                projectId,
+                addedStrangers.map { it to true } + removedStrangers.map { it to false }
+        )
     }
 }

@@ -126,8 +126,7 @@ class DomainFactory(
 
     val localFactory: LocalFactory
 
-    var remoteProjectFactory: RemoteProjectFactory
-        private set
+    val remoteProjectFactory: RemoteProjectFactory
 
     private val remoteUserFactory: RemoteUserFactory
 
@@ -185,6 +184,15 @@ class DomainFactory(
         remoteUserFactory = RemoteUserFactory(this, userSnapshot, deviceInfo)
         remoteUserFactory.remoteUser.setToken(deviceInfo.token)
 
+        val sharedProjectIds = sharedSnapshot.children.map { it.key!! } // don't use remoteProjectFactory because of OnlyVisibilityPresentException
+        val existingProjectIds = remoteUserFactory.remoteUser.projectIds // todo change to checking if ids exist in remoteProjectsList, and remove deleted projects
+
+        val addProjects = sharedProjectIds - existingProjectIds
+        val removeProjects = existingProjectIds - sharedProjectIds
+
+        addProjects.forEach(remoteUserFactory.remoteUser::addProject)
+        removeProjects.forEach(remoteUserFactory.remoteUser::removeProject) // todo remove after a while
+
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
         tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.init", if (firstRun) RunType.APP_START else RunType.SIGN_IN)
@@ -224,8 +232,9 @@ class DomainFactory(
         val localChanges = localFactory.save(source)
         val remoteChanges = remoteProjectFactory.save()
         val userChanges = remoteUserFactory.save()
+        val friendChanges = remoteFriendFactory.save()
 
-        if (localChanges || remoteChanges || userChanges) {
+        if (localChanges || remoteChanges || userChanges || friendChanges) {
             domainChanged.accept(dataIds)
 
             updateIsSaved()
@@ -1939,7 +1948,14 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateProject(dataId: Int, source: SaveService.Source, projectId: String, name: String, addedFriends: Set<String>, removedFriends: Set<String>) {
+    fun updateProject(
+            dataId: Int,
+            source: SaveService.Source,
+            projectId: String,
+            name: String,
+            addedFriends: Set<String>,
+            removedFriends: Set<String>
+    ) {
         MyCrashlytics.log("DomainFactory.updateProject")
 
         check(projectId.isNotEmpty())
@@ -1951,6 +1967,8 @@ class DomainFactory(
 
         remoteProject.name = name
         remoteProject.updateRecordOf(addedFriends.map { remoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
+
+        remoteFriendFactory.updateProjects(projectId, addedFriends, removedFriends)
 
         updateNotifications(now)
 
@@ -1974,6 +1992,8 @@ class DomainFactory(
         recordOf.add(key)
 
         val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteUserFactory.remoteUser)
+
+        remoteFriendFactory.updateProjects(remoteProject.id, friends, setOf())
 
         save(dataId, source)
 

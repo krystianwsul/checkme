@@ -10,6 +10,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
         const val USER_DATA = "userData"
         private const val FRIEND_OF = "friendOf"
+        const val PROJECTS = "projects"
     }
 
     val userJson by lazy { createObject.userData }
@@ -24,6 +25,11 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
     open val photoUrl get() = userJson.photoUrl
 
+    val projectIds
+        get() = createObject.projects
+                .keys
+                .toSet()
+
     fun removeFriendOf(friendId: String) {
         check(friendId.isNotEmpty())
 
@@ -37,4 +43,20 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
     }
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
+
+    fun addProject(projectId: String) {
+        if (!createObject.projects.containsKey(projectId)) {
+            createObject.projects[projectId] = true
+
+            addValue("$key/$PROJECTS/$projectId", true)
+        }
+    }
+
+    fun removeProject(projectId: String) {
+        if (createObject.projects.containsKey(projectId)) {
+            createObject.projects.remove(projectId)
+
+            addValue("$key/$PROJECTS/$projectId", null)
+        }
+    }
 }

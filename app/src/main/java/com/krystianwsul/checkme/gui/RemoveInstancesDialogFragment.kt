@@ -34,5 +34,6 @@ class RemoveInstancesDialogFragment : AbstractDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?) = MaterialAlertDialogBuilder(requireContext()).setMessage(R.string.removeInstancesMessage)
             .setNegativeButton(R.string.removeInstancesNo) { _, _ -> listener(payload, false) }
             .setPositiveButton(R.string.removeInstancesYes) { _, _ -> listener(payload, true) }
+            .setNeutralButton(R.string.removeInstancesCancel) { _, _ -> }
             .create()
 }

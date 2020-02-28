@@ -109,6 +109,7 @@
     <string name="removeInstancesMessage">Usunąć nieukończone przypomnienia?</string>
     <string name="removeInstancesNo">Nie</string>
     <string name="removeInstancesYes">Tak</string>
+    <string name="removeInstancesCancel">Anuluj</string>
     <string name="version">Wersja</string>
     <string name="from">Od</string>
     <string name="until">Do</string>

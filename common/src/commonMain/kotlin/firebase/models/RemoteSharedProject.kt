@@ -64,7 +64,7 @@ class RemoteSharedProject(
         remoteUsers.remove(id)
     }
 
-    fun updateUserInfo(deviceDbInfo: DeviceDbInfo) {
+    fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) {
         check(remoteUsers.containsKey(deviceDbInfo.key))
 
         val remoteProjectUser = remoteUsers[deviceDbInfo.key]!!

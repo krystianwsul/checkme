@@ -172,7 +172,7 @@ class DomainFactory(
 
         val remoteRead = ExactTimeStamp.now
 
-        remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, remoteRead)
+        remoteProjectFactory = RemoteProjectFactory(deviceDbInfo, localFactory, sharedSnapshot.children, privateSnapshot, remoteRead)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 
@@ -222,7 +222,7 @@ class DomainFactory(
         }
 
         val localChanges = localFactory.save(source)
-        val remoteChanges = remoteProjectFactory.save()
+        val remoteChanges = remoteProjectFactory.save(this)
         val userChanges = remoteUserFactory.save(this)
         val friendChanges = remoteFriendFactory.save()
 
@@ -313,7 +313,7 @@ class DomainFactory(
 
             runType = RunType.LOCAL
         } else {
-            remoteProjectFactory.onChildEvent(childEvent, now)
+            remoteProjectFactory.onChildEvent(deviceDbInfo, childEvent, now)
 
             TickHolder.getTickData()?.sharedTriggered()
 
@@ -1240,7 +1240,15 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val task = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas.map { it to getTime(it.timePair) }, note, finalProjectId, imageUuid)
+        val task = remoteProjectFactory.createScheduleRootTask(
+                now,
+                name,
+                scheduleDatas.map { it to getTime(it.timePair) },
+                note,
+                finalProjectId,
+                imageUuid,
+                deviceDbInfo
+        )
 
         copyTaskKey?.let { copyTask(now, task, it) }
 
@@ -1340,7 +1348,15 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val newParentTask = remoteProjectFactory.createScheduleRootTask(now, name, scheduleDatas.map { it to getTime(it.timePair) }, note, finalProjectId, imageUuid)
+        val newParentTask = remoteProjectFactory.createScheduleRootTask(
+                now,
+                name,
+                scheduleDatas.map { it to getTime(it.timePair) },
+                note,
+                finalProjectId,
+                imageUuid,
+                deviceDbInfo
+        )
 
         joinTasks = joinTasks.map { it.updateProject(this, now, finalProjectId) }
 
@@ -1382,7 +1398,14 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val task = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId, imageUuid)
+        val task = remoteProjectFactory.createRemoteTaskHelper(
+                now,
+                name,
+                note,
+                finalProjectId,
+                imageUuid,
+                deviceDbInfo
+        )
 
         copyTaskKey?.let { copyTask(now, task, it) }
 
@@ -1429,7 +1452,14 @@ class DomainFactory(
 
         val imageUuid = imagePath?.let { newUuid() }
 
-        val newParentTask = remoteProjectFactory.createRemoteTaskHelper(now, name, note, finalProjectId, imageUuid)
+        val newParentTask = remoteProjectFactory.createRemoteTaskHelper(
+                now,
+                name,
+                note,
+                finalProjectId,
+                imageUuid,
+                deviceDbInfo
+        )
 
         joinTasks = joinTasks.map { it.updateProject(this, now, finalProjectId) }
 
@@ -1994,7 +2024,14 @@ class DomainFactory(
         check(!recordOf.contains(key))
         recordOf.add(key)
 
-        val remoteProject = remoteProjectFactory.createRemoteProject(name, now, recordOf, remoteUserFactory.remoteUser)
+        val remoteProject = remoteProjectFactory.createRemoteProject(
+                name,
+                now,
+                recordOf,
+                remoteUserFactory.remoteUser,
+                deviceDbInfo.userInfo,
+                remoteFriendFactory
+        )
 
         remoteFriendFactory.updateProjects(remoteProject.id, friends, setOf())
 

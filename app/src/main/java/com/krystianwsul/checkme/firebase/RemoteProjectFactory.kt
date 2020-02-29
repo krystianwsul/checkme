@@ -28,8 +28,8 @@ class RemoteProjectFactory(
         now: ExactTimeStamp
 ) : RemoteProject.Parent {
 
-    private val remotePrivateProjectManager = AndroidRemotePrivateProjectManager(domainFactory, privateSnapshot, now)
-    private val remoteSharedProjectManager = AndroidRemoteSharedProjectManager(domainFactory, sharedChildren)
+    private val remotePrivateProjectManager = AndroidRemotePrivateProjectManager(domainFactory.deviceDbInfo, privateSnapshot, now)
+    private val remoteSharedProjectManager = AndroidRemoteSharedProjectManager(sharedChildren)
 
     var remotePrivateProject = RemotePrivateProject(remotePrivateProjectManager.remoteProjectRecord).apply { fixNotificationShown(domainFactory.localFactory, now) }
         private set
@@ -163,8 +163,8 @@ class RemoteProjectFactory(
     }
 
     fun save(): Boolean {
-        val privateSaved = remotePrivateProjectManager.save()
-        val sharedSaved = remoteSharedProjectManager.save()
+        val privateSaved = remotePrivateProjectManager.save(domainFactory)
+        val sharedSaved = remoteSharedProjectManager.save(domainFactory)
         return privateSaved || sharedSaved
     }
 

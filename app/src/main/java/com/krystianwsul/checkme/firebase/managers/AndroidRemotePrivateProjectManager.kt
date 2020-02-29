@@ -4,6 +4,7 @@ import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.managers.RemotePrivateProjectManager
@@ -11,13 +12,13 @@ import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 
 class AndroidRemotePrivateProjectManager(
-        private val domainFactory: DomainFactory,
+        deviceDbInfo: DeviceDbInfo,
         dataSnapshot: DataSnapshot,
         now: ExactTimeStamp
-) : RemotePrivateProjectManager() {
+) : RemotePrivateProjectManager<DomainFactory>() {
 
     var remoteProjectRecord = if (dataSnapshot.value == null) {
-        RemotePrivateProjectRecord(AndroidDatabaseWrapper, domainFactory.deviceDbInfo, PrivateProjectJson(startTime = now.long))
+        RemotePrivateProjectRecord(AndroidDatabaseWrapper, deviceDbInfo, PrivateProjectJson(startTime = now.long))
     } else {
         dataSnapshot.toRecord()
     }
@@ -34,7 +35,7 @@ class AndroidRemotePrivateProjectManager(
         return remoteProjectRecord
     }
 
-    override fun getDatabaseCallback(values: Map<String, Any?>): DatabaseCallback {
-        return checkError(domainFactory, "RemotePrivateProjectManager.save", values)
+    override fun getDatabaseCallback(extra: DomainFactory, values: Map<String, Any?>): DatabaseCallback {
+        return checkError(extra, "RemotePrivateProjectManager.save", values)
     }
 }

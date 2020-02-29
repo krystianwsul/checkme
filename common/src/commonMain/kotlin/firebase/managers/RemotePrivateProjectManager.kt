@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import kotlin.properties.Delegates
 
-abstract class RemotePrivateProjectManager {
+abstract class RemotePrivateProjectManager<T> {
 
     var isSaved by Delegates.observable(false) { _, _, value -> ErrorLogger.instance.log("RemotePrivateProjectManager.isSaved = $value") }
 
@@ -14,11 +14,11 @@ abstract class RemotePrivateProjectManager {
 
     abstract val remotePrivateProjectRecords: List<RemotePrivateProjectRecord>
 
-    protected abstract fun getDatabaseCallback(values: Map<String, Any?>): DatabaseCallback
+    protected abstract fun getDatabaseCallback(extra: T, values: Map<String, Any?>): DatabaseCallback
 
     open val saveCallback: (() -> Unit)? = null
 
-    fun save(): Boolean {
+    fun save(extra: T): Boolean {
         val values = mutableMapOf<String, Any?>()
 
         remotePrivateProjectRecords.forEach { it.getValues(values) }
@@ -29,7 +29,7 @@ abstract class RemotePrivateProjectManager {
             check(!isSaved)
 
             isSaved = true
-            databaseWrapper.updatePrivateProjects(values, getDatabaseCallback(values))
+            databaseWrapper.updatePrivateProjects(values, getDatabaseCallback(extra, values))
         } else {
             saveCallback?.invoke()
         }

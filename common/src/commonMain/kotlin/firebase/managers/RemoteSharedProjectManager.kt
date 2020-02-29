@@ -7,7 +7,7 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import kotlin.properties.Delegates
 
-abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
+abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent {
 
     var isSaved by Delegates.observable(false) { _, _, value -> ErrorLogger.instance.log("RemoteSharedProjectManager.isSaved = $value") }
 
@@ -15,11 +15,11 @@ abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
 
     abstract val databaseWrapper: DatabaseWrapper
 
-    protected abstract fun getDatabaseCallback(): DatabaseCallback
+    protected abstract fun getDatabaseCallback(extra: T): DatabaseCallback
 
     open val saveCallback: (() -> Unit)? = null
 
-    fun save(): Boolean {
+    fun save(extra: T): Boolean {
         val values = mutableMapOf<String, Any?>()
 
         remoteProjectRecords.values.forEach { it.getValues(values) }
@@ -30,7 +30,7 @@ abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
             check(!isSaved)
 
             isSaved = true
-            databaseWrapper.updateRecords(values, getDatabaseCallback())
+            databaseWrapper.updateRecords(values, getDatabaseCallback(extra))
         } else {
             saveCallback?.invoke()
         }

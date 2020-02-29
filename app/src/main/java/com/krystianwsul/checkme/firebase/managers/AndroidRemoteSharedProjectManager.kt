@@ -10,10 +10,7 @@ import com.krystianwsul.common.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 
-class AndroidRemoteSharedProjectManager(
-        private val domainFactory: DomainFactory,
-        children: Iterable<DataSnapshot>
-) : RemoteSharedProjectManager() {
+class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : RemoteSharedProjectManager<DomainFactory>() {
 
     private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(AndroidDatabaseWrapper, this@AndroidRemoteSharedProjectManager, key!!, getValue(JsonWrapper::class.java)!!)
 
@@ -39,7 +36,7 @@ class AndroidRemoteSharedProjectManager(
         }
     }
 
-    override fun getDatabaseCallback() = checkError(domainFactory, "RemoteSharedProjectManager.save")
+    override fun getDatabaseCallback(extra: DomainFactory) = checkError(extra, "RemoteSharedProjectManager.save")
 
     fun removeChild(dataSnapshot: DataSnapshot) = dataSnapshot.key!!.also {
         check(remoteProjectRecords.remove(it) != null)

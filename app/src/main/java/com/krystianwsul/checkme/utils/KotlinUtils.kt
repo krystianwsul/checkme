@@ -182,7 +182,7 @@ private fun onComplete(
     }
 }
 
-fun checkError(domainFactory: DomainFactory, caller: String, values: Any? = null): DatabaseCallback {
+fun checkError(domainFactory: DomainFactory, caller: String, values: Map<String, Any?>? = null): DatabaseCallback {
     val taskKeysBefore = values?.let { domainFactory.getTaskKeys() }
 
     return { databaseMessage, successful, exception ->

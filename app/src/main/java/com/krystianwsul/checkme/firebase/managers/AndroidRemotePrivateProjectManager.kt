@@ -34,7 +34,7 @@ class AndroidRemotePrivateProjectManager(
         return remoteProjectRecord
     }
 
-    override fun getDatabaseCallback(values: Any): DatabaseCallback {
+    override fun getDatabaseCallback(values: Map<String, Any?>): DatabaseCallback {
         return checkError(domainFactory, "RemotePrivateProjectManager.save", values)
     }
 }

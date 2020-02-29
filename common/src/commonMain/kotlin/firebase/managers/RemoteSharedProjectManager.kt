@@ -20,7 +20,7 @@ abstract class RemoteSharedProjectManager : RemoteSharedProjectRecord.Parent {
     open val saveCallback: (() -> Unit)? = null
 
     fun save(): Boolean {
-        val values = HashMap<String, Any?>()
+        val values = mutableMapOf<String, Any?>()
 
         remoteProjectRecords.values.forEach { it.getValues(values) }
 

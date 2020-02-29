@@ -14,12 +14,12 @@ abstract class RemotePrivateProjectManager {
 
     abstract val remotePrivateProjectRecords: List<RemotePrivateProjectRecord>
 
-    protected abstract fun getDatabaseCallback(values: Any): DatabaseCallback
+    protected abstract fun getDatabaseCallback(values: Map<String, Any?>): DatabaseCallback
 
     open val saveCallback: (() -> Unit)? = null
 
     fun save(): Boolean {
-        val values = HashMap<String, Any?>()
+        val values = mutableMapOf<String, Any?>()
 
         remotePrivateProjectRecords.forEach { it.getValues(values) }
 

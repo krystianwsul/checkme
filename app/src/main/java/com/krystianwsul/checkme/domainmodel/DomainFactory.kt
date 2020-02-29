@@ -23,7 +23,6 @@ import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
 import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
-import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.newUuid
@@ -43,7 +42,7 @@ import java.util.*
 
 @Suppress("LeakingThis")
 class DomainFactory(
-        persistenceManager: PersistenceManager,
+        val localFactory: LocalFactory,
         deviceInfo: DeviceInfo,
         remoteStart: ExactTimeStamp,
         sharedSnapshot: DataSnapshot,
@@ -127,8 +126,6 @@ class DomainFactory(
     var remoteUpdateTime: Long? = null
         private set
 
-    val localFactory: LocalFactory
-
     val remoteProjectFactory: RemoteProjectFactory
 
     private val remoteUserFactory: RemoteUserFactory
@@ -167,12 +164,9 @@ class DomainFactory(
 
         val start = ExactTimeStamp.now
 
-        localFactory = LocalFactory(persistenceManager)
         deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
 
         val localRead = ExactTimeStamp.now
-
-        localFactory.initialize(this)
 
         val stop = ExactTimeStamp.now
 

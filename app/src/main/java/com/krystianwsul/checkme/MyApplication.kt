@@ -13,6 +13,7 @@ import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.toUserInfo
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
@@ -102,7 +103,7 @@ class MyApplication : Application() {
                 { AndroidDatabaseWrapper.getUserObservable(it.key) },
                 { userInfo, privateProject, sharedProjects, friends, user ->
                     DomainFactory(
-                            PersistenceManager.instance,
+                            LocalFactory(PersistenceManager.instance),
                             userInfo,
                             ExactTimeStamp.now,
                             sharedProjects,

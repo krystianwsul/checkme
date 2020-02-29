@@ -8,12 +8,12 @@ import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.models.RemoteMyUser
 
 class RemoteUserFactory(
-        domainFactory: DomainFactory,
+        uuid: String,
         userSnapshot: DataSnapshot,
         deviceInfo: DeviceInfo
 ) {
 
-    private val remoteUserManager = RemoteUserManager(domainFactory, deviceInfo, domainFactory.uuid, userSnapshot)
+    private val remoteUserManager = RemoteUserManager(deviceInfo, uuid, userSnapshot)
 
     var remoteUser = RemoteMyUser(remoteUserManager.remoteUserRecord)
         private set
@@ -40,5 +40,5 @@ class RemoteUserFactory(
         setTab()
     }
 
-    fun save() = remoteUserManager.save()
+    fun save(domainFactory: DomainFactory) = remoteUserManager.save(domainFactory)
 }

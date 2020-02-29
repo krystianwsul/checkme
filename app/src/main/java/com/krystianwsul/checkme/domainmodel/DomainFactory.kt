@@ -184,8 +184,8 @@ class DomainFactory(
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 
-        remoteUserFactory = RemoteUserFactory(this, userSnapshot, deviceInfo)
-        remoteUserFactory.remoteUser.setToken(deviceInfo.token)
+        remoteUserFactory = RemoteUserFactory(uuid, userSnapshot, deviceInfo)
+        remoteUserFactory.remoteUser.setToken(uuid, deviceInfo.token)
 
         val sharedProjectIds = sharedSnapshot.children.map { it.key!! } // don't use remoteProjectFactory because of OnlyVisibilityPresentException
         val existingProjectIds = remoteUserFactory.remoteUser.projectIds // todo change to checking if ids exist in remoteProjectsList, and remove deleted projects
@@ -234,7 +234,7 @@ class DomainFactory(
 
         val localChanges = localFactory.save(source)
         val remoteChanges = remoteProjectFactory.save()
-        val userChanges = remoteUserFactory.save()
+        val userChanges = remoteUserFactory.save(this)
         val friendChanges = remoteFriendFactory.save()
 
         if (localChanges || remoteChanges || userChanges || friendChanges) {
@@ -1619,7 +1619,8 @@ class DomainFactory(
             name: String,
             parentTaskKey: TaskKey,
             note: String?,
-            imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
+            imagePath: NullableWrapper<Pair<String, Uri>>?
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.updateChildTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1923,7 +1924,7 @@ class DomainFactory(
 
         deviceDbInfo = deviceDbInfo.copy(deviceInfo = deviceDbInfo.deviceInfo.copy(token = token))
 
-        remoteUserFactory.remoteUser.setToken(token)
+        remoteUserFactory.remoteUser.setToken(uuid, token)
         remoteProjectFactory.updateDeviceInfo(deviceDbInfo)
 
         save(0, source)

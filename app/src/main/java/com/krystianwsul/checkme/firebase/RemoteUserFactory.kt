@@ -26,6 +26,8 @@ class RemoteUserFactory(
 
     init {
         setTab()
+
+        remoteUser.setToken(uuid, deviceInfo.token)
     }
 
     private fun setTab() {

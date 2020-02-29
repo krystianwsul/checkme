@@ -43,11 +43,11 @@ import java.util.*
 @Suppress("LeakingThis")
 class DomainFactory(
         val localFactory: LocalFactory,
+        private val remoteUserFactory: RemoteUserFactory,
         deviceInfo: DeviceInfo,
         remoteStart: ExactTimeStamp,
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
-        userSnapshot: DataSnapshot,
         friendSnapshot: DataSnapshot
 ) : RemotePrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
 
@@ -128,8 +128,6 @@ class DomainFactory(
 
     val remoteProjectFactory: RemoteProjectFactory
 
-    private val remoteUserFactory: RemoteUserFactory
-
     var remoteFriendFactory: RemoteFriendFactory
         private set
 
@@ -177,9 +175,6 @@ class DomainFactory(
         remoteProjectFactory = RemoteProjectFactory(this, sharedSnapshot.children, privateSnapshot, remoteRead)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
-
-        remoteUserFactory = RemoteUserFactory(uuid, userSnapshot, deviceInfo)
-        remoteUserFactory.remoteUser.setToken(uuid, deviceInfo.token)
 
         val sharedProjectIds = sharedSnapshot.children.map { it.key!! } // don't use remoteProjectFactory because of OnlyVisibilityPresentException
         val existingProjectIds = remoteUserFactory.remoteUser.projectIds // todo change to checking if ids exist in remoteProjectsList, and remove deleted projects

@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.toUserInfo
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
+import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
@@ -101,14 +102,17 @@ class MyApplication : Application() {
                 { AndroidDatabaseWrapper.getSharedProjectEvents(it.key) },
                 { AndroidDatabaseWrapper.getFriendObservable(it.key) },
                 { AndroidDatabaseWrapper.getUserObservable(it.key) },
-                { userInfo, privateProject, sharedProjects, friends, user ->
+                { deviceInfo, privateProject, sharedProjects, friends, user ->
+                    val localFactory = LocalFactory(PersistenceManager.instance)
+                    val remoteUserFactory = RemoteUserFactory(localFactory.uuid, user, deviceInfo)
+
                     DomainFactory(
-                            LocalFactory(PersistenceManager.instance),
-                            userInfo,
+                            localFactory,
+                            remoteUserFactory,
+                            deviceInfo,
                             ExactTimeStamp.now,
                             sharedProjects,
                             privateProject,
-                            user,
                             friends
                     )
                 },

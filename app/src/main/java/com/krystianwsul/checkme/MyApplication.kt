@@ -18,6 +18,7 @@ import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.toUserInfo
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
+import com.krystianwsul.checkme.firebase.RemoteProjectFactory
 import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -109,14 +110,17 @@ class MyApplication : Application() {
                     val localFactory = LocalFactory(PersistenceManager.instance)
                     val remoteUserFactory = RemoteUserFactory(localFactory.uuid, user, deviceInfo)
 
+                    val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
+                    val remoteProjectFactory = RemoteProjectFactory(deviceDbInfo, localFactory, sharedProjects.children, privateProject, ExactTimeStamp.now)
+
                     DomainFactory(
                             localFactory,
                             remoteUserFactory,
-                            DeviceDbInfo(deviceInfo, localFactory.uuid),
+                            remoteProjectFactory,
+                            deviceDbInfo,
                             startTime,
                             readTime,
                             sharedProjects,
-                            privateProject,
                             friends
                     )
                 },

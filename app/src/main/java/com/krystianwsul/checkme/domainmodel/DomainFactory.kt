@@ -44,11 +44,11 @@ import java.util.*
 class DomainFactory(
         private val localFactory: LocalFactory,
         private val remoteUserFactory: RemoteUserFactory,
+        val remoteProjectFactory: RemoteProjectFactory,
         _deviceDbInfo: DeviceDbInfo,
         startTime: ExactTimeStamp,
         readTime: ExactTimeStamp,
         sharedSnapshot: DataSnapshot,
-        privateSnapshot: DataSnapshot,
         friendSnapshot: DataSnapshot
 ) : RemotePrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
 
@@ -125,8 +125,6 @@ class DomainFactory(
     var remoteUpdateTime: Long? = null
         private set
 
-    val remoteProjectFactory: RemoteProjectFactory
-
     var remoteFriendFactory: RemoteFriendFactory
         private set
 
@@ -158,8 +156,6 @@ class DomainFactory(
 
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
-
-        remoteProjectFactory = RemoteProjectFactory(deviceDbInfo, localFactory, sharedSnapshot.children, privateSnapshot, ExactTimeStamp.now)
 
         remoteReadTimes = ReadTimes(startTime, readTime, ExactTimeStamp.now)
 

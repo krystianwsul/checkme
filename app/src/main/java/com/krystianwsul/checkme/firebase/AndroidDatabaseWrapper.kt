@@ -47,17 +47,17 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
             .push()
             .key!!
 
-    private fun sharedProjectQuery(key: String) = rootReference.child(RECORDS_KEY)
-            .orderByChild("recordOf/$key")
+    private fun sharedProjectQuery(userKey: String) = rootReference.child(RECORDS_KEY)
+            .orderByChild("recordOf/$userKey")
             .equalTo(true)
 
     /* todo
     Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding '".indexOn": "recordOf/cGF0cmljaXVzQGdtYWlsLmNvbQ=="' at production/records to your security and Firebase Database rules for better performance
      */
 
-    fun getSharedProjectSingle(key: String) = sharedProjectQuery(key).data()
+    fun getSharedProjectSingle(userKey: String) = sharedProjectQuery(userKey).data()
 
-    fun getSharedProjectEvents(key: String) = sharedProjectQuery(key).childEvents()
+    fun getSharedProjectEvents(userKey: String) = sharedProjectQuery(userKey).childEvents()
 
     override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.child(path)

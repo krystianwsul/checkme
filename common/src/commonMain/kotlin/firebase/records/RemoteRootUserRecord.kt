@@ -2,9 +2,10 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.firebase.models.RemoteRootUserProperties
 
 
-open class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create) {
+open class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create), RemoteRootUserProperties {
 
     companion object {
 
@@ -13,24 +14,24 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
         const val PROJECTS = "projects"
     }
 
-    val userJson by lazy { createObject.userData }
+    final override val userJson by lazy { createObject.userData }
 
-    val id by lazy { UserData.getKey(userJson.email) }
+    override val id by lazy { UserData.getKey(userJson.email) }
 
     final override val key by lazy { id }
 
-    var name by Committer(userJson::name, "$key/$USER_DATA")
+    override var name by Committer(userJson::name, "$key/$USER_DATA")
 
-    val email by lazy { userJson.email }
+    override val email by lazy { userJson.email }
 
-    open val photoUrl get() = userJson.photoUrl
+    override val photoUrl get() = userJson.photoUrl
 
-    val projectIds
+    override val projectIds
         get() = createObject.projects
                 .keys
                 .toSet()
 
-    fun removeFriendOf(friendId: String) {
+    override fun removeFriend(friendId: String) {
         check(friendId.isNotEmpty())
 
         val friendOf = createObject.friendOf
@@ -44,7 +45,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    fun addProject(projectId: String) {
+    override fun addProject(projectId: String) {
         if (!createObject.projects.containsKey(projectId)) {
             createObject.projects[projectId] = true
 
@@ -52,7 +53,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
         }
     }
 
-    fun removeProject(projectId: String) {
+    override fun removeProject(projectId: String) {
         if (createObject.projects.containsKey(projectId)) {
             createObject.projects.remove(projectId)
 

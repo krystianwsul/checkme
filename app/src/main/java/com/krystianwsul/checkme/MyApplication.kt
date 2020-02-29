@@ -25,6 +25,7 @@ import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
@@ -109,7 +110,7 @@ class MyApplication : Application() {
                     DomainFactory(
                             localFactory,
                             remoteUserFactory,
-                            deviceInfo,
+                            DeviceDbInfo(deviceInfo, localFactory.uuid),
                             ExactTimeStamp.now,
                             sharedProjects,
                             privateProject,

@@ -44,15 +44,7 @@ class DebugFragment : AbstractFragment() {
 
                 val domainFactory = DomainFactory.instance
 
-                append("local load time: ")
-                append(domainFactory.localReadTimes.readMillis + domainFactory.localReadTimes.instantiateMillis)
-                append("ms (")
-                append(domainFactory.localReadTimes.readMillis)
-                append(" + ")
-                append(domainFactory.localReadTimes.instantiateMillis)
-                append(")")
-
-                append("\nremote load time: ")
+                append("\nload time: ")
                 append(domainFactory.remoteReadTimes.readMillis + domainFactory.remoteReadTimes.instantiateMillis)
                 append("ms (")
                 append(domainFactory.remoteReadTimes.readMillis)

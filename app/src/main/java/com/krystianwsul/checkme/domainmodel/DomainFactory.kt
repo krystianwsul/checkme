@@ -42,9 +42,9 @@ import java.util.*
 
 @Suppress("LeakingThis")
 class DomainFactory(
-        val localFactory: LocalFactory,
+        private val localFactory: LocalFactory,
         private val remoteUserFactory: RemoteUserFactory,
-        deviceInfo: DeviceInfo,
+        _deviceDbInfo: DeviceDbInfo,
         remoteStart: ExactTimeStamp,
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
@@ -118,8 +118,6 @@ class DomainFactory(
         }
     }
 
-    val localReadTimes: ReadTimes
-
     var remoteReadTimes: ReadTimes
         private set
 
@@ -135,7 +133,7 @@ class DomainFactory(
 
     val domainChanged = BehaviorRelay.createDefault(setOf<Int>())
 
-    var deviceDbInfo: DeviceDbInfo
+    var deviceDbInfo = _deviceDbInfo
         private set
 
     val irrelevantSummary
@@ -160,19 +158,9 @@ class DomainFactory(
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
-        val start = ExactTimeStamp.now
-
-        deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
-
-        val localRead = ExactTimeStamp.now
-
-        val stop = ExactTimeStamp.now
-
-        localReadTimes = ReadTimes(start, localRead, stop)
-
         val remoteRead = ExactTimeStamp.now
 
-        remoteProjectFactory = RemoteProjectFactory(deviceDbInfo, localFactory, sharedSnapshot.children, privateSnapshot, remoteRead)
+        remoteProjectFactory = RemoteProjectFactory(deviceDbInfo, localFactory, sharedSnapshot.children, privateSnapshot, ExactTimeStamp.now)
 
         remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
 

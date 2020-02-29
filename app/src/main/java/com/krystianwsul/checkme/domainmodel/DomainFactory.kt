@@ -45,7 +45,8 @@ class DomainFactory(
         private val localFactory: LocalFactory,
         private val remoteUserFactory: RemoteUserFactory,
         _deviceDbInfo: DeviceDbInfo,
-        remoteStart: ExactTimeStamp,
+        startTime: ExactTimeStamp,
+        readTime: ExactTimeStamp,
         sharedSnapshot: DataSnapshot,
         privateSnapshot: DataSnapshot,
         friendSnapshot: DataSnapshot
@@ -158,11 +159,9 @@ class DomainFactory(
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
-        val remoteRead = ExactTimeStamp.now
-
         remoteProjectFactory = RemoteProjectFactory(deviceDbInfo, localFactory, sharedSnapshot.children, privateSnapshot, ExactTimeStamp.now)
 
-        remoteReadTimes = ReadTimes(remoteStart, remoteRead, ExactTimeStamp.now)
+        remoteReadTimes = ReadTimes(startTime, readTime, ExactTimeStamp.now)
 
         val sharedProjectIds = sharedSnapshot.children.map { it.key!! } // don't use remoteProjectFactory because of OnlyVisibilityPresentException
         val existingProjectIds = remoteUserFactory.remoteUser.projectIds // todo change to checking if ids exist in remoteProjectsList, and remove deleted projects

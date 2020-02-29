@@ -27,6 +27,7 @@ import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
+import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.Maybe
@@ -103,6 +104,8 @@ class MyApplication : Application() {
                 { AndroidDatabaseWrapper.getFriendObservable(it.key) },
                 { AndroidDatabaseWrapper.getUserObservable(it.key) },
                 { startTime, deviceInfo, privateProject, sharedProjects, friends, user ->
+                    val readTime = ExactTimeStamp.now
+
                     val localFactory = LocalFactory(PersistenceManager.instance)
                     val remoteUserFactory = RemoteUserFactory(localFactory.uuid, user, deviceInfo)
 
@@ -111,6 +114,7 @@ class MyApplication : Application() {
                             remoteUserFactory,
                             DeviceDbInfo(deviceInfo, localFactory.uuid),
                             startTime,
+                            readTime,
                             sharedProjects,
                             privateProject,
                             friends

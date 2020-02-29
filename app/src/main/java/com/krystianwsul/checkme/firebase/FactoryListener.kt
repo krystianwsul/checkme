@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -18,7 +19,7 @@ class FactoryListener<T : Any, U : Any, V : Any, W : Any>(
         getSharedProjectEvents: (T) -> Observable<V>,
         getFriendObservable: (T) -> Observable<U>,
         getUserObservable: (T) -> Observable<U>,
-        initialCallback: (userInfo: T, privateProject: U, sharedProjects: U, friends: U, user: U) -> W,
+        initialCallback: (startTime: ExactTimeStamp, userInfo: T, privateProject: U, sharedProjects: U, friends: U, user: U) -> W,
         clearCallback: () -> Unit,
         privateProjectCallback: (domainFactory: W, privateProject: U) -> Unit,
         sharedProjectCallback: (domainFactory: W, sharedProjects: V) -> Unit,
@@ -60,7 +61,16 @@ class FactoryListener<T : Any, U : Any, V : Any, W : Any>(
                 val friendSingle = getFriendSingle(userInfo).doOnSuccess { logger("friendSingle $it") }.cache()
                 val userSingle = getUserSingle(userInfo).doOnSuccess { logger("userSingle $it") }.cache()
 
-                val domainFactorySingle = Singles.zip(privateProjectSingle, sharedProjectSingle, friendSingle, userSingle) { privateProject, sharedProjects, friends, user -> initialCallback(userInfo, privateProject, sharedProjects, friends, user) }.cache()
+                val startTime = ExactTimeStamp.now
+
+                val domainFactorySingle = Singles.zip(
+                        privateProjectSingle,
+                        sharedProjectSingle,
+                        friendSingle,
+                        userSingle
+                ) { privateProject, sharedProjects, friends, user ->
+                    initialCallback(startTime, userInfo, privateProject, sharedProjects, friends, user)
+                }.cache()
 
                 privateProjectSingle.flatMapObservable { privateProjectObservable }
                         .subscribe {

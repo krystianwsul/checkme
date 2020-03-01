@@ -23,6 +23,7 @@ import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
@@ -48,7 +49,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private var data: FriendListViewModel.Data? = null
 
-    private var selectedIds = listOf<String>()
+    private var selectedIds = listOf<ProjectKey.Private>()
 
     private val listener get() = activity as FriendListListener
 
@@ -99,7 +100,11 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private val mainActivity get() = activity as MainActivity
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -111,7 +116,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         friendListRecycler.layoutManager = LinearLayoutManager(activity)
 
         if (savedInstanceState?.containsKey(SELECTED_IDS_KEY) == true)
-            selectedIds = savedInstanceState.getStringArrayList(SELECTED_IDS_KEY)!!
+            selectedIds = savedInstanceState.getParcelableArrayList(SELECTED_IDS_KEY)!!
 
         friendListViewModel = getViewModel<FriendListViewModel>().apply {
             start()
@@ -164,7 +169,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         super.onSaveInstanceState(outState)
 
         if (this::treeViewAdapter.isInitialized)
-            treeViewAdapter.let { outState.putStringArrayList(SELECTED_IDS_KEY, ArrayList(getSelectedIds())) }
+            treeViewAdapter.let { outState.putParcelableArrayList(SELECTED_IDS_KEY, ArrayList(getSelectedIds())) }
     }
 
     private fun updateSelectAll() = (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())

@@ -539,7 +539,7 @@ class CreateTaskActivity : NavBarActivity() {
                         check(hasExtra(KEY_PARENT_TASK))
                         check(!hasExtra(KEY_SHORTCUT_ID))
 
-                        Hint.Task(TaskKey(getStringExtra(KEY_PARENT_PROJECT)!!, getStringExtra(KEY_PARENT_TASK)!!))
+                        Hint.Task(TaskKey(getParcelableExtra(KEY_PARENT_PROJECT)!!, getStringExtra(KEY_PARENT_TASK)!!))
                     }
                     else -> null
                 }

@@ -7,7 +7,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.NullableWrapper
 import com.soywiz.klock.days
 
-abstract class RepeatingSchedule(rootTask: RemoteTask<*>) : Schedule(rootTask) {
+abstract class RepeatingSchedule(rootTask: RemoteTask<*, *>) : Schedule(rootTask) {
 
     protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge
 

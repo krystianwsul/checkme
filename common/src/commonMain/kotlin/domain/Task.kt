@@ -8,10 +8,7 @@ import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.RemoteProject
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ScheduleData
-import com.krystianwsul.common.utils.ScheduleKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
 abstract class Task {
 
@@ -33,7 +30,7 @@ abstract class Task {
 
     abstract val existingInstances: Map<ScheduleKey, Instance>
 
-    abstract val project: RemoteProject<*>
+    abstract val project: RemoteProject<*, *>
 
     abstract val imageJson: TaskJson.Image?
 
@@ -242,7 +239,7 @@ abstract class Task {
 
     abstract fun setName(name: String, note: String?)
 
-    fun updateSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
+    fun updateSchedules(ownerKey: ProjectKey.Private, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
         val removeSchedules = ArrayList<Schedule>()
         val addScheduleDatas = ArrayList(scheduleDatas)
 
@@ -263,7 +260,11 @@ abstract class Task {
             addSchedules(ownerKey, addScheduleDatas, now)
     }
 
-    protected abstract fun addSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp)
+    protected abstract fun addSchedules(
+            ownerKey: ProjectKey.Private,
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            now: ExactTimeStamp
+    )
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp)
 
@@ -273,7 +274,11 @@ abstract class Task {
 
     abstract fun belongsToRemoteProject(): Boolean
 
-    abstract fun updateProject(projectUpdater: RemoteTask.ProjectUpdater, now: ExactTimeStamp, projectId: String): Task
+    abstract fun updateProject(
+            projectUpdater: RemoteTask.ProjectUpdater,
+            now: ExactTimeStamp,
+            projectId: ProjectKey
+    ): Task
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
 

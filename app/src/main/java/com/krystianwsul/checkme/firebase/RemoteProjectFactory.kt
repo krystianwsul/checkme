@@ -21,7 +21,6 @@ import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
-import java.util.*
 
 class RemoteProjectFactory(
         deviceDbInfo: DeviceDbInfo,
@@ -48,7 +47,7 @@ class RemoteProjectFactory(
             .toMutableMap()
 
     val remoteProjects
-        get() = remoteSharedProjects.toMutableMap<String, RemoteProject<*>>().apply {
+        get() = remoteSharedProjects.toMutableMap<ProjectKey, RemoteProject<*, *>>().apply {
             put(remotePrivateProject.id, remotePrivateProject)
         }.toMap()
 
@@ -137,7 +136,7 @@ class RemoteProjectFactory(
             name: String,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             note: String?,
-            projectId: String,
+            projectId: ProjectKey,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo
     ) = createRemoteTaskHelper(now, name, note, projectId, imageUuid, deviceDbInfo).apply {
@@ -148,10 +147,10 @@ class RemoteProjectFactory(
             now: ExactTimeStamp,
             name: String,
             note: String?,
-            projectId: String,
+            projectId: ProjectKey,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo
-    ): RemoteTask<*> {
+    ): RemoteTask<*, *> {
         val image = imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) }
         val taskJson = TaskJson(name, now.long, null, note, image = image)
 
@@ -161,22 +160,29 @@ class RemoteProjectFactory(
     fun createRemoteProject(
             name: String,
             now: ExactTimeStamp,
-            recordOf: Set<String>,
+            recordOf: Set<ProjectKey.Private>,
             remoteRootUser: RemoteRootUser,
             userInfo: UserInfo,
             remoteFriendFactory: RemoteFriendFactory
     ): RemoteSharedProject {
         check(!TextUtils.isEmpty(name))
 
-        val friendIds = HashSet(recordOf)
+        val friendIds = recordOf.toMutableSet()
         friendIds.remove(userInfo.key)
 
         val userJsons = remoteFriendFactory.getUserJsons(friendIds)
         userJsons[userInfo.key] = remoteRootUser.userJson
 
-        val projectJson = SharedProjectJson(name, now.long, users = userJsons)
+        val projectJson = SharedProjectJson(
+                name,
+                now.long,
+                users = userJsons.mapKeys { it.key.key }.toMutableMap()
+        )
 
-        val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(JsonWrapper(recordOf, projectJson))
+        val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(JsonWrapper(
+                recordOf.map { it.key }.toSet(),
+                projectJson
+        ))
 
         val remoteProject = RemoteSharedProject(remoteProjectRecord)
 
@@ -193,15 +199,13 @@ class RemoteProjectFactory(
         return privateSaved || sharedSaved
     }
 
-    fun getRemoteCustomTime(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<*> {
-        check(!TextUtils.isEmpty(remoteProjectId))
-
+    fun getRemoteCustomTime(remoteProjectId: ProjectKey, remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<*, *> {
         check(remoteProjects.containsKey(remoteProjectId))
 
         return remoteProjects.getValue(remoteProjectId).getRemoteCustomTime(remoteCustomTimeId)
     }
 
-    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance<*>? {
+    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance<*, *>? {
         val taskKey = instanceKey.taskKey
 
         if (TextUtils.isEmpty(taskKey.remoteTaskId))
@@ -215,20 +219,19 @@ class RemoteProjectFactory(
 
     private fun getRemoteProjectForce(taskKey: TaskKey) = getRemoteProjectIfPresent(taskKey)!!
 
-    private fun getRemoteProjectIfPresent(taskKey: TaskKey): RemoteProject<*>? {
-        check(!TextUtils.isEmpty(taskKey.remoteProjectId))
+    private fun getRemoteProjectIfPresent(taskKey: TaskKey): RemoteProject<*, *>? {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return remoteProjects[taskKey.remoteProjectId]
     }
 
-    fun getTaskForce(taskKey: TaskKey): RemoteTask<*> {
+    fun getTaskForce(taskKey: TaskKey): RemoteTask<*, *> {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId)
     }
 
-    fun getTaskIfPresent(taskKey: TaskKey): RemoteTask<*>? {
+    fun getTaskIfPresent(taskKey: TaskKey): RemoteTask<*, *>? {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return getRemoteProjectIfPresent(taskKey)?.getRemoteTaskIfPresent(taskKey.remoteTaskId)
@@ -238,20 +241,19 @@ class RemoteProjectFactory(
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }
 
-    fun getRemoteProjectForce(projectId: String): RemoteProject<*> {
-        check(!TextUtils.isEmpty(projectId))
+    fun getRemoteProjectForce(projectId: ProjectKey): RemoteProject<*, *> {
         check(remoteProjects.containsKey(projectId))
 
         return remoteProjects.getValue(projectId)
     }
 
-    fun getRemoteProjectIfPresent(projectId: String): RemoteProject<*>? {
-        check(!TextUtils.isEmpty(projectId))
+    fun getRemoteProjectIfPresent(projectId: ProjectKey) = remoteProjects[projectId]
 
-        return remoteProjects[projectId]
-    }
+    fun getRemoteProjectIfPresent(projectId: String) = remoteProjects.entries
+            .singleOrNull { it.key.key == projectId }
+            ?.value
 
-    override fun deleteProject(remoteProject: RemoteProject<*>) {
+    override fun deleteProject(remoteProject: RemoteProject<*, *>) {
         val projectId = remoteProject.id
 
         check(remoteProjects.containsKey(projectId))

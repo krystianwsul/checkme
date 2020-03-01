@@ -16,7 +16,7 @@ abstract class RemoteCustomTimeRecord<T : RemoteCustomTimeId, U : CustomTimeJson
 
     abstract val id: RemoteCustomTimeId
 
-    protected abstract val remoteProjectRecord: RemoteProjectRecord<T, *>
+    protected abstract val remoteProjectRecord: RemoteProjectRecord<T, *, *>
 
     override var name by Committer(customTimeJson::name)
 

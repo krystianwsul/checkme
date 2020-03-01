@@ -1,6 +1,6 @@
 package com.krystianwsul.common.utils
 
-sealed class RemoteCustomTimeId : Serializable {
+sealed class RemoteCustomTimeId : Serializable { // todo consider ProjectKey
 
     abstract val value: String
 

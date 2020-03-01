@@ -1,17 +1,18 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.common.utils.ProjectKey
 
 class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
 
-    private var projectId: String? = null
+    private var projectId: ProjectKey.Shared? = null
 
     override val domainListener = object : DomainListener<Data>() {
 
         override fun getData(domainFactory: DomainFactory) = domainFactory.getShowProjectData(projectId)
     }
 
-    fun start(projectId: String?) {
+    fun start(projectId: ProjectKey.Shared?) {
         this.projectId = projectId
 
         internalStart()
@@ -20,18 +21,18 @@ class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
     data class Data(
             val name: String?,
             val userListDatas: Set<UserListData>,
-            val friendDatas: Map<String, UserListData>) : DomainData()
+            val friendDatas: Map<ProjectKey.Private, UserListData>
+    ) : DomainData()
 
     data class UserListData(
             val name: String,
             val email: String,
-            val id: String,
+            val id: ProjectKey.Private,
             val photoUrl: String?) {
 
         init {
             check(name.isNotEmpty())
             check(email.isNotEmpty())
-            check(id.isNotEmpty())
         }
     }
 }

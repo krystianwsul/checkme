@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.getDateInMonth
 import com.soywiz.klock.months
 
 class MonthlyDaySchedule(
-        rootTask: RemoteTask<*>,
+        rootTask: RemoteTask<*, *>,
         override val repeatingScheduleBridge: MonthlyDayScheduleBridge
 ) : RepeatingSchedule(rootTask) {
 

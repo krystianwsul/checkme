@@ -120,7 +120,6 @@ class MyApplication : Application() {
                             deviceDbInfo,
                             startTime,
                             readTime,
-                            sharedProjects,
                             friends
                     )
                 },

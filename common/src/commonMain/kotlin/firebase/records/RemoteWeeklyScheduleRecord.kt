@@ -23,9 +23,9 @@ class RemoteWeeklyScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRecord<
     val from by lazy { weeklyScheduleJson.from }
     val until by lazy { weeklyScheduleJson.until }
 
-    constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
+    constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T, *>, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
 
-    constructor(remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
+    constructor(remoteTaskRecord: RemoteTaskRecord<T, *>, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteWeeklyScheduleRecords.remove(id) == this)
 }

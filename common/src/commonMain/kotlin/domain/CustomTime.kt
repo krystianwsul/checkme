@@ -11,5 +11,5 @@ interface CustomTime : Time {
 
     val hourMinutes: Map<DayOfWeek, HourMinute>
 
-    val customTimeKey: CustomTimeKey<*>
+    val customTimeKey: CustomTimeKey<*, *>
 }

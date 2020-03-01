@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.RemoteRootUserProperties
+import com.krystianwsul.common.utils.ProjectKey
 
 
 open class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create), RemoteRootUserProperties {
@@ -18,7 +19,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
     override val id by lazy { UserData.getKey(userJson.email) }
 
-    final override val key by lazy { id }
+    final override val key by lazy { id.key }
 
     override var name by Committer(userJson::name, "$key/$USER_DATA")
 
@@ -29,10 +30,11 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
     override val projectIds
         get() = createObject.projects
                 .keys
+                .map { ProjectKey.Shared(it) }
                 .toSet()
 
-    override fun removeFriend(friendId: String) {
-        check(friendId.isNotEmpty())
+    override fun removeFriend(userKey: ProjectKey.Private) {
+        val friendId = userKey.key
 
         val friendOf = createObject.friendOf
         check(friendOf.containsKey(friendId))
@@ -45,7 +47,9 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    override fun addProject(projectId: String) {
+    override fun addProject(projectKey: ProjectKey) {
+        val projectId = projectKey.key
+
         if (!createObject.projects.containsKey(projectId)) {
             createObject.projects[projectId] = true
 
@@ -53,7 +57,9 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
         }
     }
 
-    override fun removeProject(projectId: String) {
+    override fun removeProject(projectKey: ProjectKey) {
+        val projectId = projectKey.key
+
         if (createObject.projects.containsKey(projectId)) {
             createObject.projects.remove(projectId)
 

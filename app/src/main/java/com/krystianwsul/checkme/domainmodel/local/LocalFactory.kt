@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.time.DateTime
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
@@ -19,7 +20,16 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
     fun save(source: SaveService.Source): Boolean = persistenceManager.save(source)
 
-    override fun getShown(projectId: String, taskId: String, scheduleYear: Int, scheduleMonth: Int, scheduleDay: Int, scheduleCustomTimeId: RemoteCustomTimeId?, scheduleHour: Int?, scheduleMinute: Int?): InstanceShownRecord? {
+    override fun getShown(
+            projectId: ProjectKey,
+            taskId: String,
+            scheduleYear: Int,
+            scheduleMonth: Int,
+            scheduleDay: Int,
+            scheduleCustomTimeId: RemoteCustomTimeId?,
+            scheduleHour: Int?,
+            scheduleMinute: Int?
+    ): InstanceShownRecord? {
         val matches: List<InstanceShownRecord>
         if (scheduleCustomTimeId != null) {
             check(scheduleHour == null)
@@ -27,7 +37,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
             matches = persistenceManager.instanceShownRecords
                     .asSequence()
-                    .filter { it.projectId == projectId }
+                    .filter { it.projectId == projectId.key }
                     .filter { it.taskId == taskId }
                     .filter { it.scheduleYear == scheduleYear }
                     .filter { it.scheduleMonth == scheduleMonth }
@@ -40,7 +50,7 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
 
             matches = persistenceManager.instanceShownRecords
                     .asSequence()
-                    .filter { it.projectId == projectId }
+                    .filter { it.projectId == projectId.key }
                     .filter { it.taskId == taskId }
                     .filter { it.scheduleYear == scheduleYear }
                     .filter { it.scheduleMonth == scheduleMonth }
@@ -53,12 +63,23 @@ class LocalFactory(private val persistenceManager: PersistenceManager = Persiste
         return matches.singleOrNull()
     }
 
-    override fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): InstanceShownRecord {
+    override fun createShown(
+            remoteTaskId: String,
+            scheduleDateTime: DateTime,
+            projectId: ProjectKey
+    ): InstanceShownRecord {
         val (remoteCustomTimeId, hour, minute) = scheduleDateTime.time
                 .timePair
                 .destructureRemote()
 
-        return persistenceManager.createInstanceShownRecord(remoteTaskId, scheduleDateTime.date, remoteCustomTimeId, hour, minute, projectId)
+        return persistenceManager.createInstanceShownRecord(
+                remoteTaskId,
+                scheduleDateTime.date,
+                remoteCustomTimeId,
+                hour,
+                minute,
+                projectId
+        )
     }
 
     fun deleteInstanceShownRecords(taskKeys: Set<TaskKey>) = persistenceManager.deleteInstanceShownRecords(taskKeys)

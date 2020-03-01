@@ -10,7 +10,17 @@ abstract class Instance {
 
     companion object {
 
-        fun getNotificationId(scheduleDate: Date, scheduleCustomTimeKey: CustomTimeKey<*>?, scheduleHourMinute: HourMinute?, taskKey: TaskKey) = getNotificationId(scheduleDate, scheduleCustomTimeKey?.let { Pair(it.remoteProjectId, it.remoteCustomTimeId.value) }, scheduleHourMinute, taskKey)
+        fun getNotificationId(
+                scheduleDate: Date,
+                scheduleCustomTimeKey: CustomTimeKey<*, *>?,
+                scheduleHourMinute: HourMinute?,
+                taskKey: TaskKey
+        ) = getNotificationId(
+                scheduleDate,
+                scheduleCustomTimeKey?.let { Pair(it.remoteProjectId.key, it.remoteCustomTimeId.value) },
+                scheduleHourMinute,
+                taskKey.run { Pair(remoteProjectId.key, remoteTaskId) }
+        )
 
         /*
         I'm going to make some assumptions here:
@@ -20,7 +30,12 @@ abstract class Instance {
             4. hash looping past Integer.MAX_VALUE isn't likely to cause collisions
          */
 
-        fun getNotificationId(scheduleDate: Date, scheduleCustomTimeData: Pair<String, String>?, scheduleHourMinute: HourMinute?, taskKey: TaskKey): Int {
+        fun getNotificationId(
+                scheduleDate: Date,
+                scheduleCustomTimeData: Pair<String, String>?,
+                scheduleHourMinute: HourMinute?,
+                taskKey: Pair<String, String>
+        ): Int {
             check(scheduleCustomTimeData == null != (scheduleHourMinute == null))
 
             var hash = scheduleDate.month
@@ -55,7 +70,7 @@ abstract class Instance {
 
     val instanceTime get() = instanceData.instanceTime
 
-    abstract val scheduleCustomTimeKey: CustomTimeKey<*>?
+    abstract val scheduleCustomTimeKey: CustomTimeKey<*, *>?
 
     private val scheduleHourMinute
         get() = instanceData.let {
@@ -97,9 +112,9 @@ abstract class Instance {
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
 
-    abstract val project: RemoteProject<*>
+    abstract val project: RemoteProject<*, *>
 
-    abstract val customTimeKey: Pair<String, RemoteCustomTimeId>?
+    abstract val customTimeKey: Pair<ProjectKey, RemoteCustomTimeId>?
 
     abstract fun getShown(shownFactory: ShownFactory): Shown?
 
@@ -134,7 +149,12 @@ abstract class Instance {
 
     fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
-    abstract fun setInstanceDateTime(shownFactory: ShownFactory, ownerKey: String, dateTime: DateTime, now: ExactTimeStamp)
+    abstract fun setInstanceDateTime(
+            shownFactory: ShownFactory,
+            ownerKey: ProjectKey.Private,
+            dateTime: DateTime,
+            now: ExactTimeStamp
+    )
 
     fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *, *> {
         (instanceData as? InstanceData.Real)?.let {
@@ -238,7 +258,7 @@ abstract class Instance {
 
     val hidden get() = instanceData.hidden
 
-    abstract fun getCreateTaskTimePair(ownerKey: String): TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
+    abstract fun getCreateTaskTimePair(ownerKey: ProjectKey.Private): TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
 
     fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
 
@@ -250,10 +270,10 @@ abstract class Instance {
 
     interface ShownFactory {
 
-        fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: String): Shown
+        fun createShown(remoteTaskId: String, scheduleDateTime: DateTime, projectId: ProjectKey): Shown
 
         fun getShown(
-                projectId: String,
+                projectId: ProjectKey,
                 taskId: String,
                 scheduleYear: Int,
                 scheduleMonth: Int,

@@ -8,7 +8,7 @@ import com.soywiz.klock.days
 
 object Irrelevant {
 
-    fun setIrrelevant(parent: RemoteProject.Parent, project: RemoteProject<*>, now: ExactTimeStamp): Collection<Instance> {
+    fun setIrrelevant(parent: RemoteProject.Parent, project: RemoteProject<*, *>, now: ExactTimeStamp): Collection<Instance> {
         val tasks = project.tasks
 
         // relevant hack

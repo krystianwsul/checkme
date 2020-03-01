@@ -56,7 +56,7 @@ object RelevanceChecker {
                     Irrelevant.setIrrelevant(
                             object : RemoteProject.Parent {
 
-                                override fun deleteProject(remoteProject: RemoteProject<*>) = throw UnsupportedOperationException()
+                                override fun deleteProject(remoteProject: RemoteProject<*, *>) = throw UnsupportedOperationException()
                             },
                             it,
                             now
@@ -66,7 +66,7 @@ object RelevanceChecker {
                 privateProjectManager.apply {
                     saveCallback = { callback(root, true) }
 
-                    save()
+                    save(Unit)
                 }
             }
 
@@ -82,7 +82,7 @@ object RelevanceChecker {
 
                 val parent = object : RemoteProject.Parent {
 
-                    override fun deleteProject(remoteProject: RemoteProject<*>) {
+                    override fun deleteProject(remoteProject: RemoteProject<*, *>) {
                         check(sharedProjects.contains(remoteProject.id))
 
                         sharedProjects.remove(remoteProject.id)
@@ -98,7 +98,7 @@ object RelevanceChecker {
                 sharedProjectManager.apply {
                     saveCallback = { callback(root, false) }
 
-                    save()
+                    save(Unit)
                 }
             }
         }

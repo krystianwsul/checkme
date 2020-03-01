@@ -117,9 +117,7 @@ class NotificationServlet : HttpServlet() {
             resp.writer.println()
 
             for (userKey in userKeys) {
-                check(!StringUtils.isEmpty(userKey))
-
-                val tokenUrl = URL("https://check-me-add47.firebaseio.com/$prefix/users/$userKey/userData/tokens.json?access_token=$firebaseToken")
+                val tokenUrl = URL("https://check-me-add47.firebaseio.com/$prefix/users/${userKey.key}/userData/tokens.json?access_token=$firebaseToken")
 
                 resp.writer.println(tokenUrl.toString())
                 resp.writer.println()
@@ -184,11 +182,11 @@ class NotificationServlet : HttpServlet() {
             resp.writer.println("tokens to remove: $removeTokens")
 
             val removeProjectUsers = removeTokens.mapNotNull { projectTokenData[it] }.map { (project, userKey, uuid) ->
-                "$prefix/records/$project/projectJson/users/$userKey/tokens/$uuid"
+                "$prefix/records/$project/projectJson/users/${userKey.key}/tokens/$uuid"
             }
 
             val removeRootUsers = removeTokens.mapNotNull { userTokenData[it] }.map { (userKey, uuid) ->
-                "$prefix/users/$userKey/userData/tokens/$uuid"
+                "$prefix/users/${userKey.key}/userData/tokens/$uuid"
             }
 
             resp.writer.println("project users to remove:\n" + removeProjectUsers.joinToString("\n"))

@@ -5,13 +5,14 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
+import com.krystianwsul.common.utils.ProjectKey
 import kotlin.properties.Delegates
 
 abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent {
 
     var isSaved by Delegates.observable(false) { _, _, value -> ErrorLogger.instance.log("RemoteSharedProjectManager.isSaved = $value") }
 
-    abstract val remoteProjectRecords: MutableMap<String, RemoteSharedProjectRecord>
+    abstract val remoteProjectRecords: MutableMap<ProjectKey.Shared, RemoteSharedProjectRecord>
 
     abstract val databaseWrapper: DatabaseWrapper
 
@@ -44,7 +45,7 @@ abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent 
         remoteProjectRecords[it.id] = it
     }
 
-    override fun deleteRemoteSharedProjectRecord(id: String) {
+    override fun deleteRemoteSharedProjectRecord(id: ProjectKey.Shared) {
         remoteProjectRecords.remove(id)
     }
 }

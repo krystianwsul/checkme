@@ -70,7 +70,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
-        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
+        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*, *>) {
             checkNotNull(data)
 
             timePairPersist!!.customTimeKey = customTimeKey

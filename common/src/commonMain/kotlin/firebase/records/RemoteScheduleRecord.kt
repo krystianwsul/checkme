@@ -13,7 +13,7 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord {
 
     val id: String
 
-    protected val remoteTaskRecord: RemoteTaskRecord<T>
+    protected val remoteTaskRecord: RemoteTaskRecord<T, *>
 
     final override val createObject: ScheduleWrapper
 
@@ -29,13 +29,20 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord {
 
     abstract val customTimeId: T?
 
-    constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(false) {
+    constructor(
+            id: String,
+            remoteTaskRecord: RemoteTaskRecord<T, *>,
+            scheduleWrapper: ScheduleWrapper
+    ) : super(false) {
         this.id = id
         this.remoteTaskRecord = remoteTaskRecord
         this.createObject = scheduleWrapper
     }
 
-    constructor(remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(true) {
+    constructor(
+            remoteTaskRecord: RemoteTaskRecord<T, *>,
+            scheduleWrapper: ScheduleWrapper
+    ) : super(true) {
         id = remoteTaskRecord.getScheduleRecordId()
         this.remoteTaskRecord = remoteTaskRecord
         this.createObject = scheduleWrapper

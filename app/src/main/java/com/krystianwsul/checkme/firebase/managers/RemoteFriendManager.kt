@@ -7,6 +7,7 @@ import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.utils.ProjectKey
 
 class RemoteFriendManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
@@ -14,7 +15,7 @@ class RemoteFriendManager(private val domainFactory: DomainFactory, children: It
 
     val remoteRootUserRecords = children.map { RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!) }.associateBy { it.id }
 
-    private var strangerProjects: Pair<String, List<Pair<String, Boolean>>>? = null
+    private var strangerProjects: Pair<ProjectKey, List<Pair<ProjectKey.Private, Boolean>>>? = null
 
     fun save(): Boolean {
         val values = mutableMapOf<String, Any?>()
@@ -42,7 +43,11 @@ class RemoteFriendManager(private val domainFactory: DomainFactory, children: It
         return isSaved
     }
 
-    fun updateStrangerProjects(projectId: String, addedStrangers: Set<String>, removedStrangers: Set<String>) {
+    fun updateStrangerProjects(
+            projectId: ProjectKey,
+            addedStrangers: Set<ProjectKey.Private>,
+            removedStrangers: Set<ProjectKey.Private>
+    ) {
         check(strangerProjects == null)
 
         strangerProjects = Pair(

@@ -10,6 +10,7 @@ import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.firebase.managers.RemotePrivateProjectManager
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 
 class AndroidRemotePrivateProjectManager(
         userInfo: UserInfo,
@@ -28,7 +29,11 @@ class AndroidRemotePrivateProjectManager(
 
     override val databaseWrapper = AndroidDatabaseWrapper
 
-    private fun DataSnapshot.toRecord() = RemotePrivateProjectRecord(AndroidDatabaseWrapper, key!!, getValue(PrivateProjectJson::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemotePrivateProjectRecord(
+            AndroidDatabaseWrapper,
+            ProjectKey.Private(key!!),
+            getValue(PrivateProjectJson::class.java)!!
+    )
 
     fun newSnapshot(dataSnapshot: DataSnapshot): RemotePrivateProjectRecord {
         remoteProjectRecord = dataSnapshot.toRecord()

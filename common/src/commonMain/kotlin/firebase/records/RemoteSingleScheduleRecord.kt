@@ -26,12 +26,12 @@ class RemoteSingleScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRecord<
 
     constructor(
             id: String,
-            remoteTaskRecord: RemoteTaskRecord<T>,
+            remoteTaskRecord: RemoteTaskRecord<T, *>,
             scheduleWrapper: ScheduleWrapper
     ) : super(id, remoteTaskRecord, scheduleWrapper)
 
     constructor(
-            remoteTaskRecord: RemoteTaskRecord<T>,
+            remoteTaskRecord: RemoteTaskRecord<T, *>,
             scheduleWrapper: ScheduleWrapper
     ) : super(remoteTaskRecord, scheduleWrapper)
 

@@ -19,6 +19,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ProjectListViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
@@ -97,14 +98,20 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    private var selectedProjectIds: Set<String> = setOf()
+    private var selectedProjectIds: Set<ProjectKey.Shared> = setOf()
 
     private lateinit var projectListViewModel: ProjectListViewModel
 
     private val deleteInstancesListener = { projectIds: Serializable, removeInstances: Boolean ->
         checkNotNull(data)
 
-        @Suppress("UNCHECKED_CAST") val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(0, SaveService.Source.GUI, projectIds as Set<String>, removeInstances)
+        @Suppress("UNCHECKED_CAST")
+        val projectUndoData = DomainFactory.instance.setProjectEndTimeStamps(
+                0,
+                SaveService.Source.GUI,
+                projectIds as Set<ProjectKey.Shared>,
+                removeInstances
+        )
 
         mainActivity.showSnackbarRemoved(projectIds.size) {
             DomainFactory.instance.clearProjectEndTimeStamps(0, SaveService.Source.GUI, projectUndoData)
@@ -115,7 +122,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState?.containsKey(SELECTED_PROJECT_IDS) == true) {
-            val selectedProjectIds = savedInstanceState.getStringArrayList(SELECTED_PROJECT_IDS)!!
+            val selectedProjectIds = savedInstanceState.getParcelableArrayList<ProjectKey.Shared>(SELECTED_PROJECT_IDS)!!
 
             this.selectedProjectIds = HashSet(selectedProjectIds)
         }
@@ -188,7 +195,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
                     .map { (it.modelNode as ProjectListAdapter.ProjectNode).projectData.id }
                     .toSet()
 
-        outState.putStringArrayList(SELECTED_PROJECT_IDS, ArrayList(selectedProjectIds))
+        outState.putParcelableArrayList(SELECTED_PROJECT_IDS, ArrayList(selectedProjectIds))
     }
 
     override fun setFab(floatingActionButton: FloatingActionButton) {
@@ -224,7 +231,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
         override lateinit var treeNodeCollection: TreeNodeCollection<NodeHolder>
             private set
 
-        fun initialize(projectDatas: SortedMap<String, ProjectListViewModel.ProjectData>) {
+        fun initialize(projectDatas: SortedMap<ProjectKey.Shared, ProjectListViewModel.ProjectData>) {
             projectNodes = projectDatas.values
                     .map(::ProjectNode)
                     .toMutableList()

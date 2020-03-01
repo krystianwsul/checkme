@@ -3,7 +3,9 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.domain.UserInfo
 
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import kotlin.properties.Delegates.observable
 
 
 class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.Shared, SharedCustomTimeJson> {
@@ -27,7 +29,9 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
 
     override fun mine(userInfo: UserInfo) = ownerKey == userInfo.key
 
-    var ownerKey by Committer(customTimeJson::ownerKey)
+    var ownerKey by observable(customTimeJson.ownerKey?.let { ProjectKey.Private(it) }) { _, _, newValue ->
+        customTimeJson.ownerKey = newValue?.key
+    }
 
     var privateKey: RemoteCustomTimeId.Private?
         get() = customTimeJson.privateKey

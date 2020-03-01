@@ -25,7 +25,8 @@ class FactoryListener<T : Any, U : Any, V : Any, W : Any>(
         sharedProjectCallback: (domainFactory: W, sharedProjects: V) -> Unit,
         friendCallback: (domainFactory: W, friends: U) -> Unit,
         userCallback: (domainFactory: W, user: U) -> Unit,
-        logger: (String) -> Unit = { }) {
+        logger: (String) -> Unit = { }
+) {
 
     val domainFactoryObservable: Observable<NullableWrapper<W>>
 

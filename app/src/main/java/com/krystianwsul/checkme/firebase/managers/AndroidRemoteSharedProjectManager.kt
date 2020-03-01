@@ -9,14 +9,20 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteTaskRecord
+import com.krystianwsul.common.utils.ProjectKey
 
 class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : RemoteSharedProjectManager<DomainFactory>() {
 
-    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(AndroidDatabaseWrapper, this@AndroidRemoteSharedProjectManager, key!!, getValue(JsonWrapper::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(
+            AndroidDatabaseWrapper,
+            this@AndroidRemoteSharedProjectManager,
+            ProjectKey.Shared(key!!),
+            getValue(JsonWrapper::class.java)!!
+    )
 
     override val remoteProjectRecords = children.mapNotNull {
         try {
-            it.key!! to it.toRecord()
+            ProjectKey.Shared(it.key!!) to it.toRecord()
         } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
             MyCrashlytics.logException(onlyVisibilityPresentException)
 
@@ -29,7 +35,7 @@ class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : Remo
     override val databaseWrapper = AndroidDatabaseWrapper
 
     fun setChild(dataSnapshot: DataSnapshot): RemoteSharedProjectRecord {
-        val key = dataSnapshot.key!!
+        val key = ProjectKey.Shared(dataSnapshot.key!!)
 
         return dataSnapshot.toRecord().also {
             remoteProjectRecords[key] = it
@@ -38,7 +44,7 @@ class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : Remo
 
     override fun getDatabaseCallback(extra: DomainFactory) = checkError(extra, "RemoteSharedProjectManager.save")
 
-    fun removeChild(dataSnapshot: DataSnapshot) = dataSnapshot.key!!.also {
+    fun removeChild(dataSnapshot: DataSnapshot) = ProjectKey.Shared(dataSnapshot.key!!).also {
         check(remoteProjectRecords.remove(it) != null)
     }
 }

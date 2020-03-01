@@ -17,6 +17,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.common.utils.ProjectKey
 import kotlinx.android.synthetic.main.fragment_friend_picker.view.*
 import kotlinx.android.synthetic.main.row_friend.view.*
 
@@ -33,7 +34,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
 
     private var data: Data? = null
 
-    private lateinit var listener: (String) -> Unit
+    private lateinit var listener: (ProjectKey.Private) -> Unit
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -60,7 +61,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
             initialize()
     }
 
-    fun initialize(data: Data, listener: (String) -> Unit) {
+    fun initialize(data: Data, listener: (ProjectKey.Private) -> Unit) {
         this.data = data
         this.listener = listener
 
@@ -120,13 +121,13 @@ class FriendPickerFragment : AbstractDialogFragment() {
     data class Data(val immediate: Boolean, val friendDatas: List<FriendData>)
 
     class FriendData(
-            val id: String,
+            val id: ProjectKey.Private,
             val name: String,
             val email: String,
-            val photoUrl: String?) {
+            val photoUrl: String?
+    ) {
 
         init {
-            check(!TextUtils.isEmpty(id))
             check(!TextUtils.isEmpty(name))
             check(!TextUtils.isEmpty(email))
         }

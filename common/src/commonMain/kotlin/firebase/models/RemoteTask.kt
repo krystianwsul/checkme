@@ -12,14 +12,11 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.RemoteCustomTimeId
-import com.krystianwsul.common.utils.ScheduleData
-import com.krystianwsul.common.utils.ScheduleKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
-class RemoteTask<T : RemoteCustomTimeId>(
-        val remoteProject: RemoteProject<T>,
-        private val remoteTaskRecord: RemoteTaskRecord<T>
+class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
+        val remoteProject: RemoteProject<T, U>,
+        private val remoteTaskRecord: RemoteTaskRecord<T, *>
 ) : Task() {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
@@ -128,13 +125,17 @@ class RemoteTask<T : RemoteCustomTimeId>(
         remoteTaskRecord.note = note
     }
 
-    override fun addSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) = createSchedules(ownerKey, now, scheduleDatas)
+    override fun addSchedules(
+            ownerKey: ProjectKey.Private,
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            now: ExactTimeStamp
+    ) = createSchedules(ownerKey, now, scheduleDatas)
 
     override fun addChild(childTask: Task, now: ExactTimeStamp) {
-        check(childTask is RemoteTask<*>)
+        check(childTask is RemoteTask<*, *>)
 
         @Suppress("UNCHECKED_CAST")
-        remoteProject.createTaskHierarchy(this, childTask as RemoteTask<T>, now)
+        remoteProject.createTaskHierarchy(this, childTask as RemoteTask<T, U>, now)
     }
 
     override fun deleteSchedule(schedule: Schedule) {
@@ -143,7 +144,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         remoteSchedules.remove(schedule)
     }
 
-    fun createRemoteInstanceRecord(remoteInstance: RemoteInstance<T>, scheduleDateTime: DateTime): RemoteInstanceRecord<T> {
+    fun createRemoteInstanceRecord(remoteInstance: RemoteInstance<T, U>, scheduleDateTime: DateTime): RemoteInstanceRecord<T> {
         val instanceJson = InstanceJson(null, null, null, null, null, null, null, null)
 
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
@@ -161,7 +162,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         return remoteInstanceRecord
     }
 
-    fun deleteInstance(remoteInstance: RemoteInstance<T>) {
+    fun deleteInstance(remoteInstance: RemoteInstance<T, U>) {
         val scheduleKey = remoteInstance.scheduleKey
 
         check(existingRemoteInstances.containsKey(scheduleKey))
@@ -180,7 +181,7 @@ class RemoteTask<T : RemoteCustomTimeId>(
         return existingInstance ?: generateInstance(scheduleDateTime)
     }
 
-    fun createSchedules(ownerKey: String, now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
+    fun createSchedules(ownerKey: ProjectKey.Private, now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
         for ((scheduleData, time) in scheduleDatas) {
             val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(ownerKey, time)
 
@@ -317,7 +318,11 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     override fun belongsToRemoteProject() = true
 
-    override fun updateProject(projectUpdater: ProjectUpdater, now: ExactTimeStamp, projectId: String): RemoteTask<*> {
+    override fun updateProject(
+            projectUpdater: ProjectUpdater,
+            now: ExactTimeStamp,
+            projectId: ProjectKey
+    ): RemoteTask<*, *> {
         return if (projectId == remoteProject.id)
             this
         else
@@ -355,11 +360,15 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     interface ScheduleTextFactory {
 
-        fun getScheduleText(scheduleGroup: ScheduleGroup, remoteProject: RemoteProject<*>): String
+        fun getScheduleText(scheduleGroup: ScheduleGroup, remoteProject: RemoteProject<*, *>): String
     }
 
     interface ProjectUpdater {
 
-        fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*>
+        fun <T : RemoteCustomTimeId, U : ProjectKey> convertRemoteToRemote(
+                now: ExactTimeStamp,
+                startingRemoteTask: RemoteTask<T, U>,
+                projectId: ProjectKey
+        ): RemoteTask<*, *>
     }
 }

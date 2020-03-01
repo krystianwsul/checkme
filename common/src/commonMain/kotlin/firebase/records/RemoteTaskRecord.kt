@@ -5,13 +5,14 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.firebase.json.TaskJson
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
 
-class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
+class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private constructor(
         create: Boolean,
         val id: String,
-        private val remoteProjectRecord: RemoteProjectRecord<T, *>,
+        private val remoteProjectRecord: RemoteProjectRecord<T, *, U>,
         private val taskJson: TaskJson
 ) : RemoteRecord(create) {
 
@@ -92,7 +93,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
 
     constructor(
             id: String,
-            remoteProjectRecord: RemoteProjectRecord<T, *>,
+            remoteProjectRecord: RemoteProjectRecord<T, *, U>,
             taskJson: TaskJson
     ) : this(
             false,
@@ -102,7 +103,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId> private constructor(
     )
 
     constructor(
-            remoteProjectRecord: RemoteProjectRecord<T, *>,
+            remoteProjectRecord: RemoteProjectRecord<T, *, U>,
             taskJson: TaskJson
     ) : this(
             true,

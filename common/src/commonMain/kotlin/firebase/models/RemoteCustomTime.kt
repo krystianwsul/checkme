@@ -5,11 +5,12 @@ import com.krystianwsul.common.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-abstract class RemoteCustomTime<T : RemoteCustomTimeId> : CustomTime {
+abstract class RemoteCustomTime<T : RemoteCustomTimeId, U : ProjectKey> : CustomTime {
 
-    protected abstract val remoteProject: RemoteProject<T>
+    protected abstract val remoteProject: RemoteProject<T, U>
 
     abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord<T, *>
 

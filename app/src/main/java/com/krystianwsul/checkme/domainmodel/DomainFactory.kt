@@ -48,7 +48,6 @@ class DomainFactory(
         _deviceDbInfo: DeviceDbInfo,
         startTime: ExactTimeStamp,
         readTime: ExactTimeStamp,
-        sharedSnapshot: DataSnapshot,
         friendSnapshot: DataSnapshot
 ) : RemotePrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
 
@@ -157,18 +156,9 @@ class DomainFactory(
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
-        remoteReadTimes = ReadTimes(startTime, readTime, ExactTimeStamp.now)
-
-        val sharedProjectIds = sharedSnapshot.children.map { it.key!! } // don't use remoteProjectFactory because of OnlyVisibilityPresentException
-        val existingProjectIds = remoteUserFactory.remoteUser.projectIds // todo change to checking if ids exist in remoteProjectsList, and remove deleted projects
-
-        val addProjects = sharedProjectIds - existingProjectIds
-        val removeProjects = existingProjectIds - sharedProjectIds
-
-        addProjects.forEach(remoteUserFactory.remoteUser::addProject)
-        removeProjects.forEach(remoteUserFactory.remoteUser::removeProject) // todo remove after a while
-
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
+
+        remoteReadTimes = ReadTimes(startTime, readTime, ExactTimeStamp.now)
 
         tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.init", if (firstRun) RunType.APP_START else RunType.SIGN_IN)
 
@@ -279,7 +269,7 @@ class DomainFactory(
         updateShortcuts()
 
         remoteUserFactory.remoteUser.apply {
-            val projectId = childEvent.dataSnapshot().key!!
+            val projectId = ProjectKey.Shared(childEvent.dataSnapshot().key!!)
 
             when (childEvent) {
                 is ChildAddEvent, is ChildChangeEvent -> addProject(projectId)
@@ -403,12 +393,14 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey<*>, RemoteCustomTime<*>>()
+        val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
+            it.customTimeKey
+        }.toMutableMap<CustomTimeKey<*, *>, RemoteCustomTime<*, *>>()
 
         val instance = getInstance(instanceKey)
         check(instance.isRootInstance(now))
 
-        (instance.instanceTime as? RemoteCustomTime<*>)?.let {
+        (instance.instanceTime as? RemoteCustomTime<*, *>)?.let {
             currentCustomTimes[it.customTimeKey] = it
         }
 
@@ -427,7 +419,9 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey<*>, CustomTime>()
+        val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
+            it.customTimeKey
+        }.toMutableMap<CustomTimeKey<*, *>, CustomTime>()
 
         val instanceDatas = mutableMapOf<InstanceKey, EditInstancesViewModel.InstanceData>()
 
@@ -750,7 +744,9 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val customTimes = getCurrentRemoteCustomTimes(now).associateBy { it.customTimeKey }.toMutableMap<CustomTimeKey<*>, CustomTime>()
+        val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
+            it.customTimeKey
+        }.toMutableMap<CustomTimeKey<*, *>, CustomTime>()
 
         val excludedTaskKeys = when {
             taskKey != null -> setOf(taskKey)
@@ -815,7 +811,7 @@ class DomainFactory(
             parentTreeDatas = getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             check(checkHintPresent(parentTreeDatas))
         } else {
-            var projectId: String? = null
+            var projectId: ProjectKey? = null
             if (joinTaskKeys != null) {
                 check(joinTaskKeys.size > 1)
 
@@ -824,13 +820,14 @@ class DomainFactory(
                 projectId = projectIds.single()
             }
 
-            parentTreeDatas = if (!projectId.isNullOrEmpty()) {
+            parentTreeDatas = if (projectId != null) {
                 val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
 
                 getProjectTaskTreeDatas(now, remoteProject, excludedTaskKeys, includeTaskKeys)
             } else {
                 getParentTreeDatas(now, excludedTaskKeys, includeTaskKeys)
             }
+
             check(checkHintPresent(parentTreeDatas))
         }
 
@@ -950,7 +947,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun getShowProjectData(projectId: String?): ShowProjectViewModel.Data {
+    fun getShowProjectData(projectId: ProjectKey.Shared?): ShowProjectViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowProjectData")
 
         val friendDatas = remoteFriendFactory.friends
@@ -959,7 +956,7 @@ class DomainFactory(
 
         val name: String?
         val userListDatas: Set<ShowProjectViewModel.UserListData>
-        if (!projectId.isNullOrEmpty()) {
+        if (projectId != null) {
             val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId) as RemoteSharedProject
 
             name = remoteProject.name
@@ -1207,7 +1204,7 @@ class DomainFactory(
             name: String,
             scheduleDatas: List<ScheduleData>,
             note: String?,
-            projectId: String?,
+            projectId: ProjectKey?,
             imagePath: Pair<String, Uri>?,
             copyTaskKey: TaskKey? = null
     ): TaskKey {
@@ -1219,7 +1216,7 @@ class DomainFactory(
         check(name.isNotEmpty())
         check(scheduleDatas.isNotEmpty())
 
-        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
+        val finalProjectId = projectId ?: defaultProjectId
 
         val imageUuid = imagePath?.let { newUuid() }
 
@@ -1258,8 +1255,9 @@ class DomainFactory(
             name: String,
             scheduleDatas: List<ScheduleData>,
             note: String?,
-            projectId: String?,
-            imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
+            projectId: ProjectKey?,
+            imagePath: NullableWrapper<Pair<String, Uri>>?
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.updateScheduleTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1274,7 +1272,7 @@ class DomainFactory(
         var task = getTaskForce(taskKey)
         check(task.current(now))
 
-        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
+        val finalProjectId = projectId ?: defaultProjectId
 
         task = task.updateProject(this, now, finalProjectId)
 
@@ -1311,7 +1309,7 @@ class DomainFactory(
             scheduleDatas: List<ScheduleData>,
             joinTaskKeys: List<TaskKey>,
             note: String?,
-            projectId: String?,
+            projectId: ProjectKey?,
             imagePath: Pair<String, Uri>?,
             removeInstanceKeys: List<InstanceKey>
     ): TaskKey {
@@ -1322,8 +1320,7 @@ class DomainFactory(
         check(scheduleDatas.isNotEmpty())
         check(joinTaskKeys.size > 1)
 
-        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() }
-                ?: joinTaskKeys.map { it.remoteProjectId }
+        val finalProjectId = projectId ?: joinTaskKeys.map { it.remoteProjectId }
                         .distinct()
                         .single()
 
@@ -1366,7 +1363,7 @@ class DomainFactory(
             source: SaveService.Source,
             name: String,
             note: String?,
-            projectId: String?,
+            projectId: ProjectKey?,
             imagePath: Pair<String, Uri>?,
             copyTaskKey: TaskKey? = null
     ): TaskKey {
@@ -1377,7 +1374,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
+        val finalProjectId = projectId ?: defaultProjectId
 
         val imageUuid = imagePath?.let { newUuid() }
 
@@ -1414,7 +1411,7 @@ class DomainFactory(
             name: String,
             joinTaskKeys: List<TaskKey>,
             note: String?,
-            projectId: String?,
+            projectId: ProjectKey?,
             imagePath: Pair<String, Uri>?,
             removeInstanceKeys: List<InstanceKey>
     ): TaskKey {
@@ -1426,8 +1423,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() }
-                ?: joinTaskKeys.map { it.remoteProjectId }
+        val finalProjectId = projectId ?: joinTaskKeys.map { it.remoteProjectId }
                         .distinct()
                         .single()
 
@@ -1470,8 +1466,9 @@ class DomainFactory(
             taskKey: TaskKey,
             name: String,
             note: String?,
-            projectId: String?,
-            imagePath: NullableWrapper<Pair<String, Uri>>?): TaskKey {
+            projectId: ProjectKey?,
+            imagePath: NullableWrapper<Pair<String, Uri>>?
+    ): TaskKey {
         MyCrashlytics.log("DomainFactory.updateRootTask")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -1482,7 +1479,7 @@ class DomainFactory(
         var task = getTaskForce(taskKey)
         check(task.current(now))
 
-        val finalProjectId = projectId.takeUnless { it.isNullOrEmpty() } ?: defaultProjectId
+        val finalProjectId = projectId ?: defaultProjectId
 
         task = task.updateProject(this, now, finalProjectId)
 
@@ -1689,13 +1686,10 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val remoteProject: RemoteProject<*>?
-        val taskHierarchy: TaskHierarchy
-
         val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey as TaskHierarchyKey.Remote
 
-        remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
-        taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
+        val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
+        val taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
 
         check(taskHierarchy.current(now))
 
@@ -1840,7 +1834,8 @@ class DomainFactory(
                 hourMinutes.getValue(DayOfWeek.FRIDAY).minute,
                 hourMinutes.getValue(DayOfWeek.SATURDAY).hour,
                 hourMinutes.getValue(DayOfWeek.SATURDAY).minute,
-                true)
+                true
+        )
 
         val remoteCustomTime = remoteProjectFactory.remotePrivateProject.newRemoteCustomTime(customTimeJson)
 
@@ -1910,7 +1905,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun removeFriends(keys: Set<String>) {
+    fun removeFriends(keys: Set<ProjectKey.Private>) {
         MyCrashlytics.log("DomainFactory.removeFriends")
         check(!remoteFriendFactory.isSaved)
 
@@ -1967,14 +1962,13 @@ class DomainFactory(
     fun updateProject(
             dataId: Int,
             source: SaveService.Source,
-            projectId: String,
+            projectId: ProjectKey,
             name: String,
-            addedFriends: Set<String>,
-            removedFriends: Set<String>
+            addedFriends: Set<ProjectKey.Private>,
+            removedFriends: Set<ProjectKey.Private>
     ) {
         MyCrashlytics.log("DomainFactory.updateProject")
 
-        check(projectId.isNotEmpty())
         check(name.isNotEmpty())
 
         val now = ExactTimeStamp.now
@@ -1994,14 +1988,14 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun createProject(dataId: Int, source: SaveService.Source, name: String, friends: Set<String>) {
+    fun createProject(dataId: Int, source: SaveService.Source, name: String, friends: Set<ProjectKey.Private>) {
         MyCrashlytics.log("DomainFactory.createProject")
 
         check(name.isNotEmpty())
 
         val now = ExactTimeStamp.now
 
-        val recordOf = HashSet(friends)
+        val recordOf = friends.toMutableSet()
 
         val key = deviceDbInfo.key
         check(!recordOf.contains(key))
@@ -2024,7 +2018,12 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setProjectEndTimeStamps(dataId: Int, source: SaveService.Source, projectIds: Set<String>, removeInstances: Boolean): ProjectUndoData {
+    fun setProjectEndTimeStamps(
+            dataId: Int,
+            source: SaveService.Source,
+            projectIds: Set<ProjectKey>,
+            removeInstances: Boolean
+    ): ProjectUndoData {
         MyCrashlytics.log("DomainFactory.setProjectEndTimeStamps")
 
         check(projectIds.isNotEmpty())
@@ -2190,7 +2189,8 @@ class DomainFactory(
                                 childTask.getScheduleText(ScheduleText, now),
                                 childTask.note,
                                 CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
-                                (childTask.project as? RemoteSharedProject)?.id)
+                                (childTask.project as? RemoteSharedProject)?.id
+                        )
 
                         taskParentKey to parentTreeData
                     }
@@ -2272,7 +2272,12 @@ class DomainFactory(
         return parentTreeDatas
     }
 
-    private fun getProjectTaskTreeDatas(now: ExactTimeStamp, remoteProject: RemoteProject<*>, excludedTaskKeys: Set<TaskKey>, includedTaskKeys: Set<TaskKey>): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
+    private fun getProjectTaskTreeDatas(
+            now: ExactTimeStamp,
+            remoteProject: RemoteProject<*, *>,
+            excludedTaskKeys: Set<TaskKey>,
+            includedTaskKeys: Set<TaskKey>
+    ): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
         return remoteProject.tasks
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
@@ -2293,10 +2298,12 @@ class DomainFactory(
 
     private val ownerKey get() = remoteProjectFactory.remotePrivateProject.id
 
-    override fun <T : RemoteCustomTimeId> convertRemoteToRemote(now: ExactTimeStamp, startingRemoteTask: RemoteTask<T>, projectId: String): RemoteTask<*> {
-        check(projectId.isNotEmpty())
-
-        val remoteToRemoteConversion = RemoteToRemoteConversion<T>()
+    override fun <T : RemoteCustomTimeId, U : ProjectKey> convertRemoteToRemote(
+            now: ExactTimeStamp,
+            startingRemoteTask: RemoteTask<T, U>,
+            projectId: ProjectKey
+    ): RemoteTask<*, *> {
+        val remoteToRemoteConversion = RemoteToRemoteConversion<T, U>()
         val startProject = startingRemoteTask.remoteProject
         startProject.convertRemoteToRemoteHelper(now, remoteToRemoteConversion, startingRemoteTask)
 
@@ -2373,7 +2380,12 @@ class DomainFactory(
 
     fun getTaskIfPresent(taskKey: TaskKey) = remoteProjectFactory.getTaskIfPresent(taskKey)
 
-    private fun getTaskListChildTaskDatas(parentTask: Task, now: ExactTimeStamp, alwaysShow: Boolean = true, hierarchyExactTimeStamp: ExactTimeStamp = now): List<TaskListFragment.ChildTaskData> {
+    private fun getTaskListChildTaskDatas(
+            parentTask: Task,
+            now: ExactTimeStamp,
+            alwaysShow: Boolean = true,
+            hierarchyExactTimeStamp: ExactTimeStamp = now
+    ): List<TaskListFragment.ChildTaskData> {
         return parentTask.getChildTaskHierarchies(hierarchyExactTimeStamp)
                 .asSequence()
                 .sortedBy { it.ordinal }
@@ -2391,7 +2403,8 @@ class DomainFactory(
                             childTask.getImage(deviceDbInfo),
                             childTask.current(now),
                             childTask.hasInstances(now),
-                            alwaysShow)
+                            alwaysShow
+                    )
                 }
                 .toList()
     }
@@ -2431,16 +2444,22 @@ class DomainFactory(
         irrelevantInstanceShownRecords.forEach { it.delete() }
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject<*>) = notifyCloud(setOf(remoteProject))
+    private fun notifyCloud(remoteProject: RemoteProject<*, *>) = notifyCloud(setOf(remoteProject))
 
-    private fun notifyCloud(remoteProjects: Set<RemoteProject<*>>) {
+    private fun notifyCloud(remoteProjects: Set<RemoteProject<*, *>>) {
         if (remoteProjects.isNotEmpty())
             notifyCloudPrivateFixed(remoteProjects.toMutableSet(), mutableListOf())
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject<*>, userKeys: Collection<String>) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userKeys.toMutableList())
+    private fun notifyCloud(
+            remoteProject: RemoteProject<*, *>,
+            userKeys: Collection<ProjectKey.Private>
+    ) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userKeys.toMutableList())
 
-    private fun notifyCloudPrivateFixed(remoteProjects: MutableSet<RemoteProject<*>>, userKeys: MutableCollection<String>) {
+    private fun notifyCloudPrivateFixed(
+            remoteProjects: MutableSet<RemoteProject<*, *>>,
+            userKeys: MutableCollection<ProjectKey.Private>
+    ) {
         aggregateData?.run {
             notificationProjects.addAll(remoteProjects)
             notificationUserKeys.addAll(userKeys)
@@ -2512,7 +2531,7 @@ class DomainFactory(
                 hourMinute = HourMinute(instanceShownRecord.scheduleHour, instanceShownRecord.scheduleMinute)
             }
 
-            val taskKey = TaskKey(instanceShownRecord.projectId, instanceShownRecord.taskId)
+            val taskKey = Pair(instanceShownRecord.projectId, instanceShownRecord.taskId)
 
             NotificationWrapper.instance.cancelNotification(Instance.getNotificationId(scheduleDate, customTimePair, hourMinute, taskKey))
             instanceShownRecord.notificationShown = false
@@ -2521,16 +2540,15 @@ class DomainFactory(
         val shownInstanceKeys = instanceShownPairs.filter { it.second != null }.map { (instanceShownRecord, task) ->
             val scheduleDate = Date(instanceShownRecord.scheduleYear, instanceShownRecord.scheduleMonth, instanceShownRecord.scheduleDay)
             val remoteCustomTimeId = instanceShownRecord.scheduleCustomTimeId
+            val project = task!!.project
 
-            val customTimeKey: CustomTimeKey<*>?
+            val customTimeKey: CustomTimeKey<*, *>?
             val hourMinute: HourMinute?
             if (!remoteCustomTimeId.isNullOrEmpty()) {
                 check(instanceShownRecord.scheduleHour == null)
                 check(instanceShownRecord.scheduleMinute == null)
 
-                val project = task!!.project
-
-                customTimeKey = getCustomTimeKey(instanceShownRecord.projectId, project.getRemoteCustomTimeId(remoteCustomTimeId))
+                customTimeKey = getCustomTimeKey(project.id, project.getRemoteCustomTimeId(remoteCustomTimeId))
                 hourMinute = null
             } else {
                 checkNotNull(instanceShownRecord.scheduleHour)
@@ -2540,7 +2558,7 @@ class DomainFactory(
                 hourMinute = HourMinute(instanceShownRecord.scheduleHour, instanceShownRecord.scheduleMinute)
             }
 
-            val taskKey = TaskKey(instanceShownRecord.projectId, instanceShownRecord.taskId)
+            val taskKey = TaskKey(project.id, instanceShownRecord.taskId)
             InstanceKey(taskKey, scheduleDate, TimePair(customTimeKey, hourMinute))
         }
 
@@ -2749,9 +2767,10 @@ class DomainFactory(
         return dataWrapper
     }
 
-    private fun getCustomTimeKey(remoteProjectId: String, remoteCustomTimeId: RemoteCustomTimeId): CustomTimeKey<*> {
-        return remoteProjectFactory.getRemoteCustomTime(remoteProjectId, remoteCustomTimeId).customTimeKey
-    }
+    private fun getCustomTimeKey(
+            remoteProjectId: ProjectKey,
+            remoteCustomTimeId: RemoteCustomTimeId
+    ) = remoteProjectFactory.getRemoteCustomTime(remoteProjectId, remoteCustomTimeId).customTimeKey
 
     private fun copyTask(now: ExactTimeStamp, task: Task, copyTaskKey: TaskKey) {
         val copiedTask = getTaskForce(copyTaskKey)
@@ -2768,7 +2787,7 @@ class DomainFactory(
             ?.let { getCustomTime(it) }
             ?: NormalTime(timePair.hourMinute!!)
 
-    private fun getCustomTime(customTimeKey: CustomTimeKey<*>) = remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
+    private fun getCustomTime(customTimeKey: CustomTimeKey<*, *>) = remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 
@@ -2782,7 +2801,7 @@ class DomainFactory(
 
     private class AggregateData {
 
-        val notificationProjects = mutableSetOf<RemoteProject<*>>()
-        val notificationUserKeys = mutableSetOf<String>()
+        val notificationProjects = mutableSetOf<RemoteProject<*, *>>()
+        val notificationUserKeys = mutableSetOf<ProjectKey.Private>()
     }
 }

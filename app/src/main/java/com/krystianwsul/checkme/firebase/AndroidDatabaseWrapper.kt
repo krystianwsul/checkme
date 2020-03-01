@@ -30,6 +30,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
 
     fun getUserDataDatabaseReference(key: ProjectKey.Private) = rootReference.child("$USERS_KEY/${key.key}/userData")
 
+    // todo same change as for projects
     fun addFriend(friendKey: ProjectKey.Private) = rootReference.child("$USERS_KEY/${friendKey.key}/friendOf/${userInfo.key}").setValue(true)
 
     fun addFriends(friendKeys: Set<ProjectKey.Private>) = rootReference.child(USERS_KEY).updateChildren(friendKeys.map { "${it.key}/friendOf/${userInfo.key}" to true }.toMap())

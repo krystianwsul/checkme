@@ -28,6 +28,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
                 .child(root)
     }
 
+    // todo add UserKey class
     fun getUserDataDatabaseReference(key: ProjectKey.Private) = rootReference.child("$USERS_KEY/${key.key}/userData")
 
     // todo same change as for projects

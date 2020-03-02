@@ -111,7 +111,13 @@ class MyApplication : Application() {
                     val remoteUserFactory = RemoteUserFactory(localFactory.uuid, user, deviceInfo)
 
                     val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
-                    val remoteProjectFactory = RemoteProjectFactory(deviceDbInfo, localFactory, sharedProjects.children, privateProject, ExactTimeStamp.now)
+                    val remoteProjectFactory = RemoteProjectFactory(
+                            deviceDbInfo,
+                            localFactory,
+                            sharedProjects.children,
+                            privateProject,
+                            ExactTimeStamp.now
+                    )
 
                     DomainFactory(
                             localFactory,

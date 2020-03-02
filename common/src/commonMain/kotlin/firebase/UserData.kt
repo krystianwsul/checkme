@@ -2,7 +2,7 @@ package com.krystianwsul.common.firebase
 
 import com.krystianwsul.common.utils.Parcelable
 import com.krystianwsul.common.utils.Parcelize
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.common.utils.toBase64
 
 @Parcelize
@@ -13,7 +13,7 @@ data class UserData(
 
     companion object {
 
-        fun getKey(email: String) = ProjectKey.Private(email.trim { it <= ' ' }
+        fun getKey(email: String) = UserKey(email.trim { it <= ' ' }
                 .toLowerCase()
                 .toBase64())
     }

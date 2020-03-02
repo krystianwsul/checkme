@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 
 class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
 
@@ -21,14 +22,15 @@ class ShowProjectViewModel : DomainViewModel<ShowProjectViewModel.Data>() {
     data class Data(
             val name: String?,
             val userListDatas: Set<UserListData>,
-            val friendDatas: Map<ProjectKey.Private, UserListData>
+            val friendDatas: Map<UserKey, UserListData>
     ) : DomainData()
 
     data class UserListData(
             val name: String,
             val email: String,
-            val id: ProjectKey.Private,
-            val photoUrl: String?) {
+            val id: UserKey,
+            val photoUrl: String?
+    ) {
 
         init {
             check(name.isNotEmpty())

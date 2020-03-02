@@ -6,6 +6,7 @@ import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.UserKey
 
 class RemotePrivateProject(
         override val remoteProjectRecord: RemotePrivateProjectRecord
@@ -37,7 +38,7 @@ class RemotePrivateProject(
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
     }
 
-    override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<ProjectKey.Private>) = throw UnsupportedOperationException()
+    override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) = throw UnsupportedOperationException()
 
     fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
@@ -65,10 +66,10 @@ class RemotePrivateProject(
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
 
-    override fun getOrCreateCustomTime(ownerKey: ProjectKey.Private, remoteCustomTime: RemoteCustomTime<*, *>) = when (remoteCustomTime) {
+    override fun getOrCreateCustomTime(ownerKey: UserKey, remoteCustomTime: RemoteCustomTime<*, *>) = when (remoteCustomTime) {
         is RemotePrivateCustomTime -> remoteCustomTime
         is RemoteSharedCustomTime -> {
-            if (remoteCustomTime.ownerKey == id) {
+            if (remoteCustomTime.ownerKey?.toPrivateProjectKey() == id) {
                 customTimes.single { it.id == remoteCustomTime.privateKey }
             } else {
                 val customTimeJson = PrivateCustomTimeJson(

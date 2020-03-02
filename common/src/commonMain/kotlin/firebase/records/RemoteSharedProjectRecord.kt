@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.UserKey
 
 class RemoteSharedProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
@@ -38,7 +39,7 @@ class RemoteSharedProjectRecord(
                 .associate { (id, userJson) ->
                     check(id.isNotEmpty())
 
-                    ProjectKey.Private(id) to RemoteProjectUserRecord(create, this, userJson)
+                    UserKey(id) to RemoteProjectUserRecord(create, this, userJson)
                 }
                 .toMutableMap()
     }
@@ -70,7 +71,7 @@ class RemoteSharedProjectRecord(
             jsonWrapper
     )
 
-    fun updateRecordOf(addedFriends: Set<ProjectKey.Private>, removedFriends: Set<ProjectKey.Private>) {
+    fun updateRecordOf(addedFriends: Set<UserKey>, removedFriends: Set<UserKey>) {
         check(addedFriends.none { removedFriends.contains(it) })
 
         jsonWrapper.updateRecordOf(addedFriends, removedFriends)

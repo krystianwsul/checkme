@@ -239,7 +239,7 @@ abstract class Task {
 
     abstract fun setName(name: String, note: String?)
 
-    fun updateSchedules(ownerKey: ProjectKey.Private, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
+    fun updateSchedules(ownerKey: UserKey, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
         val removeSchedules = ArrayList<Schedule>()
         val addScheduleDatas = ArrayList(scheduleDatas)
 
@@ -261,7 +261,7 @@ abstract class Task {
     }
 
     protected abstract fun addSchedules(
-            ownerKey: ProjectKey.Private,
+            ownerKey: UserKey,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp
     )

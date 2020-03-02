@@ -40,7 +40,7 @@ class RemotePrivateProjectRecord(
             databaseWrapper: DatabaseWrapper,
             userInfo: UserInfo,
             projectJson: PrivateProjectJson
-    ) : this(databaseWrapper, true, userInfo.key, projectJson)
+    ) : this(databaseWrapper, true, userInfo.key.toPrivateProjectKey(), projectJson)
 
     fun newRemoteCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {
         val remoteCustomTimeRecord = RemotePrivateCustomTimeRecord(this, customTimeJson)

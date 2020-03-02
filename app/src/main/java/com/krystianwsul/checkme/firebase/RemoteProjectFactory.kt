@@ -140,7 +140,7 @@ class RemoteProjectFactory(
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo
     ) = createRemoteTaskHelper(now, name, note, projectId, imageUuid, deviceDbInfo).apply {
-        createSchedules(remotePrivateProject.id, now, scheduleDatas)
+        createSchedules(remotePrivateProject.id.toUserKey(), now, scheduleDatas)
     }
 
     fun createRemoteTaskHelper(
@@ -160,7 +160,7 @@ class RemoteProjectFactory(
     fun createRemoteProject(
             name: String,
             now: ExactTimeStamp,
-            recordOf: Set<ProjectKey.Private>,
+            recordOf: Set<UserKey>,
             remoteRootUser: RemoteRootUser,
             userInfo: UserInfo,
             remoteFriendFactory: RemoteFriendFactory

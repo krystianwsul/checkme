@@ -96,12 +96,12 @@ class MyApplication : Application() {
 
         FactoryListener(
                 deviceInfoRelay,
-                { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key) },
-                { AndroidDatabaseWrapper.getSharedProjectSingle(it.key) },
+                { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key.toPrivateProjectKey()) },
+                { AndroidDatabaseWrapper.getSharedProjectSingle(it.key.toPrivateProjectKey()) },
                 { AndroidDatabaseWrapper.getFriendSingle(it.key) },
                 { AndroidDatabaseWrapper.getUserSingle(it.key) },
-                { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key) },
-                { AndroidDatabaseWrapper.getSharedProjectEvents(it.key) },
+                { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key.toPrivateProjectKey()) },
+                { AndroidDatabaseWrapper.getSharedProjectEvents(it.key.toPrivateProjectKey()) },
                 { AndroidDatabaseWrapper.getFriendObservable(it.key) },
                 { AndroidDatabaseWrapper.getUserObservable(it.key) },
                 { startTime, deviceInfo, privateProject, sharedProjects, friends, user ->

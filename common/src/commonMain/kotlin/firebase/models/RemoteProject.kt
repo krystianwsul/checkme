@@ -11,10 +11,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.Time
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ProjectKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
 abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
 
@@ -113,11 +110,11 @@ abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
     }
 
     abstract fun getOrCreateCustomTime(
-            ownerKey: ProjectKey.Private,
+            ownerKey: UserKey,
             remoteCustomTime: RemoteCustomTime<*, *>
     ): RemoteCustomTime<T, U>
 
-    fun getOrCopyTime(ownerKey: ProjectKey.Private, time: Time) = time.let {
+    fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
         when (it) {
             is CustomTime -> getOrCreateCustomTime(ownerKey, it as RemoteCustomTime<*, *>)
             is NormalTime -> it
@@ -126,7 +123,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
     }
 
     fun getOrCopyAndDestructureTime(
-            ownerKey: ProjectKey.Private,
+            ownerKey: UserKey,
             time: Time
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
         is CustomTime -> Triple(newTime.customTimeKey.remoteCustomTimeId, null, null)
@@ -134,7 +131,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
         else -> throw IllegalArgumentException()
     }
 
-    private fun getInstanceJson(ownerKey: ProjectKey.Private, instance: Instance): InstanceJson {
+    private fun getInstanceJson(ownerKey: UserKey, instance: Instance): InstanceJson {
         val done = instance.done?.long
 
         val instanceDate = instance.instanceDate
@@ -261,7 +258,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchyContainer.getById(id)
 
-    abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<ProjectKey.Private>)
+    abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>)
 
     abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<T, U>
 

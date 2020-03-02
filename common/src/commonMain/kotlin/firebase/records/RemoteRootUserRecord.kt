@@ -4,6 +4,7 @@ import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.models.RemoteRootUserProperties
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 
 
 open class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create), RemoteRootUserProperties {
@@ -33,7 +34,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
                 .map { ProjectKey.Shared(it) }
                 .toSet()
 
-    override fun removeFriend(userKey: ProjectKey.Private) {
+    override fun removeFriend(userKey: UserKey) {
         val friendId = userKey.key
 
         val friendOf = createObject.friendOf

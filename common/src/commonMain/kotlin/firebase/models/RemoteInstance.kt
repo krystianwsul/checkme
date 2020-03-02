@@ -9,6 +9,7 @@ import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.UserKey
 
 class RemoteInstance<T : RemoteCustomTimeId, U : ProjectKey> : Instance {
 
@@ -83,7 +84,7 @@ class RemoteInstance<T : RemoteCustomTimeId, U : ProjectKey> : Instance {
 
     override fun setInstanceDateTime(
             shownFactory: ShownFactory,
-            ownerKey: ProjectKey.Private,
+            ownerKey: UserKey,
             dateTime: DateTime,
             now: ExactTimeStamp
     ) {
@@ -136,7 +137,7 @@ class RemoteInstance<T : RemoteCustomTimeId, U : ProjectKey> : Instance {
 
     override fun getNullableOrdinal() = (instanceData as? RemoteReal<*, *>)?.instanceRecord?.ordinal
 
-    override fun getCreateTaskTimePair(ownerKey: ProjectKey.Private): TimePair {
+    override fun getCreateTaskTimePair(ownerKey: UserKey): TimePair {
         val instanceTimePair = instanceTime.timePair
         val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
 
@@ -144,7 +145,7 @@ class RemoteInstance<T : RemoteCustomTimeId, U : ProjectKey> : Instance {
             val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.remoteCustomTimeId) as RemoteSharedCustomTime
 
             if (sharedCustomTime.ownerKey == ownerKey) {
-                val privateCustomTimeKey = CustomTimeKey.Private(ownerKey, sharedCustomTime.privateKey!!)
+                val privateCustomTimeKey = CustomTimeKey.Private(ownerKey.toPrivateProjectKey(), sharedCustomTime.privateKey!!)
 
                 TimePair(privateCustomTimeKey)
             } else {

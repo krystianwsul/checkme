@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.firebase.managers.RemoteFriendManager
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.models.RemoteRootUser
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 
 class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
@@ -27,7 +28,7 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
 
     fun save() = remoteFriendManager.save()
 
-    fun getUserJsons(friendIds: Set<ProjectKey.Private>): MutableMap<ProjectKey.Private, UserJson> {
+    fun getUserJsons(friendIds: Set<UserKey>): MutableMap<UserKey, UserJson> {
         check(friendIds.all { _friends.containsKey(it) })
 
         return _friends.entries
@@ -36,13 +37,13 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
                 .toMutableMap()
     }
 
-    fun getFriend(friendId: ProjectKey.Private): RemoteRootUser {
+    fun getFriend(friendId: UserKey): RemoteRootUser {
         check(_friends.containsKey(friendId))
 
         return _friends[friendId]!!
     }
 
-    fun removeFriend(userKey: ProjectKey.Private, friendId: ProjectKey.Private) {
+    fun removeFriend(userKey: UserKey, friendId: UserKey) {
         check(_friends.containsKey(friendId))
 
         _friends[friendId]!!.removeFriend(userKey)
@@ -52,8 +53,8 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
 
     fun updateProjects(
             projectId: ProjectKey,
-            addedUsers: Set<ProjectKey.Private>,
-            removedUsers: Set<ProjectKey.Private>
+            addedUsers: Set<UserKey>,
+            removedUsers: Set<UserKey>
     ) {
         val addedFriends = addedUsers.mapNotNull(_friends::get)
         val addedStrangers = addedUsers - addedFriends.map { it.id }

@@ -21,6 +21,7 @@ import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
@@ -341,7 +342,7 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     inner class UserNode(
             val userListData: ShowProjectViewModel.UserListData,
-            private val selectedIds: Set<ProjectKey.Private>
+            private val selectedIds: Set<UserKey>
     ) : GroupHolderNode(0) {
 
         override val ripple = true
@@ -376,9 +377,9 @@ class UserListFragment : AbstractFragment(), FabUser {
 
     @Parcelize
     class SaveState(
-            val addedIds: Set<ProjectKey.Private>,
-            val removedIds: Set<ProjectKey.Private>,
-            val selectedIds: Set<ProjectKey.Private>
+            val addedIds: Set<UserKey>,
+            val removedIds: Set<UserKey>,
+            val selectedIds: Set<UserKey>
     ) : Parcelable
 
     interface UserListListener : SnackbarListener {

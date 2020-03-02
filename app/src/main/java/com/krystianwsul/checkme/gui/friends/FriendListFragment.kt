@@ -23,7 +23,7 @@ import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
@@ -49,7 +49,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private var data: FriendListViewModel.Data? = null
 
-    private var selectedIds = listOf<ProjectKey.Private>()
+    private var selectedIds = listOf<UserKey>()
 
     private val listener get() = activity as FriendListListener
 

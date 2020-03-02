@@ -10,6 +10,7 @@ import com.krystianwsul.checkme.utils.getMessage
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 
 
 object AndroidDatabaseWrapper : DatabaseWrapper() {
@@ -28,20 +29,19 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
                 .child(root)
     }
 
-    // todo add UserKey class
-    fun getUserDataDatabaseReference(key: ProjectKey.Private) = rootReference.child("$USERS_KEY/${key.key}/userData")
+    fun getUserDataDatabaseReference(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}/userData")
 
     // todo same change as for projects
-    fun addFriend(friendKey: ProjectKey.Private) = rootReference.child("$USERS_KEY/${friendKey.key}/friendOf/${userInfo.key}").setValue(true)
+    fun addFriend(friendKey: UserKey) = rootReference.child("$USERS_KEY/${friendKey.key}/friendOf/${userInfo.key}").setValue(true)
 
-    fun addFriends(friendKeys: Set<ProjectKey.Private>) = rootReference.child(USERS_KEY).updateChildren(friendKeys.map { "${it.key}/friendOf/${userInfo.key}" to true }.toMap())
+    fun addFriends(friendKeys: Set<UserKey>) = rootReference.child(USERS_KEY).updateChildren(friendKeys.map { "${it.key}/friendOf/${userInfo.key}" to true }.toMap())
 
-    fun getFriendSingle(key: ProjectKey.Private) = rootReference.child(USERS_KEY)
+    fun getFriendSingle(key: UserKey) = rootReference.child(USERS_KEY)
             .orderByChild("friendOf/${key.key}")
             .equalTo(true)
             .data()
 
-    fun getFriendObservable(key: ProjectKey.Private) = rootReference.child(USERS_KEY)
+    fun getFriendObservable(key: UserKey) = rootReference.child(USERS_KEY)
             .orderByChild("friendOf/${key.key}")
             .equalTo(true)
             .dataChanges()
@@ -76,7 +76,7 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
 
     fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
 
-    fun getUserSingle(key: ProjectKey.Private) = rootReference.child("$USERS_KEY/${key.key}").data()
+    fun getUserSingle(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").data()
 
-    fun getUserObservable(key: ProjectKey.Private) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()
+    fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()
 }

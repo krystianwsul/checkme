@@ -8,6 +8,7 @@ import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.UserKey
 
 class RemoteSharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord
@@ -82,8 +83,13 @@ class RemoteSharedProject(
         remoteProjectUser.photoUrl = photoUrl
     }
 
-    override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<ProjectKey.Private>) {
-        remoteProjectRecord.updateRecordOf(addedFriends.asSequence().map { it.id }.toSet(), removedFriends)
+    override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) {
+        remoteProjectRecord.updateRecordOf(
+                addedFriends.asSequence()
+                        .map { it.id }
+                        .toSet(),
+                removedFriends
+        )
 
         for (addedFriend in addedFriends)
             addUser(addedFriend)
@@ -103,7 +109,7 @@ class RemoteSharedProject(
 
     fun getSharedTimeIfPresent(
             privateCustomTimeId: RemoteCustomTimeId.Private,
-            ownerKey: ProjectKey.Private
+            ownerKey: UserKey
     ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId }
 
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteSharedCustomTime {
@@ -126,7 +132,7 @@ class RemoteSharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(ownerKey: ProjectKey.Private, remoteCustomTime: RemoteCustomTime<*, *>): RemoteSharedCustomTime {
+    override fun getOrCreateCustomTime(ownerKey: UserKey, remoteCustomTime: RemoteCustomTime<*, *>): RemoteSharedCustomTime {
         fun copy(): RemoteSharedCustomTime {
             val private = remoteCustomTime as? RemotePrivateCustomTime
 

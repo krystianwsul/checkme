@@ -126,7 +126,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
     }
 
     override fun addSchedules(
-            ownerKey: ProjectKey.Private,
+            ownerKey: UserKey,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp
     ) = createSchedules(ownerKey, now, scheduleDatas)
@@ -181,7 +181,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
         return existingInstance ?: generateInstance(scheduleDateTime)
     }
 
-    fun createSchedules(ownerKey: ProjectKey.Private, now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
+    fun createSchedules(ownerKey: UserKey, now: ExactTimeStamp, scheduleDatas: List<Pair<ScheduleData, Time>>) {
         for ((scheduleData, time) in scheduleDatas) {
             val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(ownerKey, time)
 

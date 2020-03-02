@@ -151,7 +151,7 @@ abstract class Instance {
 
     abstract fun setInstanceDateTime(
             shownFactory: ShownFactory,
-            ownerKey: ProjectKey.Private,
+            ownerKey: UserKey,
             dateTime: DateTime,
             now: ExactTimeStamp
     )
@@ -258,7 +258,7 @@ abstract class Instance {
 
     val hidden get() = instanceData.hidden
 
-    abstract fun getCreateTaskTimePair(ownerKey: ProjectKey.Private): TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
+    abstract fun getCreateTaskTimePair(ownerKey: UserKey): TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
 
     fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
 

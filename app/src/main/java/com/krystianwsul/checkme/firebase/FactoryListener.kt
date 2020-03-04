@@ -1,6 +1,10 @@
 package com.krystianwsul.checkme.firebase
 
+import com.androidhuman.rxfirebase2.database.ChildEvent
+import com.google.firebase.database.DataSnapshot
+import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
+import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -9,37 +13,43 @@ import io.reactivex.rxkotlin.Singles
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.plusAssign
 
-class FactoryListener<T : Any, U : Any, V : Any, W : Any>(
-        userInfoObservable: Observable<NullableWrapper<T>>,
-        getPrivateProjectSingle: (T) -> Single<U>,
-        getSharedProjectSingle: (T) -> Single<U>,
-        getFriendSingle: (T) -> Single<U>,
-        getUserSingle: (T) -> Single<U>,
-        getPrivateProjectObservable: (T) -> Observable<U>,
-        getSharedProjectEvents: (T) -> Observable<V>,
-        getFriendObservable: (T) -> Observable<U>,
-        getUserObservable: (T) -> Observable<U>,
-        initialCallback: (startTime: ExactTimeStamp, userInfo: T, privateProject: U, sharedProjects: U, friends: U, user: U) -> W,
+class FactoryListener(
+        deviceInfoObservable: Observable<NullableWrapper<DeviceInfo>>,
+        getUserSingle: (DeviceInfo) -> Single<DataSnapshot>,
+        getUserObservable: (DeviceInfo) -> Observable<DataSnapshot>,
+        userFactoryCallback: (userInfo: DeviceInfo, user: DataSnapshot) -> RemoteUserFactory,
+        getPrivateProjectSingle: (DeviceInfo) -> Single<DataSnapshot>,
+        getSharedProjectSingle: (DeviceInfo) -> Single<DataSnapshot>,
+        getPrivateProjectObservable: (DeviceInfo) -> Observable<DataSnapshot>,
+        getSharedProjectEvents: (DeviceInfo) -> Observable<ChildEvent>,
+        projectFactoryCallback: (deviceInfo: DeviceInfo, userFactory: RemoteUserFactory, privateProject: DataSnapshot, sharedProjects: DataSnapshot) -> RemoteProjectFactory,
+        getFriendSingle: (DeviceInfo) -> Single<DataSnapshot>,
+        getFriendObservable: (DeviceInfo) -> Observable<DataSnapshot>,
+        initialCallback: (startTime: ExactTimeStamp, userInfo: DeviceInfo, userFactory: RemoteUserFactory, projectFactory: RemoteProjectFactory, friends: DataSnapshot) -> DomainFactory,
         clearCallback: () -> Unit,
-        privateProjectCallback: (domainFactory: W, privateProject: U) -> Unit,
-        sharedProjectCallback: (domainFactory: W, sharedProjects: V) -> Unit,
-        friendCallback: (domainFactory: W, friends: U) -> Unit,
-        userCallback: (domainFactory: W, user: U) -> Unit,
+        privateProjectCallback: (domainFactory: DomainFactory, privateProject: DataSnapshot) -> Unit,
+        sharedProjectCallback: (domainFactory: DomainFactory, sharedProjects: ChildEvent) -> Unit,
+        friendCallback: (domainFactory: DomainFactory, friends: DataSnapshot) -> Unit,
+        userCallback: (domainFactory: DomainFactory, user: DataSnapshot) -> Unit,
         logger: (String) -> Unit = { }
 ) {
 
-    val domainFactoryObservable: Observable<NullableWrapper<W>>
+    val domainFactoryObservable: Observable<NullableWrapper<DomainFactory>>
 
     init {
         val domainDisposable = CompositeDisposable()
 
-        domainFactoryObservable = userInfoObservable.switchMapSingle {
+        domainFactoryObservable = deviceInfoObservable.switchMapSingle {
             logger("userInfo begin $it")
 
             domainDisposable.clear()
 
             if (it.value != null) {
                 val userInfo = it.value
+
+                val userObservable = getUserObservable(userInfo).doOnNext { logger("userObservable $it") }
+                        .publish()
+                        .apply { domainDisposable += connect() }
 
                 val privateProjectObservable = getPrivateProjectObservable(userInfo).doOnNext { logger("privateProjectObservable $it") }
                         .publish()
@@ -53,24 +63,28 @@ class FactoryListener<T : Any, U : Any, V : Any, W : Any>(
                         .publish()
                         .apply { domainDisposable += connect() }
 
-                val userObservable = getUserObservable(userInfo).doOnNext { logger("userObservable $it") }
-                        .publish()
-                        .apply { domainDisposable += connect() }
-
+                val userSingle = getUserSingle(userInfo).doOnSuccess { logger("userSingle $it") }.cache()
                 val privateProjectSingle = getPrivateProjectSingle(userInfo).doOnSuccess { logger("privateProjectSingle $it") }.cache()
                 val sharedProjectSingle = getSharedProjectSingle(userInfo).doOnSuccess { logger("sharedProjectSingle $it") }.cache()
                 val friendSingle = getFriendSingle(userInfo).doOnSuccess { logger("friendSingle $it") }.cache()
-                val userSingle = getUserSingle(userInfo).doOnSuccess { logger("userSingle $it") }.cache()
 
                 val startTime = ExactTimeStamp.now
 
-                val domainFactorySingle = Singles.zip(
+                val userFactorySingle = userSingle.map { userFactoryCallback(userInfo, it) }
+                val projectFactorySingle = Singles.zip(
+                        userFactorySingle,
                         privateProjectSingle,
-                        sharedProjectSingle,
-                        friendSingle,
-                        userSingle
-                ) { privateProject, sharedProjects, friends, user ->
-                    initialCallback(startTime, userInfo, privateProject, sharedProjects, friends, user)
+                        sharedProjectSingle
+                ) { userFactory, privateProject, sharedProjects ->
+                    projectFactoryCallback(userInfo, userFactory, privateProject, sharedProjects)
+                }
+
+                val domainFactorySingle = Singles.zip(
+                        userFactorySingle,
+                        projectFactorySingle,
+                        friendSingle
+                ) { userFactory, projectFactory, friends ->
+                    initialCallback(startTime, userInfo, userFactory, projectFactory, friends)
                 }.cache()
 
                 privateProjectSingle.flatMapObservable { privateProjectObservable }

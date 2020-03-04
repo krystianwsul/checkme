@@ -94,30 +94,34 @@ class MyApplication : Application() {
                 .filter { it.value != null }
                 .subscribe { DomainFactory.firstRun = true }
 
+        val localFactory = LocalFactory(PersistenceManager.instance)
+
         FactoryListener(
                 deviceInfoRelay,
+                { AndroidDatabaseWrapper.getUserSingle(it.key) },
+                { AndroidDatabaseWrapper.getUserObservable(it.key) },
+                { deviceInfo, user -> RemoteUserFactory(localFactory.uuid, user, deviceInfo) },
                 { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key.toPrivateProjectKey()) },
                 { AndroidDatabaseWrapper.getSharedProjectSingle(it.key.toPrivateProjectKey()) },
-                { AndroidDatabaseWrapper.getFriendSingle(it.key) },
-                { AndroidDatabaseWrapper.getUserSingle(it.key) },
                 { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key.toPrivateProjectKey()) },
                 { AndroidDatabaseWrapper.getSharedProjectEvents(it.key.toPrivateProjectKey()) },
-                { AndroidDatabaseWrapper.getFriendObservable(it.key) },
-                { AndroidDatabaseWrapper.getUserObservable(it.key) },
-                { startTime, deviceInfo, privateProject, sharedProjects, friends, user ->
-                    val readTime = ExactTimeStamp.now
-
-                    val localFactory = LocalFactory(PersistenceManager.instance)
-                    val remoteUserFactory = RemoteUserFactory(localFactory.uuid, user, deviceInfo)
-
+                { deviceInfo, userFactory, privateProject, sharedProjects ->
                     val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
-                    val remoteProjectFactory = RemoteProjectFactory(
+
+                    RemoteProjectFactory(
                             deviceDbInfo,
                             localFactory,
                             sharedProjects.children,
                             privateProject,
                             ExactTimeStamp.now
                     )
+                },
+                { AndroidDatabaseWrapper.getFriendSingle(it.key) },
+                { AndroidDatabaseWrapper.getFriendObservable(it.key) },
+                { startTime, deviceInfo, remoteUserFactory, remoteProjectFactory, friends ->
+                    val readTime = ExactTimeStamp.now
+
+                    val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
 
                     DomainFactory(
                             localFactory,

@@ -1,6 +1,7 @@
 package com.krystianwsul.checkme.firebase
 
 import com.google.firebase.database.DataSnapshot
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.managers.RemoteUserManager
@@ -15,14 +16,21 @@ class RemoteUserFactory(
 
     private val remoteUserManager = RemoteUserManager(deviceInfo, uuid, userSnapshot)
 
-    var remoteUser = RemoteMyUser(remoteUserManager.remoteUserRecord)
-        private set
+    private val remoteUserRelay = BehaviorRelay.createDefault(RemoteMyUser(remoteUserManager.remoteUserRecord))
+
+    var remoteUser
+        get() = remoteUserRelay.value!!
+        set(value) {
+            remoteUserRelay.accept(value)
+        }
 
     var isSaved
         get() = remoteUserManager.isSaved
         set(value) {
             remoteUserManager.isSaved = value
         }
+
+    val sharedProjectKeysObservable = remoteUserRelay.map { it.projectIds }.distinctUntilChanged()!!
 
     init {
         setTab()

@@ -1964,7 +1964,7 @@ class DomainFactory(
     fun updateProject(
             dataId: Int,
             source: SaveService.Source,
-            projectId: ProjectKey,
+            projectId: ProjectKey.Shared,
             name: String,
             addedFriends: Set<UserKey>,
             removedFriends: Set<UserKey>

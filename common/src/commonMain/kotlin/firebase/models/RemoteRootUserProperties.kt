@@ -11,10 +11,10 @@ interface RemoteRootUserProperties {
     val email: String
     val userJson: UserJson
     val photoUrl: String?
-    val projectIds: Set<ProjectKey>
+    val projectIds: Set<ProjectKey.Shared>
 
     fun removeFriend(userKey: UserKey)
 
-    fun addProject(projectKey: ProjectKey)
-    fun removeProject(projectKey: ProjectKey)
+    fun addProject(projectKey: ProjectKey.Shared)
+    fun removeProject(projectKey: ProjectKey.Shared)
 }

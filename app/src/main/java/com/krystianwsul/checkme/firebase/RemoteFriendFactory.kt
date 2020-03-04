@@ -52,7 +52,7 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
     }
 
     fun updateProjects(
-            projectId: ProjectKey,
+            projectId: ProjectKey.Shared,
             addedUsers: Set<UserKey>,
             removedUsers: Set<UserKey>
     ) {

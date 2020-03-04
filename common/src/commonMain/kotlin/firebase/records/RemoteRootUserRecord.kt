@@ -48,7 +48,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
     override fun deleteFromParent() = throw UnsupportedOperationException()
 
-    override fun addProject(projectKey: ProjectKey) {
+    override fun addProject(projectKey: ProjectKey.Shared) {
         val projectId = projectKey.key
 
         if (!createObject.projects.containsKey(projectId)) {
@@ -58,7 +58,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
         }
     }
 
-    override fun removeProject(projectKey: ProjectKey) {
+    override fun removeProject(projectKey: ProjectKey.Shared) {
         val projectId = projectKey.key
 
         if (createObject.projects.containsKey(projectId)) {

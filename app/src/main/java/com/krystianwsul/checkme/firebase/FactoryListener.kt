@@ -6,6 +6,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.time.ExactTimeStamp
+import com.krystianwsul.common.utils.ProjectKey
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -19,9 +20,9 @@ class FactoryListener(
         getUserObservable: (DeviceInfo) -> Observable<DataSnapshot>,
         userFactoryCallback: (userInfo: DeviceInfo, user: DataSnapshot) -> RemoteUserFactory,
         getPrivateProjectSingle: (DeviceInfo) -> Single<DataSnapshot>,
-        getSharedProjectSingle: (DeviceInfo) -> Single<DataSnapshot>,
+        getSharedProjectSingle: (DeviceInfo, Set<ProjectKey.Shared>) -> Single<DataSnapshot>,
         getPrivateProjectObservable: (DeviceInfo) -> Observable<DataSnapshot>,
-        getSharedProjectEvents: (DeviceInfo) -> Observable<ChildEvent>,
+        getSharedProjectEvents: (DeviceInfo, Set<ProjectKey.Shared>) -> Observable<ChildEvent>,
         projectFactoryCallback: (deviceInfo: DeviceInfo, userFactory: RemoteUserFactory, privateProject: DataSnapshot, sharedProjects: DataSnapshot) -> RemoteProjectFactory,
         getFriendSingle: (DeviceInfo) -> Single<DataSnapshot>,
         getFriendObservable: (DeviceInfo) -> Observable<DataSnapshot>,
@@ -55,22 +56,31 @@ class FactoryListener(
                         .publish()
                         .apply { domainDisposable += connect() }
 
-                val sharedProjectEvents = getSharedProjectEvents(userInfo).doOnNext { logger("sharedProjectEvents $it") }
-                        .publish()
-                        .apply { domainDisposable += connect() }
-
                 val friendObservable = getFriendObservable(userInfo).doOnNext { logger("friendObservable $it") }
                         .publish()
                         .apply { domainDisposable += connect() }
 
                 val userSingle = getUserSingle(userInfo).doOnSuccess { logger("userSingle $it") }.cache()
                 val privateProjectSingle = getPrivateProjectSingle(userInfo).doOnSuccess { logger("privateProjectSingle $it") }.cache()
-                val sharedProjectSingle = getSharedProjectSingle(userInfo).doOnSuccess { logger("sharedProjectSingle $it") }.cache()
                 val friendSingle = getFriendSingle(userInfo).doOnSuccess { logger("friendSingle $it") }.cache()
 
                 val startTime = ExactTimeStamp.now
 
                 val userFactorySingle = userSingle.map { userFactoryCallback(userInfo, it) }
+
+                val sharedProjectKeysObservable = userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable }
+                        .publish()
+                        .apply { domainDisposable += connect() }
+
+                val sharedProjectSingle = sharedProjectKeysObservable.firstOrError()
+                        .flatMap { getSharedProjectSingle(userInfo, it) }
+                        .doOnSuccess { logger("sharedProjectSingle $it") }
+                        .cache()
+
+                val sharedProjectEvents = sharedProjectKeysObservable.switchMap { getSharedProjectEvents(userInfo, it) }.doOnNext { logger("sharedProjectEvents $it") }
+                        .publish()
+                        .apply { domainDisposable += connect() }
+
                 val projectFactorySingle = Singles.zip(
                         userFactorySingle,
                         privateProjectSingle,

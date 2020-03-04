@@ -102,9 +102,9 @@ class MyApplication : Application() {
                 { AndroidDatabaseWrapper.getUserObservable(it.key) },
                 { deviceInfo, user -> RemoteUserFactory(localFactory.uuid, user, deviceInfo) },
                 { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key.toPrivateProjectKey()) },
-                { AndroidDatabaseWrapper.getSharedProjectSingle(it.key.toPrivateProjectKey()) },
+                { deviceInfo, projectIds -> AndroidDatabaseWrapper.getSharedProjectSingle(deviceInfo.key.toPrivateProjectKey()) },
                 { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key.toPrivateProjectKey()) },
-                { AndroidDatabaseWrapper.getSharedProjectEvents(it.key.toPrivateProjectKey()) },
+                { deviceInfo, projectIds -> AndroidDatabaseWrapper.getSharedProjectEvents(deviceInfo.key.toPrivateProjectKey()) },
                 { deviceInfo, userFactory, privateProject, sharedProjects ->
                     val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
 

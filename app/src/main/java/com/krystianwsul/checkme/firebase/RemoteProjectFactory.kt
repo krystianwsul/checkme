@@ -1,9 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.androidhuman.rxfirebase2.database.ChildAddEvent
-import com.androidhuman.rxfirebase2.database.ChildChangeEvent
-import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
@@ -93,11 +90,11 @@ class RemoteProjectFactory(
                 .map { it.tasks.size }
                 .sum()
 
-    fun onChildEvent(deviceDbInfo: DeviceDbInfo, childEvent: ChildEvent, now: ExactTimeStamp) {
-        when (childEvent) {
-            is ChildAddEvent, is ChildChangeEvent -> {
+    fun onChildEvent(deviceDbInfo: DeviceDbInfo, event: Event, now: ExactTimeStamp) {
+        when (event) {
+            is Event.AddChange -> {
                 try {
-                    val remoteProjectRecord = remoteSharedProjectManager.setChild(childEvent.dataSnapshot())
+                    val remoteProjectRecord = remoteSharedProjectManager.setChild(event.dataSnapshot)
 
                     remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
                         fixNotificationShown(localFactory, now)
@@ -108,7 +105,7 @@ class RemoteProjectFactory(
                 }
             }
             is ChildRemoveEvent -> {
-                val key = remoteSharedProjectManager.removeChild(childEvent.dataSnapshot())
+                val key = remoteSharedProjectManager.removeChild(event.dataSnapshot)
 
                 remoteSharedProjects.remove(key)
             }
@@ -265,4 +262,12 @@ class RemoteProjectFactory(
     fun getSchedule(scheduleId: ScheduleId.Remote) = remoteProjects.getValue(scheduleId.projectId).getRemoteTaskForce(scheduleId.taskId)
             .schedules
             .single { it.scheduleId == scheduleId }
+
+    sealed class Event {
+
+        abstract val dataSnapshot: DataSnapshot
+
+        class AddChange(override val dataSnapshot: DataSnapshot) : Event()
+        class Remove(override val dataSnapshot: DataSnapshot) : Event()
+    }
 }

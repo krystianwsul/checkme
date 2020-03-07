@@ -268,16 +268,6 @@ class DomainFactory(
 
         updateShortcuts()
 
-        remoteUserFactory.remoteUser.apply {
-            val projectId = ProjectKey.Shared(childEvent.dataSnapshot().key!!)
-
-            when (childEvent) {
-                is ChildAddEvent, is ChildChangeEvent -> addProject(projectId)
-                is ChildRemoveEvent -> removeProject(projectId)
-                else -> throw IllegalArgumentException()
-            }
-        }
-
         val now = ExactTimeStamp.now
 
         val runType: RunType
@@ -286,7 +276,13 @@ class DomainFactory(
 
             runType = RunType.LOCAL
         } else {
-            remoteProjectFactory.onChildEvent(deviceDbInfo, childEvent, now)
+            val event = when (childEvent) {
+                is ChildAddEvent, is ChildChangeEvent -> RemoteProjectFactory.Event.AddChange(childEvent.dataSnapshot())
+                is ChildRemoveEvent -> RemoteProjectFactory.Event.Remove(childEvent.dataSnapshot())
+                else -> throw IllegalArgumentException()
+            }
+
+            remoteProjectFactory.onChildEvent(deviceDbInfo, event, now)
 
             TickHolder.getTickData()?.sharedTriggered()
 

@@ -1,7 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
 import android.text.TextUtils
-import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
@@ -104,12 +103,10 @@ class RemoteProjectFactory(
                     // hack for oldestVisible being set on records removed by cloud function
                 }
             }
-            is ChildRemoveEvent -> {
-                val key = remoteSharedProjectManager.removeChild(event.dataSnapshot)
-
-                remoteSharedProjects.remove(key)
+            is Event.Remove -> {
+                remoteSharedProjectManager.removeChild(event.key)
+                remoteSharedProjects.remove(event.key)
             }
-            else -> throw IllegalArgumentException()
         }
     }
 
@@ -244,8 +241,6 @@ class RemoteProjectFactory(
         return remoteProjects.getValue(projectId)
     }
 
-    fun getRemoteProjectIfPresent(projectId: ProjectKey) = remoteProjects[projectId]
-
     fun getRemoteProjectIfPresent(projectId: String) = remoteProjects.entries
             .singleOrNull { it.key.key == projectId }
             ?.value
@@ -265,9 +260,7 @@ class RemoteProjectFactory(
 
     sealed class Event {
 
-        abstract val dataSnapshot: DataSnapshot
-
-        class AddChange(override val dataSnapshot: DataSnapshot) : Event()
-        class Remove(override val dataSnapshot: DataSnapshot) : Event()
+        class AddChange(val dataSnapshot: DataSnapshot) : Event()
+        class Remove(val key: ProjectKey.Shared) : Event()
     }
 }

@@ -31,6 +31,7 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
+import io.reactivex.Single
 import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -309,6 +310,13 @@ fun Window.setTransparentNavigation(landscape: Boolean) {
 val Resources.isLandscape get() = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
 fun <T> RequestBuilder<T>.circle(circle: Boolean) = if (circle) apply(RequestOptions.circleCropTransform()) else this
+
+fun <T : Any> List<Single<T>>.zipSingle() = Single.zip(this) {
+    it.map {
+        @Suppress("UNCHECKED_CAST")
+        it as T
+    }
+}
 
 inline fun <reified T, U> T.getPrivateField(name: String): U {
     return T::class.java.getDeclaredField(name).let {

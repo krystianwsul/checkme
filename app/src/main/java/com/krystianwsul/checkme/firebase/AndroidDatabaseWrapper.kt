@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.androidhuman.rxfirebase2.database.childEvents
 import com.androidhuman.rxfirebase2.database.data
 import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.database.FirebaseDatabase
@@ -50,17 +49,10 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
             .push()
             .key!!
 
-    private fun sharedProjectQuery(projectKey: ProjectKey) = rootReference.child(RECORDS_KEY)
-            .orderByChild("recordOf/${projectKey.key}")
-            .equalTo(true)
+    private fun sharedProjectQuery(projectKey: ProjectKey.Shared) = rootReference.child("$RECORDS_KEY/${projectKey.key}")
 
-    /* todo
-    Using an unspecified index. Your data will be downloaded and filtered on the client. Consider adding '".indexOn": "recordOf/cGF0cmljaXVzQGdtYWlsLmNvbQ=="' at production/records to your security and Firebase Database rules for better performance
-     */
-
-    fun getSharedProjectSingle(projectKey: ProjectKey) = sharedProjectQuery(projectKey).data()
-
-    fun getSharedProjectEvents(projectKey: ProjectKey) = sharedProjectQuery(projectKey).childEvents()
+    fun getSharedProjectSingle(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).data()
+    fun getSharedProjectObservable(projectKey: ProjectKey.Shared) = sharedProjectQuery(projectKey).dataChanges()
 
     override fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback) {
         rootReference.child(path)

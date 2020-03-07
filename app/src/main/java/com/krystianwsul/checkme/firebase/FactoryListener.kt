@@ -19,10 +19,10 @@ class FactoryListener(
         getUserObservable: (DeviceInfo) -> Observable<DataSnapshot>,
         userFactoryCallback: (userInfo: DeviceInfo, user: DataSnapshot) -> RemoteUserFactory,
         getPrivateProjectSingle: (DeviceInfo) -> Single<DataSnapshot>,
-        getSharedProjectSingle: (DeviceInfo, Set<ProjectKey.Shared>) -> Single<List<DataSnapshot>>,
+        getSharedProjectSingle: (Set<ProjectKey.Shared>) -> Single<List<DataSnapshot>>,
         getPrivateProjectObservable: (DeviceInfo) -> Observable<DataSnapshot>,
-        getSharedProjectEvents: (DeviceInfo, Pair<Set<ProjectKey.Shared>, Set<ProjectKey.Shared>>) -> Observable<RemoteProjectFactory.Event>,
-        projectFactoryCallback: (deviceInfo: DeviceInfo, userFactory: RemoteUserFactory, privateProject: DataSnapshot, sharedProjects: List<DataSnapshot>) -> RemoteProjectFactory,
+        getSharedProjectEvents: (Pair<Set<ProjectKey.Shared>, Set<ProjectKey.Shared>>) -> Observable<RemoteProjectFactory.Event>,
+        projectFactoryCallback: (deviceInfo: DeviceInfo, privateProject: DataSnapshot, sharedProjects: List<DataSnapshot>) -> RemoteProjectFactory,
         getFriendSingle: (DeviceInfo) -> Single<DataSnapshot>,
         getFriendObservable: (DeviceInfo) -> Observable<DataSnapshot>,
         initialCallback: (startTime: ExactTimeStamp, userInfo: DeviceInfo, userFactory: RemoteUserFactory, projectFactory: RemoteProjectFactory, friends: DataSnapshot) -> DomainFactory,
@@ -76,21 +76,21 @@ class FactoryListener(
                         .flatMap { (old, new) ->
                             check(old.isEmpty())
 
-                            getSharedProjectSingle(userInfo, new)
+                            getSharedProjectSingle(new)
                         }
                         .doOnSuccess { logger("sharedProjectSingle $it") }
                         .cache()
 
-                val sharedProjectEvents = sharedProjectKeysObservable.switchMap { getSharedProjectEvents(userInfo, it) }.doOnNext { logger("sharedProjectEvents $it") }
+                val sharedProjectEvents = sharedProjectKeysObservable.switchMap(getSharedProjectEvents)
+                        .doOnNext { logger("sharedProjectEvents $it") }
                         .publish()
                         .apply { domainDisposable += connect() }
 
                 val projectFactorySingle = Singles.zip(
-                        userFactorySingle,
                         privateProjectSingle,
                         sharedProjectSingle
-                ) { userFactory, privateProject, sharedProjects ->
-                    projectFactoryCallback(userInfo, userFactory, privateProject, sharedProjects)
+                ) { privateProject, sharedProjects ->
+                    projectFactoryCallback(userInfo, privateProject, sharedProjects)
                 }
 
                 val domainFactorySingle = Singles.zip(

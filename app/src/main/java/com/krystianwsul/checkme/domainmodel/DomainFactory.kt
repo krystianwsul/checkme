@@ -1998,6 +1998,7 @@ class DomainFactory(
                 remoteFriendFactory
         )
 
+        remoteUserFactory.remoteUser.addProject(remoteProject.id)
         remoteFriendFactory.updateProjects(remoteProject.id, friends, setOf())
 
         save(dataId, source)

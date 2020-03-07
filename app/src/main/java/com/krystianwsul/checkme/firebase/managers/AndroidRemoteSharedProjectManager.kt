@@ -44,7 +44,7 @@ class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : Remo
 
     override fun getDatabaseCallback(extra: DomainFactory) = checkError(extra, "RemoteSharedProjectManager.save")
 
-    fun removeChild(dataSnapshot: DataSnapshot) = ProjectKey.Shared(dataSnapshot.key!!).also {
-        check(remoteProjectRecords.remove(it) != null)
+    fun removeChild(key: ProjectKey.Shared) {
+        check(remoteProjectRecords.remove(key) != null)
     }
 }

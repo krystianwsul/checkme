@@ -6,9 +6,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.androidhuman.rxfirebase2.auth.authStateChanges
-import com.androidhuman.rxfirebase2.database.ChildAddEvent
-import com.androidhuman.rxfirebase2.database.ChildChangeEvent
-import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.github.anrwatchdog.ANRWatchDog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -28,6 +25,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.toSingle
+import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
@@ -35,6 +33,8 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.Maybe
+import io.reactivex.Observable
+import io.reactivex.rxkotlin.merge
 import net.danlew.android.joda.JodaTimeAndroid
 import java.io.File
 
@@ -105,20 +105,20 @@ class MyApplication : Application() {
                 { AndroidDatabaseWrapper.getUserObservable(it.key) },
                 { deviceInfo, user -> RemoteUserFactory(localFactory.uuid, user, deviceInfo) },
                 { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key.toPrivateProjectKey()) },
-                { deviceInfo, projectIds ->
-                    AndroidDatabaseWrapper.getSharedProjectSingle(deviceInfo.key.toPrivateProjectKey()).map { it.children.toList() }
-                },
+                { projectIds -> projectIds.map { AndroidDatabaseWrapper.getSharedProjectSingle(it) }.zipSingle() },
                 { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key.toPrivateProjectKey()) },
-                { deviceInfo, (oldProjectIds, newProjectIds) ->
-                    AndroidDatabaseWrapper.getSharedProjectEvents(deviceInfo.key.toPrivateProjectKey()).map { childEvent ->
-                        when (childEvent) {
-                            is ChildAddEvent, is ChildChangeEvent -> RemoteProjectFactory.Event.AddChange(childEvent.dataSnapshot())
-                            is ChildRemoveEvent -> RemoteProjectFactory.Event.Remove(childEvent.dataSnapshot())
-                            else -> throw IllegalArgumentException()
-                        }
-                    }
+                { (oldProjectIds, newProjectIds) ->
+                    val removedIds = oldProjectIds - newProjectIds
+
+                    val removedEvents = Observable.fromIterable(removedIds.map { RemoteProjectFactory.Event.Remove(it) })
+
+                    val addChangeEvents = newProjectIds.map {
+                        AndroidDatabaseWrapper.getSharedProjectObservable(it).map { RemoteProjectFactory.Event.AddChange(it) }
+                    }.merge()
+
+                    listOf(removedEvents, addChangeEvents).merge()
                 },
-                { deviceInfo, userFactory, privateProject, sharedProjects ->
+                { deviceInfo, privateProject, sharedProjects ->
                     val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
 
                     RemoteProjectFactory(

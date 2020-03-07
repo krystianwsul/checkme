@@ -86,6 +86,7 @@ object RelevanceChecker {
                         check(sharedProjects.contains(remoteProject.id))
 
                         sharedProjects.remove(remoteProject.id)
+                        // todo project remove from sharedProjectManager, remove keys from users
                     }
                 }
 

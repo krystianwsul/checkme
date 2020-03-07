@@ -105,7 +105,9 @@ class MyApplication : Application() {
                 { AndroidDatabaseWrapper.getUserObservable(it.key) },
                 { deviceInfo, user -> RemoteUserFactory(localFactory.uuid, user, deviceInfo) },
                 { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key.toPrivateProjectKey()) },
-                { deviceInfo, projectIds -> AndroidDatabaseWrapper.getSharedProjectSingle(deviceInfo.key.toPrivateProjectKey()) },
+                { deviceInfo, projectIds ->
+                    AndroidDatabaseWrapper.getSharedProjectSingle(deviceInfo.key.toPrivateProjectKey()).map { it.children.toList() }
+                },
                 { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key.toPrivateProjectKey()) },
                 { deviceInfo, (oldProjectIds, newProjectIds) ->
                     AndroidDatabaseWrapper.getSharedProjectEvents(deviceInfo.key.toPrivateProjectKey()).map { childEvent ->
@@ -122,7 +124,7 @@ class MyApplication : Application() {
                     RemoteProjectFactory(
                             deviceDbInfo,
                             localFactory,
-                            sharedProjects.children,
+                            sharedProjects,
                             privateProject,
                             ExactTimeStamp.now
                     )

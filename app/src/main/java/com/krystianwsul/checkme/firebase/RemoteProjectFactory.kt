@@ -22,7 +22,7 @@ import com.krystianwsul.common.utils.*
 class RemoteProjectFactory(
         deviceDbInfo: DeviceDbInfo,
         private val localFactory: LocalFactory,
-        sharedChildren: Iterable<DataSnapshot>,
+        sharedChildren: List<DataSnapshot>,
         privateSnapshot: DataSnapshot,
         now: ExactTimeStamp
 ) : RemoteProject.Parent {

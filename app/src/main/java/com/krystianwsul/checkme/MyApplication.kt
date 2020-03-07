@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.androidhuman.rxfirebase2.auth.authStateChanges
+import com.androidhuman.rxfirebase2.database.ChildAddEvent
+import com.androidhuman.rxfirebase2.database.ChildChangeEvent
+import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.github.anrwatchdog.ANRWatchDog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -104,7 +107,15 @@ class MyApplication : Application() {
                 { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key.toPrivateProjectKey()) },
                 { deviceInfo, projectIds -> AndroidDatabaseWrapper.getSharedProjectSingle(deviceInfo.key.toPrivateProjectKey()) },
                 { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key.toPrivateProjectKey()) },
-                { deviceInfo, projectIds -> AndroidDatabaseWrapper.getSharedProjectEvents(deviceInfo.key.toPrivateProjectKey()) },
+                { deviceInfo, (oldProjectIds, newProjectIds) ->
+                    AndroidDatabaseWrapper.getSharedProjectEvents(deviceInfo.key.toPrivateProjectKey()).map { childEvent ->
+                        when (childEvent) {
+                            is ChildAddEvent, is ChildChangeEvent -> RemoteProjectFactory.Event.AddChange(childEvent.dataSnapshot())
+                            is ChildRemoveEvent -> RemoteProjectFactory.Event.Remove(childEvent.dataSnapshot())
+                            else -> throw IllegalArgumentException()
+                        }
+                    }
+                },
                 { deviceInfo, userFactory, privateProject, sharedProjects ->
                     val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
 

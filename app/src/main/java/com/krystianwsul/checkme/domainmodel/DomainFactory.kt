@@ -3,10 +3,6 @@ package com.krystianwsul.checkme.domainmodel
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.pm.ShortcutManagerCompat
-import com.androidhuman.rxfirebase2.database.ChildAddEvent
-import com.androidhuman.rxfirebase2.database.ChildChangeEvent
-import com.androidhuman.rxfirebase2.database.ChildEvent
-import com.androidhuman.rxfirebase2.database.ChildRemoveEvent
 import com.google.firebase.database.DataSnapshot
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.MyApplication
@@ -263,7 +259,7 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun updateSharedProjectRecords(childEvent: ChildEvent) {
+    fun updateSharedProjectRecords(event: RemoteProjectFactory.Event) {
         MyCrashlytics.log("updateSharedProjectRecord")
 
         updateShortcuts()
@@ -276,12 +272,6 @@ class DomainFactory(
 
             runType = RunType.LOCAL
         } else {
-            val event = when (childEvent) {
-                is ChildAddEvent, is ChildChangeEvent -> RemoteProjectFactory.Event.AddChange(childEvent.dataSnapshot())
-                is ChildRemoveEvent -> RemoteProjectFactory.Event.Remove(childEvent.dataSnapshot())
-                else -> throw IllegalArgumentException()
-            }
-
             remoteProjectFactory.onChildEvent(deviceDbInfo, event, now)
 
             TickHolder.getTickData()?.sharedTriggered()

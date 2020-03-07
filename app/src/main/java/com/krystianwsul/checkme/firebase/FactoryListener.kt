@@ -1,6 +1,5 @@
 package com.krystianwsul.checkme.firebase
 
-import com.androidhuman.rxfirebase2.database.ChildEvent
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
@@ -22,14 +21,14 @@ class FactoryListener(
         getPrivateProjectSingle: (DeviceInfo) -> Single<DataSnapshot>,
         getSharedProjectSingle: (DeviceInfo, Set<ProjectKey.Shared>) -> Single<DataSnapshot>,
         getPrivateProjectObservable: (DeviceInfo) -> Observable<DataSnapshot>,
-        getSharedProjectEvents: (DeviceInfo, Set<ProjectKey.Shared>) -> Observable<ChildEvent>,
+        getSharedProjectEvents: (DeviceInfo, Pair<Set<ProjectKey.Shared>, Set<ProjectKey.Shared>>) -> Observable<RemoteProjectFactory.Event>,
         projectFactoryCallback: (deviceInfo: DeviceInfo, userFactory: RemoteUserFactory, privateProject: DataSnapshot, sharedProjects: DataSnapshot) -> RemoteProjectFactory,
         getFriendSingle: (DeviceInfo) -> Single<DataSnapshot>,
         getFriendObservable: (DeviceInfo) -> Observable<DataSnapshot>,
         initialCallback: (startTime: ExactTimeStamp, userInfo: DeviceInfo, userFactory: RemoteUserFactory, projectFactory: RemoteProjectFactory, friends: DataSnapshot) -> DomainFactory,
         clearCallback: () -> Unit,
         privateProjectCallback: (domainFactory: DomainFactory, privateProject: DataSnapshot) -> Unit,
-        sharedProjectCallback: (domainFactory: DomainFactory, sharedProjects: ChildEvent) -> Unit,
+        sharedProjectCallback: (domainFactory: DomainFactory, sharedProjects: RemoteProjectFactory.Event) -> Unit,
         friendCallback: (domainFactory: DomainFactory, friends: DataSnapshot) -> Unit,
         userCallback: (domainFactory: DomainFactory, user: DataSnapshot) -> Unit,
         logger: (String) -> Unit = { }
@@ -69,11 +68,16 @@ class FactoryListener(
                 val userFactorySingle = userSingle.map { userFactoryCallback(userInfo, it) }
 
                 val sharedProjectKeysObservable = userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable }
+                        .scan(Pair(setOf<ProjectKey.Shared>(), setOf<ProjectKey.Shared>())) { old, new -> Pair(old.second, new) }
                         .publish()
                         .apply { domainDisposable += connect() }
 
                 val sharedProjectSingle = sharedProjectKeysObservable.firstOrError()
-                        .flatMap { getSharedProjectSingle(userInfo, it) }
+                        .flatMap { (old, new) ->
+                            check(old.isEmpty())
+
+                            getSharedProjectSingle(userInfo, new)
+                        }
                         .doOnSuccess { logger("sharedProjectSingle $it") }
                         .cache()
 

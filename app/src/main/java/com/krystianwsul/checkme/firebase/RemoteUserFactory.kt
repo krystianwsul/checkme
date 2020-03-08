@@ -30,13 +30,19 @@ class RemoteUserFactory(
             remoteUserManager.isSaved = value
         }
 
-    val sharedProjectKeysObservable = remoteUserRelay.map { it.projectIds }.distinctUntilChanged()!!
+    private val projectIdTrigger = BehaviorRelay.createDefault(Unit)
 
     init {
         setTab()
 
         remoteUser.setToken(uuid, deviceInfo.token)
+
+        remoteUser.projectChangeListener = { projectIdTrigger.accept(Unit) }
     }
+
+    val sharedProjectKeysObservable = projectIdTrigger.switchMap {
+        remoteUserRelay.map { it.projectIds } // todo this isn't working after the trigger
+    }.distinctUntilChanged()!!
 
     private fun setTab() {
         Preferences.tab = remoteUser.defaultTab

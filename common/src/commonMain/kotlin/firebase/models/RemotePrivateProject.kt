@@ -38,6 +38,7 @@ class RemotePrivateProject(
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
     }
 
+    // todo function only for shared projects, use key to differentiate
     override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) = throw UnsupportedOperationException()
 
     fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTime {

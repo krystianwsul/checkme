@@ -16,25 +16,17 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.toUserInfo
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory
-import com.krystianwsul.checkme.firebase.RemoteUserFactory
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Queue
 import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.toSingle
-import com.krystianwsul.checkme.utils.zipSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.DeviceInfo
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.Maybe
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.merge
 import net.danlew.android.joda.JodaTimeAndroid
 import java.io.File
 
@@ -100,58 +92,8 @@ class MyApplication : Application() {
         val localFactory = LocalFactory(PersistenceManager.instance)
 
         FactoryListener(
-                deviceInfoRelay,
-                { AndroidDatabaseWrapper.getUserSingle(it.key) },
-                { AndroidDatabaseWrapper.getUserObservable(it.key) },
-                { deviceInfo, user -> RemoteUserFactory(localFactory.uuid, user, deviceInfo) },
-                { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key.toPrivateProjectKey()) },
-                { projectIds -> projectIds.map { AndroidDatabaseWrapper.getSharedProjectSingle(it) }.zipSingle() },
-                { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key.toPrivateProjectKey()) },
-                { (oldProjectIds, newProjectIds) ->
-                    val removedIds = oldProjectIds - newProjectIds
-
-                    val removedEvents = Observable.fromIterable(removedIds.map { RemoteProjectFactory.Event.Remove(it) })
-
-                    val addChangeEvents = newProjectIds.map {
-                        AndroidDatabaseWrapper.getSharedProjectObservable(it).map { RemoteProjectFactory.Event.AddChange(it) }
-                    }.merge()
-
-                    listOf(removedEvents, addChangeEvents).merge()
-                },
-                { deviceInfo, privateProject, sharedProjects ->
-                    val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
-
-                    RemoteProjectFactory(
-                            deviceDbInfo,
-                            localFactory,
-                            sharedProjects,
-                            privateProject,
-                            ExactTimeStamp.now
-                    )
-                },
-                { AndroidDatabaseWrapper.getFriendSingle(it.key) },
-                { AndroidDatabaseWrapper.getFriendObservable(it.key) },
-                { startTime, deviceInfo, remoteUserFactory, remoteProjectFactory, friends ->
-                    val readTime = ExactTimeStamp.now
-
-                    val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
-
-                    DomainFactory(
-                            localFactory,
-                            remoteUserFactory,
-                            remoteProjectFactory,
-                            deviceDbInfo,
-                            startTime,
-                            readTime,
-                            friends
-                    )
-                },
-                { DomainFactory.nullableInstance?.clearUserInfo() },
-                DomainFactory::updatePrivateProjectRecord,
-                DomainFactory::updateSharedProjectRecords,
-                DomainFactory::setFriendRecords,
-                DomainFactory::updateUserRecord
-                //, { Log.e("asdf", "FactoryListener:\n$it")}
+                localFactory,
+                deviceInfoRelay
         ).domainFactoryObservable.subscribe(DomainFactory.instanceRelay)
 
         if (token == null)

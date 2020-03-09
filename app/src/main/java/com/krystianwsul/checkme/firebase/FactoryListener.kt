@@ -59,14 +59,29 @@ class FactoryListener(
                         .publish()
                         .apply { domainDisposable += connect() }
 
-                val sharedProjectEvents = sharedProjectKeysObservable.switchMap { (oldProjectIds, newProjectIds) ->
-                            val removedIds = oldProjectIds - newProjectIds
+                val sharedProjectEvents = sharedProjectKeysObservable.scan<Pair<Set<ProjectKey.Shared>, Map<ProjectKey.Shared, Observable<DataSnapshot>>>>(Pair(setOf(), mapOf())) { (_, oldMap), (oldProjectIds, newProjectIds) ->
+                            val newMap = oldMap.toMutableMap()
 
+                            val removedIds = oldProjectIds - newProjectIds
+                            removedIds.forEach { newMap.remove(it) }
+
+                            val addedIds = newProjectIds - oldProjectIds
+                            addedIds.forEach {
+                                check(!newMap.containsKey(it))
+
+                                newMap[it] = AndroidDatabaseWrapper.getSharedProjectObservable(it)
+                                        .publish()
+                                        .apply { connect() }
+                            }
+
+                            Pair(removedIds, newMap)
+                        }
+                        .switchMap { (removedIds, addChangeObservables) ->
                             val removedEvents = Observable.fromIterable(removedIds.map { RemoteProjectFactory.Event.Remove(it) })
 
-                            val addChangeEvents = newProjectIds.map {
-                                AndroidDatabaseWrapper.getSharedProjectObservable(it).map { RemoteProjectFactory.Event.AddChange(it) }
-                            }.merge()
+                            val addChangeEvents = addChangeObservables.values
+                                    .map { it.map { RemoteProjectFactory.Event.AddChange(it) } }
+                                    .merge()
 
                             listOf(removedEvents, addChangeEvents).merge()
                         }
@@ -113,7 +128,7 @@ class FactoryListener(
                     )
                 }.cache()
 
-                privateProjectSingle.flatMapObservable { privateProjectObservable }
+                privateProjectSingle.flatMapObservable { privateProjectObservable.replay() }
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updatePrivateProjectRecord(it) }.addTo(domainDisposable)
                         }

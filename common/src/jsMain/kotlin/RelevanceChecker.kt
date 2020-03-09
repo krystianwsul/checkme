@@ -14,11 +14,11 @@ object RelevanceChecker {
         val roots = listOf("development", "production")
 
         val completed = roots.map {
-            listOf(
-                    it to true,
-                    it to false
-            )
-        }
+                    listOf(
+                            it to true,
+                            it to false
+                    )
+                }
                 .flatten()
                 .associateWith { false }
                 .toMutableMap()
@@ -75,7 +75,7 @@ object RelevanceChecker {
 
                 val sharedProjects = sharedProjectManager.remoteProjectRecords
                         .entries
-                        .associate { it.key to RemoteSharedProject(it.value) }
+                        .associate { it.key to RemoteSharedProject(it.value.first) }
                         .toMutableMap()
 
                 val now = ExactTimeStamp.now
@@ -86,14 +86,19 @@ object RelevanceChecker {
                         check(sharedProjects.contains(remoteProject.id))
 
                         sharedProjects.remove(remoteProject.id)
-                        // todo project remove from sharedProjectManager, remove keys from users
                     }
                 }
 
-                sharedProjects.values.forEach {
-                    response += "checking relevance for shared project ${it.id}: ${it.name}"
+                val sharedProjectsRemoved = sharedProjects.values
+                        .map {
+                            response += "checking relevance for shared project ${it.id}: ${it.name}"
 
-                    Irrelevant.setIrrelevant(parent, it, now)
+                            Irrelevant.setIrrelevant(parent, it, now).removedSharedProjects
+                        }
+                        .flatten()
+
+                if (sharedProjectsRemoved.isNotEmpty()) {
+                    // todo project remove from sharedProjectManager, remove keys from users
                 }
 
                 sharedProjectManager.apply {

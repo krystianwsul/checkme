@@ -1,7 +1,9 @@
 package com.krystianwsul.common.firebase.json
 
+import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmOverloads
 
+@Serializable
 class UserWrapper @JvmOverloads constructor(
         val friendOf: MutableMap<String, Boolean> = mutableMapOf(),
         val userData: UserJson = UserJson(),

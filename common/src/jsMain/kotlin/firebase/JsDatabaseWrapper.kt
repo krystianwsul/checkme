@@ -4,6 +4,7 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
+import com.krystianwsul.common.firebase.json.UserWrapper
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -55,6 +56,19 @@ class JsDatabaseWrapper(admin: dynamic, root: String) : DatabaseWrapper() {
 
     @Serializable
     private class SharedProjects(val jsonWrappers: Map<String, JsonWrapper>)
+
+    fun getUsers(callback: (Map<String, UserWrapper>) -> Unit) {
+        rootReference.child(USERS_KEY).once("value") { snapshot ->
+            callback(parse(Users.serializer(), object {
+
+                @Suppress("unused")
+                val userWrappers = snapshot
+            }).userWrappers)
+        }
+    }
+
+    @Serializable
+    private class Users(val userWrappers: Map<String, UserWrapper>)
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     fun <T> parse(

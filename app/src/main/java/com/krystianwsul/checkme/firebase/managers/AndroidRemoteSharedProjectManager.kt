@@ -20,9 +20,9 @@ class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : Remo
             getValue(JsonWrapper::class.java)!!
     )
 
-    override val remoteProjectRecords = children.mapNotNull {
+    override var remoteProjectRecords = children.mapNotNull {
         try {
-            ProjectKey.Shared(it.key!!) to it.toRecord()
+            ProjectKey.Shared(it.key!!) to Pair(it.toRecord(), false)
         } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
             MyCrashlytics.logException(onlyVisibilityPresentException)
 
@@ -38,7 +38,7 @@ class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : Remo
         val key = ProjectKey.Shared(dataSnapshot.key!!)
 
         return dataSnapshot.toRecord().also {
-            remoteProjectRecords[key] = it
+            remoteProjectRecords[key] = Pair(it, false)
         }
     }
 

@@ -34,8 +34,8 @@ class RemoteProjectFactory(
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
-            .associate {
-                it.id to RemoteSharedProject(it).apply {
+            .associate { (remoteSharedProjectRecord, _) ->
+                remoteSharedProjectRecord.id to RemoteSharedProject(remoteSharedProjectRecord).apply {
                     fixNotificationShown(localFactory, now)
                     updateDeviceDbInfo(deviceDbInfo)
                 }
@@ -53,11 +53,7 @@ class RemoteProjectFactory(
             remotePrivateProjectManager.isSaved = value
         }
 
-    var isSharedSaved
-        get() = remoteSharedProjectManager.isSaved
-        set(value) {
-            remoteSharedProjectManager.isSaved = value
-        }
+    val isSharedSaved get() = remoteSharedProjectManager.isSaved
 
     val eitherSaved get() = isPrivateSaved || isSharedSaved
 
@@ -90,8 +86,10 @@ class RemoteProjectFactory(
                 .sum()
 
     fun onChildEvent(deviceDbInfo: DeviceDbInfo, event: Event, now: ExactTimeStamp): Boolean {
-        if (isSharedSaved) {
-            isSharedSaved = false
+        val projectPair = remoteSharedProjectManager.remoteProjectRecords[event.key]
+
+        if (projectPair?.second == true) {
+            remoteSharedProjectManager.remoteProjectRecords[event.key] = Pair(projectPair.first, false)
 
             return true
         } else {
@@ -268,7 +266,13 @@ class RemoteProjectFactory(
 
     sealed class Event {
 
-        class AddChange(val dataSnapshot: DataSnapshot) : Event()
-        class Remove(val key: ProjectKey.Shared) : Event()
+        abstract val key: ProjectKey.Shared
+
+        class AddChange(val dataSnapshot: DataSnapshot) : Event() {
+
+            override val key = ProjectKey.Shared(dataSnapshot.key!!)
+        }
+
+        class Remove(override val key: ProjectKey.Shared) : Event()
     }
 }

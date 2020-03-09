@@ -77,10 +77,10 @@ class FactoryListener(
                             Pair(removedIds, newMap)
                         }
                         .switchMap { (removedIds, addChangeObservables) ->
-                            val removedEvents = Observable.fromIterable(removedIds.map { RemoteProjectFactory.Event.Remove(it) })
+                            val removedEvents = Observable.fromIterable(removedIds.map(RemoteProjectFactory.Event::Remove))
 
                             val addChangeEvents = addChangeObservables.values
-                                    .map { it.map { RemoteProjectFactory.Event.AddChange(it) } }
+                                    .map { it.map(RemoteProjectFactory.Event::AddChange) }
                                     .merge()
 
                             listOf(removedEvents, addChangeEvents).merge()

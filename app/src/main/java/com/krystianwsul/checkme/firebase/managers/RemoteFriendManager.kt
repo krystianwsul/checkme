@@ -16,7 +16,7 @@ class RemoteFriendManager(private val domainFactory: DomainFactory, children: It
 
     val remoteRootUserRecords = children.map { RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!) }.associateBy { it.id }
 
-    private var strangerProjects: Pair<ProjectKey, List<Pair<UserKey, Boolean>>>? = null
+    private var strangerProjects: Pair<ProjectKey, List<Pair<UserKey, Boolean>>>? = null // todo move to separate class
 
     fun save(): Boolean {
         val values = mutableMapOf<String, Any?>()

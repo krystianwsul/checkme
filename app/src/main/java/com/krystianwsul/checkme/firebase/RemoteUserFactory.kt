@@ -41,7 +41,7 @@ class RemoteUserFactory(
     }
 
     val sharedProjectKeysObservable = projectIdTrigger.switchMap {
-        remoteUserRelay.map { it.projectIds } // todo this isn't working after the trigger
+        remoteUserRelay.map { it.projectIds }
     }.distinctUntilChanged()!!
 
     private fun setTab() {

@@ -89,24 +89,32 @@ class RemoteProjectFactory(
                 .map { it.tasks.size }
                 .sum()
 
-    fun onChildEvent(deviceDbInfo: DeviceDbInfo, event: Event, now: ExactTimeStamp) {
-        when (event) {
-            is Event.AddChange -> {
-                try {
-                    val remoteProjectRecord = remoteSharedProjectManager.setChild(event.dataSnapshot)
+    fun onChildEvent(deviceDbInfo: DeviceDbInfo, event: Event, now: ExactTimeStamp): Boolean {
+        if (isSharedSaved) {
+            isSharedSaved = false
 
-                    remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
-                        fixNotificationShown(localFactory, now)
-                        updateDeviceDbInfo(deviceDbInfo)
+            return false
+        } else {
+            when (event) {
+                is Event.AddChange -> {
+                    try {
+                        val remoteProjectRecord = remoteSharedProjectManager.setChild(event.dataSnapshot)
+
+                        remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
+                            fixNotificationShown(localFactory, now)
+                            updateDeviceDbInfo(deviceDbInfo)
+                        }
+                    } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
+                        // hack for oldestVisible being set on records removed by cloud function
                     }
-                } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
-                    // hack for oldestVisible being set on records removed by cloud function
+                }
+                is Event.Remove -> {
+                    remoteSharedProjectManager.removeChild(event.key)
+                    remoteSharedProjects.remove(event.key)
                 }
             }
-            is Event.Remove -> {
-                remoteSharedProjectManager.removeChild(event.key)
-                remoteSharedProjects.remove(event.key)
-            }
+
+            return true
         }
     }
 

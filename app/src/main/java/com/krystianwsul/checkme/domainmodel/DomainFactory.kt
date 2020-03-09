@@ -266,17 +266,14 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val runType: RunType
-        if (remoteProjectFactory.isSharedSaved) {
-            remoteProjectFactory.isSharedSaved = false
+        val remoteChange = remoteProjectFactory.onChildEvent(deviceDbInfo, event, now)
 
-            runType = RunType.LOCAL
+        val runType = if (remoteChange) {
+            RunType.LOCAL
         } else {
-            remoteProjectFactory.onChildEvent(deviceDbInfo, event, now)
-
             TickHolder.getTickData()?.sharedTriggered()
 
-            runType = RunType.REMOTE
+            RunType.REMOTE
         }
 
         tryNotifyListeners(now, "DomainFactory.updateSharedProjectRecords", runType)

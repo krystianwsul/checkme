@@ -1,5 +1,6 @@
 package com.krystianwsul.checkme.firebase
 
+import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.utils.zipSingle
@@ -51,20 +52,12 @@ class FactoryListener(
 
                 val startTime = ExactTimeStamp.now
 
-                val userFactorySingle = userSingle.map { RemoteUserFactory(localFactory.uuid, it, deviceInfo) }
+                val userFactorySingle = userSingle.map { RemoteUserFactory(localFactory.uuid, it, deviceInfo) }.cache()
 
                 val sharedProjectKeysObservable = userFactorySingle.flatMapObservable { it.sharedProjectKeysObservable }
                         .scan(Pair(setOf<ProjectKey.Shared>(), setOf<ProjectKey.Shared>())) { old, new -> Pair(old.second, new) }
                         .publish()
                         .apply { domainDisposable += connect() }
-
-                val sharedProjectSingle = sharedProjectKeysObservable.firstOrError()
-                        .flatMap { (old, new) ->
-                            check(old.isEmpty())
-
-                            new.map { AndroidDatabaseWrapper.getSharedProjectSingle(it) }.zipSingle()
-                        }
-                        .cache()
 
                 val sharedProjectEvents = sharedProjectKeysObservable.switchMap { (oldProjectIds, newProjectIds) ->
                             val removedIds = oldProjectIds - newProjectIds
@@ -79,6 +72,17 @@ class FactoryListener(
                         }
                         .publish()
                         .apply { domainDisposable += connect() }
+
+                val sharedProjectSingle: Single<List<DataSnapshot>> = sharedProjectKeysObservable.firstOrError()
+                        .flatMap { (old, new) ->
+                            check(old.isEmpty())
+
+                            new.takeIf { it.isNotEmpty() }
+                                    ?.map { AndroidDatabaseWrapper.getSharedProjectSingle(it) }
+                                    ?.zipSingle()
+                                    ?: Single.just(listOf())
+                        }
+                        .cache()
 
                 val projectFactorySingle = Singles.zip(
                         privateProjectSingle,

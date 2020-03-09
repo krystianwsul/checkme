@@ -266,9 +266,9 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val remoteChange = remoteProjectFactory.onChildEvent(deviceDbInfo, event, now)
+        val localChange = remoteProjectFactory.onChildEvent(deviceDbInfo, event, now)
 
-        val runType = if (remoteChange) {
+        val runType = if (localChange) {
             RunType.LOCAL
         } else {
             TickHolder.getTickData()?.sharedTriggered()

@@ -93,7 +93,7 @@ class RemoteProjectFactory(
         if (isSharedSaved) {
             isSharedSaved = false
 
-            return false
+            return true
         } else {
             when (event) {
                 is Event.AddChange -> {
@@ -114,7 +114,7 @@ class RemoteProjectFactory(
                 }
             }
 
-            return true
+            return false
         }
     }
 

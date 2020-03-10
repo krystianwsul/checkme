@@ -1,18 +1,22 @@
 package com.krystianwsul.checkme.firebase.managers
 
-import com.google.firebase.database.DataSnapshot
-import com.krystianwsul.checkme.MyCrashlytics
-import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
-import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.common.firebase.json.UserWrapper
+import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.firebase.DatabaseCallback
+import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.utils.UserKey
 
-class RemoteRootUserManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
+abstract class RemoteRootUserManager {
 
     var isSaved = false
 
-    val remoteRootUserRecords = children.map { RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!) }.associateBy { it.id }
+    abstract val remoteRootUserRecords: Map<UserKey, RemoteRootUserRecord>
+
+    abstract val databaseWrapper: DatabaseWrapper
+
+    protected abstract fun getDatabaseCallback(values: Map<String, Any?>): DatabaseCallback
+
+    open val saveCallback: (() -> Unit)? = null
 
     fun save(): Boolean {
         val values = mutableMapOf<String, Any?>()
@@ -25,10 +29,13 @@ class RemoteRootUserManager(private val domainFactory: DomainFactory, children: 
             isSaved = true
         }
 
-        MyCrashlytics.log("RemoteFriendManager.save values: $values")
+        ErrorLogger.instance.log("RemoteFriendManager.save values: $values")
 
-        if (values.isNotEmpty())
-            AndroidDatabaseWrapper.updateFriends(values).checkError(domainFactory, "RemoteFriendManager.save")
+        if (values.isNotEmpty()) {
+            databaseWrapper.updateFriends(values, getDatabaseCallback(values))
+        } else {
+            saveCallback?.invoke()
+        }
 
         return isSaved
     }

@@ -43,4 +43,9 @@ abstract class DatabaseWrapper {
             values: Map<String, Any?>,
             callback: DatabaseCallback
     ) = update(PRIVATE_PROJECTS_KEY, values, callback)
+
+    fun updateFriends(
+            values: Map<String, Any?>,
+            callback: DatabaseCallback
+    ) = update(USERS_KEY, values, callback)
 }

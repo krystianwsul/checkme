@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.UserKey
 
 class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
-    private val remoteFriendManager = AndroidRemoteRootUserManager(domainFactory, children)
+    private val remoteFriendManager = AndroidRemoteRootUserManager(children)
     private val strangerProjectManager = StrangerProjectManager(domainFactory)
 
     private val _friends = remoteFriendManager.remoteRootUserRecords

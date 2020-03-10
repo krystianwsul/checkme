@@ -66,6 +66,8 @@ object AndroidDatabaseWrapper : DatabaseWrapper() {
 
     fun getPrivateProjectObservable(key: ProjectKey.Private) = privateProjectQuery(key).dataChanges()
 
+    fun updateFriends(values: Map<String, Any?>) = rootReference.child(USERS_KEY).updateChildren(values)
+
     fun getUserSingle(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").data()
 
     fun getUserObservable(key: UserKey) = rootReference.child("$USERS_KEY/${key.key}").dataChanges()

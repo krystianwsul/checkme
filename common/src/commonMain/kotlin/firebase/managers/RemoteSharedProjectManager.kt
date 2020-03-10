@@ -45,7 +45,7 @@ abstract class RemoteSharedProjectManager<T> : RemoteSharedProjectRecord.Parent 
     fun newRemoteProjectRecord(jsonWrapper: JsonWrapper) = RemoteSharedProjectRecord(databaseWrapper, this, jsonWrapper).also {
         check(!remoteProjectRecords.containsKey(it.id))
 
-        remoteProjectRecords[it.id] = Pair(it, true)
+        remoteProjectRecords[it.id] = Pair(it, false)
     }
 
     override fun deleteRemoteSharedProjectRecord(id: ProjectKey.Shared) {

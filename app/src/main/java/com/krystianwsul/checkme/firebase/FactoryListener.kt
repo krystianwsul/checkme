@@ -34,7 +34,6 @@ class FactoryListener(
                 val deviceInfo = it.value
                 val deviceDbInfo = DeviceDbInfo(deviceInfo, localFactory.uuid)
 
-                // todo project separate observable/single not needed in most cases, just pay attention to publish/firstOrError
                 val userObservable = AndroidDatabaseWrapper.getUserObservable(deviceInfo.key)
                         .publish()
                         .apply { domainDisposable += connect() }
@@ -129,7 +128,7 @@ class FactoryListener(
                     )
                 }.cache()
 
-                privateProjectSingle.flatMapObservable { privateProjectObservable.replay() }
+                privateProjectSingle.flatMapObservable { privateProjectObservable }
                         .subscribe {
                             domainFactorySingle.subscribe { domainFactory -> domainFactory.updatePrivateProjectRecord(it) }.addTo(domainDisposable)
                         }

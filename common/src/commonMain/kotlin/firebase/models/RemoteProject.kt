@@ -258,8 +258,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchyContainer.getById(id)
 
-    abstract fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>)
-
     abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<T, U>
 
     abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId

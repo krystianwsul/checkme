@@ -83,7 +83,7 @@ class RemoteSharedProject(
         remoteProjectUser.photoUrl = photoUrl
     }
 
-    override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) {
+    fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) {
         remoteProjectRecord.updateRecordOf(
                 addedFriends.asSequence()
                         .map { it.id }

@@ -21,9 +21,11 @@ class RemoteMyUser(private val remoteMyUserRecord: RemoteMyUserRecord) : RemoteR
         projectChangeListener?.invoke()
     }
 
-    override fun removeProject(projectKey: ProjectKey.Shared) {
-        super.removeProject(projectKey)
+    override fun removeProject(projectKey: ProjectKey.Shared): Boolean {
+        val result = super.removeProject(projectKey)
 
         projectChangeListener?.invoke()
+
+        return result
     }
 }

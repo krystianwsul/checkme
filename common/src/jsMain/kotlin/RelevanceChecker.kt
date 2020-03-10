@@ -124,7 +124,7 @@ object RelevanceChecker {
                         }.any()
 
                         if (saveUsers) {
-                            rootUserManager.apply {
+                            rootUserManager.apply { // todo makes more sense to do in parallel
                                 saveCallback = ::saveProject
                                 save()
                             }

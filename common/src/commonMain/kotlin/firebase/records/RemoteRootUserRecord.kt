@@ -58,13 +58,17 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
         }
     }
 
-    override fun removeProject(projectKey: ProjectKey.Shared) {
+    override fun removeProject(projectKey: ProjectKey.Shared): Boolean {
         val projectId = projectKey.key
 
-        if (createObject.projects.containsKey(projectId)) {
+        return if (createObject.projects.containsKey(projectId)) {
             createObject.projects.remove(projectId)
 
             addValue("$key/$PROJECTS/$projectId", null)
+
+            true
+        } else {
+            false
         }
     }
 }

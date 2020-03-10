@@ -12,7 +12,7 @@ import com.krystianwsul.common.firebase.records.RemoteMyUserRecord
 import java.util.*
 import kotlin.properties.Delegates.observable
 
-class RemoteUserManager(
+class RemoteMyUserManager(
         deviceInfo: DeviceInfo,
         private val uuid: String,
         dataSnapshot: DataSnapshot

@@ -2,7 +2,7 @@ package com.krystianwsul.checkme.firebase
 
 import com.google.firebase.database.DataSnapshot
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.managers.RemoteFriendManager
+import com.krystianwsul.checkme.firebase.managers.RemoteRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.models.RemoteRootUser
@@ -11,7 +11,7 @@ import com.krystianwsul.common.utils.UserKey
 
 class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
-    private val remoteFriendManager = RemoteFriendManager(domainFactory, children)
+    private val remoteFriendManager = RemoteRootUserManager(domainFactory, children)
     private val strangerProjectManager = StrangerProjectManager(domainFactory)
 
     private val _friends = remoteFriendManager.remoteRootUserRecords

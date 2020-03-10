@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
 
-class RemoteFriendManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
+class RemoteRootUserManager(private val domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
     var isSaved = false
 

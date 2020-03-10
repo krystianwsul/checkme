@@ -15,9 +15,9 @@ class AndroidRemoteRootUserManager(children: Iterable<DataSnapshot>) : RemoteRoo
 
     override val databaseWrapper = AndroidDatabaseWrapper
 
-    override fun getDatabaseCallback(values: Map<String, Any?>): DatabaseCallback {
+    override fun getDatabaseCallback(): DatabaseCallback {
         return { databaseMessage, successful, exception ->
-            val message = "firebase write: RemotePrivateProjectManager.save $databaseMessage, \nvalues: $values"
+            val message = "firebase write: RemotePrivateProjectManager.save $databaseMessage"
             if (successful) {
                 MyCrashlytics.log(message)
             } else {

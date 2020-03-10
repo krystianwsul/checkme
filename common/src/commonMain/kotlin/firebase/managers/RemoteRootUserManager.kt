@@ -14,7 +14,7 @@ abstract class RemoteRootUserManager {
 
     abstract val databaseWrapper: DatabaseWrapper
 
-    protected abstract fun getDatabaseCallback(values: Map<String, Any?>): DatabaseCallback
+    protected abstract fun getDatabaseCallback(): DatabaseCallback
 
     open val saveCallback: (() -> Unit)? = null
 
@@ -32,7 +32,7 @@ abstract class RemoteRootUserManager {
         ErrorLogger.instance.log("RemoteFriendManager.save values: $values")
 
         if (values.isNotEmpty()) {
-            databaseWrapper.updateFriends(values, getDatabaseCallback(values))
+            databaseWrapper.updateFriends(values, getDatabaseCallback())
         } else {
             saveCallback?.invoke()
         }

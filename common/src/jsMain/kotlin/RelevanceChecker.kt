@@ -12,21 +12,23 @@ import firebase.managers.JsSharedProjectManager
 
 object RelevanceChecker {
 
+    private enum class Branch {
+
+        PRIVATE, SHARED, USER
+    }
+
     fun checkRelevance(admin: dynamic, response: MutableList<String>, onComplete: () -> Unit) {
         val roots = listOf("development", "production")
 
-        val completed = roots.map {
-                    listOf(
-                            it to true,
-                            it to false
-                    )
+        val completed = roots.map { root ->
+                    Branch.values().map { root to it }
                 }
                 .flatten()
                 .associateWith { false }
                 .toMutableMap()
 
-        fun callback(root: String, private: Boolean) {
-            val key = root to private
+        fun callback(root: String, branch: Branch) {
+            val key = root to branch
             check(!completed.getValue(key))
 
             completed[key] = true
@@ -66,7 +68,7 @@ object RelevanceChecker {
                 }
 
                 privateProjectManager.apply {
-                    saveCallback = { callback(root, true) }
+                    saveCallback = { callback(root, Branch.PRIVATE) }
 
                     save(Unit)
                 }
@@ -99,14 +101,6 @@ object RelevanceChecker {
                         }
                         .flatten()
 
-                fun saveProject() {
-                    sharedProjectManager.apply {
-                        saveCallback = { callback(root, false) }
-
-                        save(Unit)
-                    }
-                }
-
                 if (sharedProjectsRemoved.isNotEmpty()) {
                     databaseWrapper.getUsers {
                         val rootUserManager = JsRootUserManager(databaseWrapper, it)
@@ -117,23 +111,25 @@ object RelevanceChecker {
 
                         val removedSharedProjectKeys = sharedProjectsRemoved.map { it.id }
 
-                        val saveUsers = rootUsers.filter { remoteUser ->
-                            removedSharedProjectKeys.any {
+                        rootUsers.forEach { remoteUser ->
+                            removedSharedProjectKeys.forEach {
                                 remoteUser.removeProject(it)
                             }
-                        }.any()
+                        }
 
-                        if (saveUsers) {
-                            rootUserManager.apply { // todo makes more sense to do in parallel
-                                saveCallback = ::saveProject
-                                save()
-                            }
-                        } else {
-                            saveProject()
+                        rootUserManager.apply {
+                            saveCallback = { callback(root, Branch.USER) }
+                            save()
                         }
                     }
                 } else {
-                    saveProject()
+                    callback(root, Branch.USER)
+                }
+
+                sharedProjectManager.apply {
+                    saveCallback = { callback(root, Branch.SHARED) }
+
+                    save(Unit)
                 }
             }
         }

@@ -43,11 +43,11 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : 
 
     abstract val childKey: String
 
-    var name by Committer(projectJson::name, "$id/$PROJECT_JSON")
+    var name by Committer(projectJson::name, "$key/$PROJECT_JSON")
 
     val startTime get() = projectJson.startTime
 
-    var endTime by Committer(projectJson::endTime, "$id/$PROJECT_JSON")
+    var endTime by Committer(projectJson::endTime, "$key/$PROJECT_JSON")
 
     override val children
         get() = remoteTaskRecords.values +

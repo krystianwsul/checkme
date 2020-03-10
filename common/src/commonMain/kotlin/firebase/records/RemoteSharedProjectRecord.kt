@@ -77,10 +77,10 @@ class RemoteSharedProjectRecord(
         jsonWrapper.updateRecordOf(addedFriends, removedFriends)
 
         for (addedFriend in addedFriends)
-            addValue("$id/recordOf/$addedFriend", true)
+            addValue("$key/recordOf/$addedFriend", true)
 
         for (removedFriend in removedFriends)
-            addValue("$id/recordOf/$removedFriend", null)
+            addValue("$key/recordOf/$removedFriend", null)
     }
 
     fun newRemoteCustomTimeRecord(customTimeJson: SharedCustomTimeJson): RemoteSharedCustomTimeRecord {

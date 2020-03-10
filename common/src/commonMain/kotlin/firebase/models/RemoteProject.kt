@@ -21,7 +21,7 @@ abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
     protected abstract val remoteTaskHierarchyContainer: TaskHierarchyContainer<String, RemoteTaskHierarchy<T, U>>
     protected abstract val remoteCustomTimes: Map<T, RemoteCustomTime<T, U>>
 
-    val id by lazy { remoteProjectRecord.id }
+    val id: U by lazy { remoteProjectRecord.id }
 
     var name
         get() = remoteProjectRecord.name

@@ -1,11 +1,13 @@
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.RemotePrivateProject
 import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.firebase.models.RemoteRootUser
 import com.krystianwsul.common.firebase.models.RemoteSharedProject
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
 import firebase.JsDatabaseWrapper
 import firebase.managers.JsPrivateProjectManager
+import firebase.managers.JsRootUserManager
 import firebase.managers.JsSharedProjectManager
 
 object RelevanceChecker {
@@ -97,14 +99,41 @@ object RelevanceChecker {
                         }
                         .flatten()
 
-                if (sharedProjectsRemoved.isNotEmpty()) {
-                    // todo project remove from sharedProjectManager, remove keys from users
+                fun saveProject() {
+                    sharedProjectManager.apply {
+                        saveCallback = { callback(root, false) }
+
+                        save(Unit)
+                    }
                 }
 
-                sharedProjectManager.apply {
-                    saveCallback = { callback(root, false) }
+                if (sharedProjectsRemoved.isNotEmpty()) {
+                    databaseWrapper.getUsers {
+                        val rootUserManager = JsRootUserManager(databaseWrapper, it)
 
-                    save(Unit)
+                        val rootUsers = rootUserManager.remoteRootUserRecords
+                                .values
+                                .map { RemoteRootUser(it) }
+
+                        val removedSharedProjectKeys = sharedProjectsRemoved.map { it.id }
+
+                        val saveUsers = rootUsers.filter { remoteUser ->
+                            removedSharedProjectKeys.any {
+                                remoteUser.removeProject(it)
+                            }
+                        }.any()
+
+                        if (saveUsers) {
+                            rootUserManager.apply {
+                                saveCallback = ::saveProject
+                                save()
+                            }
+                        } else {
+                            saveProject()
+                        }
+                    }
+                } else {
+                    saveProject()
                 }
             }
         }

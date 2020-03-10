@@ -16,5 +16,5 @@ interface RemoteRootUserProperties {
     fun removeFriend(userKey: UserKey)
 
     fun addProject(projectKey: ProjectKey.Shared)
-    fun removeProject(projectKey: ProjectKey.Shared)
+    fun removeProject(projectKey: ProjectKey.Shared): Boolean
 }

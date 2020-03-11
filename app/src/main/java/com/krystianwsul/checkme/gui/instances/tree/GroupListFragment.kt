@@ -50,7 +50,8 @@ class GroupListFragment @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
-        defStyleRes: Int = 0) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes), FabUser, ListItemAddedScroller {
+        defStyleRes: Int = 0
+) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes), FabUser, ListItemAddedScroller {
 
     companion object {
 

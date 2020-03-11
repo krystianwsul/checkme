@@ -59,7 +59,7 @@ android {
 }
 
 ext {
-    powermockVersion = '2.0.4'
+    powermockVersion = '2.0.5'
     lifecycleVersion = '2.2.0'
     glideVersion = '4.11.0'
 }
@@ -89,10 +89,10 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-core:17.2.2'
     implementation 'com.google.firebase:firebase-auth:19.2.0'
-    implementation 'com.google.firebase:firebase-database:19.2.0'
+    implementation 'com.google.firebase:firebase-database:19.2.1'
     implementation 'com.google.firebase:firebase-messaging:20.1.0'
-    implementation 'com.google.firebase:firebase-config:19.1.0'
-    implementation 'com.google.firebase:firebase-storage:19.1.0'
+    implementation 'com.google.firebase:firebase-config:19.1.1'
+    implementation 'com.google.firebase:firebase-storage:19.1.1'
 
     implementation 'com.firebaseui:firebase-ui-storage:4.3.2'
 

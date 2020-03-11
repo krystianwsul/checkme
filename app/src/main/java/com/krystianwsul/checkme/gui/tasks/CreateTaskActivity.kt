@@ -9,7 +9,6 @@ import android.os.Parcelable
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -509,7 +508,6 @@ class CreateTaskActivity : NavBarActivity() {
 
         intent.run {
             if (hasExtra(TASK_KEY_KEY)) {
-                Log.e("asdf", "shortcut a")
                 check(!hasExtra(TASK_KEYS_KEY))
                 check(!hasExtra(KEY_HINT))
 
@@ -518,16 +516,14 @@ class CreateTaskActivity : NavBarActivity() {
             } else {
                 check(!hasExtra(KEY_COPY))
 
-                Log.e("asdf", "shortcut b")
                 if (action == Intent.ACTION_SEND) {
-                    Log.e("asdf", "shortcut c")
                     check(type == "text/plain")
 
                     nameHint = getStringExtra(Intent.EXTRA_TEXT)!!
                     check(!nameHint.isNullOrEmpty())
+                } else {
+                    nameHint = getStringExtra(KEY_NAME_HINT)
                 }
-
-                Log.e("asdf", "shortcut keys: " + extras?.keySet()?.joinToString(","))
 
                 if (hasExtra(TASK_KEYS_KEY))
                     taskKeys = getParcelableArrayListExtra<TaskKey>(TASK_KEYS_KEY)!!.apply { check(size > 1) }
@@ -540,7 +536,6 @@ class CreateTaskActivity : NavBarActivity() {
                     }
                     hasExtra(KEY_SHORTCUT_ID) -> Hint.Task(TaskKey.fromShortcut(getStringExtra(KEY_SHORTCUT_ID)!!))
                     hasExtra(KEY_PARENT_PROJECT) -> {
-                        Log.e("asdf", "shortcut e")
                         check(hasExtra(KEY_PARENT_TASK))
                         check(!hasExtra(KEY_SHORTCUT_ID))
 
@@ -548,8 +543,6 @@ class CreateTaskActivity : NavBarActivity() {
                     }
                     else -> null
                 }
-
-                nameHint = getStringExtra(KEY_NAME_HINT)
             }
 
             removeInstanceKeys = getParcelableArrayListExtra(KEY_REMOVE_INSTANCE_KEYS) ?: listOf()

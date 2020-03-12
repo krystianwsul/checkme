@@ -8,11 +8,11 @@ import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
-class StrangerProjectManager(private val domainFactory: DomainFactory) {
+class StrangerProjectManager {
 
     private var strangerProjects: Pair<ProjectKey, List<Pair<UserKey, Boolean>>>? = null
 
-    fun save() {
+    fun save(domainFactory: DomainFactory) {
         val values = mutableMapOf<String, Any?>()
 
         strangerProjects?.let { (projectId, userValues) ->

@@ -9,5 +9,6 @@ class UserWrapper @JvmOverloads constructor(
         val userData: UserJson = UserJson(),
         var defaultReminder: Boolean = true,
         var defaultTab: Int = 0,
-        val projects: MutableMap<String, Boolean> = mutableMapOf()
+        val projects: MutableMap<String, Boolean> = mutableMapOf(),
+        val friends: MutableMap<String, Boolean> = mutableMapOf()
 )

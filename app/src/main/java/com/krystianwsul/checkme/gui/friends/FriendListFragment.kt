@@ -12,14 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
@@ -240,14 +239,14 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             val friendIds = userListDatas.map { it.id }.toSet()
 
-            DomainFactory.instance.removeFriends(friendIds)
+            DomainFactory.instance.removeFriends(SaveService.Source.GUI, friendIds)
 
             mainActivity.showSnackbarRemoved(userListDatas.size) {
                 onLoadFinished(data!!.copy(userListDatas = data!!.userListDatas
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))
 
-                AndroidDatabaseWrapper.addFriends(friendIds).checkError(DomainFactory.instance, "FriendListFragment.removeFriends.undo")
+                DomainFactory.instance.addFriends(SaveService.Source.GUI, friendIds)
             }
         }
     }

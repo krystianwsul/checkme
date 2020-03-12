@@ -10,10 +10,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
-import com.krystianwsul.checkme.firebase.DatabaseEvent
-import com.krystianwsul.checkme.firebase.RemoteFriendFactory
-import com.krystianwsul.checkme.firebase.RemoteProjectFactory
-import com.krystianwsul.checkme.firebase.RemoteUserFactory
+import com.krystianwsul.checkme.firebase.*
 import com.krystianwsul.checkme.gui.HierarchyData
 import com.krystianwsul.checkme.gui.MainActivity
 import com.krystianwsul.checkme.gui.instances.tree.GroupListFragment
@@ -21,6 +18,7 @@ import com.krystianwsul.checkme.gui.tasks.TaskListFragment
 import com.krystianwsul.checkme.notifications.TickJobIntentService
 import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.upload.Uploader
+import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.viewmodels.*
@@ -148,10 +146,24 @@ class DomainFactory(
 
     val isSaved = BehaviorRelay.createDefault(false)
 
+    private fun updateFriends() { // todo friends remove
+        val newFriends = remoteFriendFactory.friends.map { it.id }
+        val oldFriends = remoteUserFactory.remoteUser.friends
+
+        val addedFriends = newFriends - oldFriends
+        val removedFriends = oldFriends - newFriends
+
+        addedFriends.forEach { remoteUserFactory.remoteUser.addFriend(it) }
+        removedFriends.forEach { remoteUserFactory.remoteUser.removeFriend(it) }
+
+        if (addedFriends.isNotEmpty() || removedFriends.isNotEmpty())
+            save(0, SaveService.Source.GUI)
+    }
+
     init {
         Preferences.tickLog.logLineHour("DomainFactory.init")
 
-        remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
+        remoteFriendFactory = RemoteFriendFactory(friendSnapshot.children)
 
         val now = ExactTimeStamp.now
 
@@ -162,6 +174,8 @@ class DomainFactory(
         firstRun = false
 
         updateShortcuts(now)
+
+        updateFriends()
     }
 
     private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
@@ -194,7 +208,7 @@ class DomainFactory(
         val localChanges = localFactory.save(source)
         val remoteChanges = remoteProjectFactory.save(this)
         val userChanges = remoteUserFactory.save(this)
-        val friendChanges = remoteFriendFactory.save()
+        val friendChanges = remoteFriendFactory.save(this)
 
         if (localChanges || remoteChanges || userChanges || friendChanges) {
             domainChanged.accept(dataIds)
@@ -333,15 +347,16 @@ class DomainFactory(
     fun updateUserRecord(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("updateUserRecord")
 
-        val runType: RunType
-        if (remoteUserFactory.isSaved) {
+        val runType = if (remoteUserFactory.isSaved) {
             remoteUserFactory.isSaved = false
 
-            runType = RunType.LOCAL
+            RunType.LOCAL
         } else {
             remoteUserFactory.onNewSnapshot(dataSnapshot)
 
-            runType = RunType.REMOTE
+            updateFriends()
+
+            RunType.REMOTE
         }
 
         tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updateUserRecord", runType)
@@ -357,6 +372,8 @@ class DomainFactory(
             RunType.LOCAL
         } else {
             remoteFriendFactory.onNewSnapshot(dataSnapshot.children)
+
+            updateFriends()
 
             RunType.REMOTE
         }
@@ -1886,13 +1903,37 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun removeFriends(keys: Set<UserKey>) {
+    fun removeFriends(source: SaveService.Source, keys: Set<UserKey>) {
         MyCrashlytics.log("DomainFactory.removeFriends")
         check(!remoteFriendFactory.isSaved)
 
         keys.forEach { remoteFriendFactory.removeFriend(deviceDbInfo.key, it) }
 
-        remoteFriendFactory.save()
+        save(0, source)
+    }
+
+    @Synchronized
+    fun addFriend(source: SaveService.Source, userKey: UserKey) {
+        MyCrashlytics.log("DomainFactory.addFriend")
+        check(!remoteUserFactory.isSaved)
+
+        remoteUserFactory.remoteUser.addFriend(userKey)
+
+        AndroidDatabaseWrapper.addFriend(userKey).checkError(this, "DomainFactory.addFriend")
+
+        save(0, source)
+    }
+
+    @Synchronized
+    fun addFriends(source: SaveService.Source, userKeys: Set<UserKey>) {
+        MyCrashlytics.log("DomainFactory.addFriends")
+        check(!remoteUserFactory.isSaved)
+
+        userKeys.forEach { remoteUserFactory.remoteUser.addFriend(it) }
+
+        AndroidDatabaseWrapper.addFriends(userKeys).checkError(this, "DomainFactory.addFriends")
+
+        save(0, source)
     }
 
     @Synchronized

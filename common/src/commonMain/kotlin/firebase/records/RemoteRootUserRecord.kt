@@ -13,6 +13,7 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
 
         const val USER_DATA = "userData"
         private const val FRIEND_OF = "friendOf"
+        private const val FRIENDS = "friends"
         const val PROJECTS = "projects"
     }
 
@@ -31,10 +32,35 @@ open class RemoteRootUserRecord(create: Boolean, override val createObject: User
     override val projectIds
         get() = createObject.projects
                 .keys
-                .map { ProjectKey.Shared(it) }
+                .map(ProjectKey::Shared)
                 .toSet()
 
+    override val friends
+        get() = createObject.friends
+                .keys
+                .map(::UserKey)
+                .toSet()
+
+    override fun addFriend(userKey: UserKey) {
+        val friendId = userKey.key
+        check(!createObject.friends.containsKey(friendId))
+
+        addValue("$key/$FRIENDS/$friendId", true)
+    }
+
     override fun removeFriend(userKey: UserKey) {
+        val friendId = userKey.key
+
+        val friends = createObject.friends
+        check(friends.containsKey(friendId))
+        checkNotNull(friends[friendId])
+
+        friends.remove(friendId)
+
+        addValue("$key/$FRIENDS/$friendId", null)
+    }
+
+    override fun removeFriendOf(userKey: UserKey) {
         val friendId = userKey.key
 
         val friendOf = createObject.friendOf

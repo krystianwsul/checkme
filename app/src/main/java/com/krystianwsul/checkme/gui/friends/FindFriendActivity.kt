@@ -20,8 +20,8 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.gui.NavBarActivity
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.utils.loadPhoto
 import com.krystianwsul.common.firebase.UserData
 import io.reactivex.rxkotlin.plusAssign
@@ -86,7 +86,7 @@ class FindFriendActivity : NavBarActivity() {
         findFriendUserLayout.setOnClickListener {
             check(!loading)
 
-            AndroidDatabaseWrapper.addFriend(userData!!.getKey()).checkError(DomainFactory.instance, "FindFriendActivity.addFriend")
+            DomainFactory.instance.addFriend(SaveService.Source.GUI, userData!!.getKey())
 
             finish()
         }

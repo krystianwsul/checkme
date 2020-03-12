@@ -10,7 +10,7 @@ import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
-class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
+class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
     companion object {
 
@@ -20,7 +20,7 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
     }
 
     private val remoteFriendManager = AndroidRemoteRootUserManager(children)
-    private val strangerProjectManager = StrangerProjectManager(domainFactory)
+    private val strangerProjectManager = StrangerProjectManager()
 
     private var _friends = remoteFriendManager.remoteRootUserRecords.toRootUsers()
 
@@ -32,8 +32,8 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
 
     val friends: Collection<RemoteRootUser> get() = _friends.values
 
-    fun save(): Boolean {
-        strangerProjectManager.save()
+    fun save(domainFactory: DomainFactory): Boolean {
+        strangerProjectManager.save(domainFactory)
 
         return remoteFriendManager.save()
     }
@@ -56,7 +56,7 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
     fun removeFriend(userKey: UserKey, friendId: UserKey) {
         check(_friends.containsKey(friendId))
 
-        _friends[friendId]!!.removeFriend(userKey)
+        _friends[friendId]!!.removeFriendOf(userKey)
 
         _friends.remove(friendId)
     }

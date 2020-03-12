@@ -85,18 +85,19 @@ class RemoteProjectFactory(
                 .map { it.tasks.size }
                 .sum()
 
-    fun onChildEvent(deviceDbInfo: DeviceDbInfo, event: Event, now: ExactTimeStamp): Boolean {
-        val projectPair = remoteSharedProjectManager.remoteProjectRecords[event.key]
+    fun onChildEvent(deviceDbInfo: DeviceDbInfo, databaseEvent: DatabaseEvent, now: ExactTimeStamp): Boolean {
+        val projectKey = ProjectKey.Shared(databaseEvent.key)
+        val projectPair = remoteSharedProjectManager.remoteProjectRecords[projectKey]
 
         if (projectPair?.second == true) {
-            remoteSharedProjectManager.remoteProjectRecords[event.key] = Pair(projectPair.first, false)
+            remoteSharedProjectManager.remoteProjectRecords[projectKey] = Pair(projectPair.first, false)
 
             return true
         } else {
-            when (event) {
-                is Event.AddChange -> {
+            when (databaseEvent) {
+                is DatabaseEvent.AddChange -> {
                     try {
-                        val remoteProjectRecord = remoteSharedProjectManager.setChild(event.dataSnapshot)
+                        val remoteProjectRecord = remoteSharedProjectManager.setChild(databaseEvent.dataSnapshot)
 
                         remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
                             fixNotificationShown(localFactory, now)
@@ -106,9 +107,9 @@ class RemoteProjectFactory(
                         // hack for oldestVisible being set on records removed by cloud function
                     }
                 }
-                is Event.Remove -> {
-                    remoteSharedProjectManager.removeChild(event.key)
-                    remoteSharedProjects.remove(event.key)
+                is DatabaseEvent.Remove -> {
+                    remoteSharedProjectManager.removeChild(projectKey)
+                    remoteSharedProjects.remove(projectKey)
                 }
             }
 
@@ -261,15 +262,4 @@ class RemoteProjectFactory(
             .schedules
             .single { it.scheduleId == scheduleId }
 
-    sealed class Event {
-
-        abstract val key: ProjectKey.Shared
-
-        class AddChange(val dataSnapshot: DataSnapshot) : Event() {
-
-            override val key = ProjectKey.Shared(dataSnapshot.key!!)
-        }
-
-        class Remove(override val key: ProjectKey.Shared) : Event()
-    }
 }

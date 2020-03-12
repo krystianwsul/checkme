@@ -77,10 +77,10 @@ class FactoryListener(
                             Pair(removedIds, newMap)
                         }
                         .switchMap { (removedIds, addChangeObservables) ->
-                            val removedEvents = Observable.fromIterable(removedIds.map(RemoteProjectFactory.Event::Remove))
+                            val removedEvents = Observable.fromIterable(removedIds.map { DatabaseEvent.Remove(it.key) })
 
                             val addChangeEvents = addChangeObservables.values
-                                    .map { it.map(RemoteProjectFactory.Event::AddChange) }
+                                    .map { it.map(DatabaseEvent::AddChange) }
                                     .merge()
 
                             listOf(removedEvents, addChangeEvents).merge()
@@ -142,7 +142,7 @@ class FactoryListener(
 
                 friendSingle.flatMapObservable { friendObservable }
                         .subscribe {
-                            domainFactorySingle.subscribe { domainFactory -> domainFactory.setFriendRecords(it) }.addTo(domainDisposable)
+                            domainFactorySingle.subscribe { domainFactory -> domainFactory.updateFriendRecords(it) }.addTo(domainDisposable)
                         }
                         .addTo(domainDisposable)
 

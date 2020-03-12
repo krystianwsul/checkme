@@ -1958,7 +1958,7 @@ class DomainFactory(
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId) as RemoteSharedProject
 
         remoteProject.name = name
-        remoteProject.updateRecordOf(addedFriends.map { remoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
+        remoteProject.updateUsers(addedFriends.map { remoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
 
         remoteFriendFactory.updateProjects(projectId, addedFriends, removedFriends)
 

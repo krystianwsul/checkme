@@ -83,14 +83,7 @@ class RemoteSharedProject(
         remoteProjectUser.photoUrl = photoUrl
     }
 
-    fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) {
-        remoteProjectRecord.updateRecordOf(
-                addedFriends.asSequence()
-                        .map { it.id }
-                        .toSet(),
-                removedFriends
-        )
-
+    fun updateUsers(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) {
         for (addedFriend in addedFriends)
             addUser(addedFriend)
 

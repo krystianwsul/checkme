@@ -71,18 +71,6 @@ class RemoteSharedProjectRecord(
             jsonWrapper
     )
 
-    fun updateRecordOf(addedFriends: Set<UserKey>, removedFriends: Set<UserKey>) {
-        check(addedFriends.none { removedFriends.contains(it) })
-
-        jsonWrapper.updateRecordOf(addedFriends, removedFriends)
-
-        for (addedFriend in addedFriends)
-            addValue("$key/recordOf/$addedFriend", true)
-
-        for (removedFriend in removedFriends)
-            addValue("$key/recordOf/$removedFriend", null)
-    }
-
     fun newRemoteCustomTimeRecord(customTimeJson: SharedCustomTimeJson): RemoteSharedCustomTimeRecord {
         val remoteCustomTimeRecord = RemoteSharedCustomTimeRecord(this, customTimeJson)
         check(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.id))

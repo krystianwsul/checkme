@@ -261,7 +261,7 @@ fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) {
     (parent.parent as TextInputLayout).setEndIconOnClickListener { listener() }
 }
 
-fun <T> serialize(obj: T): String {
+fun <T : Serializable> serialize(obj: T): String {
     return ByteArrayOutputStream().let {
         ObjectOutputStream(it).run {
             writeObject(obj)
@@ -272,7 +272,7 @@ fun <T> serialize(obj: T): String {
     }
 }
 
-fun <T> deserialize(serialized: String?): T? {
+fun <T : Serializable> deserialize(serialized: String?): T? {
     if (serialized.isNullOrEmpty())
         return null
 

@@ -1,6 +1,6 @@
 package com.krystianwsul.common.utils
 
-sealed class ProjectKey : Parcelable {
+sealed class ProjectKey : Parcelable, Serializable {
 
     abstract val key: String
     abstract val type: Type
@@ -25,6 +25,15 @@ sealed class ProjectKey : Parcelable {
 
     enum class Type {
 
-        SHARED, PRIVATE
+        SHARED {
+
+            override fun newKey(key: String) = Shared(key)
+        },
+        PRIVATE {
+
+            override fun newKey(key: String) = Private(key)
+        };
+
+        abstract fun newKey(key: String): ProjectKey
     }
 }

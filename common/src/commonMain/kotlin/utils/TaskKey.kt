@@ -8,14 +8,13 @@ data class TaskKey(val remoteProjectId: ProjectKey, val remoteTaskId: String) : 
         fun fromShortcut(shortcut: String): TaskKey {
             val (type, projectId, taskId) = shortcut.split(':')
 
-            val projectKey: ProjectKey = when (ProjectKey.Type.valueOf(type)) {
-                ProjectKey.Type.SHARED -> ProjectKey.Shared(projectId)
-                ProjectKey.Type.PRIVATE -> ProjectKey.Private(projectId)
-            }
+            val projectKey: ProjectKey = ProjectKey.Type
+                    .valueOf(type)
+                    .newKey(projectId)
 
             return TaskKey(projectKey, taskId)
         }
     }
 
-    fun toShortcut() = "${remoteProjectId.type}$remoteProjectId:$remoteTaskId"
+    fun toShortcut() = "${remoteProjectId.type}:${remoteProjectId.key}:$remoteTaskId"
 }

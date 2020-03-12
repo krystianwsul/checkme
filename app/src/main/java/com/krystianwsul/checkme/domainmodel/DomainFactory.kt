@@ -9,7 +9,6 @@ import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.local.LocalFactory
-import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.notifications.NotificationWrapper
 import com.krystianwsul.checkme.firebase.RemoteFriendFactory
 import com.krystianwsul.checkme.firebase.RemoteProjectFactory
@@ -154,13 +153,15 @@ class DomainFactory(
 
         remoteFriendFactory = RemoteFriendFactory(this, friendSnapshot.children)
 
-        remoteReadTimes = ReadTimes(startTime, readTime, ExactTimeStamp.now)
+        val now = ExactTimeStamp.now
 
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.init", if (firstRun) RunType.APP_START else RunType.SIGN_IN)
+        remoteReadTimes = ReadTimes(startTime, readTime, now)
+
+        tryNotifyListeners(now, "DomainFactory.init", if (firstRun) RunType.APP_START else RunType.SIGN_IN)
 
         firstRun = false
 
-        updateShortcuts()
+        updateShortcuts(now)
     }
 
     private val defaultProjectId by lazy { remoteProjectFactory.remotePrivateProject.id }
@@ -202,11 +203,7 @@ class DomainFactory(
         }
     }
 
-    private fun updateShortcuts() {
-        val now = ExactTimeStamp.now
-
-        ImageManager.prefetch(deviceDbInfo, getTasks().toList()) { updateNotifications(ExactTimeStamp.now) }
-
+    private fun updateShortcuts(now: ExactTimeStamp) {
         val shortcutTasks = ShortcutManager.getShortcuts()
                 .map { Pair(it.value, getTaskIfPresent(it.key)) }
                 .filter { it.second?.isVisible(now, false) == true }
@@ -234,9 +231,9 @@ class DomainFactory(
     fun updatePrivateProjectRecord(dataSnapshot: DataSnapshot) {
         MyCrashlytics.log("updatePrivateProjectRecord")
 
-        updateShortcuts()
-
         val start = ExactTimeStamp.now
+
+        updateShortcuts(start)
 
         val runType: RunType
         if (remoteProjectFactory.isPrivateSaved) {
@@ -244,7 +241,7 @@ class DomainFactory(
 
             runType = RunType.LOCAL
         } else {
-            remoteProjectFactory.onNewPrivate(dataSnapshot, ExactTimeStamp.now)
+            remoteProjectFactory.onNewPrivate(dataSnapshot, start)
 
             val stop = ExactTimeStamp.now
 
@@ -255,16 +252,16 @@ class DomainFactory(
             runType = RunType.REMOTE
         }
 
-        tryNotifyListeners(ExactTimeStamp.now, "DomainFactory.updatePrivateProjectRecord", runType)
+        tryNotifyListeners(start, "DomainFactory.updatePrivateProjectRecord", runType)
     }
 
     @Synchronized
     fun updateSharedProjectRecords(event: RemoteProjectFactory.Event) {
         MyCrashlytics.log("updateSharedProjectRecord")
 
-        updateShortcuts()
-
         val now = ExactTimeStamp.now
+
+        updateShortcuts(now)
 
         val localChange = remoteProjectFactory.onChildEvent(deviceDbInfo, event, now)
 

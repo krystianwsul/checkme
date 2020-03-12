@@ -179,10 +179,7 @@ class RemoteProjectFactory(
                 users = userJsons.mapKeys { it.key.key }.toMutableMap()
         )
 
-        val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(JsonWrapper(
-                recordOf.map { it.key }.toSet(),
-                projectJson
-        ))
+        val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(JsonWrapper(projectJson))
 
         val remoteProject = RemoteSharedProject(remoteProjectRecord)
 

@@ -6,19 +6,23 @@ import com.krystianwsul.checkme.firebase.managers.AndroidRemoteRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.models.RemoteRootUser
+import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
 class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataSnapshot>) {
 
+    companion object {
+
+        private fun Map<UserKey, RemoteRootUserRecord>.toRootUsers() = values.map { RemoteRootUser(it) }
+                .associateBy { it.id }
+                .toMutableMap()
+    }
+
     private val remoteFriendManager = AndroidRemoteRootUserManager(children)
     private val strangerProjectManager = StrangerProjectManager(domainFactory)
 
-    private val _friends = remoteFriendManager.remoteRootUserRecords
-            .values
-            .map { RemoteRootUser(it) }
-            .associateBy { it.id }
-            .toMutableMap()
+    private var _friends = remoteFriendManager.remoteRootUserRecords.toRootUsers()
 
     var isSaved
         get() = remoteFriendManager.isSaved
@@ -72,5 +76,9 @@ class RemoteFriendFactory(domainFactory: DomainFactory, children: Iterable<DataS
         removedFriends.forEach { it.removeProject(projectId) }
 
         strangerProjectManager.updateStrangerProjects(projectId, addedStrangers, removedStrangers)
+    }
+
+    fun onNewSnapshot(children: Iterable<DataSnapshot>) {
+        _friends = remoteFriendManager.onNewSnapshot(children).toRootUsers()
     }
 }

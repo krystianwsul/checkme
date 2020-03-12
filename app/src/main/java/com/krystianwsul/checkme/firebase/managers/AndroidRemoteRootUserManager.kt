@@ -11,7 +11,14 @@ import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
 
 class AndroidRemoteRootUserManager(children: Iterable<DataSnapshot>) : RemoteRootUserManager() {
 
-    override val remoteRootUserRecords = children.map { RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!) }.associateBy { it.id }
+    companion object {
+
+        private fun Iterable<DataSnapshot>.toRootUserRecords() = map {
+            RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!)
+        }.associateBy { it.id }
+    }
+
+    override var remoteRootUserRecords = children.toRootUserRecords()
 
     override val databaseWrapper = AndroidDatabaseWrapper
 
@@ -24,5 +31,9 @@ class AndroidRemoteRootUserManager(children: Iterable<DataSnapshot>) : RemoteRoo
                 MyCrashlytics.logException(FirebaseWriteException(message, exception))
             }
         }
+    }
+
+    fun onNewSnapshot(children: Iterable<DataSnapshot>) = children.toRootUserRecords().also {
+        remoteRootUserRecords = it
     }
 }

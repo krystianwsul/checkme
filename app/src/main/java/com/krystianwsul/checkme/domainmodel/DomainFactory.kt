@@ -119,8 +119,7 @@ class DomainFactory(
     var remoteUpdateTime: Long? = null
         private set
 
-    var remoteFriendFactory: RemoteFriendFactory
-        private set
+    val remoteFriendFactory: RemoteFriendFactory
 
     private var aggregateData: AggregateData? = null
 
@@ -357,7 +356,7 @@ class DomainFactory(
 
             runType = RunType.LOCAL
         } else {
-            remoteFriendFactory = RemoteFriendFactory(this, dataSnapshot.children)
+            remoteFriendFactory.onNewSnapshot(dataSnapshot.children)
 
             runType = RunType.REMOTE
         }

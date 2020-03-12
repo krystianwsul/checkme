@@ -1907,7 +1907,10 @@ class DomainFactory(
         MyCrashlytics.log("DomainFactory.removeFriends")
         check(!remoteFriendFactory.isSaved)
 
-        keys.forEach { remoteFriendFactory.removeFriend(deviceDbInfo.key, it) }
+        keys.forEach {
+            remoteUserFactory.remoteUser.removeFriend(it)
+            remoteFriendFactory.removeFriend(deviceDbInfo.key, it)
+        }
 
         save(0, source)
     }

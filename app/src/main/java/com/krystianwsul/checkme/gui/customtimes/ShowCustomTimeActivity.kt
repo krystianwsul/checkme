@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
@@ -55,7 +54,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         fun getEditIntent(customTimeId: RemoteCustomTimeId.Private, context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply {
             @Suppress("CAST_NEVER_SUCCEEDS")
-            putExtra(CUSTOM_TIME_ID_KEY, customTimeId as Parcelable)
+            putExtra(CUSTOM_TIME_ID_KEY, customTimeId)
         }
 
         fun getCreateIntent(context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply { putExtra(NEW_KEY, true) }
@@ -180,8 +179,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
             check(!intent.hasExtra(NEW_KEY))
 
-            @Suppress("CAST_NEVER_SUCCEEDS") // because the IDE isn't recognizing it's a subclass
-            customTimeId = intent.getParcelableExtra<Parcelable>(CUSTOM_TIME_ID_KEY) as RemoteCustomTimeId.Private
+            customTimeId = intent.getParcelableExtra<RemoteCustomTimeId.Private>(CUSTOM_TIME_ID_KEY)
 
             showCustomTimeViewModel = getViewModel<ShowCustomTimeViewModel>().apply {
                 start(customTimeId!!)

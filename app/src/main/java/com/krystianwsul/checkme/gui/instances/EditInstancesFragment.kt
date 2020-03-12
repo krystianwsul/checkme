@@ -335,6 +335,6 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         checkNotNull(timePairPersist)
 
         if (resultCode == Activity.RESULT_OK)
-            timePairPersist!!.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.Private
+            timePairPersist!!.customTimeKey = data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY)!!
     }
 }

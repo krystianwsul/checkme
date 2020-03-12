@@ -532,7 +532,7 @@ class CreateTaskActivity : NavBarActivity() {
                     hasExtra(KEY_HINT) -> {
                         check(!hasExtra(KEY_SHORTCUT_ID))
 
-                        getSerializableExtra(KEY_HINT) as Hint
+                        getParcelableExtra<Hint>(KEY_HINT)
                     }
                     hasExtra(KEY_SHORTCUT_ID) -> Hint.Task(TaskKey.fromShortcut(getStringExtra(KEY_SHORTCUT_ID)!!))
                     hasExtra(KEY_PARENT_PROJECT) -> {
@@ -992,8 +992,9 @@ class CreateTaskActivity : NavBarActivity() {
         return ScheduleEntry(CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
     }
 
-    sealed class Hint : Serializable {
+    sealed class Hint : Parcelable {
 
+        @Parcelize
         class Schedule(val date: Date, val timePair: TimePair) : Hint() {
 
             constructor(
@@ -1004,6 +1005,7 @@ class CreateTaskActivity : NavBarActivity() {
             constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
         }
 
+        @Parcelize
         class Task(val taskKey: TaskKey) : Hint()
     }
 

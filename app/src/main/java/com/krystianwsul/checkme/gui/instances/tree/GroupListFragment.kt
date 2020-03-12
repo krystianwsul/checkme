@@ -493,11 +493,10 @@ class GroupListFragment @JvmOverloads constructor(
         super.onAttachedToWindow()
 
         val observable = activity.started.switchMap {
-            if (it) {
+            if (it)
                 parametersRelay
-            } else {
+            else
                 Observable.never<Parameters>()
-            }
         }
 
         compositeDisposable += observable.subscribe { initialize() }
@@ -656,27 +655,33 @@ class GroupListFragment @JvmOverloads constructor(
         floatingActionButton.setOnClickListener {
             check(showFab())
 
-            when (val parameters = parameters) {
+            fun List<InstanceData>.getHint() = (firstOrNull { it.createTaskTimePair.customTimeKey != null }
+                    ?: first()).let {
+                CreateTaskActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)
+            }
+
+            val hint = when (val parameters = parameters) {
                 is Parameters.All -> {
                     val actionMode = selectionCallback.actionMode
 
                     if (actionMode != null) {
-                        nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).map { it as InstanceData }.let {
-                            (it.firstOrNull { it.createTaskTimePair.customTimeKey != null }
-                                    ?: it.first()).let {
-                                activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(it.instanceTimeStamp.date, it.createTaskTimePair)))
-                            }
-                        }
+                        val hint = nodesToSelectedDatas(treeViewAdapter.selectedNodes, true).map { it as InstanceData }.getHint()
 
                         actionMode.finish()
+
+                        hint
                     } else {
-                        activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position))))
+                        CreateTaskActivity.Hint.Schedule(rangePositionToDate(parameters.timeRange, parameters.position))
                     }
                 }
-                is Parameters.TimeStamp -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Schedule(parameters.timeStamp.date, parameters.timeStamp.hourMinute)))
-                is Parameters.InstanceKey -> activity.startActivity(CreateTaskActivity.getCreateIntent(CreateTaskActivity.Hint.Task(parameters.instanceKey.taskKey)))
+                is Parameters.TimeStamp -> parameters.dataWrapper
+                        .instanceDatas
+                        .getHint()
+                is Parameters.InstanceKey -> CreateTaskActivity.Hint.Task(parameters.instanceKey.taskKey)
                 else -> throw IllegalStateException()
             }
+
+            activity.startActivity(CreateTaskActivity.getCreateIntent(hint))
         }
 
         updateFabVisibility()

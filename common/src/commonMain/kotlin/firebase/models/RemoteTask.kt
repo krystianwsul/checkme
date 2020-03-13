@@ -336,7 +336,11 @@ class RemoteTask<T : RemoteCustomTimeId>(
 
     fun generateInstance(scheduleDateTime: DateTime) = RemoteInstance(remoteProject, this, scheduleDateTime)
 
-    override fun getScheduleText(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp, showParent: Boolean): String? {
+    override fun getScheduleText(
+            scheduleTextFactory: ScheduleTextFactory,
+            exactTimeStamp: ExactTimeStamp,
+            showParent: Boolean
+    ): String? {
         check(current(exactTimeStamp))
 
         val currentSchedules = getCurrentSchedules(exactTimeStamp)
@@ -345,7 +349,9 @@ class RemoteTask<T : RemoteCustomTimeId>(
         return if (parentTask == null) {
             check(currentSchedules.all { it.current(exactTimeStamp) })
 
-            ScheduleGroup.getGroups(currentSchedules).joinToString(", ") { scheduleTextFactory.getScheduleText(it, remoteProject) }
+            ScheduleGroup.getGroups(currentSchedules).joinToString(", ") {
+                scheduleTextFactory.getScheduleText(it, remoteProject)
+            }
         } else {
             check(currentSchedules.isEmpty())
 

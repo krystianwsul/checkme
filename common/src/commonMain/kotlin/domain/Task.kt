@@ -3,15 +3,14 @@ package com.krystianwsul.common.domain
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.schedules.Schedule
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
+import com.krystianwsul.common.domain.schedules.SingleSchedule
+import com.krystianwsul.common.domain.schedules.SingleScheduleBridge
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.RemoteProject
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.*
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ScheduleData
-import com.krystianwsul.common.utils.ScheduleKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
 abstract class Task {
 
@@ -74,7 +73,56 @@ abstract class Task {
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(current(exactTimeStamp))
 
-        return schedules.filter { it.current(exactTimeStamp) }
+        val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
+        val singleSchedule = currentSchedules.singleOrNull() as? SingleSchedule
+        if (singleSchedule != null && existingInstances.size == 1) {
+            val singleInstance = existingInstances[ScheduleKey(singleSchedule.date, singleSchedule.timePair)]
+            if (singleInstance != null) {
+                if (singleInstance.scheduleDate != singleInstance.instanceDate || singleInstance.scheduleDateTime.time.timePair != singleInstance.instanceTimePair)
+                    return listOf(SingleSchedule(this as RemoteTask<*>, MockSingleScheduleBridge(singleSchedule, singleInstance)))
+            }
+        }
+
+        return currentSchedules
+    }
+
+    private class MockSingleScheduleBridge(
+            private val singleSchedule: SingleSchedule,
+            private val instance: Instance
+    ) : SingleScheduleBridge by singleSchedule.singleScheduleBridge {
+
+        override val customTimeKey: CustomTimeKey<*>?
+            get() = instance.instanceTimePair.customTimeKey
+
+        override val year: Int
+            get() = instance.instanceDate.year
+
+        override val month: Int
+            get() = instance.instanceDate.month
+
+        override val day: Int
+            get() = instance.instanceDate.day
+
+        override val hour: Int?
+            get() = instance.instanceTime
+                    .timePair
+                    .hourMinute
+                    ?.hour
+
+        override val minute: Int?
+            get() = instance.instanceTime
+                    .timePair
+                    .hourMinute
+                    ?.minute
+
+        override val remoteCustomTimeKey: Pair<String, RemoteCustomTimeId>?
+            get() = instance.instanceTime
+                    .timePair
+                    .customTimeKey
+                    ?.let { Pair(it.remoteProjectId, it.remoteCustomTimeId) }
+
+        override val timePair
+            get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {

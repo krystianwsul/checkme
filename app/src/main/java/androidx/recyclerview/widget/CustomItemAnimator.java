@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @see RecyclerView#setItemAnimator(RecyclerView.ItemAnimator)
  */
-public class LinearChangeItemAnimator extends SimpleItemAnimator {
+public class CustomItemAnimator extends SimpleItemAnimator {
     private static final boolean DEBUG = false;
 
     private static TimeInterpolator sDefaultInterpolator;
@@ -345,40 +345,14 @@ public class LinearChangeItemAnimator extends SimpleItemAnimator {
         return true;
     }
 
-    private void animateNew(View newView, ChangeInfo changeInfo, long duration) {
-        final ViewPropertyAnimator newViewAnimation = newView.animate();
-        mChangeAnimations.add(changeInfo.newHolder);
-        newViewAnimation.translationX(0).translationY(0).setDuration(duration)
-                .alpha(1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-                dispatchChangeStarting(changeInfo.newHolder, false);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                newViewAnimation.setListener(null);
-                newView.setAlpha(1);
-                newView.setTranslationX(0);
-                newView.setTranslationY(0);
-                dispatchChangeFinished(changeInfo.newHolder, false);
-                mChangeAnimations.remove(changeInfo.newHolder);
-                dispatchFinishedWhenDone();
-            }
-        }).start();
-    }
-
     void animateChangeImpl(final ChangeInfo changeInfo) {
         final RecyclerView.ViewHolder holder = changeInfo.oldHolder;
         final View view = holder == null ? null : holder.itemView;
         final RecyclerView.ViewHolder newHolder = changeInfo.newHolder;
         final View newView = newHolder != null ? newHolder.itemView : null;
-
-        long tmpDuration = getChangeDuration();
-        final long duration = (view != null && newView != null) ? tmpDuration / 2 : tmpDuration;
-
         if (view != null) {
-            final ViewPropertyAnimator oldViewAnim = view.animate().setDuration(duration);
+            final ViewPropertyAnimator oldViewAnim = view.animate().setDuration(
+                    getChangeDuration());
             mChangeAnimations.add(changeInfo.oldHolder);
             oldViewAnim.translationX(changeInfo.toX - changeInfo.fromX);
             oldViewAnim.translationY(changeInfo.toY - changeInfo.fromY);
@@ -396,17 +370,31 @@ public class LinearChangeItemAnimator extends SimpleItemAnimator {
                     view.setTranslationY(0);
                     dispatchChangeFinished(changeInfo.oldHolder, true);
                     mChangeAnimations.remove(changeInfo.oldHolder);
-
-                    if (newView != null) {
-                        animateNew(newView, changeInfo, duration);
-                    }
-
                     dispatchFinishedWhenDone();
                 }
             }).start();
         }
-        if (view == null && newView != null) {
-            animateNew(newView, changeInfo, duration);
+        if (newView != null) {
+            final ViewPropertyAnimator newViewAnimation = newView.animate();
+            mChangeAnimations.add(changeInfo.newHolder);
+            newViewAnimation.translationX(0).translationY(0).setDuration(getChangeDuration())
+                    .alpha(1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+                    dispatchChangeStarting(changeInfo.newHolder, false);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    newViewAnimation.setListener(null);
+                    newView.setAlpha(1);
+                    newView.setTranslationX(0);
+                    newView.setTranslationY(0);
+                    dispatchChangeFinished(changeInfo.newHolder, false);
+                    mChangeAnimations.remove(changeInfo.newHolder);
+                    dispatchFinishedWhenDone();
+                }
+            }).start();
         }
     }
 

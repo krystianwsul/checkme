@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
@@ -169,6 +170,7 @@ class ProjectListFragment : AbstractFragment(), FabUser {
             projectListAdapter.initialize(data.projectDatas)
             treeViewAdapter = projectListAdapter.treeViewAdapter
             projectListRecycler.adapter = treeViewAdapter
+            projectListRecycler.itemAnimator = CustomItemAnimator()
 
             treeViewAdapter.updateDisplayedNodes {
                 selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)

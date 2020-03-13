@@ -8,6 +8,7 @@ import android.text.TextUtils
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -132,6 +133,7 @@ class ParentPickerFragment : AbstractDialogFragment() {
             taskAdapter.initialize(taskDatas!!, expandedParentKeys)
             treeViewAdapter = taskAdapter.treeViewAdapter
             recyclerView.adapter = treeViewAdapter
+            recyclerView.itemAnimator = CustomItemAnimator()
 
             treeViewAdapter!!.updateDisplayedNodes {
                 query.takeIf { it.isNotEmpty() }?.let { search(it, TreeViewAdapter.Placeholder) }

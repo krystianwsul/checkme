@@ -13,6 +13,7 @@ import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -771,6 +772,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         createTaskAdapter = CreateTaskAdapter()
         createTaskRecycler.adapter = createTaskAdapter
+        createTaskRecycler.itemAnimator = CustomItemAnimator()
 
         if (noteHasFocus) { // keyboard hack
             val notePosition = stateData.state

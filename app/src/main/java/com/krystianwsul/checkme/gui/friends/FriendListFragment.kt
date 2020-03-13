@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -136,6 +137,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
             friendListAdapter.initialize()
             treeViewAdapter = friendListAdapter.treeViewAdapter
             friendListRecycler.adapter = treeViewAdapter
+            friendListRecycler.itemAnimator = CustomItemAnimator()
         }
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)

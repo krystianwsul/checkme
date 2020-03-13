@@ -36,13 +36,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         const val CUSTOM_TIME_ID_KEY = "customTimeId"
         private const val NEW_KEY = "new"
 
-        private const val HOUR_MINUTE_SUNDAY_KEY = "hourMinuteSunday"
-        private const val HOUR_MINUTE_MONDAY_KEY = "hourMinuteMonday"
-        private const val HOUR_MINUTE_TUESDAY_KEY = "hourMinuteTuesday"
-        private const val HOUR_MINUTE_WEDNESDAY_KEY = "hourMinuteWednesday"
-        private const val HOUR_MINUTE_THURSDAY_KEY = "hourMinuteThursday"
-        private const val HOUR_MINUTE_FRIDAY_KEY = "hourMinuteFriday"
-        private const val HOUR_MINUTE_SATURDAY_KEY = "hourMinuteSaturday"
+        private const val KEY_HOUR_MINUTES = "hourMinutes"
 
         private const val EDITED_DAY_OF_WEEK_KEY = "editedDayOfWeek"
 
@@ -53,12 +47,17 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         private val sDefaultHourMinute = HourMinute(9, 0)
 
-        fun getEditIntent(customTimeId: RemoteCustomTimeId.Private, context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply {
+        fun getEditIntent(
+                customTimeId: RemoteCustomTimeId.Private,
+                context: Context
+        ) = Intent(context, ShowCustomTimeActivity::class.java).apply {
             @Suppress("CAST_NEVER_SUCCEEDS")
             putExtra(CUSTOM_TIME_ID_KEY, customTimeId as Parcelable)
         }
 
-        fun getCreateIntent(context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply { putExtra(NEW_KEY, true) }
+        fun getCreateIntent(context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply {
+            putExtra(NEW_KEY, true)
+        }
     }
 
     private var customTimeId: RemoteCustomTimeId.Private? = null
@@ -66,7 +65,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
     private var data: ShowCustomTimeViewModel.Data? = null
 
     private val timeViews = HashMap<DayOfWeek, AutoCompleteTextView>()
-    private val hourMinutes = HashMap<DayOfWeek, HourMinute>()
+    private var hourMinutes = HashMap<DayOfWeek, HourMinute>()
 
     private var editedDayOfWeek: DayOfWeek? = null
 
@@ -111,7 +110,13 @@ class ShowCustomTimeActivity : NavBarActivity() {
                     showCustomTimeViewModel?.stop()
 
                     if (data != null) {
-                        DomainFactory.instance.updateCustomTime(data!!.dataId, SaveService.Source.GUI, data!!.id, name, hourMinutes)
+                        DomainFactory.instance.updateCustomTime(
+                                data!!.dataId,
+                                SaveService.Source.GUI,
+                                data!!.id,
+                                name,
+                                hourMinutes
+                        )
                     } else {
                         val customTimeKey = DomainFactory.instance.createCustomTime(SaveService.Source.GUI, name, hourMinutes)
 
@@ -148,17 +153,12 @@ class ShowCustomTimeActivity : NavBarActivity() {
         initializeDay(DayOfWeek.FRIDAY, R.id.time_friday_name, R.id.time_friday_time)
         initializeDay(DayOfWeek.SATURDAY, R.id.time_saturday_name, R.id.time_saturday_time)
 
-        if (savedInstanceState?.containsKey(HOUR_MINUTE_SUNDAY_KEY) == true) {
+        if (savedInstanceState?.containsKey(KEY_HOUR_MINUTES) == true) {
             check(savedInstanceState.containsKey(EDITED_DAY_OF_WEEK_KEY))
             check(hourMinutes.isEmpty())
 
-            extractKey(HOUR_MINUTE_SUNDAY_KEY, DayOfWeek.SUNDAY)
-            extractKey(HOUR_MINUTE_MONDAY_KEY, DayOfWeek.MONDAY)
-            extractKey(HOUR_MINUTE_TUESDAY_KEY, DayOfWeek.TUESDAY)
-            extractKey(HOUR_MINUTE_WEDNESDAY_KEY, DayOfWeek.WEDNESDAY)
-            extractKey(HOUR_MINUTE_THURSDAY_KEY, DayOfWeek.THURSDAY)
-            extractKey(HOUR_MINUTE_FRIDAY_KEY, DayOfWeek.FRIDAY)
-            extractKey(HOUR_MINUTE_SATURDAY_KEY, DayOfWeek.SATURDAY)
+            @Suppress("UNCHECKED_CAST")
+            hourMinutes = savedInstanceState.getSerializable(KEY_HOUR_MINUTES) as HashMap<DayOfWeek, HourMinute>
 
             editedDayOfWeek = savedInstanceState.getSerializable(EDITED_DAY_OF_WEEK_KEY) as? DayOfWeek
 
@@ -195,17 +195,6 @@ class ShowCustomTimeActivity : NavBarActivity() {
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
     }
 
-    private fun extractKey(key: String, dayOfWeek: DayOfWeek) {
-        check(savedInstanceState != null)
-        check(key.isNotEmpty())
-
-        check(savedInstanceState!!.containsKey(key))
-
-        val hourMinute = savedInstanceState!!.getParcelable<HourMinute>(key)!!
-
-        hourMinutes[dayOfWeek] = hourMinute
-    }
-
     private fun initializeDay(dayOfWeek: DayOfWeek, nameId: Int, timeId: Int) {
         val timeName = findViewById<TextView>(nameId)!!
 
@@ -219,14 +208,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         if (hourMinutes.isNotEmpty()) {
             outState.run {
-                putParcelable(HOUR_MINUTE_SUNDAY_KEY, hourMinutes[DayOfWeek.SUNDAY])
-                putParcelable(HOUR_MINUTE_MONDAY_KEY, hourMinutes[DayOfWeek.MONDAY])
-                putParcelable(HOUR_MINUTE_TUESDAY_KEY, hourMinutes[DayOfWeek.TUESDAY])
-                putParcelable(HOUR_MINUTE_WEDNESDAY_KEY, hourMinutes[DayOfWeek.WEDNESDAY])
-                putParcelable(HOUR_MINUTE_THURSDAY_KEY, hourMinutes[DayOfWeek.THURSDAY])
-                putParcelable(HOUR_MINUTE_FRIDAY_KEY, hourMinutes[DayOfWeek.FRIDAY])
-                putParcelable(HOUR_MINUTE_SATURDAY_KEY, hourMinutes[DayOfWeek.SATURDAY])
-
+                putSerializable(KEY_HOUR_MINUTES, hourMinutes)
                 putSerializable(EDITED_DAY_OF_WEEK_KEY, editedDayOfWeek)
             }
         }
@@ -279,13 +261,12 @@ class ShowCustomTimeActivity : NavBarActivity() {
     private fun onLoadFinished(data: ShowCustomTimeViewModel.Data) {
         this.data = data
 
-        if (savedInstanceState?.containsKey(HOUR_MINUTE_SUNDAY_KEY) != true) {
+        if (savedInstanceState?.containsKey(KEY_HOUR_MINUTES) != true) {
             check(hourMinutes.isEmpty())
 
             toolbarEditText.setText(data.name)
 
-            for (dayOfWeek in DayOfWeek.values())
-                hourMinutes[dayOfWeek] = data.hourMinutes.getValue(dayOfWeek)
+            hourMinutes = HashMap(data.hourMinutes)
 
             updateGui()
         }

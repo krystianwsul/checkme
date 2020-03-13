@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -76,6 +77,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
         animateVisibility(friendPickerRecycler, friendPickerProgress, data!!.immediate)
 
         friendPickerRecycler.adapter = FriendListAdapter()
+        friendPickerRecycler.itemAnimator = CustomItemAnimator()
     }
 
     private inner class FriendListAdapter : RecyclerView.Adapter<FriendListAdapter.FriendHolder>() {

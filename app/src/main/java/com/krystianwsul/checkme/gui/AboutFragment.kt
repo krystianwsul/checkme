@@ -36,7 +36,7 @@ class AboutFragment : AbstractFragment() {
         val element = Element().setTitle(getString(R.string.designBy)).setIconDrawable(R.drawable.ic_brush_black_24dp)
 
         val config = FirebaseRemoteConfig.getInstance().apply {
-            setDefaultsAsync(mapOf(BENIA_URL_KEY to "https://www.linkedin.com/in/bernardakaluza/"))
+            setDefaultsAsync(mapOf(BENIA_URL_KEY to "https://www.linkedin.com/in/bernardawsul/"))
         }
 
         fun update() = element.setIntent(Intent(Intent.ACTION_VIEW, Uri.parse(config.getString(BENIA_URL_KEY))))

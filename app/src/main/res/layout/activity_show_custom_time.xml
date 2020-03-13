@@ -24,6 +24,50 @@
             android:orientation="vertical"
             android:visibility="gone">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:baselineAligned="false">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
+
+                    <AutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/timeAllDaysText"
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor"
+                        android:text="@string/allDays" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/listVerticalPadding"
+                    tools:ignore="RelativeOverlap"
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
+
+                    <AutoCompleteTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/timeAllDaysTime"
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor"
+                        android:text="@string/allDays" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -46,7 +90,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
 
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
@@ -81,7 +126,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
 
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
@@ -116,7 +162,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
 
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
@@ -151,7 +198,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
 
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
@@ -186,7 +234,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
 
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
@@ -221,7 +270,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
 
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
@@ -257,7 +307,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
 
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"

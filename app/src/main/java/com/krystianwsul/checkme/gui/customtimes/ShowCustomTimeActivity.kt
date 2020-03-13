@@ -37,8 +37,6 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         private const val KEY_HOUR_MINUTES = "hourMinutes"
 
-        private const val EDITED_DAY_OF_WEEK_KEY = "editedDayOfWeek"
-
         private const val TIME_PICKER_TAG = "timePicker"
         private const val DISCARD_TAG = "discard"
 
@@ -66,22 +64,16 @@ class ShowCustomTimeActivity : NavBarActivity() {
     private lateinit var timeViews: Map<DayOfWeek, AutoCompleteTextView>
     private var hourMinutes = HashMap<DayOfWeek, HourMinute>()
 
-    private var editedDayOfWeek: DayOfWeek? = null
-
     private var savedInstanceState: Bundle? = null
 
     private val discardDialogListener = this@ShowCustomTimeActivity::finish
 
-    private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
-        editedDayOfWeek!!.let {
-            check(timeViews.containsKey(it))
-            check(hourMinutes.containsKey(it))
+    private val timePickerDialogFragmentListener = { hourMinute: HourMinute, dayOfWeek: DayOfWeek ->
+        check(timeViews.containsKey(dayOfWeek))
+        check(hourMinutes.containsKey(dayOfWeek))
 
-            hourMinutes[it] = hourMinute
-            timeViews.getValue(it).setText(hourMinute.toString())
-        }
-
-        editedDayOfWeek = null
+        hourMinutes[dayOfWeek] = hourMinute
+        timeViews.getValue(dayOfWeek).setText(hourMinute.toString())
     }
 
     private var showCustomTimeViewModel: ShowCustomTimeViewModel? = null
@@ -159,13 +151,10 @@ class ShowCustomTimeActivity : NavBarActivity() {
         }
 
         if (savedInstanceState?.containsKey(KEY_HOUR_MINUTES) == true) {
-            check(savedInstanceState.containsKey(EDITED_DAY_OF_WEEK_KEY))
             check(hourMinutes.isEmpty())
 
             @Suppress("UNCHECKED_CAST")
             hourMinutes = savedInstanceState.getSerializable(KEY_HOUR_MINUTES) as HashMap<DayOfWeek, HourMinute>
-
-            editedDayOfWeek = savedInstanceState.getSerializable(EDITED_DAY_OF_WEEK_KEY) as? DayOfWeek
 
             updateGui()
         } else {
@@ -203,12 +192,8 @@ class ShowCustomTimeActivity : NavBarActivity() {
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        if (hourMinutes.isNotEmpty()) {
-            outState.run {
-                putSerializable(KEY_HOUR_MINUTES, hourMinutes)
-                putSerializable(EDITED_DAY_OF_WEEK_KEY, editedDayOfWeek)
-            }
-        }
+        if (hourMinutes.isNotEmpty())
+            outState.putSerializable(KEY_HOUR_MINUTES, hourMinutes)
     }
 
     private fun updateGui() {
@@ -224,18 +209,17 @@ class ShowCustomTimeActivity : NavBarActivity() {
             timeView.setText(hourMinute.toString())
 
             timeView.setFixedOnClickListener {
-                editedDayOfWeek = dayOfWeek
-
                 val currHourMinute = hourMinutes.getValue(dayOfWeek)
 
-                TimePickerDialogFragment.newInstance(currHourMinute).apply {
+                TimePickerDialogFragment.newInstance(currHourMinute, dayOfWeek).apply {
                     listener = timePickerDialogFragmentListener
                     show(supportFragmentManager, TIME_PICKER_TAG)
                 }
             }
         }
 
-        (supportFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.listener = timePickerDialogFragmentListener
+        @Suppress("UNCHECKED_CAST")
+        (supportFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment<DayOfWeek>)?.listener = timePickerDialogFragmentListener
 
         toolbarEditText.addTextChangedListener(object : TextWatcher {
             private var skip = savedInstanceState != null

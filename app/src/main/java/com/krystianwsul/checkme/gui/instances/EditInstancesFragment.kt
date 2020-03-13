@@ -15,6 +15,7 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
 import com.krystianwsul.checkme.persistencemodel.SaveService
+import com.krystianwsul.checkme.utils.SerializableUnit
 import com.krystianwsul.checkme.utils.setFixedOnClickListener
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.EditInstancesViewModel
@@ -83,7 +84,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         override fun onOtherSelected() {
             checkNotNull(data)
 
-            TimePickerDialogFragment.newInstance(timePairPersist!!.hourMinute).also {
+            TimePickerDialogFragment.newInstance(timePairPersist!!.hourMinute, SerializableUnit).also {
                 it.listener = timePickerDialogFragmentListener
                 it.show(childFragmentManager, TIME_FRAGMENT_TAG)
             }
@@ -92,7 +93,7 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
         override fun onAddSelected() = startActivityForResult(ShowCustomTimeActivity.getCreateIntent(requireContext()), ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
     }
 
-    private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
+    private val timePickerDialogFragmentListener = { hourMinute: HourMinute, _: SerializableUnit ->
         checkNotNull(data)
 
         timePairPersist!!.setHourMinute(hourMinute)
@@ -250,21 +251,22 @@ class EditInstancesFragment : NoCollapseBottomSheetDialogFragment() {
 
         updateDateText()
 
-        val timePickerDialogFragment = childFragmentManager.findFragmentByTag(TIME_FRAGMENT_TAG) as? TimePickerDialogFragment
+        @Suppress("UNCHECKED_CAST")
+        val timePickerDialogFragment = childFragmentManager.findFragmentByTag(TIME_FRAGMENT_TAG) as? TimePickerDialogFragment<SerializableUnit>
         timePickerDialogFragment?.listener = timePickerDialogFragmentListener
 
         myView.editInstanceTime.setFixedOnClickListener {
-            val customTimeDatas = ArrayList<TimeDialogFragment.CustomTimeData>(data.customTimeDatas
+            val customTimeDatas = ArrayList(data.customTimeDatas
                     .values
                     .filter { it.customTimeKey is CustomTimeKey.Private }
                     .sortedBy { it.hourMinutes[date!!.dayOfWeek] }
-                    .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[date!!.dayOfWeek] + ")") })
+                    .map { TimeDialogFragment.CustomTimeData(it.customTimeKey, it.name + " (" + it.hourMinutes[date!!.dayOfWeek] + ")") }
+            )
 
-            val timeDialogFragment = TimeDialogFragment.newInstance(customTimeDatas)
-
-            timeDialogFragment.timeDialogListener = timeDialogListener
-
-            timeDialogFragment.show(childFragmentManager, TIME_DIALOG_FRAGMENT_TAG)
+            TimeDialogFragment.newInstance(customTimeDatas).also {
+                it.timeDialogListener = timeDialogListener
+                it.show(childFragmentManager, TIME_DIALOG_FRAGMENT_TAG)
+            }
         }
 
         val timeDialogFragment = childFragmentManager.findFragmentByTag(TIME_DIALOG_FRAGMENT_TAG) as? TimeDialogFragment

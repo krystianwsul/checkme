@@ -11,7 +11,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AutoCompleteTextView
-import android.widget.TextView
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
@@ -64,7 +63,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
     private var data: ShowCustomTimeViewModel.Data? = null
 
-    private val timeViews = HashMap<DayOfWeek, AutoCompleteTextView>()
+    private lateinit var timeViews: Map<DayOfWeek, AutoCompleteTextView>
     private var hourMinutes = HashMap<DayOfWeek, HourMinute>()
 
     private var editedDayOfWeek: DayOfWeek? = null
@@ -79,7 +78,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
             check(hourMinutes.containsKey(it))
 
             hourMinutes[it] = hourMinute
-            timeViews[it]!!.setText(hourMinute.toString())
+            timeViews.getValue(it).setText(hourMinute.toString())
         }
 
         editedDayOfWeek = null
@@ -145,13 +144,19 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
         this.savedInstanceState = savedInstanceState
 
-        initializeDay(DayOfWeek.SUNDAY, R.id.time_sunday_name, R.id.time_sunday_time)
-        initializeDay(DayOfWeek.MONDAY, R.id.time_monday_name, R.id.time_monday_time)
-        initializeDay(DayOfWeek.TUESDAY, R.id.time_tuesday_name, R.id.time_tuesday_time)
-        initializeDay(DayOfWeek.WEDNESDAY, R.id.time_wednesday_name, R.id.time_wednesday_time)
-        initializeDay(DayOfWeek.THURSDAY, R.id.time_thursday_name, R.id.time_thursday_time)
-        initializeDay(DayOfWeek.FRIDAY, R.id.time_friday_name, R.id.time_friday_time)
-        initializeDay(DayOfWeek.SATURDAY, R.id.time_saturday_name, R.id.time_saturday_time)
+        timeViews = listOf(
+                Triple(DayOfWeek.SUNDAY, timeSundayName, timeSundayTime),
+                Triple(DayOfWeek.MONDAY, timeMondayName, timeMondayTime),
+                Triple(DayOfWeek.TUESDAY, timeTuesdayName, timeTuesdayTime),
+                Triple(DayOfWeek.WEDNESDAY, timeWednesdayName, timeWednesdayTime),
+                Triple(DayOfWeek.THURSDAY, timeThursdayName, timeThursdayTime),
+                Triple(DayOfWeek.FRIDAY, timeFridayName, timeFridayTime),
+                Triple(DayOfWeek.SATURDAY, timeSaturdayName, timeSaturdayTime)
+        ).associate { (dayOfWeek, name, time) ->
+            name.text = dayOfWeek.toString()
+
+            dayOfWeek to time
+        }
 
         if (savedInstanceState?.containsKey(KEY_HOUR_MINUTES) == true) {
             check(savedInstanceState.containsKey(EDITED_DAY_OF_WEEK_KEY))
@@ -195,14 +200,6 @@ class ShowCustomTimeActivity : NavBarActivity() {
         (supportFragmentManager.findFragmentByTag(DISCARD_TAG) as? DiscardDialogFragment)?.discardDialogListener = discardDialogListener
     }
 
-    private fun initializeDay(dayOfWeek: DayOfWeek, nameId: Int, timeId: Int) {
-        val timeName = findViewById<TextView>(nameId)!!
-
-        timeName.text = dayOfWeek.toString()
-
-        timeViews[dayOfWeek] = findViewById(timeId)!!
-    }
-
     public override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
@@ -221,20 +218,20 @@ class ShowCustomTimeActivity : NavBarActivity() {
         showCustomTimeContainer.visibility = View.VISIBLE
 
         for (dayOfWeek in DayOfWeek.values()) {
-            val timeView = timeViews[dayOfWeek]!!
-
-            val hourMinute = hourMinutes[dayOfWeek]!!
+            val timeView = timeViews.getValue(dayOfWeek)
+            val hourMinute = hourMinutes.getValue(dayOfWeek)
 
             timeView.setText(hourMinute.toString())
 
             timeView.setFixedOnClickListener {
                 editedDayOfWeek = dayOfWeek
 
-                val currHourMinute = hourMinutes[dayOfWeek]!!
+                val currHourMinute = hourMinutes.getValue(dayOfWeek)
 
-                val timePickerDialogFragment = TimePickerDialogFragment.newInstance(currHourMinute)
-                timePickerDialogFragment.listener = timePickerDialogFragmentListener
-                timePickerDialogFragment.show(supportFragmentManager, TIME_PICKER_TAG)
+                TimePickerDialogFragment.newInstance(currHourMinute).apply {
+                    listener = timePickerDialogFragmentListener
+                    show(supportFragmentManager, TIME_PICKER_TAG)
+                }
             }
         }
 

@@ -35,7 +35,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:paddingTop="7dp"
-                    android:id="@+id/time_sunday_name"
+                    android:id="@+id/timeSundayName"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"
@@ -51,7 +51,7 @@
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_sunday_time"
+                        android:id="@+id/timeSundayTime"
                         style="@style/MySpinnerText"
                         tools:ignore="LabelFor" />
 
@@ -70,7 +70,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:paddingTop="7dp"
-                    android:id="@+id/time_monday_name"
+                    android:id="@+id/timeMondayName"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"
@@ -86,7 +86,7 @@
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_monday_time"
+                        android:id="@+id/timeMondayTime"
                         style="@style/MySpinnerText"
                         tools:ignore="LabelFor" />
 
@@ -105,7 +105,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:paddingTop="7dp"
-                    android:id="@+id/time_tuesday_name"
+                    android:id="@+id/timeTuesdayName"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"
@@ -121,7 +121,7 @@
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_tuesday_time"
+                        android:id="@+id/timeTuesdayTime"
                         style="@style/MySpinnerText"
                         tools:ignore="LabelFor" />
 
@@ -140,7 +140,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:paddingTop="7dp"
-                    android:id="@+id/time_wednesday_name"
+                    android:id="@+id/timeWednesdayName"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"
@@ -156,7 +156,7 @@
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_wednesday_time"
+                        android:id="@+id/timeWednesdayTime"
                         style="@style/MySpinnerText"
                         tools:ignore="LabelFor" />
 
@@ -175,7 +175,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:paddingTop="7dp"
-                    android:id="@+id/time_thursday_name"
+                    android:id="@+id/timeThursdayName"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"
@@ -191,7 +191,7 @@
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_thursday_time"
+                        android:id="@+id/timeThursdayTime"
                         style="@style/MySpinnerText"
                         tools:ignore="LabelFor" />
 
@@ -210,7 +210,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:paddingTop="7dp"
-                    android:id="@+id/time_friday_name"
+                    android:id="@+id/timeFridayName"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"
@@ -226,7 +226,7 @@
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_friday_time"
+                        android:id="@+id/timeFridayTime"
                         style="@style/MySpinnerText"
                         tools:ignore="LabelFor" />
 
@@ -246,7 +246,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:paddingTop="7dp"
-                    android:id="@+id/time_saturday_name"
+                    android:id="@+id/timeSaturdayName"
                     android:singleLine="true"
                     android:textSize="@dimen/textPrimary"
                     android:textColor="@color/textPrimary"
@@ -262,7 +262,7 @@
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_saturday_time"
+                        android:id="@+id/timeSaturdayTime"
                         style="@style/MySpinnerText"
                         tools:ignore="LabelFor" />
 

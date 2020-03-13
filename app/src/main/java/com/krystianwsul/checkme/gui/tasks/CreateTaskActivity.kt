@@ -1000,8 +1000,6 @@ class CreateTaskActivity : NavBarActivity() {
                     date: Date,
                     pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date)
             ) : this(pair.first, TimePair(pair.second))
-
-            constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
         }
 
         class Task(val taskKey: TaskKey) : Hint()

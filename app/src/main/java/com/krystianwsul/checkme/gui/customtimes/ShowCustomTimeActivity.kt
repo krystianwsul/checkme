@@ -11,6 +11,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.AutoCompleteTextView
+import androidx.transition.TransitionManager
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.gui.DiscardDialogFragment
@@ -223,7 +224,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         toolbarLayout.visibility = View.VISIBLE
         showCustomTimeContainer.visibility = View.VISIBLE
 
-        // todo times animation?
+        TransitionManager.beginDelayedTransition(showCustomTimeContainer)
         timeIndividualDaysLayout.visibility = if (allDaysExpanded) View.VISIBLE else View.GONE
         timeAllDaysTimeLayout.visibility = if (allDaysExpanded) View.GONE else View.VISIBLE
 

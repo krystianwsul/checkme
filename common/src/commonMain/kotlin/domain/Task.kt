@@ -74,16 +74,19 @@ abstract class Task {
         check(current(exactTimeStamp))
 
         val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
-        val singleSchedule = currentSchedules.singleOrNull() as? SingleSchedule
-        if (singleSchedule != null && existingInstances.size == 1) {
-            val singleInstance = existingInstances[ScheduleKey(singleSchedule.date, singleSchedule.timePair)]
-            if (singleInstance != null) {
-                if (singleInstance.scheduleDate != singleInstance.instanceDate || singleInstance.scheduleDateTime.time.timePair != singleInstance.instanceTimePair)
-                    return listOf(SingleSchedule(this as RemoteTask<*>, MockSingleScheduleBridge(singleSchedule, singleInstance)))
-            }
+
+        getSingleSchedule(exactTimeStamp)?.let { singleSchedule ->
+            val instance = singleSchedule.getInstance(this)
+
+            if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
+                return listOf(SingleSchedule(this as RemoteTask<*>, MockSingleScheduleBridge(singleSchedule, instance)))
         }
 
         return currentSchedules
+    }
+
+    private fun getSingleSchedule(exactTimeStamp: ExactTimeStamp): SingleSchedule? {
+        return schedules.singleOrNull { it.current(exactTimeStamp) } as? SingleSchedule
     }
 
     private class MockSingleScheduleBridge(
@@ -290,7 +293,7 @@ abstract class Task {
 
     abstract fun setName(name: String, note: String?)
 
-    fun updateSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
+    fun updateSchedules(uuid: String, ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
         val removeSchedules = ArrayList<Schedule>()
         val addScheduleDatas = ArrayList(scheduleDatas)
 
@@ -307,8 +310,16 @@ abstract class Task {
 
         removeSchedules.forEach { it.setEndExactTimeStamp(now) }
 
-        if (addScheduleDatas.isNotEmpty())
+        if (addScheduleDatas.isNotEmpty()) {
+            val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
+            val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
+
+            getSingleSchedule(now)?.takeIf { singleRemoveSchedule != null && singleAddSchedulePair != null }
+                    ?.getInstance(this)
+                    ?.hide(uuid, now)
+
             addSchedules(ownerKey, addScheduleDatas, now)
+        }
     }
 
     protected abstract fun addSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp)

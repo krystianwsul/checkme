@@ -1303,7 +1303,7 @@ class DomainFactory(
         if (!task.isRootTask(now))
             task.getParentTaskHierarchy(now)!!.setEndExactTimeStamp(now)
 
-        task.updateSchedules(ownerKey, scheduleDatas.map { it to getTime(it.timePair) }, now)
+        task.updateSchedules(uuid, ownerKey, scheduleDatas.map { it to getTime(it.timePair) }, now)
 
         val imageUuid = imagePath?.value?.let { newUuid() }
         if (imagePath != null)

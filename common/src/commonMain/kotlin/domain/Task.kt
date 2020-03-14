@@ -79,7 +79,7 @@ abstract class Task {
             val instance = singleSchedule.getInstance(this)
 
             if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
-                return listOf(SingleSchedule(this as RemoteTask<*>, MockSingleScheduleBridge(singleSchedule, instance)))
+                return listOf(SingleSchedule(this as RemoteTask<*, *>, MockSingleScheduleBridge(singleSchedule, instance)))
         }
 
         return currentSchedules
@@ -94,31 +94,27 @@ abstract class Task {
             private val instance: Instance
     ) : SingleScheduleBridge by singleSchedule.singleScheduleBridge {
 
-        override val customTimeKey: CustomTimeKey<*>?
-            get() = instance.instanceTimePair.customTimeKey
+        override val customTimeKey get() = instance.instanceTimePair.customTimeKey
 
-        override val year: Int
-            get() = instance.instanceDate.year
+        override val year get() = instance.instanceDate.year
 
-        override val month: Int
-            get() = instance.instanceDate.month
+        override val month get() = instance.instanceDate.month
 
-        override val day: Int
-            get() = instance.instanceDate.day
+        override val day get() = instance.instanceDate.day
 
-        override val hour: Int?
+        override val hour
             get() = instance.instanceTime
                     .timePair
                     .hourMinute
                     ?.hour
 
-        override val minute: Int?
+        override val minute
             get() = instance.instanceTime
                     .timePair
                     .hourMinute
                     ?.minute
 
-        override val remoteCustomTimeKey: Pair<String, RemoteCustomTimeId>?
+        override val remoteCustomTimeKey
             get() = instance.instanceTime
                     .timePair
                     .customTimeKey

@@ -55,9 +55,9 @@ class RemotePrivateProject(override val remoteProjectRecord: RemotePrivateProjec
     }
 
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemotePrivateCustomTime {
-        check(remoteCustomTimes.containsKey(remoteCustomTimeId))
+        check(remoteCustomTimes.containsKey(remoteCustomTimeId as RemoteCustomTimeId.Private))
 
-        return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Private)
+        return remoteCustomTimes.getValue(remoteCustomTimeId)
     }
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)

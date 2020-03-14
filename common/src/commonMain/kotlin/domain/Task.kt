@@ -293,31 +293,41 @@ abstract class Task {
 
     abstract fun setName(name: String, note: String?)
 
-    fun updateSchedules(uuid: String, ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
-        val removeSchedules = ArrayList<Schedule>()
-        val addScheduleDatas = ArrayList(scheduleDatas)
+    fun updateSchedules(
+            ownerKey: String,
+            shownFactory: Instance.ShownFactory,
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            now: ExactTimeStamp
+    ) {
+        val removeSchedules = mutableListOf<Schedule>()
+        val addScheduleDatas = scheduleDatas.toMutableList()
 
         val oldSchedules = getCurrentSchedules(now)
         val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleData to it.schedules }
         for ((key, value) in oldScheduleDatas) {
             val existing = addScheduleDatas.singleOrNull { it.first == key }
-            if (existing != null) {
+            if (existing != null)
                 addScheduleDatas.remove(existing)
-            } else {
+            else
                 removeSchedules.addAll(value)
-            }
         }
 
-        removeSchedules.forEach { it.setEndExactTimeStamp(now) }
+        val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
+        val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
+        val oldSingleSchedule = getSingleSchedule(now)
 
-        if (addScheduleDatas.isNotEmpty()) {
-            val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
-            val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
-
-            getSingleSchedule(now)?.takeIf { singleRemoveSchedule != null && singleAddSchedulePair != null }
-                    ?.getInstance(this)
-                    ?.hide(uuid, now)
-
+        if (singleRemoveSchedule != null &&
+                singleAddSchedulePair != null &&
+                singleRemoveSchedule.scheduleId == oldSingleSchedule?.scheduleId
+        ) {
+            oldSingleSchedule.getInstance(this).setInstanceDateTime(
+                    shownFactory,
+                    ownerKey,
+                    singleAddSchedulePair.run { DateTime((first as ScheduleData.Single).date, second) },
+                    now
+            )
+        } else {
+            removeSchedules.forEach { it.setEndExactTimeStamp(now) }
             addSchedules(ownerKey, addScheduleDatas, now)
         }
     }

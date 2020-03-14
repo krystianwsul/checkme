@@ -7,22 +7,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.gui.*
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderAdapter
 import com.krystianwsul.checkme.gui.instances.tree.GroupHolderNode
 import com.krystianwsul.checkme.gui.instances.tree.NameData
 import com.krystianwsul.checkme.gui.instances.tree.NodeHolder
+import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
-import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.checkme.viewmodels.FriendListViewModel
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
@@ -48,7 +49,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private var data: FriendListViewModel.Data? = null
 
-    private var selectedIds = listOf<String>()
+    private var selectedIds = listOf<UserKey>()
 
     private val listener get() = activity as FriendListListener
 
@@ -99,7 +100,11 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
     private val mainActivity get() = activity as MainActivity
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ) = inflater.inflate(R.layout.fragment_friend_list, container, false)!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -111,7 +116,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         friendListRecycler.layoutManager = LinearLayoutManager(activity)
 
         if (savedInstanceState?.containsKey(SELECTED_IDS_KEY) == true)
-            selectedIds = savedInstanceState.getStringArrayList(SELECTED_IDS_KEY)!!
+            selectedIds = savedInstanceState.getParcelableArrayList(SELECTED_IDS_KEY)!!
 
         friendListViewModel = getViewModel<FriendListViewModel>().apply {
             start()
@@ -136,6 +141,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
             friendListAdapter.initialize()
             treeViewAdapter = friendListAdapter.treeViewAdapter
             friendListRecycler.adapter = treeViewAdapter
+            friendListRecycler.itemAnimator = CustomItemAnimator()
         }
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
@@ -164,7 +170,7 @@ class FriendListFragment : AbstractFragment(), FabUser {
         super.onSaveInstanceState(outState)
 
         if (this::treeViewAdapter.isInitialized)
-            treeViewAdapter.let { outState.putStringArrayList(SELECTED_IDS_KEY, ArrayList(getSelectedIds())) }
+            treeViewAdapter.let { outState.putParcelableArrayList(SELECTED_IDS_KEY, ArrayList(getSelectedIds())) }
     }
 
     private fun updateSelectAll() = (activity as MainActivity).setUserSelectAllVisibility(treeViewAdapter.displayedNodes.isNotEmpty())
@@ -235,14 +241,14 @@ class FriendListFragment : AbstractFragment(), FabUser {
 
             val friendIds = userListDatas.map { it.id }.toSet()
 
-            DomainFactory.instance.removeFriends(friendIds)
+            DomainFactory.instance.removeFriends(SaveService.Source.GUI, friendIds)
 
             mainActivity.showSnackbarRemoved(userListDatas.size) {
                 onLoadFinished(data!!.copy(userListDatas = data!!.userListDatas
                         .toMutableSet()
                         .apply { addAll(userListDatas) }))
 
-                AndroidDatabaseWrapper.addFriends(friendIds).checkError(DomainFactory.instance, "FriendListFragment.removeFriends.undo")
+                DomainFactory.instance.addFriends(SaveService.Source.GUI, friendIds)
             }
         }
     }

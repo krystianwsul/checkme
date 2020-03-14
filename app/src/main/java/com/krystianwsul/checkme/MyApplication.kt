@@ -13,9 +13,9 @@ import com.google.firebase.database.Logger
 import com.google.firebase.iid.FirebaseInstanceId
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.domainmodel.DomainFactory
+import com.krystianwsul.checkme.domainmodel.local.LocalFactory
 import com.krystianwsul.checkme.domainmodel.notifications.ImageManager
 import com.krystianwsul.checkme.domainmodel.toUserInfo
-import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.firebase.FactoryListener
 import com.krystianwsul.checkme.persistencemodel.PersistenceManager
 import com.krystianwsul.checkme.persistencemodel.SaveService
@@ -24,7 +24,6 @@ import com.krystianwsul.checkme.upload.Uploader
 import com.krystianwsul.checkme.utils.toSingle
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.common.domain.DeviceInfo
-import com.krystianwsul.common.time.ExactTimeStamp
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo
 import com.pacoworks.rxpaper2.RxPaperBook
 import io.reactivex.Maybe
@@ -90,33 +89,11 @@ class MyApplication : Application() {
                 .filter { it.value != null }
                 .subscribe { DomainFactory.firstRun = true }
 
+        val localFactory = LocalFactory(PersistenceManager.instance)
+
         FactoryListener(
-                deviceInfoRelay,
-                { AndroidDatabaseWrapper.getPrivateProjectSingle(it.key) },
-                { AndroidDatabaseWrapper.getSharedProjectSingle(it.key) },
-                { AndroidDatabaseWrapper.getFriendSingle(it.key) },
-                { AndroidDatabaseWrapper.getUserSingle(it.key) },
-                { AndroidDatabaseWrapper.getPrivateProjectObservable(it.key) },
-                { AndroidDatabaseWrapper.getSharedProjectEvents(it.key) },
-                { AndroidDatabaseWrapper.getFriendObservable(it.key) },
-                { AndroidDatabaseWrapper.getUserObservable(it.key) },
-                { userInfo, privateProject, sharedProjects, friends, user ->
-                    DomainFactory(
-                            PersistenceManager.instance,
-                            userInfo,
-                            ExactTimeStamp.now,
-                            sharedProjects,
-                            privateProject,
-                            user,
-                            friends
-                    )
-                },
-                { DomainFactory.nullableInstance?.clearUserInfo() },
-                DomainFactory::updatePrivateProjectRecord,
-                DomainFactory::updateSharedProjectRecords,
-                DomainFactory::setFriendRecords,
-                DomainFactory::updateUserRecord
-                //, { Log.e("asdf", "FactoryListener:\n$it")}
+                localFactory,
+                deviceInfoRelay
         ).domainFactoryObservable.subscribe(DomainFactory.instanceRelay)
 
         if (token == null)

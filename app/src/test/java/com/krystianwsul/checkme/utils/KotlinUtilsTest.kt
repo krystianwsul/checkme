@@ -22,19 +22,19 @@ class KotlinUtilsTest {
 
     @Test
     fun testDoubleAdjacent() {
-        val input = Arrays.asList(DayOfWeek.TUESDAY, DayOfWeek.MONDAY)
+        val input = listOf(DayOfWeek.TUESDAY, DayOfWeek.MONDAY)
         val output = getRanges(input)
-        val answer = listOf(Arrays.asList(DayOfWeek.MONDAY, DayOfWeek.TUESDAY))
+        val answer = listOf(listOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY))
         Assert.assertTrue(output == answer)
     }
 
     @Test
     fun testDoubleNotAdjacent() {
-        Assert.assertTrue(getRanges(Arrays.asList(DayOfWeek.SATURDAY, DayOfWeek.TUESDAY)) == Arrays.asList(listOf(DayOfWeek.TUESDAY), listOf(DayOfWeek.SATURDAY)))
+        Assert.assertTrue(getRanges(listOf(DayOfWeek.SATURDAY, DayOfWeek.TUESDAY)) == listOf(listOf(DayOfWeek.TUESDAY), listOf(DayOfWeek.SATURDAY)))
     }
 
     @Test
     fun testMissingWednesday() {
-        Assert.assertTrue(getRanges(Arrays.asList(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY, DayOfWeek.FRIDAY, DayOfWeek.MONDAY, DayOfWeek.THURSDAY, DayOfWeek.TUESDAY)) == Arrays.asList(Arrays.asList(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY), Arrays.asList(DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY)))
+        Assert.assertTrue(getRanges(listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY, DayOfWeek.FRIDAY, DayOfWeek.MONDAY, DayOfWeek.THURSDAY, DayOfWeek.TUESDAY)) == listOf(listOf(DayOfWeek.SUNDAY, DayOfWeek.MONDAY, DayOfWeek.TUESDAY), listOf(DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY)))
     }
 }

@@ -32,7 +32,7 @@ abstract class Task {
 
     abstract val existingInstances: Map<ScheduleKey, Instance>
 
-    abstract val project: RemoteProject<*>
+    abstract val project: RemoteProject<*, *>
 
     abstract val imageJson: TaskJson.Image?
 
@@ -294,7 +294,7 @@ abstract class Task {
     abstract fun setName(name: String, note: String?)
 
     fun updateSchedules(
-            ownerKey: String,
+            ownerKey: UserKey,
             shownFactory: Instance.ShownFactory,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp
@@ -332,7 +332,11 @@ abstract class Task {
         }
     }
 
-    protected abstract fun addSchedules(ownerKey: String, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp)
+    protected abstract fun addSchedules(
+            ownerKey: UserKey,
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            now: ExactTimeStamp
+    )
 
     abstract fun addChild(childTask: Task, now: ExactTimeStamp)
 
@@ -342,7 +346,11 @@ abstract class Task {
 
     abstract fun belongsToRemoteProject(): Boolean
 
-    abstract fun updateProject(projectUpdater: RemoteTask.ProjectUpdater, now: ExactTimeStamp, projectId: String): Task
+    abstract fun updateProject(
+            projectUpdater: RemoteTask.ProjectUpdater,
+            now: ExactTimeStamp,
+            projectId: ProjectKey
+    ): Task
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
 

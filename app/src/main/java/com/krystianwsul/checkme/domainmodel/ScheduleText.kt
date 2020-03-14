@@ -19,7 +19,10 @@ sealed class ScheduleText {
 
     companion object : RemoteTask.ScheduleTextFactory {
 
-        override fun getScheduleText(scheduleGroup: ScheduleGroup, remoteProject: RemoteProject<*>) = when (scheduleGroup) {
+        override fun getScheduleText(
+                scheduleGroup: ScheduleGroup,
+                remoteProject: RemoteProject<*, *>
+        ) = when (scheduleGroup) {
             is ScheduleGroup.Single -> Single(scheduleGroup)
             is ScheduleGroup.Weekly -> Weekly(scheduleGroup)
             is ScheduleGroup.MonthlyDay -> MonthlyDay(scheduleGroup)
@@ -45,9 +48,9 @@ sealed class ScheduleText {
         }
     }
 
-    abstract fun getScheduleText(remoteProject: RemoteProject<*>): String
+    abstract fun getScheduleText(remoteProject: RemoteProject<*, *>): String
 
-    protected fun timePairCallback(timePair: TimePair, remoteProject: RemoteProject<*>): String {
+    protected fun timePairCallback(timePair: TimePair, remoteProject: RemoteProject<*, *>): String {
         return (timePair.customTimeKey?.let {
             remoteProject.getRemoteCustomTime(it.remoteCustomTimeId)
         } ?: NormalTime(timePair.hourMinute!!)).toString()
@@ -63,7 +66,7 @@ sealed class ScheduleText {
             ) = scheduleData.date.getDisplayText() + ", " + timePairCallback(scheduleData.timePair)
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+        override fun getScheduleText(remoteProject: RemoteProject<*, *>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
             timePairCallback(it, remoteProject)
         }
     }
@@ -82,7 +85,7 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>): String {
+        override fun getScheduleText(remoteProject: RemoteProject<*, *>): String {
             return Companion.getScheduleText(scheduleGroup.scheduleData) {
                 timePairCallback(it, remoteProject)
             }
@@ -103,7 +106,7 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+        override fun getScheduleText(remoteProject: RemoteProject<*, *>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
             timePairCallback(it, remoteProject)
         }
     }
@@ -122,7 +125,7 @@ sealed class ScheduleText {
             }
         }
 
-        override fun getScheduleText(remoteProject: RemoteProject<*>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
+        override fun getScheduleText(remoteProject: RemoteProject<*, *>) = Companion.getScheduleText(scheduleGroup.scheduleData) {
             timePairCallback(it, remoteProject)
         }
     }

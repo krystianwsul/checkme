@@ -3,6 +3,7 @@ package com.krystianwsul.checkme.gui.projects
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -15,6 +16,7 @@ import com.krystianwsul.checkme.gui.ToolbarActivity
 import com.krystianwsul.checkme.gui.friends.UserListFragment
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_project.*
@@ -29,16 +31,17 @@ class ShowProjectActivity : ToolbarActivity(), UserListFragment.UserListListener
 
         private const val DISCARD_TAG = "discard"
 
-        fun newIntent(context: Context, projectId: String) = Intent(context, ShowProjectActivity::class.java).apply {
-            check(!TextUtils.isEmpty(projectId))
-
-            putExtra(PROJECT_ID_KEY, projectId)
+        fun newIntent(
+                context: Context,
+                projectId: ProjectKey.Shared
+        ) = Intent(context, ShowProjectActivity::class.java).apply {
+            putExtra(PROJECT_ID_KEY, projectId as Parcelable)
         }
 
         fun newIntent(context: Context) = Intent(context, ShowProjectActivity::class.java)
     }
 
-    private var projectId: String? = null
+    private var projectId: ProjectKey.Shared? = null
 
     private var data: ShowProjectViewModel.Data? = null
 
@@ -118,10 +121,8 @@ class ShowProjectActivity : ToolbarActivity(), UserListFragment.UserListListener
             }
         })
 
-        if (intent.hasExtra(PROJECT_ID_KEY)) {
-            projectId = intent.getStringExtra(PROJECT_ID_KEY)
-            check(!TextUtils.isEmpty(projectId))
-        }
+        if (intent.hasExtra(PROJECT_ID_KEY))
+            projectId = intent.getParcelableExtra(PROJECT_ID_KEY)
 
         userListFragment = supportFragmentManager.findFragmentById(R.id.show_project_frame) as? UserListFragment ?: UserListFragment.newInstance().also {
             supportFragmentManager

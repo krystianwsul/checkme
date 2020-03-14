@@ -24,251 +24,311 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/listVerticalPadding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:paddingTop="7dp"
-                    android:id="@+id/time_sunday_name"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"
-                    tools:ignore="Deprecated"/>
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:baselineAligned="false">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
+
+                    <AutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/timeAllDaysText"
+                        style="@style/MySpinnerText"
+                        tools:ignore="LabelFor"
+                        android:text="@string/allDays" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/timeAllDaysTimeLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="@dimen/listVerticalPadding"
                     tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
+                    style="@style/MySpinner"
+                    app:hintEnabled="false">
 
                     <AutoCompleteTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_sunday_time"
+                        android:id="@+id/timeAllDaysTime"
                         style="@style/MySpinnerText"
-                        tools:ignore="LabelFor" />
+                        tools:ignore="LabelFor"
+                        android:text="@string/allDays" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-            </RelativeLayout>
+            </LinearLayout>
 
-            <RelativeLayout
+            <LinearLayout
+                android:id="@+id/timeIndividualDaysLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/listVerticalPadding">
+                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:paddingTop="7dp"
-                    android:id="@+id/time_monday_name"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"
-                    tools:ignore="Deprecated"/>
+                    android:layout_marginTop="@dimen/listVerticalPadding">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
-
-                    <AutoCompleteTextView
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_monday_time"
-                        style="@style/MySpinnerText"
-                        tools:ignore="LabelFor" />
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:paddingTop="7dp"
+                        android:id="@+id/timeSundayName"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"
+                        tools:ignore="Deprecated" />
 
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/listVerticalPadding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:paddingTop="7dp"
-                    android:id="@+id/time_tuesday_name"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"
-                    tools:ignore="Deprecated"/>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
-
-                    <AutoCompleteTextView
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_tuesday_time"
-                        style="@style/MySpinnerText"
-                        tools:ignore="LabelFor" />
+                        android:layout_alignParentEnd="true"
+                        tools:ignore="RelativeOverlap"
+                        style="@style/MySpinner"
+                        app:hintEnabled="false">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <AutoCompleteTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/timeSundayTime"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
 
-            </RelativeLayout>
+                    </com.google.android.material.textfield.TextInputLayout>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/listVerticalPadding">
+                </RelativeLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:paddingTop="7dp"
-                    android:id="@+id/time_wednesday_name"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"
-                    tools:ignore="Deprecated"/>
+                    android:layout_marginTop="@dimen/listVerticalPadding">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
-
-                    <AutoCompleteTextView
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_wednesday_time"
-                        style="@style/MySpinnerText"
-                        tools:ignore="LabelFor" />
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:paddingTop="7dp"
+                        android:id="@+id/timeMondayName"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"
+                        tools:ignore="Deprecated" />
 
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/listVerticalPadding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:paddingTop="7dp"
-                    android:id="@+id/time_thursday_name"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"
-                    tools:ignore="Deprecated"/>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
-
-                    <AutoCompleteTextView
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_thursday_time"
-                        style="@style/MySpinnerText"
-                        tools:ignore="LabelFor" />
+                        android:layout_alignParentEnd="true"
+                        tools:ignore="RelativeOverlap"
+                        style="@style/MySpinner"
+                        app:hintEnabled="false">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <AutoCompleteTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/timeMondayTime"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
 
-            </RelativeLayout>
+                    </com.google.android.material.textfield.TextInputLayout>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/listVerticalPadding">
+                </RelativeLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:paddingTop="7dp"
-                    android:id="@+id/time_friday_name"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"
-                    tools:ignore="Deprecated"/>
+                    android:layout_marginTop="@dimen/listVerticalPadding">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
-
-                    <AutoCompleteTextView
+                    <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_friday_time"
-                        style="@style/MySpinnerText"
-                        tools:ignore="LabelFor" />
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:paddingTop="7dp"
+                        android:id="@+id/timeTuesdayName"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"
+                        tools:ignore="Deprecated" />
 
-                </com.google.android.material.textfield.TextInputLayout>
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/listVerticalPadding"
-                android:layout_marginBottom="@dimen/listVerticalPadding">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:paddingTop="7dp"
-                    android:id="@+id/time_saturday_name"
-                    android:singleLine="true"
-                    android:textSize="@dimen/textPrimary"
-                    android:textColor="@color/textPrimary"
-                    tools:ignore="Deprecated"/>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    tools:ignore="RelativeOverlap"
-                    style="@style/MySpinner">
-
-                    <AutoCompleteTextView
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/time_saturday_time"
-                        style="@style/MySpinnerText"
-                        tools:ignore="LabelFor" />
+                        android:layout_alignParentEnd="true"
+                        tools:ignore="RelativeOverlap"
+                        style="@style/MySpinner"
+                        app:hintEnabled="false">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <AutoCompleteTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/timeTuesdayTime"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
 
-            </RelativeLayout>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/listVerticalPadding">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:paddingTop="7dp"
+                        android:id="@+id/timeWednesdayName"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"
+                        tools:ignore="Deprecated" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        tools:ignore="RelativeOverlap"
+                        style="@style/MySpinner"
+                        app:hintEnabled="false">
+
+                        <AutoCompleteTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/timeWednesdayTime"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/listVerticalPadding">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:paddingTop="7dp"
+                        android:id="@+id/timeThursdayName"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"
+                        tools:ignore="Deprecated" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        tools:ignore="RelativeOverlap"
+                        style="@style/MySpinner"
+                        app:hintEnabled="false">
+
+                        <AutoCompleteTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/timeThursdayTime"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/listVerticalPadding">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:paddingTop="7dp"
+                        android:id="@+id/timeFridayName"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"
+                        tools:ignore="Deprecated" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        tools:ignore="RelativeOverlap"
+                        style="@style/MySpinner"
+                        app:hintEnabled="false">
+
+                        <AutoCompleteTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/timeFridayTime"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/listVerticalPadding"
+                    android:layout_marginBottom="@dimen/listVerticalPadding">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:paddingTop="7dp"
+                        android:id="@+id/timeSaturdayName"
+                        android:singleLine="true"
+                        android:textSize="@dimen/textPrimary"
+                        android:textColor="@color/textPrimary"
+                        tools:ignore="Deprecated" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        tools:ignore="RelativeOverlap"
+                        style="@style/MySpinner"
+                        app:hintEnabled="false">
+
+                        <AutoCompleteTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/timeSaturdayTime"
+                            style="@style/MySpinnerText"
+                            tools:ignore="LabelFor" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </RelativeLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 

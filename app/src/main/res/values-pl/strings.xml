@@ -114,4 +114,5 @@
     <string name="from">Od</string>
     <string name="until">Do</string>
     <string name="endDate">Data końcowa nie może być przed datą startową</string>
+    <string name="allDays">Wszystkie dni</string>
 </resources>

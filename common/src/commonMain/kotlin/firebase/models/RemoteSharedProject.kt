@@ -6,11 +6,13 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.UserKey
 
 class RemoteSharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord
-) : RemoteProject<RemoteCustomTimeId.Shared>() {
+) : RemoteProject<RemoteCustomTimeId.Shared, ProjectKey.Shared>() {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
@@ -21,8 +23,8 @@ class RemoteSharedProject(
     val users get() = remoteUsers.values
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Shared, RemoteSharedCustomTime>()
-    override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Shared>>
-    override val remoteTaskHierarchyContainer = TaskHierarchyContainer<String, RemoteTaskHierarchy<RemoteCustomTimeId.Shared>>()
+    override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Shared, ProjectKey.Shared>>
+    override val remoteTaskHierarchyContainer = TaskHierarchyContainer<String, RemoteTaskHierarchy<RemoteCustomTimeId.Shared, ProjectKey.Shared>>()
 
     override val customTimes get() = remoteCustomTimes.values
 
@@ -64,7 +66,7 @@ class RemoteSharedProject(
         remoteUsers.remove(id)
     }
 
-    fun updateUserInfo(deviceDbInfo: DeviceDbInfo) {
+    fun updateDeviceDbInfo(deviceDbInfo: DeviceDbInfo) {
         check(remoteUsers.containsKey(deviceDbInfo.key))
 
         val remoteProjectUser = remoteUsers[deviceDbInfo.key]!!
@@ -81,9 +83,7 @@ class RemoteSharedProject(
         remoteProjectUser.photoUrl = photoUrl
     }
 
-    override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) {
-        remoteProjectRecord.updateRecordOf(addedFriends.asSequence().map { it.id }.toSet(), removedFriends)
-
+    fun updateUsers(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) {
         for (addedFriend in addedFriends)
             addUser(addedFriend)
 
@@ -102,7 +102,7 @@ class RemoteSharedProject(
 
     fun getSharedTimeIfPresent(
             privateCustomTimeId: RemoteCustomTimeId.Private,
-            ownerKey: String
+            ownerKey: UserKey
     ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId }
 
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteSharedCustomTime {
@@ -125,7 +125,7 @@ class RemoteSharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(ownerKey: String, remoteCustomTime: RemoteCustomTime<*>): RemoteSharedCustomTime {
+    override fun getOrCreateCustomTime(ownerKey: UserKey, remoteCustomTime: RemoteCustomTime<*, *>): RemoteSharedCustomTime {
         fun copy(): RemoteSharedCustomTime {
             val private = remoteCustomTime as? RemotePrivateCustomTime
 
@@ -145,7 +145,7 @@ class RemoteSharedProject(
                     remoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute,
                     remoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour,
                     remoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute,
-                    private?.projectId,
+                    private?.projectId?.key,
                     private?.id?.value
             )
 

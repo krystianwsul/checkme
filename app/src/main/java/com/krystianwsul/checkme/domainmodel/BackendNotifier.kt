@@ -12,17 +12,19 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 
 object BackendNotifier {
 
     private const val PREFIX = "https://us-central1-check-me-add47.cloudfunctions.net/notify?"
 
-    fun getUrl(projects: Set<String>, production: Boolean, userKeys: Collection<String>, senderToken: String): String {
+    fun getUrl(projects: Set<ProjectKey>, production: Boolean, userKeys: Collection<UserKey>, senderToken: String): String {
         check(projects.isNotEmpty() || !userKeys.isEmpty())
 
-        val parameters = projects.map { "projects=$it" }.toMutableSet()
+        val parameters = projects.map { "projects=${it.key}" }.toMutableSet()
 
-        parameters.addAll(userKeys.map { "userKeys=$it" })
+        parameters.addAll(userKeys.map { "userKeys=${it.key}" })
 
         if (production)
             parameters.add("production=1")
@@ -32,7 +34,7 @@ object BackendNotifier {
         return PREFIX + parameters.joinToString("&")
     }
 
-    fun notify(remoteProjects: Set<RemoteProject<*>>, deviceInfo: DeviceInfo, userKeys: Collection<String>) {
+    fun notify(remoteProjects: Set<RemoteProject<*, *>>, deviceInfo: DeviceInfo, userKeys: Collection<UserKey>) {
         val production = when (AndroidDatabaseWrapper.root) {
             "development" -> false
             "production" -> true

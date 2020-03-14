@@ -18,7 +18,7 @@ class RemoteProjectUserRecord(
 
     val id by lazy { UserData.getKey(createObject.email) }
 
-    override val key by lazy { remoteProjectRecord.childKey + "/" + USERS + "/" + id }
+    override val key by lazy { remoteProjectRecord.childKey + "/" + USERS + "/" + id.key }
 
     var name by Committer(createObject::name)
 

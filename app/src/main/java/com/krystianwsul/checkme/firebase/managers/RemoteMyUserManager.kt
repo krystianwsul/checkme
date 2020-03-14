@@ -12,8 +12,7 @@ import com.krystianwsul.common.firebase.records.RemoteMyUserRecord
 import java.util.*
 import kotlin.properties.Delegates.observable
 
-class RemoteUserManager(
-        private val domainFactory: DomainFactory,
+class RemoteMyUserManager(
         deviceInfo: DeviceInfo,
         private val uuid: String,
         dataSnapshot: DataSnapshot
@@ -27,20 +26,20 @@ class RemoteUserManager(
                 deviceInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) }
         )
 
-        RemoteMyUserRecord(true, userWrapper, uuid)
+        RemoteMyUserRecord(true, userWrapper)
     } else {
         dataSnapshot.toRecord()
     }
         private set
 
-    private fun DataSnapshot.toRecord() = RemoteMyUserRecord(false, getValue(UserWrapper::class.java)!!, uuid)
+    private fun DataSnapshot.toRecord() = RemoteMyUserRecord(false, getValue(UserWrapper::class.java)!!)
 
     fun newSnapshot(dataSnapshot: DataSnapshot): RemoteMyUserRecord {
         remoteUserRecord = dataSnapshot.toRecord()
         return remoteUserRecord
     }
 
-    fun save(): Boolean {
+    fun save(domainFactory: DomainFactory): Boolean {
         val values = HashMap<String, Any?>()
 
         remoteUserRecord.getValues(values)

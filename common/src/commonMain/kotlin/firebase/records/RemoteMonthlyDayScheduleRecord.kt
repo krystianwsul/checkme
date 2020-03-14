@@ -21,9 +21,9 @@ class RemoteMonthlyDayScheduleRecord<T : RemoteCustomTimeId> : RemoteScheduleRec
     val from by lazy { monthlyDayScheduleJson.from }
     val until by lazy { monthlyDayScheduleJson.until }
 
-    constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
+    constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T, *>, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
 
-    constructor(remoteTaskRecord: RemoteTaskRecord<T>, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
+    constructor(remoteTaskRecord: RemoteTaskRecord<T, *>, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
 
     override val startTime by lazy { monthlyDayScheduleJson.startTime }
 

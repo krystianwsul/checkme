@@ -13,6 +13,7 @@ import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -36,10 +37,7 @@ import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.ScheduleData
-import com.krystianwsul.common.utils.ScheduleType
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response
 import io.reactivex.BackpressureStrategy
@@ -72,7 +70,8 @@ class CreateTaskActivity : NavBarActivity() {
         private const val KEY_HINT = "hint"
         private const val KEY_NAME_HINT = "nameHint"
         private const val KEY_REMOVE_INSTANCE_KEYS = "removeInstanceKeys"
-        private const val KEY_PARENT_PROJECT = "parentProject"
+        private const val KEY_PARENT_PROJECT_TYPE = "parentProjectType"
+        private const val KEY_PARENT_PROJECT_KEY = "parentProjectKey"
         private const val KEY_PARENT_TASK = "parentTask"
         private const val KEY_SHORTCUT_ID = "android.intent.extra.shortcut.ID"
 
@@ -123,7 +122,8 @@ class CreateTaskActivity : NavBarActivity() {
 
         fun getShortcutIntent(parentTaskKeyHint: TaskKey) = Intent(MyApplication.instance, CreateTaskActivity::class.java).apply {
             action = Intent.ACTION_DEFAULT
-            putExtra(KEY_PARENT_PROJECT, parentTaskKeyHint.remoteProjectId)
+            putExtra(KEY_PARENT_PROJECT_KEY, parentTaskKeyHint.remoteProjectId.key)
+            putExtra(KEY_PARENT_PROJECT_TYPE, parentTaskKeyHint.remoteProjectId.type.ordinal)
             putExtra(KEY_PARENT_TASK, parentTaskKeyHint.remoteTaskId)
         }
 
@@ -532,14 +532,19 @@ class CreateTaskActivity : NavBarActivity() {
                     hasExtra(KEY_HINT) -> {
                         check(!hasExtra(KEY_SHORTCUT_ID))
 
-                        getSerializableExtra(KEY_HINT) as Hint
+                        getParcelableExtra<Hint>(KEY_HINT)
                     }
                     hasExtra(KEY_SHORTCUT_ID) -> Hint.Task(TaskKey.fromShortcut(getStringExtra(KEY_SHORTCUT_ID)!!))
-                    hasExtra(KEY_PARENT_PROJECT) -> {
+                    hasExtra(KEY_PARENT_PROJECT_KEY) -> {
                         check(hasExtra(KEY_PARENT_TASK))
+                        check(hasExtra(KEY_PARENT_PROJECT_TYPE))
                         check(!hasExtra(KEY_SHORTCUT_ID))
 
-                        Hint.Task(TaskKey(getStringExtra(KEY_PARENT_PROJECT)!!, getStringExtra(KEY_PARENT_TASK)!!))
+                        val projectKey = ProjectKey.Type
+                                .values()[getIntExtra(KEY_PARENT_PROJECT_TYPE, -1)]
+                                .newKey(getStringExtra(KEY_PARENT_PROJECT_KEY)!!)
+
+                        Hint.Task(TaskKey(projectKey, getStringExtra(KEY_PARENT_TASK)!!))
                     }
                     else -> null
                 }
@@ -771,6 +776,7 @@ class CreateTaskActivity : NavBarActivity() {
 
         createTaskAdapter = CreateTaskAdapter()
         createTaskRecycler.adapter = createTaskAdapter
+        createTaskRecycler.itemAnimator = CustomItemAnimator()
 
         if (noteHasFocus) { // keyboard hack
             val notePosition = stateData.state
@@ -992,8 +998,9 @@ class CreateTaskActivity : NavBarActivity() {
         return ScheduleEntry(CreateTaskViewModel.ScheduleDataWrapper.Single(ScheduleData.Single(date, timePair)))
     }
 
-    sealed class Hint : Serializable {
+    sealed class Hint : Parcelable {
 
+        @Parcelize
         class Schedule(val date: Date, val timePair: TimePair) : Hint() {
 
             constructor(
@@ -1002,6 +1009,7 @@ class CreateTaskActivity : NavBarActivity() {
             ) : this(pair.first, TimePair(pair.second))
         }
 
+        @Parcelize
         class Task(val taskKey: TaskKey) : Hint()
     }
 

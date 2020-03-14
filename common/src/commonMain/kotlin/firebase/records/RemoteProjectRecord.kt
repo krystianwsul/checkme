@@ -4,12 +4,13 @@ import com.krystianwsul.common.firebase.json.ProjectJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
-abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson>(
+abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : ProjectKey>(
         create: Boolean,
-        val id: String,
+        val id: V,
         protected val projectJson: U
 ) : RemoteRecord(create) {
 
@@ -38,22 +39,22 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson>(
                 .toMutableMap()
     }
 
-    override val key get() = id
+    override val key get() = id.key
 
     abstract val childKey: String
 
-    var name by Committer(projectJson::name, "$id/$PROJECT_JSON")
+    var name by Committer(projectJson::name, "$key/$PROJECT_JSON")
 
     val startTime get() = projectJson.startTime
 
-    var endTime by Committer(projectJson::endTime, "$id/$PROJECT_JSON")
+    var endTime by Committer(projectJson::endTime, "$key/$PROJECT_JSON")
 
     override val children
         get() = remoteTaskRecords.values +
                 remoteTaskHierarchyRecords.values +
                 remoteCustomTimeRecords.values
 
-    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T> {
+    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T, V> {
         val remoteTaskRecord = RemoteTaskRecord(this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
@@ -79,7 +80,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson>(
 
     abstract fun getRemoteCustomTimeId(id: String): T
 
-    abstract fun getRemoteCustomTimeKey(remoteCustomTimeId: T): CustomTimeKey<T>
+    abstract fun getRemoteCustomTimeKey(remoteCustomTimeId: T): CustomTimeKey<T, V>
 
     fun getRemoteCustomTimeKey(customTimeId: String) = getRemoteCustomTimeKey(getRemoteCustomTimeId(customTimeId))
 }

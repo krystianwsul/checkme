@@ -31,6 +31,7 @@ import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import io.reactivex.Observable
+import io.reactivex.Single
 import java.io.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -182,7 +183,7 @@ private fun onComplete(
     }
 }
 
-fun checkError(domainFactory: DomainFactory, caller: String, values: Any? = null): DatabaseCallback {
+fun checkError(domainFactory: DomainFactory, caller: String, values: Map<String, Any?>? = null): DatabaseCallback {
     val taskKeysBefore = values?.let { domainFactory.getTaskKeys() }
 
     return { databaseMessage, successful, exception ->
@@ -260,7 +261,7 @@ fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) {
     (parent.parent as TextInputLayout).setEndIconOnClickListener { listener() }
 }
 
-fun <T> serialize(obj: T): String {
+fun <T : Serializable> serialize(obj: T): String {
     return ByteArrayOutputStream().let {
         ObjectOutputStream(it).run {
             writeObject(obj)
@@ -271,7 +272,7 @@ fun <T> serialize(obj: T): String {
     }
 }
 
-fun <T> deserialize(serialized: String?): T? {
+fun <T : Serializable> deserialize(serialized: String?): T? {
     if (serialized.isNullOrEmpty())
         return null
 
@@ -309,6 +310,13 @@ fun Window.setTransparentNavigation(landscape: Boolean) {
 val Resources.isLandscape get() = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
 fun <T> RequestBuilder<T>.circle(circle: Boolean) = if (circle) apply(RequestOptions.circleCropTransform()) else this
+
+fun <T : Any> List<Single<T>>.zipSingle() = Single.zip(this) {
+    it.map {
+        @Suppress("UNCHECKED_CAST")
+        it as T
+    }
+}
 
 inline fun <reified T, U> T.getPrivateField(name: String): U {
     return T::class.java.getDeclaredField(name).let {

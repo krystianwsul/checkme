@@ -47,7 +47,7 @@ kotlin {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serializationVersion"
-                implementation "com.soywiz.korlibs.klock:klock:1.6.0"
+                implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
             }
         }
 
@@ -55,7 +55,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationVersion"
-                implementation "com.soywiz.korlibs.klock:klock:1.6.0"
+                implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
                 implementation "net.danlew:android.joda:$jodaVersion"
             }
         }
@@ -64,7 +64,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationVersion"
-                implementation "com.soywiz.korlibs.klock:klock:1.6.0"
+                implementation "com.soywiz.korlibs.klock:klock:$klockVersion"
             }
         }
     }

@@ -21,10 +21,7 @@ import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.utils.Utils
-import com.krystianwsul.checkme.utils.getPrivateField
-import com.krystianwsul.checkme.utils.setFixedOnClickListener
-import com.krystianwsul.checkme.utils.startTicks
+import com.krystianwsul.checkme.utils.*
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.time.Date
@@ -65,7 +62,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
     private lateinit var customView: View
     private lateinit var scheduleDialogDays: Map<DayOfWeek, CheckBox>
 
-    private var customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>? = null
+    private var customTimeDatas: Map<CustomTimeKey<*, *>, CreateTaskViewModel.CustomTimeData>? = null
 
     private lateinit var scheduleDialogData: ScheduleDialogData
 
@@ -79,7 +76,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
     private val timeDialogListener = object : TimeDialogFragment.TimeDialogListener {
 
-        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*>) {
+        override fun onCustomTimeSelected(customTimeKey: CustomTimeKey<*, *>) {
             check(customTimeDatas != null)
 
             scheduleDialogData.timePairPersist.customTimeKey = customTimeKey
@@ -88,9 +85,9 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
 
         override fun onOtherSelected() {
-            check(customTimeDatas != null)
+            checkNotNull(customTimeDatas)
 
-            TimePickerDialogFragment.newInstance(scheduleDialogData.timePairPersist.hourMinute).let {
+            TimePickerDialogFragment.newInstance(scheduleDialogData.timePairPersist.hourMinute, SerializableUnit).let {
                 it.listener = timePickerDialogFragmentListener
                 it.show(childFragmentManager, TIME_PICKER_TAG)
             }
@@ -101,8 +98,8 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         }
     }
 
-    private val timePickerDialogFragmentListener = { hourMinute: HourMinute ->
-        check(customTimeDatas != null)
+    private val timePickerDialogFragmentListener = { hourMinute: HourMinute, _: SerializableUnit ->
+        checkNotNull(customTimeDatas)
 
         scheduleDialogData.timePairPersist.setHourMinute(hourMinute)
         updateFields()
@@ -298,9 +295,12 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             }
         }
 
-        (childFragmentManager.findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.timeDialogListener = timeDialogListener
+        childFragmentManager.apply {
+            (findFragmentByTag(TIME_LIST_FRAGMENT_TAG) as? TimeDialogFragment)?.timeDialogListener = timeDialogListener
 
-        (childFragmentManager.findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment)?.listener = timePickerDialogFragmentListener
+            @Suppress("UNCHECKED_CAST")
+            (findFragmentByTag(TIME_PICKER_TAG) as? TimePickerDialogFragment<SerializableUnit>)?.listener = timePickerDialogFragmentListener
+        }
 
         customView.scheduleDialogDate.setFixedOnClickListener {
             check(scheduleDialogData.scheduleType == ScheduleType.SINGLE)
@@ -457,7 +457,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
             updateFields()
     }
 
-    fun initialize(customTimeDatas: Map<CustomTimeKey<*>, CreateTaskViewModel.CustomTimeData>) {
+    fun initialize(customTimeDatas: Map<CustomTimeKey<*, *>, CreateTaskViewModel.CustomTimeData>) {
         this.customTimeDatas = customTimeDatas
 
         if (this::scheduleDialogData.isInitialized)
@@ -512,7 +512,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
 
         if (resultCode == Activity.RESULT_OK)
-            scheduleDialogData.timePairPersist.customTimeKey = data!!.getSerializableExtra(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY) as CustomTimeKey.Private
+            scheduleDialogData.timePairPersist.customTimeKey = data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY)!!
     }
 
     @SuppressLint("SetTextI18n")

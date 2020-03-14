@@ -7,7 +7,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteDailyScheduleRecord<T : RemoteCustomTimeId>(
         id: String,
-        remoteTaskRecord: RemoteTaskRecord<T>,
+        remoteTaskRecord: RemoteTaskRecord<T, *>,
         scheduleWrapper: ScheduleWrapper
 ) : RemoteScheduleRecord<T>(id, remoteTaskRecord, scheduleWrapper) {
 

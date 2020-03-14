@@ -54,7 +54,7 @@ sealed class ScheduleGroup {
         }
     }
 
-    abstract val customTimeKey: CustomTimeKey<*>?
+    abstract val customTimeKey: CustomTimeKey<*, *>?
 
     abstract val scheduleData: ScheduleData
 

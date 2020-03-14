@@ -6,19 +6,20 @@ import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemotePrivateCustomTime(
         override val remoteProject: RemotePrivateProject,
         override val remoteCustomTimeRecord: RemotePrivateCustomTimeRecord
-) : RemoteCustomTime<RemoteCustomTimeId.Private>() {
+) : RemoteCustomTime<RemoteCustomTimeId.Private, ProjectKey.Private>() {
 
     override val id = remoteCustomTimeRecord.id
 
     override val customTimeKey by lazy { CustomTimeKey.Private(projectId, id) }
 
     private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(id)
-            .map { (it as RemoteCustomTime<*>).remoteCustomTimeRecord }
+            .map { (it as RemoteCustomTime<*, *>).remoteCustomTimeRecord }
             .toMutableList<RemoteCustomTimeRecord<*, *>>()
             .apply { add(remoteCustomTimeRecord) }
 

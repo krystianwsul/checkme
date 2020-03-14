@@ -13,6 +13,7 @@ import android.widget.RelativeLayout
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -574,6 +575,7 @@ class GroupListFragment @JvmOverloads constructor(
             )
             treeViewAdapter = groupAdapter.treeViewAdapter
             groupListRecycler.adapter = treeViewAdapter
+            groupListRecycler.itemAnimator = CustomItemAnimator()
 
             treeViewAdapter.updates
                     .subscribe {

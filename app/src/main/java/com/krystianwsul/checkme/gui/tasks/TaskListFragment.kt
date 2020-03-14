@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -323,6 +324,7 @@ class TaskListFragment : AbstractFragment(), FabUser, ListItemAddedScroller {
             taskAdapter.initialize(data!!.taskData, selectedTaskKeys, expandedTaskIds)
             treeViewAdapter = taskAdapter.treeViewAdapter
             taskListRecycler.adapter = treeViewAdapter
+            taskListRecycler.itemAnimator = CustomItemAnimator()
             dragHelper.attachToRecyclerView(taskListRecycler)
 
             treeViewAdapter.updateDisplayedNodes {

@@ -9,7 +9,7 @@ import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.ScheduleType
 
 
-abstract class Schedule(private val rootTask: RemoteTask<*>) {
+abstract class Schedule(private val rootTask: RemoteTask<*, *>) {
 
     protected abstract val scheduleBridge: ScheduleBridge
 

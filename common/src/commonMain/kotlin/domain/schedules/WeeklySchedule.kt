@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
 
 class WeeklySchedule(
-        rootTask: RemoteTask<*>,
+        rootTask: RemoteTask<*, *>,
         override val repeatingScheduleBridge: WeeklyScheduleBridge
 ) : RepeatingSchedule(rootTask) {
 

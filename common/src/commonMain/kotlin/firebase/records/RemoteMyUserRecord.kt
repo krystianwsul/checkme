@@ -6,11 +6,10 @@ import com.krystianwsul.common.firebase.json.UserWrapper
 
 class RemoteMyUserRecord(
         create: Boolean,
-        createObject: UserWrapper,
-        private val uuid: String
+        createObject: UserWrapper
 ) : RemoteRootUserRecord(create, createObject), RemoteMyUserInterface {
 
-    override fun setToken(token: String?) {
+    override fun setToken(uuid: String, token: String?) {
         if (token == userJson.tokens[uuid])
             return
 

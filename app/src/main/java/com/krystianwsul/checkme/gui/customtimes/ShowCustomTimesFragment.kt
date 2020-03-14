@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
@@ -145,6 +146,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
             customTimesAdapter.initialize()
             treeViewAdapter = customTimesAdapter.treeViewAdapter
             showTimesList.adapter = treeViewAdapter
+            showTimesList.itemAnimator = CustomItemAnimator()
         }
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)

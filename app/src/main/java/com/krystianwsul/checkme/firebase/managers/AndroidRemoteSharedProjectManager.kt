@@ -9,17 +9,20 @@ import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.managers.RemoteSharedProjectManager
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteTaskRecord
+import com.krystianwsul.common.utils.ProjectKey
 
-class AndroidRemoteSharedProjectManager(
-        private val domainFactory: DomainFactory,
-        children: Iterable<DataSnapshot>
-) : RemoteSharedProjectManager() {
+class AndroidRemoteSharedProjectManager(children: Iterable<DataSnapshot>) : RemoteSharedProjectManager<DomainFactory>() {
 
-    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(AndroidDatabaseWrapper, this@AndroidRemoteSharedProjectManager, key!!, getValue(JsonWrapper::class.java)!!)
+    private fun DataSnapshot.toRecord() = RemoteSharedProjectRecord(
+            AndroidDatabaseWrapper,
+            this@AndroidRemoteSharedProjectManager,
+            ProjectKey.Shared(key!!),
+            getValue(JsonWrapper::class.java)!!
+    )
 
-    override val remoteProjectRecords = children.mapNotNull {
+    override var remoteProjectRecords = children.mapNotNull {
         try {
-            it.key!! to it.toRecord()
+            ProjectKey.Shared(it.key!!) to Pair(it.toRecord(), false)
         } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
             MyCrashlytics.logException(onlyVisibilityPresentException)
 
@@ -32,16 +35,16 @@ class AndroidRemoteSharedProjectManager(
     override val databaseWrapper = AndroidDatabaseWrapper
 
     fun setChild(dataSnapshot: DataSnapshot): RemoteSharedProjectRecord {
-        val key = dataSnapshot.key!!
+        val key = ProjectKey.Shared(dataSnapshot.key!!)
 
         return dataSnapshot.toRecord().also {
-            remoteProjectRecords[key] = it
+            remoteProjectRecords[key] = Pair(it, false)
         }
     }
 
-    override fun getDatabaseCallback() = checkError(domainFactory, "RemoteSharedProjectManager.save")
+    override fun getDatabaseCallback(extra: DomainFactory) = checkError(extra, "RemoteSharedProjectManager.save")
 
-    fun removeChild(dataSnapshot: DataSnapshot) = dataSnapshot.key!!.also {
-        check(remoteProjectRecords.remove(it) != null)
+    fun removeChild(key: ProjectKey.Shared) {
+        check(remoteProjectRecords.remove(key) != null)
     }
 }

@@ -1,22 +1,28 @@
 package com.krystianwsul.checkme.firebase
 
 import com.google.firebase.database.DataSnapshot
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-import com.krystianwsul.checkme.firebase.managers.RemoteUserManager
+import com.krystianwsul.checkme.firebase.managers.RemoteMyUserManager
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.models.RemoteMyUser
 
 class RemoteUserFactory(
-        domainFactory: DomainFactory,
+        uuid: String,
         userSnapshot: DataSnapshot,
         deviceInfo: DeviceInfo
 ) {
 
-    private val remoteUserManager = RemoteUserManager(domainFactory, deviceInfo, domainFactory.uuid, userSnapshot)
+    private val remoteUserManager = RemoteMyUserManager(deviceInfo, uuid, userSnapshot)
 
-    var remoteUser = RemoteMyUser(remoteUserManager.remoteUserRecord)
-        private set
+    private val remoteUserRelay = BehaviorRelay.createDefault(RemoteMyUser(remoteUserManager.remoteUserRecord))
+
+    var remoteUser
+        get() = remoteUserRelay.value!!
+        set(value) {
+            remoteUserRelay.accept(value)
+        }
 
     var isSaved
         get() = remoteUserManager.isSaved
@@ -24,9 +30,19 @@ class RemoteUserFactory(
             remoteUserManager.isSaved = value
         }
 
+    private val projectIdTrigger = BehaviorRelay.createDefault(Unit)
+
     init {
         setTab()
+
+        remoteUser.setToken(uuid, deviceInfo.token)
+
+        remoteUser.projectChangeListener = { projectIdTrigger.accept(Unit) }
     }
+
+    val sharedProjectKeysObservable = projectIdTrigger.switchMap {
+        remoteUserRelay.map { it.projectIds }
+    }.distinctUntilChanged()!!
 
     private fun setTab() {
         Preferences.tab = remoteUser.defaultTab
@@ -40,5 +56,5 @@ class RemoteUserFactory(
         setTab()
     }
 
-    fun save() = remoteUserManager.save()
+    fun save(domainFactory: DomainFactory) = remoteUserManager.save(domainFactory)
 }

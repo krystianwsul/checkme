@@ -40,9 +40,9 @@ object Preferences {
                 .apply()
     }
 
-    var shortcuts: Map<TaskKey, LocalDateTime> by observable(deserialize(shortcutString)
-            ?: mapOf()) { _, _, newValue ->
-        shortcutString = serialize(newValue)
+    var shortcuts: Map<TaskKey, LocalDateTime> by observable(deserialize<HashMap<TaskKey, LocalDateTime>>(shortcutString)
+            ?: mapOf<TaskKey, LocalDateTime>()) { _, _, newValue ->
+        shortcutString = serialize(HashMap(newValue))
     }
 
     val temporaryNotificationLog = Logger(KEY_TEMPORARY_NOTIFICATION_LOG)

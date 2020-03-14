@@ -3,10 +3,7 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.utils.InstanceKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
-import com.krystianwsul.common.utils.TaskHierarchyKey
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
 
 class TaskRelevance(val task: Task) {
@@ -57,7 +54,10 @@ class TaskRelevance(val task: Task) {
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 
-    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<Pair<String, RemoteCustomTimeId>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<String, RemoteProjectRelevance>) {
+    fun setRemoteRelevant(
+            remoteCustomTimeRelevances: Map<Pair<ProjectKey, RemoteCustomTimeId>, RemoteCustomTimeRelevance>,
+            remoteProjectRelevances: Map<ProjectKey, RemoteProjectRelevance>
+    ) {
         check(relevant)
 
         task.schedules

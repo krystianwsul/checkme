@@ -3,12 +3,13 @@ package com.krystianwsul.common.relevance
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.firebase.models.RemotePrivateProject
 import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.firebase.models.RemoteSharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.soywiz.klock.days
 
 object Irrelevant {
 
-    fun setIrrelevant(parent: RemoteProject.Parent, project: RemoteProject<*>, now: ExactTimeStamp): Collection<Instance> {
+    fun setIrrelevant(parent: RemoteProject.Parent, project: RemoteProject<*, *>, now: ExactTimeStamp): Result {
         val tasks = project.tasks
 
         // relevant hack
@@ -117,9 +118,11 @@ object Irrelevant {
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
         irrelevantRemoteProjects.forEach { it.delete(parent) }
 
-        return relevantInstances
+        return Result(relevantInstances, irrelevantRemoteProjects.map { it as RemoteSharedProject })
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)
     private class VisibleIrrelevantExistingInstancesException(message: String) : Exception(message)
+
+    data class Result(val relevantInstances: Collection<Instance>, val removedSharedProjects: Collection<RemoteSharedProject>)
 }

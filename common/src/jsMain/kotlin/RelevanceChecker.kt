@@ -1,30 +1,34 @@
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.RemotePrivateProject
 import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.firebase.models.RemoteRootUser
 import com.krystianwsul.common.firebase.models.RemoteSharedProject
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
 import firebase.JsDatabaseWrapper
 import firebase.managers.JsPrivateProjectManager
+import firebase.managers.JsRootUserManager
 import firebase.managers.JsSharedProjectManager
 
 object RelevanceChecker {
 
+    private enum class Branch {
+
+        PRIVATE, SHARED, USER
+    }
+
     fun checkRelevance(admin: dynamic, response: MutableList<String>, onComplete: () -> Unit) {
         val roots = listOf("development", "production")
 
-        val completed = roots.map {
-            listOf(
-                    it to true,
-                    it to false
-            )
-        }
+        val completed = roots.map { root ->
+                    Branch.values().map { root to it }
+                }
                 .flatten()
                 .associateWith { false }
                 .toMutableMap()
 
-        fun callback(root: String, private: Boolean) {
-            val key = root to private
+        fun callback(root: String, branch: Branch) {
+            val key = root to branch
             check(!completed.getValue(key))
 
             completed[key] = true
@@ -56,7 +60,7 @@ object RelevanceChecker {
                     Irrelevant.setIrrelevant(
                             object : RemoteProject.Parent {
 
-                                override fun deleteProject(remoteProject: RemoteProject<*>) = throw UnsupportedOperationException()
+                                override fun deleteProject(remoteProject: RemoteProject<*, *>) = throw UnsupportedOperationException()
                             },
                             it,
                             now
@@ -64,9 +68,9 @@ object RelevanceChecker {
                 }
 
                 privateProjectManager.apply {
-                    saveCallback = { callback(root, true) }
+                    saveCallback = { callback(root, Branch.PRIVATE) }
 
-                    save()
+                    save(Unit)
                 }
             }
 
@@ -75,30 +79,57 @@ object RelevanceChecker {
 
                 val sharedProjects = sharedProjectManager.remoteProjectRecords
                         .entries
-                        .associate { it.key to RemoteSharedProject(it.value) }
+                        .associate { it.key to RemoteSharedProject(it.value.first) }
                         .toMutableMap()
 
                 val now = ExactTimeStamp.now
 
                 val parent = object : RemoteProject.Parent {
 
-                    override fun deleteProject(remoteProject: RemoteProject<*>) {
+                    override fun deleteProject(remoteProject: RemoteProject<*, *>) {
                         check(sharedProjects.contains(remoteProject.id))
 
                         sharedProjects.remove(remoteProject.id)
                     }
                 }
 
-                sharedProjects.values.forEach {
-                    response += "checking relevance for shared project ${it.id}: ${it.name}"
+                val sharedProjectsRemoved = sharedProjects.values
+                        .map {
+                            response += "checking relevance for shared project ${it.id}: ${it.name}"
 
-                    Irrelevant.setIrrelevant(parent, it, now)
+                            Irrelevant.setIrrelevant(parent, it, now).removedSharedProjects
+                        }
+                        .flatten()
+
+                if (sharedProjectsRemoved.isNotEmpty()) {
+                    databaseWrapper.getUsers {
+                        val rootUserManager = JsRootUserManager(databaseWrapper, it)
+
+                        val rootUsers = rootUserManager.remoteRootUserRecords
+                                .values
+                                .map { RemoteRootUser(it) }
+
+                        val removedSharedProjectKeys = sharedProjectsRemoved.map { it.id }
+
+                        rootUsers.forEach { remoteUser ->
+                            removedSharedProjectKeys.forEach {
+                                remoteUser.removeProject(it)
+                            }
+                        }
+
+                        rootUserManager.apply {
+                            saveCallback = { callback(root, Branch.USER) }
+                            save()
+                        }
+                    }
+                } else {
+                    callback(root, Branch.USER)
                 }
 
                 sharedProjectManager.apply {
-                    saveCallback = { callback(root, false) }
+                    saveCallback = { callback(root, Branch.SHARED) }
 
-                    save()
+                    save(Unit)
                 }
             }
         }

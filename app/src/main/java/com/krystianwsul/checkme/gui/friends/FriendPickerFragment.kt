@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -17,6 +18,7 @@ import com.krystianwsul.checkme.R
 import com.krystianwsul.checkme.gui.AbstractDialogFragment
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.utils.loadPhoto
+import com.krystianwsul.common.utils.UserKey
 import kotlinx.android.synthetic.main.fragment_friend_picker.view.*
 import kotlinx.android.synthetic.main.row_friend.view.*
 
@@ -33,7 +35,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
 
     private var data: Data? = null
 
-    private lateinit var listener: (String) -> Unit
+    private lateinit var listener: (UserKey) -> Unit
 
     @SuppressLint("InflateParams")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -60,7 +62,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
             initialize()
     }
 
-    fun initialize(data: Data, listener: (String) -> Unit) {
+    fun initialize(data: Data, listener: (UserKey) -> Unit) {
         this.data = data
         this.listener = listener
 
@@ -75,6 +77,7 @@ class FriendPickerFragment : AbstractDialogFragment() {
         animateVisibility(friendPickerRecycler, friendPickerProgress, data!!.immediate)
 
         friendPickerRecycler.adapter = FriendListAdapter()
+        friendPickerRecycler.itemAnimator = CustomItemAnimator()
     }
 
     private inner class FriendListAdapter : RecyclerView.Adapter<FriendListAdapter.FriendHolder>() {
@@ -120,13 +123,13 @@ class FriendPickerFragment : AbstractDialogFragment() {
     data class Data(val immediate: Boolean, val friendDatas: List<FriendData>)
 
     class FriendData(
-            val id: String,
+            val id: UserKey,
             val name: String,
             val email: String,
-            val photoUrl: String?) {
+            val photoUrl: String?
+    ) {
 
         init {
-            check(!TextUtils.isEmpty(id))
             check(!TextUtils.isEmpty(name))
             check(!TextUtils.isEmpty(email))
         }

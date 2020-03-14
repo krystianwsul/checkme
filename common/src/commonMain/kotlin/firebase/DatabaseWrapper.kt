@@ -1,6 +1,7 @@
 package com.krystianwsul.common.firebase
 
 import com.krystianwsul.common.firebase.records.*
+import com.krystianwsul.common.utils.ProjectKey
 
 abstract class DatabaseWrapper {
 
@@ -15,23 +16,23 @@ abstract class DatabaseWrapper {
 
     protected abstract fun update(path: String, values: Map<String, Any?>, callback: DatabaseCallback)
 
-    fun getPrivateScheduleRecordId(projectId: String, taskId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
+    fun getPrivateScheduleRecordId(projectId: ProjectKey.Private, taskId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
 
-    fun getPrivateTaskRecordId(projectId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
+    fun getPrivateTaskRecordId(projectId: ProjectKey.Private) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
 
-    fun getPrivateTaskHierarchyRecordId(projectId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
+    fun getPrivateTaskHierarchyRecordId(projectId: ProjectKey.Private) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
 
-    fun getPrivateCustomTimeRecordId(projectId: String) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
+    fun getPrivateCustomTimeRecordId(projectId: ProjectKey.Private) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
 
-    fun newSharedProjectRecordId() = getNewId(RECORDS_KEY)
+    fun newSharedProjectRecordId() = ProjectKey.Shared(getNewId(RECORDS_KEY))
 
-    fun newSharedScheduleRecordId(projectId: String, taskId: String) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
+    fun newSharedScheduleRecordId(projectId: ProjectKey.Shared, taskId: String) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}/$taskId/${RemoteScheduleRecord.SCHEDULES}")
 
-    fun newSharedTaskRecordId(projectId: String) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
+    fun newSharedTaskRecordId(projectId: ProjectKey.Shared) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskRecord.TASKS}")
 
-    fun newSharedTaskHierarchyRecordId(projectId: String) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
+    fun newSharedTaskHierarchyRecordId(projectId: ProjectKey.Shared) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
 
-    fun newSharedCustomTimeRecordId(projectId: String) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
+    fun newSharedCustomTimeRecordId(projectId: ProjectKey.Shared) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
 
     fun updateRecords(
             values: Map<String, Any?>,
@@ -42,4 +43,9 @@ abstract class DatabaseWrapper {
             values: Map<String, Any?>,
             callback: DatabaseCallback
     ) = update(PRIVATE_PROJECTS_KEY, values, callback)
+
+    fun updateFriends(
+            values: Map<String, Any?>,
+            callback: DatabaseCallback
+    ) = update(USERS_KEY, values, callback)
 }

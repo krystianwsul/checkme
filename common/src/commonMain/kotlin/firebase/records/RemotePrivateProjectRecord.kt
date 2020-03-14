@@ -1,18 +1,19 @@
 package com.krystianwsul.common.firebase.records
 
-import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.PrivateProjectJson
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemotePrivateProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
-        id: String,
+        id: ProjectKey.Private,
         projectJson: PrivateProjectJson
-) : RemoteProjectRecord<RemoteCustomTimeId.Private, PrivateProjectJson>(
+) : RemoteProjectRecord<RemoteCustomTimeId.Private, PrivateProjectJson, ProjectKey.Private>(
         create,
         id,
         projectJson
@@ -31,15 +32,15 @@ class RemotePrivateProjectRecord(
 
     constructor(
             databaseWrapper: DatabaseWrapper,
-            id: String,
+            id: ProjectKey.Private,
             projectJson: PrivateProjectJson
     ) : this(databaseWrapper, false, id, projectJson)
 
     constructor(
             databaseWrapper: DatabaseWrapper,
-            deviceInfoDbInfo: DeviceDbInfo,
+            userInfo: UserInfo,
             projectJson: PrivateProjectJson
-    ) : this(databaseWrapper, true, deviceInfoDbInfo.key, projectJson)
+    ) : this(databaseWrapper, true, userInfo.key.toPrivateProjectKey(), projectJson)
 
     fun newRemoteCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {
         val remoteCustomTimeRecord = RemotePrivateCustomTimeRecord(this, customTimeJson)

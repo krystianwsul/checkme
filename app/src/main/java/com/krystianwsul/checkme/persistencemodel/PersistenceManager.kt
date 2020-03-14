@@ -2,6 +2,7 @@ package com.krystianwsul.checkme.persistencemodel
 
 
 import com.krystianwsul.common.time.Date
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.TaskKey
 
@@ -41,10 +42,9 @@ class PersistenceManager(
             remoteCustomTimeId: RemoteCustomTimeId?,
             hour: Int?,
             minute: Int?,
-            projectId: String
+            projectId: ProjectKey
     ): InstanceShownRecord {
         check(remoteTaskId.isNotEmpty())
-        check(projectId.isNotEmpty())
 
         val id = ++instanceShownMaxId
 
@@ -60,13 +60,13 @@ class PersistenceManager(
                 minute,
                 mNotified = false,
                 mNotificationShown = false,
-                mProjectId = projectId
+                mProjectId = projectId.key
         ).also { _instanceShownRecords.add(it) }
     }
 
     fun deleteInstanceShownRecords(taskKeys: Set<TaskKey>) {
         val remove = _instanceShownRecords.filterNot {
-            taskKeys.any { taskKey -> it.projectId == taskKey.remoteProjectId && it.taskId == taskKey.remoteTaskId }
+            taskKeys.any { taskKey -> it.projectId == taskKey.remoteProjectId.key && it.taskId == taskKey.remoteTaskId }
         }
 
         remove.forEach { it.delete() }

@@ -14,11 +14,12 @@ import kotlin.properties.Delegates.observable
 
 class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         create: Boolean,
-        private val remoteTaskRecord: RemoteTaskRecord<T>,
+        private val remoteTaskRecord: RemoteTaskRecord<T, *>,
         override val createObject: InstanceJson,
         val scheduleKey: ScheduleKey,
         private val firebaseKey: String,
-        override val scheduleCustomTimeId: T?) : RemoteRecord(create), InstanceRecord<T> {
+        override val scheduleCustomTimeId: T?
+) : RemoteRecord(create), InstanceRecord<T> {
 
     companion object {
 
@@ -44,7 +45,10 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             return key
         }
 
-        fun <T : RemoteCustomTimeId> stringToScheduleKey(remoteProjectRecord: RemoteProjectRecord<T, *>, key: String): Pair<ScheduleKey, T?> {
+        fun <T : RemoteCustomTimeId> stringToScheduleKey(
+                remoteProjectRecord: RemoteProjectRecord<T, *, *>,
+                key: String
+        ): Pair<ScheduleKey, T?> {
             val hourMinuteMatchResult = hourMinuteKeyRegex.find(key)
 
             fun MatchResult.getInt(position: Int) = groupValues[position].toInt()

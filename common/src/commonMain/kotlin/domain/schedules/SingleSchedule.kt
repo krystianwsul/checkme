@@ -9,7 +9,7 @@ import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ScheduleType
 
 class SingleSchedule(
-        rootTask: RemoteTask<*>,
+        rootTask: RemoteTask<*, *>,
         val singleScheduleBridge: SingleScheduleBridge
 ) : Schedule(rootTask) {
 

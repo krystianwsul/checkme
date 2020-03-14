@@ -6,15 +6,17 @@ import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.UserKey
 
 class RemoteSharedProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         private val parent: Parent,
         create: Boolean,
-        id: String,
+        id: ProjectKey.Shared,
         private val jsonWrapper: JsonWrapper
-) : RemoteProjectRecord<RemoteCustomTimeId.Shared, SharedProjectJson>(
+) : RemoteProjectRecord<RemoteCustomTimeId.Shared, SharedProjectJson, ProjectKey.Shared>(
         create,
         id,
         jsonWrapper.projectJson
@@ -33,10 +35,11 @@ class RemoteSharedProjectRecord(
 
     val remoteUserRecords by lazy {
         projectJson.users
-                .mapValues { (id, userJson) ->
+                .entries
+                .associate { (id, userJson) ->
                     check(id.isNotEmpty())
 
-                    RemoteProjectUserRecord(create, this, userJson)
+                    UserKey(id) to RemoteProjectUserRecord(create, this, userJson)
                 }
                 .toMutableMap()
     }
@@ -46,7 +49,7 @@ class RemoteSharedProjectRecord(
     constructor(
             databaseWrapper: DatabaseWrapper,
             parent: Parent,
-            id: String,
+            id: ProjectKey.Shared,
             jsonWrapper: JsonWrapper
     ) : this(
             databaseWrapper,
@@ -67,18 +70,6 @@ class RemoteSharedProjectRecord(
             databaseWrapper.newSharedProjectRecordId(),
             jsonWrapper
     )
-
-    fun updateRecordOf(addedFriends: Set<String>, removedFriends: Set<String>) {
-        check(addedFriends.none { removedFriends.contains(it) })
-
-        jsonWrapper.updateRecordOf(addedFriends, removedFriends)
-
-        for (addedFriend in addedFriends)
-            addValue("$id/recordOf/$addedFriend", true)
-
-        for (removedFriend in removedFriends)
-            addValue("$id/recordOf/$removedFriend", null)
-    }
 
     fun newRemoteCustomTimeRecord(customTimeJson: SharedCustomTimeJson): RemoteSharedCustomTimeRecord {
         val remoteCustomTimeRecord = RemoteSharedCustomTimeRecord(this, customTimeJson)
@@ -111,7 +102,7 @@ class RemoteSharedProjectRecord(
                     .toMutableMap()
 
             users = remoteUserRecords.values
-                    .associateBy({ it.id }, { it.createObject })
+                    .associateBy({ it.id.key }, { it.createObject })
                     .toMutableMap()
         }
 
@@ -137,6 +128,6 @@ class RemoteSharedProjectRecord(
 
     interface Parent {
 
-        fun deleteRemoteSharedProjectRecord(id: String)
+        fun deleteRemoteSharedProjectRecord(id: ProjectKey.Shared)
     }
 }

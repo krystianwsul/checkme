@@ -2,7 +2,6 @@ package com.krystianwsul.checkme.viewmodels
 
 import android.content.Context
 import android.os.Parcelable
-import android.text.TextUtils
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.domainmodel.ScheduleText
 import com.krystianwsul.checkme.gui.tasks.CreateTaskActivity
@@ -48,7 +47,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
             private fun timePairCallback(
                     timePair: TimePair,
-                    customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
+                    customTimeDatas: Map<CustomTimeKey<*, *>, CustomTimeData>,
                     dayOfWeek: DayOfWeek? = null
             ): String {
                 return timePair.customTimeKey?.let {
@@ -64,13 +63,13 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
         val timePair get() = scheduleData.timePair
 
-        abstract fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String
+        abstract fun getText(customTimeDatas: Map<CustomTimeKey<*, *>, CustomTimeData>, context: Context): String
 
         abstract fun getScheduleDialogData(today: Date, scheduleHint: CreateTaskActivity.Hint.Schedule?): ScheduleDialogFragment.ScheduleDialogData
 
         data class Single(override val scheduleData: ScheduleData.Single) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(customTimeDatas: Map<CustomTimeKey<*, *>, CustomTimeData>, context: Context): String {
                 return ScheduleText.Single.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas, scheduleData.date.dayOfWeek)
                 }
@@ -103,7 +102,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
         data class Weekly(override val scheduleData: ScheduleData.Weekly) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(customTimeDatas: Map<CustomTimeKey<*, *>, CustomTimeData>, context: Context): String {
                 return ScheduleText.Weekly.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
                 }
@@ -138,7 +137,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
         data class MonthlyDay(override val scheduleData: ScheduleData.MonthlyDay) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(customTimeDatas: Map<CustomTimeKey<*, *>, CustomTimeData>, context: Context): String {
                 return ScheduleText.MonthlyDay.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
                 }
@@ -167,7 +166,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
         data class MonthlyWeek(override val scheduleData: ScheduleData.MonthlyWeek) : ScheduleDataWrapper() {
 
-            override fun getText(customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>, context: Context): String {
+            override fun getText(customTimeDatas: Map<CustomTimeKey<*, *>, CustomTimeData>, context: Context): String {
                 return ScheduleText.MonthlyWeek.getScheduleText(scheduleData) {
                     timePairCallback(it, customTimeDatas)
                 }
@@ -203,12 +202,12 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
     data class Data(
             val taskData: TaskData?,
             val parentTreeDatas: Map<ParentKey, ParentTreeData>,
-            val customTimeDatas: Map<CustomTimeKey<*>, CustomTimeData>,
+            val customTimeDatas: Map<CustomTimeKey<*, *>, CustomTimeData>,
             val defaultReminder: Boolean
     ) : DomainData()
 
     data class CustomTimeData(
-            val customTimeKey: CustomTimeKey<*>,
+            val customTimeKey: CustomTimeKey<*, *>,
             val name: String,
             val hourMinutes: SortedMap<DayOfWeek, HourMinute>
     )
@@ -229,7 +228,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
             val scheduleText: String?,
             val note: String?,
             val sortKey: SortKey,
-            val projectId: String?
+            val projectId: ProjectKey.Shared?
     ) {
 
         fun matchesSearch(query: String?): Boolean {
@@ -249,7 +248,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
     sealed class ParentKey : Parcelable {
 
         @Parcelize
-        data class Project(val projectId: String) : ParentKey()
+        data class Project(val projectId: ProjectKey) : ParentKey()
 
         @Parcelize
         data class Task(val taskKey: TaskKey) : ParentKey()
@@ -257,11 +256,7 @@ class CreateTaskViewModel : DomainViewModel<CreateTaskViewModel.Data>() {
 
     sealed class SortKey : Comparable<SortKey> {
 
-        data class ProjectSortKey(private val projectId: String) : SortKey() {
-
-            init {
-                check(!TextUtils.isEmpty(projectId))
-            }
+        data class ProjectSortKey(private val projectId: ProjectKey.Shared) : SortKey() {
 
             override fun compareTo(other: SortKey): Int {
                 if (other is TaskSortKey)

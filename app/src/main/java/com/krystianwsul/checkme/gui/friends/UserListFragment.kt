@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.krystianwsul.checkme.R
@@ -20,6 +21,8 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
 import com.krystianwsul.checkme.viewmodels.ShowProjectViewModel
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.UserKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
@@ -39,7 +42,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         fun newInstance() = UserListFragment()
     }
 
-    private var projectId: String? = null
+    private var projectId: ProjectKey.Shared? = null
 
     lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
@@ -56,7 +59,9 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         override fun unselect(x: TreeViewAdapter.Placeholder) = treeViewAdapter.unselect(x)
 
-        override val bottomBarData by lazy { Triple(listener.getBottomBar(), R.menu.menu_friends, listener::initBottomBar) }
+        override val bottomBarData by lazy {
+            Triple(listener.getBottomBar(), R.menu.menu_friends, listener::initBottomBar)
+        }
 
         override fun onMenuClick(itemId: Int, x: TreeViewAdapter.Placeholder) {
             check(itemId == R.id.action_friends_delete)
@@ -133,7 +138,7 @@ class UserListFragment : AbstractFragment(), FabUser {
         }
     }
 
-    fun initialize(projectId: String?, data: ShowProjectViewModel.Data) {
+    fun initialize(projectId: ProjectKey.Shared?, data: ShowProjectViewModel.Data) {
         this.projectId = projectId
         this.data = data
 
@@ -158,6 +163,7 @@ class UserListFragment : AbstractFragment(), FabUser {
             friendListAdapter.initialize(data!!.userListDatas, saveState)
             treeViewAdapter = friendListAdapter.treeViewAdapter
             friendListRecycler.adapter = treeViewAdapter
+            friendListRecycler.itemAnimator = CustomItemAnimator()
         }
 
         selectionCallback.setSelected(treeViewAdapter.selectedNodes.size, TreeViewAdapter.Placeholder)
@@ -211,12 +217,24 @@ class UserListFragment : AbstractFragment(), FabUser {
 
         val saveState = (treeViewAdapter.treeModelAdapter as FriendListAdapter).getSaveState()
 
-        if (projectId.isNullOrEmpty()) {
+        if (projectId == null) {
             check(saveState.removedIds.isEmpty())
 
-            DomainFactory.instance.createProject(data!!.dataId, SaveService.Source.GUI, name, saveState.addedIds)
+            DomainFactory.instance.createProject(
+                    data!!.dataId,
+                    SaveService.Source.GUI,
+                    name,
+                    saveState.addedIds
+            )
         } else {
-            DomainFactory.instance.updateProject(data!!.dataId, SaveService.Source.GUI, projectId!!, name, saveState.addedIds, saveState.removedIds)
+            DomainFactory.instance.updateProject(
+                    data!!.dataId,
+                    SaveService.Source.GUI,
+                    projectId!!,
+                    name,
+                    saveState.addedIds,
+                    saveState.removedIds
+            )
         }
     }
 
@@ -324,7 +342,10 @@ class UserListFragment : AbstractFragment(), FabUser {
         override fun decrementSelected(x: TreeViewAdapter.Placeholder) = selectionCallback.decrementSelected(x)
     }
 
-    inner class UserNode(val userListData: ShowProjectViewModel.UserListData, private val selectedIds: Set<String>) : GroupHolderNode(0) {
+    inner class UserNode(
+            val userListData: ShowProjectViewModel.UserListData,
+            private val selectedIds: Set<UserKey>
+    ) : GroupHolderNode(0) {
 
         override val ripple = true
 
@@ -357,7 +378,11 @@ class UserListFragment : AbstractFragment(), FabUser {
     }
 
     @Parcelize
-    class SaveState(val addedIds: Set<String>, val removedIds: Set<String>, val selectedIds: Set<String>) : Parcelable
+    class SaveState(
+            val addedIds: Set<UserKey>,
+            val removedIds: Set<UserKey>,
+            val selectedIds: Set<UserKey>
+    ) : Parcelable
 
     interface UserListListener : SnackbarListener {
 

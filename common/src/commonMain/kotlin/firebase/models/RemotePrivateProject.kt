@@ -4,13 +4,17 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.UserKey
 
-class RemotePrivateProject(override val remoteProjectRecord: RemotePrivateProjectRecord) : RemoteProject<RemoteCustomTimeId.Private>() {
+class RemotePrivateProject(
+        override val remoteProjectRecord: RemotePrivateProjectRecord
+) : RemoteProject<RemoteCustomTimeId.Private, ProjectKey.Private>() {
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
-    override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private>>
-    override val remoteTaskHierarchyContainer = TaskHierarchyContainer<String, RemoteTaskHierarchy<RemoteCustomTimeId.Private>>()
+    override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private, ProjectKey.Private>>
+    override val remoteTaskHierarchyContainer = TaskHierarchyContainer<String, RemoteTaskHierarchy<RemoteCustomTimeId.Private, ProjectKey.Private>>()
 
     override val customTimes get() = remoteCustomTimes.values
 
@@ -33,8 +37,6 @@ class RemotePrivateProject(override val remoteProjectRecord: RemotePrivateProjec
                 .map { RemoteTaskHierarchy(this, it) }
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
     }
-
-    override fun updateRecordOf(addedFriends: Set<RemoteRootUser>, removedFriends: Set<String>) = throw UnsupportedOperationException()
 
     fun newRemoteCustomTime(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
@@ -62,10 +64,10 @@ class RemotePrivateProject(override val remoteProjectRecord: RemotePrivateProjec
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
 
-    override fun getOrCreateCustomTime(ownerKey: String, remoteCustomTime: RemoteCustomTime<*>) = when (remoteCustomTime) {
+    override fun getOrCreateCustomTime(ownerKey: UserKey, remoteCustomTime: RemoteCustomTime<*, *>) = when (remoteCustomTime) {
         is RemotePrivateCustomTime -> remoteCustomTime
         is RemoteSharedCustomTime -> {
-            if (remoteCustomTime.ownerKey == id) {
+            if (remoteCustomTime.ownerKey?.toPrivateProjectKey() == id) {
                 customTimes.single { it.id == remoteCustomTime.privateKey }
             } else {
                 val customTimeJson = PrivateCustomTimeJson(

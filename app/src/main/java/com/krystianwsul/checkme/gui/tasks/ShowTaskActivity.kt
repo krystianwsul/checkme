@@ -24,7 +24,6 @@ import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.bottom.*
 import kotlinx.android.synthetic.main.toolbar.appBarLayout
-import kotlinx.android.synthetic.main.toolbar.toolbar
 import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
@@ -119,10 +118,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
-        toolbar.run {
-            title = data.name
-            subtitle = data.subtitle
-        }
+        toolbarCollapseLayout.title = data.name
 
         toolbarCollapseText.apply {
             visibility = if (data.collapseText.isNullOrEmpty()) View.GONE else View.VISIBLE
@@ -133,7 +129,8 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
 
         taskListFragment.setTaskKey(
                 TaskListFragment.RootTaskData(taskKey, data.imageData),
-                TaskListFragment.Data(data.dataId, data.immediate, data.taskData))
+                TaskListFragment.Data(data.dataId, data.immediate, data.taskData)
+        )
     }
 
     override fun onCreateActionMode(actionMode: ActionMode) = Unit

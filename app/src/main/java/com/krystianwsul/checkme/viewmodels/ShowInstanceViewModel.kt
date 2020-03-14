@@ -23,7 +23,6 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
 
     data class Data(
             val name: String,
-            val subtitle: String?,
             val instanceDateTime: DateTime,
             var done: Boolean,
             var taskCurrent: Boolean,
@@ -31,8 +30,9 @@ class ShowInstanceViewModel : DomainViewModel<ShowInstanceViewModel.Data>() {
             var exists: Boolean,
             val dataWrapper: GroupListFragment.DataWrapper,
             var notificationShown: Boolean,
-            val displayText: String?,
-            val taskKey: TaskKey) : DomainData() {
+            val displayText: String,
+            val taskKey: TaskKey
+    ) : DomainData() {
 
         init {
             check(name.isNotEmpty())

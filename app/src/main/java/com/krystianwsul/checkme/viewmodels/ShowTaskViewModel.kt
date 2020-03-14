@@ -22,7 +22,6 @@ class ShowTaskViewModel : DomainViewModel<ShowTaskViewModel.Data>() {
 
     data class Data(
             val name: String,
-            val subtitle: String?,
             val collapseText: String?,
             val taskData: TaskListFragment.TaskData,
             val hasInstances: Boolean,

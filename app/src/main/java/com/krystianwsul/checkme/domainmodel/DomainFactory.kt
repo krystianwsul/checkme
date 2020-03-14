@@ -712,11 +712,14 @@ class DomainFactory(
         val instance = getInstance(instanceKey)
         val instanceDateTime = instance.instanceDateTime
         val parentInstance = instance.getParentInstance(now)
-        val displayText = if (instance.isRootInstance(now)) instanceDateTime.getDisplayText() else null
+
+        val displayText = listOfNotNull(
+                instance.getParentName(now).takeIf { it.isNotEmpty() },
+                instanceDateTime.getDisplayText().takeIf { instance.isRootInstance(now) }
+        ).joinToString("\n\n")
 
         return ShowInstanceViewModel.Data(
                 instance.name,
-                instance.getParentName(now),
                 instanceDateTime,
                 instance.done != null,
                 task.current(now),
@@ -860,14 +863,19 @@ class DomainFactory(
                 }
                 .sorted()
 
+        val collapseText = listOfNotNull(
+                task.getParentName(hierarchyTimeStamp).takeIf { it.isNotEmpty() },
+                task.getScheduleTextMultiline(ScheduleText, hierarchyTimeStamp).takeIf { it.isNotEmpty() }
+        ).joinToString("\n\n")
+
         return ShowTaskViewModel.Data(
                 task.name,
-                task.getParentName(hierarchyTimeStamp),
-                task.getScheduleTextMultiline(ScheduleText, hierarchyTimeStamp),
+                collapseText,
                 TaskListFragment.TaskData(childTaskDatas.toMutableList(), task.note, task.current(now)),
                 task.hasInstances(now),
                 task.getImage(deviceDbInfo),
-                task.current(now))
+                task.current(now)
+        )
     }
 
     @Synchronized

@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
-import android.view.View
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.R
@@ -248,15 +247,8 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
 
-        toolbar.run {
-            title = data.name
-            subtitle = data.subtitle
-        }
-
-        toolbarCollapseText.apply {
-            visibility = if (data.displayText.isNullOrEmpty()) View.GONE else View.VISIBLE
-            text = data.displayText
-        }
+        toolbarCollapseLayout.title = data.name
+        toolbarCollapseText.text = data.displayText
 
         updateTopMenu()
         updateBottomMenu()

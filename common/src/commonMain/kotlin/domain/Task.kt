@@ -42,7 +42,7 @@ abstract class Task {
 
     fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
 
-    abstract fun getScheduleTextMultiline(scheduleTextFactory: RemoteTask.ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String?
+    abstract fun getScheduleTextMultiline(scheduleTextFactory: RemoteTask.ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String
 
     abstract fun getScheduleText(scheduleTextFactory: RemoteTask.ScheduleTextFactory, exactTimeStamp: ExactTimeStamp, showParent: Boolean = false): String?
 

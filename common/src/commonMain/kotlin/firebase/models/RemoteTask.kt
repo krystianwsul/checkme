@@ -329,7 +329,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
             projectUpdater.convertRemoteToRemote(now, this, projectId)
     }
 
-    override fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String? {
+    override fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String {
         check(current(exactTimeStamp))
 
         val currentSchedules = getCurrentSchedules(exactTimeStamp)

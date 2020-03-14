@@ -31,8 +31,6 @@ import com.krystianwsul.treeadapter.TreeViewAdapter
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_instance.*
 import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar.appBarLayout
-import kotlinx.android.synthetic.main.toolbar.toolbar
 import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
@@ -247,8 +245,10 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
 
-        toolbarCollapseLayout.title = data.name
-        toolbarCollapseText.text = data.displayText
+        appBarLayout.apply {
+            setTitle(data.name)
+            setText(data.displayText)
+        }
 
         updateTopMenu()
         updateBottomMenu()

@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.view.View
 import androidx.appcompat.view.ActionMode
 import com.krystianwsul.checkme.MyApplication
 import com.krystianwsul.checkme.R
@@ -23,7 +22,6 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_task.*
 import kotlinx.android.synthetic.main.bottom.*
-import kotlinx.android.synthetic.main.toolbar.appBarLayout
 import kotlinx.android.synthetic.main.toolbar_collapse.*
 import java.io.Serializable
 
@@ -118,11 +116,9 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
-        toolbarCollapseLayout.title = data.name
-
-        toolbarCollapseText.apply {
-            visibility = if (data.collapseText.isNullOrEmpty()) View.GONE else View.VISIBLE
-            text = data.collapseText
+        appBarLayout.apply {
+            setTitle(data.name)
+            setText(data.collapseText)
         }
 
         updateBottomMenu()

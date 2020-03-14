@@ -17,4 +17,6 @@
     <dimen name="splashHeight">166dp</dimen>
     <dimen name="aboutPadding">112dp</dimen>
     <dimen name="listPaddingHeight">90dp</dimen>
+
+    <dimen name="collapseAppBarHeight">150dp</dimen>
 </resources>

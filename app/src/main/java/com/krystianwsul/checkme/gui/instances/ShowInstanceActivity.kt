@@ -245,10 +245,7 @@ class ShowInstanceActivity : ToolbarActivity(), GroupListFragment.GroupListListe
     private fun onLoadFinished(data: ShowInstanceViewModel.Data) {
         this.data = data
 
-        appBarLayout.apply {
-            setTitle(data.name)
-            setText(data.displayText)
-        }
+        appBarLayout.setText(data.name, data.displayText)
 
         updateTopMenu()
         updateBottomMenu()

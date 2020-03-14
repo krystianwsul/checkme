@@ -116,10 +116,7 @@ class ShowTaskActivity : ToolbarActivity(), TaskListFragment.TaskListListener {
     private fun onLoadFinished(data: ShowTaskViewModel.Data) {
         this.data = data
 
-        appBarLayout.apply {
-            setTitle(data.name)
-            setText(data.collapseText)
-        }
+        appBarLayout.setText(data.name, data.collapseText)
 
         updateBottomMenu()
 

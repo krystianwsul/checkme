@@ -226,12 +226,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 dismiss()
             }
 
-            if (arguments!!.getBoolean(SHOW_DELETE_KEY)) {
+            if (requireArguments().getBoolean(SHOW_DELETE_KEY)) {
+                checkNotNull(position)
+
                 scheduleDialogRemove.apply {
                     visibility = View.VISIBLE
 
                     setOnClickListener {
-                        result.accept(Result.Delete(position))
+                        result.accept(Result.Delete(position!!))
 
                         dismiss()
                     }
@@ -645,7 +647,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         class Change(val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
 
-        class Delete(val position: Int?) : Result()
+        class Delete(val position: Int) : Result()
 
         object Cancel : Result()
     }

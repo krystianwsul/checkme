@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
@@ -616,7 +617,6 @@ class CreateTaskActivity : NavBarActivity() {
                             }
                         }
                         is ScheduleDialogFragment.Result.Delete -> {
-                            checkNotNull(result.position)
                             check(result.position >= createTaskAdapter.elementsBeforeSchedules())
                             checkNotNull(data)
 
@@ -1007,8 +1007,6 @@ class CreateTaskActivity : NavBarActivity() {
                     date: Date,
                     pair: Pair<Date, HourMinute> = HourMinute.getNextHour(date)
             ) : this(pair.first, TimePair(pair.second))
-
-            constructor(date: Date, hourMinute: HourMinute) : this(date, TimePair(hourMinute))
         }
 
         @Parcelize
@@ -1081,12 +1079,21 @@ class CreateTaskActivity : NavBarActivity() {
                         hint = null
                         error = scheduleEntry.error
                         isHintAnimationEnabled = false
+                        endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
                     }
 
                     scheduleText.run {
                         setText(scheduleEntry.scheduleDataWrapper.getText(data!!.customTimeDatas, this@CreateTaskActivity))
 
                         setFixedOnClickListener { onTextClick() }
+                    }
+
+                    scheduleLayout.setEndIconOnClickListener {
+                        stateData.state
+                                .schedules
+                                .removeAt(holder.adapterPosition - createTaskAdapter.elementsBeforeSchedules())
+
+                        createTaskAdapter.notifyItemRemoved(holder.adapterPosition)
                     }
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size -> (holder as ScheduleHolder).run {

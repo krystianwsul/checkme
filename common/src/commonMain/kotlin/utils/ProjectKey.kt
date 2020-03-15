@@ -6,7 +6,7 @@ sealed class ProjectKey : Parcelable, Serializable {
     abstract val type: Type
 
     @Parcelize
-    data class Shared(override val key: String) : ProjectKey(), Comparable<Shared>, Serializable {
+    data class Shared(override val key: String) : ProjectKey(), Comparable<Shared> {
 
         override val type get() = Type.SHARED
 

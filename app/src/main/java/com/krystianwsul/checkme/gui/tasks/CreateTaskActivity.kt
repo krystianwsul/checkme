@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.CustomItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.textfield.TextInputLayout
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import com.krystianwsul.checkme.MyApplication
@@ -157,17 +158,7 @@ class CreateTaskActivity : NavBarActivity() {
             updateParentView()
         }
 
-        override fun onTaskDeleted() {
-            checkNotNull(stateData.parent)
-
-            stateData.parent = null
-
-            val view = createTaskRecycler.getChildAt(createTaskAdapter.elementsBeforeSchedules() - 1)!!
-
-            val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
-
-            scheduleHolder.scheduleText.text = null
-        }
+        override fun onTaskDeleted() = removeParent()
 
         override fun onNewParent(nameHint: String?) = startActivityForResult(
                 getCreateIntent(
@@ -182,6 +173,14 @@ class CreateTaskActivity : NavBarActivity() {
                 ),
                 REQUEST_CREATE_PARENT
         )
+    }
+
+    private fun removeParent() {
+        checkNotNull(stateData.parent)
+
+        stateData.parent = null
+
+        updateParentView()
     }
 
     private fun setupParent(view: View) {
@@ -615,21 +614,22 @@ class CreateTaskActivity : NavBarActivity() {
                                 createTaskAdapter.notifyItemChanged(result.position)
                             }
                         }
-                        is ScheduleDialogFragment.Result.Delete -> {
-                            checkNotNull(result.position)
-                            check(result.position >= createTaskAdapter.elementsBeforeSchedules())
-                            checkNotNull(data)
-
-                            stateData.state
-                                    .schedules
-                                    .removeAt(result.position - createTaskAdapter.elementsBeforeSchedules())
-
-                            createTaskAdapter.notifyItemRemoved(result.position)
-                        }
+                        is ScheduleDialogFragment.Result.Delete -> removeSchedule(result.position)
                         is ScheduleDialogFragment.Result.Cancel -> Unit
                     }
                 }
                 .addTo(createDisposable)
+    }
+
+    private fun removeSchedule(position: Int) {
+        check(position >= createTaskAdapter.elementsBeforeSchedules())
+        checkNotNull(data)
+
+        stateData.state
+                .schedules
+                .removeAt(position - createTaskAdapter.elementsBeforeSchedules())
+
+        createTaskAdapter.notifyItemRemoved(position)
     }
 
     @SuppressLint("CheckResult")
@@ -960,8 +960,30 @@ class CreateTaskActivity : NavBarActivity() {
                 ?: return
 
         val scheduleHolder = createTaskRecycler.getChildViewHolder(view) as CreateTaskAdapter.ScheduleHolder
+        updateParentView(scheduleHolder)
+    }
 
-        scheduleHolder.scheduleText.setText(if (stateData.parent != null) stateData.parent!!.name else null)
+    private fun updateParentView(scheduleHolder: CreateTaskAdapter.ScheduleHolder) {
+        scheduleHolder.apply {
+            scheduleLayout.endIconMode = if (stateData.parent != null)
+                TextInputLayout.END_ICON_CLEAR_TEXT
+            else
+                TextInputLayout.END_ICON_DROPDOWN_MENU
+
+            scheduleText.run {
+                setText(stateData.parent?.name)
+
+                setFixedOnClickListener {
+                    ParentPickerFragment.newInstance(stateData.parent != null).let {
+                        it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
+                        it.initialize(data!!.parentTreeDatas, parentFragmentListener)
+                    }
+                }
+            }
+
+            if (stateData.parent != null)
+                scheduleLayout.setEndIconOnClickListener { removeParent() }
+        }
     }
 
     private fun hasValueParentInGeneral() = stateData.parent != null
@@ -1059,16 +1081,7 @@ class CreateTaskActivity : NavBarActivity() {
                         }
                     }
 
-                    scheduleText.run {
-                        setText(this@CreateTaskActivity.stateData.parent?.name)
-
-                        setFixedOnClickListener {
-                            ParentPickerFragment.newInstance(this@CreateTaskActivity.stateData.parent != null).let {
-                                it.show(supportFragmentManager, PARENT_PICKER_FRAGMENT_TAG)
-                                it.initialize(data!!.parentTreeDatas, parentFragmentListener)
-                            }
-                        }
-                    }
+                    updateParentView(this)
                 }
                 in (elementsBeforeSchedules until (elementsBeforeSchedules + stateData.state.schedules.size)) -> (holder as ScheduleHolder).run {
                     val scheduleEntry = stateData.state.schedules[position - elementsBeforeSchedules()]
@@ -1079,12 +1092,16 @@ class CreateTaskActivity : NavBarActivity() {
                         hint = null
                         error = scheduleEntry.error
                         isHintAnimationEnabled = false
+                        endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
                     }
 
                     scheduleText.run {
                         setText(scheduleEntry.scheduleDataWrapper.getText(data!!.customTimeDatas, this@CreateTaskActivity))
 
-                        setFixedOnClickListener { onTextClick() }
+                        setFixedOnClickListener(
+                                { onTextClick() },
+                                { removeSchedule(holder.adapterPosition) }
+                        )
                     }
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size -> (holder as ScheduleHolder).run {
@@ -1094,6 +1111,7 @@ class CreateTaskActivity : NavBarActivity() {
                         hint = getString(R.string.addReminder)
                         error = null
                         isHintAnimationEnabled = false
+                        endIconMode = TextInputLayout.END_ICON_DROPDOWN_MENU
                     }
 
                     scheduleText.run {

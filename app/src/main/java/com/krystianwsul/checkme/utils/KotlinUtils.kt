@@ -253,12 +253,14 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
 
 fun newUuid() = UUID.randomUUID().toString()
 
-fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) {
+fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) = setFixedOnClickListener(listener, listener)
+
+fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit, iconListener: () -> Unit) {
     setOnClickListener { listener() }
 
     setOnTouchListener { _, _ -> false }
 
-    (parent.parent as TextInputLayout).setEndIconOnClickListener { listener() }
+    (parent.parent as TextInputLayout).setEndIconOnClickListener { iconListener() }
 }
 
 fun <T : Serializable> serialize(obj: T): String {

@@ -1087,11 +1087,10 @@ class CreateTaskActivity : NavBarActivity() {
                     scheduleText.run {
                         setText(scheduleEntry.scheduleDataWrapper.getText(data!!.customTimeDatas, this@CreateTaskActivity))
 
-                        setFixedOnClickListener { onTextClick() }
-                    }
-
-                    scheduleLayout.setEndIconOnClickListener {
-                        removeSchedule(holder.adapterPosition)
+                        setFixedOnClickListener(
+                                { onTextClick() },
+                                { removeSchedule(holder.adapterPosition) }
+                        )
                     }
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size -> (holder as ScheduleHolder).run {

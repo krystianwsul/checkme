@@ -616,20 +616,22 @@ class CreateTaskActivity : NavBarActivity() {
                                 createTaskAdapter.notifyItemChanged(result.position)
                             }
                         }
-                        is ScheduleDialogFragment.Result.Delete -> {
-                            check(result.position >= createTaskAdapter.elementsBeforeSchedules())
-                            checkNotNull(data)
-
-                            stateData.state
-                                    .schedules
-                                    .removeAt(result.position - createTaskAdapter.elementsBeforeSchedules())
-
-                            createTaskAdapter.notifyItemRemoved(result.position)
-                        }
+                        is ScheduleDialogFragment.Result.Delete -> removeSchedule(result.position)
                         is ScheduleDialogFragment.Result.Cancel -> Unit
                     }
                 }
                 .addTo(createDisposable)
+    }
+
+    private fun removeSchedule(position: Int) {
+        check(position >= createTaskAdapter.elementsBeforeSchedules())
+        checkNotNull(data)
+
+        stateData.state
+                .schedules
+                .removeAt(position - createTaskAdapter.elementsBeforeSchedules())
+
+        createTaskAdapter.notifyItemRemoved(position)
     }
 
     @SuppressLint("CheckResult")
@@ -1089,11 +1091,7 @@ class CreateTaskActivity : NavBarActivity() {
                     }
 
                     scheduleLayout.setEndIconOnClickListener {
-                        stateData.state
-                                .schedules
-                                .removeAt(holder.adapterPosition - createTaskAdapter.elementsBeforeSchedules())
-
-                        createTaskAdapter.notifyItemRemoved(holder.adapterPosition)
+                        removeSchedule(holder.adapterPosition)
                     }
                 }
                 elementsBeforeSchedules + stateData.state.schedules.size -> (holder as ScheduleHolder).run {

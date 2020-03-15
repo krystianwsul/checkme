@@ -1,6 +1,7 @@
 package com.krystianwsul.common.relevance
 
-import com.krystianwsul.common.domain.Instance
+
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.SharedProject
@@ -124,5 +125,8 @@ object Irrelevant {
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)
     private class VisibleIrrelevantExistingInstancesException(message: String) : Exception(message)
 
-    data class Result(val relevantInstances: Collection<Instance>, val removedSharedProjects: Collection<SharedProject>)
+    data class Result(
+            val relevantInstances: Collection<Instance<*, *>>,
+            val removedSharedProjects: Collection<SharedProject>
+    )
 }

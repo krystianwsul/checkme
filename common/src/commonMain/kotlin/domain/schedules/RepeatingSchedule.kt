@@ -1,7 +1,8 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.domain.Instance
+
 import com.krystianwsul.common.domain.Task
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.NullableWrapper
@@ -18,7 +19,7 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*, *>) : Schedule(rootTask
             task: Task,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp? // can be null only if until or endExactTimeStamp are set
-    ): Sequence<Instance> {
+    ): Sequence<Instance<*, *>> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleBridge.from
@@ -42,7 +43,7 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*, *>) : Schedule(rootTask
 
         check(startExactTimeStamp < endExactTimeStamp)
 
-        val nullableSequence: Sequence<Instance?>
+        val nullableSequence: Sequence<Instance<*, *>?>
 
         if (startExactTimeStamp.date == endExactTimeStamp.date) {
             nullableSequence = sequenceOf(getInstanceInDate(task, startExactTimeStamp.date, startExactTimeStamp.hourMilli, endExactTimeStamp.hourMilli))
@@ -71,7 +72,12 @@ abstract class RepeatingSchedule(rootTask: RemoteTask<*, *>) : Schedule(rootTask
         return nullableSequence.filterNotNull()
     }
 
-    protected abstract fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance?
+    protected abstract fun getInstanceInDate(
+            task: Task,
+            date: Date,
+            startHourMilli: HourMilli?,
+            endHourMilli: HourMilli?
+    ): Instance<*, *>?
 
     override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {
         check(current(now))

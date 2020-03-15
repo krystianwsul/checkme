@@ -73,7 +73,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
             task: Task,
-            instances: Collection<Instance>,
+            instances: Collection<Instance<*, *>>,
             now: ExactTimeStamp
     ): RemoteTask<T, U> {
         val endTime = task.getEndExactTimeStamp()?.long
@@ -131,7 +131,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
         else -> throw IllegalArgumentException()
     }
 
-    private fun getInstanceJson(ownerKey: UserKey, instance: Instance): InstanceJson {
+    private fun getInstanceJson(ownerKey: UserKey, instance: Instance<*, *>): InstanceJson {
         val done = instance.done?.long
 
         val instanceDate = instance.instanceDate
@@ -289,16 +289,23 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
         }
     }
 
-    fun fixNotificationShown(shownFactory: Instance.ShownFactory, now: ExactTimeStamp) = tasks.forEach {
+    fun fixNotificationShown(
+            shownFactory: Instance.ShownFactory,
+            now: ExactTimeStamp
+    ) = tasks.forEach {
         it.existingInstances
                 .values
                 .forEach { it.fixNotificationShown(shownFactory, now) }
     }
 
-    fun getRootInstances(startExactTimeStamp: ExactTimeStamp?, endExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
+    fun getRootInstances(
+            startExactTimeStamp: ExactTimeStamp?,
+            endExactTimeStamp: ExactTimeStamp,
+            now: ExactTimeStamp
+    ): List<Instance<*, *>> {
         check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
-        val allInstances = HashMap<InstanceKey, Instance>()
+        val allInstances = mutableMapOf<InstanceKey, Instance<*, *>>()
 
         for (instance in existingInstances) {
             val instanceExactTimeStamp = instance.instanceDateTime

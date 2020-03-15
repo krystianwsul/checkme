@@ -1,7 +1,8 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.domain.Instance
+
 import com.krystianwsul.common.domain.Task
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
@@ -55,7 +56,7 @@ abstract class Schedule(private val rootTask: RemoteTask<*, *>) {
             task: Task,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Sequence<Instance>
+    ): Sequence<Instance<*, *>>
 
     abstract fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean
 

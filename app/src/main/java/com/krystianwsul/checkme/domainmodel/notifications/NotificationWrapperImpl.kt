@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.gui.instances.ShowInstanceActivity
 import com.krystianwsul.checkme.gui.instances.ShowNotificationGroupActivity
 import com.krystianwsul.checkme.notifications.*
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.domain.Instance
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.InstanceKey
@@ -69,12 +69,22 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.cancel(id)
     }
 
-    final override fun notifyInstance(deviceDbInfo: DeviceDbInfo, instance: Instance, silent: Boolean, now: ExactTimeStamp) { // consider queueing all notifications and group in a batch
+    final override fun notifyInstance(
+            deviceDbInfo: DeviceDbInfo,
+            instance: Instance<*, *>,
+            silent: Boolean,
+            now: ExactTimeStamp
+    ) { // consider queueing all notifications and group in a batch
         val instanceData = getInstanceData(deviceDbInfo, instance, silent, now)
         notificationRelay.accept { notifyInstanceHelper(instanceData) }
     }
 
-    protected open fun getInstanceData(deviceDbInfo: DeviceDbInfo, instance: Instance, silent: Boolean, now: ExactTimeStamp): InstanceData {
+    protected open fun getInstanceData(
+            deviceDbInfo: DeviceDbInfo,
+            instance: Instance<*, *>,
+            silent: Boolean,
+            now: ExactTimeStamp
+    ): InstanceData {
         val reallySilent = if (silent) {
             true
         } else {
@@ -180,7 +190,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
                 notificationHash = notificationHash)
     }
 
-    private fun getInstanceText(instance: Instance, now: ExactTimeStamp): String {
+    private fun getInstanceText(instance: Instance<*, *>, now: ExactTimeStamp): String {
         val childNames = getChildNames(instance, now)
 
         return if (childNames.isNotEmpty()) {
@@ -192,7 +202,7 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    private fun getChildNames(instance: Instance, now: ExactTimeStamp) = instance.getChildInstances(now)
+    private fun getChildNames(instance: Instance<*, *>, now: ExactTimeStamp) = instance.getChildInstances(now)
             .asSequence()
             .filter { it.first.done == null }
             .sortedBy { it.second.ordinal }
@@ -319,19 +329,20 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         notificationManager.notify(notificationId, notification)
     }
 
-    override fun notifyGroup(instances: Collection<Instance>, silent: Boolean /* not needed >= 24 */, now: ExactTimeStamp) {
-        val groupData = GroupData(instances, now, silent)
-        notificationRelay.accept { notifyGroupHelper(groupData) }
-    }
+    override fun notifyGroup(
+            instances: Collection<Instance<*, *>>,
+            silent: Boolean, // not needed >= 24
+            now: ExactTimeStamp
+    ) = notificationRelay.accept { notifyGroupHelper(GroupData(instances, now, silent)) }
 
     private inner class GroupData(
-            instances: Collection<com.krystianwsul.common.domain.Instance>,
+            instances: Collection<com.krystianwsul.common.firebase.models.Instance<*, *>>,
             private val now: ExactTimeStamp,
             val silent: Boolean) {
 
         val instances = instances.map(::Instance)
 
-        inner class Instance(instance: com.krystianwsul.common.domain.Instance) {
+        inner class Instance(instance: com.krystianwsul.common.firebase.models.Instance<*, *>) {
 
             val name = instance.name
             val instanceKey = instance.instanceKey
@@ -472,7 +483,12 @@ open class NotificationWrapperImpl : NotificationWrapper() {
         }
     }
 
-    protected inner class InstanceData(deviceDbInfo: DeviceDbInfo, instance: Instance, now: ExactTimeStamp, val silent: Boolean) {
+    protected inner class InstanceData(
+            deviceDbInfo: DeviceDbInfo,
+            instance: Instance<*, *>,
+            now: ExactTimeStamp,
+            val silent: Boolean
+    ) {
 
         val notificationId = instance.notificationId
 

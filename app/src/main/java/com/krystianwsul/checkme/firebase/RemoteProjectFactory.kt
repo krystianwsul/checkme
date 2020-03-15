@@ -203,7 +203,7 @@ class RemoteProjectFactory(
         return remoteProjects.getValue(remoteProjectId).getRemoteCustomTime(remoteCustomTimeId)
     }
 
-    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): RemoteInstance<*, *>? {
+    fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance<*, *>? {
         val taskKey = instanceKey.taskKey
 
         if (TextUtils.isEmpty(taskKey.remoteTaskId))

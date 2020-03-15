@@ -3,6 +3,7 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.InstanceRecord
+
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.HourMinute

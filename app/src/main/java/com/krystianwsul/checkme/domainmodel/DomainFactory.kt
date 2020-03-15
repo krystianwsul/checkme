@@ -877,9 +877,9 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val childTaskDatas = getTasks().map {
-            val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
-            Pair(it, hierarchyExactTimeStamp)
-        }
+                    val hierarchyExactTimeStamp = it.getHierarchyExactTimeStamp(now)
+                    Pair(it, hierarchyExactTimeStamp)
+                }
                 .filter { (task, hierarchyExactTimeStamp) -> task.isRootTask(hierarchyExactTimeStamp) }
                 .map { (task, hierarchyExactTimeStamp) ->
                     TaskListFragment.ChildTaskData(
@@ -1153,7 +1153,7 @@ class DomainFactory(
 
         instances.forEach { it.setDone(uuid, localFactory, done, now) }
 
-        val remoteProjects = instances.mapNotNull(Instance::project).toSet()
+        val remoteProjects = instances.map { it.project }.toSet()
 
         updateNotifications(now)
 
@@ -1319,8 +1319,8 @@ class DomainFactory(
         check(joinTaskKeys.size > 1)
 
         val finalProjectId = projectId ?: joinTaskKeys.map { it.remoteProjectId }
-                        .distinct()
-                        .single()
+                .distinct()
+                .single()
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
@@ -1422,8 +1422,8 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val finalProjectId = projectId ?: joinTaskKeys.map { it.remoteProjectId }
-                        .distinct()
-                        .single()
+                .distinct()
+                .single()
 
         var joinTasks = joinTaskKeys.map { getTaskForce(it) }
 
@@ -2113,7 +2113,7 @@ class DomainFactory(
 
     // internal
 
-    private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance? {
+    private fun getExistingInstanceIfPresent(taskKey: TaskKey, scheduleDateTime: DateTime): Instance<*, *>? {
         val customTimeKey = scheduleDateTime.time
                 .timePair
                 .customTimeKey
@@ -2131,17 +2131,17 @@ class DomainFactory(
             .values
             .mapNotNull { it.getSharedTimeIfPresent(privateCustomTimeId, ownerKey) }
 
-    private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
+    private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance<*, *> {
         return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime)
     }
 
-    fun getInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance {
+    fun getInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance<*, *> {
         val existingInstance = getExistingInstanceIfPresent(taskKey, scheduleDateTime)
 
         return existingInstance ?: generateInstance(taskKey, scheduleDateTime)
     }
 
-    fun getInstance(instanceKey: InstanceKey): Instance {
+    fun getInstance(instanceKey: InstanceKey): Instance<*, *> {
         getExistingInstanceIfPresent(instanceKey)?.let { return it }
 
         val dateTime = DateTime(
@@ -2152,18 +2152,20 @@ class DomainFactory(
         return generateInstance(instanceKey.taskKey, dateTime)
     }
 
-    private fun getRootInstances(startExactTimeStamp: ExactTimeStamp?, endExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
-        return remoteProjectFactory.remoteProjects
-                .values
-                .flatMap { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now) }
-    }
+    private fun getRootInstances(
+            startExactTimeStamp: ExactTimeStamp?,
+            endExactTimeStamp: ExactTimeStamp,
+            now: ExactTimeStamp
+    ) = remoteProjectFactory.remoteProjects
+            .values
+            .flatMap { it.getRootInstances(startExactTimeStamp, endExactTimeStamp, now) }
 
     private fun getCurrentRemoteCustomTimes(now: ExactTimeStamp) = remoteProjectFactory.remotePrivateProject
             .customTimes
             .filter { it.current(now) }
 
     private fun getChildInstanceDatas(
-            instance: Instance,
+            instance: Instance<*, *>,
             now: ExactTimeStamp
     ): MutableMap<InstanceKey, GroupListFragment.InstanceData> {
         return instance.getChildInstances(now)
@@ -2685,9 +2687,9 @@ class DomainFactory(
             Preferences.tickLog.logLineHour("next tick: $nextAlarm")
     }
 
-    private fun notifyInstance(instance: Instance, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, silent, now)
+    private fun notifyInstance(instance: Instance<*, *>, silent: Boolean, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, silent, now)
 
-    private fun updateInstance(instance: Instance, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, true, now)
+    private fun updateInstance(instance: Instance<*, *>, now: ExactTimeStamp) = NotificationWrapper.instance.notifyInstance(deviceDbInfo, instance, true, now)
 
     private fun setInstanceNotified(instanceKey: InstanceKey) {
         getInstance(instanceKey).apply {
@@ -2744,7 +2746,7 @@ class DomainFactory(
     }
 
     private fun getGroupListData(
-            instance: Instance,
+            instance: Instance<*, *>,
             task: Task,
             now: ExactTimeStamp
     ): GroupListFragment.DataWrapper {

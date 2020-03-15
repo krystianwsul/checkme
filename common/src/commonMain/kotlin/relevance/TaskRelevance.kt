@@ -1,7 +1,8 @@
 package com.krystianwsul.common.relevance
 
-import com.krystianwsul.common.domain.Instance
+
 import com.krystianwsul.common.domain.Task
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 
@@ -30,7 +31,7 @@ class TaskRelevance(val task: Task) {
 
         val oldestVisible = task.getOldestVisible()
 
-        fun Instance.filterOldestVisible() = oldestVisible?.let { scheduleDate >= it } ?: true
+        fun Instance<*, *>.filterOldestVisible() = oldestVisible?.let { scheduleDate >= it } ?: true
 
         // mark instances relevant
         task.getPastRootInstances(now)

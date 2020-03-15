@@ -1,7 +1,8 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.domain.Instance
+
 import com.krystianwsul.common.domain.Task
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
@@ -29,7 +30,7 @@ class SingleSchedule(
             task: Task,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Sequence<Instance> {
+    ): Sequence<Instance<*, *>> {
         val singleScheduleExactTimeStamp = dateTime.timeStamp.toExactTimeStamp()
 
         if (givenStartExactTimeStamp?.let { it > singleScheduleExactTimeStamp } == true)

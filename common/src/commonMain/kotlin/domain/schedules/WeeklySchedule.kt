@@ -1,7 +1,8 @@
 package com.krystianwsul.common.domain.schedules
 
-import com.krystianwsul.common.domain.Instance
+
 import com.krystianwsul.common.domain.Task
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType
@@ -20,7 +21,12 @@ class WeeklySchedule(
 
     override val scheduleBridge get() = repeatingScheduleBridge
 
-    override fun getInstanceInDate(task: Task, date: Date, startHourMilli: HourMilli?, endHourMilli: HourMilli?): Instance? {
+    override fun getInstanceInDate(
+            task: Task,
+            date: Date,
+            startHourMilli: HourMilli?,
+            endHourMilli: HourMilli?
+    ): Instance<*, *>? {
         val day = date.dayOfWeek
 
         if (!daysOfWeek.contains(day))

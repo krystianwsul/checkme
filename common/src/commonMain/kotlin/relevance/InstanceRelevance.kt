@@ -1,11 +1,12 @@
 package com.krystianwsul.common.relevance
 
-import com.krystianwsul.common.domain.Instance
+
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 
 
-class InstanceRelevance(val instance: Instance) {
+class InstanceRelevance(val instance: Instance<*, *>) {
 
     var relevant = false
         private set

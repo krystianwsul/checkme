@@ -1,13 +1,16 @@
-package com.krystianwsul.common.domain
+package com.krystianwsul.common.firebase.models
+
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.models.CustomTime
-import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.domain.InstanceData
+import com.krystianwsul.common.domain.Task
+import com.krystianwsul.common.domain.TaskHierarchy
+import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
 
-abstract class Instance {
+class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     companion object {
 
@@ -57,7 +60,11 @@ abstract class Instance {
         }
     }
 
-    protected abstract val instanceData: InstanceData<*, *, *>
+    private val remoteProject: Project<T, U>
+
+    private var instanceData: InstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>
+
+    private val shownHolder = ShownHolder()
 
     val instanceKey get() = InstanceKey(taskKey, scheduleKey)
 
@@ -70,8 +77,6 @@ abstract class Instance {
     val instanceDate get() = instanceData.instanceDate
 
     val instanceTime get() = instanceData.instanceTime
-
-    abstract val scheduleCustomTimeKey: CustomTimeKey<*, *>?
 
     private val scheduleHourMinute
         get() = instanceData.let {
@@ -94,38 +99,17 @@ abstract class Instance {
 
     val name get() = task.name
 
-    abstract val task: Task
-
     val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
 
     private val instanceCustomTimeKey get() = (instanceTime as? CustomTime<*, *>)?.customTimeKey
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
 
-    /*
-    Has the instance's notification been dismissed? Meaningful only if the instance is a root
-    instance, in the past, and not done.  If either of the last two are changed, this flag gets
-    reset.  As far as being a root instance, there's no simple way to catch that moment.
-     */
-    abstract fun getNotified(shownFactory: ShownFactory): Boolean
-
-    abstract fun getNotificationShown(shownFactory: ShownFactory): Boolean // Is the notification visible?
-
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
-
-    abstract val project: Project<*, *>
-
-    abstract val customTimeKey: Pair<ProjectKey, RemoteCustomTimeId>?
-
-    abstract fun getShown(shownFactory: ShownFactory): Shown?
-
-    abstract fun setNotified(shownFactory: ShownFactory, notified: Boolean)
-
-    abstract fun setNotificationShown(shownFactory: ShownFactory, notificationShown: Boolean)
 
     fun exists() = (instanceData is InstanceData.Real)
 
-    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance, TaskHierarchy>> {
+    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<*, *>, TaskHierarchy>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
         val scheduleDateTime = scheduleDateTime
@@ -150,26 +134,15 @@ abstract class Instance {
 
     fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
-    abstract fun setInstanceDateTime(
-            shownFactory: ShownFactory,
-            ownerKey: UserKey,
-            dateTime: DateTime,
-            now: ExactTimeStamp
-    )
-
-    fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *, *> {
+    private fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *, *> {
         (instanceData as? InstanceData.Real)?.let {
             return it
         }
 
         getParentInstance(now)?.createInstanceHierarchy(now)
 
-        return createInstanceRecord(now)
+        return createInstanceRecord()
     }
-
-    protected abstract fun createInstanceRecord(now: ExactTimeStamp): InstanceData.Real<*, *, *>
-
-    abstract fun setDone(uuid: String, shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp)
 
     fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
         val isVisible = isVisibleHelper(now, hack24)
@@ -216,7 +189,7 @@ abstract class Instance {
         }
     }
 
-    fun getParentInstance(now: ExactTimeStamp): Instance? {
+    fun getParentInstance(now: ExactTimeStamp): Instance<*, *>? {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
@@ -231,15 +204,9 @@ abstract class Instance {
         return parentTask.getInstance(scheduleDateTime)
     }
 
-    abstract fun delete()
-
     override fun toString() = super.toString() + " name: " + name + ", schedule time: " + scheduleDateTime + " instance time: " + instanceDateTime + ", done: " + done
 
-    abstract fun belongsToRemoteProject(): Boolean
-
     private class ParentInstanceException(message: String) : Exception(message)
-
-    protected abstract fun getNullableOrdinal(): Double?
 
     val ordinal get() = getNullableOrdinal() ?: task.startExactTimeStamp.long.toDouble()
 
@@ -259,9 +226,182 @@ abstract class Instance {
 
     val hidden get() = instanceData.hidden
 
-    abstract fun getCreateTaskTimePair(ownerKey: UserKey): TimePair // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
-
     fun getParentName(now: ExactTimeStamp) = getParentInstance(now)?.name ?: project.name
+
+    fun getShown(shownFactory: ShownFactory) = shownHolder.getShown(shownFactory)
+
+    /*
+    Has the instance's notification been dismissed? Meaningful only if the instance is a root
+    instance, in the past, and not done.  If either of the last two are changed, this flag gets
+    reset.  As far as being a root instance, there's no simple way to catch that moment.
+     */
+    fun getNotified(shownFactory: ShownFactory) = getShown(shownFactory)?.notified == true
+
+    fun setNotified(shownFactory: ShownFactory, notified: Boolean) {
+        shownHolder.forceShown(shownFactory).notified = notified
+    }
+
+    // Is the notification visible?
+    fun getNotificationShown(shownFactory: ShownFactory) = getShown(shownFactory)?.notificationShown == true
+
+    fun setNotificationShown(shownFactory: ShownFactory, notificationShown: Boolean) {
+        shownHolder.forceShown(shownFactory).notificationShown = notificationShown
+    }
+
+    val scheduleCustomTimeKey
+        get() = instanceData.let {
+            when (it) {
+                is InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord
+                        .scheduleKey
+                        .scheduleTimePair
+                        .customTimeKey
+                is InstanceData.Virtual<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.scheduleDateTime
+                        .time
+                        .timePair
+                        .customTimeKey
+            }
+        }
+
+    val task: RemoteTask<T, U>
+
+    val project get() = remoteProject
+
+    val customTimeKey // scenario already covered by task/schedule relevance
+        get() = (instanceData as? RemoteReal<*, *>)?.instanceRecord
+                ?.instanceJsonTime
+                ?.let { (it as? JsonTime.Custom)?.let { Pair(remoteProject.id, it.id) } }
+
+    constructor(
+            project: Project<T, U>,
+            remoteTask: RemoteTask<T, U>,
+            remoteInstanceRecord: RemoteInstanceRecord<T>
+    ) {
+        this.remoteProject = project
+        task = remoteTask
+        val realInstanceData = RemoteReal(this, remoteInstanceRecord)
+        instanceData = realInstanceData
+    }
+
+    constructor(
+            project: Project<T, U>,
+            remoteTask: RemoteTask<T, U>,
+            scheduleDateTime: DateTime
+    ) {
+        this.remoteProject = project
+        task = remoteTask
+        instanceData = InstanceData.Virtual(task.id, scheduleDateTime)
+    }
+
+    fun fixNotificationShown(shownFactory: ShownFactory, now: ExactTimeStamp) {
+        if (done != null || instanceDateTime.toExactTimeStamp() > now)
+            getShown(shownFactory)?.notified = false
+    }
+
+    fun setInstanceDateTime(
+            shownFactory: ShownFactory,
+            ownerKey: UserKey,
+            dateTime: DateTime,
+            now: ExactTimeStamp
+    ) {
+        check(isRootInstance(now))
+
+        createInstanceHierarchy(now)
+
+        @Suppress("UNCHECKED_CAST")
+        (instanceData as RemoteReal<T, U>).instanceRecord.let {
+            it.instanceDate = dateTime.date
+
+            it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
+                @Suppress("UNCHECKED_CAST")
+                when (it) {
+                    is CustomTime<*, *> -> JsonTime.Custom(it.customTimeKey.remoteCustomTimeId as T)
+                    is NormalTime -> JsonTime.Normal(it.hourMinute)
+                    else -> throw IllegalArgumentException()
+                }
+            }
+        }
+
+        shownHolder.forceShown(shownFactory).notified = false
+    }
+
+    private fun createInstanceRecord() = RemoteReal(
+            this,
+            task.createRemoteInstanceRecord(this, scheduleDateTime)
+    ).also { instanceData = it }
+
+    fun setDone(uuid: String, shownFactory: ShownFactory, done: Boolean, now: ExactTimeStamp) {
+        if (done) {
+            createInstanceHierarchy(now).instanceRecord.done = now.long
+
+            getShown(shownFactory)?.notified = false
+        } else {
+            (instanceData as RemoteReal<*, *>).instanceRecord.done = null
+        }
+
+        task.updateOldestVisible(uuid, now)
+    }
+
+    fun delete() {
+        check(instanceData is RemoteReal<*, *>)
+
+        task.deleteInstance(this)
+
+        (instanceData as RemoteReal<*, *>).instanceRecord.delete()
+    }
+
+    fun belongsToRemoteProject() = true
+
+    private fun getNullableOrdinal() = (instanceData as? RemoteReal<*, *>)?.instanceRecord?.ordinal
+
+    // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
+    fun getCreateTaskTimePair(ownerKey: UserKey): TimePair {
+        val instanceTimePair = instanceTime.timePair
+        val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
+
+        return if (shared != null) {
+            val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.remoteCustomTimeId) as SharedCustomTime
+
+            if (sharedCustomTime.ownerKey == ownerKey) {
+                val privateCustomTimeKey = CustomTimeKey.Private(ownerKey.toPrivateProjectKey(), sharedCustomTime.privateKey!!)
+
+                TimePair(privateCustomTimeKey)
+            } else {
+                val hourMinute = sharedCustomTime.getHourMinute(instanceDate.dayOfWeek)
+
+                TimePair(hourMinute)
+            }
+        } else {
+            instanceTimePair
+        }
+    }
+
+    private class RemoteReal<T : RemoteCustomTimeId, U : ProjectKey>(
+            private val instance: Instance<T, U>,
+            remoteInstanceRecord: RemoteInstanceRecord<T>
+    ) : InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
+
+        override fun getCustomTime(customTimeId: RemoteCustomTimeId) = instance.remoteProject.getRemoteCustomTime(customTimeId)
+
+        override fun getSignature() = "${instance.name} ${instance.instanceKey}"
+    }
+
+    private inner class ShownHolder {
+
+        private var first = true
+        private var shown: Shown? = null
+
+        fun getShown(shownFactory: ShownFactory): Shown? {
+            if (first)
+                shown = shownFactory.getShown(taskKey, scheduleDateTime)
+            return shown
+        }
+
+        fun forceShown(shownFactory: ShownFactory): Shown {
+            if (getShown(shownFactory) == null)
+                shown = shownFactory.createShown(taskKey.remoteTaskId, scheduleDateTime, taskKey.remoteProjectId)
+            return shown!!
+        }
+    }
 
     interface Shown {
 

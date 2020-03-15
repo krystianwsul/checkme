@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.DeviceDbInfo
-import com.krystianwsul.common.domain.Instance
+
 import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.domain.TaskHierarchy
 import com.krystianwsul.common.domain.schedules.*
@@ -21,7 +21,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
-            .map { RemoteInstance(remoteProject, this, it) }
+            .map { Instance(remoteProject, this, it) }
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
@@ -144,7 +144,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
         remoteSchedules.remove(schedule)
     }
 
-    fun createRemoteInstanceRecord(remoteInstance: RemoteInstance<T, U>, scheduleDateTime: DateTime): RemoteInstanceRecord<T> {
+    fun createRemoteInstanceRecord(instance: Instance<T, U>, scheduleDateTime: DateTime): RemoteInstanceRecord<T> {
         val instanceJson = InstanceJson(null, null, null, null, null, null, null, null)
 
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
@@ -157,23 +157,23 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
 
         val remoteInstanceRecord = remoteTaskRecord.newRemoteInstanceRecord(instanceJson, scheduleKey, remoteCustomTimeId)
 
-        existingRemoteInstances[remoteInstance.scheduleKey] = remoteInstance
+        existingRemoteInstances[instance.scheduleKey] = instance
 
         return remoteInstanceRecord
     }
 
-    fun deleteInstance(remoteInstance: RemoteInstance<T, U>) {
-        val scheduleKey = remoteInstance.scheduleKey
+    fun deleteInstance(instance: Instance<T, U>) {
+        val scheduleKey = instance.scheduleKey
 
         check(existingRemoteInstances.containsKey(scheduleKey))
-        check(remoteInstance == existingRemoteInstances[scheduleKey])
+        check(instance == existingRemoteInstances[scheduleKey])
 
         existingRemoteInstances.remove(scheduleKey)
     }
 
     fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = existingRemoteInstances[scheduleKey]
 
-    override fun getInstance(scheduleDateTime: DateTime): Instance {
+    override fun getInstance(scheduleDateTime: DateTime): Instance<*, *> {
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)
@@ -339,7 +339,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
         return ScheduleGroup.getGroups(currentSchedules).joinToString("\n") { scheduleTextFactory.getScheduleText(it, remoteProject) }
     }
 
-    fun generateInstance(scheduleDateTime: DateTime) = RemoteInstance(remoteProject, this, scheduleDateTime)
+    fun generateInstance(scheduleDateTime: DateTime) = Instance(remoteProject, this, scheduleDateTime)
 
     override fun getScheduleText(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp, showParent: Boolean): String? {
         check(current(exactTimeStamp))

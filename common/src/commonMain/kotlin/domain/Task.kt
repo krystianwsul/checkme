@@ -5,6 +5,7 @@ import com.krystianwsul.common.domain.schedules.Schedule
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
+import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.*
@@ -28,7 +29,7 @@ abstract class Task {
 
     abstract fun getOldestVisible(): Date?
 
-    abstract val existingInstances: Map<ScheduleKey, Instance>
+    abstract val existingInstances: Map<ScheduleKey, Instance<*, *>>
 
     abstract val project: Project<*, *>
 
@@ -169,8 +170,8 @@ abstract class Task {
         }
     }
 
-    fun getPastRootInstances(now: ExactTimeStamp): List<Instance> {
-        val allInstances = HashMap<InstanceKey, Instance>()
+    fun getPastRootInstances(now: ExactTimeStamp): List<Instance<*, *>> {
+        val allInstances = mutableMapOf<InstanceKey, Instance<*, *>>()
 
         allInstances.putAll(existingInstances
                 .values
@@ -203,7 +204,11 @@ abstract class Task {
 
     protected abstract fun setOldestVisible(uuid: String, date: Date)
 
-    fun getInstances(givenStartExactTimeStamp: ExactTimeStamp?, givenEndExactTimeStamp: ExactTimeStamp, now: ExactTimeStamp): List<Instance> {
+    fun getInstances(
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenEndExactTimeStamp: ExactTimeStamp,
+            now: ExactTimeStamp
+    ): List<Instance<*, *>> {
         val startExactTimeStamp = listOfNotNull(
                 givenStartExactTimeStamp,
                 startExactTimeStamp,
@@ -282,7 +287,7 @@ abstract class Task {
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
 
-    abstract fun getInstance(scheduleDateTime: DateTime): Instance
+    abstract fun getInstance(scheduleDateTime: DateTime): Instance<*, *>
 
     abstract fun getChildTaskHierarchies(): Set<TaskHierarchy>
 

@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 abstract class RemoteCustomTime<T : RemoteCustomTimeId, U : ProjectKey> : CustomTime {
 
-    protected abstract val remoteProject: RemoteProject<T, U>
+    protected abstract val project: Project<T, U>
 
     abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord<T, *>
 
@@ -25,7 +25,7 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Custom
 
     override val timePair by lazy { TimePair(customTimeKey, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
 
-    val projectId by lazy { remoteProject.id }
+    val projectId by lazy { project.id }
 
     override fun getHourMinute(dayOfWeek: DayOfWeek) = when (dayOfWeek) {
         DayOfWeek.SUNDAY -> HourMinute(remoteCustomTimeRecord.sundayHour, remoteCustomTimeRecord.sundayMinute)

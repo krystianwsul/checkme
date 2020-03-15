@@ -1,8 +1,8 @@
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.models.RemotePrivateProject
-import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.firebase.models.PrivateProject
+import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.RemoteRootUser
-import com.krystianwsul.common.firebase.models.RemoteSharedProject
+import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
 import firebase.JsDatabaseWrapper
@@ -49,7 +49,7 @@ object RelevanceChecker {
                 val privateProjectManager = JsPrivateProjectManager(databaseWrapper, it)
 
                 val privateProjects = privateProjectManager.remotePrivateProjectRecords.map {
-                    RemotePrivateProject(it)
+                    PrivateProject(it)
                 }
 
                 val now = ExactTimeStamp.now
@@ -58,9 +58,9 @@ object RelevanceChecker {
                     response += "checking relevance for private project ${it.id}"
 
                     Irrelevant.setIrrelevant(
-                            object : RemoteProject.Parent {
+                            object : Project.Parent {
 
-                                override fun deleteProject(remoteProject: RemoteProject<*, *>) = throw UnsupportedOperationException()
+                                override fun deleteProject(project: Project<*, *>) = throw UnsupportedOperationException()
                             },
                             it,
                             now
@@ -79,17 +79,17 @@ object RelevanceChecker {
 
                 val sharedProjects = sharedProjectManager.remoteProjectRecords
                         .entries
-                        .associate { it.key to RemoteSharedProject(it.value.first) }
+                        .associate { it.key to SharedProject(it.value.first) }
                         .toMutableMap()
 
                 val now = ExactTimeStamp.now
 
-                val parent = object : RemoteProject.Parent {
+                val parent = object : Project.Parent {
 
-                    override fun deleteProject(remoteProject: RemoteProject<*, *>) {
-                        check(sharedProjects.contains(remoteProject.id))
+                    override fun deleteProject(project: Project<*, *>) {
+                        check(sharedProjects.contains(project.id))
 
-                        sharedProjects.remove(remoteProject.id)
+                        sharedProjects.remove(project.id)
                     }
                 }
 

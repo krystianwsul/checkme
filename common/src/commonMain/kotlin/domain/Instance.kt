@@ -1,7 +1,7 @@
 package com.krystianwsul.common.domain
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
@@ -112,7 +112,7 @@ abstract class Instance {
 
     val notificationId get() = getNotificationId(scheduleDate, scheduleCustomTimeKey, scheduleHourMinute, taskKey)
 
-    abstract val project: RemoteProject<*, *>
+    abstract val project: Project<*, *>
 
     abstract val customTimeKey: Pair<ProjectKey, RemoteCustomTimeId>?
 

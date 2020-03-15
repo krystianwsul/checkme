@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.UserKey
 
 class RemoteInstance<T : RemoteCustomTimeId, U : ProjectKey> : Instance {
 
-    private val remoteProject: RemoteProject<T, U>
+    private val remoteProject: Project<T, U>
 
     override var instanceData: InstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>
 
@@ -57,22 +57,22 @@ class RemoteInstance<T : RemoteCustomTimeId, U : ProjectKey> : Instance {
                 ?.let { (it as? JsonTime.Custom)?.let { Pair(remoteProject.id, it.id) } }
 
     constructor(
-            remoteProject: RemoteProject<T, U>,
+            project: Project<T, U>,
             remoteTask: RemoteTask<T, U>,
             remoteInstanceRecord: RemoteInstanceRecord<T>
     ) {
-        this.remoteProject = remoteProject
+        this.remoteProject = project
         task = remoteTask
         val realInstanceData = RemoteReal(this, remoteInstanceRecord)
         instanceData = realInstanceData
     }
 
     constructor(
-            remoteProject: RemoteProject<T, U>,
+            project: Project<T, U>,
             remoteTask: RemoteTask<T, U>,
             scheduleDateTime: DateTime
     ) {
-        this.remoteProject = remoteProject
+        this.remoteProject = project
         task = remoteTask
         instanceData = Virtual(task.id, scheduleDateTime)
     }

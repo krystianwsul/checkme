@@ -13,7 +13,7 @@ import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
-abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
+abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     abstract val remoteProjectRecord: RemoteProjectRecord<T, *, U>
 
@@ -335,6 +335,6 @@ abstract class RemoteProject<T : RemoteCustomTimeId, U : ProjectKey> {
 
     interface Parent {
 
-        fun deleteProject(remoteProject: RemoteProject<*, *>)
+        fun deleteProject(project: Project<*, *>)
     }
 }

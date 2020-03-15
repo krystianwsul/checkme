@@ -5,7 +5,7 @@ import com.krystianwsul.common.firebase.records.RemoteProjectUserRecord
 
 
 class RemoteProjectUser(
-        private val remoteProject: RemoteSharedProject,
+        private val remoteProject: SharedProject,
         private val remoteProjectUserRecord: RemoteProjectUserRecord
 ) {
 

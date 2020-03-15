@@ -15,7 +15,7 @@ import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.utils.*
 
 class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
-        val remoteProject: RemoteProject<T, U>,
+        val remoteProject: Project<T, U>,
         private val remoteTaskRecord: RemoteTaskRecord<T, *>
 ) : Task() {
 
@@ -360,7 +360,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
 
     interface ScheduleTextFactory {
 
-        fun getScheduleText(scheduleGroup: ScheduleGroup, remoteProject: RemoteProject<*, *>): String
+        fun getScheduleText(scheduleGroup: ScheduleGroup, project: Project<*, *>): String
     }
 
     interface ProjectUpdater {

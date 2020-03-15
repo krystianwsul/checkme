@@ -24,18 +24,18 @@ class RemoteProjectFactory(
         sharedChildren: List<DataSnapshot>,
         privateSnapshot: DataSnapshot,
         now: ExactTimeStamp
-) : RemoteProject.Parent {
+) : Project.Parent {
 
     private val remotePrivateProjectManager = AndroidRemotePrivateProjectManager(deviceDbInfo.userInfo, privateSnapshot, now)
     private val remoteSharedProjectManager = AndroidRemoteSharedProjectManager(sharedChildren)
 
-    var remotePrivateProject = RemotePrivateProject(remotePrivateProjectManager.remoteProjectRecord).apply { fixNotificationShown(localFactory, now) }
+    var remotePrivateProject = PrivateProject(remotePrivateProjectManager.remoteProjectRecord).apply { fixNotificationShown(localFactory, now) }
         private set
 
     val remoteSharedProjects = remoteSharedProjectManager.remoteProjectRecords
             .values
             .associate { (remoteSharedProjectRecord, _) ->
-                remoteSharedProjectRecord.id to RemoteSharedProject(remoteSharedProjectRecord).apply {
+                remoteSharedProjectRecord.id to SharedProject(remoteSharedProjectRecord).apply {
                     fixNotificationShown(localFactory, now)
                     updateDeviceDbInfo(deviceDbInfo)
                 }
@@ -43,7 +43,7 @@ class RemoteProjectFactory(
             .toMutableMap()
 
     val remoteProjects
-        get() = remoteSharedProjects.toMutableMap<ProjectKey, RemoteProject<*, *>>().apply {
+        get() = remoteSharedProjects.toMutableMap<ProjectKey, Project<*, *>>().apply {
             put(remotePrivateProject.id, remotePrivateProject)
         }.toMap()
 
@@ -99,7 +99,7 @@ class RemoteProjectFactory(
                     try {
                         val remoteProjectRecord = remoteSharedProjectManager.setChild(databaseEvent.dataSnapshot)
 
-                        remoteSharedProjects[remoteProjectRecord.id] = RemoteSharedProject(remoteProjectRecord).apply {
+                        remoteSharedProjects[remoteProjectRecord.id] = SharedProject(remoteProjectRecord).apply {
                             fixNotificationShown(localFactory, now)
                             updateDeviceDbInfo(deviceDbInfo)
                         }
@@ -121,7 +121,7 @@ class RemoteProjectFactory(
         try {
             val remotePrivateProjectRecord = remotePrivateProjectManager.newSnapshot(dataSnapshot)
 
-            remotePrivateProject = RemotePrivateProject(remotePrivateProjectRecord).apply { fixNotificationShown(localFactory, now) }
+            remotePrivateProject = PrivateProject(remotePrivateProjectRecord).apply { fixNotificationShown(localFactory, now) }
         } catch (onlyVisibilityPresentException: RemoteTaskRecord.OnlyVisibilityPresentException) {
             // hack for oldestVisible being set on records removed by cloud function
 
@@ -165,7 +165,7 @@ class RemoteProjectFactory(
             remoteRootUser: RemoteRootUser,
             userInfo: UserInfo,
             remoteFriendFactory: RemoteFriendFactory
-    ): RemoteSharedProject {
+    ): SharedProject {
         check(!TextUtils.isEmpty(name))
 
         val friendIds = recordOf.toMutableSet()
@@ -182,7 +182,7 @@ class RemoteProjectFactory(
 
         val remoteProjectRecord = remoteSharedProjectManager.newRemoteProjectRecord(JsonWrapper(projectJson))
 
-        val remoteProject = RemoteSharedProject(remoteProjectRecord)
+        val remoteProject = SharedProject(remoteProjectRecord)
 
         check(!remoteProjects.containsKey(remoteProject.id))
 
@@ -217,7 +217,7 @@ class RemoteProjectFactory(
 
     private fun getRemoteProjectForce(taskKey: TaskKey) = getRemoteProjectIfPresent(taskKey)!!
 
-    private fun getRemoteProjectIfPresent(taskKey: TaskKey): RemoteProject<*, *>? {
+    private fun getRemoteProjectIfPresent(taskKey: TaskKey): Project<*, *>? {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return remoteProjects[taskKey.remoteProjectId]
@@ -239,7 +239,7 @@ class RemoteProjectFactory(
 
     fun updatePhotoUrl(deviceInfo: DeviceInfo, photoUrl: String) = remoteSharedProjects.values.forEach { it.updatePhotoUrl(deviceInfo, photoUrl) }
 
-    fun getRemoteProjectForce(projectId: ProjectKey): RemoteProject<*, *> {
+    fun getRemoteProjectForce(projectId: ProjectKey): Project<*, *> {
         check(remoteProjects.containsKey(projectId))
 
         return remoteProjects.getValue(projectId)
@@ -249,8 +249,8 @@ class RemoteProjectFactory(
             .singleOrNull { it.key.key == projectId }
             ?.value
 
-    override fun deleteProject(remoteProject: RemoteProject<*, *>) {
-        val projectId = remoteProject.id
+    override fun deleteProject(project: Project<*, *>) {
+        val projectId = project.id
 
         check(remoteProjects.containsKey(projectId))
         remoteSharedProjects.remove(projectId)

@@ -1,15 +1,15 @@
 package com.krystianwsul.common.relevance
 
 import com.krystianwsul.common.domain.Instance
-import com.krystianwsul.common.firebase.models.RemotePrivateProject
-import com.krystianwsul.common.firebase.models.RemoteProject
-import com.krystianwsul.common.firebase.models.RemoteSharedProject
+import com.krystianwsul.common.firebase.models.PrivateProject
+import com.krystianwsul.common.firebase.models.Project
+import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.soywiz.klock.days
 
 object Irrelevant {
 
-    fun setIrrelevant(parent: RemoteProject.Parent, project: RemoteProject<*, *>, now: ExactTimeStamp): Result {
+    fun setIrrelevant(parent: Project.Parent, project: Project<*, *>, now: ExactTimeStamp): Result {
         val tasks = project.tasks
 
         // relevant hack
@@ -83,7 +83,7 @@ object Irrelevant {
         val remoteCustomTimes = project.customTimes
         val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
 
-        if (project is RemotePrivateProject) {
+        if (project is PrivateProject) {
             project.customTimes
                     .filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
                     .forEach { remoteCustomTimeRelevances.getValue(Pair(it.projectId, it.id)).setRelevant() }
@@ -113,16 +113,16 @@ object Irrelevant {
 
         val relevantRemoteProjects = remoteProjectRelevances.values
                 .filter { it.relevant }
-                .map { it.remoteProject }
+                .map { it.project }
 
         val irrelevantRemoteProjects = remoteProjects - relevantRemoteProjects
         irrelevantRemoteProjects.forEach { it.delete(parent) }
 
-        return Result(relevantInstances, irrelevantRemoteProjects.map { it as RemoteSharedProject })
+        return Result(relevantInstances, irrelevantRemoteProjects.map { it as SharedProject })
     }
 
     private class VisibleIrrelevantTasksException(message: String) : Exception(message)
     private class VisibleIrrelevantExistingInstancesException(message: String) : Exception(message)
 
-    data class Result(val relevantInstances: Collection<Instance>, val removedSharedProjects: Collection<RemoteSharedProject>)
+    data class Result(val relevantInstances: Collection<Instance>, val removedSharedProjects: Collection<SharedProject>)
 }

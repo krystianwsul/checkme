@@ -779,7 +779,7 @@ class DomainFactory(
                 )
 
                 parentKey = task.project
-                        .takeIf { it is RemoteSharedProject }
+                        .takeIf { it is SharedProject }
                         ?.let { CreateTaskViewModel.ParentKey.Project(it.id) }
 
                 if (schedules.isNotEmpty()) {
@@ -955,7 +955,7 @@ class DomainFactory(
         val name: String?
         val userListDatas: Set<ShowProjectViewModel.UserListData>
         if (projectId != null) {
-            val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId) as RemoteSharedProject
+            val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId) as SharedProject
 
             name = remoteProject.name
 
@@ -1998,7 +1998,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId) as RemoteSharedProject
+        val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId) as SharedProject
 
         remoteProject.name = name
         remoteProject.updateUsers(addedFriends.map { remoteFriendFactory.getFriend(it) }.toSet(), removedFriends)
@@ -2217,7 +2217,7 @@ class DomainFactory(
                                 childTask.getScheduleText(ScheduleText, now),
                                 childTask.note,
                                 CreateTaskViewModel.SortKey.TaskSortKey(childTask.startExactTimeStamp),
-                                (childTask.project as? RemoteSharedProject)?.id
+                                (childTask.project as? SharedProject)?.id
                         )
 
                         taskParentKey to parentTreeData
@@ -2302,11 +2302,11 @@ class DomainFactory(
 
     private fun getProjectTaskTreeDatas(
             now: ExactTimeStamp,
-            remoteProject: RemoteProject<*, *>,
+            project: Project<*, *>,
             excludedTaskKeys: Set<TaskKey>,
             includedTaskKeys: Set<TaskKey>
     ): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> {
-        return remoteProject.tasks
+        return project.tasks
                 .filter { it.showAsParent(now, excludedTaskKeys, includedTaskKeys) }
                 .map {
                     val taskParentKey = CreateTaskViewModel.ParentKey.Task(it.taskKey)
@@ -2317,7 +2317,7 @@ class DomainFactory(
                             it.getScheduleText(ScheduleText, now),
                             it.note,
                             CreateTaskViewModel.SortKey.TaskSortKey(it.startExactTimeStamp),
-                            (it.project as? RemoteSharedProject)?.id)
+                            (it.project as? SharedProject)?.id)
 
                     taskParentKey to parentTreeData
                 }
@@ -2472,38 +2472,38 @@ class DomainFactory(
         irrelevantInstanceShownRecords.forEach { it.delete() }
     }
 
-    private fun notifyCloud(remoteProject: RemoteProject<*, *>) = notifyCloud(setOf(remoteProject))
+    private fun notifyCloud(project: Project<*, *>) = notifyCloud(setOf(project))
 
-    private fun notifyCloud(remoteProjects: Set<RemoteProject<*, *>>) {
-        if (remoteProjects.isNotEmpty())
-            notifyCloudPrivateFixed(remoteProjects.toMutableSet(), mutableListOf())
+    private fun notifyCloud(projects: Set<Project<*, *>>) {
+        if (projects.isNotEmpty())
+            notifyCloudPrivateFixed(projects.toMutableSet(), mutableListOf())
     }
 
     private fun notifyCloud(
-            remoteProject: RemoteProject<*, *>,
+            project: Project<*, *>,
             userKeys: Collection<UserKey>
-    ) = notifyCloudPrivateFixed(mutableSetOf(remoteProject), userKeys.toMutableList())
+    ) = notifyCloudPrivateFixed(mutableSetOf(project), userKeys.toMutableList())
 
     private fun notifyCloudPrivateFixed(
-            remoteProjects: MutableSet<RemoteProject<*, *>>,
+            projects: MutableSet<Project<*, *>>,
             userKeys: MutableCollection<UserKey>
     ) {
         aggregateData?.run {
-            notificationProjects.addAll(remoteProjects)
+            notificationProjects.addAll(projects)
             notificationUserKeys.addAll(userKeys)
 
             return
         }
 
-        val remotePrivateProject = remoteProjects.singleOrNull { it is RemotePrivateProject }
+        val remotePrivateProject = projects.singleOrNull { it is PrivateProject }
 
         remotePrivateProject?.let {
-            remoteProjects.remove(it)
+            projects.remove(it)
 
             userKeys.add(deviceDbInfo.key)
         }
 
-        BackendNotifier.notify(remoteProjects, deviceDbInfo.deviceInfo, userKeys)
+        BackendNotifier.notify(projects, deviceDbInfo.deviceInfo, userKeys)
     }
 
     private fun updateNotifications(
@@ -2829,7 +2829,7 @@ class DomainFactory(
 
     private class AggregateData {
 
-        val notificationProjects = mutableSetOf<RemoteProject<*, *>>()
+        val notificationProjects = mutableSetOf<Project<*, *>>()
         val notificationUserKeys = mutableSetOf<UserKey>()
     }
 }

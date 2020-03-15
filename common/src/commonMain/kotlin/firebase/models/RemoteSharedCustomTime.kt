@@ -7,7 +7,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
 class RemoteSharedCustomTime(
-        override val remoteProject: RemoteSharedProject,
+        override val project: SharedProject,
         override val remoteCustomTimeRecord: RemoteSharedCustomTimeRecord
 ) : RemoteCustomTime<RemoteCustomTimeId.Shared, ProjectKey.Shared>() {
 
@@ -19,7 +19,7 @@ class RemoteSharedCustomTime(
     val privateKey get() = remoteCustomTimeRecord.privateKey
 
     override fun delete() {
-        remoteProject.deleteCustomTime(this)
+        project.deleteCustomTime(this)
 
         remoteCustomTimeRecord.delete()
     }

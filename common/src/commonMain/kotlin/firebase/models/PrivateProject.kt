@@ -8,9 +8,9 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.UserKey
 
-class RemotePrivateProject(
+class PrivateProject(
         override val remoteProjectRecord: RemotePrivateProjectRecord
-) : RemoteProject<RemoteCustomTimeId.Private, ProjectKey.Private>() {
+) : Project<RemoteCustomTimeId.Private, ProjectKey.Private>() {
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, RemotePrivateCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Private, ProjectKey.Private>>

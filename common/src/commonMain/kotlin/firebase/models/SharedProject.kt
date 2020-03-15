@@ -10,9 +10,9 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.UserKey
 
-class RemoteSharedProject(
+class SharedProject(
         override val remoteProjectRecord: RemoteSharedProjectRecord
-) : RemoteProject<RemoteCustomTimeId.Shared, ProjectKey.Shared>() {
+) : Project<RemoteCustomTimeId.Shared, ProjectKey.Shared>() {
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values

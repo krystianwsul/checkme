@@ -10,21 +10,21 @@ import com.krystianwsul.common.utils.TaskKey
 
 
 class RemoteTaskHierarchy<T : RemoteCustomTimeId, U : ProjectKey>(
-        private val remoteProject: RemoteProject<T, U>,
+        private val project: Project<T, U>,
         private val remoteTaskHierarchyRecord: RemoteTaskHierarchyRecord
 ) : TaskHierarchy() {
 
     override val startExactTimeStamp get() = ExactTimeStamp(remoteTaskHierarchyRecord.startTime)
 
-    override val parentTaskKey by lazy { TaskKey(remoteProject.id, remoteTaskHierarchyRecord.parentTaskId) }
+    override val parentTaskKey by lazy { TaskKey(project.id, remoteTaskHierarchyRecord.parentTaskId) }
 
-    override val childTaskKey by lazy { TaskKey(remoteProject.id, remoteTaskHierarchyRecord.childTaskId) }
+    override val childTaskKey by lazy { TaskKey(project.id, remoteTaskHierarchyRecord.childTaskId) }
 
     val id by lazy { remoteTaskHierarchyRecord.id }
 
-    override val parentTask by lazy { remoteProject.getRemoteTaskForce(parentTaskId) }
+    override val parentTask by lazy { project.getRemoteTaskForce(parentTaskId) }
 
-    override val childTask by lazy { remoteProject.getRemoteTaskForce(childTaskId) }
+    override val childTask by lazy { project.getRemoteTaskForce(childTaskId) }
 
     val parentTaskId by lazy { remoteTaskHierarchyRecord.parentTaskId }
     val childTaskId by lazy { remoteTaskHierarchyRecord.childTaskId }
@@ -33,7 +33,7 @@ class RemoteTaskHierarchy<T : RemoteCustomTimeId, U : ProjectKey>(
         get() = remoteTaskHierarchyRecord.ordinal ?: remoteTaskHierarchyRecord.startTime.toDouble()
         set(ordinal) = remoteTaskHierarchyRecord.setOrdinal(ordinal)
 
-    override val taskHierarchyKey by lazy { TaskHierarchyKey.Remote(remoteProject.id, remoteTaskHierarchyRecord.id) }
+    override val taskHierarchyKey by lazy { TaskHierarchyKey.Remote(project.id, remoteTaskHierarchyRecord.id) }
 
     public override fun getEndExactTimeStamp() = remoteTaskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
 
@@ -50,7 +50,7 @@ class RemoteTaskHierarchy<T : RemoteCustomTimeId, U : ProjectKey>(
     }
 
     override fun delete() {
-        remoteProject.deleteTaskHierarchy(this)
+        project.deleteTaskHierarchy(this)
 
         remoteTaskHierarchyRecord.delete()
     }

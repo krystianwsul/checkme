@@ -5,7 +5,7 @@ import com.krystianwsul.common.domain.schedules.Schedule
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
-import com.krystianwsul.common.firebase.models.RemoteProject
+import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -30,7 +30,7 @@ abstract class Task {
 
     abstract val existingInstances: Map<ScheduleKey, Instance>
 
-    abstract val project: RemoteProject<*, *>
+    abstract val project: Project<*, *>
 
     abstract val imageJson: TaskJson.Image?
 

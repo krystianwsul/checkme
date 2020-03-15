@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Menu
@@ -52,7 +53,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                 context: Context
         ) = Intent(context, ShowCustomTimeActivity::class.java).apply {
             @Suppress("CAST_NEVER_SUCCEEDS")
-            putExtra(CUSTOM_TIME_ID_KEY, customTimeId)
+            putExtra(CUSTOM_TIME_ID_KEY, customTimeId as Parcelable)
         }
 
         fun getCreateIntent(context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply {
@@ -128,7 +129,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                     } else {
                         val customTimeKey = DomainFactory.instance.createCustomTime(SaveService.Source.GUI, name, hourMinutes)
 
-                        setResult(Activity.RESULT_OK, Intent().apply { putExtra(CUSTOM_TIME_ID_KEY, customTimeKey) })
+                        setResult(Activity.RESULT_OK, Intent().apply { putExtra(CUSTOM_TIME_ID_KEY, customTimeKey as Parcelable) })
                     }
 
                     finish()
@@ -193,7 +194,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
             check(!intent.hasExtra(NEW_KEY))
 
-            customTimeId = intent.getParcelableExtra<RemoteCustomTimeId.Private>(CUSTOM_TIME_ID_KEY)
+            customTimeId = intent.getParcelableExtra(CUSTOM_TIME_ID_KEY)
 
             showCustomTimeViewModel = getViewModel<ShowCustomTimeViewModel>().apply {
                 start(customTimeId!!)

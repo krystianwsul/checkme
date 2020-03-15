@@ -1,6 +1,6 @@
 package com.krystianwsul.common.utils
 
-sealed class CustomTimeKey<T : RemoteCustomTimeId, U : ProjectKey> : Parcelable {
+sealed class CustomTimeKey<T : RemoteCustomTimeId, U : ProjectKey> : Parcelable, Serializable {
 
     abstract val remoteProjectId: U
     abstract val remoteCustomTimeId: T

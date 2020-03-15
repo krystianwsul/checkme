@@ -6,10 +6,10 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
-class RemoteSharedCustomTime(
+class SharedCustomTime(
         override val project: SharedProject,
         override val remoteCustomTimeRecord: RemoteSharedCustomTimeRecord
-) : RemoteCustomTime<RemoteCustomTimeId.Shared, ProjectKey.Shared>() {
+) : CustomTime<RemoteCustomTimeId.Shared, ProjectKey.Shared>() {
 
     override val id = remoteCustomTimeRecord.id
 

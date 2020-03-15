@@ -43,7 +43,7 @@ class DomainFactory(
         startTime: ExactTimeStamp,
         readTime: ExactTimeStamp,
         friendSnapshot: DataSnapshot
-) : RemotePrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
+) : PrivateCustomTime.AllRecordsSource, RemoteTask.ProjectUpdater {
 
     companion object {
 
@@ -391,12 +391,12 @@ class DomainFactory(
 
         val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
             it.customTimeKey
-        }.toMutableMap<CustomTimeKey<*, *>, RemoteCustomTime<*, *>>()
+        }.toMutableMap<CustomTimeKey<*, *>, CustomTime<*, *>>()
 
         val instance = getInstance(instanceKey)
         check(instance.isRootInstance(now))
 
-        (instance.instanceTime as? RemoteCustomTime<*, *>)?.let {
+        (instance.instanceTime as? CustomTime<*, *>)?.let {
             currentCustomTimes[it.customTimeKey] = it
         }
 
@@ -417,7 +417,7 @@ class DomainFactory(
 
         val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
             it.customTimeKey
-        }.toMutableMap<CustomTimeKey<*, *>, CustomTime>()
+        }.toMutableMap<CustomTimeKey<*, *>, CustomTime<*, *>>()
 
         val instanceDatas = mutableMapOf<InstanceKey, EditInstancesViewModel.InstanceData>()
 
@@ -428,7 +428,7 @@ class DomainFactory(
 
             instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(instance.instanceDateTime, instance.name, instance.done != null)
 
-            (instance.instanceTime as? CustomTime)?.let {
+            (instance.instanceTime as? CustomTime<*, *>)?.let {
                 currentCustomTimes[it.customTimeKey] = it
             }
         }
@@ -742,7 +742,7 @@ class DomainFactory(
 
         val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
             it.customTimeKey
-        }.toMutableMap<CustomTimeKey<*, *>, CustomTime>()
+        }.toMutableMap<CustomTimeKey<*, *>, CustomTime<*, *>>()
 
         val excludedTaskKeys = when {
             taskKey != null -> setOf(taskKey)

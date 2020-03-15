@@ -106,7 +106,7 @@ object Irrelevant {
 
         val relevantRemoteCustomTimes = remoteCustomTimeRelevances.values
                 .filter { it.relevant }
-                .map { it.remoteCustomTime }
+                .map { it.customTime }
 
         val irrelevantRemoteCustomTimes = remoteCustomTimes - relevantRemoteCustomTimes
         irrelevantRemoteCustomTimes.forEach { it.delete() }

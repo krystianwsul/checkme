@@ -9,17 +9,17 @@ import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-class RemotePrivateCustomTime(
+class PrivateCustomTime(
         override val project: PrivateProject,
         override val remoteCustomTimeRecord: RemotePrivateCustomTimeRecord
-) : RemoteCustomTime<RemoteCustomTimeId.Private, ProjectKey.Private>() {
+) : CustomTime<RemoteCustomTimeId.Private, ProjectKey.Private>() {
 
     override val id = remoteCustomTimeRecord.id
 
     override val customTimeKey by lazy { CustomTimeKey.Private(projectId, id) }
 
     private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(id)
-            .map { (it as RemoteCustomTime<*, *>).remoteCustomTimeRecord }
+            .map { (it as CustomTime<*, *>).remoteCustomTimeRecord }
             .toMutableList<RemoteCustomTimeRecord<*, *>>()
             .apply { add(remoteCustomTimeRecord) }
 
@@ -57,6 +57,6 @@ class RemotePrivateCustomTime(
 
     interface AllRecordsSource {
 
-        fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private): List<RemoteSharedCustomTime>
+        fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private): List<SharedCustomTime>
     }
 }

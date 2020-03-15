@@ -19,7 +19,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     protected abstract val remoteTasks: MutableMap<String, RemoteTask<T, U>>
     protected abstract val remoteTaskHierarchyContainer: TaskHierarchyContainer<String, RemoteTaskHierarchy<T, U>>
-    protected abstract val remoteCustomTimes: Map<T, RemoteCustomTime<T, U>>
+    protected abstract val remoteCustomTimes: Map<T, CustomTime<T, U>>
 
     val id: U by lazy { remoteProjectRecord.id }
 
@@ -41,7 +41,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     val taskIds get() = remoteTasks.keys
 
-    abstract val customTimes: Collection<RemoteCustomTime<T, U>>
+    abstract val customTimes: Collection<CustomTime<T, U>>
 
     val taskHierarchies get() = remoteTaskHierarchyContainer.all
 
@@ -111,12 +111,12 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     abstract fun getOrCreateCustomTime(
             ownerKey: UserKey,
-            remoteCustomTime: RemoteCustomTime<*, *>
-    ): RemoteCustomTime<T, U>
+            customTime: CustomTime<*, *>
+    ): CustomTime<T, U>
 
     fun getOrCopyTime(ownerKey: UserKey, time: Time) = time.let {
         when (it) {
-            is CustomTime -> getOrCreateCustomTime(ownerKey, it as RemoteCustomTime<*, *>)
+            is CustomTime<*, *> -> getOrCreateCustomTime(ownerKey, it)
             is NormalTime -> it
             else -> throw IllegalArgumentException()
         }
@@ -126,7 +126,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
             ownerKey: UserKey,
             time: Time
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
-        is CustomTime -> Triple(newTime.customTimeKey.remoteCustomTimeId, null, null)
+        is CustomTime<*, *> -> Triple(newTime.customTimeKey.remoteCustomTimeId, null, null)
         is NormalTime -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
         else -> throw IllegalArgumentException()
     }
@@ -138,7 +138,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
         val newInstanceTime = instance.instanceTime.let {
             when (it) {
-                is CustomTime -> getOrCreateCustomTime(ownerKey, it as RemoteCustomTime<*, *>)
+                is CustomTime<*, *> -> getOrCreateCustomTime(ownerKey, it)
                 is NormalTime -> it
                 else -> throw IllegalArgumentException()
             }
@@ -150,7 +150,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
         val instanceTimeString: String
 
         when (newInstanceTime) {
-            is CustomTime -> {
+            is CustomTime<*, *> -> {
                 instanceCustomTimeId = newInstanceTime.customTimeKey
                         .remoteCustomTimeId
                         .value
@@ -258,7 +258,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun getTaskHierarchy(id: String) = remoteTaskHierarchyContainer.getById(id)
 
-    abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteCustomTime<T, U>
+    abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): CustomTime<T, U>
 
     abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
 

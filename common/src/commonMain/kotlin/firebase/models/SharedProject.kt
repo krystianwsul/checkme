@@ -22,7 +22,7 @@ class SharedProject(
 
     val users get() = remoteUsers.values
 
-    override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Shared, RemoteSharedCustomTime>()
+    override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Shared, SharedCustomTime>()
     override val remoteTasks: MutableMap<String, RemoteTask<RemoteCustomTimeId.Shared, ProjectKey.Shared>>
     override val remoteTaskHierarchyContainer = TaskHierarchyContainer<String, RemoteTaskHierarchy<RemoteCustomTimeId.Shared, ProjectKey.Shared>>()
 
@@ -31,7 +31,7 @@ class SharedProject(
     init {
         for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
             @Suppress("LeakingThis")
-            val remoteCustomTime = RemoteSharedCustomTime(this, remoteCustomTimeRecord)
+            val remoteCustomTime = SharedCustomTime(this, remoteCustomTimeRecord)
 
             remoteCustomTimes[remoteCustomTime.id] = remoteCustomTime
         }
@@ -94,7 +94,7 @@ class SharedProject(
         }
     }
 
-    fun deleteCustomTime(remoteCustomTime: RemoteSharedCustomTime) {
+    fun deleteCustomTime(remoteCustomTime: SharedCustomTime) {
         check(remoteCustomTimes.containsKey(remoteCustomTime.id))
 
         remoteCustomTimes.remove(remoteCustomTime.id)
@@ -105,7 +105,7 @@ class SharedProject(
             ownerKey: UserKey
     ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId }
 
-    override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): RemoteSharedCustomTime {
+    override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): SharedCustomTime {
         check(remoteCustomTimes.containsKey(remoteCustomTimeId))
 
         return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Shared)
@@ -113,10 +113,10 @@ class SharedProject(
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
 
-    private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): RemoteSharedCustomTime {
+    private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)
 
-        val remoteCustomTime = RemoteSharedCustomTime(this, remoteCustomTimeRecord)
+        val remoteCustomTime = SharedCustomTime(this, remoteCustomTimeRecord)
 
         check(!remoteCustomTimes.containsKey(remoteCustomTime.id))
 
@@ -125,26 +125,26 @@ class SharedProject(
         return remoteCustomTime
     }
 
-    override fun getOrCreateCustomTime(ownerKey: UserKey, remoteCustomTime: RemoteCustomTime<*, *>): RemoteSharedCustomTime {
-        fun copy(): RemoteSharedCustomTime {
-            val private = remoteCustomTime as? RemotePrivateCustomTime
+    override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: CustomTime<*, *>): SharedCustomTime {
+        fun copy(): SharedCustomTime {
+            val private = customTime as? PrivateCustomTime
 
             val customTimeJson = SharedCustomTimeJson(
-                    remoteCustomTime.name,
-                    remoteCustomTime.getHourMinute(DayOfWeek.SUNDAY).hour,
-                    remoteCustomTime.getHourMinute(DayOfWeek.SUNDAY).minute,
-                    remoteCustomTime.getHourMinute(DayOfWeek.MONDAY).hour,
-                    remoteCustomTime.getHourMinute(DayOfWeek.MONDAY).minute,
-                    remoteCustomTime.getHourMinute(DayOfWeek.TUESDAY).hour,
-                    remoteCustomTime.getHourMinute(DayOfWeek.TUESDAY).minute,
-                    remoteCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).hour,
-                    remoteCustomTime.getHourMinute(DayOfWeek.WEDNESDAY).minute,
-                    remoteCustomTime.getHourMinute(DayOfWeek.THURSDAY).hour,
-                    remoteCustomTime.getHourMinute(DayOfWeek.THURSDAY).minute,
-                    remoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).hour,
-                    remoteCustomTime.getHourMinute(DayOfWeek.FRIDAY).minute,
-                    remoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).hour,
-                    remoteCustomTime.getHourMinute(DayOfWeek.SATURDAY).minute,
+                    customTime.name,
+                    customTime.getHourMinute(DayOfWeek.SUNDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.SUNDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.MONDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.MONDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.TUESDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.TUESDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.WEDNESDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.WEDNESDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.THURSDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.THURSDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.FRIDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.FRIDAY).minute,
+                    customTime.getHourMinute(DayOfWeek.SATURDAY).hour,
+                    customTime.getHourMinute(DayOfWeek.SATURDAY).minute,
                     private?.projectId?.key,
                     private?.id?.value
             )
@@ -152,9 +152,9 @@ class SharedProject(
             return newRemoteCustomTime(customTimeJson)
         }
 
-        return when (remoteCustomTime) {
-            is RemotePrivateCustomTime -> getSharedTimeIfPresent(remoteCustomTime.id, ownerKey)
-            is RemoteSharedCustomTime -> remoteCustomTime.takeIf { it.projectId == id }
+        return when (customTime) {
+            is PrivateCustomTime -> getSharedTimeIfPresent(customTime.id, ownerKey)
+            is SharedCustomTime -> customTime.takeIf { it.projectId == id }
             else -> throw IllegalArgumentException()
         } ?: copy()
     }

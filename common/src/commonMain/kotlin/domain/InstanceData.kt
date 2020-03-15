@@ -1,5 +1,6 @@
 package com.krystianwsul.common.domain
 
+import com.krystianwsul.common.firebase.models.CustomTime
 import com.krystianwsul.common.time.*
 
 sealed class InstanceData<T, U, V : InstanceRecord<U>> {
@@ -16,7 +17,7 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
     abstract class Real<T, U, V : InstanceRecord<U>>(val instanceRecord: V) : InstanceData<T, U, V>() {
 
-        protected abstract fun getCustomTime(customTimeId: U): CustomTime
+        protected abstract fun getCustomTime(customTimeId: U): CustomTime<*, *>
 
         protected abstract fun getSignature(): String
 

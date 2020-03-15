@@ -1,14 +1,15 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.firebase.records.RemoteCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.time.Time
 import com.krystianwsul.common.time.TimePair
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-abstract class RemoteCustomTime<T : RemoteCustomTimeId, U : ProjectKey> : CustomTime {
+abstract class CustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Time {
 
     protected abstract val project: Project<T, U>
 
@@ -16,9 +17,11 @@ abstract class RemoteCustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Custom
 
     abstract val id: T
 
-    override val name get() = remoteCustomTimeRecord.name
+    abstract val customTimeKey: CustomTimeKey<*, *>
 
-    override val hourMinutes
+    val name get() = remoteCustomTimeRecord.name
+
+    val hourMinutes
         get() = DayOfWeek.values()
                 .map { it to getHourMinute(it) }
                 .toMap()

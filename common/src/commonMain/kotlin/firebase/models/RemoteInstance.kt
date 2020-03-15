@@ -1,6 +1,5 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.domain.CustomTime
 import com.krystianwsul.common.domain.Instance
 import com.krystianwsul.common.domain.InstanceData
 import com.krystianwsul.common.domain.InstanceData.Virtual
@@ -99,7 +98,7 @@ class RemoteInstance<T : RemoteCustomTimeId, U : ProjectKey> : Instance {
             it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
                 @Suppress("UNCHECKED_CAST")
                 when (it) {
-                    is CustomTime -> JsonTime.Custom(it.customTimeKey.remoteCustomTimeId as T)
+                    is CustomTime<*, *> -> JsonTime.Custom(it.customTimeKey.remoteCustomTimeId as T)
                     is NormalTime -> JsonTime.Normal(it.hourMinute)
                     else -> throw IllegalArgumentException()
                 }
@@ -142,7 +141,7 @@ class RemoteInstance<T : RemoteCustomTimeId, U : ProjectKey> : Instance {
         val shared = instanceTimePair.customTimeKey as? CustomTimeKey.Shared
 
         return if (shared != null) {
-            val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.remoteCustomTimeId) as RemoteSharedCustomTime
+            val sharedCustomTime = remoteProject.getRemoteCustomTime(shared.remoteCustomTimeId) as SharedCustomTime
 
             if (sharedCustomTime.ownerKey == ownerKey) {
                 val privateCustomTimeKey = CustomTimeKey.Private(ownerKey.toPrivateProjectKey(), sharedCustomTime.privateKey!!)

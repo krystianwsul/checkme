@@ -1,6 +1,7 @@
 package com.krystianwsul.common.domain
 
 import com.krystianwsul.common.ErrorLogger
+import com.krystianwsul.common.firebase.models.CustomTime
 import com.krystianwsul.common.firebase.models.Project
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -97,7 +98,7 @@ abstract class Instance {
 
     val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
 
-    private val instanceCustomTimeKey get() = (instanceTime as? CustomTime)?.customTimeKey
+    private val instanceCustomTimeKey get() = (instanceTime as? CustomTime<*, *>)?.customTimeKey
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
 

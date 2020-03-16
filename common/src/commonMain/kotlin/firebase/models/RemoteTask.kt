@@ -1,23 +1,21 @@
 package com.krystianwsul.common.firebase.models
 
+import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.DeviceDbInfo
 
-import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.domain.TaskHierarchy
+import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.*
 import com.krystianwsul.common.firebase.json.*
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.common.firebase.records.RemoteTaskRecord
-import com.krystianwsul.common.time.Date
-import com.krystianwsul.common.time.DateTime
-import com.krystianwsul.common.time.ExactTimeStamp
-import com.krystianwsul.common.time.Time
+import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
+class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask<*, *>
         val remoteProject: Project<T, U>,
         private val remoteTaskRecord: RemoteTaskRecord<T, *>
-) : Task() {
+) {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords
             .values
@@ -27,25 +25,312 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
 
     private val remoteSchedules = ArrayList<Schedule>()
 
-    override val name get() = remoteTaskRecord.name
+    val name get() = remoteTaskRecord.name
 
-    override val schedules get() = remoteSchedules
+    val schedules get() = remoteSchedules
 
-    override val startExactTimeStamp get() = ExactTimeStamp(remoteTaskRecord.startTime)
+    val startExactTimeStamp get() = ExactTimeStamp(remoteTaskRecord.startTime)
 
-    override val note get() = remoteTaskRecord.note
+    val note get() = remoteTaskRecord.note
 
-    override val taskKey get() = TaskKey(remoteProject.id, remoteTaskRecord.id)
+    val taskKey get() = TaskKey(remoteProject.id, remoteTaskRecord.id)
 
     val id get() = remoteTaskRecord.id
 
-    override val existingInstances get() = existingRemoteInstances
+    val existingInstances get() = existingRemoteInstances
 
-    override val project get() = remoteProject
+    val project get() = remoteProject
 
-    override val imageJson get() = remoteTaskRecord.image
+    val imageJson get() = remoteTaskRecord.image
 
-    override fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
+    fun getEndExactTimeStamp() = getEndData()?.exactTimeStamp
+
+    fun current(exactTimeStamp: ExactTimeStamp) = startExactTimeStamp <= exactTimeStamp && notDeleted(exactTimeStamp)
+
+    fun getParentName(now: ExactTimeStamp) = getParentTask(now)?.name ?: project.name
+
+    fun notDeleted(exactTimeStamp: ExactTimeStamp) = getEndExactTimeStamp()?.let { it > exactTimeStamp } != false
+
+    fun isVisible(now: ExactTimeStamp, hack24: Boolean): Boolean {
+        if (!current(now))
+            return false
+
+        val rootTask = getRootTask(now)
+        val schedules = rootTask.getCurrentSchedules(now)
+
+        if (schedules.isEmpty())
+            return true
+
+        if (schedules.any { it.isVisible(this as RemoteTask<*, *>, now, hack24) })
+            return true
+
+        return false
+    }// bo inheritance i testy
+
+    private fun getRootTask(
+            exactTimeStamp: ExactTimeStamp
+    ): RemoteTask<*, *> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp)
+            ?: (this as RemoteTask<*, *>)
+
+    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
+        check(current(exactTimeStamp))
+
+        val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
+
+        getSingleSchedule(exactTimeStamp)?.let { singleSchedule ->
+            val instance = singleSchedule.getInstance(this as RemoteTask<*, *>)
+
+            if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
+                return listOf(SingleSchedule(this, MockSingleScheduleBridge(singleSchedule, instance)))
+        }
+
+        return currentSchedules
+    }
+
+    private fun getSingleSchedule(exactTimeStamp: ExactTimeStamp): SingleSchedule? {
+        return schedules.singleOrNull { it.current(exactTimeStamp) } as? SingleSchedule
+    }
+
+    private class MockSingleScheduleBridge(
+            private val singleSchedule: SingleSchedule,
+            private val instance: Instance<*, *>
+    ) : SingleScheduleBridge by singleSchedule.singleScheduleBridge {
+
+        override val customTimeKey get() = instance.instanceTimePair.customTimeKey
+
+        override val year get() = instance.instanceDate.year
+
+        override val month get() = instance.instanceDate.month
+
+        override val day get() = instance.instanceDate.day
+
+        override val hour
+            get() = instance.instanceTime
+                    .timePair
+                    .hourMinute
+                    ?.hour
+
+        override val minute
+            get() = instance.instanceTime
+                    .timePair
+                    .hourMinute
+                    ?.minute
+
+        override val remoteCustomTimeKey
+            get() = instance.instanceTime
+                    .timePair
+                    .customTimeKey
+                    ?.let { Pair(it.remoteProjectId, it.remoteCustomTimeId) }
+
+        override val timePair
+            get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
+    }
+
+    fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
+        check(current(exactTimeStamp))
+
+        return getParentTask(exactTimeStamp) == null
+    }
+
+    fun setEndData(
+            uuid: String,
+            endData: EndData,
+            taskUndoData: TaskUndoData? = null,
+            recursive: Boolean = false
+    ) {
+        val now = endData.exactTimeStamp
+
+        check(current(now))
+
+        taskUndoData?.taskKeys?.add(taskKey)
+
+        val schedules = getCurrentSchedules(now)
+        if (isRootTask(now)) {
+            check(schedules.all { it.current(now) })
+
+            schedules.forEach {
+                taskUndoData?.scheduleIds?.add(it.scheduleId)
+
+                it.setEndExactTimeStamp(now)
+            }
+        } else {
+            check(schedules.isEmpty())
+        }
+
+        getChildTaskHierarchies(now).forEach {
+            it.childTask.setEndData(uuid, endData, taskUndoData, true)
+
+            taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
+
+            it.setEndExactTimeStamp(now)
+        }
+
+        if (!recursive) {
+            getParentTaskHierarchy(now)?.let {
+                check(it.current(now))
+
+                taskUndoData?.taskHierarchyKeys?.add(it.taskHierarchyKey)
+
+                it.setEndExactTimeStamp(now)
+            }
+        }
+
+        setMyEndExactTimeStamp(uuid, now, endData)
+    }
+
+    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy? {
+        val taskHierarchies = if (current(exactTimeStamp)) {
+            check(notDeleted(exactTimeStamp))
+
+            getParentTaskHierarchies().filter { it.current(exactTimeStamp) }
+        } else {
+            // jeśli child task jeszcze nie istnieje, ale będzie utworzony jako child, zwróć ów przyszły hierarchy
+            // żeby można było dodawać child instances do past parent instance
+
+            check(notDeleted(exactTimeStamp))
+
+            getParentTaskHierarchies().filter { it.startExactTimeStamp == startExactTimeStamp }
+        }
+
+        return if (taskHierarchies.isEmpty()) {
+            null
+        } else {
+            taskHierarchies.single()
+        }
+    }
+
+    fun clearEndExactTimeStamp(uuid: String, now: ExactTimeStamp) {
+        check(!current(now))
+
+        setMyEndExactTimeStamp(uuid, now, null)
+    }
+
+    fun getParentTask(exactTimeStamp: ExactTimeStamp): RemoteTask<*, *>? {
+        check(notDeleted(exactTimeStamp))
+
+        return getParentTaskHierarchy(exactTimeStamp)?.let {
+            check(it.notDeleted(exactTimeStamp))
+
+            it.parentTask.also {
+                check(it.notDeleted(exactTimeStamp))
+            }
+        }
+    }
+
+    fun getPastRootInstances(now: ExactTimeStamp): List<Instance<*, *>> {
+        val allInstances = mutableMapOf<InstanceKey, Instance<*, *>>()
+
+        allInstances.putAll(existingInstances
+                .values
+                .filter { it.scheduleDateTime.timeStamp.toExactTimeStamp() <= now }
+                .associateBy { it.instanceKey })
+
+        allInstances.putAll(getInstances(null, now.plusOne(), now).associateBy { it.instanceKey })
+
+        return allInstances.values
+                .toList()
+                .filter { it.isRootInstance(now) }
+    }
+
+    // there might be an issue here when moving task across projects
+    fun updateOldestVisible(uuid: String, now: ExactTimeStamp) {
+        // 24 hack
+        val optional = getPastRootInstances(now).filter { it.isVisible(now, true) }.minBy { it.scheduleDateTime }
+
+        val oldestVisible = listOfNotNull(optional?.scheduleDate, now.date).min()!!
+
+        setOldestVisible(uuid, oldestVisible)
+    }
+
+    fun correctOldestVisible(date: Date) {
+        val oldestVisible = getOldestVisible()
+        check(oldestVisible != null && date < oldestVisible)
+
+        ErrorLogger.instance.logException(OldestVisibleException6("$name real oldest: $oldestVisible, correct oldest: $date"))
+    }
+
+    fun getInstances(
+            givenStartExactTimeStamp: ExactTimeStamp?,
+            givenEndExactTimeStamp: ExactTimeStamp,
+            now: ExactTimeStamp
+    ): List<Instance<*, *>> {
+        val startExactTimeStamp = listOfNotNull(
+                givenStartExactTimeStamp,
+                startExactTimeStamp,
+                getOldestVisible()?.let { ExactTimeStamp(it, HourMilli(0, 0, 0, 0)) } // 24 hack
+        ).max()!!
+
+        val endExactTimeStamp = listOfNotNull(
+                getEndExactTimeStamp(),
+                givenEndExactTimeStamp
+        ).min()!!
+
+        val scheduleInstances = if (startExactTimeStamp >= endExactTimeStamp)
+            listOf()
+        else
+            schedules.flatMap { it.getInstances(this as RemoteTask<*, *>, startExactTimeStamp, endExactTimeStamp).toList() }
+
+        val parentInstances = getParentTaskHierarchies().map { it.parentTask }
+                .flatMap { it.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now) }
+                .flatMap { it.getChildInstances(now) }
+                .asSequence()
+                .map { it.first }
+                .filter { it.taskKey == taskKey }
+                .toList()
+
+        return scheduleInstances + parentInstances
+    }
+
+    fun hasInstances(now: ExactTimeStamp) = existingInstances.values.isNotEmpty() || getInstances(null, now, now).isNotEmpty()
+
+    fun updateSchedules(
+            ownerKey: UserKey,
+            shownFactory: Instance.ShownFactory,
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            now: ExactTimeStamp
+    ) {
+        val removeSchedules = mutableListOf<Schedule>()
+        val addScheduleDatas = scheduleDatas.toMutableList()
+
+        val oldSchedules = getCurrentSchedules(now)
+        val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleData to it.schedules }
+        for ((key, value) in oldScheduleDatas) {
+            val existing = addScheduleDatas.singleOrNull { it.first == key }
+            if (existing != null)
+                addScheduleDatas.remove(existing)
+            else
+                removeSchedules.addAll(value)
+        }
+
+        val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
+        val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
+        val oldSingleSchedule = getSingleSchedule(now)
+
+        if (singleRemoveSchedule != null &&
+                singleAddSchedulePair != null &&
+                singleRemoveSchedule.scheduleId == oldSingleSchedule?.scheduleId
+        ) {
+            oldSingleSchedule.getInstance(this as RemoteTask<*, *>).setInstanceDateTime(
+                    shownFactory,
+                    ownerKey,
+                    singleAddSchedulePair.run { DateTime((first as ScheduleData.Single).date, second) },
+                    now
+            )
+        } else {
+            removeSchedules.forEach { it.setEndExactTimeStamp(now) }
+            addSchedules(ownerKey, addScheduleDatas, now)
+        }
+    }
+
+    private class OldestVisibleException6(message: String) : Exception(message)
+
+    fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
+
+    fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
+        it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp)
+    }.sortedBy { it.ordinal }
+
+    fun getImage(deviceDbInfo: DeviceDbInfo): ImageState? {
         val image = remoteTaskRecord.image ?: return null
 
         return if (image.uploaderUuid != null) {
@@ -58,7 +343,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
         }
     }
 
-    override fun setImage(deviceDbInfo: DeviceDbInfo, imageState: ImageState?) {
+    fun setImage(deviceDbInfo: DeviceDbInfo, imageState: ImageState?) {
         remoteTaskRecord.image = when (imageState) {
             null -> null
             is ImageState.Remote -> TaskJson.Image(imageState.uuid)
@@ -89,15 +374,15 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
                 .map { MonthlyWeekSchedule(this, RemoteMonthlyWeekScheduleBridge(remoteProject.remoteProjectRecord, it)) })
     }
 
-    override fun getEndData() = remoteTaskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
+    fun getEndData() = remoteTaskRecord.endData?.let { EndData(ExactTimeStamp(it.time), it.deleteInstances) }
 
-    override fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: EndData?) {
+    private fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: EndData?) {
         remoteTaskRecord.endData = endData?.let { TaskJson.EndData(it.exactTimeStamp.long, it.deleteInstances) }
 
         updateOldestVisible(uuid, now)
     }
 
-    override fun createChildTask(
+    fun createChildTask(
             now: ExactTimeStamp,
             name: String,
             note: String?,
@@ -112,36 +397,36 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
         return childTask
     }
 
-    override fun getOldestVisible() = remoteTaskRecord.oldestVisible
+    fun getOldestVisible() = remoteTaskRecord.oldestVisible
 
-    override fun setOldestVisible(uuid: String, date: Date) = remoteTaskRecord.setOldestVisible(uuid, OldestVisibleJson.fromDate(date))
+    private fun setOldestVisible(uuid: String, date: Date) = remoteTaskRecord.setOldestVisible(uuid, OldestVisibleJson.fromDate(date))
 
-    override fun delete() {
+    fun delete() {
         schedules.toMutableList().forEach { it.delete() }
 
         remoteProject.deleteTask(this)
         remoteTaskRecord.delete()
     }
 
-    override fun setName(name: String, note: String?) {
+    fun setName(name: String, note: String?) {
         check(name.isNotEmpty())
 
         remoteTaskRecord.name = name
         remoteTaskRecord.note = note
     }
 
-    override fun addSchedules(
+    private fun addSchedules(
             ownerKey: UserKey,
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp
     ) = createSchedules(ownerKey, now, scheduleDatas)
 
-    override fun addChild(childTask: RemoteTask<*, *>, now: ExactTimeStamp) {
+    fun addChild(childTask: RemoteTask<*, *>, now: ExactTimeStamp) {
         @Suppress("UNCHECKED_CAST")
         remoteProject.createTaskHierarchy(this, childTask as RemoteTask<T, U>, now)
     }
 
-    override fun deleteSchedule(schedule: Schedule) {
+    fun deleteSchedule(schedule: Schedule) {
         check(remoteSchedules.contains(schedule))
 
         remoteSchedules.remove(schedule)
@@ -176,7 +461,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
 
     fun getExistingInstanceIfPresent(scheduleKey: ScheduleKey) = existingRemoteInstances[scheduleKey]
 
-    override fun getInstance(scheduleDateTime: DateTime): Instance<*, *> {
+    fun getInstance(scheduleDateTime: DateTime): Instance<*, *> {
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)
 
         val existingInstance = getExistingInstanceIfPresent(scheduleKey)
@@ -315,13 +600,11 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
         }
     }
 
-    override fun getParentTaskHierarchies(): Set<TaskHierarchy> = remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)
+    fun getParentTaskHierarchies(): Set<TaskHierarchy> = remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)
 
-    override fun getChildTaskHierarchies() = remoteProject.getTaskHierarchiesByParentTaskKey(taskKey)
+    fun getChildTaskHierarchies() = remoteProject.getTaskHierarchiesByParentTaskKey(taskKey)
 
-    override fun belongsToRemoteProject() = true
-
-    override fun updateProject(
+    fun updateProject(
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp,
             projectId: ProjectKey
@@ -332,7 +615,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
             projectUpdater.convertRemoteToRemote(now, this, projectId)
     }
 
-    override fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String? {
+    fun getScheduleTextMultiline(scheduleTextFactory: ScheduleTextFactory, exactTimeStamp: ExactTimeStamp): String? {
         check(current(exactTimeStamp))
 
         val currentSchedules = getCurrentSchedules(exactTimeStamp)
@@ -344,10 +627,10 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
 
     fun generateInstance(scheduleDateTime: DateTime) = Instance(remoteProject, this, scheduleDateTime)
 
-    override fun getScheduleText(
+    fun getScheduleText(
             scheduleTextFactory: ScheduleTextFactory,
             exactTimeStamp: ExactTimeStamp,
-            showParent: Boolean
+            showParent: Boolean = false
     ): String? {
         check(current(exactTimeStamp))
 

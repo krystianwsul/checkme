@@ -9,7 +9,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
@@ -21,7 +20,10 @@ import com.krystianwsul.checkme.gui.NoCollapseBottomSheetDialogFragment
 import com.krystianwsul.checkme.gui.TimeDialogFragment
 import com.krystianwsul.checkme.gui.TimePickerDialogFragment
 import com.krystianwsul.checkme.gui.customtimes.ShowCustomTimeActivity
-import com.krystianwsul.checkme.utils.*
+import com.krystianwsul.checkme.utils.SerializableUnit
+import com.krystianwsul.checkme.utils.Utils
+import com.krystianwsul.checkme.utils.setFixedOnClickListener
+import com.krystianwsul.checkme.utils.startTicks
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.checkme.viewmodels.CreateTaskViewModel
 import com.krystianwsul.common.time.Date
@@ -226,12 +228,14 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                 dismiss()
             }
 
-            if (arguments!!.getBoolean(SHOW_DELETE_KEY)) {
+            if (requireArguments().getBoolean(SHOW_DELETE_KEY)) {
+                checkNotNull(position)
+
                 scheduleDialogRemove.apply {
                     visibility = View.VISIBLE
 
                     setOnClickListener {
-                        result.accept(Result.Delete(position))
+                        result.accept(Result.Delete(position!!))
 
                         dismiss()
                     }
@@ -561,9 +565,6 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
                     }
                 }
 
-                val listeners = data.field.getPrivateField<TextView, ArrayList<TextWatcher>>("mListeners")
-                data.field.removeTextChangedListener(listeners.last()) // prevent password mode from running animation that hides icon
-
                 if (!dropdown) {
                     data.layout.setEndIconOnClickListener {
                         data.property.set(null)
@@ -645,7 +646,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
 
         class Change(val position: Int?, val scheduleDialogData: ScheduleDialogData) : Result()
 
-        class Delete(val position: Int?) : Result()
+        class Delete(val position: Int) : Result()
 
         object Cancel : Result()
     }

@@ -106,9 +106,9 @@ class SharedProject(
     ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId }
 
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): SharedCustomTime {
-        check(remoteCustomTimes.containsKey(remoteCustomTimeId))
+        check(remoteCustomTimes.containsKey(remoteCustomTimeId as RemoteCustomTimeId.Shared))
 
-        return remoteCustomTimes.getValue(remoteCustomTimeId as RemoteCustomTimeId.Shared)
+        return remoteCustomTimes.getValue(remoteCustomTimeId)
     }
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)

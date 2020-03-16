@@ -7,10 +7,12 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
+import android.text.TextWatcher
 import android.util.Base64
 import android.view.*
 import android.widget.AutoCompleteTextView
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -253,12 +255,17 @@ fun ImageView.loadPhoto(url: String?) = Glide.with(this)
 
 fun newUuid() = UUID.randomUUID().toString()
 
-fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) {
+fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit) = setFixedOnClickListener(listener, listener)
+
+fun AutoCompleteTextView.setFixedOnClickListener(listener: () -> Unit, iconListener: () -> Unit) {
     setOnClickListener { listener() }
 
     setOnTouchListener { _, _ -> false }
 
-    (parent.parent as TextInputLayout).setEndIconOnClickListener { listener() }
+    (parent.parent as TextInputLayout).setEndIconOnClickListener { iconListener() }
+
+    val listeners = getPrivateField<TextView, java.util.ArrayList<TextWatcher>>("mListeners")
+    removeTextChangedListener(listeners.last()) // prevent password mode from running animation that hides icon
 }
 
 fun <T : Serializable> serialize(obj: T): String {

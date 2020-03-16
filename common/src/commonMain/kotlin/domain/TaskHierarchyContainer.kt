@@ -1,9 +1,9 @@
 package com.krystianwsul.common.domain
 
-import com.krystianwsul.common.firebase.models.RemoteTaskHierarchy
+import com.krystianwsul.common.firebase.models.TaskHierarchy
 import com.krystianwsul.common.utils.TaskKey
 
-class TaskHierarchyContainer<T, U : RemoteTaskHierarchy<*, *>> { // todo instance restructure these generics
+class TaskHierarchyContainer<T, U : TaskHierarchy<*, *>> { // todo instance restructure these generics
 
     private val taskHierarchiesById = HashMap<T, U>()
 
@@ -42,9 +42,9 @@ class TaskHierarchyContainer<T, U : RemoteTaskHierarchy<*, *>> { // todo instanc
 
     fun getById(id: T) = taskHierarchiesById[id]!!
 
-    val all: Collection<RemoteTaskHierarchy<*, *>> get() = taskHierarchiesById.values
+    val all: Collection<TaskHierarchy<*, *>> get() = taskHierarchiesById.values
 
-    private class MultiMap<U : RemoteTaskHierarchy<*, *>> {
+    private class MultiMap<U : TaskHierarchy<*, *>> {
 
         private val values = mutableMapOf<TaskKey, MutableSet<U>>()
 

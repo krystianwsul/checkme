@@ -175,7 +175,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         setMyEndExactTimeStamp(uuid, now, endData)
     }
 
-    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): RemoteTaskHierarchy<T, U>? {
+    fun getParentTaskHierarchy(exactTimeStamp: ExactTimeStamp): TaskHierarchy<T, U>? {
         val taskHierarchies = if (current(exactTimeStamp)) {
             check(notDeleted(exactTimeStamp))
 
@@ -597,7 +597,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         }
     }
 
-    fun getParentTaskHierarchies(): Set<RemoteTaskHierarchy<T, U>> = remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)
+    fun getParentTaskHierarchies(): Set<TaskHierarchy<T, U>> = remoteProject.getTaskHierarchiesByChildTaskKey(taskKey)
 
     fun getChildTaskHierarchies() = remoteProject.getTaskHierarchiesByParentTaskKey(taskKey)
 

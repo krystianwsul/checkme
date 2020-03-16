@@ -109,7 +109,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun exists() = (data is Data.Real)
 
-    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<T, U>, RemoteTaskHierarchy<*, *>>> {
+    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<T, U>, TaskHierarchy<*, *>>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
         val scheduleDateTime = scheduleDateTime

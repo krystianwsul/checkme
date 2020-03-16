@@ -4,8 +4,8 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.firebase.records.RemoteProjectUserRecord
 
 
-class RemoteProjectUser(
-        private val remoteProject: SharedProject,
+class ProjectUser(
+        private val sharedProject: SharedProject,
         private val remoteProjectUserRecord: RemoteProjectUserRecord
 ) {
 
@@ -30,7 +30,7 @@ class RemoteProjectUser(
         }
 
     fun delete() {
-        remoteProject.deleteUser(this)
+        sharedProject.deleteUser(this)
 
         remoteProjectUserRecord.delete()
     }

@@ -16,7 +16,7 @@ class SharedProject(
 
     private val remoteUsers = remoteProjectRecord.remoteUserRecords
             .values
-            .map { RemoteProjectUser(this, it) }
+            .map { ProjectUser(this, it) }
             .associateBy { it.id }
             .toMutableMap()
 
@@ -54,13 +54,13 @@ class SharedProject(
         check(!remoteUsers.containsKey(id))
 
         val remoteProjectUserRecord = remoteProjectRecord.newRemoteUserRecord(rootUser.userJson)
-        val remoteProjectUser = RemoteProjectUser(this, remoteProjectUserRecord)
+        val remoteProjectUser = ProjectUser(this, remoteProjectUserRecord)
 
         remoteUsers[id] = remoteProjectUser
     }
 
-    fun deleteUser(remoteProjectUser: RemoteProjectUser) {
-        val id = remoteProjectUser.id
+    fun deleteUser(projectUser: ProjectUser) {
+        val id = projectUser.id
         check(remoteUsers.containsKey(id))
 
         remoteUsers.remove(id)

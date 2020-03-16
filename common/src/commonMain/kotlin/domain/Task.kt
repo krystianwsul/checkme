@@ -92,7 +92,7 @@ abstract class Task {
 
     private class MockSingleScheduleBridge(
             private val singleSchedule: SingleSchedule,
-            private val instance: Instance
+            private val instance: Instance<*, *>
     ) : SingleScheduleBridge by singleSchedule.singleScheduleBridge {
 
         override val customTimeKey get() = instance.instanceTimePair.customTimeKey

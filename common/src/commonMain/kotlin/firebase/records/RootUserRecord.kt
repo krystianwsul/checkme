@@ -1,8 +1,8 @@
 package com.krystianwsul.common.firebase.records
 
+import com.krystianwsul.common.firebase.RootUserProperties
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.models.RootUserProperties
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 

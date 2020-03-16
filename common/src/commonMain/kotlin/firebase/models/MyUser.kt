@@ -1,11 +1,11 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.firebase.RemoteMyUserInterface
+import com.krystianwsul.common.firebase.MyUserProperties
 import com.krystianwsul.common.firebase.records.MyUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 
 
-class MyUser(private val remoteMyUserRecord: MyUserRecord) : RootUser(remoteMyUserRecord), RemoteMyUserInterface by remoteMyUserRecord {
+class MyUser(private val remoteMyUserRecord: MyUserRecord) : RootUser(remoteMyUserRecord), MyUserProperties by remoteMyUserRecord {
 
     override var photoUrl
         get() = super.photoUrl

@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase
 
-interface RemoteMyUserInterface {
+interface MyUserProperties {
 
     fun setToken(uuid: String, token: String?)
 

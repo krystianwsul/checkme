@@ -1,4 +1,4 @@
-package com.krystianwsul.common.firebase.models
+package com.krystianwsul.common.firebase
 
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.ProjectKey

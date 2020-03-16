@@ -29,7 +29,7 @@ class SharedProject(
     override val customTimes get() = remoteCustomTimes.values
 
     init {
-        for (remoteCustomTimeRecord in remoteProjectRecord.remoteCustomTimeRecords.values) {
+        for (remoteCustomTimeRecord in remoteProjectRecord.customTimeRecords.values) {
             @Suppress("LeakingThis")
             val remoteCustomTime = SharedCustomTime(this, remoteCustomTimeRecord)
 

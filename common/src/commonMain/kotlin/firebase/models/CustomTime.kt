@@ -1,6 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.firebase.records.RemoteCustomTimeRecord
+import com.krystianwsul.common.firebase.records.CustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.Time
@@ -13,13 +13,13 @@ abstract class CustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Time {
 
     protected abstract val project: Project<T, U>
 
-    abstract val remoteCustomTimeRecord: RemoteCustomTimeRecord<T, *>
+    abstract val customTimeRecord: CustomTimeRecord<T, *>
 
     abstract val id: T
 
     abstract val customTimeKey: CustomTimeKey<*, *>
 
-    val name get() = remoteCustomTimeRecord.name
+    val name get() = customTimeRecord.name
 
     val hourMinutes
         get() = DayOfWeek.values()
@@ -31,13 +31,13 @@ abstract class CustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Time {
     val projectId by lazy { project.id }
 
     override fun getHourMinute(dayOfWeek: DayOfWeek) = when (dayOfWeek) {
-        DayOfWeek.SUNDAY -> HourMinute(remoteCustomTimeRecord.sundayHour, remoteCustomTimeRecord.sundayMinute)
-        DayOfWeek.MONDAY -> HourMinute(remoteCustomTimeRecord.mondayHour, remoteCustomTimeRecord.mondayMinute)
-        DayOfWeek.TUESDAY -> HourMinute(remoteCustomTimeRecord.tuesdayHour, remoteCustomTimeRecord.tuesdayMinute)
-        DayOfWeek.WEDNESDAY -> HourMinute(remoteCustomTimeRecord.wednesdayHour, remoteCustomTimeRecord.wednesdayMinute)
-        DayOfWeek.THURSDAY -> HourMinute(remoteCustomTimeRecord.thursdayHour, remoteCustomTimeRecord.thursdayMinute)
-        DayOfWeek.FRIDAY -> HourMinute(remoteCustomTimeRecord.fridayHour, remoteCustomTimeRecord.fridayMinute)
-        DayOfWeek.SATURDAY -> HourMinute(remoteCustomTimeRecord.saturdayHour, remoteCustomTimeRecord.saturdayMinute)
+        DayOfWeek.SUNDAY -> HourMinute(customTimeRecord.sundayHour, customTimeRecord.sundayMinute)
+        DayOfWeek.MONDAY -> HourMinute(customTimeRecord.mondayHour, customTimeRecord.mondayMinute)
+        DayOfWeek.TUESDAY -> HourMinute(customTimeRecord.tuesdayHour, customTimeRecord.tuesdayMinute)
+        DayOfWeek.WEDNESDAY -> HourMinute(customTimeRecord.wednesdayHour, customTimeRecord.wednesdayMinute)
+        DayOfWeek.THURSDAY -> HourMinute(customTimeRecord.thursdayHour, customTimeRecord.thursdayMinute)
+        DayOfWeek.FRIDAY -> HourMinute(customTimeRecord.fridayHour, customTimeRecord.fridayMinute)
+        DayOfWeek.SATURDAY -> HourMinute(customTimeRecord.saturdayHour, customTimeRecord.saturdayMinute)
     }
 
     override fun toString() = name

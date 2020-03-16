@@ -19,7 +19,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : 
         const val PROJECT_JSON = "projectJson"
     }
 
-    abstract val remoteCustomTimeRecords: Map<out T, RemoteCustomTimeRecord<T, *>>
+    abstract val customTimeRecords: Map<out T, CustomTimeRecord<T, *>>
 
     val remoteTaskRecords = projectJson.tasks
             .mapValues { (id, taskJson) ->
@@ -52,7 +52,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : 
     override val children
         get() = remoteTaskRecords.values +
                 remoteTaskHierarchyRecords.values +
-                remoteCustomTimeRecords.values
+                customTimeRecords.values
 
     fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T, V> {
         val remoteTaskRecord = RemoteTaskRecord(this, taskJson)
@@ -76,7 +76,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : 
 
     abstract fun getScheduleRecordId(taskId: String): String
 
-    abstract fun getCustomTimeRecord(id: String): RemoteCustomTimeRecord<T, *>
+    abstract fun getCustomTimeRecord(id: String): CustomTimeRecord<T, *>
 
     abstract fun getRemoteCustomTimeId(id: String): T
 

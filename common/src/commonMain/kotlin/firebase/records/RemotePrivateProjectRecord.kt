@@ -19,13 +19,13 @@ class RemotePrivateProjectRecord(
         projectJson
 ) {
 
-    override val remoteCustomTimeRecords = projectJson.customTimes
+    override val customTimeRecords = projectJson.customTimes
             .map { (id, customTimeJson) ->
                 check(id.isNotEmpty())
 
                 val remoteCustomTimeId = RemoteCustomTimeId.Private(id)
 
-                remoteCustomTimeId to RemotePrivateCustomTimeRecord(remoteCustomTimeId, this, customTimeJson)
+                remoteCustomTimeId to PrivateCustomTimeRecord(remoteCustomTimeId, this, customTimeJson)
             }
             .toMap()
             .toMutableMap()
@@ -42,11 +42,11 @@ class RemotePrivateProjectRecord(
             projectJson: PrivateProjectJson
     ) : this(databaseWrapper, true, userInfo.key.toPrivateProjectKey(), projectJson)
 
-    fun newRemoteCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): RemotePrivateCustomTimeRecord {
-        val remoteCustomTimeRecord = RemotePrivateCustomTimeRecord(this, customTimeJson)
-        check(!remoteCustomTimeRecords.containsKey(remoteCustomTimeRecord.id))
+    fun newRemoteCustomTimeRecord(customTimeJson: PrivateCustomTimeJson): PrivateCustomTimeRecord {
+        val remoteCustomTimeRecord = PrivateCustomTimeRecord(this, customTimeJson)
+        check(!customTimeRecords.containsKey(remoteCustomTimeRecord.id))
 
-        remoteCustomTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
+        customTimeRecords[remoteCustomTimeRecord.id] = remoteCustomTimeRecord
         return remoteCustomTimeRecord
     }
 
@@ -60,7 +60,7 @@ class RemotePrivateProjectRecord(
                     .associateBy({ it.id }, { it.createObject })
                     .toMutableMap()
 
-            customTimes = remoteCustomTimeRecords.values
+            customTimes = customTimeRecords.values
                     .associateBy({ it.id.value }, { it.createObject })
                     .toMutableMap()
         }
@@ -79,7 +79,7 @@ class RemotePrivateProjectRecord(
 
     override fun getTaskHierarchyRecordId() = databaseWrapper.getPrivateTaskHierarchyRecordId(id)
 
-    override fun getCustomTimeRecord(id: String) = remoteCustomTimeRecords.getValue(RemoteCustomTimeId.Private(id))
+    override fun getCustomTimeRecord(id: String) = customTimeRecords.getValue(RemoteCustomTimeId.Private(id))
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
 

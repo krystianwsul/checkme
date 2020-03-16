@@ -7,7 +7,7 @@ import com.krystianwsul.common.utils.UserKey
 import kotlin.properties.Delegates.observable
 
 
-class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.Shared, SharedCustomTimeJson> {
+class SharedCustomTimeRecord : CustomTimeRecord<RemoteCustomTimeId.Shared, SharedCustomTimeJson> {
 
     override val id: RemoteCustomTimeId.Shared
     override val remoteProjectRecord: RemoteSharedProjectRecord
@@ -24,7 +24,7 @@ class RemoteSharedCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.S
 
     override val createObject get() = customTimeJson
 
-    override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
+    override fun deleteFromParent() = check(remoteProjectRecord.customTimeRecords.remove(id) == this)
 
     override fun mine(userInfo: UserInfo) = ownerKey == userInfo.key
 

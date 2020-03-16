@@ -6,7 +6,7 @@ import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
-class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.Private, PrivateCustomTimeJson> {
+class PrivateCustomTimeRecord : CustomTimeRecord<RemoteCustomTimeId.Private, PrivateCustomTimeJson> {
 
     override val id: RemoteCustomTimeId.Private
     override val remoteProjectRecord: RemotePrivateProjectRecord
@@ -23,7 +23,7 @@ class RemotePrivateCustomTimeRecord : RemoteCustomTimeRecord<RemoteCustomTimeId.
 
     override val createObject get() = customTimeJson
 
-    override fun deleteFromParent() = check(remoteProjectRecord.remoteCustomTimeRecords.remove(id) == this)
+    override fun deleteFromParent() = check(remoteProjectRecord.customTimeRecords.remove(id) == this)
 
     override fun mine(userInfo: UserInfo) = true
 

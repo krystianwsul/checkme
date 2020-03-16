@@ -1,7 +1,7 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.firebase.records.RemoteCustomTimeRecord
-import com.krystianwsul.common.firebase.records.RemotePrivateCustomTimeRecord
+import com.krystianwsul.common.firebase.records.CustomTimeRecord
+import com.krystianwsul.common.firebase.records.PrivateCustomTimeRecord
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.HourMinute
@@ -11,20 +11,20 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class PrivateCustomTime(
         override val project: PrivateProject,
-        override val remoteCustomTimeRecord: RemotePrivateCustomTimeRecord
+        override val customTimeRecord: PrivateCustomTimeRecord
 ) : CustomTime<RemoteCustomTimeId.Private, ProjectKey.Private>() {
 
-    override val id = remoteCustomTimeRecord.id
+    override val id = customTimeRecord.id
 
     override val customTimeKey by lazy { CustomTimeKey.Private(projectId, id) }
 
     private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(id)
-            .map { (it as CustomTime<*, *>).remoteCustomTimeRecord }
-            .toMutableList<RemoteCustomTimeRecord<*, *>>()
-            .apply { add(remoteCustomTimeRecord) }
+            .map { (it as CustomTime<*, *>).customTimeRecord }
+            .toMutableList<CustomTimeRecord<*, *>>()
+            .apply { add(customTimeRecord) }
 
     fun current(exactTimeStamp: ExactTimeStamp): Boolean {
-        val current = remoteCustomTimeRecord.current
+        val current = customTimeRecord.current
         val endExactTimeStamp = endExactTimeStamp
 
         check(endExactTimeStamp == null || !current)
@@ -33,18 +33,18 @@ class PrivateCustomTime(
     }
 
     var endExactTimeStamp
-        get() = remoteCustomTimeRecord.endTime?.let { ExactTimeStamp(it) }
+        get() = customTimeRecord.endTime?.let { ExactTimeStamp(it) }
         set(value) {
-            check((value == null) != (remoteCustomTimeRecord.endTime == null))
+            check((value == null) != (customTimeRecord.endTime == null))
 
-            remoteCustomTimeRecord.current = value == null
-            remoteCustomTimeRecord.endTime = value?.long
+            customTimeRecord.current = value == null
+            customTimeRecord.endTime = value?.long
         }
 
     override fun delete() {
         project.deleteCustomTime(this)
 
-        remoteCustomTimeRecord.delete()
+        customTimeRecord.delete()
     }
 
     fun setHourMinute(

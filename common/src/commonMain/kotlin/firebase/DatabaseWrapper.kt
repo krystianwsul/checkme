@@ -22,7 +22,7 @@ abstract class DatabaseWrapper {
 
     fun getPrivateTaskHierarchyRecordId(projectId: ProjectKey.Private) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
 
-    fun getPrivateCustomTimeRecordId(projectId: ProjectKey.Private) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
+    fun getPrivateCustomTimeRecordId(projectId: ProjectKey.Private) = getNewId("$PRIVATE_PROJECTS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${CustomTimeRecord.CUSTOM_TIMES}")
 
     fun newSharedProjectRecordId() = ProjectKey.Shared(getNewId(RECORDS_KEY))
 
@@ -32,7 +32,7 @@ abstract class DatabaseWrapper {
 
     fun newSharedTaskHierarchyRecordId(projectId: ProjectKey.Shared) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteTaskHierarchyRecord.TASK_HIERARCHIES}")
 
-    fun newSharedCustomTimeRecordId(projectId: ProjectKey.Shared) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${RemoteCustomTimeRecord.CUSTOM_TIMES}")
+    fun newSharedCustomTimeRecordId(projectId: ProjectKey.Shared) = getNewId("$RECORDS_KEY/$projectId/${RemoteProjectRecord.PROJECT_JSON}/${CustomTimeRecord.CUSTOM_TIMES}")
 
     fun updateRecords(
             values: Map<String, Any?>,

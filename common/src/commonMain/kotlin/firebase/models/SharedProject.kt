@@ -24,7 +24,7 @@ class SharedProject(
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Shared, SharedCustomTime>()
     override val remoteTasks: MutableMap<String, Task<RemoteCustomTimeId.Shared, ProjectKey.Shared>>
-    override val taskHierarchyContainer = TaskHierarchyContainer<String, TaskHierarchy<RemoteCustomTimeId.Shared, ProjectKey.Shared>>()
+    override val taskHierarchyContainer = TaskHierarchyContainer<RemoteCustomTimeId.Shared, ProjectKey.Shared>()
 
     override val customTimes get() = remoteCustomTimes.values
 

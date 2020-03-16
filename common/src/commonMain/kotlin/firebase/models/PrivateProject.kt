@@ -14,7 +14,7 @@ class PrivateProject(
 
     override val remoteCustomTimes = HashMap<RemoteCustomTimeId.Private, PrivateCustomTime>()
     override val remoteTasks: MutableMap<String, Task<RemoteCustomTimeId.Private, ProjectKey.Private>>
-    override val taskHierarchyContainer = TaskHierarchyContainer<String, TaskHierarchy<RemoteCustomTimeId.Private, ProjectKey.Private>>()
+    override val taskHierarchyContainer = TaskHierarchyContainer<RemoteCustomTimeId.Private, ProjectKey.Private>()
 
     override val customTimes get() = remoteCustomTimes.values
 

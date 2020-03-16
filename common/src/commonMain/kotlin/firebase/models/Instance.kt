@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.InstanceRecord
-import com.krystianwsul.common.domain.TaskHierarchy
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -110,7 +109,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun exists() = (data is Data.Real)
 
-    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<T, U>, TaskHierarchy>> {
+    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<T, U>, RemoteTaskHierarchy<*, *>>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
         val scheduleDateTime = scheduleDateTime

@@ -4,6 +4,8 @@ package com.krystianwsul.common.domain.schedules
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import com.soywiz.klock.months
@@ -21,12 +23,12 @@ class MonthlyDaySchedule(
 
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
-    override fun getInstanceInDate(
-            task: Task<*, *>,
+    override fun <T : RemoteCustomTimeId, U : ProjectKey> getInstanceInDate(
+            task: Task<T, U>,
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?
-    ): Instance<*, *>? {
+    ): Instance<T, U>? {
         val dateThisMonth = getDate(date.year, date.month)
 
         if (dateThisMonth != date)

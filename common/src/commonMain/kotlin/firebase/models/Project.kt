@@ -311,10 +311,10 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
             startExactTimeStamp: ExactTimeStamp?,
             endExactTimeStamp: ExactTimeStamp,
             now: ExactTimeStamp
-    ): List<Instance<*, *>> {
+    ): List<Instance<T, U>> {
         check(startExactTimeStamp == null || startExactTimeStamp < endExactTimeStamp)
 
-        val allInstances = mutableMapOf<InstanceKey, Instance<*, *>>()
+        val allInstances = mutableMapOf<InstanceKey, Instance<T, U>>()
 
         for (instance in existingInstances) {
             val instanceExactTimeStamp = instance.instanceDateTime

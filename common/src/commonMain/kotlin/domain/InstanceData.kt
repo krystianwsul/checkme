@@ -15,6 +15,7 @@ sealed class InstanceData<T, U, V : InstanceRecord<U>> {
 
     abstract val hidden: Boolean
 
+    // todo remote remove abstract
     abstract class Real<T, U, V : InstanceRecord<U>>(val instanceRecord: V) : InstanceData<T, U, V>() {
 
         protected abstract fun getCustomTime(customTimeId: U): CustomTime<*, *>

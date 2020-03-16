@@ -5,6 +5,8 @@ import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.NullableWrapper
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.soywiz.klock.days
 
 abstract class RepeatingSchedule(rootTask: Task<*, *>) : Schedule(rootTask) {
@@ -14,11 +16,11 @@ abstract class RepeatingSchedule(rootTask: Task<*, *>) : Schedule(rootTask) {
     val from get() = repeatingScheduleBridge.from
     val until get() = repeatingScheduleBridge.until
 
-    override fun getInstances(
-            task: Task<*, *>,
+    override fun <T : RemoteCustomTimeId, U : ProjectKey> getInstances(
+            task: Task<T, U>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp? // can be null only if until or endExactTimeStamp are set
-    ): Sequence<Instance<*, *>> {
+    ): Sequence<Instance<T, U>> {
         val startExactTimeStamp = listOfNotNull(
                 startExactTimeStamp,
                 repeatingScheduleBridge.from
@@ -71,12 +73,12 @@ abstract class RepeatingSchedule(rootTask: Task<*, *>) : Schedule(rootTask) {
         return nullableSequence.filterNotNull()
     }
 
-    protected abstract fun getInstanceInDate(
-            task: Task<*, *>,
+    protected abstract fun <T : RemoteCustomTimeId, U : ProjectKey> getInstanceInDate(
+            task: Task<T, U>,
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?
-    ): Instance<*, *>?
+    ): Instance<T, U>?
 
     override fun isVisible(task: Task<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean {
         check(current(now))

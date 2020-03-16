@@ -6,6 +6,8 @@ import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimeStamp
+import com.krystianwsul.common.utils.ProjectKey
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleType
 
 
@@ -51,11 +53,11 @@ abstract class Schedule(private val rootTask: Task<*, *>) {
     fun current(exactTimeStamp: ExactTimeStamp) =
             startExactTimeStamp <= exactTimeStamp && (getEndExactTimeStamp()?.let { it > exactTimeStamp } != false)
 
-    abstract fun getInstances(
-            task: Task<*, *>,
+    abstract fun <T : RemoteCustomTimeId, U : ProjectKey> getInstances(
+            task: Task<T, U>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
-    ): Sequence<Instance<*, *>>
+    ): Sequence<Instance<T, U>>
 
     abstract fun isVisible(task: Task<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean
 

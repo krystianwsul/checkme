@@ -108,7 +108,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun exists() = (instanceData is InstanceData.Real)
 
-    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<*, *>, TaskHierarchy>> {
+    fun getChildInstances(now: ExactTimeStamp): List<Pair<Instance<T, U>, TaskHierarchy>> {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now).first
 
         val scheduleDateTime = scheduleDateTime
@@ -188,7 +188,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
         }
     }
 
-    fun getParentInstance(now: ExactTimeStamp): Instance<*, *>? {
+    fun getParentInstance(now: ExactTimeStamp): Instance<T, U>? {
         val hierarchyExactTimeStamp = getHierarchyExactTimeStamp(now)
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null

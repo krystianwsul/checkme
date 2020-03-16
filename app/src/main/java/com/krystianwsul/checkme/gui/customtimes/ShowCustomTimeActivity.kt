@@ -24,7 +24,7 @@ import com.krystianwsul.checkme.viewmodels.ShowCustomTimeViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
-import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.CustomTimeKey
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.android.synthetic.main.activity_show_custom_time.*
 import kotlinx.android.synthetic.main.toolbar_edit_text.*
@@ -34,7 +34,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
     companion object {
 
-        const val CUSTOM_TIME_ID_KEY = "customTimeId"
+        const val CUSTOM_TIME_KEY = "customTimeKey"
         private const val NEW_KEY = "new"
 
         private const val KEY_HOUR_MINUTES = "hourMinutes"
@@ -49,11 +49,11 @@ class ShowCustomTimeActivity : NavBarActivity() {
         private val defaultHourMinute = HourMinute(9, 0)
 
         fun getEditIntent(
-                customTimeId: RemoteCustomTimeId.Private,
+                customTimeKey: CustomTimeKey.Private,
                 context: Context
         ) = Intent(context, ShowCustomTimeActivity::class.java).apply {
             @Suppress("CAST_NEVER_SUCCEEDS")
-            putExtra(CUSTOM_TIME_ID_KEY, customTimeId as Parcelable)
+            putExtra(CUSTOM_TIME_KEY, customTimeKey as Parcelable)
         }
 
         fun getCreateIntent(context: Context) = Intent(context, ShowCustomTimeActivity::class.java).apply {
@@ -61,7 +61,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
         }
     }
 
-    private var customTimeId: RemoteCustomTimeId.Private? = null
+    private var customTimeKey: CustomTimeKey.Private? = null
 
     private var data: ShowCustomTimeViewModel.Data? = null
 
@@ -102,7 +102,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.action_save).isVisible = customTimeId == null || data != null
+        menu.findItem(R.id.action_save).isVisible = customTimeKey == null || data != null
 
         return true
     }
@@ -129,7 +129,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                     } else {
                         val customTimeKey = DomainFactory.instance.createCustomTime(SaveService.Source.GUI, name, hourMinutes)
 
-                        setResult(Activity.RESULT_OK, Intent().apply { putExtra(CUSTOM_TIME_ID_KEY, customTimeKey as Parcelable) })
+                        setResult(Activity.RESULT_OK, Intent().apply { putExtra(CUSTOM_TIME_KEY, customTimeKey as Parcelable) })
                     }
 
                     finish()
@@ -178,7 +178,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
 
             updateGui()
         } else {
-            if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
+            if (intent.hasExtra(CUSTOM_TIME_KEY)) {
                 check(!intent.hasExtra(NEW_KEY))
             } else {
                 check(intent.hasExtra(NEW_KEY))
@@ -191,13 +191,13 @@ class ShowCustomTimeActivity : NavBarActivity() {
             }
         }
 
-        if (intent.hasExtra(CUSTOM_TIME_ID_KEY)) {
+        if (intent.hasExtra(CUSTOM_TIME_KEY)) {
             check(!intent.hasExtra(NEW_KEY))
 
-            customTimeId = intent.getParcelableExtra(CUSTOM_TIME_ID_KEY)
+            customTimeKey = intent.getParcelableExtra(CUSTOM_TIME_KEY)
 
             showCustomTimeViewModel = getViewModel<ShowCustomTimeViewModel>().apply {
-                start(customTimeId!!)
+                start(customTimeKey!!)
 
                 createDisposable += data.subscribe { onLoadFinished(it) }
             }
@@ -328,7 +328,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
     }
 
     private fun dataChanged(): Boolean {
-        if (customTimeId == null) {
+        if (customTimeKey == null) {
             check(data == null)
 
             if (!toolbarEditText.text.isNullOrEmpty())

@@ -4,19 +4,20 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() {
 
     override val domainListener = object : DomainListener<Data>() {
 
-        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowCustomTimeData(customTimeId)
+        override fun getData(domainFactory: DomainFactory) = domainFactory.getShowCustomTimeData(customTimeKey)
     }
 
-    private lateinit var customTimeId: RemoteCustomTimeId.Private
+    private lateinit var customTimeKey: CustomTimeKey.Private
 
-    fun start(customTimeId: RemoteCustomTimeId.Private) {
-        this.customTimeId = customTimeId
+    fun start(customTimeKey: CustomTimeKey.Private) {
+        this.customTimeKey = customTimeKey
 
         internalStart()
     }

@@ -6,6 +6,7 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemoteSharedProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.UserKey
@@ -110,6 +111,8 @@ class SharedProject(
 
         return remoteCustomTimes.getValue(remoteCustomTimeId)
     }
+
+    override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<RemoteCustomTimeId.Shared, ProjectKey.Shared>): CustomTime<RemoteCustomTimeId.Shared, ProjectKey.Shared> = getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
 

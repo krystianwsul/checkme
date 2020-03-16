@@ -516,7 +516,7 @@ class ScheduleDialogFragment : NoCollapseBottomSheetDialogFragment() {
         check(requestCode == ShowCustomTimeActivity.CREATE_CUSTOM_TIME_REQUEST_CODE)
 
         if (resultCode == Activity.RESULT_OK)
-            scheduleDialogData.timePairPersist.customTimeKey = data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_ID_KEY)!!
+            scheduleDialogData.timePairPersist.customTimeKey = data!!.getParcelableExtra<CustomTimeKey.Private>(ShowCustomTimeActivity.CUSTOM_TIME_KEY)!!
     }
 
     @SuppressLint("SetTextI18n")

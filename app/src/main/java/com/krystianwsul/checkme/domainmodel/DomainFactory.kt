@@ -451,10 +451,10 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun getShowCustomTimeData(customTimeId: RemoteCustomTimeId.Private): ShowCustomTimeViewModel.Data {
+    fun getShowCustomTimeData(customTimeKey: CustomTimeKey.Private): ShowCustomTimeViewModel.Data {
         MyCrashlytics.log("DomainFactory.getShowCustomTimeData")
 
-        val customTime = remoteProjectFactory.remotePrivateProject.getRemoteCustomTime(customTimeId)
+        val customTime = remoteProjectFactory.remotePrivateProject.getRemoteCustomTime(customTimeKey)
 
         val hourMinutes = DayOfWeek.values().associate { it to customTime.getHourMinute(it) }
 
@@ -467,7 +467,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val entries = getCurrentRemoteCustomTimes(now).map { ShowCustomTimesViewModel.CustomTimeData(it.id, it.name) }.toMutableList()
+        val entries = getCurrentRemoteCustomTimes(now).map { ShowCustomTimesViewModel.CustomTimeData(it.customTimeKey, it.name) }.toMutableList()
 
         return ShowCustomTimesViewModel.Data(entries)
     }
@@ -1872,7 +1872,12 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun setCustomTimesCurrent(dataId: Int, source: SaveService.Source, customTimeIds: List<RemoteCustomTimeId.Private>, current: Boolean) {
+    fun setCustomTimesCurrent(
+            dataId: Int,
+            source: SaveService.Source,
+            customTimeIds: List<CustomTimeKey.Private>,
+            current: Boolean
+    ) {
         MyCrashlytics.log("DomainFactory.setCustomTimesCurrent")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 

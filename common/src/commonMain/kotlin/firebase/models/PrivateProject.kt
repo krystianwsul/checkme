@@ -4,6 +4,7 @@ import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.records.RemotePrivateProjectRecord
 import com.krystianwsul.common.time.DayOfWeek
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.UserKey
@@ -61,6 +62,8 @@ class PrivateProject(
 
         return remoteCustomTimes.getValue(remoteCustomTimeId)
     }
+
+    override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<RemoteCustomTimeId.Private, ProjectKey.Private>): PrivateCustomTime = getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
 
     override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
 

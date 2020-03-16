@@ -22,7 +22,7 @@ import com.krystianwsul.checkme.persistencemodel.SaveService
 import com.krystianwsul.checkme.utils.animateVisibility
 import com.krystianwsul.checkme.viewmodels.ShowCustomTimesViewModel
 import com.krystianwsul.checkme.viewmodels.getViewModel
-import com.krystianwsul.common.utils.RemoteCustomTimeId
+import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.treeadapter.ModelNode
 import com.krystianwsul.treeadapter.TreeNode
 import com.krystianwsul.treeadapter.TreeNodeCollection
@@ -44,7 +44,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
     lateinit var treeViewAdapter: TreeViewAdapter<NodeHolder>
         private set
 
-    private var selectedCustomTimeIds: List<RemoteCustomTimeId.Private>? = null
+    private var selectedCustomTimeKeys: List<CustomTimeKey.Private>? = null
 
     private val listener get() = activity as CustomTimesListListener
 
@@ -64,14 +64,14 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
             when (itemId) {
                 R.id.action_custom_times_delete -> {
-                    val selectedCustomTimeIds = (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).customTimeWrappers
+                    val selectedCustomTimeKeys = (treeViewAdapter.treeModelAdapter as CustomTimesAdapter).customTimeWrappers
                             .filter { it.treeNode.isSelected }
                             .map { it.customTimeData.id }
 
-                    DomainFactory.instance.setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeIds, false)
+                    DomainFactory.instance.setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeKeys, false)
 
-                    customTimesListListener.showSnackbarRemoved(selectedCustomTimeIds.size) {
-                        DomainFactory.instance.setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeIds, true)
+                    customTimesListListener.showSnackbarRemoved(selectedCustomTimeKeys.size) {
+                        DomainFactory.instance.setCustomTimesCurrent(0, SaveService.Source.GUI, selectedCustomTimeKeys, true)
                     }
                 }
                 else -> throw UnsupportedOperationException()
@@ -117,8 +117,8 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         showTimesList.layoutManager = LinearLayoutManager(activity)
 
         if (savedInstanceState?.containsKey(SELECTED_CUSTOM_TIME_IDS_KEY) == true) {
-            selectedCustomTimeIds = savedInstanceState.getParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY)!!
-            check(selectedCustomTimeIds!!.isNotEmpty())
+            selectedCustomTimeKeys = savedInstanceState.getParcelableArrayList(SELECTED_CUSTOM_TIME_IDS_KEY)!!
+            check(selectedCustomTimeKeys!!.isNotEmpty())
         }
 
         showCustomTimesViewModel = getViewModel<ShowCustomTimesViewModel>().apply {
@@ -132,7 +132,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         this.data = data
 
         if (this::treeViewAdapter.isInitialized) {
-            selectedCustomTimeIds = treeViewAdapter.selectedNodes
+            selectedCustomTimeKeys = treeViewAdapter.selectedNodes
                     .asSequence()
                     .map { (it.modelNode as CustomTimeNode).customTimeData.id }
                     .toList()
@@ -252,7 +252,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
         override val ripple = true
 
         fun initialize(treeNodeCollection: TreeNodeCollection<NodeHolder>): TreeNode<NodeHolder> {
-            treeNode = TreeNode(this, treeNodeCollection, false, selectedCustomTimeIds?.contains(customTimeData.id)
+            treeNode = TreeNode(this, treeNodeCollection, false, selectedCustomTimeKeys?.contains(customTimeData.id)
                     ?: false)
             treeNode.setChildTreeNodes(listOf())
             return treeNode
@@ -270,7 +270,7 @@ class ShowCustomTimesFragment : AbstractFragment(), FabUser {
 
         override fun onClick(holder: NodeHolder) = requireActivity().startActivity(ShowCustomTimeActivity.getEditIntent(customTimeData.id, requireActivity()))
 
-        override fun compareTo(other: ModelNode<NodeHolder>) = customTimeData.id.compareTo((other as CustomTimeNode).customTimeData.id)
+        override fun compareTo(other: ModelNode<NodeHolder>) = customTimeData.id.remoteCustomTimeId.compareTo((other as CustomTimeNode).customTimeData.id.remoteCustomTimeId)
     }
 
     interface CustomTimesListListener : ActionModeListener, SnackbarListener {

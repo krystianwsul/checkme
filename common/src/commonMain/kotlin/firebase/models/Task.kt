@@ -12,7 +12,7 @@ import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 
-class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask<*, *>
+class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         val remoteProject: Project<T, U>,
         private val remoteTaskRecord: RemoteTaskRecord<T, *>
 ) {
@@ -61,7 +61,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
         if (schedules.isEmpty())
             return true
 
-        if (schedules.any { it.isVisible(this as RemoteTask<*, *>, now, hack24) })
+        if (schedules.any { it.isVisible(this as Task<*, *>, now, hack24) })
             return true
 
         return false
@@ -69,8 +69,8 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
 
     private fun getRootTask(
             exactTimeStamp: ExactTimeStamp
-    ): RemoteTask<*, *> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp)
-            ?: (this as RemoteTask<*, *>)
+    ): Task<*, *> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp)
+            ?: (this as Task<*, *>)
 
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(current(exactTimeStamp))
@@ -78,7 +78,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
         val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
 
         getSingleSchedule(exactTimeStamp)?.let { singleSchedule ->
-            val instance = singleSchedule.getInstance(this as RemoteTask<*, *>)
+            val instance = singleSchedule.getInstance(this as Task<*, *>)
 
             if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
                 return listOf(SingleSchedule(this, MockSingleScheduleBridge(singleSchedule, instance)))
@@ -205,7 +205,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
         setMyEndExactTimeStamp(uuid, now, null)
     }
 
-    fun getParentTask(exactTimeStamp: ExactTimeStamp): RemoteTask<*, *>? {
+    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task<*, *>? {
         check(notDeleted(exactTimeStamp))
 
         return getParentTaskHierarchy(exactTimeStamp)?.let {
@@ -268,7 +268,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
         val scheduleInstances = if (startExactTimeStamp >= endExactTimeStamp)
             listOf()
         else
-            schedules.flatMap { it.getInstances(this as RemoteTask<*, *>, startExactTimeStamp, endExactTimeStamp).toList() }
+            schedules.flatMap { it.getInstances(this as Task<*, *>, startExactTimeStamp, endExactTimeStamp).toList() }
 
         val parentInstances = getParentTaskHierarchies().map { it.parentTask }
                 .flatMap { it.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now) }
@@ -310,7 +310,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
                 singleAddSchedulePair != null &&
                 singleRemoveSchedule.scheduleId == oldSingleSchedule?.scheduleId
         ) {
-            oldSingleSchedule.getInstance(this as RemoteTask<*, *>).setInstanceDateTime(
+            oldSingleSchedule.getInstance(this as Task<*, *>).setInstanceDateTime(
                     shownFactory,
                     ownerKey,
                     singleAddSchedulePair.run { DateTime((first as ScheduleData.Single).date, second) },
@@ -387,7 +387,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
             name: String,
             note: String?,
             image: TaskJson.Image?
-    ): RemoteTask<T, U> {
+    ): Task<T, U> {
         val taskJson = TaskJson(name, now.long, null, note, image = image)
 
         val childTask = remoteProject.newRemoteTask(taskJson)
@@ -421,9 +421,9 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
             now: ExactTimeStamp
     ) = createSchedules(ownerKey, now, scheduleDatas)
 
-    fun addChild(childTask: RemoteTask<*, *>, now: ExactTimeStamp) {
+    fun addChild(childTask: Task<*, *>, now: ExactTimeStamp) {
         @Suppress("UNCHECKED_CAST")
-        remoteProject.createTaskHierarchy(this, childTask as RemoteTask<T, U>, now)
+        remoteProject.createTaskHierarchy(this, childTask as Task<T, U>, now)
     }
 
     fun deleteSchedule(schedule: Schedule) {
@@ -608,7 +608,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
             projectUpdater: ProjectUpdater,
             now: ExactTimeStamp,
             projectId: ProjectKey
-    ): RemoteTask<*, *> {
+    ): Task<*, *> {
         return if (projectId == remoteProject.id)
             this
         else
@@ -659,9 +659,9 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>( // todo fix RemoteTask
 
         fun <T : RemoteCustomTimeId, U : ProjectKey> convertRemoteToRemote(
                 now: ExactTimeStamp,
-                startingRemoteTask: RemoteTask<T, U>,
+                startingTask: Task<T, U>,
                 projectId: ProjectKey
-        ): RemoteTask<*, *>
+        ): Task<*, *>
     }
 
     data class EndData(

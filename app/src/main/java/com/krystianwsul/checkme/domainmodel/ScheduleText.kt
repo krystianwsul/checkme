@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.prettyPrint
 import com.krystianwsul.checkme.utils.time.getDisplayText
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.models.Project
-import com.krystianwsul.common.firebase.models.RemoteTask
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimePair
@@ -17,7 +17,7 @@ import java.util.*
 
 sealed class ScheduleText {
 
-    companion object : RemoteTask.ScheduleTextFactory {
+    companion object : Task.ScheduleTextFactory {
 
         override fun getScheduleText(
                 scheduleGroup: ScheduleGroup,

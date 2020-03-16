@@ -2,14 +2,14 @@ package com.krystianwsul.common.domain.schedules
 
 
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.RemoteTask
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.DateTime
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.ScheduleType
 
 class SingleSchedule(
-        rootTask: RemoteTask<*, *>,
+        rootTask: Task<*, *>,
         val singleScheduleBridge: SingleScheduleBridge
 ) : Schedule(rootTask) {
 
@@ -21,12 +21,12 @@ class SingleSchedule(
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    fun getInstance(task: RemoteTask<*, *>) = task.getInstance(dateTime)
+    fun getInstance(task: Task<*, *>) = task.getInstance(dateTime)
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 
     override fun getInstances(
-            task: RemoteTask<*, *>,
+            task: Task<*, *>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
     ): Sequence<Instance<*, *>> {
@@ -44,7 +44,7 @@ class SingleSchedule(
         return sequenceOf(getInstance(task))
     }
 
-    override fun isVisible(task: RemoteTask<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean {
+    override fun isVisible(task: Task<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean {
         check(current(now))
 
         return getInstance(task).isVisible(now, hack24)

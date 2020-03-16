@@ -20,7 +20,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     abstract val remoteProjectRecord: RemoteProjectRecord<T, *, U>
 
-    protected abstract val remoteTasks: MutableMap<String, RemoteTask<T, U>>
+    protected abstract val remoteTasks: MutableMap<String, Task<T, U>>
     protected abstract val remoteTaskHierarchyContainer: TaskHierarchyContainer<String, RemoteTaskHierarchy<T, U>>
     protected abstract val remoteCustomTimes: Map<T, CustomTime<T, U>>
 
@@ -50,10 +50,10 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     val existingInstances get() = tasks.flatMap { it.existingInstances.values }
 
-    fun newRemoteTask(taskJson: TaskJson): RemoteTask<T, U> {
+    fun newRemoteTask(taskJson: TaskJson): Task<T, U> {
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
-        val remoteTask = RemoteTask(this, remoteTaskRecord)
+        val remoteTask = Task(this, remoteTaskRecord)
         check(!remoteTasks.containsKey(remoteTask.id))
         remoteTasks[remoteTask.id] = remoteTask
 
@@ -61,11 +61,11 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
     }
 
     fun createTaskHierarchy(
-            parentRemoteTask: RemoteTask<T, U>,
-            childRemoteTask: RemoteTask<T, U>,
+            parentTask: Task<T, U>,
+            childTask: Task<T, U>,
             now: ExactTimeStamp
     ) {
-        val taskHierarchyJson = TaskHierarchyJson(parentRemoteTask.id, childRemoteTask.id, now.long, null, null)
+        val taskHierarchyJson = TaskHierarchyJson(parentTask.id, childTask.id, now.long, null, null)
         val remoteTaskHierarchyRecord = remoteProjectRecord.newRemoteTaskHierarchyRecord(taskHierarchyJson)
 
         val remoteTaskHierarchy = RemoteTaskHierarchy(this, remoteTaskHierarchyRecord)
@@ -75,10 +75,10 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
-            task: RemoteTask<*, *>,
+            task: Task<*, *>,
             instances: Collection<Instance<*, *>>,
             now: ExactTimeStamp
-    ): RemoteTask<T, U> {
+    ): Task<T, U> {
         val endTime = task.getEndExactTimeStamp()?.long
 
         val oldestVisible = task.getOldestVisible()
@@ -102,7 +102,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
                 oldestVisible = oldestVisibleMap.toMutableMap())
         val remoteTaskRecord = remoteProjectRecord.newRemoteTaskRecord(taskJson)
 
-        val remoteTask = RemoteTask(this, remoteTaskRecord)
+        val remoteTask = Task(this, remoteTaskRecord)
         check(!remoteTasks.containsKey(remoteTask.id))
 
         remoteTasks[remoteTask.id] = remoteTask
@@ -204,10 +204,10 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
         return remoteTaskHierarchy
     }
 
-    fun deleteTask(remoteTask: RemoteTask<T, U>) {
-        check(remoteTasks.containsKey(remoteTask.id))
+    fun deleteTask(task: Task<T, U>) {
+        check(remoteTasks.containsKey(task.id))
 
-        remoteTasks.remove(remoteTask.id)
+        remoteTasks.remove(task.id)
     }
 
     fun deleteTaskHierarchy(remoteTaskHierarchy: RemoteTaskHierarchy<T, U>) = remoteTaskHierarchyContainer.removeForce(remoteTaskHierarchy.id)
@@ -249,7 +249,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
                 .forEach {
                     it.setEndData(
                             uuid,
-                            RemoteTask.EndData(now, removeInstances),
+                            Task.EndData(now, removeInstances),
                             projectUndoData.taskUndoData
                     )
                 }
@@ -274,7 +274,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp,
             remoteToRemoteConversion: RemoteToRemoteConversion<T, U>,
-            startTask: RemoteTask<T, U>) {
+            startTask: Task<T, U>) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
             return
 
@@ -287,7 +287,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
         )
 
         @Suppress("UNCHECKED_CAST")
-        val childTaskHierarchies = startTask.getChildTaskHierarchies(now).map { it as RemoteTaskHierarchy<T, U> }
+        val childTaskHierarchies = startTask.getChildTaskHierarchies(now)
 
         remoteToRemoteConversion.startTaskHierarchies.addAll(childTaskHierarchies)
 

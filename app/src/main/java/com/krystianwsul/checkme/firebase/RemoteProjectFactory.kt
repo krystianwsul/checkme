@@ -151,7 +151,7 @@ class RemoteProjectFactory(
             projectId: ProjectKey,
             imageUuid: String?,
             deviceDbInfo: DeviceDbInfo
-    ): RemoteTask<*, *> {
+    ): Task<*, *> {
         val image = imageUuid?.let { TaskJson.Image(imageUuid, deviceDbInfo.uuid) }
         val taskJson = TaskJson(name, now.long, null, note, image = image)
 
@@ -223,13 +223,13 @@ class RemoteProjectFactory(
         return remoteProjects[taskKey.remoteProjectId]
     }
 
-    fun getTaskForce(taskKey: TaskKey): RemoteTask<*, *> {
+    fun getTaskForce(taskKey: TaskKey): Task<*, *> {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return getRemoteProjectForce(taskKey).getRemoteTaskForce(taskKey.remoteTaskId)
     }
 
-    fun getTaskIfPresent(taskKey: TaskKey): RemoteTask<*, *>? {
+    fun getTaskIfPresent(taskKey: TaskKey): Task<*, *>? {
         check(!TextUtils.isEmpty(taskKey.remoteTaskId))
 
         return getRemoteProjectIfPresent(taskKey)?.getRemoteTaskIfPresent(taskKey.remoteTaskId)

@@ -2,14 +2,14 @@ package com.krystianwsul.common.domain.schedules
 
 
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.RemoteTask
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import com.soywiz.klock.months
 
 class MonthlyDaySchedule(
-        rootTask: RemoteTask<*, *>,
+        rootTask: Task<*, *>,
         override val repeatingScheduleBridge: MonthlyDayScheduleBridge
 ) : RepeatingSchedule(rootTask) {
 
@@ -22,7 +22,7 @@ class MonthlyDaySchedule(
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
     override fun getInstanceInDate(
-            task: RemoteTask<*, *>,
+            task: Task<*, *>,
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?

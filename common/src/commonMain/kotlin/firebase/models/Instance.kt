@@ -193,7 +193,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
 
-        fun message(task: RemoteTask<*, *>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
+        fun message(task: Task<*, *>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
 
         if (!parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
             ErrorLogger.instance.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))
@@ -261,7 +261,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
             }
         }
 
-    val task: RemoteTask<T, U>
+    val task: Task<T, U>
 
     val project get() = remoteProject
 
@@ -272,23 +272,23 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     constructor(
             project: Project<T, U>,
-            remoteTask: RemoteTask<T, U>,
+            task: Task<T, U>,
             remoteInstanceRecord: RemoteInstanceRecord<T>
     ) {
         this.remoteProject = project
-        task = remoteTask
+        this.task = task
         val realInstanceData = RemoteReal(this, remoteInstanceRecord)
         instanceData = realInstanceData
     }
 
     constructor(
             project: Project<T, U>,
-            remoteTask: RemoteTask<T, U>,
+            task: Task<T, U>,
             scheduleDateTime: DateTime
     ) {
         this.remoteProject = project
-        task = remoteTask
-        instanceData = InstanceData.Virtual(task.id, scheduleDateTime)
+        this.task = task
+        instanceData = InstanceData.Virtual(this.task.id, scheduleDateTime)
     }
 
     fun fixNotificationShown(shownFactory: ShownFactory, now: ExactTimeStamp) {

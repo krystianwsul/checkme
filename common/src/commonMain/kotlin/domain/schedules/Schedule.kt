@@ -2,14 +2,14 @@ package com.krystianwsul.common.domain.schedules
 
 
 import com.krystianwsul.common.firebase.models.Instance
-import com.krystianwsul.common.firebase.models.RemoteTask
+import com.krystianwsul.common.firebase.models.Task
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.time.NormalTime
 import com.krystianwsul.common.time.TimeStamp
 import com.krystianwsul.common.utils.ScheduleType
 
 
-abstract class Schedule(private val rootTask: RemoteTask<*, *>) {
+abstract class Schedule(private val rootTask: Task<*, *>) {
 
     protected abstract val scheduleBridge: ScheduleBridge
 
@@ -52,12 +52,12 @@ abstract class Schedule(private val rootTask: RemoteTask<*, *>) {
             startExactTimeStamp <= exactTimeStamp && (getEndExactTimeStamp()?.let { it > exactTimeStamp } != false)
 
     abstract fun getInstances(
-            task: RemoteTask<*, *>,
+            task: Task<*, *>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
     ): Sequence<Instance<*, *>>
 
-    abstract fun isVisible(task: RemoteTask<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean
+    abstract fun isVisible(task: Task<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean
 
     abstract fun getNextAlarm(now: ExactTimeStamp): TimeStamp?
 

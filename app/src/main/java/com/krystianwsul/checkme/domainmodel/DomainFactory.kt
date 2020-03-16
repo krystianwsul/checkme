@@ -1692,7 +1692,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey as TaskHierarchyKey.Remote
+        val (projectId, taskHierarchyId) = hierarchyData.taskHierarchyKey
 
         val remoteProject = remoteProjectFactory.getRemoteProjectForce(projectId)
         val taskHierarchy = remoteProject.getTaskHierarchy(taskHierarchyId)
@@ -1799,7 +1799,7 @@ class DomainFactory(
                 }
 
         taskUndoData.taskHierarchyKeys
-                .map { remoteProjectFactory.getTaskHierarchy(it as TaskHierarchyKey.Remote) }
+                .map { remoteProjectFactory.getTaskHierarchy(it) }
                 .forEach {
                     check(!it.current(now))
 
@@ -1807,7 +1807,7 @@ class DomainFactory(
                 }
 
         taskUndoData.scheduleIds
-                .map { remoteProjectFactory.getSchedule(it as ScheduleId.Remote) }
+                .map { remoteProjectFactory.getSchedule(it) }
                 .forEach {
                     check(!it.current(now))
 

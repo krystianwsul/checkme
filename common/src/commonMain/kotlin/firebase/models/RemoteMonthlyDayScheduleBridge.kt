@@ -37,7 +37,7 @@ class RemoteMonthlyDayScheduleBridge<T : RemoteCustomTimeId>(
 
     override fun delete() = remoteMonthlyDayScheduleRecord.delete()
 
-    override val scheduleId get() = ScheduleId.Remote(remoteMonthlyDayScheduleRecord.projectId, remoteMonthlyDayScheduleRecord.taskId, remoteMonthlyDayScheduleRecord.id)
+    override val scheduleId get() = ScheduleId(remoteMonthlyDayScheduleRecord.projectId, remoteMonthlyDayScheduleRecord.taskId, remoteMonthlyDayScheduleRecord.id)
 
     override val from by lazy {
         remoteMonthlyDayScheduleRecord.from?.let { Date.fromJson(it) }

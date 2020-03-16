@@ -256,10 +256,9 @@ class RemoteProjectFactory(
         remoteSharedProjects.remove(projectId)
     }
 
-    fun getTaskHierarchy(remote: TaskHierarchyKey.Remote) = remoteProjects.getValue(remote.projectId).getTaskHierarchy(remote.taskHierarchyId)
+    fun getTaskHierarchy(remote: TaskHierarchyKey) = remoteProjects.getValue(remote.projectId).getTaskHierarchy(remote.taskHierarchyId)
 
-    fun getSchedule(scheduleId: ScheduleId.Remote) = remoteProjects.getValue(scheduleId.projectId).getRemoteTaskForce(scheduleId.taskId)
+    fun getSchedule(scheduleId: ScheduleId) = remoteProjects.getValue(scheduleId.projectId).getRemoteTaskForce(scheduleId.taskId)
             .schedules
             .single { it.scheduleId == scheduleId }
-
 }

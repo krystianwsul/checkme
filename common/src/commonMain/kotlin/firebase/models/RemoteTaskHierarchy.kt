@@ -33,7 +33,7 @@ class RemoteTaskHierarchy<T : RemoteCustomTimeId, U : ProjectKey>(
         get() = remoteTaskHierarchyRecord.ordinal ?: remoteTaskHierarchyRecord.startTime.toDouble()
         set(ordinal) = remoteTaskHierarchyRecord.setOrdinal(ordinal)
 
-    override val taskHierarchyKey by lazy { TaskHierarchyKey.Remote(project.id, remoteTaskHierarchyRecord.id) }
+    override val taskHierarchyKey by lazy { TaskHierarchyKey(project.id, remoteTaskHierarchyRecord.id) }
 
     public override fun getEndExactTimeStamp() = remoteTaskHierarchyRecord.endTime?.let { ExactTimeStamp(it) }
 

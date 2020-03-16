@@ -36,7 +36,7 @@ class RemoteDailyScheduleBridge<T : RemoteCustomTimeId>(
             .map { it.ordinal }
             .toSet()
 
-    override val scheduleId get() = ScheduleId.Remote(remoteDailyScheduleRecord.projectId, remoteDailyScheduleRecord.taskId, remoteDailyScheduleRecord.id)
+    override val scheduleId get() = ScheduleId(remoteDailyScheduleRecord.projectId, remoteDailyScheduleRecord.taskId, remoteDailyScheduleRecord.id)
 
     override var from: Date? = null
     override var until: Date? = null

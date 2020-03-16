@@ -38,5 +38,5 @@ class RemoteSingleScheduleBridge<T : RemoteCustomTimeId>(
 
     override fun delete() = remoteSingleScheduleRecord.delete()
 
-    override val scheduleId get() = ScheduleId.Remote(remoteSingleScheduleRecord.projectId, remoteSingleScheduleRecord.taskId, remoteSingleScheduleRecord.id)
+    override val scheduleId get() = ScheduleId(remoteSingleScheduleRecord.projectId, remoteSingleScheduleRecord.taskId, remoteSingleScheduleRecord.id)
 }

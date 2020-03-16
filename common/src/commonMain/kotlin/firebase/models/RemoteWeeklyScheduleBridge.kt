@@ -33,7 +33,7 @@ class RemoteWeeklyScheduleBridge<T : RemoteCustomTimeId>(
 
     override val remoteCustomTimeKey get() = remoteWeeklyScheduleRecord.run { customTimeId?.let { Pair(projectId, it) } }
 
-    override val scheduleId get() = ScheduleId.Remote(remoteWeeklyScheduleRecord.projectId, remoteWeeklyScheduleRecord.taskId, remoteWeeklyScheduleRecord.id)
+    override val scheduleId get() = ScheduleId(remoteWeeklyScheduleRecord.projectId, remoteWeeklyScheduleRecord.taskId, remoteWeeklyScheduleRecord.id)
 
     override val from by lazy {
         remoteWeeklyScheduleRecord.from?.let { Date.fromJson(it) }

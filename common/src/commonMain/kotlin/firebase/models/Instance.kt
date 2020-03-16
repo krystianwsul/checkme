@@ -61,7 +61,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     private val remoteProject: Project<T, U>
 
-    private var instanceData: InstanceData<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>
+    private var instanceData: InstanceData<RemoteCustomTimeId, RemoteInstanceRecord<T>>
 
     private val shownHolder = ShownHolder()
 
@@ -80,8 +80,8 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
     private val scheduleHourMinute
         get() = instanceData.let {
             when (it) {
-                is InstanceData.Real<*, *, *> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
-                is InstanceData.Virtual<*, *, *> -> it.scheduleDateTime
+                is InstanceData.Real<*, *> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
+                is InstanceData.Virtual<*, *> -> it.scheduleDateTime
                         .time
                         .timePair
                         .hourMinute
@@ -133,7 +133,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
-    private fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *, *> {
+    private fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *> {
         (instanceData as? InstanceData.Real)?.let {
             return it
         }
@@ -250,11 +250,11 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
     val scheduleCustomTimeKey
         get() = instanceData.let {
             when (it) {
-                is InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord
+                is InstanceData.Real<RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord
                         .scheduleKey
                         .scheduleTimePair
                         .customTimeKey
-                is InstanceData.Virtual<String, RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.scheduleDateTime
+                is InstanceData.Virtual<RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.scheduleDateTime
                         .time
                         .timePair
                         .customTimeKey
@@ -377,7 +377,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
     private class RemoteReal<T : RemoteCustomTimeId, U : ProjectKey>(
             private val instance: Instance<T, U>,
             remoteInstanceRecord: RemoteInstanceRecord<T>
-    ) : InstanceData.Real<String, RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
+    ) : InstanceData.Real<RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
 
         override fun getCustomTime(customTimeId: RemoteCustomTimeId) = instance.remoteProject.getRemoteCustomTime(customTimeId)
 

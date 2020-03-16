@@ -2,12 +2,12 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.firebase.UserData
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.models.RemoteRootUserProperties
+import com.krystianwsul.common.firebase.models.RootUserProperties
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
 
-open class RemoteRootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create), RemoteRootUserProperties {
+open class RootUserRecord(create: Boolean, override val createObject: UserWrapper) : RemoteRecord(create), RootUserProperties {
 
     companion object {
 

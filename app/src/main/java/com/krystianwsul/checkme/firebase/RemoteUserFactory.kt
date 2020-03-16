@@ -6,7 +6,7 @@ import com.krystianwsul.checkme.Preferences
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.managers.RemoteMyUserManager
 import com.krystianwsul.common.domain.DeviceInfo
-import com.krystianwsul.common.firebase.models.RemoteMyUser
+import com.krystianwsul.common.firebase.models.MyUser
 
 class RemoteUserFactory(
         uuid: String,
@@ -16,7 +16,7 @@ class RemoteUserFactory(
 
     private val remoteUserManager = RemoteMyUserManager(deviceInfo, uuid, userSnapshot)
 
-    private val remoteUserRelay = BehaviorRelay.createDefault(RemoteMyUser(remoteUserManager.remoteUserRecord))
+    private val remoteUserRelay = BehaviorRelay.createDefault(MyUser(remoteUserManager.remoteUserRecord))
 
     var remoteUser
         get() = remoteUserRelay.value!!
@@ -51,7 +51,7 @@ class RemoteUserFactory(
     fun onNewSnapshot(dataSnapshot: DataSnapshot) {
         val remoteUserRecord = remoteUserManager.newSnapshot(dataSnapshot)
 
-        remoteUser = RemoteMyUser(remoteUserRecord)
+        remoteUser = MyUser(remoteUserRecord)
 
         setTab()
     }

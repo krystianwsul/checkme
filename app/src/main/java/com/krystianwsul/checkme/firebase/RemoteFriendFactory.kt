@@ -5,8 +5,8 @@ import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.managers.AndroidRemoteRootUserManager
 import com.krystianwsul.checkme.firebase.managers.StrangerProjectManager
 import com.krystianwsul.common.firebase.json.UserJson
-import com.krystianwsul.common.firebase.models.RemoteRootUser
-import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.firebase.models.RootUser
+import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
@@ -14,7 +14,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
 
     companion object {
 
-        private fun Map<UserKey, RemoteRootUserRecord>.toRootUsers() = values.map { RemoteRootUser(it) }
+        private fun Map<UserKey, RootUserRecord>.toRootUsers() = values.map { RootUser(it) }
                 .associateBy { it.id }
                 .toMutableMap()
     }
@@ -30,7 +30,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
             remoteFriendManager.isSaved = value
         }
 
-    val friends: Collection<RemoteRootUser> get() = _friends.values
+    val friends: Collection<RootUser> get() = _friends.values
 
     fun save(domainFactory: DomainFactory): Boolean {
         strangerProjectManager.save(domainFactory)
@@ -47,7 +47,7 @@ class RemoteFriendFactory(children: Iterable<DataSnapshot>) {
                 .toMutableMap()
     }
 
-    fun getFriend(friendId: UserKey): RemoteRootUser {
+    fun getFriend(friendId: UserKey): RootUser {
         check(_friends.containsKey(friendId))
 
         return _friends[friendId]!!

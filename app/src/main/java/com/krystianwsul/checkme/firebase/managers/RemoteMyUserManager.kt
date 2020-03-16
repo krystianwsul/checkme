@@ -8,7 +8,7 @@ import com.krystianwsul.checkme.utils.checkError
 import com.krystianwsul.common.domain.DeviceInfo
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.firebase.json.UserWrapper
-import com.krystianwsul.common.firebase.records.RemoteMyUserRecord
+import com.krystianwsul.common.firebase.records.MyUserRecord
 import java.util.*
 import kotlin.properties.Delegates.observable
 
@@ -26,15 +26,15 @@ class RemoteMyUserManager(
                 deviceInfo.run { UserJson(email, name, mutableMapOf(uuid to token)) }
         )
 
-        RemoteMyUserRecord(true, userWrapper)
+        MyUserRecord(true, userWrapper)
     } else {
         dataSnapshot.toRecord()
     }
         private set
 
-    private fun DataSnapshot.toRecord() = RemoteMyUserRecord(false, getValue(UserWrapper::class.java)!!)
+    private fun DataSnapshot.toRecord() = MyUserRecord(false, getValue(UserWrapper::class.java)!!)
 
-    fun newSnapshot(dataSnapshot: DataSnapshot): RemoteMyUserRecord {
+    fun newSnapshot(dataSnapshot: DataSnapshot): MyUserRecord {
         remoteUserRecord = dataSnapshot.toRecord()
         return remoteUserRecord
     }

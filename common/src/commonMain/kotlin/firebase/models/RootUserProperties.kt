@@ -4,7 +4,7 @@ import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
-interface RemoteRootUserProperties {
+interface RootUserProperties {
 
     val id: UserKey
     val name: String

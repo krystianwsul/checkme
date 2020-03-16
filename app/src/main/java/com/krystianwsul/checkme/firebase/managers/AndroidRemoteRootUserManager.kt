@@ -7,14 +7,14 @@ import com.krystianwsul.checkme.firebase.FirebaseWriteException
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.json.UserWrapper
 import com.krystianwsul.common.firebase.managers.RemoteRootUserManager
-import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.firebase.records.RootUserRecord
 
 class AndroidRemoteRootUserManager(children: Iterable<DataSnapshot>) : RemoteRootUserManager() {
 
     companion object {
 
         private fun Iterable<DataSnapshot>.toRootUserRecords() = map {
-            RemoteRootUserRecord(false, it.getValue(UserWrapper::class.java)!!)
+            RootUserRecord(false, it.getValue(UserWrapper::class.java)!!)
         }.associateBy { it.id }
     }
 

@@ -3,14 +3,14 @@ package com.krystianwsul.common.firebase.managers
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.DatabaseCallback
 import com.krystianwsul.common.firebase.DatabaseWrapper
-import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.UserKey
 
 abstract class RemoteRootUserManager {
 
     var isSaved = false
 
-    abstract val remoteRootUserRecords: Map<UserKey, RemoteRootUserRecord>
+    abstract val remoteRootUserRecords: Map<UserKey, RootUserRecord>
 
     abstract val databaseWrapper: DatabaseWrapper
 

@@ -162,7 +162,7 @@ class RemoteProjectFactory(
             name: String,
             now: ExactTimeStamp,
             recordOf: Set<UserKey>,
-            remoteRootUser: RemoteRootUser,
+            rootUser: RootUser,
             userInfo: UserInfo,
             remoteFriendFactory: RemoteFriendFactory
     ): SharedProject {
@@ -172,7 +172,7 @@ class RemoteProjectFactory(
         friendIds.remove(userInfo.key)
 
         val userJsons = remoteFriendFactory.getUserJsons(friendIds)
-        userJsons[userInfo.key] = remoteRootUser.userJson
+        userJsons[userInfo.key] = rootUser.userJson
 
         val projectJson = SharedProjectJson(
                 name,

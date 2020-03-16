@@ -48,12 +48,12 @@ class SharedProject(
                 .forEach { remoteTaskHierarchyContainer.add(it.id, it) }
     }
 
-    private fun addUser(remoteRootUser: RemoteRootUser) {
-        val id = remoteRootUser.id
+    private fun addUser(rootUser: RootUser) {
+        val id = rootUser.id
 
         check(!remoteUsers.containsKey(id))
 
-        val remoteProjectUserRecord = remoteProjectRecord.newRemoteUserRecord(remoteRootUser.userJson)
+        val remoteProjectUserRecord = remoteProjectRecord.newRemoteUserRecord(rootUser.userJson)
         val remoteProjectUser = RemoteProjectUser(this, remoteProjectUserRecord)
 
         remoteUsers[id] = remoteProjectUser
@@ -83,7 +83,7 @@ class SharedProject(
         remoteProjectUser.photoUrl = photoUrl
     }
 
-    fun updateUsers(addedFriends: Set<RemoteRootUser>, removedFriends: Set<UserKey>) {
+    fun updateUsers(addedFriends: Set<RootUser>, removedFriends: Set<UserKey>) {
         for (addedFriend in addedFriends)
             addUser(addedFriend)
 

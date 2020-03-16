@@ -4,7 +4,7 @@ import com.krystianwsul.checkme.MyCrashlytics
 import com.krystianwsul.checkme.domainmodel.DomainFactory
 import com.krystianwsul.checkme.firebase.AndroidDatabaseWrapper
 import com.krystianwsul.checkme.utils.checkError
-import com.krystianwsul.common.firebase.records.RemoteRootUserRecord
+import com.krystianwsul.common.firebase.records.RootUserRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.UserKey
 
@@ -17,7 +17,7 @@ class StrangerProjectManager {
 
         strangerProjects?.let { (projectId, userValues) ->
             userValues.forEach { (userId, add) ->
-                values["$userId/${RemoteRootUserRecord.PROJECTS}/$projectId"] = if (add) true else null
+                values["$userId/${RootUserRecord.PROJECTS}/$projectId"] = if (add) true else null
             }
         }
         strangerProjects = null

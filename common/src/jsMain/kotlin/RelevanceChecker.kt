@@ -1,7 +1,7 @@
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.firebase.models.PrivateProject
 import com.krystianwsul.common.firebase.models.Project
-import com.krystianwsul.common.firebase.models.RemoteRootUser
+import com.krystianwsul.common.firebase.models.RootUser
 import com.krystianwsul.common.firebase.models.SharedProject
 import com.krystianwsul.common.relevance.Irrelevant
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -107,7 +107,7 @@ object RelevanceChecker {
 
                         val rootUsers = rootUserManager.remoteRootUserRecords
                                 .values
-                                .map { RemoteRootUser(it) }
+                                .map { RootUser(it) }
 
                         val removedSharedProjectKeys = sharedProjectsRemoved.map { it.id }
 

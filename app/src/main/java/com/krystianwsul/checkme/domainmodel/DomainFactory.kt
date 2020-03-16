@@ -23,7 +23,10 @@ import com.krystianwsul.checkme.utils.newUuid
 import com.krystianwsul.checkme.utils.time.*
 import com.krystianwsul.checkme.viewmodels.*
 import com.krystianwsul.checkme.viewmodels.NullableWrapper
-import com.krystianwsul.common.domain.*
+import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.domain.ProjectUndoData
+import com.krystianwsul.common.domain.RemoteToRemoteConversion
+import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
 import com.krystianwsul.common.firebase.json.PrivateCustomTimeJson
 import com.krystianwsul.common.firebase.json.TaskJson
@@ -470,7 +473,11 @@ class DomainFactory(
     }
 
     @Synchronized
-    fun getGroupListData(now: ExactTimeStamp, position: Int, timeRange: MainActivity.TimeRange): DayViewModel.DayData {
+    fun getGroupListData(
+            now: ExactTimeStamp,
+            position: Int,
+            timeRange: MainActivity.TimeRange
+    ): DayViewModel.DayData {
         MyCrashlytics.log("DomainFactory.getGroupListData")
 
         check(position >= 0)
@@ -1543,13 +1550,14 @@ class DomainFactory(
         return childTask.taskKey
     }
 
-    private fun createChildTask(
+    private fun <T : RemoteCustomTimeId, U : ProjectKey> createChildTask(
             now: ExactTimeStamp,
-            parentTask: Task,
+            parentTask: RemoteTask<T, U>,
             name: String,
             note: String?,
             imageJson: TaskJson.Image?,
-            copyTaskKey: TaskKey? = null): Task {
+            copyTaskKey: TaskKey? = null
+    ): RemoteTask<T, U> {
         check(name.isNotEmpty())
         check(parentTask.current(now))
 
@@ -1706,7 +1714,7 @@ class DomainFactory(
         val tasks = taskKeys.map { getTaskForce(it) }.toMutableSet()
         check(tasks.all { it.current(now) })
 
-        fun parentPresent(task: Task): Boolean = task.getParentTask(now)?.let {
+        fun parentPresent(task: RemoteTask<*, *>): Boolean = task.getParentTask(now)?.let {
             tasks.contains(it) || parentPresent(it)
         } ?: false
 
@@ -1717,7 +1725,7 @@ class DomainFactory(
 
         val taskUndoData = TaskUndoData()
 
-        tasks.forEach { it.setEndData(uuid, Task.EndData(now, deleteInstances), taskUndoData) }
+        tasks.forEach { it.setEndData(uuid, RemoteTask.EndData(now, deleteInstances), taskUndoData) }
 
         val remoteProjects = tasks.map { it.project }.toSet()
 
@@ -2203,7 +2211,7 @@ class DomainFactory(
 
     private fun getTaskListChildTaskDatas(
             now: ExactTimeStamp,
-            parentTask: Task,
+            parentTask: RemoteTask<*, *>,
             excludedTaskKeys: Set<TaskKey>
     ): Map<CreateTaskViewModel.ParentKey, CreateTaskViewModel.ParentTreeData> =
             parentTask.getChildTaskHierarchies(now)
@@ -2227,7 +2235,7 @@ class DomainFactory(
                     .toList()
                     .toMap()
 
-    private fun Task.showAsParent(
+    private fun RemoteTask<*, *>.showAsParent(
             now: ExactTimeStamp,
             excludedTaskKeys: Set<TaskKey>,
             includedTaskKeys: Set<TaskKey>
@@ -2357,7 +2365,7 @@ class DomainFactory(
             remoteToRemoteConversion.endTaskHierarchies.add(remoteTaskHierarchy)
         }
 
-        val endData = Task.EndData(now, true)
+        val endData = RemoteTask.EndData(now, true)
 
         for (pair in remoteToRemoteConversion.startTasks.values) {
             pair.second.forEach {
@@ -2375,8 +2383,8 @@ class DomainFactory(
     }
 
     private fun joinTasks(
-            newParentTask: Task,
-            joinTasks: List<Task>,
+            newParentTask: RemoteTask<*, *>,
+            joinTasks: List<RemoteTask<*, *>>,
             now: ExactTimeStamp,
             removeInstanceKeys: List<InstanceKey>
     ) {
@@ -2411,7 +2419,7 @@ class DomainFactory(
     fun getTaskIfPresent(taskKey: TaskKey) = remoteProjectFactory.getTaskIfPresent(taskKey)
 
     private fun getTaskListChildTaskDatas(
-            parentTask: Task,
+            parentTask: RemoteTask<*, *>,
             now: ExactTimeStamp,
             alwaysShow: Boolean = true,
             hierarchyExactTimeStamp: ExactTimeStamp = now
@@ -2441,7 +2449,7 @@ class DomainFactory(
 
     private fun getExistingInstances() = remoteProjectFactory.existingInstances
 
-    private fun getGroupListChildTaskDatas(parentTask: Task, now: ExactTimeStamp): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now)
+    private fun getGroupListChildTaskDatas(parentTask: RemoteTask<*, *>, now: ExactTimeStamp): List<GroupListFragment.TaskData> = parentTask.getChildTaskHierarchies(now)
             .map {
                 val childTask = it.childTask
 
@@ -2747,7 +2755,7 @@ class DomainFactory(
 
     private fun getGroupListData(
             instance: Instance<*, *>,
-            task: Task,
+            task: RemoteTask<*, *>,
             now: ExactTimeStamp
     ): GroupListFragment.DataWrapper {
         val customTimeDatas = getCurrentRemoteCustomTimes(now).map { GroupListFragment.CustomTimeData(it.name, it.hourMinutes.toSortedMap()) }
@@ -2802,7 +2810,7 @@ class DomainFactory(
             remoteCustomTimeId: RemoteCustomTimeId
     ) = remoteProjectFactory.getRemoteCustomTime(remoteProjectId, remoteCustomTimeId).customTimeKey
 
-    private fun copyTask(now: ExactTimeStamp, task: Task, copyTaskKey: TaskKey) {
+    private fun copyTask(now: ExactTimeStamp, task: RemoteTask<*, *>, copyTaskKey: TaskKey) {
         val copiedTask = getTaskForce(copyTaskKey)
 
         copiedTask.getChildTaskHierarchies(now).forEach {

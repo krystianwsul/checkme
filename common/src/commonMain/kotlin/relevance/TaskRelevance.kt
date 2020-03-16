@@ -1,13 +1,13 @@
 package com.krystianwsul.common.relevance
 
 
-import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.firebase.models.Instance
+import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.*
 
 
-class TaskRelevance(val task: Task) {
+class TaskRelevance(val task: RemoteTask<*, *>) {
 
     var relevant = false
         private set

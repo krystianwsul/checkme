@@ -25,7 +25,7 @@ abstract class Task {
 
     abstract val schedules: Collection<Schedule>
 
-    abstract fun getEndData(): EndData?
+    abstract fun getEndData(): RemoteTask.EndData?
 
     fun getEndExactTimeStamp() = getEndData()?.exactTimeStamp
 
@@ -61,15 +61,16 @@ abstract class Task {
         if (schedules.isEmpty())
             return true
 
-        if (schedules.any { it.isVisible(this, now, hack24) })
+        if (schedules.any { it.isVisible(this as RemoteTask<*, *>, now, hack24) })
             return true
 
         return false
     }// bo inheritance i testy
 
-    private fun getRootTask(
+    protected fun getRootTask(
             exactTimeStamp: ExactTimeStamp
-    ): Task = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
+    ): RemoteTask<*, *> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp)
+            ?: (this as RemoteTask<*, *>)
 
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(current(exactTimeStamp))
@@ -77,10 +78,10 @@ abstract class Task {
         val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
 
         getSingleSchedule(exactTimeStamp)?.let { singleSchedule ->
-            val instance = singleSchedule.getInstance(this)
+            val instance = singleSchedule.getInstance(this as RemoteTask<*, *>)
 
             if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
-                return listOf(SingleSchedule(this as RemoteTask<*, *>, MockSingleScheduleBridge(singleSchedule, instance)))
+                return listOf(SingleSchedule(this, MockSingleScheduleBridge(singleSchedule, instance)))
         }
 
         return currentSchedules
@@ -131,11 +132,11 @@ abstract class Task {
         return getParentTask(exactTimeStamp) == null
     }
 
-    protected abstract fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: EndData?)
+    protected abstract fun setMyEndExactTimeStamp(uuid: String, now: ExactTimeStamp, endData: RemoteTask.EndData?)
 
     fun setEndData(
             uuid: String,
-            endData: EndData,
+            endData: RemoteTask.EndData,
             taskUndoData: TaskUndoData? = null,
             recursive: Boolean = false
     ) {
@@ -206,9 +207,14 @@ abstract class Task {
         setMyEndExactTimeStamp(uuid, now, null)
     }
 
-    abstract fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task
+    abstract fun createChildTask(
+            now: ExactTimeStamp,
+            name: String,
+            note: String?,
+            image: TaskJson.Image?
+    ): RemoteTask<*, *>
 
-    fun getParentTask(exactTimeStamp: ExactTimeStamp): Task? {
+    fun getParentTask(exactTimeStamp: ExactTimeStamp): RemoteTask<*, *>? {
         check(notDeleted(exactTimeStamp))
 
         return getParentTaskHierarchy(exactTimeStamp)?.let {
@@ -273,7 +279,7 @@ abstract class Task {
         val scheduleInstances = if (startExactTimeStamp >= endExactTimeStamp)
             listOf()
         else
-            schedules.flatMap { it.getInstances(this, startExactTimeStamp, endExactTimeStamp).toList() }
+            schedules.flatMap { it.getInstances(this as RemoteTask<*, *>, startExactTimeStamp, endExactTimeStamp).toList() }
 
         val parentInstances = getParentTaskHierarchies().map { it.parentTask }
                 .flatMap { it.getInstances(givenStartExactTimeStamp, givenEndExactTimeStamp, now) }
@@ -321,7 +327,7 @@ abstract class Task {
                 singleAddSchedulePair != null &&
                 singleRemoveSchedule.scheduleId == oldSingleSchedule?.scheduleId
         ) {
-            oldSingleSchedule.getInstance(this).setInstanceDateTime(
+            oldSingleSchedule.getInstance(this as RemoteTask<*, *>).setInstanceDateTime(
                     shownFactory,
                     ownerKey,
                     singleAddSchedulePair.run { DateTime((first as ScheduleData.Single).date, second) },
@@ -339,7 +345,7 @@ abstract class Task {
             now: ExactTimeStamp
     )
 
-    abstract fun addChild(childTask: Task, now: ExactTimeStamp)
+    abstract fun addChild(childTask: RemoteTask<*, *>, now: ExactTimeStamp)
 
     abstract fun deleteSchedule(schedule: Schedule)
 
@@ -351,7 +357,7 @@ abstract class Task {
             projectUpdater: RemoteTask.ProjectUpdater,
             now: ExactTimeStamp,
             projectId: ProjectKey
-    ): Task
+    ): RemoteTask<*, *>
 
     fun getHierarchyExactTimeStamp(now: ExactTimeStamp) = listOfNotNull(now, getEndExactTimeStamp()?.minusOne()).min()!!
 
@@ -362,9 +368,4 @@ abstract class Task {
     fun getChildTaskHierarchies(exactTimeStamp: ExactTimeStamp) = getChildTaskHierarchies().filter {
         it.current(exactTimeStamp) && it.childTask.current(exactTimeStamp)
     }.sortedBy { it.ordinal }
-
-    data class EndData(
-            val exactTimeStamp: ExactTimeStamp,
-            val deleteInstances: Boolean
-    )
 }

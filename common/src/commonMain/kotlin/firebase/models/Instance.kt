@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.InstanceData
-import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.domain.TaskHierarchy
 import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
 import com.krystianwsul.common.time.*
@@ -194,7 +193,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
         val parentTask = task.getParentTask(hierarchyExactTimeStamp.first) ?: return null
 
-        fun message(task: Task) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
+        fun message(task: RemoteTask<*, *>) = "name: ${task.name}, start: ${task.startExactTimeStamp}, end: " + task.getEndExactTimeStamp()
 
         if (!parentTask.notDeleted(hierarchyExactTimeStamp.first)) {
             ErrorLogger.instance.logException(ParentInstanceException("instance: " + toString() + ", task: " + message(task) + ", parentTask: " + message(parentTask) + ", hierarchy: " + hierarchyExactTimeStamp))

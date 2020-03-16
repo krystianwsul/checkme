@@ -1,7 +1,6 @@
 package com.krystianwsul.common.domain.schedules
 
 
-import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.*
@@ -23,7 +22,7 @@ class MonthlyDaySchedule(
     override val scheduleType = ScheduleType.MONTHLY_DAY
 
     override fun getInstanceInDate(
-            task: Task,
+            task: RemoteTask<*, *>,
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?

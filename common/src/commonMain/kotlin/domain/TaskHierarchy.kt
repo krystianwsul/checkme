@@ -1,5 +1,6 @@
 package com.krystianwsul.common.domain
 
+import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.ExactTimeStamp
 import com.krystianwsul.common.utils.TaskHierarchyKey
 import com.krystianwsul.common.utils.TaskKey
@@ -16,9 +17,9 @@ abstract class TaskHierarchy {
 
     abstract val childTaskKey: TaskKey
 
-    abstract val parentTask: Task
+    abstract val parentTask: RemoteTask<*, *>
 
-    abstract val childTask: Task
+    abstract val childTask: RemoteTask<*, *>
 
     abstract val taskHierarchyKey: TaskHierarchyKey
 

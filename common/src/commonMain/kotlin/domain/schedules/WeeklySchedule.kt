@@ -1,7 +1,6 @@
 package com.krystianwsul.common.domain.schedules
 
 
-import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.*
@@ -22,7 +21,7 @@ class WeeklySchedule(
     override val scheduleBridge get() = repeatingScheduleBridge
 
     override fun getInstanceInDate(
-            task: Task,
+            task: RemoteTask<*, *>,
             date: Date,
             startHourMilli: HourMilli?,
             endHourMilli: HourMilli?

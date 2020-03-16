@@ -1,6 +1,9 @@
 package com.krystianwsul.common.firebase.models
 
-import com.krystianwsul.common.domain.*
+import com.krystianwsul.common.domain.DeviceDbInfo
+import com.krystianwsul.common.domain.ProjectUndoData
+import com.krystianwsul.common.domain.RemoteToRemoteConversion
+import com.krystianwsul.common.domain.TaskHierarchyContainer
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
@@ -72,7 +75,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun copyTask(
             deviceDbInfo: DeviceDbInfo,
-            task: Task,
+            task: RemoteTask<*, *>,
             instances: Collection<Instance<*, *>>,
             now: ExactTimeStamp
     ): RemoteTask<T, U> {
@@ -243,7 +246,13 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
         remoteTasks.values
                 .filter { it.current(now) }
-                .forEach { it.setEndData(uuid, Task.EndData(now, removeInstances), projectUndoData.taskUndoData) }
+                .forEach {
+                    it.setEndData(
+                            uuid,
+                            RemoteTask.EndData(now, removeInstances),
+                            projectUndoData.taskUndoData
+                    )
+                }
 
         projectUndoData.projectIds.add(id)
 

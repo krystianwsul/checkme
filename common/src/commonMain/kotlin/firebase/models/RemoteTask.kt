@@ -97,7 +97,12 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
         updateOldestVisible(uuid, now)
     }
 
-    override fun createChildTask(now: ExactTimeStamp, name: String, note: String?, image: TaskJson.Image?): Task {
+    override fun createChildTask(
+            now: ExactTimeStamp,
+            name: String,
+            note: String?,
+            image: TaskJson.Image?
+    ): RemoteTask<T, U> {
         val taskJson = TaskJson(name, now.long, null, note, image = image)
 
         val childTask = remoteProject.newRemoteTask(taskJson)
@@ -131,9 +136,7 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
             now: ExactTimeStamp
     ) = createSchedules(ownerKey, now, scheduleDatas)
 
-    override fun addChild(childTask: Task, now: ExactTimeStamp) {
-        check(childTask is RemoteTask<*, *>)
-
+    override fun addChild(childTask: RemoteTask<*, *>, now: ExactTimeStamp) {
         @Suppress("UNCHECKED_CAST")
         remoteProject.createTaskHierarchy(this, childTask as RemoteTask<T, U>, now)
     }
@@ -377,4 +380,9 @@ class RemoteTask<T : RemoteCustomTimeId, U : ProjectKey>(
                 projectId: ProjectKey
         ): RemoteTask<*, *>
     }
+
+    data class EndData(
+            val exactTimeStamp: ExactTimeStamp,
+            val deleteInstances: Boolean
+    )
 }

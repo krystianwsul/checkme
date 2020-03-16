@@ -1,7 +1,6 @@
 package com.krystianwsul.common.domain.schedules
 
 
-import com.krystianwsul.common.domain.Task
 import com.krystianwsul.common.firebase.models.Instance
 import com.krystianwsul.common.firebase.models.RemoteTask
 import com.krystianwsul.common.time.Date
@@ -22,12 +21,12 @@ class SingleSchedule(
 
     override val scheduleType get() = ScheduleType.SINGLE
 
-    fun getInstance(task: Task) = task.getInstance(dateTime)
+    fun getInstance(task: RemoteTask<*, *>) = task.getInstance(dateTime)
 
     override fun getNextAlarm(now: ExactTimeStamp) = dateTime.timeStamp.takeIf { it.toExactTimeStamp() > now }
 
     override fun getInstances(
-            task: Task,
+            task: RemoteTask<*, *>,
             givenStartExactTimeStamp: ExactTimeStamp?,
             givenExactEndTimeStamp: ExactTimeStamp?
     ): Sequence<Instance<*, *>> {
@@ -45,7 +44,7 @@ class SingleSchedule(
         return sequenceOf(getInstance(task))
     }
 
-    override fun isVisible(task: Task, now: ExactTimeStamp, hack24: Boolean): Boolean {
+    override fun isVisible(task: RemoteTask<*, *>, now: ExactTimeStamp, hack24: Boolean): Boolean {
         check(current(now))
 
         return getInstance(task).isVisible(now, hack24)

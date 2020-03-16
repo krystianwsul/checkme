@@ -17,7 +17,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         create: Boolean,
         private val remoteTaskRecord: RemoteTaskRecord<T, *>,
         override val createObject: InstanceJson,
-        val scheduleKey: ScheduleKey,
+        override val scheduleKey: ScheduleKey,
         private val firebaseKey: String,
         override val scheduleCustomTimeId: T?
 ) : RemoteRecord(create), InstanceRecord<T> {

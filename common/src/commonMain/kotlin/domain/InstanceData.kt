@@ -2,8 +2,9 @@ package com.krystianwsul.common.domain
 
 import com.krystianwsul.common.firebase.models.CustomTime
 import com.krystianwsul.common.time.*
+import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-sealed class InstanceData<U, V : InstanceRecord<U>> {
+sealed class InstanceData<T : RemoteCustomTimeId> {
 
     abstract val scheduleDate: Date
     abstract val scheduleTime: Time
@@ -16,9 +17,9 @@ sealed class InstanceData<U, V : InstanceRecord<U>> {
     abstract val hidden: Boolean
 
     // todo remote remove abstract
-    abstract class Real<U, V : InstanceRecord<U>>(val instanceRecord: V) : InstanceData<U, V>() {
+    abstract class Real<T : RemoteCustomTimeId>(val instanceRecord: InstanceRecord<T>) : InstanceData<T>() {
 
-        protected abstract fun getCustomTime(customTimeId: U): CustomTime<*, *>
+        protected abstract fun getCustomTime(customTimeId: T): CustomTime<T, *>
 
         protected abstract fun getSignature(): String
 
@@ -47,7 +48,7 @@ sealed class InstanceData<U, V : InstanceRecord<U>> {
         override val hidden get() = instanceRecord.hidden
     }
 
-    class Virtual<U, V : InstanceRecord<U>>(val taskId: String, val scheduleDateTime: DateTime) : InstanceData<U, V>() {
+    class Virtual<T : RemoteCustomTimeId>(val taskId: String, val scheduleDateTime: DateTime) : InstanceData<T>() {
 
         override val scheduleDate by lazy { scheduleDateTime.date }
 

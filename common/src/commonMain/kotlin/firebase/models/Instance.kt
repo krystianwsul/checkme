@@ -61,7 +61,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     private val remoteProject: Project<T, U>
 
-    private var instanceData: InstanceData<RemoteCustomTimeId, RemoteInstanceRecord<T>>
+    private var instanceData: InstanceData<T>
 
     private val shownHolder = ShownHolder()
 
@@ -80,8 +80,10 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
     private val scheduleHourMinute
         get() = instanceData.let {
             when (it) {
-                is InstanceData.Real<*, *> -> it.instanceRecord.let { record -> record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) } }
-                is InstanceData.Virtual<*, *> -> it.scheduleDateTime
+                is InstanceData.Real<*> -> it.instanceRecord.let { record ->
+                    record.scheduleHour?.let { HourMinute(it, record.scheduleMinute!!) }
+                }
+                is InstanceData.Virtual<*> -> it.scheduleDateTime
                         .time
                         .timePair
                         .hourMinute
@@ -133,7 +135,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun getDisplayData(now: ExactTimeStamp) = if (isRootInstance(now)) instanceDateTime else null
 
-    private fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*, *> {
+    private fun createInstanceHierarchy(now: ExactTimeStamp): InstanceData.Real<*> {
         (instanceData as? InstanceData.Real)?.let {
             return it
         }
@@ -250,11 +252,11 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
     val scheduleCustomTimeKey
         get() = instanceData.let {
             when (it) {
-                is InstanceData.Real<RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.instanceRecord
+                is InstanceData.Real<T> -> it.instanceRecord
                         .scheduleKey
                         .scheduleTimePair
                         .customTimeKey
-                is InstanceData.Virtual<RemoteCustomTimeId, RemoteInstanceRecord<T>> -> it.scheduleDateTime
+                is InstanceData.Virtual<T> -> it.scheduleDateTime
                         .time
                         .timePair
                         .customTimeKey
@@ -266,7 +268,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
     val project get() = remoteProject
 
     val customTimeKey // scenario already covered by task/schedule relevance
-        get() = (instanceData as? RemoteReal<*, *>)?.instanceRecord
+        get() = (instanceData as? RemoteReal<*>)?.instanceRecord
                 ?.instanceJsonTime
                 ?.let { (it as? JsonTime.Custom)?.let { Pair(remoteProject.id, it.id) } }
 
@@ -307,7 +309,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
         createInstanceHierarchy(now)
 
         @Suppress("UNCHECKED_CAST")
-        (instanceData as RemoteReal<T, U>).instanceRecord.let {
+        (instanceData as RemoteReal<T>).instanceRecord.let {
             it.instanceDate = dateTime.date
 
             it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
@@ -334,23 +336,23 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
             getShown(shownFactory)?.notified = false
         } else {
-            (instanceData as RemoteReal<*, *>).instanceRecord.done = null
+            (instanceData as RemoteReal<*>).instanceRecord.done = null
         }
 
         task.updateOldestVisible(uuid, now)
     }
 
     fun delete() {
-        check(instanceData is RemoteReal<*, *>)
+        check(instanceData is RemoteReal<*>)
 
         task.deleteInstance(this)
 
-        (instanceData as RemoteReal<*, *>).instanceRecord.delete()
+        (instanceData as RemoteReal<*>).instanceRecord.delete()
     }
 
     fun belongsToRemoteProject() = true
 
-    private fun getNullableOrdinal() = (instanceData as? RemoteReal<*, *>)?.instanceRecord?.ordinal
+    private fun getNullableOrdinal() = (instanceData as? RemoteReal<*>)?.instanceRecord?.ordinal
 
     // todo use for all CreateTaskActivity schedule hints.  Either filter by current, or add non-current to create task data
     fun getCreateTaskTimePair(ownerKey: UserKey): TimePair {
@@ -374,12 +376,12 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
         }
     }
 
-    private class RemoteReal<T : RemoteCustomTimeId, U : ProjectKey>(
-            private val instance: Instance<T, U>,
+    private class RemoteReal<T : RemoteCustomTimeId>(
+            private val instance: Instance<T, *>,
             remoteInstanceRecord: RemoteInstanceRecord<T>
-    ) : InstanceData.Real<RemoteCustomTimeId, RemoteInstanceRecord<T>>(remoteInstanceRecord) {
+    ) : InstanceData.Real<T>(remoteInstanceRecord) {
 
-        override fun getCustomTime(customTimeId: RemoteCustomTimeId) = instance.remoteProject.getRemoteCustomTime(customTimeId)
+        override fun getCustomTime(customTimeId: T) = instance.remoteProject.getRemoteCustomTime(customTimeId)
 
         override fun getSignature() = "${instance.name} ${instance.instanceKey}"
     }

@@ -2,8 +2,7 @@ package com.krystianwsul.common.firebase.models
 
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.domain.InstanceRecord
-import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
+import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
 import com.soywiz.klock.days
@@ -274,11 +273,11 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
     constructor(
             project: Project<T, U>,
             task: Task<T, U>,
-            remoteInstanceRecord: RemoteInstanceRecord<T>
+            instanceRecord: InstanceRecord<T>
     ) {
         this.remoteProject = project
         this.task = task
-        val realInstanceData = Data.Real(this, remoteInstanceRecord)
+        val realInstanceData = Data.Real(this, instanceRecord)
         data = realInstanceData
     }
 

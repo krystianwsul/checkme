@@ -2,7 +2,6 @@ package com.krystianwsul.common.firebase.records
 
 
 import com.krystianwsul.common.ErrorLogger
-import com.krystianwsul.common.domain.InstanceRecord
 
 import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.time.Date
@@ -13,14 +12,14 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleKey
 import kotlin.properties.Delegates.observable
 
-class RemoteInstanceRecord<T : RemoteCustomTimeId>(
+class InstanceRecord<T : RemoteCustomTimeId>(
         create: Boolean,
         private val remoteTaskRecord: RemoteTaskRecord<T, *>,
         override val createObject: InstanceJson,
-        override val scheduleKey: ScheduleKey,
+        val scheduleKey: ScheduleKey,
         private val firebaseKey: String,
-        override val scheduleCustomTimeId: T?
-) : RemoteRecord(create), InstanceRecord<T> {
+        val scheduleCustomTimeId: T?
+) : RemoteRecord(create) {
 
     companion object {
 
@@ -84,19 +83,19 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
 
     val taskId by lazy { remoteTaskRecord.id }
 
-    override var done by Committer(createObject::done)
+    var done by Committer(createObject::done)
 
-    override val scheduleYear by lazy { scheduleKey.scheduleDate.year }
-    override val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
-    override val scheduleDay by lazy { scheduleKey.scheduleDate.day }
+    val scheduleYear by lazy { scheduleKey.scheduleDate.year }
+    val scheduleMonth by lazy { scheduleKey.scheduleDate.month }
+    val scheduleDay by lazy { scheduleKey.scheduleDate.day }
 
-    override val scheduleHour by lazy {
+    val scheduleHour by lazy {
         scheduleKey.scheduleTimePair
                 .hourMinute
                 ?.hour
     }
 
-    override val scheduleMinute by lazy {
+    val scheduleMinute by lazy {
         scheduleKey.scheduleTimePair
                 .hourMinute
                 ?.minute
@@ -120,7 +119,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
             null
     }
 
-    override var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
+    var instanceDate by observable(getInitialInstanceDate()) { _, _, value ->
         setProperty(createObject::instanceYear, value!!.year)
         setProperty(createObject::instanceMonth, value.month)
         setProperty(createObject::instanceDay, value.day)
@@ -142,7 +141,7 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
                         ?: createObject.instanceHour?.let { hour -> createObject.instanceMinute?.let { JsonTime.Normal<T>(HourMinute(hour, it)) } }
     }
 
-    override var instanceJsonTime by observable(initialInstanceJsonTime) { _, _, value ->
+    var instanceJsonTime by observable(initialInstanceJsonTime) { _, _, value ->
         var customTimeId: T? = null
         var hourMinute: HourMinute? = null
 
@@ -157,8 +156,8 @@ class RemoteInstanceRecord<T : RemoteCustomTimeId>(
         setProperty(createObject::instanceTime, value?.toJson())
     }
 
-    override var ordinal by Committer(createObject::ordinal)
-    override var hidden by Committer(createObject::hidden)
+    var ordinal by Committer(createObject::ordinal)
+    var hidden by Committer(createObject::hidden)
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteInstanceRecords.remove(scheduleKey) == this)
 

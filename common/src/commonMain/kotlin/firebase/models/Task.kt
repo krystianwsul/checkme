@@ -5,7 +5,7 @@ import com.krystianwsul.common.domain.DeviceDbInfo
 import com.krystianwsul.common.domain.TaskUndoData
 import com.krystianwsul.common.domain.schedules.*
 import com.krystianwsul.common.firebase.json.*
-import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
+import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RemoteTaskRecord
 import com.krystianwsul.common.time.*
 import com.krystianwsul.common.utils.*
@@ -429,7 +429,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         remoteSchedules.remove(schedule)
     }
 
-    fun createRemoteInstanceRecord(instance: Instance<T, U>, scheduleDateTime: DateTime): RemoteInstanceRecord<T> {
+    fun createRemoteInstanceRecord(instance: Instance<T, U>, scheduleDateTime: DateTime): InstanceRecord<T> {
         val instanceJson = InstanceJson(null, null, null, null, null, null, null, null)
 
         val scheduleKey = ScheduleKey(scheduleDateTime.date, scheduleDateTime.time.timePair)

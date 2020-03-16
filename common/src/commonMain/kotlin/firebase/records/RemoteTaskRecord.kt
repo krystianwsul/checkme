@@ -21,7 +21,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
         const val TASKS = "tasks"
     }
 
-    val remoteInstanceRecords = mutableMapOf<ScheduleKey, RemoteInstanceRecord<T>>()
+    val remoteInstanceRecords = mutableMapOf<ScheduleKey, InstanceRecord<T>>()
 
     val remoteSingleScheduleRecords: MutableMap<String, RemoteSingleScheduleRecord<T>> = HashMap()
 
@@ -38,7 +38,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
         get() {
             if (update != null)
                 taskJson.instances = remoteInstanceRecords.entries
-                        .associateBy({ RemoteInstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
+                        .associateBy({ InstanceRecord.scheduleKeyToString(it.key) }, { it.value.createObject })
                         .toMutableMap()
 
             val scheduleWrappers = HashMap<String, ScheduleWrapper>()
@@ -134,9 +134,9 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
         for ((key, instanceJson) in taskJson.instances) {
             check(key.isNotEmpty())
 
-            val (scheduleKey, remoteCustomTimeId) = RemoteInstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
+            val (scheduleKey, remoteCustomTimeId) = InstanceRecord.stringToScheduleKey(remoteProjectRecord, key)
 
-            val remoteInstanceRecord = RemoteInstanceRecord(
+            val remoteInstanceRecord = InstanceRecord(
                     create,
                     this,
                     instanceJson,
@@ -218,10 +218,10 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
             instanceJson: InstanceJson,
             scheduleKey: ScheduleKey,
             remoteCustomTimeId: T?
-    ): RemoteInstanceRecord<T> {
-        val firebaseKey = RemoteInstanceRecord.scheduleKeyToString(scheduleKey)
+    ): InstanceRecord<T> {
+        val firebaseKey = InstanceRecord.scheduleKeyToString(scheduleKey)
 
-        val remoteInstanceRecord = RemoteInstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)
+        val remoteInstanceRecord = InstanceRecord(true, this, instanceJson, scheduleKey, firebaseKey, remoteCustomTimeId)
         check(!remoteInstanceRecords.containsKey(remoteInstanceRecord.scheduleKey))
 
         remoteInstanceRecords[remoteInstanceRecord.scheduleKey] = remoteInstanceRecord

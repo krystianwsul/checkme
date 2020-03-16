@@ -8,7 +8,7 @@ import com.krystianwsul.common.firebase.json.InstanceJson
 import com.krystianwsul.common.firebase.json.OldestVisibleJson
 import com.krystianwsul.common.firebase.json.TaskHierarchyJson
 import com.krystianwsul.common.firebase.json.TaskJson
-import com.krystianwsul.common.firebase.records.RemoteInstanceRecord
+import com.krystianwsul.common.firebase.records.InstanceRecord
 import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.time.Date
 import com.krystianwsul.common.time.ExactTimeStamp
@@ -87,7 +87,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
             val instanceJson = getInstanceJson(deviceDbInfo.key, it)
             val scheduleKey = it.scheduleKey
 
-            RemoteInstanceRecord.scheduleKeyToString(scheduleKey) to instanceJson
+            InstanceRecord.scheduleKeyToString(scheduleKey) to instanceJson
         }.toMutableMap()
 
         val oldestVisibleMap = oldestVisible?.let { mapOf(deviceDbInfo.uuid to OldestVisibleJson.fromDate(Date(it.year, it.month, it.day))) }

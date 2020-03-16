@@ -3,6 +3,8 @@ package com.krystianwsul.common.domain
 import com.krystianwsul.common.ErrorLogger
 import com.krystianwsul.common.domain.schedules.Schedule
 import com.krystianwsul.common.domain.schedules.ScheduleGroup
+import com.krystianwsul.common.domain.schedules.SingleSchedule
+import com.krystianwsul.common.domain.schedules.SingleScheduleBridge
 import com.krystianwsul.common.firebase.json.TaskJson
 import com.krystianwsul.common.firebase.models.ImageState
 import com.krystianwsul.common.firebase.models.RemoteProject
@@ -71,7 +73,55 @@ abstract class Task {
     fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
         check(current(exactTimeStamp))
 
-        return schedules.filter { it.current(exactTimeStamp) }
+        val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
+
+        getSingleSchedule(exactTimeStamp)?.let { singleSchedule ->
+            val instance = singleSchedule.getInstance(this)
+
+            if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
+                return listOf(SingleSchedule(this as RemoteTask<*, *>, MockSingleScheduleBridge(singleSchedule, instance)))
+        }
+
+        return currentSchedules
+    }
+
+    private fun getSingleSchedule(exactTimeStamp: ExactTimeStamp): SingleSchedule? {
+        return schedules.singleOrNull { it.current(exactTimeStamp) } as? SingleSchedule
+    }
+
+    private class MockSingleScheduleBridge(
+            private val singleSchedule: SingleSchedule,
+            private val instance: Instance
+    ) : SingleScheduleBridge by singleSchedule.singleScheduleBridge {
+
+        override val customTimeKey get() = instance.instanceTimePair.customTimeKey
+
+        override val year get() = instance.instanceDate.year
+
+        override val month get() = instance.instanceDate.month
+
+        override val day get() = instance.instanceDate.day
+
+        override val hour
+            get() = instance.instanceTime
+                    .timePair
+                    .hourMinute
+                    ?.hour
+
+        override val minute
+            get() = instance.instanceTime
+                    .timePair
+                    .hourMinute
+                    ?.minute
+
+        override val remoteCustomTimeKey
+            get() = instance.instanceTime
+                    .timePair
+                    .customTimeKey
+                    ?.let { Pair(it.remoteProjectId, it.remoteCustomTimeId) }
+
+        override val timePair
+            get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
     }
 
     fun isRootTask(exactTimeStamp: ExactTimeStamp): Boolean {
@@ -239,25 +289,43 @@ abstract class Task {
 
     abstract fun setName(name: String, note: String?)
 
-    fun updateSchedules(ownerKey: UserKey, scheduleDatas: List<Pair<ScheduleData, Time>>, now: ExactTimeStamp) {
-        val removeSchedules = ArrayList<Schedule>()
-        val addScheduleDatas = ArrayList(scheduleDatas)
+    fun updateSchedules(
+            ownerKey: UserKey,
+            shownFactory: Instance.ShownFactory,
+            scheduleDatas: List<Pair<ScheduleData, Time>>,
+            now: ExactTimeStamp
+    ) {
+        val removeSchedules = mutableListOf<Schedule>()
+        val addScheduleDatas = scheduleDatas.toMutableList()
 
         val oldSchedules = getCurrentSchedules(now)
         val oldScheduleDatas = ScheduleGroup.getGroups(oldSchedules).map { it.scheduleData to it.schedules }
         for ((key, value) in oldScheduleDatas) {
             val existing = addScheduleDatas.singleOrNull { it.first == key }
-            if (existing != null) {
+            if (existing != null)
                 addScheduleDatas.remove(existing)
-            } else {
+            else
                 removeSchedules.addAll(value)
-            }
         }
 
-        removeSchedules.forEach { it.setEndExactTimeStamp(now) }
+        val singleRemoveSchedule = removeSchedules.singleOrNull() as? SingleSchedule
+        val singleAddSchedulePair = addScheduleDatas.singleOrNull()?.takeIf { it.first is ScheduleData.Single }
+        val oldSingleSchedule = getSingleSchedule(now)
 
-        if (addScheduleDatas.isNotEmpty())
+        if (singleRemoveSchedule != null &&
+                singleAddSchedulePair != null &&
+                singleRemoveSchedule.scheduleId == oldSingleSchedule?.scheduleId
+        ) {
+            oldSingleSchedule.getInstance(this).setInstanceDateTime(
+                    shownFactory,
+                    ownerKey,
+                    singleAddSchedulePair.run { DateTime((first as ScheduleData.Single).date, second) },
+                    now
+            )
+        } else {
+            removeSchedules.forEach { it.setEndExactTimeStamp(now) }
             addSchedules(ownerKey, addScheduleDatas, now)
+        }
     }
 
     protected abstract fun addSchedules(

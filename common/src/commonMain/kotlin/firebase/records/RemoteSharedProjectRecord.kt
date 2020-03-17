@@ -3,7 +3,6 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.DatabaseWrapper
 import com.krystianwsul.common.firebase.json.JsonWrapper
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
-import com.krystianwsul.common.firebase.json.SharedProjectJson
 import com.krystianwsul.common.firebase.json.UserJson
 import com.krystianwsul.common.utils.CustomTimeKey
 import com.krystianwsul.common.utils.ProjectKey
@@ -16,13 +15,14 @@ class RemoteSharedProjectRecord(
         create: Boolean,
         id: ProjectKey.Shared,
         private val jsonWrapper: JsonWrapper
-) : RemoteProjectRecord<RemoteCustomTimeId.Shared, SharedProjectJson, ProjectKey.Shared>(
+) : RemoteProjectRecord<RemoteCustomTimeId.Shared, ProjectKey.Shared>(
         create,
         id,
         jsonWrapper.projectJson
 ) {
 
-    override val customTimeRecords = projectJson.customTimes
+    override val customTimeRecords = jsonWrapper.projectJson
+            .customTimes
             .map { (id, customTimeJson) ->
                 check(id.isNotEmpty())
 
@@ -34,7 +34,8 @@ class RemoteSharedProjectRecord(
             .toMutableMap()
 
     val remoteUserRecords by lazy {
-        projectJson.users
+        jsonWrapper.projectJson
+                .users
                 .entries
                 .associate { (id, userJson) ->
                     check(id.isNotEmpty())
@@ -88,7 +89,7 @@ class RemoteSharedProjectRecord(
     }
 
     private val createProjectJson
-        get() = projectJson.apply {
+        get() = jsonWrapper.projectJson.apply {
             tasks = remoteTaskRecords.values
                     .associateBy({ it.id }, { it.createObject })
                     .toMutableMap()

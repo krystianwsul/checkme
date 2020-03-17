@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
 
 class RemoteSingleScheduleBridge<T : RemoteCustomTimeId>(
-        remoteProjectRecord: RemoteProjectRecord<T, *, *>,
+        remoteProjectRecord: RemoteProjectRecord<T, *>,
         private val remoteSingleScheduleRecord: RemoteSingleScheduleRecord<T>
 ) : RemoteScheduleBridge<T>(remoteProjectRecord, remoteSingleScheduleRecord), SingleScheduleBridge {
 

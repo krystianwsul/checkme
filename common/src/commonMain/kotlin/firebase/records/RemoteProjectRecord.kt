@@ -8,10 +8,10 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
-abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : ProjectKey>( // todo instance remove U
+abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectKey>(
         create: Boolean,
-        val id: V,
-        protected val projectJson: U
+        val id: U,
+        private val projectJson: ProjectJson
 ) : RemoteRecord(create) {
 
     companion object {
@@ -19,7 +19,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : 
         const val PROJECT_JSON = "projectJson"
     }
 
-    abstract val customTimeRecords: Map<out T, CustomTimeRecord<T, V>>
+    abstract val customTimeRecords: Map<T, CustomTimeRecord<T, U>>
 
     val remoteTaskRecords = projectJson.tasks
             .mapValues { (id, taskJson) ->
@@ -54,7 +54,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : 
                 remoteTaskHierarchyRecords.values +
                 customTimeRecords.values
 
-    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T, V> {
+    fun newRemoteTaskRecord(taskJson: TaskJson): RemoteTaskRecord<T, U> {
         val remoteTaskRecord = RemoteTaskRecord(this, taskJson)
         check(!remoteTaskRecords.containsKey(remoteTaskRecord.id))
 
@@ -80,7 +80,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : 
 
     abstract fun getRemoteCustomTimeId(id: String): T
 
-    abstract fun getRemoteCustomTimeKey(remoteCustomTimeId: T): CustomTimeKey<T, V>
+    abstract fun getRemoteCustomTimeKey(remoteCustomTimeId: T): CustomTimeKey<T, U>
 
     fun getRemoteCustomTimeKey(customTimeId: String) = getRemoteCustomTimeKey(getRemoteCustomTimeId(customTimeId))
 }

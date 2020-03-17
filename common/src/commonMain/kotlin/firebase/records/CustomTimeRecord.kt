@@ -20,7 +20,7 @@ abstract class CustomTimeRecord<T : RemoteCustomTimeId, U : ProjectKey>(create: 
     abstract val id: T
     abstract val customTimeKey: CustomTimeKey<T, U>
     protected abstract val customTimeJson: CustomTimeJson
-    protected abstract val remoteProjectRecord: RemoteProjectRecord<T, *, U>
+    protected abstract val remoteProjectRecord: RemoteProjectRecord<T, U>
 
     var name by Committer({ customTimeJson::name })
 

@@ -18,7 +18,7 @@ import com.krystianwsul.common.utils.*
 
 abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
-    abstract val remoteProjectRecord: RemoteProjectRecord<T, *, U>
+    abstract val remoteProjectRecord: RemoteProjectRecord<T, U>
 
     protected abstract val remoteTasks: MutableMap<String, Task<T, U>>
     protected abstract val taskHierarchyContainer: TaskHierarchyContainer<T, U>

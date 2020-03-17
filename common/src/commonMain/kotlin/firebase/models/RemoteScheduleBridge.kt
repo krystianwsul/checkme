@@ -7,7 +7,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
 abstract class RemoteScheduleBridge<T : RemoteCustomTimeId>(
-        private val remoteProjectRecord: RemoteProjectRecord<T, *, *>,
+        private val remoteProjectRecord: RemoteProjectRecord<T, *>,
         private val remoteScheduleRecord: RemoteScheduleRecord<T>
 ) : ScheduleBridge {
 

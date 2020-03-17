@@ -12,8 +12,8 @@ class RemotePrivateProjectRecord(
         private val databaseWrapper: DatabaseWrapper,
         create: Boolean,
         id: ProjectKey.Private,
-        projectJson: PrivateProjectJson
-) : RemoteProjectRecord<RemoteCustomTimeId.Private, PrivateProjectJson, ProjectKey.Private>(
+        private val projectJson: PrivateProjectJson
+) : RemoteProjectRecord<RemoteCustomTimeId.Private, ProjectKey.Private>(
         create,
         id,
         projectJson

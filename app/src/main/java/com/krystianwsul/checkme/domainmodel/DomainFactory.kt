@@ -393,18 +393,18 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
-            it.customTimeKey
+            it.key
         }.toMutableMap<CustomTimeKey<*, *>, CustomTime<*, *>>()
 
         val instance = getInstance(instanceKey)
         check(instance.isRootInstance(now))
 
         (instance.instanceTime as? CustomTime<*, *>)?.let {
-            currentCustomTimes[it.customTimeKey] = it
+            currentCustomTimes[it.key] = it
         }
 
         val customTimeDatas = currentCustomTimes.mapValues {
-            it.value.let { EditInstanceViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes.toSortedMap()) }
+            it.value.let { EditInstanceViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap()) }
         }
 
         return EditInstanceViewModel.Data(instance.instanceKey, instance.instanceDate, instance.instanceTimePair, instance.name, customTimeDatas, instance.done != null, instance.instanceDateTime.timeStamp.toExactTimeStamp() <= now)
@@ -419,7 +419,7 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val currentCustomTimes = getCurrentRemoteCustomTimes(now).associateBy {
-            it.customTimeKey
+            it.key
         }.toMutableMap<CustomTimeKey<*, *>, CustomTime<*, *>>()
 
         val instanceDatas = mutableMapOf<InstanceKey, EditInstancesViewModel.InstanceData>()
@@ -432,14 +432,14 @@ class DomainFactory(
             instanceDatas[instanceKey] = EditInstancesViewModel.InstanceData(instance.instanceDateTime, instance.name, instance.done != null)
 
             (instance.instanceTime as? CustomTime<*, *>)?.let {
-                currentCustomTimes[it.customTimeKey] = it
+                currentCustomTimes[it.key] = it
             }
         }
 
         val customTimeDatas = currentCustomTimes.mapValues {
             it.value.let {
                 EditInstancesViewModel.CustomTimeData(
-                        it.customTimeKey,
+                        it.key,
                         it.name,
                         it.hourMinutes.toSortedMap())
             }
@@ -458,7 +458,7 @@ class DomainFactory(
 
         val hourMinutes = DayOfWeek.values().associate { it to customTime.getHourMinute(it) }
 
-        return ShowCustomTimeViewModel.Data(customTime.id, customTime.name, hourMinutes)
+        return ShowCustomTimeViewModel.Data(customTime.key, customTime.name, hourMinutes)
     }
 
     @Synchronized
@@ -467,7 +467,7 @@ class DomainFactory(
 
         val now = ExactTimeStamp.now
 
-        val entries = getCurrentRemoteCustomTimes(now).map { ShowCustomTimesViewModel.CustomTimeData(it.customTimeKey, it.name) }.toMutableList()
+        val entries = getCurrentRemoteCustomTimes(now).map { ShowCustomTimesViewModel.CustomTimeData(it.key, it.name) }.toMutableList()
 
         return ShowCustomTimesViewModel.Data(entries)
     }
@@ -748,7 +748,7 @@ class DomainFactory(
         val now = ExactTimeStamp.now
 
         val customTimes = getCurrentRemoteCustomTimes(now).associateBy {
-            it.customTimeKey
+            it.key
         }.toMutableMap<CustomTimeKey<*, *>, CustomTime<*, *>>()
 
         val excludedTaskKeys = when {
@@ -834,7 +834,7 @@ class DomainFactory(
             check(checkHintPresent(parentTreeDatas))
         }
 
-        val customTimeDatas = customTimes.values.associate { it.customTimeKey to CreateTaskViewModel.CustomTimeData(it.customTimeKey, it.name, it.hourMinutes.toSortedMap()) }
+        val customTimeDatas = customTimes.values.associate { it.key to CreateTaskViewModel.CustomTimeData(it.key, it.name, it.hourMinutes.toSortedMap()) }
 
         return CreateTaskViewModel.Data(taskData, parentTreeDatas, customTimeDatas, remoteUserFactory.remoteUser.defaultReminder)
     }
@@ -1847,11 +1847,17 @@ class DomainFactory(
 
         save(0, source)
 
-        return remoteCustomTime.customTimeKey
+        return remoteCustomTime.key
     }
 
     @Synchronized
-    fun updateCustomTime(dataId: Int, source: SaveService.Source, customTimeId: RemoteCustomTimeId.Private, name: String, hourMinutes: Map<DayOfWeek, HourMinute>) {
+    fun updateCustomTime(
+            dataId: Int,
+            source: SaveService.Source,
+            customTimeId: CustomTimeKey.Private,
+            name: String,
+            hourMinutes: Map<DayOfWeek, HourMinute>
+    ) {
         MyCrashlytics.log("DomainFactory.updateCustomTime")
         if (remoteProjectFactory.eitherSaved) throw SavedFactoryException()
 
@@ -2140,9 +2146,9 @@ class DomainFactory(
 
     private fun getExistingInstanceIfPresent(instanceKey: InstanceKey) = remoteProjectFactory.getExistingInstanceIfPresent(instanceKey)
 
-    override fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private) = remoteProjectFactory.remoteSharedProjects
+    override fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Private) = remoteProjectFactory.remoteSharedProjects
             .values
-            .mapNotNull { it.getSharedTimeIfPresent(privateCustomTimeId, ownerKey) }
+            .mapNotNull { it.getSharedTimeIfPresent(customTimeKey, ownerKey) }
 
     private fun generateInstance(taskKey: TaskKey, scheduleDateTime: DateTime): Instance<*, *> {
         return remoteProjectFactory.getTaskForce(taskKey).generateInstance(scheduleDateTime)
@@ -2591,7 +2597,7 @@ class DomainFactory(
                 check(instanceShownRecord.scheduleHour == null)
                 check(instanceShownRecord.scheduleMinute == null)
 
-                customTimeKey = getCustomTimeKey(project.id, project.getRemoteCustomTimeId(remoteCustomTimeId))
+                customTimeKey = project.getRemoteCustomTime(remoteCustomTimeId).key
                 hourMinute = null
             } else {
                 checkNotNull(instanceShownRecord.scheduleHour)
@@ -2810,11 +2816,6 @@ class DomainFactory(
         return dataWrapper
     }
 
-    private fun getCustomTimeKey(
-            remoteProjectId: ProjectKey,
-            remoteCustomTimeId: RemoteCustomTimeId
-    ) = remoteProjectFactory.getRemoteCustomTime(remoteProjectId, remoteCustomTimeId).customTimeKey
-
     private fun copyTask(now: ExactTimeStamp, task: Task<*, *>, copyTaskKey: TaskKey) {
         val copiedTask = getTaskForce(copyTaskKey)
 
@@ -2827,10 +2828,8 @@ class DomainFactory(
     }
 
     private fun getTime(timePair: TimePair) = timePair.customTimeKey
-            ?.let { getCustomTime(it) }
+            ?.let { remoteProjectFactory.getRemoteCustomTime(it) }
             ?: NormalTime(timePair.hourMinute!!)
-
-    private fun getCustomTime(customTimeKey: CustomTimeKey<*, *>) = remoteProjectFactory.getRemoteCustomTime(customTimeKey.remoteProjectId, customTimeKey.remoteCustomTimeId)
 
     class HourUndoData(val instanceDateTimes: Map<InstanceKey, DateTime>)
 

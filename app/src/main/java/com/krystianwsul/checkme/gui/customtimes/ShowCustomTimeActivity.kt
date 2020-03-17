@@ -122,7 +122,7 @@ class ShowCustomTimeActivity : NavBarActivity() {
                         DomainFactory.instance.updateCustomTime(
                                 data!!.dataId,
                                 SaveService.Source.GUI,
-                                data!!.id,
+                                data!!.key,
                                 name,
                                 hourMinutes
                         )

@@ -13,7 +13,7 @@ class SharedCustomTime(
 
     override val id = customTimeRecord.id
 
-    override val customTimeKey by lazy { CustomTimeKey.Shared(projectId, id) }
+    override val key by lazy { CustomTimeKey.Shared(projectId, id) }
 
     val ownerKey get() = customTimeRecord.ownerKey
     val privateKey get() = customTimeRecord.privateKey

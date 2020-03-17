@@ -100,7 +100,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
 
-    private val instanceCustomTimeKey get() = (instanceTime as? CustomTime<*, *>)?.customTimeKey
+    private val instanceCustomTimeKey get() = (instanceTime as? CustomTime<*, *>)?.key
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
 
@@ -313,7 +313,7 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
             it.instanceJsonTime = project.getOrCopyTime(ownerKey, dateTime.time).let {
                 @Suppress("UNCHECKED_CAST")
                 when (it) {
-                    is CustomTime<*, *> -> JsonTime.Custom(it.customTimeKey.remoteCustomTimeId as T)
+                    is CustomTime<*, *> -> JsonTime.Custom(it.key.remoteCustomTimeId as T)
                     is NormalTime -> JsonTime.Normal(it.hourMinute)
                     else -> throw IllegalArgumentException()
                 }

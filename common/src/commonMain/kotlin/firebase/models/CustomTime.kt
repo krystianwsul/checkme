@@ -17,7 +17,7 @@ abstract class CustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Time {
 
     abstract val id: T
 
-    abstract val customTimeKey: CustomTimeKey<*, *>
+    abstract val key: CustomTimeKey<T, *>
 
     val name get() = customTimeRecord.name
 
@@ -26,7 +26,7 @@ abstract class CustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Time {
                 .map { it to getHourMinute(it) }
                 .toMap()
 
-    override val timePair by lazy { TimePair(customTimeKey, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
+    override val timePair by lazy { TimePair(key, null) }// possibly should get local key from DomainFactory (instead I have to do it in RemoteInstance)
 
     val projectId by lazy { project.id }
 

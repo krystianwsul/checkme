@@ -16,9 +16,9 @@ class PrivateCustomTime(
 
     override val id = customTimeRecord.id
 
-    override val customTimeKey by lazy { CustomTimeKey.Private(projectId, id) }
+    override val key by lazy { CustomTimeKey.Private(projectId, id) }
 
-    private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(id)
+    private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(key)
             .map { (it as CustomTime<*, *>).customTimeRecord }
             .toMutableList<CustomTimeRecord<*, *>>()
             .apply { add(customTimeRecord) }
@@ -57,6 +57,6 @@ class PrivateCustomTime(
 
     interface AllRecordsSource {
 
-        fun getSharedCustomTimes(privateCustomTimeId: RemoteCustomTimeId.Private): List<SharedCustomTime>
+        fun getSharedCustomTimes(customTimeKey: CustomTimeKey.Private): List<SharedCustomTime>
     }
 }

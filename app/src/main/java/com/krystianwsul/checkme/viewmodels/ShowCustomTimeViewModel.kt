@@ -1,11 +1,9 @@
 package com.krystianwsul.checkme.viewmodels
 
 import com.krystianwsul.checkme.domainmodel.DomainFactory
-
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() {
 
@@ -23,9 +21,10 @@ class ShowCustomTimeViewModel : DomainViewModel<ShowCustomTimeViewModel.Data>() 
     }
 
     data class Data(
-            val id: RemoteCustomTimeId.Private,
+            val key: CustomTimeKey.Private,
             val name: String,
-            val hourMinutes: Map<DayOfWeek, HourMinute>) : DomainData() {
+            val hourMinutes: Map<DayOfWeek, HourMinute>
+    ) : DomainData() {
 
         init {
             check(name.isNotEmpty())

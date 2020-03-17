@@ -197,10 +197,10 @@ class RemoteProjectFactory(
         return privateSaved || sharedSaved
     }
 
-    fun getRemoteCustomTime(remoteProjectId: ProjectKey, remoteCustomTimeId: RemoteCustomTimeId): CustomTime<*, *> {
-        check(remoteProjects.containsKey(remoteProjectId))
+    fun getRemoteCustomTime(customTimeKey: CustomTimeKey<*, *>): CustomTime<*, *> {
+        check(remoteProjects.containsKey(customTimeKey.remoteProjectId))
 
-        return remoteProjects.getValue(remoteProjectId).getRemoteCustomTime(remoteCustomTimeId)
+        return remoteProjects.getValue(customTimeKey.remoteProjectId).getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
     }
 
     fun getExistingInstanceIfPresent(instanceKey: InstanceKey): Instance<*, *>? {

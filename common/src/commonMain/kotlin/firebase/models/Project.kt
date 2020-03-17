@@ -129,7 +129,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
             ownerKey: UserKey,
             time: Time
     ) = when (val newTime = getOrCopyTime(ownerKey, time)) {
-        is CustomTime<*, *> -> Triple(newTime.customTimeKey.remoteCustomTimeId, null, null)
+        is CustomTime<*, *> -> Triple(newTime.key.remoteCustomTimeId, null, null)
         is NormalTime -> Triple(null, newTime.hourMinute.hour, newTime.hourMinute.minute)
         else -> throw IllegalArgumentException()
     }
@@ -154,7 +154,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
         when (newInstanceTime) {
             is CustomTime<*, *> -> {
-                instanceCustomTimeId = newInstanceTime.customTimeKey
+                instanceCustomTimeId = newInstanceTime.key
                         .remoteCustomTimeId
                         .value
                 instanceHour = null
@@ -270,7 +270,9 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
     abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): CustomTime<T, U>
     abstract fun getRemoteCustomTime(customTimeKey: CustomTimeKey<T, U>): CustomTime<T, U>
 
-    abstract fun getRemoteCustomTimeId(id: String): RemoteCustomTimeId
+    abstract fun getRemoteCustomTimeId(id: String): T
+
+    fun getRemoteCustomTime(remoteCustomTimeId: String) = getRemoteCustomTime(getRemoteCustomTimeId(remoteCustomTimeId))
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp,

@@ -102,9 +102,9 @@ class SharedProject(
     }
 
     fun getSharedTimeIfPresent(
-            privateCustomTimeId: RemoteCustomTimeId.Private,
+            privateCustomTimeId: CustomTimeKey.Private,
             ownerKey: UserKey
-    ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId }
+    ) = remoteCustomTimes.values.singleOrNull { it.ownerKey == ownerKey && it.privateKey == privateCustomTimeId.remoteCustomTimeId }
 
     override fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): SharedCustomTime {
         check(remoteCustomTimes.containsKey(remoteCustomTimeId as RemoteCustomTimeId.Shared))
@@ -156,7 +156,7 @@ class SharedProject(
         }
 
         return when (customTime) {
-            is PrivateCustomTime -> getSharedTimeIfPresent(customTime.id, ownerKey)
+            is PrivateCustomTime -> getSharedTimeIfPresent(customTime.key, ownerKey)
             is SharedCustomTime -> customTime.takeIf { it.projectId == id }
             else -> throw IllegalArgumentException()
         } ?: copy()

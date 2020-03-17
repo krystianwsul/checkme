@@ -4,7 +4,7 @@ package com.krystianwsul.common.firebase.records
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord {
+abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord { // todo instance use CustomTimeKey
 
     companion object {
 

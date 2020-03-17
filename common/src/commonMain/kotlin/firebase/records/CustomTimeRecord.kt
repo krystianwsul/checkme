@@ -5,45 +5,45 @@ import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.CustomTimeJson
 import com.krystianwsul.common.time.DayOfWeek
 import com.krystianwsul.common.time.HourMinute
+import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
-abstract class CustomTimeRecord<T : RemoteCustomTimeId, U : CustomTimeJson>(
-        create: Boolean,
-        protected val customTimeJson: U
-) : RemoteRecord(create) {
+abstract class CustomTimeRecord<T : RemoteCustomTimeId, U : ProjectKey>(create: Boolean) : RemoteRecord(create) {
 
     companion object {
 
         const val CUSTOM_TIMES = "customTimes"
     }
 
-    abstract val id: RemoteCustomTimeId
+    abstract val id: T
+    abstract val customTimeKey: CustomTimeKey<T, U>
+    protected abstract val customTimeJson: CustomTimeJson
+    protected abstract val remoteProjectRecord: RemoteProjectRecord<T, *, U>
 
-    protected abstract val remoteProjectRecord: RemoteProjectRecord<T, *, *>
+    var name by Committer({ customTimeJson::name })
 
-    var name by Committer(customTimeJson::name)
+    var sundayHour by Committer({ customTimeJson::sundayHour })
+    var sundayMinute by Committer({ customTimeJson::sundayMinute })
 
-    var sundayHour by Committer(customTimeJson::sundayHour)
-    var sundayMinute by Committer(customTimeJson::sundayMinute)
+    var mondayHour by Committer({ customTimeJson::mondayHour })
+    var mondayMinute by Committer({ customTimeJson::mondayMinute })
 
-    var mondayHour by Committer(customTimeJson::mondayHour)
-    var mondayMinute by Committer(customTimeJson::mondayMinute)
+    var tuesdayHour by Committer({ customTimeJson::tuesdayHour })
+    var tuesdayMinute by Committer({ customTimeJson::tuesdayMinute })
 
-    var tuesdayHour by Committer(customTimeJson::tuesdayHour)
-    var tuesdayMinute by Committer(customTimeJson::tuesdayMinute)
+    var wednesdayHour by Committer({ customTimeJson::wednesdayHour })
+    var wednesdayMinute by Committer({ customTimeJson::wednesdayMinute })
 
-    var wednesdayHour by Committer(customTimeJson::wednesdayHour)
-    var wednesdayMinute by Committer(customTimeJson::wednesdayMinute)
+    var thursdayHour by Committer({ customTimeJson::thursdayHour })
+    var thursdayMinute by Committer({ customTimeJson::thursdayMinute })
 
-    var thursdayHour by Committer(customTimeJson::thursdayHour)
-    var thursdayMinute by Committer(customTimeJson::thursdayMinute)
+    var fridayHour by Committer({ customTimeJson::fridayHour })
+    var fridayMinute by Committer({ customTimeJson::fridayMinute })
 
-    var fridayHour by Committer(customTimeJson::fridayHour)
-    var fridayMinute by Committer(customTimeJson::fridayMinute)
-
-    var saturdayHour by Committer(customTimeJson::saturdayHour)
-    var saturdayMinute by Committer(customTimeJson::saturdayMinute)
+    var saturdayHour by Committer({ customTimeJson::saturdayHour })
+    var saturdayMinute by Committer({ customTimeJson::saturdayMinute })
 
     val projectId get() = remoteProjectRecord.id
 

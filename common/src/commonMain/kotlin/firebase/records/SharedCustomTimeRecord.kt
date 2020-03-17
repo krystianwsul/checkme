@@ -2,25 +2,32 @@ package com.krystianwsul.common.firebase.records
 
 import com.krystianwsul.common.domain.UserInfo
 import com.krystianwsul.common.firebase.json.SharedCustomTimeJson
+import com.krystianwsul.common.utils.CustomTimeKey
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.UserKey
 import kotlin.properties.Delegates.observable
 
 
-class SharedCustomTimeRecord : CustomTimeRecord<RemoteCustomTimeId.Shared, SharedCustomTimeJson> {
+class SharedCustomTimeRecord(
+        create: Boolean,
+        override val id: RemoteCustomTimeId.Shared,
+        override val customTimeJson: SharedCustomTimeJson,
+        override val remoteProjectRecord: RemoteSharedProjectRecord
+) : CustomTimeRecord<RemoteCustomTimeId.Shared, ProjectKey.Shared>(create) {
 
-    override val id: RemoteCustomTimeId.Shared
-    override val remoteProjectRecord: RemoteSharedProjectRecord
+    constructor(
+            id: RemoteCustomTimeId.Shared,
+            remoteProjectRecord: RemoteSharedProjectRecord,
+            customTimeJson: SharedCustomTimeJson
+    ) : this(false, id, customTimeJson, remoteProjectRecord)
 
-    constructor(id: RemoteCustomTimeId.Shared, remoteProjectRecord: RemoteSharedProjectRecord, customTimeJson: SharedCustomTimeJson) : super(false, customTimeJson) {
-        this.id = id
-        this.remoteProjectRecord = remoteProjectRecord
-    }
+    constructor(
+            remoteProjectRecord: RemoteSharedProjectRecord,
+            customTimeJson: SharedCustomTimeJson
+    ) : this(true, remoteProjectRecord.getCustomTimeRecordId(), customTimeJson, remoteProjectRecord)
 
-    constructor(remoteProjectRecord: RemoteSharedProjectRecord, customTimeJson: SharedCustomTimeJson) : super(true, customTimeJson) {
-        id = remoteProjectRecord.getCustomTimeRecordId()
-        this.remoteProjectRecord = remoteProjectRecord
-    }
+    override val customTimeKey = CustomTimeKey.Shared(remoteProjectRecord.id, id)
 
     override val createObject get() = customTimeJson
 

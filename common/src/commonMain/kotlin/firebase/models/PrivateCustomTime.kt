@@ -14,9 +14,8 @@ class PrivateCustomTime(
         override val customTimeRecord: PrivateCustomTimeRecord
 ) : CustomTime<RemoteCustomTimeId.Private, ProjectKey.Private>() {
 
-    override val id = customTimeRecord.id
-
-    override val key by lazy { CustomTimeKey.Private(projectId, id) }
+    override val key = customTimeRecord.customTimeKey
+    override val id = key.remoteCustomTimeId
 
     private fun getAllRecords(allRecordsSource: AllRecordsSource) = allRecordsSource.getSharedCustomTimes(key)
             .map { (it as CustomTime<*, *>).customTimeRecord }

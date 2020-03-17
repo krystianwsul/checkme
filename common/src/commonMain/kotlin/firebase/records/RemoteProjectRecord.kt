@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 @Suppress("LeakingThis")
-abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : ProjectKey>(
+abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : ProjectKey>( // todo instance remove U
         create: Boolean,
         val id: V,
         protected val projectJson: U
@@ -19,7 +19,7 @@ abstract class RemoteProjectRecord<T : RemoteCustomTimeId, U : ProjectJson, V : 
         const val PROJECT_JSON = "projectJson"
     }
 
-    abstract val customTimeRecords: Map<out T, CustomTimeRecord<T, *>>
+    abstract val customTimeRecords: Map<out T, CustomTimeRecord<T, V>>
 
     val remoteTaskRecords = projectJson.tasks
             .mapValues { (id, taskJson) ->

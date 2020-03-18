@@ -21,7 +21,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
             .associateBy { it.scheduleKey }
             .toMutableMap()
 
-    private val remoteSchedules = ArrayList<Schedule>()
+    private val remoteSchedules = ArrayList<Schedule<T, U>>()
 
     val name get() = remoteTaskRecord.name
 
@@ -69,7 +69,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
             exactTimeStamp: ExactTimeStamp
     ): Task<T, U> = getParentTask(exactTimeStamp)?.getRootTask(exactTimeStamp) ?: this
 
-    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule> {
+    fun getCurrentSchedules(exactTimeStamp: ExactTimeStamp): List<Schedule<T, U>> {
         check(current(exactTimeStamp))
 
         val currentSchedules = schedules.filter { it.current(exactTimeStamp) }
@@ -81,14 +81,14 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
             if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
                 return listOf(SingleSchedule(
                         this,
-                        MockSingleScheduleBridge(singleSchedule.singleScheduleBridge as SingleScheduleBridge<T, U>, instance)
+                        MockSingleScheduleBridge(singleSchedule.singleScheduleBridge, instance)
                 ))
         }
 
         return currentSchedules
     }
 
-    private fun getSingleSchedule(exactTimeStamp: ExactTimeStamp): SingleSchedule? {
+    private fun getSingleSchedule(exactTimeStamp: ExactTimeStamp): SingleSchedule<T, U>? {
         return schedules.singleOrNull { it.current(exactTimeStamp) } as? SingleSchedule
     }
 
@@ -284,7 +284,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
             scheduleDatas: List<Pair<ScheduleData, Time>>,
             now: ExactTimeStamp
     ) {
-        val removeSchedules = mutableListOf<Schedule>()
+        val removeSchedules = mutableListOf<Schedule<T, U>>()
         val addScheduleDatas = scheduleDatas.toMutableList()
 
         val oldSchedules = getCurrentSchedules(now)
@@ -421,7 +421,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         remoteProject.createTaskHierarchy(this, childTask as Task<T, U>, now)
     }
 
-    fun deleteSchedule(schedule: Schedule) {
+    fun deleteSchedule(schedule: Schedule<T, U>) {
         check(remoteSchedules.contains(schedule))
 
         remoteSchedules.remove(schedule)
@@ -531,19 +531,19 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         }
     }
 
-    fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp, schedules: Collection<Schedule>) {
+    fun copySchedules(deviceDbInfo: DeviceDbInfo, now: ExactTimeStamp, schedules: Collection<Schedule<*, *>>) {
         for (schedule in schedules) {
             val (remoteCustomTimeId, hour, minute) = remoteProject.getOrCopyAndDestructureTime(deviceDbInfo.key, schedule.time)
 
             when (schedule) {
-                is SingleSchedule -> {
+                is SingleSchedule<*, *> -> {
                     val date = schedule.date
 
                     val remoteSingleScheduleRecord = remoteTaskRecord.newRemoteSingleScheduleRecord(ScheduleWrapper(SingleScheduleJson(now.long, schedule.endTime, date.year, date.month, date.day, remoteCustomTimeId?.value, hour, minute)))
 
                     remoteSchedules.add(SingleSchedule(this, RemoteSingleScheduleBridge(remoteSingleScheduleRecord)))
                 }
-                is WeeklySchedule -> {
+                is WeeklySchedule<*, *> -> {
                     for (dayOfWeek in schedule.daysOfWeek) {
                         val remoteWeeklyScheduleRecord = remoteTaskRecord.newRemoteWeeklyScheduleRecord(ScheduleWrapper(weeklyScheduleJson = WeeklyScheduleJson(
                                 now.long,
@@ -559,7 +559,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
                         remoteSchedules.add(WeeklySchedule(this, RemoteWeeklyScheduleBridge(remoteWeeklyScheduleRecord)))
                     }
                 }
-                is MonthlyDaySchedule -> {
+                is MonthlyDaySchedule<*, *> -> {
                     val remoteMonthlyDayScheduleRecord = remoteTaskRecord.newRemoteMonthlyDayScheduleRecord(ScheduleWrapper(monthlyDayScheduleJson = MonthlyDayScheduleJson(
                             now.long,
                             schedule.endTime,
@@ -574,7 +574,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
 
                     remoteSchedules.add(MonthlyDaySchedule(this, RemoteMonthlyDayScheduleBridge(remoteMonthlyDayScheduleRecord)))
                 }
-                is MonthlyWeekSchedule -> {
+                is MonthlyWeekSchedule<*, *> -> {
                     val remoteMonthlyWeekScheduleRecord = remoteTaskRecord.newRemoteMonthlyWeekScheduleRecord(ScheduleWrapper(monthlyWeekScheduleJson = MonthlyWeekScheduleJson(
                             now.long,
                             schedule.endTime,
@@ -647,7 +647,7 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
 
     interface ScheduleTextFactory {
 
-        fun getScheduleText(scheduleGroup: ScheduleGroup, project: Project<*, *>): String
+        fun getScheduleText(scheduleGroup: ScheduleGroup<*, *>, project: Project<*, *>): String
     }
 
     interface ProjectUpdater {

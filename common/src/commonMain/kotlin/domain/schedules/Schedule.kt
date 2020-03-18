@@ -11,9 +11,9 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleType
 
 
-abstract class Schedule(private val rootTask: Task<*, *>) {
+abstract class Schedule<T : RemoteCustomTimeId, U : ProjectKey>(private val rootTask: Task<T, U>) {
 
-    protected abstract val scheduleBridge: ScheduleBridge<*, *>
+    protected abstract val scheduleBridge: ScheduleBridge<T, U>
 
     protected val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }
 

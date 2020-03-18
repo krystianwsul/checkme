@@ -9,10 +9,10 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleType
 import com.soywiz.klock.days
 
-class WeeklySchedule(
-        rootTask: Task<*, *>,
-        override val repeatingScheduleBridge: WeeklyScheduleBridge<*, *>
-) : RepeatingSchedule(rootTask) {
+class WeeklySchedule<T : RemoteCustomTimeId, U : ProjectKey>(
+        rootTask: Task<T, U>,
+        override val repeatingScheduleBridge: WeeklyScheduleBridge<T, U>
+) : RepeatingSchedule<T, U>(rootTask) {
 
     val daysOfWeek
         get() = repeatingScheduleBridge.daysOfWeek

@@ -10,10 +10,10 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleType
 
-class SingleSchedule(
-        rootTask: Task<*, *>,
-        val singleScheduleBridge: SingleScheduleBridge<*, *>
-) : Schedule(rootTask) {
+class SingleSchedule<T : RemoteCustomTimeId, U : ProjectKey>(
+        rootTask: Task<T, U>,
+        val singleScheduleBridge: SingleScheduleBridge<T, U>
+) : Schedule<T, U>(rootTask) {
 
     override val scheduleBridge get() = singleScheduleBridge
 

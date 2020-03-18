@@ -9,9 +9,9 @@ import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.soywiz.klock.days
 
-abstract class RepeatingSchedule(rootTask: Task<*, *>) : Schedule(rootTask) {
+abstract class RepeatingSchedule<T : RemoteCustomTimeId, U : ProjectKey>(rootTask: Task<T, U>) : Schedule<T, U>(rootTask) {
 
-    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge<*, *>
+    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge<T, U>
 
     val from get() = repeatingScheduleBridge.from
     val until get() = repeatingScheduleBridge.until

@@ -20,7 +20,7 @@ sealed class ScheduleText {
     companion object : Task.ScheduleTextFactory {
 
         override fun getScheduleText(
-                scheduleGroup: ScheduleGroup,
+                scheduleGroup: ScheduleGroup<*, *>,
                 project: Project<*, *>
         ) = when (scheduleGroup) {
             is ScheduleGroup.Single -> Single(scheduleGroup)
@@ -56,7 +56,7 @@ sealed class ScheduleText {
         } ?: NormalTime(timePair.hourMinute!!)).toString()
     }
 
-    class Single(private val scheduleGroup: ScheduleGroup.Single) : ScheduleText() {
+    class Single(private val scheduleGroup: ScheduleGroup.Single<*, *>) : ScheduleText() {
 
         companion object {
 
@@ -71,7 +71,7 @@ sealed class ScheduleText {
         }
     }
 
-    class Weekly(private val scheduleGroup: ScheduleGroup.Weekly) : ScheduleText() {
+    class Weekly(private val scheduleGroup: ScheduleGroup.Weekly<*, *>) : ScheduleText() {
 
         companion object {
 
@@ -92,7 +92,7 @@ sealed class ScheduleText {
         }
     }
 
-    class MonthlyDay(private val scheduleGroup: ScheduleGroup.MonthlyDay) : ScheduleText() {
+    class MonthlyDay(private val scheduleGroup: ScheduleGroup.MonthlyDay<*, *>) : ScheduleText() {
 
         companion object {
 
@@ -111,7 +111,7 @@ sealed class ScheduleText {
         }
     }
 
-    class MonthlyWeek(private val scheduleGroup: ScheduleGroup.MonthlyWeek) : ScheduleText() {
+    class MonthlyWeek(private val scheduleGroup: ScheduleGroup.MonthlyWeek<*, *>) : ScheduleText() {
 
         companion object {
 

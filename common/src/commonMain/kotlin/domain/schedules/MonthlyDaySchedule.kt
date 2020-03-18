@@ -10,10 +10,10 @@ import com.krystianwsul.common.utils.ScheduleType
 import com.krystianwsul.common.utils.getDateInMonth
 import com.soywiz.klock.months
 
-class MonthlyDaySchedule(
-        rootTask: Task<*, *>,
-        override val repeatingScheduleBridge: MonthlyDayScheduleBridge<*, *>
-) : RepeatingSchedule(rootTask) {
+class MonthlyDaySchedule<T : RemoteCustomTimeId, U : ProjectKey>(
+        rootTask: Task<T, U>,
+        override val repeatingScheduleBridge: MonthlyDayScheduleBridge<T, U>
+) : RepeatingSchedule<T, U>(rootTask) {
 
     override val scheduleBridge get() = repeatingScheduleBridge
 

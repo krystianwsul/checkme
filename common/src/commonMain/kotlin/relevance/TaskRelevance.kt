@@ -56,13 +56,13 @@ class TaskRelevance(val task: Task<*, *>) {
     }
 
     fun setRemoteRelevant(
-            remoteCustomTimeRelevances: Map<Pair<ProjectKey, RemoteCustomTimeId>, RemoteCustomTimeRelevance>,
+            remoteCustomTimeRelevances: Map<CustomTimeKey<*, *>, RemoteCustomTimeRelevance>,
             remoteProjectRelevances: Map<ProjectKey, RemoteProjectRelevance>
     ) {
         check(relevant)
 
         task.schedules
-                .mapNotNull { it.remoteCustomTimeKey }
+                .mapNotNull { it.customTimeKey }
                 .map { remoteCustomTimeRelevances.getValue(it) }
                 .forEach { it.setRelevant() }
 

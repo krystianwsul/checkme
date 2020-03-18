@@ -16,20 +16,19 @@ class RemoteMonthlyWeekScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey> : 
 
     val beginningOfMonth by lazy { monthlyWeekScheduleJson.beginningOfMonth }
 
-    override val customTimeId by lazy { monthlyWeekScheduleJson.customTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) } }
-
-    val hour by lazy { monthlyWeekScheduleJson.hour }
-
-    val minute by lazy { monthlyWeekScheduleJson.minute }
-
     val from by lazy { monthlyWeekScheduleJson.from }
     val until by lazy { monthlyWeekScheduleJson.until }
 
-    constructor(id: String, remoteTaskRecord: RemoteTaskRecord<T, U>, scheduleWrapper: ScheduleWrapper) : super(id, remoteTaskRecord, scheduleWrapper)
+    constructor(
+            id: String,
+            remoteTaskRecord: RemoteTaskRecord<T, U>,
+            scheduleWrapper: ScheduleWrapper
+    ) : super(id, remoteTaskRecord, scheduleWrapper, scheduleWrapper.monthlyWeekScheduleJson!!)
 
-    constructor(remoteTaskRecord: RemoteTaskRecord<T, U>, scheduleWrapper: ScheduleWrapper) : super(remoteTaskRecord, scheduleWrapper)
-
-    override val startTime by lazy { monthlyWeekScheduleJson.startTime }
+    constructor(
+            remoteTaskRecord: RemoteTaskRecord<T, U>,
+            scheduleWrapper: ScheduleWrapper
+    ) : super(remoteTaskRecord, scheduleWrapper, scheduleWrapper.monthlyWeekScheduleJson!!)
 
     override var endTime by Committer(monthlyWeekScheduleJson::endTime, "$key/monthlyWeekScheduleJson")
 

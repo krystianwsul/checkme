@@ -25,8 +25,6 @@ abstract class Schedule(private val rootTask: Task<*, *>) {
 
     val customTimeKey get() = scheduleBridge.customTimeKey
 
-    val remoteCustomTimeKey get() = scheduleBridge.remoteCustomTimeKey
-
     abstract val scheduleType: ScheduleType
 
     val timePair get() = scheduleBridge.timePair

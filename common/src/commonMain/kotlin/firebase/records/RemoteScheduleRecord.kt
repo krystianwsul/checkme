@@ -1,51 +1,64 @@
 package com.krystianwsul.common.firebase.records
 
 
+import com.krystianwsul.common.firebase.json.ScheduleJson
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-abstract class RemoteScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey> : RemoteRecord {
+abstract class RemoteScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey>(
+        create: Boolean,
+        val id: String,
+        protected val remoteTaskRecord: RemoteTaskRecord<T, U>,
+        final override val createObject: ScheduleWrapper,
+        private val scheduleJson: ScheduleJson
+) : RemoteRecord(create) {
 
     companion object {
 
         const val SCHEDULES = "schedules"
     }
 
-    val id: String
+    final override val key get() = remoteTaskRecord.key + "/" + SCHEDULES + "/" + id
 
-    protected val remoteTaskRecord: RemoteTaskRecord<T, U>
+    val startTime get() = scheduleJson.startTime
 
-    final override val createObject: ScheduleWrapper
-
-    override val key get() = remoteTaskRecord.key + "/" + SCHEDULES + "/" + id
-
-    abstract val startTime: Long
-
-    abstract var endTime: Long?
+    abstract var endTime: Long? // todo instances get key for this
 
     val projectId get() = remoteTaskRecord.projectId
 
     val taskId get() = remoteTaskRecord.id
 
-    abstract val customTimeId: T? // todo instance customTimeKey
+    val hour get() = scheduleJson.hour
+
+    val minute get() = scheduleJson.minute
+
+    val customTimeKey by lazy {
+        scheduleJson.customTimeId?.let { remoteTaskRecord.getRemoteCustomTimeKey(it) }
+    }
 
     constructor(
             id: String,
             remoteTaskRecord: RemoteTaskRecord<T, U>,
-            scheduleWrapper: ScheduleWrapper
-    ) : super(false) {
-        this.id = id
-        this.remoteTaskRecord = remoteTaskRecord
-        this.createObject = scheduleWrapper
-    }
+            scheduleWrapper: ScheduleWrapper,
+            scheduleJson: ScheduleJson
+    ) : this(
+            false,
+            id,
+            remoteTaskRecord,
+            scheduleWrapper,
+            scheduleJson
+    )
 
     constructor(
             remoteTaskRecord: RemoteTaskRecord<T, U>,
-            scheduleWrapper: ScheduleWrapper
-    ) : super(true) {
-        id = remoteTaskRecord.getScheduleRecordId()
-        this.remoteTaskRecord = remoteTaskRecord
-        this.createObject = scheduleWrapper
-    }
+            scheduleWrapper: ScheduleWrapper,
+            scheduleJson: ScheduleJson
+    ) : this(
+            true,
+            remoteTaskRecord.getScheduleRecordId(),
+            remoteTaskRecord,
+            scheduleWrapper,
+            scheduleJson
+    )
 }

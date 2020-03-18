@@ -10,17 +10,9 @@ class RemoteDailyScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey>(
         id: String,
         remoteTaskRecord: RemoteTaskRecord<T, U>,
         scheduleWrapper: ScheduleWrapper
-) : RemoteScheduleRecord<T, U>(id, remoteTaskRecord, scheduleWrapper) {
+) : RemoteScheduleRecord<T, U>(id, remoteTaskRecord, scheduleWrapper, scheduleWrapper.dailyScheduleJson!!) {
 
     private val dailyScheduleJson by lazy { scheduleWrapper.dailyScheduleJson!! }
-
-    override val customTimeId by lazy { dailyScheduleJson.customTimeId?.let { remoteTaskRecord.getRemoteCustomTimeId(it) } }
-
-    val hour by lazy { dailyScheduleJson.hour }
-
-    val minute by lazy { dailyScheduleJson.minute }
-
-    override val startTime by lazy { dailyScheduleJson.startTime }
 
     override var endTime by Committer(dailyScheduleJson::endTime, "$key/dailyScheduleJson")
 

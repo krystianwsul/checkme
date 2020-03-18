@@ -44,18 +44,22 @@ class InstanceRelevance(val instance: Instance<*, *>) {
                 .forEach { it.setRelevant(taskRelevances, taskHierarchyRelevances, instanceRelevances, now) }
     }
 
-    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<Pair<ProjectKey, RemoteCustomTimeId>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<ProjectKey, RemoteProjectRelevance>) {
+    fun setRemoteRelevant(remoteCustomTimeRelevances: Map<CustomTimeKey<*, *>, RemoteCustomTimeRelevance>, remoteProjectRelevances: Map<ProjectKey, RemoteProjectRelevance>) {
         check(relevant)
 
-        val pair = instance.customTimeKey
         val remoteProject = instance.project
+
+        val pair = instance.instanceDateTime
+                .time
+                .timePair
+                .customTimeKey
         if (pair != null)
             remoteCustomTimeRelevances.getValue(pair).setRelevant()
 
         remoteProjectRelevances.getValue(remoteProject.id).setRelevant()
 
         (instance.scheduleCustomTimeKey)?.let {
-            remoteCustomTimeRelevances.getValue(Pair(it.remoteProjectId, it.remoteCustomTimeId)).setRelevant()
+            remoteCustomTimeRelevances.getValue(it).setRelevant()
         }
     }
 }

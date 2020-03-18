@@ -113,12 +113,6 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
                     .hourMinute
                     ?.minute
 
-        override val remoteCustomTimeKey
-            get() = instance.instanceTime
-                    .timePair
-                    .customTimeKey
-                    ?.let { Pair(it.remoteProjectId, it.remoteCustomTimeId) }
-
         override val timePair
             get() = customTimeKey?.let { TimePair(it) } ?: TimePair(HourMinute(hour!!, minute!!))
     }

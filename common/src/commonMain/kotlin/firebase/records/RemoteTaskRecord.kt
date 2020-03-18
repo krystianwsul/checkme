@@ -265,6 +265,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
     fun getScheduleRecordId() = remoteProjectRecord.getScheduleRecordId(id)
 
     fun getRemoteCustomTimeId(id: String) = remoteProjectRecord.getRemoteCustomTimeId(id)
+    fun getRemoteCustomTimeKey(id: String) = remoteProjectRecord.getRemoteCustomTimeKey(id)
 
     private class MalformedTaskException(message: String) : Exception(message)
 

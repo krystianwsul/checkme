@@ -82,12 +82,12 @@ object Irrelevant {
         irrelevantTaskHierarchies.forEach { it.delete() }
 
         val remoteCustomTimes = project.customTimes
-        val remoteCustomTimeRelevances = remoteCustomTimes.map { Pair(it.projectId, it.id) to RemoteCustomTimeRelevance(it) }.toMap()
+        val remoteCustomTimeRelevances = remoteCustomTimes.map { it.key to RemoteCustomTimeRelevance(it) }.toMap()
 
         if (project is PrivateProject) {
             project.customTimes
                     .filter { it.current(getIrrelevantNow(it.endExactTimeStamp)) }
-                    .forEach { remoteCustomTimeRelevances.getValue(Pair(it.projectId, it.id)).setRelevant() }
+                    .forEach { remoteCustomTimeRelevances.getValue(it.key).setRelevant() }
         }
 
         val remoteProjects = listOf(project)

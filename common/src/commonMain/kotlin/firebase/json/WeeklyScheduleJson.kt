@@ -8,9 +8,9 @@ data class WeeklyScheduleJson @JvmOverloads constructor(
         override val startTime: Long = 0,
         override var endTime: Long? = null,
         val dayOfWeek: Int = 0,
-        val customTimeId: String? = null,
-        val hour: Int? = null,
-        val minute: Int? = null,
+        override val customTimeId: String? = null,
+        override val hour: Int? = null,
+        override val minute: Int? = null,
         val from: String? = null,
         val until: String? = null
 ) : ScheduleJson

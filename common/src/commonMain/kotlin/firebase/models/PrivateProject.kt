@@ -64,8 +64,7 @@ class PrivateProject(
     }
 
     override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<RemoteCustomTimeId.Private, ProjectKey.Private>): PrivateCustomTime = getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
-
-    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Private(id)
+    override fun getRemoteCustomTime(remoteCustomTimeId: String) = getRemoteCustomTime(RemoteCustomTimeId.Private(remoteCustomTimeId))
 
     override fun getOrCreateCustomTime(ownerKey: UserKey, customTime: CustomTime<*, *>) = when (customTime) {
         is PrivateCustomTime -> customTime

@@ -113,8 +113,7 @@ class SharedProject(
     }
 
     override fun getRemoteCustomTime(customTimeKey: CustomTimeKey<RemoteCustomTimeId.Shared, ProjectKey.Shared>): CustomTime<RemoteCustomTimeId.Shared, ProjectKey.Shared> = getRemoteCustomTime(customTimeKey.remoteCustomTimeId)
-
-    override fun getRemoteCustomTimeId(id: String) = RemoteCustomTimeId.Shared(id)
+    override fun getRemoteCustomTime(remoteCustomTimeId: String) = getRemoteCustomTime(RemoteCustomTimeId.Shared(remoteCustomTimeId))
 
     private fun newRemoteCustomTime(customTimeJson: SharedCustomTimeJson): SharedCustomTime {
         val remoteCustomTimeRecord = remoteProjectRecord.newRemoteCustomTimeRecord(customTimeJson)

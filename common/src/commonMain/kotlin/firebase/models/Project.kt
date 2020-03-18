@@ -269,15 +269,13 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): CustomTime<T, U>
     abstract fun getRemoteCustomTime(customTimeKey: CustomTimeKey<T, U>): CustomTime<T, U>
-
-    abstract fun getRemoteCustomTimeId(id: String): T
-
-    fun getRemoteCustomTime(remoteCustomTimeId: String) = getRemoteCustomTime(getRemoteCustomTimeId(remoteCustomTimeId))
+    abstract fun getRemoteCustomTime(remoteCustomTimeId: String): CustomTime<T, U>
 
     fun convertRemoteToRemoteHelper(
             now: ExactTimeStamp,
             remoteToRemoteConversion: RemoteToRemoteConversion<T, U>,
-            startTask: Task<T, U>) {
+            startTask: Task<T, U>
+    ) {
         if (remoteToRemoteConversion.startTasks.containsKey(startTask.id))
             return
 

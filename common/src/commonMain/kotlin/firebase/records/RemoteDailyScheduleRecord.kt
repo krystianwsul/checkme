@@ -10,11 +10,13 @@ class RemoteDailyScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey>(
         id: String,
         remoteTaskRecord: RemoteTaskRecord<T, U>,
         scheduleWrapper: ScheduleWrapper
-) : RemoteScheduleRecord<T, U>(id, remoteTaskRecord, scheduleWrapper, scheduleWrapper.dailyScheduleJson!!) {
-
-    private val dailyScheduleJson by lazy { scheduleWrapper.dailyScheduleJson!! }
-
-    override var endTime by Committer(dailyScheduleJson::endTime, "$key/dailyScheduleJson")
+) : RemoteScheduleRecord<T, U>(
+        id,
+        remoteTaskRecord,
+        scheduleWrapper,
+        scheduleWrapper.dailyScheduleJson!!,
+        "dailyScheduleJson"
+) {
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteDailyScheduleRecords.remove(id) == this)
 }

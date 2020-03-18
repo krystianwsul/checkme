@@ -10,8 +10,6 @@ class RemoteSingleScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey> : Remot
 
     private val singleScheduleJson by lazy { createObject.singleScheduleJson!! }
 
-    override var endTime by Committer(singleScheduleJson::endTime, "$key/singleScheduleJson")
-
     val year by lazy { singleScheduleJson.year }
     val month by lazy { singleScheduleJson.month }
     val day by lazy { singleScheduleJson.day }
@@ -20,12 +18,23 @@ class RemoteSingleScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey> : Remot
             id: String,
             remoteTaskRecord: RemoteTaskRecord<T, U>,
             scheduleWrapper: ScheduleWrapper
-    ) : super(id, remoteTaskRecord, scheduleWrapper, scheduleWrapper.singleScheduleJson!!)
+    ) : super(
+            id,
+            remoteTaskRecord,
+            scheduleWrapper,
+            scheduleWrapper.singleScheduleJson!!,
+            "singleScheduleJson"
+    )
 
     constructor(
             remoteTaskRecord: RemoteTaskRecord<T, U>,
             scheduleWrapper: ScheduleWrapper
-    ) : super(remoteTaskRecord, scheduleWrapper, scheduleWrapper.singleScheduleJson!!)
+    ) : super(
+            remoteTaskRecord,
+            scheduleWrapper,
+            scheduleWrapper.singleScheduleJson!!,
+            "singleScheduleJson"
+    )
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteSingleScheduleRecords.remove(id) == this)
 }

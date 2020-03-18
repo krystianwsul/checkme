@@ -11,7 +11,8 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey>(
         val id: String,
         protected val remoteTaskRecord: RemoteTaskRecord<T, U>,
         final override val createObject: ScheduleWrapper,
-        private val scheduleJson: ScheduleJson
+        private val scheduleJson: ScheduleJson,
+        endTimeKey: String
 ) : RemoteRecord(create) {
 
     companion object {
@@ -23,7 +24,7 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey>(
 
     val startTime get() = scheduleJson.startTime
 
-    abstract var endTime: Long? // todo instances get key for this
+    var endTime by Committer(scheduleJson::endTime, "$key/$endTimeKey")
 
     val projectId get() = remoteTaskRecord.projectId
 
@@ -41,24 +42,28 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey>(
             id: String,
             remoteTaskRecord: RemoteTaskRecord<T, U>,
             scheduleWrapper: ScheduleWrapper,
-            scheduleJson: ScheduleJson
+            scheduleJson: ScheduleJson,
+            endTimeKey: String
     ) : this(
             false,
             id,
             remoteTaskRecord,
             scheduleWrapper,
-            scheduleJson
+            scheduleJson,
+            endTimeKey
     )
 
     constructor(
             remoteTaskRecord: RemoteTaskRecord<T, U>,
             scheduleWrapper: ScheduleWrapper,
-            scheduleJson: ScheduleJson
+            scheduleJson: ScheduleJson,
+            endTimeKey: String
     ) : this(
             true,
             remoteTaskRecord.getScheduleRecordId(),
             remoteTaskRecord,
             scheduleWrapper,
-            scheduleJson
+            scheduleJson,
+            endTimeKey
     )
 }

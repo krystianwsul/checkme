@@ -21,14 +21,23 @@ class RemoteMonthlyDayScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey> : R
             id: String,
             remoteTaskRecord: RemoteTaskRecord<T, U>,
             scheduleWrapper: ScheduleWrapper
-    ) : super(id, remoteTaskRecord, scheduleWrapper, scheduleWrapper.monthlyDayScheduleJson!!)
+    ) : super(
+            id,
+            remoteTaskRecord,
+            scheduleWrapper,
+            scheduleWrapper.monthlyDayScheduleJson!!,
+            "monthlyDayScheduleJson"
+    )
 
     constructor(
             remoteTaskRecord: RemoteTaskRecord<T, U>,
             scheduleWrapper: ScheduleWrapper
-    ) : super(remoteTaskRecord, scheduleWrapper, scheduleWrapper.monthlyDayScheduleJson!!)
-
-    override var endTime by Committer(monthlyDayScheduleJson::endTime, "$key/monthlyDayScheduleJson")
+    ) : super(
+            remoteTaskRecord,
+            scheduleWrapper,
+            scheduleWrapper.monthlyDayScheduleJson!!,
+            "monthlyDayScheduleJson"
+    )
 
     override fun deleteFromParent() = check(remoteTaskRecord.remoteMonthlyDayScheduleRecords.remove(id) == this)
 }

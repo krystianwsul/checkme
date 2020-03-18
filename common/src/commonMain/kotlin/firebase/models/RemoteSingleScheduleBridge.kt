@@ -7,7 +7,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteSingleScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
         private val remoteSingleScheduleRecord: RemoteSingleScheduleRecord<T, U>
-) : RemoteScheduleBridge<T, U>(remoteSingleScheduleRecord), SingleScheduleBridge {
+) : RemoteScheduleBridge<T, U>(remoteSingleScheduleRecord), SingleScheduleBridge<T, U> {
 
     override val year get() = remoteSingleScheduleRecord.year
 

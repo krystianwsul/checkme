@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteMonthlyDayScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
         private val remoteMonthlyDayScheduleRecord: RemoteMonthlyDayScheduleRecord<T, U>
-) : RemoteScheduleBridge<T, U>(remoteMonthlyDayScheduleRecord), MonthlyDayScheduleBridge {
+) : RemoteScheduleBridge<T, U>(remoteMonthlyDayScheduleRecord), MonthlyDayScheduleBridge<T, U> {
 
     override val dayOfMonth get() = remoteMonthlyDayScheduleRecord.dayOfMonth
 

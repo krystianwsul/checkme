@@ -9,7 +9,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteDailyScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
         remoteDailyScheduleRecord: RemoteDailyScheduleRecord<T, U>
-) : RemoteScheduleBridge<T, U>(remoteDailyScheduleRecord), WeeklyScheduleBridge {
+) : RemoteScheduleBridge<T, U>(remoteDailyScheduleRecord), WeeklyScheduleBridge<T, U> {
 
     override val daysOfWeek = DayOfWeek.values()
             .map { it.ordinal }

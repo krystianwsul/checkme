@@ -11,7 +11,7 @@ import com.soywiz.klock.days
 
 class WeeklySchedule(
         rootTask: Task<*, *>,
-        override val repeatingScheduleBridge: WeeklyScheduleBridge
+        override val repeatingScheduleBridge: WeeklyScheduleBridge<*, *>
 ) : RepeatingSchedule(rootTask) {
 
     val daysOfWeek

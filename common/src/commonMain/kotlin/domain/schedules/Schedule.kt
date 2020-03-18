@@ -13,7 +13,7 @@ import com.krystianwsul.common.utils.ScheduleType
 
 abstract class Schedule(private val rootTask: Task<*, *>) {
 
-    protected abstract val scheduleBridge: ScheduleBridge
+    protected abstract val scheduleBridge: ScheduleBridge<*, *>
 
     protected val startExactTimeStamp by lazy { ExactTimeStamp(scheduleBridge.startTime) }
 

@@ -11,7 +11,7 @@ import com.soywiz.klock.days
 
 abstract class RepeatingSchedule(rootTask: Task<*, *>) : Schedule(rootTask) {
 
-    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge
+    protected abstract val repeatingScheduleBridge: RepeatingScheduleBridge<*, *>
 
     val from get() = repeatingScheduleBridge.from
     val until get() = repeatingScheduleBridge.until

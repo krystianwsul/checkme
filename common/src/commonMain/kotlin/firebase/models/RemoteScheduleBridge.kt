@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 abstract class RemoteScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
         private val remoteScheduleRecord: RemoteScheduleRecord<T, U>
-) : ScheduleBridge {
+) : ScheduleBridge<T, U> {
 
     final override val startTime get() = remoteScheduleRecord.startTime
 

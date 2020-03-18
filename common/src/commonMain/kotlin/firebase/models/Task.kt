@@ -77,8 +77,12 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         getSingleSchedule(exactTimeStamp)?.let { singleSchedule ->
             val instance = singleSchedule.getInstance(this)
 
+            @Suppress("UNCHECKED_CAST")
             if (instance.scheduleDate != instance.instanceDate || instance.scheduleDateTime.time.timePair != instance.instanceTimePair)
-                return listOf(SingleSchedule(this, MockSingleScheduleBridge(singleSchedule, instance)))
+                return listOf(SingleSchedule(
+                        this,
+                        MockSingleScheduleBridge(singleSchedule.singleScheduleBridge as SingleScheduleBridge<T, U>, instance)
+                ))
         }
 
         return currentSchedules
@@ -88,12 +92,12 @@ class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         return schedules.singleOrNull { it.current(exactTimeStamp) } as? SingleSchedule
     }
 
-    private class MockSingleScheduleBridge(
-            private val singleSchedule: SingleSchedule,
-            private val instance: Instance<*, *>
-    ) : SingleScheduleBridge by singleSchedule.singleScheduleBridge {
+    private class MockSingleScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
+            private val singleScheduleBridge: SingleScheduleBridge<T, U>,
+            private val instance: Instance<T, U>
+    ) : SingleScheduleBridge<T, U> by singleScheduleBridge {
 
-        override val customTimeKey get() = instance.instanceTimePair.customTimeKey
+        override val customTimeKey get() = instance.instanceCustomTimeKey
 
         override val year get() = instance.instanceDate.year
 

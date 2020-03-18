@@ -100,7 +100,9 @@ class Instance<T : RemoteCustomTimeId, U : ProjectKey> {
 
     val instanceTimePair get() = TimePair(instanceCustomTimeKey, instanceHourMinute)
 
-    private val instanceCustomTimeKey get() = (instanceTime as? CustomTime<*, *>)?.key
+    @Suppress("UNCHECKED_CAST")
+    val instanceCustomTimeKey
+        get() = (instanceTime as? CustomTime<T, U>)?.key
 
     private val instanceHourMinute get() = (instanceTime as? NormalTime)?.hourMinute
 

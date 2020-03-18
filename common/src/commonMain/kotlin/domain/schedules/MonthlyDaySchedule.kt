@@ -12,7 +12,7 @@ import com.soywiz.klock.months
 
 class MonthlyDaySchedule(
         rootTask: Task<*, *>,
-        override val repeatingScheduleBridge: MonthlyDayScheduleBridge
+        override val repeatingScheduleBridge: MonthlyDayScheduleBridge<*, *>
 ) : RepeatingSchedule(rootTask) {
 
     override val scheduleBridge get() = repeatingScheduleBridge

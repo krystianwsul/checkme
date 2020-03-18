@@ -8,7 +8,7 @@ import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 class RemoteWeeklyScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
         private val remoteWeeklyScheduleRecord: RemoteWeeklyScheduleRecord<T, U>
-) : RemoteScheduleBridge<T, U>(remoteWeeklyScheduleRecord), WeeklyScheduleBridge {
+) : RemoteScheduleBridge<T, U>(remoteWeeklyScheduleRecord), WeeklyScheduleBridge<T, U> {
 
     override val daysOfWeek get() = setOf(remoteWeeklyScheduleRecord.dayOfWeek)
 

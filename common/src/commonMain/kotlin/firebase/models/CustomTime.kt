@@ -17,7 +17,7 @@ abstract class CustomTime<T : RemoteCustomTimeId, U : ProjectKey> : Time {
 
     abstract val id: T
 
-    abstract val key: CustomTimeKey<T, *>
+    abstract val key: CustomTimeKey<T, U>
 
     val name get() = customTimeRecord.name
 

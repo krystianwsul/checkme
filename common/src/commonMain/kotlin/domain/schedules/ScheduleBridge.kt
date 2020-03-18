@@ -2,11 +2,9 @@ package com.krystianwsul.common.domain.schedules
 
 import com.krystianwsul.common.time.HourMinute
 import com.krystianwsul.common.time.TimePair
-import com.krystianwsul.common.utils.CustomTimeKey
-import com.krystianwsul.common.utils.ScheduleId
-import com.krystianwsul.common.utils.TaskKey
+import com.krystianwsul.common.utils.*
 
-interface ScheduleBridge {
+interface ScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey> {
 
     val startTime: Long
 
@@ -16,7 +14,7 @@ interface ScheduleBridge {
 
     fun delete()
 
-    val customTimeKey: CustomTimeKey<*, *>?
+    val customTimeKey: CustomTimeKey<T, U>?
 
     val hour: Int?
 

@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.ScheduleType
 
 class SingleSchedule(
         rootTask: Task<*, *>,
-        val singleScheduleBridge: SingleScheduleBridge
+        val singleScheduleBridge: SingleScheduleBridge<*, *>
 ) : Schedule(rootTask) {
 
     override val scheduleBridge get() = singleScheduleBridge

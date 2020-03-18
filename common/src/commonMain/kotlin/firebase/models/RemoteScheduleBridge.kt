@@ -6,9 +6,9 @@ import com.krystianwsul.common.firebase.records.RemoteScheduleRecord
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
 
-abstract class RemoteScheduleBridge<T : RemoteCustomTimeId>(
+abstract class RemoteScheduleBridge<T : RemoteCustomTimeId>( // todo instance projectKey
         private val remoteProjectRecord: RemoteProjectRecord<T, *>,
-        private val remoteScheduleRecord: RemoteScheduleRecord<T>
+        private val remoteScheduleRecord: RemoteScheduleRecord<T, *>
 ) : ScheduleBridge {
 
     // use project record instead

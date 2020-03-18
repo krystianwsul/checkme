@@ -2,9 +2,10 @@ package com.krystianwsul.common.firebase.records
 
 
 import com.krystianwsul.common.firebase.json.ScheduleWrapper
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 
-abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord { // todo instance use CustomTimeKey
+abstract class RemoteScheduleRecord<T : RemoteCustomTimeId, U : ProjectKey> : RemoteRecord {
 
     companion object {
 
@@ -13,7 +14,7 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord { // 
 
     val id: String
 
-    protected val remoteTaskRecord: RemoteTaskRecord<T, *>
+    protected val remoteTaskRecord: RemoteTaskRecord<T, U>
 
     final override val createObject: ScheduleWrapper
 
@@ -27,11 +28,11 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord { // 
 
     val taskId get() = remoteTaskRecord.id
 
-    abstract val customTimeId: T?
+    abstract val customTimeId: T? // todo instance customTimeKey
 
     constructor(
             id: String,
-            remoteTaskRecord: RemoteTaskRecord<T, *>,
+            remoteTaskRecord: RemoteTaskRecord<T, U>,
             scheduleWrapper: ScheduleWrapper
     ) : super(false) {
         this.id = id
@@ -40,7 +41,7 @@ abstract class RemoteScheduleRecord<T : RemoteCustomTimeId> : RemoteRecord { // 
     }
 
     constructor(
-            remoteTaskRecord: RemoteTaskRecord<T, *>,
+            remoteTaskRecord: RemoteTaskRecord<T, U>,
             scheduleWrapper: ScheduleWrapper
     ) : super(true) {
         id = remoteTaskRecord.getScheduleRecordId()

@@ -23,15 +23,15 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
 
     val remoteInstanceRecords = mutableMapOf<ScheduleKey, InstanceRecord<T>>()
 
-    val remoteSingleScheduleRecords: MutableMap<String, RemoteSingleScheduleRecord<T>> = HashMap()
+    val remoteSingleScheduleRecords: MutableMap<String, RemoteSingleScheduleRecord<T, U>> = HashMap()
 
-    val remoteDailyScheduleRecords: MutableMap<String, RemoteDailyScheduleRecord<T>> = HashMap()
+    val remoteDailyScheduleRecords: MutableMap<String, RemoteDailyScheduleRecord<T, U>> = HashMap()
 
-    val remoteWeeklyScheduleRecords: MutableMap<String, RemoteWeeklyScheduleRecord<T>> = HashMap()
+    val remoteWeeklyScheduleRecords: MutableMap<String, RemoteWeeklyScheduleRecord<T, U>> = HashMap()
 
-    val remoteMonthlyDayScheduleRecords: MutableMap<String, RemoteMonthlyDayScheduleRecord<T>> = HashMap()
+    val remoteMonthlyDayScheduleRecords: MutableMap<String, RemoteMonthlyDayScheduleRecord<T, U>> = HashMap()
 
-    val remoteMonthlyWeekScheduleRecords: MutableMap<String, RemoteMonthlyWeekScheduleRecord<T>> = HashMap()
+    val remoteMonthlyWeekScheduleRecords: MutableMap<String, RemoteMonthlyWeekScheduleRecord<T, U>> = HashMap()
 
     override val createObject: TaskJson
         // because of duplicate functionality when converting local task
@@ -228,7 +228,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
         return remoteInstanceRecord
     }
 
-    fun newRemoteSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteSingleScheduleRecord<T> {
+    fun newRemoteSingleScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteSingleScheduleRecord<T, U> {
         val remoteSingleScheduleRecord = RemoteSingleScheduleRecord(this, scheduleWrapper)
         check(!remoteSingleScheduleRecords.containsKey(remoteSingleScheduleRecord.id))
 
@@ -236,7 +236,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
         return remoteSingleScheduleRecord
     }
 
-    fun newRemoteWeeklyScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteWeeklyScheduleRecord<T> {
+    fun newRemoteWeeklyScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteWeeklyScheduleRecord<T, U> {
         val remoteWeeklyScheduleRecord = RemoteWeeklyScheduleRecord(this, scheduleWrapper)
         check(!remoteWeeklyScheduleRecords.containsKey(remoteWeeklyScheduleRecord.id))
 
@@ -244,7 +244,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
         return remoteWeeklyScheduleRecord
     }
 
-    fun newRemoteMonthlyDayScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyDayScheduleRecord<T> {
+    fun newRemoteMonthlyDayScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyDayScheduleRecord<T, U> {
         val remoteMonthlyDayScheduleRecord = RemoteMonthlyDayScheduleRecord(this, scheduleWrapper)
         check(!remoteMonthlyDayScheduleRecords.containsKey(remoteMonthlyDayScheduleRecord.id))
 
@@ -252,7 +252,7 @@ class RemoteTaskRecord<T : RemoteCustomTimeId, U : ProjectKey> private construct
         return remoteMonthlyDayScheduleRecord
     }
 
-    fun newRemoteMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyWeekScheduleRecord<T> {
+    fun newRemoteMonthlyWeekScheduleRecord(scheduleWrapper: ScheduleWrapper): RemoteMonthlyWeekScheduleRecord<T, U> {
         val remoteMonthlyWeekScheduleRecord = RemoteMonthlyWeekScheduleRecord(this, scheduleWrapper)
         check(!remoteMonthlyWeekScheduleRecords.containsKey(remoteMonthlyWeekScheduleRecord.id))
 

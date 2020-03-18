@@ -10,7 +10,7 @@ import com.krystianwsul.common.utils.TaskKey
 
 class RemoteMonthlyDayScheduleBridge<T : RemoteCustomTimeId>(
         remoteProjectRecord: RemoteProjectRecord<T, *>,
-        private val remoteMonthlyDayScheduleRecord: RemoteMonthlyDayScheduleRecord<T>
+        private val remoteMonthlyDayScheduleRecord: RemoteMonthlyDayScheduleRecord<T, *>
 ) : RemoteScheduleBridge<T>(remoteProjectRecord, remoteMonthlyDayScheduleRecord), MonthlyDayScheduleBridge {
 
     override val startTime by lazy { remoteMonthlyDayScheduleRecord.startTime }

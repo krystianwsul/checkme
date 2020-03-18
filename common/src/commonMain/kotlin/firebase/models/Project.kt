@@ -267,7 +267,7 @@ abstract class Project<T : RemoteCustomTimeId, U : ProjectKey> {
 
     fun getTaskHierarchy(id: String) = taskHierarchyContainer.getById(id)
 
-    abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): CustomTime<T, U>
+    abstract fun getRemoteCustomTime(remoteCustomTimeId: RemoteCustomTimeId): CustomTime<T, U> // todo instances try to remove
     abstract fun getRemoteCustomTime(customTimeKey: CustomTimeKey<T, U>): CustomTime<T, U>
     abstract fun getRemoteCustomTime(remoteCustomTimeId: String): CustomTime<T, U>
 

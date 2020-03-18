@@ -12,7 +12,7 @@ import com.krystianwsul.common.utils.*
 
 class Task<T : RemoteCustomTimeId, U : ProjectKey>(
         val remoteProject: Project<T, U>,
-        private val remoteTaskRecord: RemoteTaskRecord<T, *>
+        private val remoteTaskRecord: RemoteTaskRecord<T, U>
 ) {
 
     private val existingRemoteInstances = remoteTaskRecord.remoteInstanceRecords

@@ -3,14 +3,15 @@ package com.krystianwsul.common.firebase.models
 import com.krystianwsul.common.domain.schedules.ScheduleBridge
 import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteScheduleRecord
+import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
 import com.krystianwsul.common.utils.ScheduleId
 import com.krystianwsul.common.utils.TaskKey
 
 
-abstract class RemoteScheduleBridge<T : RemoteCustomTimeId>( // todo instance projectKey
-        private val remoteProjectRecord: RemoteProjectRecord<T, *>,
-        private val remoteScheduleRecord: RemoteScheduleRecord<T, *>
+abstract class RemoteScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
+        private val remoteProjectRecord: RemoteProjectRecord<T, U>,
+        private val remoteScheduleRecord: RemoteScheduleRecord<T, U>
 ) : ScheduleBridge {
 
     final override val startTime get() = remoteProjectRecord.startTime

@@ -1,7 +1,6 @@
 package com.krystianwsul.common.firebase.models
 
 import com.krystianwsul.common.domain.schedules.ScheduleBridge
-import com.krystianwsul.common.firebase.records.RemoteProjectRecord
 import com.krystianwsul.common.firebase.records.RemoteScheduleRecord
 import com.krystianwsul.common.utils.ProjectKey
 import com.krystianwsul.common.utils.RemoteCustomTimeId
@@ -10,11 +9,10 @@ import com.krystianwsul.common.utils.TaskKey
 
 
 abstract class RemoteScheduleBridge<T : RemoteCustomTimeId, U : ProjectKey>(
-        private val remoteProjectRecord: RemoteProjectRecord<T, U>,
         private val remoteScheduleRecord: RemoteScheduleRecord<T, U>
 ) : ScheduleBridge {
 
-    final override val startTime get() = remoteProjectRecord.startTime
+    final override val startTime get() = remoteScheduleRecord.startTime
 
     final override var endTime: Long?
         get() = remoteScheduleRecord.endTime
